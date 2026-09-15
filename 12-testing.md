@@ -28,7 +28,9 @@ test('solver output is invariant under input permutation', () => {
 ```
 
 Every array property of the snapshot is permuted, the snapshot builder re-sorts
-them, and the output hash must be identical.
+them, and the output hash must be identical. `tagAssignments` is one of the
+arrays the shuffler permutes — this is the single most important consequence
+of rev2 for this test.
 
 This single test catches almost every violation of the determinism contract in
 [04-solver-rooms](04-solver-rooms.md) §1:
@@ -60,10 +62,20 @@ test/fixtures/snapshots/
   oversubscribed.json     demand > capacity; things must be unplaced
   fragmented.json         many children opted in; many size-1 parties
   conflicted.json         pins that span parties after a change
+  tag-heavy.json          many relations, several merge cascades
+  infeasible.json         trips preflight C8
 ```
 
+Golden fixtures must pin the registry they were recorded against, since a
+registry change legitimately changes output. Store `config_hash` alongside
+`expectedHash` and fail with a clear message when the registry moved, rather
+than reporting an opaque mismatch:
+
 ```ts
-test.each(goldenCases)('golden: $name', ({ snapshot, expectedHash }) => {
+test.each(goldenCases)('golden: $name', ({ snapshot, expectedHash, configHash }) => {
+  if (currentConfigHash() !== configHash) {
+    throw new Error(`golden: $name was recorded against a different registry — re-record with npm run test:record`)
+  }
   expect(sha256(canonical(solve(snapshot, defaultConfig)))).toBe(expectedHash)
 })
 ```
@@ -125,6 +137,15 @@ const invariants = [
     (p, s) => /* … */],
 
   ['every child in a child room is within its age band',
+    (p, s) => /* … */],
+
+  ['every tag assignment in the snapshot names a registry tag or is reported as C7',
+    (p, s) => /* … */],
+
+  ['a capability with a derive has no assignments',
+    (p, s) => /* … */],
+
+  ["party requirements are exactly the strictest-strength union of member families' requirement tags",
     (p, s) => /* … */],
 ]
 ```
@@ -196,6 +217,29 @@ motivating line in the build output.
 
 ---
 
+## Registry tests
+
+Cheap, and they catch the failure mode where the Worker boots and solves
+wrongly:
+
+- every entry has a non-empty `doc`;
+- every `satisfiedBy` names a tag whose kind is `capability`;
+- every `param` names a valid entity type;
+- no alias collides with another tag or alias;
+- every `familyFacing.control` has a renderer in `src/views/controls/`;
+- every tag depending on a phase is disabled when that phase is;
+- `defineEvent` throws on each of the above when deliberately broken.
+
+---
+
+## Preflight tests
+
+One fixture per check C1–C9, asserting the finding fires with the right
+severity and names the right entities. C8's message should be asserted
+verbatim, since it is the one an organiser acts on.
+
+---
+
 ## 5. Lint rules as tests
 
 Some parts of the determinism contract are better enforced statically.
@@ -203,7 +247,7 @@ Some parts of the determinism contract are better enforced statically.
 ```jsonc
 {
   "overrides": [{
-    "files": ["src/solver/**/*.ts"],
+    "files": ["src/solver/**/*.ts", "src/config/**/*.ts"],
     "rules": {
       "no-restricted-globals": ["error",
         { "name": "Date",   "message": "Pass eventDate in via config." },
@@ -217,6 +261,9 @@ Some parts of the determinism contract are better enforced statically.
   }]
 }
 ```
+
+These overrides extend to `src/config/**` — derivations and checks (`derive`,
+`check`, `validFor`) run inside the solver and are bound by the same contract.
 
 Plus one structural test, which catches the case a lint rule cannot:
 
@@ -246,7 +293,7 @@ test('the full loop: import → preferences → solve → pin → re-solve → p
   const db = await freshDb()
 
   await importFamilies(db, csvFixture)           // 55 families
-  await statePreferences(db, prefFixture)
+  await setTags(db, tagFixture)                  // TagSet events
   const plan1 = await computePlan(db)
 
   await pinParty(db, ['per_a1','per_a2'], 'rm_0014', 'SCORING_DISAGREEMENT')

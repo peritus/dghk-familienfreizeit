@@ -94,8 +94,7 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family (non-admin) | Preference events about **its own** people only |
-| Family (non-admin) | Co-room requests **from** itself to any family |
+| Family (non-admin) | `TagSet` / `TagCleared` on entities it owns, for tags declaring `familyFacing`, at strengths that control permits |
 | Admin | Everything, including preference events on behalf of a family |
 | System | `PlanComputed` only |
 
@@ -110,9 +109,8 @@ Two distinct kinds, with different lifetimes.
 
 ### Projections — derived, disposable
 
-`family`, `person`, `room`, `bed`, `place`, `family_room_pref`,
-`child_room_optin`, `co_room_request`, `keep_apart`, `pin`, `workshop_pref`,
-`slot`, `workshop`.
+`family`, `person`, `room`, `bed`, `place`, `tag_assignment`, `pin`,
+`workshop_pref`, `slot`, `workshop`.
 
 Rebuilt from the log. Never written to directly outside the projector. If you
 find an `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
@@ -128,7 +126,7 @@ plan
   id              autoincrement
   input_seq       the event.seq the snapshot was cut at
   solver_version  semver of src/solver
-  config_hash     sha256 of the canonicalised weights
+  config_hash     sha256 of the canonicalised config object
   output_hash     sha256 of the canonicalised plan body
   body            the full Plan JSON, including trace
   status          draft | published | superseded
@@ -139,6 +137,11 @@ config_hash)` reproduces it exactly. Store it anyway. Six weeks and four solver
 versions later you will need to answer "what did we email the Müllers on the
 14th", and reconstructing that by checking out an old commit is not a thing
 anyone will actually do.
+
+`config_hash` is now computed at runtime from the code config object rather
+than from a stored weight table. See [15-event-config](15-event-config.md) §4
+for what goes into it, including the requirement that function bodies are
+hashed by source.
 
 Those three fields also mean **every difference between two plans has exactly one
 attributable cause**: new events, retuned weights, or new code. You never have to
@@ -229,9 +232,13 @@ src/
   project/
     index.ts              rebuild(db, scope) — the only writer of projections
     families.ts  inventory.ts  preferences.ts  pins.ts  workshops.ts
+  config/
+    define.ts             defineEvent + the tag constructors
+    index.ts               re-exports the active event
   solver/
     index.ts              solve(snapshot, config) — pure
     snapshot.ts           projections → frozen sorted Snapshot
+    preflight.ts           C1–C9
     parties.ts            phase A
     place.ts              phases 0-3
     workshops.ts          the workshop solver
@@ -239,8 +246,9 @@ src/
     canonical.ts          canonical JSON + sha256
     rng.ts                seeded xorshift32 (unused by default)
     rules/
-      hard/  capacity.ts ageBand.ts keepApart.ts accessibility.ts designation.ts
-      soft/  exactFit.ts ensuite.ts indoor.ts coRoom.ts orphanBed.ts crossFamily.ts
+      hard/  capacity.ts ageBand.ts designation.ts tagRequirements.ts
+      soft/  exactFit.ts orphanBed.ts tagPreferences.ts
+      tagRelations.ts
   views/                  hono/jsx components
   client/
     board.ts              the one browser bundle
@@ -249,13 +257,19 @@ src/
     raw.ts                hand-written SQL for the event log
   lib/
     auth.ts  email.ts  csv.ts  dates.ts
+events/
+  2026-familienwochenende/
+    event.ts              the registry for this event
+scripts/
+  tune.ts                 offline weight sweep, Node not Worker
 ```
 
 Three boundaries are load-bearing and should be enforced in review:
 
 - **`src/solver/**` imports nothing from `src/db`, `src/routes`, or `src/lib`.**
-  It is pure TypeScript over plain data. If it needs something, that something is
-  passed in via the snapshot or the config.
+  It is pure TypeScript over plain data. It may now import `src/config/**`,
+  which is also pure data and pure functions with no I/O — this does not weaken
+  the boundary. The ESLint determinism rules extend to `src/config/**`.
 - **Only `src/events/append.ts` writes to `event`.**
 - **Only `src/project/**` writes to projection tables.**
 
