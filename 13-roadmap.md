@@ -33,7 +33,7 @@ inadequate.
 - `BuildingAdded`, `RoomAdded`, `BedAdded`, `RoomDesignationChanged`
 - Place generation from `bed.sleeps`
 - `FamilyInvited`, `PersonAdded`
-- The `tag_assignment` table and a minimal registry (capabilities plus
+- The generic `label` projection and a minimal built-in registry (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
 - CSV import with a validating preview
 - Admin inventory and families screens — plain tables
@@ -58,7 +58,7 @@ have surprises in it, and they should surface now rather than in M3.
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain HTML rendering of it
-- `plan` table, `PlanComputed`
+- plan snapshot projection, `PlanSnapshotted`
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
@@ -102,8 +102,8 @@ arrive; the collection window should open as early as possible.
 - Party review screen with provenance, merge and split
 - Board: server-rendered cards, room grouping, status glyphs
 - The island: pragmatic-drag-and-drop, multi-select, keyboard, optimistic move
-- `AdminPinned` with `UNCLASSIFIED` default, `solver_said` capture
-- Undo via `AdminUnpinned`
+- Custom constraint definitions and `needs/provides` label application
+- Undo via `LabelCleared`
 - Optimistic concurrency with 409 handling
 
 **Done when:** an organiser who has not seen the code can rearrange a plan and
@@ -141,26 +141,26 @@ verifying explicitly.
 - `workshop-with` co-assignment groups (rankings unchanged)
 - Cancellation sweep
 - Admin workshop screen with the preference heatmap
-- Workshop pins
+- Workshop constraints
 
 Separable from everything before it. If time runs out, workshops can be assigned
 on paper while rooms are not.
 
 ---
 
-## M7 — Pin health
+## M7 — Constraint health
 
 *One to two days. The milestone that is easiest to skip and should not be.*
 
 - Retirement loop with the redundant / near / load-bearing buckets
 - The dashboard panel, batch retirement
-- Reason-code triage screen with grouping
-- Tag promotion: the panel suggests when a cluster of pins looks like a
-  registry entry
-- Pin fixture export and the CI corpus
-- The quality metric, plotted, plus the pins-absorbed-per-tag metric
+- Constraint health screen with missing-provider and contradiction findings
+- Custom constraint definition and label application UI
+- Constraint fixture export and the CI corpus
+- Constraint usage and redundancy metrics
 
-**Done when:** you have retired your first absorbed pin and the count went down.
+**Done when:** an admin can add, inspect, clear, and regression-test a custom
+constraint without a second override model.
 
 This is the milestone that pays off over the following weeks rather than
 immediately, which is exactly why it gets cut under pressure. Do it before M8.
@@ -172,7 +172,7 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 *Continuous, through the run-up.*
 
 - `scripts/tune.ts` and a weight-tuning pass against the real exported log
-- New registry entries from clustered `MISSING_CONSTRAINT` pins
+- New built-in registry entries from recurring custom constraints
 - Copy review, German throughout the family surface
 - Accessibility pass: keyboard, contrast, focus, reduced motion
 - Deliverability testing against GMX, web.de, Gmail, Outlook
@@ -216,10 +216,10 @@ If time runs short, in the order they should go:
 5. **Multi-select on the board.** Drag one party at a time. Slower, still better
    than a spreadsheet.
 
-**Never cut:** the determinism contract, the trace, pin reason codes, or the
-registry. Each is cheap to build and expensive to retrofit, and each is
+**Never cut:** the determinism contract, the trace, human-readable constraint
+definitions, or the registry. Each is cheap to build and expensive to retrofit, and each is
 load-bearing for something else. A solver without a trace is a black box
-nobody will trust; pins without reasons are permanent sediment. The registry
+nobody will trust; unexplained constraints are permanent sediment. The registry
 is **not cuttable** — it replaces four tables and five event types, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
 to C8 alone, which carries most of the value.
