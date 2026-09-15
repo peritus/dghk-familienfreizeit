@@ -317,10 +317,10 @@ Also covered:
   works; rate limits bite; changing an email kills sessions.
 - **Projections**: append events, rebuild, compare against a hand-written
   expectation. Then rebuild twice and assert identical — rebuild idempotency.
-- **Constraint enforcement**: attempt to insert two `plan_room_assignment` rows
-  for one place and assert the write fails. The unique index is an assertion
-  about the solver; test that the assertion is live.
-- **The one-published-plan index**: publishing while another is published fails.
+- **Constraint enforcement**: attempt to emit a snapshot with two assignments for
+  one place and assert snapshot validation fails.
+- **Publication concurrency**: publishing while another plan is published fails
+  the event-sequence compare-and-swap.
 
 ---
 
