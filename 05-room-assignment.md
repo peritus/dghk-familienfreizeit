@@ -1,4 +1,4 @@
-# 04 — The room solver
+# 05 — Room assignment
 
 The core of the system. Everything else is plumbing around this file.
 

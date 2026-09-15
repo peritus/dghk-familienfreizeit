@@ -1,4 +1,4 @@
-# 09 — Authentication
+# 10 — Authentication
 
 Magic link, no passwords, invite-only. One login per family. Admin access is a
 code-level allowlist of verified email addresses, exposed through a separate

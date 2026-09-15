@@ -1,4 +1,4 @@
-# 12 — Testing
+# 13 — Testing
 
 Vitest with `@cloudflare/vitest-pool-workers`, which runs tests inside `workerd`
 against a real D1 instance rather than a mock.

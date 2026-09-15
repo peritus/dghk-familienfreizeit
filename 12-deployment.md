@@ -1,4 +1,4 @@
-# 11 — Deployment
+# 12 — Deployment
 
 One Worker, one D1 database, one custom domain. No queues, no KV, no R2, no
 Durable Objects.
