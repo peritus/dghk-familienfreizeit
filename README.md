@@ -44,12 +44,12 @@ are stored as constraints rather than as edits.
 - Family import from a spreadsheet, invitation by email.
 - Family self-service: their people, room preferences, children's-room opt-ins,
   co-rooming requests, workshop rankings.
-- Magic-link authentication, one login per family, admin flag on the family record.
+- Magic-link authentication, one login per family, and a code-level admin allowlist.
 - Deterministic room assignment with a full human-readable explanation.
 - Deterministic workshop assignment with an explicit fairness objective.
 - Drag-and-drop admin board that writes constraints, not assignments.
 - Plan snapshots, publication, and change emails on re-publication.
-- Pin taxonomy and a retirement loop that retires constraints the solver outgrows.
+- Custom, human-readable matching constraints that admins can add and clear.
 
 **Explicitly out of scope**
 
@@ -73,7 +73,7 @@ are stored as constraints rather than as edits.
 | 03 | [Event catalogue](03-events.md) | The complete write-side vocabulary |
 | 04 | [Room solver](04-solver-rooms.md) | Party formation, placement, scoring, determinism |
 | 05 | [Workshop solver](05-solver-workshops.md) | Fairness objective, slot handling, cancellation |
-| 06 | [Pins and evolution](06-pins-and-evolution.md) | Reason codes, retirement loop, regression corpus |
+| 06 | [Constraints and evolution](06-pins-and-evolution.md) | Custom constraints, history, regression corpus |
 | 07 | [Admin UX](07-admin-ux.md) | Every admin screen, the board in detail |
 | 08 | [Attendee UX](08-attendee-ux.md) | The family portal, copy, privacy boundaries |
 | 09 | [Authentication](09-auth.md) | Magic link implementation, sessions, threat model |
@@ -108,9 +108,9 @@ strictest strength winning.
 **Place** — one sleeping position. A single bed is one Place. A double bed is two
 Places. This is the atomic unit of capacity. Rooms have Beds; Beds have Places.
 
-**Pin** — an admin decision recorded as a hard constraint on the solver, carrying
-a reason code. Pins reference People, never Parties, because Party membership is
-derived and unstable.
+**Constraint** — an event-backed, human-readable matching fact such as a person
+needing a room capability or two people needing to stay together. Constraints
+reference stable entities, never derived Parties.
 
 **Snapshot** — the complete, frozen, sorted input to the solver, built by
 replaying the event log up to a specific sequence number.
@@ -171,7 +171,7 @@ Identical inputs produce byte-identical output, forever.
 
 *Why:* it makes every other good property possible. Re-runs are stable, so
 publishing twice does not shuffle people arbitrarily. Counterfactuals are cheap,
-so pin retirement can be computed rather than guessed. Regression testing is a
+so constraint health can be computed rather than guessed. Regression testing is a
 hash comparison. Reproducing a complaint is `solve(snapshot@seq)`.
 
 ### D4 — Sorted greedy with bounded repair, not integer programming
@@ -194,23 +194,24 @@ intervene. Fitting boxes onto shelves is mechanical. Splitting the phases means
 admins review a short list of parties with provenance rather than auditing 40
 room placements.
 
-### D6 — Admin overrides are constraints, not edits
+### D6 — Admin decisions are constraints, not edits
 
-*Chosen.* Dragging a family on the board emits a pin. The solver re-runs with
-that pin as a hard constraint.
+*Chosen.* Dragging a family on the board emits a matching constraint. The solver
+re-runs with that constraint as an ordinary input, so stated preferences and
+admin decisions share one path.
 
 *Rejected alternative:* the board writes assignments directly. Then every
 re-run either destroys admin work or requires merge logic, and the solver stops
 being the single writer of assignments.
 
-### D7 — Pins carry a closed-enum reason code
+### D7 — Constraints carry human-readable explanations
 
-*Chosen.* Six codes, listed in [06-pins-and-evolution](06-pins-and-evolution.md).
-Free-text notes sit alongside, never instead.
+*Chosen.* Admin-created constraints carry a label and explanation. The event
+history supplies author and timing; a separate pin taxonomy is unnecessary.
 
-*Why:* the value of recording reasons is being able to query them. "Show me every
-pin that exists because the solver does not understand a rule" is the product
-backlog. Free text cannot answer that.
+*Why:* the value of recording intent is being able to explain and review the
+constraint. The resolver reports active, missing, contradictory, and redundant
+constraints directly.
 
 *Amended in rev2:* `MISSING_CONSTRAINT` now usually resolves to a registry
 entry rather than a schema migration.
@@ -249,10 +250,11 @@ dance on Workers.
 *Non-negotiable rules* are in [09-auth](09-auth.md). Follow them exactly or use
 the library instead.
 
-### D11 — The tag registry lives in code, not a database table
+### D11 — Built-in rules live in code; custom matching keys live in the event log
 
-*Chosen.* Config changes require a deploy; accepted. Rationale in
-[15-event-config](15-event-config.md) §1.
+*Chosen.* Built-in solver mechanisms require a deploy. Admin-created matching
+keys use only the fixed generic resolver and are event-backed, so they need no
+dynamic evaluation or code deployment.
 
 ### D12 — Weights live in code
 

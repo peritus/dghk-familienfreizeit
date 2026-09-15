@@ -11,14 +11,13 @@
                                              ▼
                             ┌─────────────────────────────────┐
                             │          projections            │
-                            │  families, people, inventory,   │
-                            │  preferences, pins              │
+                            │  entities, labels, constraints │
                             └────────────────┬────────────────┘
                                              │  freeze + sort
                                              ▼
                             ┌─────────────────────────────────┐
                             │           snapshot              │
-                            │   pure data, pinned at a seq    │
+                            │   pure data, cut at an event seq│
                             └────────────────┬────────────────┘
                                              │
                                   solve(snapshot, config)
@@ -48,7 +47,7 @@ it is too big.
 None of that applies here. Concretely:
 
 - 150 attendees, ~55 families, ~40 rooms, ~120 places, ~24 workshops.
-- Every family edits preferences a handful of times. Admins pin a few dozen
+- Every family edits preferences a handful of times. Admins add a few dozen
   times. Inventory is entered once and corrected occasionally.
 - Realistic total: **2,000 to 4,000 events** for the entire life of the event.
 
@@ -94,14 +93,14 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family (non-admin) | `TagSet` / `TagCleared` on entities it owns, for tags declaring `familyFacing`, at strengths that control permits |
-| Admin | Everything, including preference events on behalf of a family |
-| System | `PlanComputed` only |
+| Family | Label/constraint events on entities it owns, for family-facing controls |
+| Allowlisted admin | Everything, through the admin UI |
+| System | `PlanSnapshotted` only |
 
-Admins emitting preference events on a family's behalf is deliberate and needed —
-it is scenario 1c from the requirements, where an admin reads an email and enters
-what it said. The event records `actor: admin:3` while the subject remains
-`family:17`, so the provenance stays visible in the family's own history.
+An allowlisted admin may enter a constraint for any entity. The actor identifies
+the authenticated principal and the subject identifies the affected entity. There
+is no separate semantic distinction between an admin acting for themselves and
+for another family.
 
 ## Read models
 
@@ -109,21 +108,20 @@ Two distinct kinds, with different lifetimes.
 
 ### Projections — derived, disposable
 
-`family`, `person`, `room`, `bed`, `place`, `tag_assignment`, `pin`,
-`workshop_pref`, `slot`, `workshop`.
+`entity`, `label`, `slot`, `workshop`, workshop rankings, and query indexes.
 
 Rebuilt from the log. Never written to directly outside the projector. If you
 find an `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
 
-### Plans — immutable, kept forever
+### Plan snapshots — immutable, kept forever
 
-A plan is not a projection. It is a *record of what we computed and, sometimes,
-what we told people*. It is never rebuilt, because the solver code that produced
-it will have changed.
+A plan snapshot is an event-log artifact: a record of what we computed and,
+sometimes, what we told people. It is never regenerated from current code when
+answering historical questions.
 
 ```
-plan
-  id              autoincrement
+PlanSnapshotted event
+  snapshot_id
   input_seq       the event.seq the snapshot was cut at
   solver_version  semver of src/solver
   config_hash     sha256 of the canonicalised config object
@@ -156,10 +154,8 @@ JSON parse:
 - `plan_room_assignment (plan_id, person_id, place_id, room_id, party_key)`
 - `plan_workshop_assignment (plan_id, person_id, workshop_id, slot_id)`
 
-These carry uniqueness constraints that act as an integrity check on the solver's
-output — see [02-data-model](02-data-model.md). A plan that violates them cannot
-be stored, which means a solver bug surfaces as a failed write rather than as a
-family discovering they were double-booked.
+These are disposable projections with uniqueness constraints that act as an
+integrity check on the solver's output. The event-log snapshot remains canonical.
 
 ## Staleness and publication
 
@@ -199,10 +195,10 @@ Publishing is a state transition plus, optionally, an email run.
 
 ```
 1. Admin reviews the draft plan and its diff against the published plan.
-2. Admin publishes    → PlanPublished { plan_id, notify: bool }
+2. Admin publishes    → PlanPublished { snapshot_id, notify: bool }
 3. Previous published plan → status = 'superseded'
 4. New plan            → status = 'published', published_at = now
-5. If notify: diff old vs new, email only affected families
+5. If notify: diff old vs new snapshots, email only affected families
 ```
 
 Step 5 is a `for` loop because both plans are stored and the solver is
@@ -223,7 +219,7 @@ src/
     admin/
       dashboard.ts  families.ts  inventory.ts
       parties.ts    board.ts     plans.ts
-      pins.ts       workshops.ts
+      constraints.ts workshops.ts
     api/
       board.ts            JSON endpoints for the board island
   events/
@@ -231,7 +227,7 @@ src/
     append.ts             the only place that INSERTs into event
   project/
     index.ts              rebuild(db, scope) — the only writer of projections
-    families.ts  inventory.ts  preferences.ts  pins.ts  workshops.ts
+    entities.ts  labels.ts  constraints.ts  workshops.ts
   config/
     define.ts             defineEvent + the tag constructors
     index.ts               re-exports the active event

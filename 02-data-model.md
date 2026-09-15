@@ -23,7 +23,7 @@ One table. It is the source of truth and the only thing that must never be lost.
 CREATE TABLE event (
   seq     INTEGER PRIMARY KEY AUTOINCREMENT,
   at      TEXT    NOT NULL,          -- ISO-8601 UTC
-  actor   TEXT    NOT NULL,          -- 'family:fam_ab12' | 'admin:fam_cd34' | 'system'
+  actor   TEXT    NOT NULL,          -- authenticated principal | 'system'
   type    TEXT    NOT NULL,
   subject TEXT,                      -- primary entity id, for cheap filtering
   payload TEXT    NOT NULL           -- JSON
@@ -41,11 +41,8 @@ assumes. We never delete events, so it is belt and braces — but it is free.
 "What did we know at 14:00 on the 12th" is `WHERE seq <= (SELECT MAX(seq) FROM
 event WHERE at <= '...')`.
 
-`actor` distinguishes `family:` from `admin:` even when the id is the same
-family — an admin acting on their own family's preferences is recorded as
-`family:`, acting on someone else's is `admin:`. The distinction shows up in the
-family's own history page, which is a small honesty feature: a family can see
-that an organiser entered something on their behalf.
+`actor` identifies the authenticated principal. Admin authorization comes from
+the verified login identity and a code-level allowlist, not from a family flag.
 
 **Nothing operational goes in here.** Sessions, magic-link tokens, rate-limit
 counters, email delivery receipts and page views are not domain decisions. They
@@ -61,7 +58,6 @@ CREATE TABLE family (
   id             TEXT PRIMARY KEY,
   email          TEXT NOT NULL COLLATE NOCASE,
   display_name   TEXT NOT NULL,
-  is_admin       INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0,1)),
   locale         TEXT NOT NULL DEFAULT 'de',
   invited_at     TEXT,
   first_login_at TEXT,
@@ -79,7 +75,7 @@ than quietly become two logins for one household.
 ```sql
 CREATE TABLE person (
   id               TEXT PRIMARY KEY,
-  family_id        TEXT NOT NULL REFERENCES family(id),
+  family_id        TEXT NOT NULL,       -- resolver relation to a family entity
   given_name       TEXT NOT NULL,
   family_name      TEXT NOT NULL,
   birthdate        TEXT,                    -- ISO date; NULL for adults who decline
@@ -124,7 +120,7 @@ CREATE TABLE building (
 
 CREATE TABLE room (
   id             TEXT PRIMARY KEY,
-  building_id    TEXT NOT NULL REFERENCES building(id),
+  building_id    TEXT NOT NULL,         -- resolver relation to a space entity
   number         TEXT NOT NULL,           -- '14', 'B-3', 'Zelt 2'
   floor          INTEGER,
   kind           TEXT NOT NULL CHECK (kind IN ('room','bungalow','tent')),
@@ -155,12 +151,12 @@ way to set the corresponding capability.
 the child pool can be placed into, and general parties cannot be placed there.
 `blocked` removes a room from consideration entirely and requires a
 `blocked_reason` — this is the "the heater in Room 7 is broken" case, and
-modelling it here is what lets the corresponding pins be retired.
+modelling it here is what lets the corresponding constraints be cleared.
 
 ```sql
 CREATE TABLE bed (
   id       TEXT PRIMARY KEY,
-  room_id  TEXT NOT NULL REFERENCES room(id),
+  room_id  TEXT NOT NULL,               -- resolver relation to a space entity
   label    TEXT NOT NULL,              -- '14-A', 'oben links'
   kind     TEXT NOT NULL CHECK (kind IN ('single','double','bunk_top','bunk_bottom','cot')),
   sleeps   INTEGER NOT NULL DEFAULT 1 CHECK (sleeps BETWEEN 1 AND 2),
@@ -169,8 +165,8 @@ CREATE TABLE bed (
 
 CREATE TABLE place (
   id       TEXT PRIMARY KEY,
-  bed_id   TEXT NOT NULL REFERENCES bed(id),
-  room_id  TEXT NOT NULL REFERENCES room(id),   -- denormalised, deliberately
+  bed_id   TEXT NOT NULL,               -- resolver relation to a space entity
+  room_id  TEXT NOT NULL,               -- resolver-maintained relation
   idx      INTEGER NOT NULL,                     -- 0 or 1 within a double
   sort_key INTEGER NOT NULL
 );
@@ -188,7 +184,8 @@ solver counts capacity it counts Places.
 
 ### Adjacency
 
-Used only by the `room-with.adjacentWeight` soft term.
+Used only by the adjacency resolver and the `room-with` soft term. In rev3 this
+is a generic relation projection rather than a domain table.
 
 ```sql
 CREATE TABLE room_adjacency (
@@ -207,25 +204,23 @@ need to normalise the pair.
 
 ---
 
-## 4. Preferences
+## 4. Labels and constraints
 
-Superseded by [14-tags](14-tags.md) §2. One table, `tag_assignment`, replaces
-`family_room_pref`, `child_room_optin`, `co_room_request` and `keep_apart`:
+All current facts and preferences are represented by generic label events. The
+following projection is disposable and exists only for indexed reads:
 
 ```sql
-CREATE TABLE tag_assignment (
-  entity_type TEXT NOT NULL CHECK (entity_type IN ('room','family','person','workshop')),
+CREATE TABLE label (
   entity_id   TEXT NOT NULL,
-  tag         TEXT NOT NULL,
-  value       TEXT NOT NULL DEFAULT '',
+  key         TEXT NOT NULL,
+  value       TEXT NOT NULL,
   strength    TEXT          CHECK (strength IN ('required','preferred')),
   set_at      TEXT NOT NULL,
   set_by      TEXT NOT NULL,             -- actor string from the event
-  PRIMARY KEY (entity_type, entity_id, tag, value)
+  PRIMARY KEY (entity_id, key, value)
 );
 
-CREATE INDEX tag_by_tag    ON tag_assignment(tag, entity_type, entity_id);
-CREATE INDEX tag_by_value  ON tag_assignment(tag, value) WHERE value <> '';
+CREATE INDEX label_by_key_value ON label(key, value, entity_id);
 ```
 
 Three pieces of rationale from rev1's per-preference tables survive the change
@@ -302,52 +297,20 @@ oversight.
 
 ---
 
-## 6. Pins
+## 6. Constraint history
 
-```sql
-CREATE TABLE pin (
-  id                  TEXT PRIMARY KEY,
-  kind                TEXT NOT NULL CHECK (kind IN ('room','workshop','party_merge','party_split')),
-  person_ids          TEXT NOT NULL,          -- JSON array, sorted
-  target_room_id      TEXT REFERENCES room(id),
-  target_place_id     TEXT REFERENCES place(id),
-  target_workshop_id  TEXT REFERENCES workshop(id),
-  reason_code         TEXT NOT NULL
-                      CHECK (reason_code IN ('UNCLASSIFIED','MISSING_CONSTRAINT',
-                                             'MISSING_DATA','SCORING_DISAGREEMENT',
-                                             'OPERATIONAL','IRREDUCIBLE')),
-  note                TEXT,
-  solver_said         TEXT,                   -- JSON: what the solver proposed at pin time
-  created_at          TEXT NOT NULL,
-  created_by          TEXT NOT NULL,
-  retired_at          TEXT,
-  retired_reason      TEXT CHECK (retired_reason IN ('absorbed','obsolete','mistake')),
-  retired_by_version  TEXT
-);
-
-CREATE INDEX pin_active_idx ON pin(retired_at, kind);
-```
-
-**Pins reference people, never parties.** A party key is derived from its
-membership, and membership changes whenever a child opts in or out of the
-children's room. A pin keyed on a party would silently stop applying the moment
-anything shifted. A pin keyed on people always resolves.
-
-`solver_said` is the counterfactual captured at pin time: what room the solver
-had proposed and with what score. It makes retirement checking a comparison
-rather than a re-solve, and it preserves the record of the disagreement even
-after the pin is gone.
-
-Retirement is soft. A retired pin is history, and history is the regression test
-corpus.
+There is no separate pin table. Admin decisions are ordinary constraint and
+label events. They may be cleared by a later `LabelCleared` event, while the
+original event and all plan snapshots remain in the event log. Stable people and
+spaces are referenced; derived party keys are never persisted as identity.
 
 ---
 
-## 7. Plans
+## 7. Plan snapshots
 
 ```sql
-CREATE TABLE plan (
-  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE plan_snapshot (
+  snapshot_id    TEXT PRIMARY KEY,
   input_seq      INTEGER NOT NULL,
   solver_version TEXT NOT NULL,
   config_hash    TEXT NOT NULL,
@@ -355,42 +318,41 @@ CREATE TABLE plan (
   body           TEXT NOT NULL,
   status         TEXT NOT NULL CHECK (status IN ('draft','published','superseded')),
   created_at     TEXT NOT NULL,
-  created_by     TEXT NOT NULL,
-  published_at   TEXT,
-  published_by   TEXT
+  created_by     TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX plan_one_published_idx
-  ON plan(status) WHERE status = 'published';
+  ON plan_snapshot(status) WHERE status = 'published';
 ```
 
-That partial unique index enforces a real invariant: **at most one published plan
-exists at any time**. Two published plans means two answers to "where do I
-sleep", and there is no sensible tiebreak. SQLite will refuse the second one.
+The table is a disposable projection of `PlanSnapshotted` and
+`PlanPublished` events. The partial unique index still enforces **at most one
+published plan** in the query model; publication commands also use an event
+sequence compare-and-swap so concurrent admins cannot append two publications.
 
 ```sql
 CREATE TABLE plan_room_assignment (
-  plan_id   INTEGER NOT NULL REFERENCES plan(id),
-  person_id TEXT    NOT NULL REFERENCES person(id),
-  place_id  TEXT    NOT NULL REFERENCES place(id),
-  room_id   TEXT    NOT NULL REFERENCES room(id),
+  snapshot_id TEXT    NOT NULL,
+  person_id TEXT    NOT NULL,
+  place_id  TEXT    NOT NULL,
+  room_id   TEXT    NOT NULL,
   party_key TEXT    NOT NULL,
-  PRIMARY KEY (plan_id, person_id)
+  PRIMARY KEY (snapshot_id, person_id)
 );
 
 CREATE UNIQUE INDEX plan_place_unique_idx
-  ON plan_room_assignment(plan_id, place_id);
+  ON plan_room_assignment(snapshot_id, place_id);
 
 CREATE TABLE plan_workshop_assignment (
-  plan_id     INTEGER NOT NULL REFERENCES plan(id),
-  person_id   TEXT    NOT NULL REFERENCES person(id),
-  workshop_id TEXT    NOT NULL REFERENCES workshop(id),
-  slot_id     TEXT    NOT NULL REFERENCES slot(id),
-  PRIMARY KEY (plan_id, person_id, workshop_id)
+  snapshot_id TEXT    NOT NULL,
+  person_id   TEXT    NOT NULL,
+  workshop_id TEXT    NOT NULL,
+  slot_id     TEXT    NOT NULL,
+  PRIMARY KEY (snapshot_id, person_id, workshop_id)
 );
 
 CREATE UNIQUE INDEX plan_slot_unique_idx
-  ON plan_workshop_assignment(plan_id, person_id, slot_id);
+  ON plan_workshop_assignment(snapshot_id, person_id, slot_id);
 ```
 
 These two unique indexes are the most valuable lines in this document.
@@ -441,7 +403,7 @@ CREATE TABLE email_log (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   to_email   TEXT NOT NULL,
   kind       TEXT NOT NULL,           -- 'magic_link' | 'invite' | 'plan_change'
-  plan_id    INTEGER REFERENCES plan(id),
+  snapshot_id TEXT,
   sent_at    TEXT NOT NULL,
   provider_id TEXT,
   error      TEXT
@@ -464,5 +426,5 @@ DELETE FROM session    WHERE expires_at < :now;
 DELETE FROM rate_limit WHERE expires_at < :now;
 ```
 
-Nothing else is ever deleted. Not events, not plans, not retired pins, not
-withdrawn people.
+Nothing else is ever deleted. Not events, not plan snapshots, not cleared
+constraints, not withdrawn people.
