@@ -37,6 +37,29 @@ Everything flows in one direction. There is no path by which an attendee or an
 admin writes an assignment. The solver is the only writer of assignments, and its
 only inputs are the event log and a config.
 
+## Module profiles
+
+The application is assembled from typed modules. This resembles feature flags at
+the selection boundary, but module composition is a build-time property rather
+than a runtime rollout switch. It is part of the event profile and therefore part
+of the configuration hash used to identify a plan.
+
+An event profile explicitly selects its modules. A selected module may contribute
+event schemas, labels, validation, solver stages, traces, routes, views, and test
+contracts. Modules declare dependencies; a profile that omits a required
+dependency fails validation before deployment. A disabled module contributes no
+solver stage, trace section, route, view, or required fixture.
+
+The generic module implementation owns mechanisms. The profile owns vocabulary
+and policy: concrete tags and values, module parameters, pure derivations and
+checks, scoring weights, phases, and user-facing copy. Profile functions are
+deterministic evaluators only. They cannot perform I/O, read a clock, use
+randomness, dynamically evaluate code, or alter module control flow.
+
+Room and workshop capabilities are independent. A room-only event does not need
+workshop entities or views; a workshop-only event does not need rooms, beds,
+places, or sleeping-party formation. The first deployed profile enables both.
+
 ## Why CQRS is cheap at this size
 
 CQRS and event sourcing usually cost a lot: incremental projections that can
@@ -223,9 +246,11 @@ src/
   project/
     index.ts              rebuild(db, scope) — the only writer of projections
     entities.ts  labels.ts  constraints.ts  workshops.ts
+  modules/
+    <module>/             generic contract, implementation, views, and tests
   config/
-    define.ts             defineEvent + the tag constructors
-    index.ts               re-exports the active event
+    define.ts             profile builders and tag constructors
+    index.ts               re-exports the active event profile
   solver/
     index.ts              solve(snapshot, config) — pure
     snapshot.ts           projections → frozen sorted Snapshot
@@ -249,8 +274,7 @@ src/
   lib/
     auth.ts  email.ts  csv.ts  dates.ts
 events/
-  2026-familienwochenende/
-    event.ts              the registry for this event
+  familienfreizeit-2027.ts  the first deployed event profile
 scripts/
   tune.ts                 offline weight sweep, Node not Worker
 ```
@@ -258,9 +282,9 @@ scripts/
 Three boundaries are load-bearing and should be enforced in review:
 
 - **`src/solver/**` imports nothing from `src/db`, `src/routes`, or `src/lib`.**
-  It is pure TypeScript over plain data. It may now import `src/config/**`,
-  which is also pure data and pure functions with no I/O — this does not weaken
-  the boundary. The ESLint determinism rules extend to `src/config/**`.
+  It is pure TypeScript over plain data. It may import selected module contracts
+  and the active profile, which are also pure data and pure functions with no
+  I/O. The ESLint determinism rules extend to profile code.
 - **Only `src/events/append.ts` writes to `event`.**
 - **Only `src/project/**` writes to projection tables.**
 
