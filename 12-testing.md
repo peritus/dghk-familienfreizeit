@@ -29,7 +29,7 @@ test('solver output is invariant under input permutation', () => {
 
 Every array property of the snapshot is permuted, the snapshot builder re-sorts
 them, and the output hash must be identical. `labels` is one of the arrays the
-shuffler permutes — this is the key consequence of rev3 for this test.
+shuffler permutes — this proves the generic label input is order-independent.
 
 This single test catches almost every violation of the determinism contract in
 [04-solver-rooms](04-solver-rooms.md) §1:

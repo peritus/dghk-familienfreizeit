@@ -52,7 +52,7 @@ have surprises in it, and they should surface now rather than in M3.
 - `snapshot.ts` with the freeze-and-sort discipline
 - Preflight, C1–C9
 - The two generic handlers, `tagRequirements` and `tagPreferences`, replacing
-  eight rule files — net effect is *less* work than rev1, not more
+  eight rule files — the generic handlers keep the implementation small
 - Party formation: children's rooms first, residue, merges, the unplaceable-merge
   guard
 - Placement phases 0–4
@@ -81,7 +81,7 @@ day for that possibility.
 
 - Magic link, sessions, rate limits, the ten rules from [09-auth](09-auth.md)
 - The family portal: a renderer over `familyFacing` registry entries, not
-  hand-written sections — this makes M3 shorter than rev1 estimated, and
+  hand-written sections — this keeps the milestone compact, and
   couples the portal to the registry by design
 - htmx save-on-change with the progressive-enhancement fallback
 - Invitation and reminder emails
@@ -220,7 +220,7 @@ If time runs short, in the order they should go:
 definitions, or the registry. Each is cheap to build and expensive to retrofit, and each is
 load-bearing for something else. A solver without a trace is a black box
 nobody will trust; unexplained constraints are permanent sediment. The registry
-is **not cuttable** — it replaces four tables and five event types, so
+is **not cuttable** — it consolidates the matching model and event vocabulary, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
 to C8 alone, which carries most of the value.
 
