@@ -3,9 +3,10 @@
 The complete write vocabulary. Adding an event type means adding to this file, to
 `src/events/types.ts`, and to the projector. Nothing else.
 
-Rev3 uses semantic setup events (`FamilyInvited`, `PersonAdded`, `RoomAdded`,
-and so on) as convenient command vocabulary. The projector reduces them to
-generic entities and labels. Constraints and intrinsic facts then use the same
+Semantic setup events (`FamilyInvited`, `PersonAdded`, `RoomAdded`, and so on)
+are convenient command vocabulary. Their complete payloads are projected into
+one typed entity identity and generic labels. Constraints and intrinsic facts
+then use the same
 `LabelSet` stream; no event type exists solely for a particular preference or
 admin override.
 
@@ -48,6 +49,13 @@ discover the problem in the solver.
 
 4. **No event ever contains a secret.** No tokens, no hashes of tokens, no
    session ids.
+
+Setup event payloads are complete command inputs, not a second data model. The
+projector creates the typed entity identity and emits the payload's mutable
+values as labels. For example, `PersonAdded.role`, `birthdate`, and
+`occupies_bed` become labels on the new person; `RoomAdded.kind`, `floor`, and
+capacity-related values do the same for the room. Event-specific config defines
+which labels are legal and how the resolver uses them.
 
 ---
 
@@ -209,8 +217,8 @@ remains in the log.
 ```
 
 Defines a custom matching vocabulary. It contains no executable code; the fixed
-resolver implements the operators. This replaces the former pin-to-registry
-promotion path.
+resolver implements the operators. Definitions and assignments remain ordinary
+event-log data.
 
 ### `WorkshopPreferencesRanked`
 ```ts
