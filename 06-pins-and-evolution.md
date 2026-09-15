@@ -1,8 +1,8 @@
 # 06 — Constraints and evolution
 
-Rev3 removes pins. Admin judgement is expressed through the same event-backed
-constraint system as attendee preferences. This avoids a temporary override
-model that later has to be promoted into a tag.
+Admin judgement is expressed through the same event-backed constraint system as
+attendee preferences. There is no temporary override model separate from the
+matching vocabulary.
 
 ## 1. The premise
 

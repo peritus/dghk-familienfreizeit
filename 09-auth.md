@@ -46,7 +46,7 @@ entirely, and keep registration closed.
 │   look up family by email (COLLATE NOCASE)                  │
 │   if found:                                                 │
 │     token = base64url(crypto.getRandomValues(32 bytes))     │
-│     INSERT magic_link (sha256(token), family_id, now+15min) │
+│     INSERT magic_link (sha256(token), principal_id, now+15min) │
 │     send email containing https://…/auth/{token}            │
 │   ALWAYS return the same 200 page                           │
 └─────────────────────────────────────────────────────────────┘
@@ -56,10 +56,10 @@ entirely, and keep registration closed.
 │   DELETE FROM magic_link                                    │
 │     WHERE token_hash = sha256(:token)                       │
 │       AND expires_at > now                                  │
-│     RETURNING family_id                                     │
+│     RETURNING principal_id                                  │
 │   if no row → generic "link expired or already used" page   │
 │   session = base64url(32 random bytes)                      │
-│   INSERT session (sha256(session), family_id, now+30d)      │
+│   INSERT session (sha256(session), principal_id, now+30d)   │
 │   Set-Cookie; 302 to /                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -69,7 +69,7 @@ entirely, and keep registration closed.
 ```sql
 DELETE FROM magic_link
  WHERE token_hash = ?1 AND expires_at > ?2
- RETURNING family_id;
+ RETURNING principal_id;
 ```
 
 One statement. Atomic in SQLite. Returns a row exactly once, ever.
@@ -154,7 +154,7 @@ async function currentFamily(c: Context): Promise<Family | null> {
   const hash = await sha256(raw)
   const row = await c.env.DB.prepare(
     `SELECT f.* FROM session s
-       JOIN family f ON f.id = s.family_id
+       JOIN principal p ON p.id = s.principal_id
       WHERE s.token_hash = ?1 AND s.expires_at > ?2`
   ).bind(hash, nowIso()).first<Family>()
 
