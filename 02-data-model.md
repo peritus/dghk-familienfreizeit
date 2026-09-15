@@ -3,17 +3,26 @@
 SQLite dialect, targeting Cloudflare D1. All DDL below is the real thing; it is
 intended to be copied into migrations, not paraphrased.
 
+The model has three layers:
+
+1. `event` is the only domain write table.
+2. Typed entity tables provide durable identity for families, people, rooms,
+   beds, places, workshops, and slots.
+3. `label` and `constraint_definition` are generic projections. Every domain
+   property and every domain relationship is represented there and interpreted
+   by the constraint resolver.
+
+Typed tables deliberately contain identity and ordering only. They do not carry
+domain properties or foreign keys expressing domain relationships. A typed table
+is useful for stable URLs, authentication lookup, lifecycle, and query shape;
+the resolver remains the only authority for what an entity means or relates to.
+
 Conventions:
 
-- Primary keys are text, prefixed (`fam_`, `per_`, `rm_`, `bed_`, `plc_`). Human
-  readable in traces and URLs, and impossible to confuse across tables when
-  debugging. Generate with `crypto.randomUUID().replace(/-/g,'').slice(0,12)`.
-- Timestamps are ISO-8601 UTC strings. SQLite has no date type; do not invent one.
-- Booleans are `INTEGER NOT NULL` with a `CHECK (x IN (0,1))`.
-- Every table that the solver reads carries a `sort_key INTEGER NOT NULL`. This
-  is the determinism anchor. See [04-solver-rooms](04-solver-rooms.md).
-
----
+- Primary keys are text, prefixed (`fam_`, `per_`, `rm_`, `bed_`, `plc_`).
+- Timestamps are ISO-8601 UTC strings. SQLite has no date type.
+- Label values are canonical JSON scalars or objects, validated by event config.
+- `sort_key` is the deterministic ordering anchor for every solver input.
 
 ## 1. The write side
 
@@ -22,315 +31,181 @@ One table. It is the source of truth and the only thing that must never be lost.
 ```sql
 CREATE TABLE event (
   seq     INTEGER PRIMARY KEY AUTOINCREMENT,
-  at      TEXT    NOT NULL,          -- ISO-8601 UTC
+  at      TEXT    NOT NULL,
   actor   TEXT    NOT NULL,          -- authenticated principal | 'system'
   type    TEXT    NOT NULL,
-  subject TEXT,                      -- primary entity id, for cheap filtering
-  payload TEXT    NOT NULL           -- JSON
+  subject TEXT,
+  payload TEXT    NOT NULL           -- canonical JSON
 );
 
 CREATE INDEX event_type_idx    ON event(type, seq);
 CREATE INDEX event_subject_idx ON event(subject, seq);
 ```
 
-`AUTOINCREMENT` matters, and is not the default. Without it SQLite reuses rowids
-after deletion, which would break the monotonicity that everything downstream
-assumes. We never delete events, so it is belt and braces — but it is free.
-
-`seq` is the total order of the system. `input_seq` on a plan snapshot fixes the
-solver input.
-"What did we know at 14:00 on the 12th" is `WHERE seq <= (SELECT MAX(seq) FROM
-event WHERE at <= '...')`.
+`seq` is the total order of the system. A snapshot fixes the solver input at one
+sequence number. Events are never deleted.
 
 `actor` identifies the authenticated principal. Admin authorization comes from
-the verified login identity and a code-level allowlist, not from a family flag.
+the verified login identity and a code-level allowlist, not from a domain label.
 
-**Nothing operational goes in here.** Sessions, magic-link tokens, rate-limit
-counters, email delivery receipts and page views are not domain decisions. They
-live in ordinary tables and are deleted freely. The event log holds only things a
-human decided.
+Operational data—sessions, magic links, rate limits, delivery receipts, and page
+views—does not belong in this table.
 
----
+## 2. Typed entity identity
 
-## 2. Identity
-
-The canonical domain projection is generic:
+The generic entity row is the common identity and lifecycle record.
 
 ```sql
 CREATE TABLE entity (
-  id         TEXT PRIMARY KEY,
-  kind       TEXT NOT NULL,
-  sort_key   INTEGER NOT NULL,
-  created_at TEXT NOT NULL,
-  retired_at TEXT
+  id          TEXT PRIMARY KEY,
+  kind        TEXT NOT NULL,
+  sort_key    INTEGER NOT NULL,
+  created_seq INTEGER NOT NULL,
+  retired_seq INTEGER
 );
+
+CREATE INDEX entity_kind_idx ON entity(kind, sort_key, id);
 ```
 
-`kind` is `family`, `person`, `space`, `workshop`, or `slot`. The tables below
-are typed read projections over these entities. They make common screens and
-integrity checks convenient without becoming a second source of truth.
+The typed tables retain their value because they give the application explicit
+entity boundaries and readable query targets. They intentionally contain no
+properties beyond the identity already held by `entity`.
 
 ```sql
-CREATE TABLE family (
-  id             TEXT PRIMARY KEY,
-  email          TEXT NOT NULL COLLATE NOCASE,
-  display_name   TEXT NOT NULL,
-  locale         TEXT NOT NULL DEFAULT 'de',
-  invited_at     TEXT,
-  first_login_at TEXT,
-  sort_key       INTEGER NOT NULL
-);
-
-CREATE UNIQUE INDEX family_email_idx ON family(email);
+CREATE TABLE family   (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE person   (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE building (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE room     (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE bed      (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE place    (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE slot     (id TEXT PRIMARY KEY REFERENCES entity(id));
+CREATE TABLE workshop (id TEXT PRIMARY KEY REFERENCES entity(id));
 ```
 
-`COLLATE NOCASE` on the column *and* a unique index over it: email addresses are
-case-insensitive in the part people actually get wrong, and two families
-registering `Mueller@` and `mueller@` must collide loudly at import time rather
-than quietly become two logins for one household.
+The `kind` value must match the typed table in the projector. This is an
+identity assertion, not a domain rule. Domain rules belong to event config and
+the resolver.
 
-```sql
-CREATE TABLE person (
-  id               TEXT PRIMARY KEY,
-  family_id        TEXT NOT NULL,       -- resolver relation to a family entity
-  given_name       TEXT NOT NULL,
-  family_name      TEXT NOT NULL,
-  birthdate        TEXT,                    -- ISO date; NULL for adults who decline
-  role             TEXT NOT NULL CHECK (role IN ('adult','child','infant')),
-  occupies_bed     INTEGER NOT NULL DEFAULT 1 CHECK (occupies_bed IN (0,1)),
-  needs_accessible INTEGER NOT NULL DEFAULT 0 CHECK (needs_accessible IN (0,1)),
-  withdrawn_at     TEXT,
-  sort_key         INTEGER NOT NULL
-);
+The event config may declare additional typed kinds without changing the core
+schema. For example, a festival may add `venue`, `vendor`, or `session`; a day
+workshop may use only `person`, `space`, `workshop`, and `slot`.
 
-CREATE INDEX person_family_idx ON person(family_id, sort_key);
-```
+## 3. Labels
 
-Three fields here are doing real work.
-
-**`birthdate`, not `age`.** Age is computed at the *event date*, which is passed
-into the solver as config. Storing age means a child who turns 13 between
-registration and the weekend is silently in the wrong age band, and it means the
-solver's output depends on when you ran it — which breaks determinism outright.
-`dates.ts` exposes exactly one function: `ageAt(birthdate, eventDate)`.
-
-**`occupies_bed`.** An infant sleeping in a travel cot or in a parent's bed does
-not consume a Place. A family of three may need two beds. Without this the solver
-over-allocates and you end up with empty beds and unplaced parties at the same
-time, which is the specific failure mode that makes people distrust the tool.
-Default 1; admins set it to 0 during import or on review.
-
-**`withdrawn_at` rather than deletion.** People drop out. Deleting the row breaks
-every historical plan that referenced them. A withdrawn person is excluded from
-the snapshot and remains visible in old plans.
-
----
-
-## 3. Inventory
-
-Rev3's canonical domain model is a generic `entity` projection plus typed
-labels. `family`, `person`, `space`, `workshop`, and `slot` are entity kinds;
-building, bedroom, bed, and sleeping-place are `space` entities. The typed
-tables below are disposable query projections retained where they make common
-capacity and timetable queries or integrity assertions clearer. Every relation
-in the domain is a label resolved by the constraint resolver.
-
-```sql
-CREATE TABLE building (
-  id       TEXT PRIMARY KEY,
-  name     TEXT NOT NULL,
-  sort_key INTEGER NOT NULL
-);
-
-CREATE TABLE room (
-  id             TEXT PRIMARY KEY,
-  building_id    TEXT NOT NULL,         -- resolver relation to a space entity
-  number         TEXT NOT NULL,           -- '14', 'B-3', 'Zelt 2'
-  floor          INTEGER,
-  kind           TEXT NOT NULL CHECK (kind IN ('room','bungalow','tent')),
-  has_ensuite    INTEGER NOT NULL DEFAULT 0 CHECK (has_ensuite IN (0,1)),
-  is_outside     INTEGER NOT NULL DEFAULT 0 CHECK (is_outside IN (0,1)),
-  is_accessible  INTEGER NOT NULL DEFAULT 0 CHECK (is_accessible IN (0,1)),
-  designation    TEXT NOT NULL DEFAULT 'general'
-                 CHECK (designation IN ('general','child','staff','blocked')),
-  child_min_age  INTEGER,
-  child_max_age  INTEGER,
-  blocked_reason TEXT,
-  notes          TEXT,
-  sort_key       INTEGER NOT NULL
-);
-
-CREATE UNIQUE INDEX room_number_idx ON room(building_id, number);
-CREATE INDEX room_sort_idx ON room(sort_key, id);
-```
-
-`has_ensuite`, `is_outside`, `is_accessible` and `floor` are the **derivation
-source** for the `ensuite`, `indoor`, `accessible` and `ground-floor`
-capabilities in the tag registry — see [14-tags](14-tags.md) §3. A capability
-with a `derive` rejects direct assignment; these four columns remain the only
-way to set the corresponding capability.
-
-`designation` is the mechanism behind children's rooms. A room designated
-`child` with `child_min_age = 8, child_max_age = 14` is the only kind of room
-the child pool can be placed into, and general parties cannot be placed there.
-`blocked` removes a room from consideration entirely and requires a
-`blocked_reason` — this is the "the heater in Room 7 is broken" case, and
-modelling it here is what lets the corresponding constraints be cleared.
-
-```sql
-CREATE TABLE bed (
-  id       TEXT PRIMARY KEY,
-  room_id  TEXT NOT NULL,               -- resolver relation to a space entity
-  label    TEXT NOT NULL,              -- '14-A', 'oben links'
-  kind     TEXT NOT NULL CHECK (kind IN ('single','double','bunk_top','bunk_bottom','cot')),
-  sleeps   INTEGER NOT NULL DEFAULT 1 CHECK (sleeps BETWEEN 1 AND 2),
-  sort_key INTEGER NOT NULL
-);
-
-CREATE TABLE place (
-  id       TEXT PRIMARY KEY,
-  bed_id   TEXT NOT NULL,               -- resolver relation to a space entity
-  room_id  TEXT NOT NULL,               -- resolver-maintained relation
-  idx      INTEGER NOT NULL,                     -- 0 or 1 within a double
-  sort_key INTEGER NOT NULL
-);
-
-CREATE UNIQUE INDEX place_bed_idx  ON place(bed_id, idx);
-CREATE INDEX        place_room_idx ON place(room_id, sort_key);
-```
-
-`place` is generated, not entered: one row per `bed.sleeps`. It exists because a
-double bed sleeps two, so `bed` cannot be the unit of capacity. Everywhere the
-solver counts capacity it counts Places.
-
-`place.room_id` is denormalised so that capacity queries do not join through
-`bed`. The projector maintains it; nothing else writes it.
-
-### Adjacency
-
-Used only by the adjacency resolver and the `room-with` soft term. In rev3 this
-is a generic relation projection rather than a domain table.
-
-```sql
-CREATE TABLE room_adjacency (
-  room_a   TEXT NOT NULL REFERENCES room(id),
-  room_b   TEXT NOT NULL REFERENCES room(id),
-  distance INTEGER NOT NULL,          -- 1 = next door, 2 = same corridor, 3 = same floor
-  PRIMARY KEY (room_a, room_b)
-);
-```
-
-Generated by the projector from `(building_id, floor, number)` with a documented
-heuristic, then overridable by an admin event. "Next door" in a hostel is not
-reliably derivable from the numbering, and an organiser who has walked the
-building knows better than any rule. Both directions are stored, so lookups never
-need to normalise the pair.
-
----
-
-## 4. Labels and constraints
-
-All current facts and preferences are represented by generic label events. The
-following projection is disposable and exists only for indexed reads:
+Labels carry all properties, capabilities, preferences, and references to other
+entities. A value that names another entity is still just a value; the resolver
+validates it and decides whether the relationship applies.
 
 ```sql
 CREATE TABLE label (
   entity_id   TEXT NOT NULL,
   key         TEXT NOT NULL,
-  value       TEXT NOT NULL,
-  strength    TEXT          CHECK (strength IN ('required','preferred')),
-  set_at      TEXT NOT NULL,
-  set_by      TEXT NOT NULL,             -- actor string from the event
-  PRIMARY KEY (entity_id, key, value)
+  value_json  TEXT NOT NULL,
+  value_type  TEXT NOT NULL,
+  strength    TEXT CHECK (strength IN ('required','preferred')),
+  set_seq     INTEGER NOT NULL,
+  cleared_seq INTEGER,
+  PRIMARY KEY (entity_id, key, value_json, set_seq)
 );
 
-CREATE INDEX label_by_key_value ON label(key, value, entity_id);
+CREATE INDEX label_lookup
+  ON label(key, value_json, entity_id, cleared_seq);
+CREATE INDEX label_entity_lookup
+  ON label(entity_id, key, cleared_seq, set_seq);
 ```
 
-Three pieces of rationale from rev1's per-preference tables survive the change
-and are load-bearing:
+The live label projection exposes the latest uncleared value for each configured
+label. Keeping `set_seq` and `cleared_seq` makes replay and temporal snapshots
+explicit; the event log remains canonical.
 
-- **The three-value scale argument.** rev1 distinguished `required` (hard rule,
-  prunes rooms), `preferred` (scored term) and `indifferent` (absent from
-  scoring). This is now expressed as strength versus absence: a tag assignment
-  at `required` or `preferred`, or no row at all. Collapsing this to a boolean
-  destroys the solver's ability to distinguish "cannot" from "would rather
-  not" — which is exactly the distinction admins need to see when the plan is
-  tight.
-- **The mutuality-is-derived argument.** rev1 derived mutual co-room requests
-  and keep-apart symmetry from directed rows. This is now a self-join over
-  generic label projection; see [14-tags](14-tags.md) §2.
-- **The `free_text` distinction.** Free text is the family's and visible to
-  them; admin notes are separate. This is now a `descriptive` tag plus a note
-  field, and the privacy boundary in [08-attendee-ux](08-attendee-ux.md) §2 is
-  unchanged.
+Examples:
 
----
+```text
+person:123  role=child
+person:123  birthdate="2014-05-07"
+person:123  occupies-bed=true
+person:123  needs-accessible=true
+person:123  needs=room-with-garden-view
 
-## 5. Workshops
+room:456    number="14"
+room:456    floor=0
+room:456    kind=bungalow
+room:456    has-ensuite=true
+room:456    designation=child
+room:456    child-min-age=8
+room:456    child-max-age=14
+room:456    provides=room-with-garden-view
+
+bed:789     kind=bunk_top
+bed:789     sleeps=1
+place:abc   index=0
+```
+
+The former `family_id`, `building_id`, `room_id`, `bed_id`, and `slot_id`
+relationships are labels as well. For example:
+
+```text
+person:123  member-of=fam_27
+room:456    located-in=building_3
+bed:789     located-in=room_456
+place:abc   located-in=bed_789
+workshop:9  offered-in=slot_sat-morning
+```
+
+These labels do not become SQL joins owned by application code. The resolver
+checks entity kinds, cardinality, ownership, and validity when it resolves them.
+
+## 4. Constraint definitions
+
+Event-specific matching vocabulary is data in the event log and has a generic
+projection:
 
 ```sql
-CREATE TABLE slot (
-  id        TEXT PRIMARY KEY,
-  label     TEXT NOT NULL,             -- 'Samstag Vormittag'
-  starts_at TEXT NOT NULL,
-  ends_at   TEXT NOT NULL,
-  sort_key  INTEGER NOT NULL
+CREATE TABLE constraint_definition (
+  key          TEXT PRIMARY KEY,
+  label        TEXT NOT NULL,
+  description  TEXT NOT NULL,
+  operator     TEXT NOT NULL,
+  config_json  TEXT NOT NULL,
+  defined_seq  INTEGER NOT NULL,
+  cleared_seq  INTEGER
 );
 
-CREATE TABLE workshop (
-  id           TEXT PRIMARY KEY,
-  slot_id      TEXT NOT NULL,
-  title        TEXT NOT NULL,
-  description  TEXT,
-  capacity     INTEGER NOT NULL CHECK (capacity > 0),
-  min_capacity INTEGER NOT NULL DEFAULT 0,
-  min_age      INTEGER,
-  max_age      INTEGER,
-  room_id      TEXT,
-  cancelled_at TEXT,
-  sort_key     INTEGER NOT NULL
-);
-
-CREATE INDEX workshop_slot_idx ON workshop(slot_id, sort_key);
-
-CREATE TABLE workshop_pref (
-  person_id   TEXT NOT NULL,
-  slot_id     TEXT NOT NULL,
-  workshop_id TEXT NOT NULL,
-  rank        INTEGER NOT NULL CHECK (rank >= 1),
-  updated_at  TEXT NOT NULL,
-  PRIMARY KEY (person_id, workshop_id)
-);
-
-CREATE UNIQUE INDEX workshop_pref_rank_idx ON workshop_pref(person_id, slot_id, rank);
+CREATE INDEX constraint_operator_idx
+  ON constraint_definition(operator, cleared_seq);
 ```
 
-That second unique index is worth pausing on. It makes "person 4 ranked two
-different workshops as their first choice in the same slot" a storage error
-rather than something the solver has to defend against. Ranks are per person per
-slot, dense from 1.
+`operator` is selected from the fixed resolver vocabulary, such as
+`needs-provides`, `excludes`, `groups-with`, `separates-from`, `capacity`, and
+`ordered-choice`. `config_json` contains scopes, value types, cardinality,
+strength rules, and UI metadata. It never contains executable code.
 
-`min_capacity` drives cancellation: a workshop that attracts fewer than its
-minimum is cancelled and its slot is re-solved. Handled deterministically in
-[05-solver-workshops](05-solver-workshops.md).
+The resolver is the only component allowed to turn labels and definitions into
+relationships, capabilities, parties, assignments, or diagnostics. SQL indexes
+support lookup; they do not define semantics.
 
-`workshop_pref` is deliberately not folded into the tag model — see
-[14-tags](14-tags.md) §7, so a future reader does not assume it was an
-oversight.
+## 5. Capacity and ordered choices
 
----
+Capacity remains represented by entities and labels, not special property
+columns. A `place` entity is the atomic sleeping position. A double bed has two
+place entities, each with a `located-in=bed` label. The resolver counts places
+when testing a room assignment.
 
-## 6. Constraint history
+Workshop rankings are encoded as labels with structured values:
 
-There is no separate override table. Admin decisions are ordinary constraint and
-label events. They may be cleared by a later `LabelCleared` event, while the
-original event and all plan snapshots remain in the event log. Stable people and
-spaces are referenced; derived party keys are never persisted as identity.
+```text
+person:123  prefers-workshop={"slot":"slot_sat-morning","workshop":"ws_4","rank":1}
+```
 
----
+The `ordered-choice` operator validates unique ranks per person and slot and
+exposes the ordered list to the workshop solver. This keeps the core model
+generic while preserving the invariant that an ordered preference is not an
+unordered set.
 
-## 7. Plan snapshots
+## 6. Plan snapshots
+
+A plan snapshot is an immutable event-log artifact. The query table is only a
+read projection:
 
 ```sql
 CREATE TABLE plan_snapshot (
@@ -349,18 +224,17 @@ CREATE UNIQUE INDEX plan_one_published_idx
   ON plan_snapshot(status) WHERE status = 'published';
 ```
 
-The table is a disposable projection of `PlanSnapshotted` and
-`PlanPublished` events. The partial unique index still enforces **at most one
-published plan** in the query model; publication commands also use an event
-sequence compare-and-swap so concurrent admins cannot append two publications.
+The complete plan body is stored by `PlanSnapshotted`. Assignment tables may be
+unpacked for indexed reads and uniqueness assertions, but the event-log body is
+the historical source.
 
 ```sql
 CREATE TABLE plan_room_assignment (
-  snapshot_id TEXT    NOT NULL,
-  person_id TEXT    NOT NULL,
-  place_id  TEXT    NOT NULL,
-  room_id   TEXT    NOT NULL,
-  party_key TEXT    NOT NULL,
+  snapshot_id TEXT NOT NULL,
+  person_id   TEXT NOT NULL,
+  place_id    TEXT NOT NULL,
+  room_id     TEXT NOT NULL,
+  party_key   TEXT NOT NULL,
   PRIMARY KEY (snapshot_id, person_id)
 );
 
@@ -368,10 +242,10 @@ CREATE UNIQUE INDEX plan_place_unique_idx
   ON plan_room_assignment(snapshot_id, place_id);
 
 CREATE TABLE plan_workshop_assignment (
-  snapshot_id TEXT    NOT NULL,
-  person_id   TEXT    NOT NULL,
-  workshop_id TEXT    NOT NULL,
-  slot_id     TEXT    NOT NULL,
+  snapshot_id TEXT NOT NULL,
+  person_id   TEXT NOT NULL,
+  workshop_id TEXT NOT NULL,
+  slot_id     TEXT NOT NULL,
   PRIMARY KEY (snapshot_id, person_id, workshop_id)
 );
 
@@ -379,76 +253,57 @@ CREATE UNIQUE INDEX plan_slot_unique_idx
   ON plan_workshop_assignment(snapshot_id, person_id, slot_id);
 ```
 
-These two unique indexes are the most valuable lines in this document.
+These are solver-output assertions, not domain relationships. They are safe to
+materialize because the solver and snapshot remain authoritative.
 
-`plan_place_unique_idx` makes double-booking a bed **structurally impossible**. A
-solver bug that assigns two people to one Place fails at write time, loudly, in
-the admin's face — not three weeks later when two families arrive at Room 14 with
-the same key.
+## 7. Operational tables
 
-`plan_slot_unique_idx` does the same for timetable clashes. The solver should
-never produce one; this guarantees that if it does, nobody finds out the hard way.
-
-Neither index is a performance optimisation. They are assertions about the
-solver's correctness, expressed somewhere the solver cannot argue with them.
-
----
-
-## 8. Operational tables
-
-Not event-sourced. Deleted freely. See [09-auth](09-auth.md) for the protocol.
+Operational tables may reference stable entity IDs for authentication and
+delivery, but those references are not domain relationships and are never used
+by the solver.
 
 ```sql
+CREATE TABLE principal (
+  id        TEXT PRIMARY KEY,
+  entity_id TEXT NOT NULL UNIQUE REFERENCES entity(id),
+  email     TEXT NOT NULL COLLATE NOCASE
+);
+
 CREATE TABLE magic_link (
-  token_hash TEXT PRIMARY KEY,        -- sha256(raw token), hex
-  family_id  TEXT NOT NULL REFERENCES family(id),
-  expires_at TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  created_ip TEXT
+  token_hash  TEXT PRIMARY KEY,
+  principal_id TEXT NOT NULL REFERENCES principal(id),
+  expires_at  TEXT NOT NULL,
+  created_at  TEXT NOT NULL,
+  created_ip  TEXT
 );
 
 CREATE TABLE session (
   token_hash  TEXT PRIMARY KEY,
-  family_id   TEXT NOT NULL REFERENCES family(id),
+  principal_id TEXT NOT NULL REFERENCES principal(id),
   expires_at  TEXT NOT NULL,
   created_at  TEXT NOT NULL,
   last_seen_at TEXT
 );
 
-CREATE INDEX session_family_idx ON session(family_id);
-
 CREATE TABLE rate_limit (
-  bucket     TEXT PRIMARY KEY,        -- 'magiclink:user@example.com:2026-09-15T14'
+  bucket     TEXT PRIMARY KEY,
   count      INTEGER NOT NULL,
   expires_at TEXT NOT NULL
 );
 
 CREATE TABLE email_log (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  to_email   TEXT NOT NULL,
-  kind       TEXT NOT NULL,           -- 'magic_link' | 'invite' | 'plan_change'
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  to_email    TEXT NOT NULL,
+  kind        TEXT NOT NULL,
   snapshot_id TEXT,
-  sent_at    TEXT NOT NULL,
+  sent_at     TEXT NOT NULL,
   provider_id TEXT,
-  error      TEXT
+  error       TEXT
 );
 ```
 
-`email_log` earns its place: when someone says they never received their room
-assignment, you need to know whether you sent it. It is operational, not domain,
-so it stays out of the event log.
-
----
-
 ## Cleanup
 
-A daily scheduled Worker, ten lines:
-
-```sql
-DELETE FROM magic_link WHERE expires_at < :now;
-DELETE FROM session    WHERE expires_at < :now;
-DELETE FROM rate_limit WHERE expires_at < :now;
-```
-
-Nothing else is ever deleted. Not events, not plan snapshots, not cleared
-constraints, not withdrawn people.
+Expired magic links, sessions, and rate-limit buckets may be deleted. Domain
+events, labels, constraint definitions, snapshots, and withdrawn entities are
+never deleted.
