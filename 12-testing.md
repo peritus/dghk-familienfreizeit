@@ -28,9 +28,8 @@ test('solver output is invariant under input permutation', () => {
 ```
 
 Every array property of the snapshot is permuted, the snapshot builder re-sorts
-them, and the output hash must be identical. `tagAssignments` is one of the
-arrays the shuffler permutes — this is the single most important consequence
-of rev2 for this test.
+them, and the output hash must be identical. `labels` is one of the arrays the
+shuffler permutes — this is the key consequence of rev3 for this test.
 
 This single test catches almost every violation of the determinism contract in
 [04-solver-rooms](04-solver-rooms.md) §1:
@@ -61,12 +60,12 @@ test/fixtures/snapshots/
   tight.json              capacity == demand exactly
   oversubscribed.json     demand > capacity; things must be unplaced
   fragmented.json         many children opted in; many size-1 parties
-  conflicted.json         pins that span parties after a change
-  tag-heavy.json          many relations, several merge cascades
+  conflicted.json         constraints that span parties after a change
+  constraint-heavy.json   many relations, several merge cascades
   infeasible.json         trips preflight C8
 ```
 
-Golden fixtures must pin the registry they were recorded against, since a
+Golden fixtures must record the registry they were recorded against, since a
 registry change legitimately changes output. Store `config_hash` alongside
 `expectedHash` and fail with a clear message when the registry moved, rather
 than reporting an opaque mismatch:
@@ -127,8 +126,8 @@ const invariants = [
   ['every person appears exactly once across assignments + unplaced',
     (p, s) => /* conservation of people */],
 
-  ['every active pin is either honoured or reported as a conflict',
-    (p, s) => s.pins.every(pin => honoured(p, pin) || conflicted(p, pin))],
+  ['every active constraint is either honoured or reported as a conflict',
+    (p, s) => s.constraints.every(c => honoured(p, c) || conflicted(p, c))],
 
   ['no person is in two workshops in one slot',
     p => /* group by (person, slot) */],
@@ -139,7 +138,7 @@ const invariants = [
   ['every child in a child room is within its age band',
     (p, s) => /* … */],
 
-  ['every tag assignment in the snapshot names a registry tag or is reported as C7',
+  ['every label names a built-in or custom definition or is reported',
     (p, s) => /* … */],
 
   ['a capability with a derive has no assignments',
@@ -177,30 +176,29 @@ capacity exactly equal to demand, capacity one short.
 
 ---
 
-## 4. The pin regression corpus
+## 4. The constraint regression corpus
 
-From [06-pins-and-evolution](06-pins-and-evolution.md) §5. Every pin, active or
-retired, is a test case authored by a domain expert.
+From [06-pins-and-evolution](06-pins-and-evolution.md) §5. Every active or
+cleared custom constraint can be a test case authored by a domain expert.
 
 ```ts
-describe('pin corpus', () => {
-  const pins = loadPinFixtures()
+describe('constraint corpus', () => {
+  const constraints = loadConstraintFixtures()
 
-  describe('retired pins must still pass unaided', () => {
-    test.each(pins.filter(p => p.retiredAt))('$note', (pin) => {
-      const snapshot = loadSnapshot(pin.snapshotSeq)
-      const plan = solve(without(snapshot, pin), defaultConfig)
-      expect(roomOf(plan, pin.personIds)).toBe(pin.expectedRoom)
+  describe('cleared constraints must remain represented by resolver rules', () => {
+    test.each(constraints.filter(c => c.clearedAt))('$description', (c) => {
+      const snapshot = loadSnapshot(c.snapshotSeq)
+      const plan = solve(without(snapshot, c), defaultConfig)
+      expect(satisfies(plan, c)).toBe(true)
     })
   })
 
-  describe('active pins — expected to fail, reported as backlog', () => {
-    test.each(pins.filter(p => !p.retiredAt))('$note', (pin) => {
-      const snapshot = loadSnapshot(pin.snapshotSeq)
-      const plan = solve(without(snapshot, pin), defaultConfig)
-      const got = roomOf(plan, pin.personIds)
-      if (got === pin.expectedRoom) {
-        console.log(`✨ now satisfied unaided: ${pin.note}`)
+  describe('active constraints — informational health checks', () => {
+    test.each(constraints.filter(c => !c.clearedAt))('$description', (c) => {
+      const snapshot = loadSnapshot(c.snapshotSeq)
+      const plan = solve(without(snapshot, c), defaultConfig)
+      if (satisfies(plan, c)) {
+        console.log(`✨ now satisfied without custom constraint: ${c.description}`)
       }
       // not asserted — this bucket is the backlog, not a gate
     })
@@ -208,11 +206,11 @@ describe('pin corpus', () => {
 })
 ```
 
-Retired pins are a hard gate: absorbing a rule and then losing it again is a
-regression and must break the build.
+Cleared constraints represented by built-in rules are a hard gate: absorbing a
+rule and then losing it again is a regression and must break the build.
 
-Active pins are informational. When one starts passing, CI prints it, and
-"solver 1.5.0 now satisfies 3 previously load-bearing pins" is the most
+Active constraints are informational. When one starts passing, CI prints it, and
+"solver 1.5.0 now satisfies 3 previously load-bearing constraints" is the most
 motivating line in the build output.
 
 ---
@@ -289,26 +287,26 @@ Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
 
 ```ts
-test('the full loop: import → preferences → solve → pin → re-solve → publish', async () => {
+test('the full loop: import → constraints → solve → snapshot → publish', async () => {
   const db = await freshDb()
 
   await importFamilies(db, csvFixture)           // 55 families
-  await setTags(db, tagFixture)                  // TagSet events
+  await setLabels(db, labelFixture)              // LabelSet events
   const plan1 = await computePlan(db)
 
-  await pinParty(db, ['per_a1','per_a2'], 'rm_0014', 'SCORING_DISAGREEMENT')
+  await addConstraint(db, ['per_a1','per_a2'], 'rm_0014')
   const plan2 = await computePlan(db)
 
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
-  expect(movedCount(plan1, plan2)).toBeLessThan(6)   // pins are surgical
+  expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  await publish(db, plan2.id)
+  await publish(db, plan2.snapshotId)
   expect(await publishedCount(db)).toBe(1)
 })
 ```
 
 That `movedCount` assertion is worth more than it looks. It encodes the property
-that makes the whole design worthwhile: **a pin moves the pinned party and very
+that makes the whole design worthwhile: **a constraint moves the constrained party and very
 little else.** If a future change makes the solver chaotic — where a small input
 change produces a large output change — this test catches it, and nothing else
 would.

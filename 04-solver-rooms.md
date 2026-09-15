@@ -284,19 +284,18 @@ unplaced, and gives an admin no idea why.
 Non-mutual relation tags, and mutual `preferred` ones, do not merge. They
 become the `room-with.oneSidedWeight` / `room-with.adjacentWeight` soft terms.
 
-### A.4 Admin overrides, applied last in event order
+### A.4 Admin constraints, applied last in event order
 
-`AdminMergedParties` and `AdminSplitParty` are applied in `event.seq` order after
-everything derived. Later admin decisions overwrite earlier ones. Each emits
-provenance:
+Custom `groups-with` and `separates-from` labels are applied in `event.seq` order
+after preference-derived formation. Later label clears and definitions determine
+the active constraint set. Each emits provenance:
 
 > `P07` size 5 — Müller (2 adults) + Schmidt (2 adults, 1 infant).
 > Merged: mutual co-room request `e1183` / `e1201`.
 > Bed demand 4 (1 infant does not occupy a bed).
 
 > `P12` size 2 — Weber (2 adults).
-> Split from `P09` by admin (`e1340`, `MISSING_CONSTRAINT`):
-> "Weber grandparents need ground floor, rest of family don't mind."
+> Separated by admin constraint (`e1340`): "Grandparents need ground floor."
 
 ### A.5 Output
 

@@ -349,10 +349,10 @@ registry**. Sections 2, 3 and 4 of that page are generated: every tag declaring
 
 | `control` | Renders | Writes |
 |---|---|---|
-| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `TagCleared` |
-| `toggle` | one checkbox | `TagSet` with no strength, or `TagCleared` |
-| `family-picker` | searchable family list, multi-select | one `TagSet` per selection, `value` = family id |
-| `person-picker` | people within the same family | one `TagSet` per selection, `value` = person id |
+| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `LabelCleared` |
+| `toggle` | one checkbox | `LabelSet` with no strength, or `LabelCleared` |
+| `family-picker` | searchable family list, multi-select | one `LabelSet` per selection, `value` = family id |
+| `person-picker` | people within the same family | one `LabelSet` per selection, `value` = person id |
 
 Adding a tag that reuses an existing control is a **one-file change**: registry
 entry, and the constraint, the rule, and the form control all appear. Adding a
@@ -388,18 +388,14 @@ import, not an environment variable. [README](README.md) already establishes one
 event per deployment, so 2027 is a new deployment with a new database and a new
 config — not a runtime switch.
 
-That also resolves the unknown-tag problem cleanly. A 2027 log never contains
-2026's retired tags, so C7 only ever fires for tags removed *mid-run-up*, within
-one event's life. That is a much smaller case: retain the assignment in the
-projection, ignore it in the solver, report it.
+Built-in definitions removed during an event remain recognizable in historical
+config hashes. Custom definitions remain replayable because their definitions
+are events; clearing a label never deletes its history.
 
 ### Renames are free
 
 ```ts
-'needs-ensuite': requirement({
-  aliases: ['ensuite-required', 'needs-bathroom'],
-  …
-})
+'needs-ensuite': requirement({ aliases: ['ensuite-required', 'needs-bathroom'], … })
 ```
 
 Aliases resolve on append and on replay. Worth adding from the start — the first
@@ -409,10 +405,10 @@ tag or alias.
 
 ### Removing a tag
 
-1. Delete the registry entry.
-2. Existing assignments stay in the projection and are ignored by the solver.
-3. Preflight C7 reports them with counts.
-4. Optionally clean up with `TagCleared` events.
+1. Remove the built-in definition in a new deploy, or clear a custom definition's
+   active labels with `LabelCleared` events.
+2. Historical assignments remain in the event log and are reported as obsolete.
+3. The resolver ignores obsolete labels for current solving and reports them.
 
 Never delete rows from the label projection directly. It is rebuilt from
 the log, so a direct delete is undone on the next rebuild.
@@ -438,7 +434,7 @@ the config and nothing else, which is only possible because both are pure.
 
 ## 8. What rev3 removes
 
-| rev1 | rev2 |
+| rev1 | rev3 |
 |---|---|
 | `SolverConfigChanged` event | `event.ts` `weights` + tag weights |
 | `Weights` in `SolverConfig` (11 terms) | `weights` (3 geometry terms) + per-tag weights |

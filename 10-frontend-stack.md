@@ -336,14 +336,14 @@ it removes an entire class of divergence bug.
 }
 ```
 
-Versions are indicative. Let npm resolve and commit the lockfile. rev2 adds no
+Versions are indicative. Let npm resolve and commit the lockfile. rev3 adds no
 runtime dependencies: the registry is code in the repo and both handlers are
 code. `tsx` is added to devDependencies for the tune script.
 
 **The solver has zero dependencies.** `src/solver/**` imports only from itself
 and from TypeScript's standard library. That is deliberate: the most important
 code in the project should be readable without knowing any framework, and
-auditable by someone who does not know this stack. The claim survives rev2 —
+auditable by someone who does not know this stack. The claim survives rev3 —
 it now imports `src/config/**`, which is also dependency-free — amended from
 "imports only from itself" to "imports only from itself and the event config,
 both of which are dependency-free".

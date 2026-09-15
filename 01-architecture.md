@@ -151,8 +151,8 @@ For the attendee portal and admin lists, the published plan's body is unpacked
 into flat tables so the common queries are a single indexed lookup rather than a
 JSON parse:
 
-- `plan_room_assignment (plan_id, person_id, place_id, room_id, party_key)`
-- `plan_workshop_assignment (plan_id, person_id, workshop_id, slot_id)`
+- `plan_room_assignment (snapshot_id, person_id, place_id, room_id, party_key)`
+- `plan_workshop_assignment (snapshot_id, person_id, workshop_id, slot_id)`
 
 These are disposable projections with uniqueness constraints that act as an
 integrity check on the solver's output. The event-log snapshot remains canonical.
@@ -161,10 +161,10 @@ integrity check on the solver's output. The event-log snapshot remains canonical
 
 ```sql
 SELECT
-  p.id,
+  p.snapshot_id,
   p.input_seq,
   (SELECT MAX(seq) FROM event) - p.input_seq AS events_behind
-FROM plan p
+FROM plan_snapshot p
 WHERE p.status = 'published'
 ORDER BY p.published_at DESC
 LIMIT 1;
