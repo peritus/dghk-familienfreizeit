@@ -427,7 +427,7 @@ A short table of named integer terms, living in config, stored with every plan.
 The `Weights` type loses eight terms to the registry — each now lives as a
 field on its tag ([15-event-config](15-event-config.md) §4):
 
-| rev1 `Weights` term | Moves to the tag, as |
+| Geometry term | Configured as |
 |---|---|
 | `ensuitePreferred` | `needs-ensuite.weight` |
 | `indoorPreferred` | `needs-indoor.weight` |

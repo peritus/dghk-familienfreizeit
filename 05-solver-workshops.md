@@ -256,5 +256,5 @@ more here than optimality.
 enter these together, and the UI does present them together — but they are
 per-person data, because a 9-year-old and a 40-year-old do not want the same
 workshop. Do not let the form shape collapse the model shape. This is also the
-justification for keeping `workshop_pref` typed rather than folding it into
-tags — see [14-tags](14-tags.md) §7 (D13).
+justification for keeping the ranking value scoped to one person and slot — see
+[14-tags](14-tags.md) §7.
