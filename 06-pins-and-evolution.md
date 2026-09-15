@@ -34,10 +34,10 @@ reliably.
 
 | Code | Means | The fix lives in | Retirable |
 |---|---|---|---|
-| `MISSING_CONSTRAINT` | The solver does not know this rule exists | Solver code — a new rule | **Yes. This is the backlog.** |
-| `MISSING_DATA` | The solver knows the rule; the input was absent or wrong | Import, or a new preference field | Yes, when the data arrives |
-| `SCORING_DISAGREEMENT` | The solver understood everything; the admin prefers a different trade-off | Config weights | Sometimes |
-| `OPERATIONAL` | A fact about the physical world the model does not hold | Inventory model | Yes, once modelled |
+| `MISSING_CONSTRAINT` | The solver does not know this rule exists | **A registry entry**, or solver code if a new mechanism is needed | **Yes. This is the backlog.** |
+| `MISSING_DATA` | The solver knows the rule; the input was absent or wrong | A tag assignment, or the import | Yes, when the data arrives |
+| `SCORING_DISAGREEMENT` | The solver understood everything; the admin prefers a different trade-off | A tag weight or a geometry weight, tuned offline | Sometimes |
+| `OPERATIONAL` | A fact about the physical world the model does not hold | Inventory model, or a capability tag | Yes, once modelled |
 | `IRREDUCIBLE` | Human knowledge that should not be encoded | Nowhere | No |
 | `UNCLASSIFIED` | Not yet triaged | — | — |
 
@@ -60,10 +60,11 @@ unusually complicated.
 
 The canonical example: *"these two families had a falling-out, keep them apart."*
 This looks irreducible — it is gossip, it is social, you cannot put it in a
-spreadsheet. But it is precisely a `keep_apart` relation, which the model already
-holds, so it is a `MISSING_DATA` pin that resolves the moment someone enters the
-relation. See the `keep_apart` table in [02-data-model](02-data-model.md); it
-exists specifically to keep this class of knowledge out of `IRREDUCIBLE`.
+spreadsheet. But it is precisely an `apart-from` relation tag, which the model
+already holds, so it is a `MISSING_DATA` pin that resolves the moment someone
+enters the tag — and now, stronger than in rev1, it needs no migration at all.
+See [14-tags](14-tags.md) §2; the tag exists specifically to keep this class of
+knowledge out of `IRREDUCIBLE`.
 
 Genuinely irreducible: *"the Beckers are hosting the Saturday evening thing, put
 them near the hall so they can slip out"* — a one-off circumstance that will not
@@ -220,35 +221,43 @@ Two caveats worth building in:
 
 The loop this whole document exists to support:
 
+rev1's eight steps collapse:
+
 ```
 1. Admin drags a party. Pin created, UNCLASSIFIED.
-
-2. Triage (weekly, on the pins screen). Admin classifies:
-   MISSING_CONSTRAINT — "Weber grandparents need ground floor."
-
-3. Cluster. Three MISSING_CONSTRAINT pins all mention stairs or floors.
-   That is a rule, not three exceptions.
-
-4. Model it. Add `mobility: 'no_stairs' | 'prefers_ground' | 'fine'`
-   to family_room_pref. New event field. New preference control in
-   the family portal. New hard/soft rule pair in the solver.
-
-5. Backfill. Admin enters the mobility values for the three families —
-   an admin-emitted preference event, subject = the family.
-
-6. Bump. solver 1.3.0.
-
-7. The loop runs. All three pins land in the redundant bucket.
-   Admin retires them. Metric drops from 33 to 19 because two other
-   pins were the same rule in disguise.
-
-8. Fixtures. The three pins move to the retired corpus and are now
-   permanent regression tests.
+2. Triage. Classified MISSING_CONSTRAINT: "Weber grandparents need ground floor."
+3. Cluster. Three pins all mention stairs. That is a tag, not three exceptions.
+4. Add one registry entry: needs-ground-floor, satisfiedBy ground-floor,
+   familyFacing tri-state. The capability derives from room.floor.
+   One file. No migration. No form work.
+5. Deploy. Backfill the three families with admin-emitted TagSet events.
+6. The retirement loop puts all three pins in the redundant bucket. Retire.
 ```
 
-Step 3 is where the judgement is and where the taxonomy earns itself. A query
-over `reason_code = 'MISSING_CONSTRAINT'` sorted by creation date, with notes
-visible, is the entire tooling requirement.
+Six steps, one of which is a deploy. What is *not* needed any more: a schema
+migration, an event type, a form control, a rule file.
+
+Step 3 is still where the judgement is and where the taxonomy earns itself. A
+query over `reason_code = 'MISSING_CONSTRAINT'` sorted by creation date, with
+notes visible, is the entire tooling requirement.
+
+### The three stages
+
+| Stage | Cost | When |
+|---|---|---|
+| **Pin** | A drag plus a reason code. No deploy. | One-off, or still being understood |
+| **Tag** | A registry entry. Deploy, no migration. | Recurring; the constraint has a shape |
+| **Typed field** | Migration plus deploy. | Structural — counted, branched on, or in every query |
+
+The third stage is now rare. Most constraints stop at stage two, because a
+registry entry already gets a form control and a trace label. Promote only
+when the fact becomes structural in the sense of [14-tags](14-tags.md) §2.
+
+### A new metric
+
+Alongside "pins required", track **pins absorbed per tag introduced**. A
+registry entry that retires five pins is the shape to look for when triaging;
+one that retires one is probably still a pin.
 
 ---
 
@@ -298,3 +307,7 @@ plan were computed once. It is not — it is recomputed for six weeks as
 registrations trickle in, and over six weeks the difference between a solver that
 learns and one that does not is the difference between eleven manual overrides
 and forty-one.
+
+The accounting improves under rev2: the cost of acting on a triaged pin drops
+from a migration to a registry entry, which is the main thing that made rev1's
+discipline expensive.

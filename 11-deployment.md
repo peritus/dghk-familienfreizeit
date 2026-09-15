@@ -32,8 +32,6 @@ Durable Objects.
 
   "vars": {
     "EVENT_NAME": "Familienwochenende 2026",
-    "EVENT_DATE": "2026-10-16",
-    "PREFERENCE_DEADLINE": "2026-09-20T23:59:59Z",
     "PUBLIC_URL": "https://bettenplan.example.de",
     "EMAIL_FROM": "Familienwochenende <wochenende@example.de>"
   },
@@ -62,9 +60,12 @@ route — a top-level navigation to `/auth/:token` that never reaches the handle
 This application server-renders every route, so static assets should 404 through
 to the Worker and let the router decide.
 
-`EVENT_DATE` is a var rather than a constant because it is the input to every age
-computation in the solver. It belongs in configuration where it is visible, not
-buried in a source file.
+`EVENT_DATE` and `PREFERENCE_DEADLINE` move to `meta.date` and
+`meta.preferenceDeadline` in `event.ts` ([15-event-config](15-event-config.md)
+§8) — every age in the solver is computed against `meta.date`, which makes it
+a solver input that belongs in `config_hash`. `EVENT_NAME`, `PUBLIC_URL` and
+`EMAIL_FROM` **stay** — they are deployment facts, not solver inputs, and must
+not enter `config_hash`.
 
 ---
 
@@ -109,6 +110,29 @@ hand-written migration and queried with raw SQL. It has one writer and two
 readers and does not benefit from an ORM.
 
 **Never edit a generated migration after applying it anywhere.** Add a new one.
+
+**The `tag_assignment` migration** drops the four preference tables it
+replaces in the same migration. No data migration is needed if this lands
+before real preferences are collected. If it lands after, write a one-off
+script that reads the four tables and emits `TagSet` events — do not `INSERT`
+into `tag_assignment` directly, because the projection is rebuilt from the log
+and a direct insert is undone on the next rebuild.
+
+---
+
+## Weight tuning
+
+There is no weight-editing screen, and this is deliberate. The offline
+workflow, from [15-event-config](15-event-config.md) §4:
+
+```bash
+wrangler d1 execute bettenplan --remote --json \
+  --command "SELECT * FROM event ORDER BY seq" > events.json
+npm run tune
+```
+
+Export the event log, run `npm run tune`, read the trade-off table, edit
+`event.ts`, deploy.
 
 ---
 
@@ -322,6 +346,10 @@ The week before, in order:
    reason.
 2. **Export everything.** Event log, full database, and the published plan as a
    PDF.
+2a. **Run `npm run tune`** against the exported log and confirm the deployed
+    weights are the ones you settled on.
+2b. **Confirm preflight is clean**, or that every error-severity finding has
+    been acknowledged.
 3. **Print the plan.** Room lists per building, workshop lists per slot, a master
    sheet. The hostel's wifi will be bad and someone will need paper.
 4. **Verify one magic link end to end** against a real address on the actual
