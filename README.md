@@ -1,12 +1,12 @@
-# Bettenplan — room and workshop assignment for a family weekend
+# Bettenplan — modular event planning
 
 Working name. Replace freely.
 
 ## What this is
 
-A small web application that assigns roughly 150 people — organised as families,
-one email address each — to beds in a Jugendherberge over a single weekend, and
-assigns the same people to workshops across several timeslots.
+A small web application composed from reusable event modules. A deployment
+selects one event profile, which may assign people to rooms, workshops, or both.
+The first deployed profile is `familienfreizeit-2027`.
 
 Attendees state preferences. They never assign anything. A deterministic
 algorithm produces a complete proposal. Admins review it, override where their
@@ -58,8 +58,8 @@ are stored as constraints rather than as edits.
   preference type and a new hard rule — the architecture absorbs them, but
   do not build them speculatively.)
 - Arrival and departure logistics, transport, parking.
-- Multi-event support. One event, one database. A second event is a second
-  deployment. Do not build tenancy.
+- Runtime multi-event tenancy. One event profile and one database per
+  deployment. A second event is a second deployment.
 - Real-time collaborative editing. Three admins, optimistic concurrency, 409 on
   conflict. Durable Objects are not needed and would not earn their complexity.
 - Mobile-first admin. Attendee pages are responsive; the board is a desktop tool.
@@ -68,21 +68,22 @@ are stored as constraints rather than as edits.
 
 | # | Document | What it settles |
 |---|---|---|
-| 01 | [Architecture](01-architecture.md) | CQRS shape, why full rebuilds, request lifecycle |
-| 02 | [Data model](02-data-model.md) | Every table, every index, every constraint, and why |
-| 03 | [Event catalogue](03-events.md) | The complete write-side vocabulary |
-| 04 | [Room solver](04-solver-rooms.md) | Party formation, placement, scoring, determinism |
-| 05 | [Workshop solver](05-solver-workshops.md) | Fairness objective, slot handling, cancellation |
-| 06 | [Constraints and evolution](06-pins-and-evolution.md) | Custom constraints, health, regression corpus |
-| 07 | [Admin UX](07-admin-ux.md) | Every admin screen, the board in detail |
-| 08 | [Attendee UX](08-attendee-ux.md) | The family portal, copy, privacy boundaries |
-| 09 | [Authentication](09-auth.md) | Magic link implementation, sessions, threat model |
-| 10 | [Frontend stack](10-frontend-stack.md) | No-React decision, Hono JSX, theme, board island |
-| 11 | [Deployment](11-deployment.md) | Cloudflare config, migrations, secrets, email, CI |
-| 12 | [Testing](12-testing.md) | Golden plans, shuffle-invariance, property tests |
-| 13 | [Roadmap](13-roadmap.md) | Milestones, what ships when, what can be cut |
-| 14 | [Tags](14-tags.md) | The tag model, generic handlers, preflight |
-| 15 | [Event configuration](15-event-config.md) | The registry format, phases, weights |
+| 01 | [Architecture](01-architecture.md) | Module composition, request lifecycle, and boundaries |
+| 02 | [Data model](02-data-model.md) | Generic identity, labels, relationships, and projections |
+| 03 | [Event model](03-events.md) | Generic event envelope, replay, and lifecycle |
+| 04 | [Labels and constraints](04-labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
+| 05 | [Room assignment](05-room-assignment.md) | Generic room modules and deterministic placement |
+| 06 | [Workshop assignment](06-workshop-assignment.md) | Generic ranking and workshop modules |
+| 07 | [Constraint health](07-constraint-health.md) | Preflight, diagnostics, and regression corpus |
+| 08 | [Admin interface](08-admin-interface.md) | Generic admin surfaces and module-provided screens |
+| 09 | [Family portal](09-family-portal.md) | Generic family-facing controls and privacy |
+| 10 | [Authentication](10-authentication.md) | Magic links, sessions, and threat model |
+| 11 | [Frontend](11-frontend.md) | Rendering, enhancement, styling, and board island |
+| 12 | [Deployment](12-deployment.md) | One profile per deployment, migrations, secrets, email |
+| 13 | [Testing](13-testing.md) | Generic module contracts and event fixtures |
+| 14 | [Roadmap](14-roadmap.md) | Delivery milestones and cut lines |
+| 15 | [Event profiles](15-event-profiles.md) | Profile contract and configuration rules |
+| — | [familienfreizeit-2027](events/familienfreizeit-2027.md) | First deployed event profile |
 
 Start with 01, 02, 04, 14 and 15. Those five carry the design. The rest is
 consequence.
