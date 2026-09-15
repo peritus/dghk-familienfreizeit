@@ -24,7 +24,8 @@ why through its definition and description.
 
 ## 2. Generic constraint definitions
 
-Built-in constraints are defined in the event config. Admin-created definitions
+Generic constraint operators are implemented by the constraint module. An event
+profile binds its concrete tags to those operators. Admin-created definitions
 are stored as `ConstraintDefined` events. They are data only:
 
 ```ts
@@ -49,7 +50,7 @@ The fixed resolver supports:
 | `separates-from` | family separates-from family | keep apart |
 
 Admins cannot upload executable rules. New mechanisms belong in solver code and
-the built-in registry; new facts and ordinary matching constraints do not.
+the active profile; new facts and ordinary matching constraints do not.
 
 ## 3. Board and constraint lifecycle
 

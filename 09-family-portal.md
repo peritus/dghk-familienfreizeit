@@ -19,13 +19,12 @@ a form people will return to three times over six weeks as they change their
 minds. Everything saves on change.
 
 Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
-zusammen?") are **generated from the registry** (D14): every tag declaring
-`familyFacing` produces a control, in registry order, grouped by scope. The
-mock-up below is an illustration of what the 2026 registry produces, labelled
-as such so nobody hard-codes it.
+zusammen?") are **generated from the active event profile**: every tag declaring
+`familyFacing` produces a control, in profile order, grouped by scope. The
+mock-up below is explanatory only; no event-specific form is hard-coded here.
 
 `control` is a closed union, and this is the thing to think about up front —
-see [15-event-config](15-event-profiles.md) §5:
+see [event profiles](15-event-profiles.md) §6:
 
 | `control` | Renders | Writes |
 |---|---|---|

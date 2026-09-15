@@ -125,24 +125,16 @@ explicit; the event log remains canonical.
 Examples:
 
 ```text
-person:123  role=child
-person:123  birthdate="2014-05-07"
-person:123  occupies-bed=true
-person:123  needs-accessible=true
-person:123  needs=room-with-garden-view
+person:123  role=<profile-defined role>
+person:123  birthdate="YYYY-MM-DD"
+person:123  <profile-defined property>=<value>
+person:123  needs=<profile-defined capability>
 
-room:456    number="14"
-room:456    floor=0
-room:456    kind=bungalow
-room:456    has-ensuite=true
-room:456    designation=child
-room:456    child-min-age=8
-room:456    child-max-age=14
-room:456    provides=room-with-garden-view
+room:456    <profile-defined property>=<value>
+room:456    provides=<profile-defined capability>
 
-bed:789     kind=bunk_top
-bed:789     sleeps=1
-place:abc   index=0
+bed:789     <profile-defined bed property>=<value>
+place:abc   <profile-defined place property>=<value>
 ```
 
 The former `family_id`, `building_id`, `room_id`, `bed_id`, and `slot_id`

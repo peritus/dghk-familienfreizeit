@@ -1,5 +1,10 @@
 # 13 — Testing
 
+Testing is layered like the application. Generic module contract tests prove
+reusable behavior; each event profile supplies fixtures, golden plans, tag
+validation cases, and enabled-module integration cases. A profile never needs
+tests for modules it did not select.
+
 Vitest with `@cloudflare/vitest-pool-workers`, which runs tests inside `workerd`
 against a real D1 instance rather than a mock.
 
@@ -32,7 +37,7 @@ them, and the output hash must be identical. `labels` is one of the arrays the
 shuffler permutes — this proves the generic label input is order-independent.
 
 This single test catches almost every violation of the determinism contract in
-[04-solver-rooms](05-room-assignment.md) §1:
+[room assignment](05-room-assignment.md) §1:
 
 - an unsorted collection someone added and forgot to sort — **caught**
 - a tiebreak that falls through to input order — **caught**
@@ -178,7 +183,7 @@ capacity exactly equal to demand, capacity one short.
 
 ## 4. The constraint regression corpus
 
-From [06-pins-and-evolution](07-constraint-health.md) §5. Every active or
+From [constraint health](07-constraint-health.md) §5. Every active or
 cleared custom constraint can be a test case authored by a domain expert.
 
 ```ts
@@ -210,8 +215,8 @@ Cleared constraints represented by built-in rules are a hard gate: absorbing a
 rule and then losing it again is a regression and must break the build.
 
 Active constraints are informational. When one starts passing, CI prints it, and
-"solver 1.5.0 now satisfies 3 previously load-bearing constraints" is the most
-motivating line in the build output.
+the build output can report that three load-bearing constraints are now
+satisfied.
 
 ---
 

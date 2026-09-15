@@ -38,7 +38,7 @@ are stored as constraints rather than as edits.
 
 ## Scope
 
-**In scope for v1**
+**In scope for the initial release**
 
 - Admin-managed inventory: buildings, rooms, beds, room designations.
 - Family import from a spreadsheet, invitation by email.
@@ -85,8 +85,8 @@ are stored as constraints rather than as edits.
 | 15 | [Event profiles](15-event-profiles.md) | Profile contract and configuration rules |
 | — | [familienfreizeit-2027](events/familienfreizeit-2027.md) | First deployed event profile |
 
-Start with 01, 02, 04, 14 and 15. Those five carry the design. The rest is
-consequence.
+Start with 01, 02, 04, 05, 06, and 15. Those documents carry the module and
+profile design. The remaining documents specify its product and operations.
 
 ## Glossary
 
@@ -122,12 +122,12 @@ decision trace. Stored immutably. Either `draft`, `published`, or `superseded`.
 per decision, including the alternatives it rejected. Not a debug log; a
 first-class deliverable that admins read.
 
-**Tag** — a named fact about an entity, optionally pointing at another entity,
-optionally carrying a strength. Defined in the registry, assigned in the
-database.
+**Tag** — a named fact in an event profile's vocabulary, optionally pointing at
+another entity and optionally carrying a strength. Stored as a generic label.
 
-**Registry** — the set of tags valid for this event, defined in code at
-`events/<event>/event.ts`. Not a database table.
+**Event profile** — the typed composition of modules and the event-specific
+vocabulary, policy, parameters, and copy for one deployment. The first profile
+is `events/familienfreizeit-2027.ts`.
 
 **Strength** — `required` (prunes rooms) or `preferred` (scored). An absent tag
 assignment means indifferent.
@@ -216,7 +216,7 @@ constraints directly.
 Admin judgement is represented directly by custom matching constraints rather
 than a separate override mechanism.
 
-### D8 — No React in v1
+### D8 — No React in the initial release
 
 *Chosen.* Server-rendered `hono/jsx`, hand-written elements on a copied
 neobrutalism theme, one vanilla island for the board.
@@ -228,7 +228,7 @@ admin tool with roughly eight distinct interactive elements.
 *Revisit if:* the board's interaction model outgrows ~600 lines of vanilla
 TypeScript, or the attendee preference form needs a real combobox. The escape
 hatch is mounting React on the board route alone; see
-[10-frontend-stack](11-frontend.md).
+[frontend](11-frontend.md).
 
 ### D9 — No Vite
 
@@ -247,7 +247,7 @@ has no passwords, no OAuth, no registration, no organisations and no 2FA. What
 remains is one flow, fully under our control, and a per-request instantiation
 dance on Workers.
 
-*Non-negotiable rules* are in [09-auth](10-authentication.md). Follow them exactly or use
+*Non-negotiable rules* are in [authentication](10-authentication.md). Follow them exactly or use
 the library instead.
 
 ### D11 — Built-in rules live in code; custom matching keys live in the event log
@@ -259,15 +259,15 @@ dynamic evaluation or code deployment.
 ### D12 — Weights live in code
 
 *Chosen.* `SolverConfigChanged` is dropped. Tuning happens offline against an
-exported event log. Rationale in [15-event-config](15-event-profiles.md) §4.
+exported event log. Rationale in [event profiles](15-event-profiles.md) §4.
 
 ### D13 — Workshop rankings are structured labels
 
 *Chosen.* Structured label values and the `ordered-choice` resolver operator
 preserve dense ordered lists without a special property table. Rationale in
-[14-tags](04-labels-and-constraints.md) §7.
+[labels and constraints](04-labels-and-constraints.md) §7.
 
-### D14 — `familyFacing` in the registry drives the family portal
+### D14 — `familyFacing` in the event profile drives the family portal
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
-[15-event-config](15-event-profiles.md) §5.
+[event profiles](15-event-profiles.md) §6.

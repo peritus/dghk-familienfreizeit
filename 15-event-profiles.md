@@ -67,7 +67,14 @@ those labels. A profile may define:
 The resolver operators remain generic and fixed. A profile maps its tags to those
 operators but cannot add executable runtime operators.
 
-## 4. Hashing and history
+## 4. Module policy and weights
+
+Profiles supply module parameters, phase switches, and integer scoring weights.
+Generic modules own the scoring mechanisms; the profile chooses the policy values
+used by the selected modules. Changes to those values are deployments, not event
+log entries.
+
+## 5. Hashing and history
 
 The configuration hash includes profile metadata, selected module ids and
 versions, module parameters, tags, phases, weights, and the source of profile
@@ -77,13 +84,13 @@ Historical plan bodies remain authoritative. The currently deployed profile is
 used for new solves; retaining a plan body does not promise that a later profile
 can reproduce the historical solve exactly.
 
-## 5. UI and copy
+## 6. UI and copy
 
 Generic UI modules render the surfaces contributed by selected modules. Profile
 metadata and tag definitions supply labels, help text, controls, privacy rules,
 and locale-specific copy. A disabled module has no corresponding UI surface.
 
-## 6. Deployment boundary
+## 7. Deployment boundary
 
 One event profile and one database belong to one deployment. Supporting another
 event means composing another profile and deploying it separately; this design
