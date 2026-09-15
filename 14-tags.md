@@ -59,7 +59,7 @@ clears the label.
 ## 2. Storage
 
 One generic projection. It replaces `family_room_pref`, `child_room_optin`,
-`co_room_request`, `keep_apart`, and admin pin events.
+`co_room_request`, `keep_apart`, and the former admin pin events.
 
 ```sql
 CREATE TABLE label (
@@ -401,15 +401,15 @@ shape as the unplaceable-merge guard.
 | `child_room_optin` | generic `label` (`needs`) |
 | `co_room_request` | generic `label` (`groups-with`) |
 | `keep_apart` | generic `label` (`separates-from`) |
-| `RoomPreferenceStated` | `TagSet` / `TagCleared` |
-| `ChildRoomOptInSet` | `TagSet` / `TagCleared` |
-| `CoRoomRequested` | `TagSet` |
-| `CoRoomRequestWithdrawn` | `TagCleared` |
-| `AdminKeptApart` | `TagSet` (`apart-from`) |
+| `RoomPreferenceStated` | `LabelSet` / `LabelCleared` |
+| `ChildRoomOptInSet` | `LabelSet` / `LabelCleared` |
+| `CoRoomRequested` | `LabelSet` |
+| `CoRoomRequestWithdrawn` | `LabelCleared` |
+| `AdminKeptApart` | `LabelSet` (`separates-from`) |
 | `soft/ensuite.ts`, `indoor.ts`, `coRoom.ts`, `crossFamily.ts` | `soft/tagPreferences.ts` |
 | `hard/keepApart.ts`, `accessibility.ts` | `hard/tagRequirements.ts` |
 
-Four tables, five event types, and admin pins become one label stream plus a
+Four tables, five event types, and the former admin pin workflow become one label stream plus a
 small fixed resolver vocabulary. Eight rule files remain two generic handlers.
 
 `hard/capacity.ts` and `hard/designation.ts` **stay** — they are structural

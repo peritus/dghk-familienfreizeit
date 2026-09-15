@@ -37,7 +37,8 @@ CREATE INDEX event_subject_idx ON event(subject, seq);
 after deletion, which would break the monotonicity that everything downstream
 assumes. We never delete events, so it is belt and braces — but it is free.
 
-`seq` is the total order of the system. `input_seq` on a plan pins a snapshot.
+`seq` is the total order of the system. `input_seq` on a plan snapshot fixes the
+solver input.
 "What did we know at 14:00 on the 12th" is `WHERE seq <= (SELECT MAX(seq) FROM
 event WHERE at <= '...')`.
 
@@ -52,6 +53,22 @@ human decided.
 ---
 
 ## 2. Identity
+
+The canonical domain projection is generic:
+
+```sql
+CREATE TABLE entity (
+  id         TEXT PRIMARY KEY,
+  kind       TEXT NOT NULL,
+  sort_key   INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  retired_at TEXT
+);
+```
+
+`kind` is `family`, `person`, `space`, `workshop`, or `slot`. The tables below
+are typed read projections over these entities. They make common screens and
+integrity checks convenient without becoming a second source of truth.
 
 ```sql
 CREATE TABLE family (
@@ -110,6 +127,13 @@ the snapshot and remains visible in old plans.
 ---
 
 ## 3. Inventory
+
+Rev3's canonical domain model is a generic `entity` projection plus typed
+labels. `family`, `person`, `space`, `workshop`, and `slot` are entity kinds;
+building, bedroom, bed, and sleeping-place are `space` entities. The typed
+tables below are disposable query projections retained where they make common
+capacity and timetable queries or integrity assertions clearer. Every relation
+in the domain is a label resolved by the constraint resolver.
 
 ```sql
 CREATE TABLE building (
@@ -235,7 +259,7 @@ and are load-bearing:
   tight.
 - **The mutuality-is-derived argument.** rev1 derived mutual co-room requests
   and keep-apart symmetry from directed rows. This is now a self-join over
-  `tag_assignment`; see [14-tags](14-tags.md) §2.
+  generic label projection; see [14-tags](14-tags.md) §2.
 - **The `free_text` distinction.** Free text is the family's and visible to
   them; admin notes are separate. This is now a `descriptive` tag plus a note
   field, and the privacy boundary in [08-attendee-ux](08-attendee-ux.md) §2 is
@@ -256,14 +280,14 @@ CREATE TABLE slot (
 
 CREATE TABLE workshop (
   id           TEXT PRIMARY KEY,
-  slot_id      TEXT NOT NULL REFERENCES slot(id),
+  slot_id      TEXT NOT NULL,
   title        TEXT NOT NULL,
   description  TEXT,
   capacity     INTEGER NOT NULL CHECK (capacity > 0),
   min_capacity INTEGER NOT NULL DEFAULT 0,
   min_age      INTEGER,
   max_age      INTEGER,
-  room_id      TEXT REFERENCES room(id),
+  room_id      TEXT,
   cancelled_at TEXT,
   sort_key     INTEGER NOT NULL
 );
@@ -271,9 +295,9 @@ CREATE TABLE workshop (
 CREATE INDEX workshop_slot_idx ON workshop(slot_id, sort_key);
 
 CREATE TABLE workshop_pref (
-  person_id   TEXT NOT NULL REFERENCES person(id),
-  slot_id     TEXT NOT NULL REFERENCES slot(id),
-  workshop_id TEXT NOT NULL REFERENCES workshop(id),
+  person_id   TEXT NOT NULL,
+  slot_id     TEXT NOT NULL,
+  workshop_id TEXT NOT NULL,
   rank        INTEGER NOT NULL CHECK (rank >= 1),
   updated_at  TEXT NOT NULL,
   PRIMARY KEY (person_id, workshop_id)
@@ -299,7 +323,7 @@ oversight.
 
 ## 6. Constraint history
 
-There is no separate pin table. Admin decisions are ordinary constraint and
+There is no separate override table. Admin decisions are ordinary constraint and
 label events. They may be cleared by a later `LabelCleared` event, while the
 original event and all plan snapshots remain in the event log. Stable people and
 spaces are referenced; derived party keys are never persisted as identity.

@@ -111,10 +111,10 @@ readers and does not benefit from an ORM.
 
 **Never edit a generated migration after applying it anywhere.** Add a new one.
 
-**The `label` migration** drops the four preference tables and pin table it
+**The `label` migration** drops the four preference tables and pin projection it
 replaces in the same migration. No data migration is needed if this lands
 before real preferences are collected. If it lands after, write a one-off
-script that reads the old tables and emits `LabelSet` events — do not insert
+script that reads old projections or legacy events and emits `LabelSet` events — do not insert
 into `label` directly, because the projection is rebuilt from the log
 and a direct insert is undone on the next rebuild.
 

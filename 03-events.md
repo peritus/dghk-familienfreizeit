@@ -3,6 +3,12 @@
 The complete write vocabulary. Adding an event type means adding to this file, to
 `src/events/types.ts`, and to the projector. Nothing else.
 
+Rev3 uses semantic setup events (`FamilyInvited`, `PersonAdded`, `RoomAdded`,
+and so on) as convenient command vocabulary. The projector reduces them to
+generic entities and labels. Constraints and intrinsic facts then use the same
+`LabelSet` stream; no event type exists solely for a particular preference or
+admin override.
+
 ## Shape
 
 ```ts
@@ -32,8 +38,8 @@ discover the problem in the solver.
    carries the birthdate. It does not carry "look up the birthdate from the
    import file". Replaying the log must not require anything but the log.
 
-2. **Payloads are complete, not deltas.** `RoomPreferenceStated` carries all four
-   preference fields every time, even the unchanged ones. Deltas mean the
+2. **Payloads are complete, not deltas.** `PersonUpdated` and ranked-preference
+   events carry complete restatements. Deltas mean the
    projector has to merge, merging has ordering subtleties, and the audit trail
    becomes unreadable. A full restatement is a few extra bytes and total clarity.
 
@@ -80,7 +86,7 @@ retain access.
   needs_accessible: boolean
 }
 ```
-Emitted by the family or by an admin on their behalf.
+Emitted by the family or by an allowlisted admin.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
 registered as an adult by their family and that is their call. The solver uses
@@ -308,5 +314,5 @@ Worth writing down, because the boundary blurs under pressure.
 | Party formation results | Derivation | plan trace |
 
 The test: **would replaying the log without this produce a different plan?** If
-no, it is not an event. Party formation is derived from preferences and admin
-overrides, both of which *are* events; the formation itself is not.
+no, it is not an event. Party formation is derived from labels and constraints,
+both of which *are* events; the formation itself is not.

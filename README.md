@@ -213,8 +213,8 @@ history supplies author and timing; a separate pin taxonomy is unnecessary.
 constraint. The resolver reports active, missing, contradictory, and redundant
 constraints directly.
 
-*Amended in rev2:* `MISSING_CONSTRAINT` now usually resolves to a registry
-entry rather than a schema migration.
+*Amended in rev3:* admin judgement is represented directly by custom matching
+constraints rather than a pin that later becomes a registry entry.
 
 ### D8 — No React in v1
 
