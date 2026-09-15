@@ -37,6 +37,9 @@ sort it. Mitigation: `snapshot.ts` has one `freezeSorted()` helper and a test
 that walks every array property of the Snapshot asserting it is sorted and
 frozen.
 
+`tagAssignments` is covered by R1 like every other array, sorted by
+`entity_type`, `entity_id`, `tag`, `value`.
+
 `Array.prototype.sort` is stable per ES2019, so a comparator chain is safe — but
 do not *rely* on stability. Always terminate the chain in an id comparison so the
 order is total regardless.
@@ -55,8 +58,8 @@ a lint rule against `[0]` on a filtered array inside `src/solver`.
 ### R3 — No `Math.random()`
 
 If randomised restarts are ever wanted, use `src/solver/rng.ts` — a seeded
-xorshift32 — and store the seed in `SolverConfigChanged`. Default is no
-randomness at all.
+xorshift32 — and store the seed on `SolverConfig`, which is recorded on every
+plan. Default is no randomness at all.
 
 *Enforced by:* `no-restricted-globals` ESLint rule scoped to `src/solver/**`.
 
@@ -122,33 +125,44 @@ type Snapshot = Readonly<{
   rooms:           readonly Room[]
   places:          readonly Place[]
   adjacency:       readonly Adjacency[]
-  roomPrefs:       readonly FamilyRoomPref[]
-  childOptIns:     readonly PersonId[]
-  coRoomRequests:  readonly CoRoomRequest[]
-  keepAparts:      readonly KeepApart[]
+  tagAssignments:  readonly TagAssignment[]
+  capabilities:    ReadonlyMap<RoomId, ReadonlySet<Tag>>
   pins:            readonly Pin[]
   partyOverrides:  readonly PartyOverride[]
 }>
 ```
 
+`capabilities` is materialised once, from derivations plus assignments
+([14-tags](14-tags.md) §3), replacing `roomPrefs`, `childOptIns`,
+`coRoomRequests` and `keepAparts`.
+
 ```ts
 type SolverConfig = Readonly<{
   solverVersion: string
   eventDate: string            // ISO date; all ages computed against this
-  weights: Weights             // integer table, see §5
-  maxRepairPasses: number      // default 50
+  weights: GeometryWeights     // exactFit, nearFit, orphanBed — see §5
+  registry: Registry           // from events/<event>/event.ts
+  phases: Phases
   seed: number | null          // default null
 }>
 ```
+
+`eventDate` now comes from `meta.date` in the registry rather than an
+environment variable.
 
 Withdrawn people are excluded when the snapshot is built, not filtered later.
 Blocked rooms likewise. The solver never sees data it must remember to ignore.
 
 ---
 
-## 3. Phase A — Party formation
+## 3. Preflight, then Phase A — Party formation
 
-The judgement-heavy phase. Runs before any placement.
+**Preflight runs first**, before any placement, over the snapshot alone. C1–C9
+per [14-tags](14-tags.md) §6. Error severity does not block computing a plan —
+an admin needs to see the plan to understand the error — but it blocks
+publishing without an explicit acknowledgement.
+
+Phase A is the judgement-heavy phase. Runs before any placement.
 
 ### A.0 Definitions
 
@@ -158,15 +172,14 @@ type Party = {
   personIds: readonly string[] // sorted
   size: number                 // headcount
   bedDemand: number            // count of persons with occupies_bed = 1
-  requires: {
-    ensuite: boolean
-    indoor: boolean
-    accessible: boolean
-    soleOccupancy: boolean     // any member family has sharing = 'refuse'
-  }
-  provenance: readonly string[]   // human-readable lines
+  requirements: readonly { tag: Tag, strength: 'required' | 'preferred' }[]
+  provenance: readonly string[]   // human-readable lines, per requirement
 }
 ```
+
+`requirements` is the strictest-strength union of member families'
+requirement tags ([14-tags](14-tags.md) §5.3), consumed by
+`rules/hard/tagRequirements.ts` and `rules/soft/tagPreferences.ts`.
 
 `size` and `bedDemand` differ whenever an infant is present. Capacity checks use
 `bedDemand`. Everything a human reads shows `size`.
@@ -191,7 +204,7 @@ residue.**
 ```
 eligible = persons where
     role = 'child'
-  and childOptIn = true
+  and has tag 'child-room-ok'
   and not pinned to a non-child room
   and ageAt(birthdate, eventDate) within some child room's band
 
@@ -206,13 +219,14 @@ childRooms = rooms where designation = 'child', sorted by (sort_key, id)
 for each childRoom in order:
     candidates = eligible not yet placed, whose age fits this room's band
     take up to childRoom.placeCount, in eligible order
-    if taken count == 1: release them back to the pool   // no lone child
+    if taken count < phases.childRooms.minOccupants: release them back to the pool
     else: place them, emit trace
 ```
 
-**The lone-child rule.** A children's room with exactly one occupant is worse
-than no children's room: the child is isolated, and a bed is wasted. Refuse it.
-The released child returns to their family party.
+**The lone-child rule.** A children's room with fewer occupants than
+`phases.childRooms.minOccupants` is worse than no children's room: an isolated
+child, and a wasted bed. Refuse it. The released children return to their
+family parties.
 
 Because there is no adult-supervision requirement, a children's room needs no
 further constraint beyond the age band. If that changes, it becomes one more hard
@@ -240,18 +254,20 @@ A family with zero residue (all members in children's rooms) produces no party.
 A family reduced to one person produces a party of one, and those fragment the
 plan badly — see the `orphanBed` penalty in §5 and the warning in §7.
 
-Requirements are lifted from the family's `family_room_pref`:
-`ensuite: required` → `requires.ensuite`, and so on. `sharing: 'refuse'` →
-`requires.soleOccupancy`.
+Requirements are lifted from the family's requirement-tag assignments
+directly: each `tag_assignment` at strength `required` or `preferred` becomes
+one entry in `party.requirements`.
 
-### A.3 Merges from mutual `must` co-room requests
+### A.3 Merges from mutual-required relation tags
 
 Build an undirected graph over families where an edge exists iff **both**
-directions have `strength = 'must'`. Union-find over that graph. Each connected
-component merges its member families' residue parties into one.
+directions carry a relation tag with `kind: 'same-room'` and
+`symmetry: 'mutual-required'`, both at strength `required`. Union-find over
+that graph. Each connected component merges its member families' residue
+parties into one.
 
 ```
-merged.requires = union of members' requirements   // strictest wins
+merged.requirements = strictest-strength union of members' requirements
 merged.bedDemand = sum
 ```
 
@@ -266,8 +282,8 @@ the request to a soft preference, and warn loudly in the trace:
 Without this guard the solver produces a party that no room can hold, reports it
 unplaced, and gives an admin no idea why.
 
-Non-mutual requests, and mutual `prefer` requests, do not merge. They become the
-`coRoomSameRoom` / `coRoomAdjacent` soft terms.
+Non-mutual relation tags, and mutual `preferred` ones, do not merge. They
+become the `room-with.oneSidedWeight` / `room-with.adjacentWeight` soft terms.
 
 ### A.4 Admin overrides, applied last in event order
 
@@ -288,6 +304,12 @@ provenance:
 A sorted `Party[]`. Sort order: `bedDemand` desc, then first member's
 `family_id`, then `key`. Admins review this list on the party screen before
 looking at any room.
+
+Party requirements are derived as a strictest-strength union of member
+families' requirement tags ([14-tags](14-tags.md) §5.3), and party provenance
+names which member contributed each requirement — a merged party's `required`
+tag came from one specific family, and admins reviewing the party screen need
+to know which one.
 
 ---
 
@@ -403,44 +425,59 @@ or pins the party into Room 31.
 
 A short table of named integer terms, living in config, stored with every plan.
 
+The `Weights` type loses eight terms to the registry — each now lives as a
+field on its tag ([15-event-config](15-event-config.md) §4):
+
+| rev1 `Weights` term | Moves to the tag, as |
+|---|---|
+| `ensuitePreferred` | `needs-ensuite.weight` |
+| `indoorPreferred` | `needs-indoor.weight` |
+| `coRoomSameRoom` | `room-with.oneSidedWeight` |
+| `coRoomAdjacent` | `room-with.adjacentWeight` |
+| `coRoomSameFloor` | folded into `adjacentWeight`, scaled by distance |
+| `crossFamilyWhenPreferNot` | `sole-occupancy.penalty` |
+| `accessibleRoomWasted` | `accessible.wasteWhenUnneeded` |
+| `outsideWhenIndoorPreferred` | `needs-indoor.penalty` |
+
 ```ts
-type Weights = {
+type GeometryWeights = {
   exactFit: number                    //  +10  bedDemand == free places
   nearFit: number                     //   +4  leaves exactly 2+ free places
-  ensuitePreferred: number            //   +6
-  indoorPreferred: number             //   +6
-  coRoomSameRoom: number              //   +6  non-merged co-room wish satisfied
-  coRoomAdjacent: number              //   +3  adjacency distance 1
-  coRoomSameFloor: number             //   +1  adjacency distance 2–3
   orphanBed: number                   //   -8  leaves exactly 1 free place
-  crossFamilyWhenPreferNot: number    //  -12  shares with another family despite prefer_not
-  accessibleRoomWasted: number        //   -4  accessible room used by a party not needing it
-  outsideWhenIndoorPreferred: number  //   -6
 }
 ```
 
-Defaults shown. They are a starting point, not a truth; expect to tune them in
-the first week and to record each change as `SolverConfigChanged`.
+`exactFit`, `nearFit` and `orphanBed` **stay** in `GeometryWeights` — they are
+geometry, not tag matching, and describe how well a party fits a room's
+remaining places regardless of which tags are involved.
 
-Three notes on why these particular terms:
+Defaults shown. They are a starting point, not a truth; expect to tune them in
+the first week with `scripts/tune.ts` against an exported event log
+([15-event-config](15-event-config.md) §4), and to record each change as a
+deploy of `event.ts` rather than an event.
+
+Three notes on why these particular terms carry the scale they do, kept
+verbatim because they are still correct and the best explanation of the scale
+in either revision:
 
 **`orphanBed` is a penalty, not a missing bonus.** A room left with exactly one
 free place is nearly always wasted — a single leftover place fits almost nobody,
 since most remaining parties are families of two or more. Penalising it heavily
 pushes the packer toward clean fits. This is the term most worth tuning first.
 
-**`accessibleRoomWasted` is small and negative.** Accessible rooms are scarce.
-Using one for a party that does not need it is not wrong, it is just a waste when
-alternatives exist. A small penalty expresses "prefer not to, but do it rather
-than leave someone unplaced".
+**`accessible.wasteWhenUnneeded` is small and negative.** Accessible rooms are
+scarce. Using one for a party that does not need it is not wrong, it is just a
+waste when alternatives exist. A small penalty expresses "prefer not to, but do
+it rather than leave someone unplaced".
 
-**`crossFamilyWhenPreferNot` is large and negative but not a hard rule.** That is
-the whole point of the three-value preference scale: `refuse` prunes, `prefer_not`
-costs 12 points. If the plan is tight, the solver will do it, and the trace will
-say so, and an admin can make a phone call.
+**`sole-occupancy.penalty` is large and negative but not a hard rule.** That is
+the whole point of the three-value preference scale: `required` prunes,
+`preferred` costs 12 points. If the plan is tight, the solver will do it, and
+the trace will say so, and an admin can make a phone call.
 
-Hard rules are *not* in this table. `ensuite: required` is not worth points; it
-prunes the room from consideration entirely. Anything in `rules/hard/` is binary.
+Hard rules are *not* in this table. A requirement tag at `required` is not
+worth points; it prunes the room from consideration entirely. Anything in
+`rules/hard/` is binary.
 
 ### Rule interface
 
@@ -456,6 +493,8 @@ interface Rule {
 ```
 
 **`describe` is mandatory. A rule that cannot explain itself does not ship.**
+The two generic handlers, `tagRequirements` and `tagPreferences`, get their
+`describe` text from `registry[tag].label`.
 
 That single constraint is what keeps the trace readable as the rule set grows
 from eleven terms to thirty. Explanation lives immediately next to logic, in the
@@ -494,6 +533,7 @@ type Plan = {
     pinId: string
     reason: string
   }>
+  preflight: PreflightFinding[]
   trace: TraceEntry[]
   stats: {
     partiesPlaced: number
@@ -505,6 +545,7 @@ type Plan = {
     totalScore: number
     coRoomWishesSatisfied: number
     coRoomWishesTotal: number
+    unsatisfiedRequirements: number
   }
 }
 ```
@@ -575,3 +616,15 @@ almost every soft term becomes irrelevant and the solver degenerates into "find
 any feasible packing", which may take the full repair budget without improving.
 Expected and fine; the trace will show `repairCapHit: true` with a near-zero
 improvement, and that is the honest report.
+
+**Typos become silence.** `room-with=fam_72` for `fam_27` — nothing errors, the
+merge simply never happens. Append-time validation and preflight C2 both catch
+it; neither is optional. See [14-tags](14-tags.md) §9.
+
+**Derived-and-assigned drift.** A capability with a `derive` must reject direct
+assignments, or you get two answers to "does Room 14 have an ensuite". See
+[14-tags](14-tags.md) §9.
+
+**Requirement inflation through merges.** The strictest-strength union of a
+merged party's requirements is correct and surprising — see A.5 above and
+[14-tags](14-tags.md) §9.
