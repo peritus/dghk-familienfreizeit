@@ -130,7 +130,7 @@ Excludes the person from all future snapshots. Historical plans keep them.
 {
   room_id: string, building_id: string, number: string,
   floor: number | null,
-  kind: 'room' | 'bungalow' | 'tent',
+  kind: string,                 // values are validated by the active profile
   has_ensuite: boolean, is_outside: boolean, is_accessible: boolean,
   sort_key: number
 }
@@ -159,7 +159,7 @@ with no age band is a trap.
 ### `BedAdded` / `BedUpdated` / `BedRemoved`
 ```ts
 { bed_id: string, room_id: string, label: string,
-  kind: 'single'|'double'|'bunk_top'|'bunk_bottom'|'cot',
+  kind: string,                // values are validated by the active profile
   sleeps: 1 | 2, sort_key: number }
 ```
 Places are *generated* by the projector from `sleeps`, never by an event. Place
@@ -240,7 +240,7 @@ the latter shows up in the admin's chase list.
 not exceed the number of workshops in the slot.
 
 This stays typed rather than becoming a tag, deliberately (D13) — see
-[14-tags](04-labels-and-constraints.md) §7.
+[labels and constraints](04-labels-and-constraints.md) §7.
 
 ---
 
@@ -316,7 +316,7 @@ Worth writing down, because the boundary blurs under pressure.
 
 | Not an event | Why | Where it lives |
 |---|---|---|
-| Registry changes (adding, removing or reweighting a tag) | Code, versioned in git; covered by `config_hash` | `events/<event>/event.ts` |
+| Event-profile changes (adding, removing or reweighting a tag) | Code, versioned with the deployment; covered by `config_hash` | `events/<event>.ts` |
 | Magic link issued / redeemed | Operational secret handling | `magic_link` |
 | Session created / destroyed | Operational | `session` |
 | Email sent, delivered, bounced | Operational telemetry | `email_log` |

@@ -123,8 +123,8 @@ lifecycle. If a component needs data it takes a prop; the route fetches it.
 and should appear nowhere in this codebase. Family free text, admin notes and
 workshop titles are all user-supplied and all rendered as `{value}`.
 
-The family preferences page is a renderer over `familyFacing` registry entries
-rather than hand-written JSX ([08-attendee-ux](09-family-portal.md) §1): each
+The family preferences page is a renderer over `familyFacing` event-profile entries
+rather than hand-written JSX ([family portal](09-family-portal.md) §1): each
 `control` value maps one-to-one onto a component in `src/views/controls/`.
 
 ---
@@ -337,7 +337,7 @@ it removes an entire class of divergence bug.
 ```
 
 Versions are indicative. Let npm resolve and commit the lockfile. This design adds no
-runtime dependencies: the registry is code in the repo and both handlers are
+runtime dependencies: the active profile is code in the repo and both handlers are
 code. `tsx` is added to devDependencies for the tune script.
 
 **The solver has zero dependencies.** `src/solver/**` imports only from itself
@@ -358,7 +358,7 @@ both of which are dependency-free".
 | A state manager | The server is the state |
 | tRPC | Hono's RPC client exists if ever needed |
 | Prisma | Heavier than Drizzle on Workers, no gain on SQLite |
-| An auth library | See [09-auth](10-authentication.md) |
+| An auth library | See [authentication](10-authentication.md) |
 | A solver or LP library | Reviewability beats optimality here |
 | A date library | One function, `ageAt()`, over ISO strings |
 | A CSS-in-JS library | Tailwind and sixty lines of tokens |

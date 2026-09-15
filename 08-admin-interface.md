@@ -76,7 +76,7 @@ submitted nothing. With a "send reminder" action that emails the lot.
 **Quality numbers.** Small, at the bottom, trending.
 
 > 3 orphan beds · 19/24 co-room wishes satisfied · 4 people with no top-two choice
-> · 11 active constraints (was 19 at v1.3.0)
+> · 11 active constraints
 
 ---
 
@@ -146,7 +146,7 @@ Each party renders as a card:
 Provenance is the content. An admin reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
 Each requirement names which member family contributed it
-([14-tags](04-labels-and-constraints.md) §5.3) — a merged party's `required` tag binding
+([labels and constraints](04-labels-and-constraints.md) §5.3) — a merged party's `required` tag binding
 everyone is correct but surprising, and the card is where that surfaces.
 
 **Warnings inline, at the top:**

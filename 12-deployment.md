@@ -31,9 +31,8 @@ Durable Objects.
   ],
 
   "vars": {
-    "EVENT_NAME": "Familienwochenende 2026",
     "PUBLIC_URL": "https://bettenplan.example.de",
-    "EMAIL_FROM": "Familienwochenende <wochenende@example.de>"
+    "EMAIL_FROM": "Configured event <wochenende@example.de>"
   },
 
   "triggers": {
@@ -60,12 +59,10 @@ route — a top-level navigation to `/auth/:token` that never reaches the handle
 This application server-renders every route, so static assets should 404 through
 to the Worker and let the router decide.
 
-`EVENT_DATE` and `PREFERENCE_DEADLINE` move to `meta.date` and
-`meta.preferenceDeadline` in `event.ts` ([15-event-config](15-event-profiles.md)
-§8) — every age in the solver is computed against `meta.date`, which makes it
-a solver input that belongs in `config_hash`. `EVENT_NAME`, `PUBLIC_URL` and
-`EMAIL_FROM` **stay** — they are deployment facts, not solver inputs, and must
-not enter `config_hash`.
+`EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
+event profile ([event profiles](15-event-profiles.md)) because they are solver
+or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
+enter `config_hash`.
 
 ---
 
@@ -123,7 +120,7 @@ and a direct insert is undone on the next rebuild.
 ## Weight tuning
 
 There is no weight-editing screen, and this is deliberate. The offline
-workflow, from [15-event-config](15-event-profiles.md) §4:
+workflow, from [event profiles](15-event-profiles.md) §4:
 
 ```bash
 wrangler d1 execute bettenplan --remote --json \
@@ -131,8 +128,8 @@ wrangler d1 execute bettenplan --remote --json \
 npm run tune
 ```
 
-Export the event log, run `npm run tune`, read the trade-off table, edit
-`event.ts`, deploy.
+Export the event log, run `npm run tune`, read the trade-off table, edit the
+active event profile, and deploy.
 
 ---
 
