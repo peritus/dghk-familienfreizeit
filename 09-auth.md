@@ -1,7 +1,8 @@
 # 09 — Authentication
 
-Magic link, no passwords, invite-only. One login per family. An `is_admin` flag
-on the family record is the only role distinction.
+Magic link, no passwords, invite-only. One login per family. Admin access is a
+code-level allowlist of verified email addresses, exposed through a separate
+admin URL and UI.
 
 Roughly 120 lines of Web Crypto. That is a deliberate choice over a library, and
 it is only defensible if the rules in §3 are followed exactly.
@@ -93,6 +94,10 @@ column: the lookup *is* the verification.
 
 ## 3. Non-negotiable rules
 
+Admin authorization is checked against the verified login email and allowlist on
+every admin request. The special URL is routing, not a credential; knowing it
+never grants access.
+
 Follow all of these or use the library instead. Each has a failure mode that is
 not obvious from reading the happy path.
 
@@ -133,9 +138,9 @@ the old address retains access indefinitely.
 No tokens, no hashes, no session ids, not even `LoginSucceeded`. The event log is
 domain decisions; these are operational secrets with a deletion policy.
 
-**10 — Admin status is checked per request from the database.**
-Not from the cookie, not from a JWT claim. Revoking admin must take effect
-immediately, and the lookup is already happening to resolve the session.
+**10 — Admin status is checked per request from the allowlist.**
+Not from the cookie, a JWT claim, or a family label. Changing the allowlist
+requires a deploy for now, and the lookup uses the verified session identity.
 
 ---
 

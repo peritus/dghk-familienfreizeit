@@ -287,16 +287,16 @@ The feasibility predicate runs client-side for immediate feedback and
 **server-side for truth**. The client version is a fast approximation — capacity
 and the hard attribute checks — and is allowed to be slightly wrong. The server
 re-solves and the board reconciles. Never let the client's opinion be
-authoritative; it does not have the pins, the keep-aparts, or the party
+authoritative; it does not have the constraints, exclusions, or party
 structure.
 
 ### Mutation cycle
 
 ```
 1. optimistic move in the DOM
-2. POST /admin/api/board/pin  { personIds, targetRoomId, planId }
-3. server: append AdminPinned → re-solve → store draft plan
-4. server responds with { planId, assignments, movedPartyKeys, stats }
+2. POST /admin/api/board/constraint  { personIds, targetRoomId, snapshotId }
+3. server: append ConstraintDefined + LabelSet → re-solve → snapshot draft plan
+4. server responds with { snapshotId, assignments, movedPartyKeys, stats }
 5. client reconciles the whole board from the response
 6. if movedPartyKeys has more than this party → flash them, show the toast
 7. on 409: revert, show "Anna changed the plan. Reload →"
