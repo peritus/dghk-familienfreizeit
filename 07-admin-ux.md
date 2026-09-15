@@ -23,6 +23,12 @@ is tables and forms, and should be boring on purpose.
 | `/admin/plans/:a/diff/:b` | Plan diff | What moved and why |
 | `/admin/pins` | Pins | Triage, health, retirement |
 | `/admin/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
+| `/admin/constraints` | Constraints | Registry reference, preflight findings, tag usage counts |
+
+`/admin/constraints` is read-only. The registry is code; the screen renders
+it, shows which tags are in use and by how many entities, and lists current
+preflight findings. It is where an admin looks to answer "what can I even ask
+for".
 
 ---
 
@@ -45,8 +51,15 @@ accurate count of consequences. If the re-solve produces the same hash:
 > Published 3 days ago · plan #7
 > 14 events since, none affecting assignments. **Up to date.**
 
-**Blocking items**, only when present. Pin conflicts, unplaceable parties,
-refused merges, workshops below minimum. Each links directly to the thing.
+**Blocking items**, only when present. Preflight findings, pin conflicts,
+unplaceable parties, refused merges, workshops below minimum. Each links
+directly to the thing.
+
+Preflight findings come first. C8 in particular is the earliest possible
+warning and should be the most prominent thing on the screen when it fires:
+
+> ⚠ **needs-ensuite: 19 beds required, 14 available.** Five people cannot be
+> placed however the rooms are arranged. *See affected families →*
 
 > ⚠ **2 pin conflicts** — pinned people are no longer in one party.
 > ⚠ **1 party cannot be placed** — Braun ×5 requires ensuite; none free.
@@ -90,13 +103,16 @@ Expected columns, documented on the page itself: `email`, `family_name`,
 order), `roles`. Be generous about header naming and show what was matched.
 
 **Family detail** shows people, current preferences, and — the useful part — the
-complete event history for that family, rendered as prose:
+complete event history for that family, rendered as prose. The preferences
+block renders tag assignments with their strengths and labels from the
+registry. The event history renders `TagSet` / `TagCleared` in prose using
+`registry[tag].label`, so it reads the same as before:
 
-> 12 Sep 14:22 · *Organiser Anna, on behalf of this family* · stated room
-> preferences: ensuite preferred, indoor required, happy to share.
+> 12 Sep 14:22 · *Organiser Anna, on behalf of this family* · set Eigenes Bad
+> to preferred, Drinnen schlafen to required.
 > 12 Sep 14:23 · *Organiser Anna* · "Wrote in saying the youngest is scared of
 > the dark, would like a room with a window onto the courtyard."
-> 14 Sep 09:01 · *This family* · opted Jonas (9) into a children's room.
+> 14 Sep 09:01 · *This family* · set Möchte ins Kinderzimmer for Jonas (9).
 
 That admin-on-behalf-of attribution is what makes scenario 1c honest — a family
 can see that an organiser entered something for them, and an organiser can see
@@ -121,21 +137,26 @@ Each party renders as a card:
 │ Müller — Anna (38), Kai (41)                                   │
 │ Schmidt — Jana (36), Tom (39), Mia (0, no bed)                 │
 │                                                                │
-│ Requires: ensuite                                              │
+│ Requires: ensuite (Schmidt)                                    │
 │                                                                │
-│ Merged from a mutual co-room request (12 Sep, 13 Sep).         │
+│ Merged from a mutual room-with request (12 Sep, 13 Sep).       │
 │ Müller's two children are in children's room K3.               │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 Provenance is the content. An admin reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
+Each requirement names which member family contributed it
+([14-tags](14-tags.md) §5.3) — a merged party's `required` tag binding
+everyone is correct but surprising, and the card is where that surfaces.
 
 **Warnings inline, at the top:**
 
 > ⚠ 7 parties of one person. Consider merging or contacting these families.
 > ⚠ Merge refused: Müller + Schmidt + Weber, combined demand 10 exceeds
 > the largest room (6 places). Treated as a preference instead.
+> ⚠ Preflight C4: merged party Müller + Schmidt + Weber needs a six-place
+> ensuite room (Schmidt's requirement); no such room exists.
 
 **Merge and split** open a small dialog that requires a reason code (defaulting
 to `UNCLASSIFIED` with a nudge) and emit `AdminMergedParties` /
@@ -210,7 +231,8 @@ the same toolchain behind Trello and Jira.
   bed-level view handles the exceptions (see below).
 - **On drag start**, rooms that cannot accept the party dim and lose their drop
   affordance. Rooms that can accept it but would incur a penalty show the penalty
-  as a ghost chip: `−12 shares with another family`.
+  as a ghost chip, its text read from `registry[tag].label` rather than
+  hard-coded: `−12 Zimmer teilen`.
 - **On drop**, the move applies optimistically, a pin is emitted, the solver
   re-runs server-side, and the board reconciles with the authoritative result.
 - **If the re-solve moves anything else**, those cards flash once and a summary
@@ -336,6 +358,10 @@ Grouping by reason code with notes visible is the triage workflow from
 pins all mentioning stairs is a rule, and this screen is where that becomes
 visible.
 
+The triage screen gains a "this cluster looks like a tag" grouping: pins
+sharing a `reason_code` and overlapping note keywords, surfaced together.
+Optional, and the highest-value small feature on this screen.
+
 ---
 
 ## 8. Workshops
@@ -372,3 +398,7 @@ administrative work; the interface should be a competent colleague.
 copy should be German with an English fallback (`family.locale`). Admin-facing
 copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
+
+Admin-facing tag labels come from `registry[tag].label` and family-facing text
+from `familyFacing.label`, so the two audiences can be worded differently for
+the same tag.
