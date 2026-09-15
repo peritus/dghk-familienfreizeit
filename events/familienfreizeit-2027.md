@@ -55,9 +55,9 @@ facilities in a neighbouring building.
 | 32 | 103.00 € | 4 | private | Gartenhaus, ground floor |
 | 33 | 103.00 € | 4 | private | Gartenhaus, ground floor |
 | 34 | 103.00 € | 4 | private | Gartenhaus, ground floor |
-| 35 | 103.00 € | 8 | private | Gartenhaus, 1st floor; apartment with two sleeping rooms and common room; suitable for two friendly families |
-| 36 | 103.00 € | 4 | private | Gartenhaus, 1st floor; apartment with two sleeping rooms and common room; suitable for two friendly families |
-| 37 | 103.00 € | 8 | private | Gartenhaus, 1st floor; apartment with two sleeping rooms and common room; suitable for two friendly families |
+| 35 | 103.00 € | 8 | private | Gartenhaus, 1st floor; source layout `2×4`; apartment with two sleeping rooms and common room; suitable for two friendly families |
+| 36 | 103.00 € | 4 | private | Gartenhaus, 1st floor; source layout `2×2`; apartment with two sleeping rooms and common room; suitable for two friendly families |
+| 37 | 103.00 € | 8 | private | Gartenhaus, 1st floor; source layout `2×4`; apartment with two sleeping rooms and common room; suitable for two friendly families |
 | 41 | 103.00 € | 6 | private | Blockhaus, ground floor |
 | 42 | 103.00 € | 6 | private | Blockhaus, ground floor |
 | 43 | 103.00 € | 4 | private | Blockhaus, ground floor |
@@ -72,8 +72,33 @@ facilities in a neighbouring building.
 | 66 | 88.50 € | 4 | remote-shared | Schlaffass |
 
 The source inventory intentionally has no room 13; room numbering is preserved
-as supplied. Apartment capacities are normalized from `2×4` and `2×2` sleeping
-rooms to 8 and 4 beds respectively.
+as supplied. The source descriptors are retained in the normalized record:
+`Etagendusche`, `mit Sanitär`, `Sanitär im Nebengebäude`, `Haupthaus`,
+`Gartenhaus`, `Blockhaus`, `Bungalow`, and `Schlaffass`. Apartment capacities
+are normalized from `2×4` and `2×2` sleeping rooms to 8 and 4 beds respectively.
+
+### Room tags
+
+The inventory uses event-specific tags and derives reusable room capabilities
+from them:
+
+| Tag | Values or derivation | Use |
+|---|---|---|
+| `room_type` | `standard`, `apartment`, `bungalow`, `schlaffass` | Event vocabulary for accommodation type |
+| `building` | `Haupthaus`, `Gartenhaus`, `Blockhaus`, or null | Location and grouping |
+| `floor` | `ground`, `1`, `2`, or null | Location; `ground` can derive `ground-floor` |
+| `sanitary` | `private`, `shared-floor`, `remote-shared` | Event vocabulary for sanitary arrangement |
+| `price_per_bed_eur` | `88.50` or `103.00` | Price information; not a solver preference by default |
+| `bed_capacity` | derived from beds and apartment layouts | Atomic room capacity |
+| `sleeping_rooms` | `2` for rooms 35–37, otherwise `1` where applicable | Apartment layout |
+| `beds_per_sleeping_room` | `4` for rooms 35 and 37; `2` for room 36 | Preserves the source `2×4` / `2×2` structure |
+| `has_common_room` | `true` for rooms 35–37 | Apartment layout |
+| `suitable_for_two_families` | `true` for rooms 35–37 | Descriptive event fact, not an automatic placement rule |
+
+Derived capabilities such as `private-sanitary`, `ground-floor`, and
+`multi-room-unit` are resolver projections, not additional authoritative room
+properties. The event profile decides which of them are exposed as preferences
+or hard requirements.
 
 At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
 103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
