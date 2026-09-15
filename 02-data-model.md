@@ -202,61 +202,7 @@ exposes the ordered list to the workshop solver. This keeps the core model
 generic while preserving the invariant that an ordered preference is not an
 unordered set.
 
-## 6. Plan snapshots
-
-A plan snapshot is an immutable event-log artifact. The query table is only a
-read projection:
-
-```sql
-CREATE TABLE plan_snapshot (
-  snapshot_id    TEXT PRIMARY KEY,
-  input_seq      INTEGER NOT NULL,
-  solver_version TEXT NOT NULL,
-  config_hash    TEXT NOT NULL,
-  output_hash    TEXT NOT NULL,
-  body           TEXT NOT NULL,
-  status         TEXT NOT NULL CHECK (status IN ('draft','published','superseded')),
-  created_at     TEXT NOT NULL,
-  created_by     TEXT NOT NULL
-);
-
-CREATE UNIQUE INDEX plan_one_published_idx
-  ON plan_snapshot(status) WHERE status = 'published';
-```
-
-The complete plan body is stored by `PlanSnapshotted`. Assignment tables may be
-unpacked for indexed reads and uniqueness assertions, but the event-log body is
-the historical source.
-
-```sql
-CREATE TABLE plan_room_assignment (
-  snapshot_id TEXT NOT NULL,
-  person_id   TEXT NOT NULL,
-  place_id    TEXT NOT NULL,
-  room_id     TEXT NOT NULL,
-  party_key   TEXT NOT NULL,
-  PRIMARY KEY (snapshot_id, person_id)
-);
-
-CREATE UNIQUE INDEX plan_place_unique_idx
-  ON plan_room_assignment(snapshot_id, place_id);
-
-CREATE TABLE plan_workshop_assignment (
-  snapshot_id TEXT NOT NULL,
-  person_id   TEXT NOT NULL,
-  workshop_id TEXT NOT NULL,
-  slot_id     TEXT NOT NULL,
-  PRIMARY KEY (snapshot_id, person_id, workshop_id)
-);
-
-CREATE UNIQUE INDEX plan_slot_unique_idx
-  ON plan_workshop_assignment(snapshot_id, person_id, slot_id);
-```
-
-These are solver-output assertions, not domain relationships. They are safe to
-materialize because the solver and snapshot remain authoritative.
-
-## 7. Operational tables
+## 6. Operational tables
 
 Operational tables may reference stable entity IDs for authentication and
 delivery, but those references are not domain relationships and are never used
@@ -268,6 +214,8 @@ CREATE TABLE principal (
   entity_id TEXT NOT NULL UNIQUE REFERENCES entity(id),
   email     TEXT NOT NULL COLLATE NOCASE
 );
+
+CREATE UNIQUE INDEX principal_email_idx ON principal(email);
 
 CREATE TABLE magic_link (
   token_hash  TEXT PRIMARY KEY,

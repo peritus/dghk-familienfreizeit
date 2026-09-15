@@ -108,16 +108,17 @@ Two distinct kinds, with different lifetimes.
 
 ### Projections — derived, disposable
 
-`entity`, `label`, `slot`, `workshop`, workshop rankings, and query indexes.
+`entity`, `label`, `constraint_definition`, and query indexes.
 
 Rebuilt from the log. Never written to directly outside the projector. If you
 find an `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
 
 ### Plan snapshots — immutable, kept forever
 
-A plan snapshot is an event-log artifact: a record of what we computed and,
-sometimes, what we told people. It is never regenerated from current code when
-answering historical questions.
+A plan snapshot is one `PlanSnapshotted` event row: a record of what we computed
+and, sometimes, what we told people. Its complete body is in the event payload.
+It is never regenerated from current code when answering questions about a
+published plan.
 
 ```
 PlanSnapshotted event
@@ -130,11 +131,9 @@ PlanSnapshotted event
   status          draft | published | superseded
 ```
 
-Strictly, `body` is redundant: a pure solver means `(input_seq, solver_version,
-config_hash)` reproduces it exactly. Store it anyway. Six weeks and four solver
-versions later you will need to answer "what did we email the Müllers on the
-14th", and reconstructing that by checking out an old commit is not a thing
-anyone will actually do.
+The complete body is required even though a pure solver can usually reproduce
+it. It makes the published result directly readable from the event log and
+keeps it independent of future solver or configuration changes.
 
 `config_hash` is now computed at runtime from the code config object rather
 than from a stored weight table. See [15-event-config](15-event-config.md) §4
@@ -145,28 +144,25 @@ Those three fields also mean **every difference between two plans has exactly on
 attributable cause**: new events, retuned weights, or new code. You never have to
 wonder which.
 
-### Derived read tables
+### Plan reads
 
-For the attendee portal and admin lists, the published plan's body is unpacked
-into flat tables so the common queries are a single indexed lookup rather than a
-JSON parse:
-
-- `plan_room_assignment (snapshot_id, person_id, place_id, room_id, party_key)`
-- `plan_workshop_assignment (snapshot_id, person_id, workshop_id, slot_id)`
-
-These are disposable projections with uniqueness constraints that act as an
-integrity check on the solver's output. The event-log snapshot remains canonical.
+For the attendee portal and admin lists, resolve the relevant
+`PlanSnapshotted` event and read its plan body. The solver validates assignment
+uniqueness before emitting that event; no assignment table is needed.
 
 ## Staleness and publication
 
 ```sql
 SELECT
-  p.snapshot_id,
-  p.input_seq,
-  (SELECT MAX(seq) FROM event) - p.input_seq AS events_behind
-FROM plan_snapshot p
-WHERE p.status = 'published'
-ORDER BY p.published_at DESC
+  json_extract(pub.payload, '$.snapshot_id') AS snapshot_id,
+  json_extract(snap.payload, '$.input_seq') AS input_seq,
+  (SELECT MAX(seq) FROM event) - json_extract(snap.payload, '$.input_seq') AS events_behind
+FROM event pub
+JOIN event snap
+  ON snap.type = 'PlanSnapshotted'
+ AND json_extract(snap.payload, '$.snapshot_id') = json_extract(pub.payload, '$.snapshot_id')
+WHERE pub.type = 'PlanPublished'
+ORDER BY pub.seq DESC
 LIMIT 1;
 ```
 
@@ -180,7 +176,8 @@ spelling of a name does not change any assignment. Rather than filtering event
 types (fragile, and it will be wrong the first time someone adds an event type),
 compute staleness properly:
 
-1. `events_behind > 0` → mark **potentially stale**, show the count.
+1. New domain events after the published snapshot → mark **potentially stale**,
+   show the count.
 2. On dashboard load, run `solve()` against the current snapshot in the
    background and compare `output_hash` to the published plan's.
 3. Equal → "up to date despite N new events". Different → "N changes would move
@@ -201,12 +198,10 @@ Publishing is a state transition plus, optionally, an email run.
 5. If notify: diff old vs new snapshots, email only affected families
 ```
 
-Step 5 is a `for` loop because both plans are stored and the solver is
-deterministic. Compare `plan_room_assignment` rows per person between the two
-plan ids; a family is affected if any of its people changed room, place, or
-workshop. Unaffected families receive nothing, which is what makes re-publishing
-socially acceptable rather than an event that trains people to ignore your
-emails.
+Step 5 is a `for` loop because both immutable plan bodies are in the event log
+and the solver is deterministic. Compare assignment objects per person between
+the two snapshot IDs; a family is affected if any of its people changed room,
+place, or workshop.
 
 ## Module layout
 
