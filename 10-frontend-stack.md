@@ -50,13 +50,16 @@ No Vite. Three commands.
     "build:css":  "tailwindcss -i src/app.css -o public/app.css --minify",
     "build:board":"esbuild src/client/board.ts --bundle --format=esm --minify --outfile=public/board.js",
 
-    "deploy":     "npm run build && wrangler deploy"
+    "deploy":     "npm run build && wrangler deploy",
+
+    "tune":       "tsx scripts/tune.ts"
   }
 }
 ```
 
 Wrangler's own esbuild handles the Worker's TypeScript and JSX. Tailwind's CLI
-handles CSS. One direct esbuild call handles the island. Nothing else.
+handles CSS. One direct esbuild call handles the island. `tune` is Node, not
+Worker code, and needs no wrangler. Nothing else.
 
 `tsconfig.json`:
 
@@ -119,6 +122,10 @@ lifecycle. If a component needs data it takes a prop; the route fetches it.
 **Escaping.** `hono/jsx` escapes interpolated values by default. `raw()` exists
 and should appear nowhere in this codebase. Family free text, admin notes and
 workshop titles are all user-supplied and all rendered as `{value}`.
+
+The family preferences page is a renderer over `familyFacing` registry entries
+rather than hand-written JSX ([08-attendee-ux](08-attendee-ux.md) §1): each
+`control` value maps one-to-one onto a component in `src/views/controls/`.
 
 ---
 
@@ -323,17 +330,23 @@ it removes an entire class of divergence bug.
     "typescript":                            "^5",
     "@types/papaparse":                      "^5",
     "vitest":                                "^3",
-    "@cloudflare/vitest-pool-workers":       "^0"
+    "@cloudflare/vitest-pool-workers":       "^0",
+    "tsx":                                    "^4"
   }
 }
 ```
 
-Versions are indicative. Let npm resolve and commit the lockfile.
+Versions are indicative. Let npm resolve and commit the lockfile. rev2 adds no
+runtime dependencies: the registry is code in the repo and both handlers are
+code. `tsx` is added to devDependencies for the tune script.
 
 **The solver has zero dependencies.** `src/solver/**` imports only from itself
 and from TypeScript's standard library. That is deliberate: the most important
 code in the project should be readable without knowing any framework, and
-auditable by someone who does not know this stack.
+auditable by someone who does not know this stack. The claim survives rev2 —
+it now imports `src/config/**`, which is also dependency-free — amended from
+"imports only from itself" to "imports only from itself and the event config,
+both of which are dependency-free".
 
 **Deliberately absent:**
 
