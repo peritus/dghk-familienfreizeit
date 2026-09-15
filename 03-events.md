@@ -69,8 +69,8 @@ Emitted by an admin, once per family, during import or manual add. Creates the
 family. Does not send the email — that is an operational side effect performed
 after the append succeeds.
 
-*Invariant:* email must be unique case-insensitively across all non-superseded
-families. Enforced by the unique index; the import path must catch the failure
+*Invariant:* email must be unique case-insensitively across all principals.
+Enforced by the unique index; the import path must catch the failure
 and report it as a row-level error rather than aborting the whole import.
 
 ### `FamilyEmailChanged`
@@ -297,12 +297,12 @@ the plan appends to the log. Harmless, but worth knowing when reading raw logs.
 ```ts
 { snapshot_id: string, notify: boolean, note: string | null }
 ```
-Transitions the snapshot to `published` and the previous published snapshot to
-`superseded`. If
-`notify`, the diff is computed and change emails are queued.
+Marks this snapshot as the published result. The latest `PlanPublished` event is
+the active publication; a later publication supersedes it. If `notify`, the
+diff is computed and change emails are queued.
 
-*Invariant:* the plan must be `draft`. Re-publishing a superseded plan is not
-supported; re-run the solver instead.
+*Invariant:* the snapshot must not already be published. Re-publishing an older
+snapshot is not supported; re-run the solver instead.
 
 ---
 
