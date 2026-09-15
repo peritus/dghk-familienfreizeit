@@ -1,4 +1,4 @@
-# 15 — Event configuration
+# 15 — Event profiles
 
 The built-in registry, solver weights, and phase switches for **this** event live
 in one TypeScript file. Runtime custom constraint definitions are stored in the

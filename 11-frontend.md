@@ -1,4 +1,4 @@
-# 10 — Frontend stack
+# 11 — Frontend
 
 Server-rendered HTML, one JavaScript island, no client framework.
 

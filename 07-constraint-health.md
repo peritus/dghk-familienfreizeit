@@ -1,4 +1,4 @@
-# 06 — Constraints and evolution
+# 07 — Constraint health
 
 Admin judgement is expressed through the same event-backed constraint system as
 attendee preferences. There is no temporary override model separate from the

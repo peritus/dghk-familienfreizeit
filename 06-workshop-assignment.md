@@ -1,4 +1,4 @@
-# 05 — The workshop solver
+# 06 — Workshop assignment
 
 A separate pure function, same contract as the room solver.
 

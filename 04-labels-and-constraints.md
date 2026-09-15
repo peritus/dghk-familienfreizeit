@@ -1,4 +1,4 @@
-# 14 — Tags
+# 04 — Labels and constraints
 
 A single mechanism for intrinsic facts, preferences, capabilities, relations,
 and admin decisions. It covers both event-specific properties and matching

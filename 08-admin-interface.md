@@ -1,4 +1,4 @@
-# 07 — Admin interface
+# 08 — Admin interface
 
 Three people will use this, for about six weeks, on laptops. Design for
 competence and speed, not for onboarding. Assume they will use it daily and learn
