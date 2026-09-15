@@ -81,8 +81,11 @@ are stored as constraints rather than as edits.
 | 11 | [Deployment](11-deployment.md) | Cloudflare config, migrations, secrets, email, CI |
 | 12 | [Testing](12-testing.md) | Golden plans, shuffle-invariance, property tests |
 | 13 | [Roadmap](13-roadmap.md) | Milestones, what ships when, what can be cut |
+| 14 | [Tags](14-tags.md) | The tag model, generic handlers, preflight |
+| 15 | [Event configuration](15-event-config.md) | The registry format, phases, weights |
 
-Start with 01, 02 and 04. Those three carry the design. The rest is consequence.
+Start with 01, 02, 04, 14 and 15. Those five carry the design. The rest is
+consequence.
 
 ## Glossary
 
@@ -98,7 +101,9 @@ occupy a bed — an infant sharing a parent's bed does not.
 
 **Party** — a set of People who must be placed in the same room. *Derived*, not
 stored as ground truth. One Family can yield several Parties; one Party can span
-several Families. Party membership is recomputed on every solver run.
+several Families. Party membership is recomputed on every solver run. A
+Party's requirements are derived as the union of its member Families' tags,
+strictest strength winning.
 
 **Place** — one sleeping position. A single bed is one Place. A double bed is two
 Places. This is the atomic unit of capacity. Rooms have Beds; Beds have Places.
@@ -116,6 +121,19 @@ decision trace. Stored immutably. Either `draft`, `published`, or `superseded`.
 **Trace** — the human-readable record of why the solver did what it did. One line
 per decision, including the alternatives it rejected. Not a debug log; a
 first-class deliverable that admins read.
+
+**Tag** — a named fact about an entity, optionally pointing at another entity,
+optionally carrying a strength. Defined in the registry, assigned in the
+database.
+
+**Registry** — the set of tags valid for this event, defined in code at
+`events/<event>/event.ts`. Not a database table.
+
+**Strength** — `required` (prunes rooms) or `preferred` (scored). An absent tag
+assignment means indifferent.
+
+**Preflight** — checks run on the snapshot before party formation, catching
+infeasibility and contradictions before any placement runs.
 
 ## Decision log
 
@@ -194,6 +212,9 @@ Free-text notes sit alongside, never instead.
 pin that exists because the solver does not understand a rule" is the product
 backlog. Free text cannot answer that.
 
+*Amended in rev2:* `MISSING_CONSTRAINT` now usually resolves to a registry
+entry rather than a schema migration.
+
 ### D8 — No React in v1
 
 *Chosen.* Server-rendered `hono/jsx`, hand-written elements on a copied
@@ -227,3 +248,23 @@ dance on Workers.
 
 *Non-negotiable rules* are in [09-auth](09-auth.md). Follow them exactly or use
 the library instead.
+
+### D11 — The tag registry lives in code, not a database table
+
+*Chosen.* Config changes require a deploy; accepted. Rationale in
+[15-event-config](15-event-config.md) §1.
+
+### D12 — Weights live in code
+
+*Chosen.* `SolverConfigChanged` is dropped. Tuning happens offline against an
+exported event log. Rationale in [15-event-config](15-event-config.md) §4.
+
+### D13 — Workshop rankings stay typed in `workshop_pref`
+
+*Chosen.* Tags do not absorb dense ordered lists. Rationale in
+[14-tags](14-tags.md) §7.
+
+### D14 — `familyFacing` in the registry drives the family portal
+
+*Chosen.* The preferences page becomes a renderer. Rationale in
+[15-event-config](15-event-config.md) §5.
