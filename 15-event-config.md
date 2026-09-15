@@ -1,10 +1,5 @@
 # 15 — Event configuration
 
-**Status:** rev3. Supersedes [03-events](03-events.md) `SolverConfigChanged`,
-[04-solver-rooms](04-solver-rooms.md) §5 `Weights`, and
-[11-deployment](11-deployment.md) §1 `vars.EVENT_DATE`. See
-[rev3-delta](rev3-delta.md).
-
 The built-in registry, solver weights, and phase switches for **this** event live
 in one TypeScript file. Runtime custom constraint definitions are stored in the
 event log and use only the fixed generic resolver; they require no deploy.
@@ -13,7 +8,8 @@ event log and use only the fixed generic resolver; they require no deploy.
 
 ## 1. Why TypeScript and not YAML
 
-The registry needs embedded logic — `derive: room => room.floor === 0`,
+The registry may contain small pure derivations over labels — for example,
+`derive: labels => hasLabel(labels, 'floor', 0)`,
 `check: (party, room, ctx) => …`. Three facts make a data format with JS-in-strings
 unworkable here.
 
@@ -23,7 +19,7 @@ The `unsafe_eval` binding people used to reach for was never publicly enrolled �
 `wrangler deploy` rejects it as an unknown binding type. The supported
 replacement is `worker_loader` / Dynamic Workers, which spawns a separate V8
 isolate per evaluation and needs the Workers Paid plan. That is the right tool
-for running user-submitted templates out of a database. For `room.floor === 0`
+for running user-submitted templates out of a database. For a configured label
 it is absurd.
 
 So embedded JavaScript must be **compiled, not interpreted** — which means either
@@ -110,26 +106,25 @@ export default defineEvent({
     'ensuite': capability({
       doc: 'Room has its own bathroom.',
       label: 'Eigenes Bad',
-      derive: room => room.has_ensuite,
+      derive: labels => hasLabel(labels, 'has-ensuite', true),
     }),
 
     'indoor': capability({
       doc: 'Not a tent or a bungalow. Derived, never assigned.',
       label: 'Drinnen',
-      derive: room => !room.is_outside,
+      derive: labels => hasLabel(labels, 'is-outside', false),
     }),
 
     'ground-floor': capability({
-      doc: `Derived from the floor number. Added in 1.3.0 after three
-            earlier admin constraints all turned out to be about stairs.`,
+      doc: 'Derived from the floor label.',
       label: 'Erdgeschoss',
-      derive: room => room.floor === 0,
+      derive: labels => hasLabel(labels, 'floor', 0),
     }),
 
     'accessible': capability({
       doc: 'Step-free, wide door, accessible bathroom.',
       label: 'Barrierefrei',
-      derive: room => room.is_accessible,
+      derive: labels => hasLabel(labels, 'is-accessible', true),
       wasteWhenUnneeded: -4,             // scarce; mild penalty for using it needlessly
     }),
 
@@ -152,7 +147,7 @@ export default defineEvent({
     }),
 
     'needs-ground-floor': requirement({
-      doc: 'Mobility. Replaced earlier admin constraints in 1.3.0.',
+      doc: 'Mobility requirement for people who need a ground-floor room.',
       satisfiedBy: 'ground-floor',
       weight: 5,
       familyFacing: { label: 'Erdgeschoss', control: 'tri-state' },
@@ -161,8 +156,7 @@ export default defineEvent({
     'sole-occupancy': requirement({
       doc: `The family will not share a room with another family. At 'required'
             this prunes rooms; at 'preferred' it costs 12 points, which the
-            solver will pay if the plan is tight. rev1 called this
-            sharing = refuse / prefer_not.`,
+            solver will pay if the plan is tight.`,
       check: (party, room, ctx) =>
         ctx.occupants(room).every(p => p.partyKey === party.key),
       penalty: -12,
@@ -282,12 +276,11 @@ Declaring both `weight` and `penalty` is legal and means the term is worth
 `weight − penalty` in total swing. Most tags declare one.
 
 `required` strengths are never scored. They prune. That distinction is the whole
-reason the three-value scale exists and it survives rev3 intact.
+reason the three-value scale exists and remains useful.
 
 ### Weights are code, not data
 
-rev1 had `SolverConfigChanged` carrying the weight table as an event.
-**rev3 drops that event.** Weights live in `event.ts`.
+Weights live in `event.ts`, alongside the mechanisms that consume them.
 
 The argument that settles it: because the solver is pure and the snapshot is
 derivable from the event log, weight tuning never has to happen in production.
@@ -431,17 +424,6 @@ run inside the solver and are bound by the same contract.
 the config and nothing else, which is only possible because both are pure.
 
 ---
-
-## 8. What rev3 removes
-
-| rev1 | rev3 |
-|---|---|
-| `SolverConfigChanged` event | `event.ts` `weights` + tag weights |
-| `Weights` in `SolverConfig` (11 terms) | `weights` (3 geometry terms) + per-tag weights |
-| `vars.EVENT_DATE` in `wrangler.jsonc` | `meta.date` |
-| `vars.PREFERENCE_DEADLINE` | `meta.preferenceDeadline` |
-| `config.maxRepairPasses` | `phases.repair.maxPasses` |
-| Hand-written portal sections 2–4 | rendered from `familyFacing` |
 
 `EVENT_NAME`, `PUBLIC_URL` and `EMAIL_FROM` stay in `wrangler.jsonc` — they are
 deployment facts, not solver inputs, and they must not enter `config_hash`.
