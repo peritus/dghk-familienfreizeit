@@ -120,6 +120,19 @@ twenty-four workshops. Reporting it rather than looping keeps termination
 obvious and keeps the trace readable. If it ever fires, an admin adjusts
 `min_capacity` and re-runs.
 
+### Co-assignment groups
+
+A `workshop-with` relation tag at `mutual-required` forms a group that the
+workshop solver treats as **one claimant**, per slot. The group's preference
+ordering is the sum of its members' ranks for that workshop, lowest first; an
+unranked workshop counts as `n + 1` for that member. Ties break on the lowest
+member `person_id`.
+
+If a group's size exceeds the remaining capacity of every workshop it could
+otherwise claim, the group is split and reported rather than cascaded — the
+same shape as the room solver's unplaceable-merge guard. Trace format in
+[14-tags](14-tags.md) §7.
+
 ### On people with no preferences
 
 Someone who never submitted rankings has an empty preference list and goes
@@ -205,7 +218,7 @@ Common real cases and where they belong:
 
 | Situation | Reason code | Eventual fix |
 |---|---|---|
-| "Lena must be with her brother, she's anxious" | `MISSING_CONSTRAINT` | A sibling-together preference type |
+| "Lena must be with her brother, she's anxious" | `MISSING_CONSTRAINT` | A `workshop-with` tag |
 | "This workshop needs one older kid to help" | `MISSING_CONSTRAINT` | A per-workshop age-mix rule |
 | "Tim's rankings were entered wrong" | `MISSING_DATA` | Fix the ranking; pin becomes obsolete |
 | "Klettern needs 2 free spots for late signups" | `OPERATIONAL` | Model reserved capacity on the workshop |
@@ -243,4 +256,6 @@ more here than optimality.
 **One ranked list per person per slot, not per family.** Families will want to
 enter these together, and the UI does present them together — but they are
 per-person data, because a 9-year-old and a 40-year-old do not want the same
-workshop. Do not let the form shape collapse the model shape.
+workshop. Do not let the form shape collapse the model shape. This is also the
+justification for keeping `workshop_pref` typed rather than folding it into
+tags — see [14-tags](14-tags.md) §7 (D13).
