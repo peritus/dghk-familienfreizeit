@@ -23,7 +23,63 @@ The profile enables:
 Room adjacency is not selected for the first deployment. The generic extension
 point remains available for a later profile decision.
 
-## 2. Event vocabulary
+## 2. Room inventory
+
+The event inventory contains 38 rooms and 162 beds. Prices below are per bed for
+both event days. `private` means sanitary facilities in the room or apartment;
+`shared-floor` means shared facilities on the floor; `remote-shared` means shared
+facilities in a neighbouring building.
+
+| Room(s) | Price/bed | Beds | Sanitary | Location / notes |
+|---|---:|---:|---|---|
+| 1 | 88.50 € | 5 | shared-floor | Haupthaus, 1st floor |
+| 2 | 88.50 € | 8 | shared-floor | Haupthaus, 1st floor |
+| 3 | 88.50 € | 8 | shared-floor | Haupthaus, 1st floor |
+| 4 | 88.50 € | 2 | shared-floor | Haupthaus, 1st floor |
+| 5 | 88.50 € | 2 | shared-floor | Haupthaus, 1st floor |
+| 6 | 88.50 € | 2 | shared-floor | Haupthaus, 1st floor |
+| 7 | 88.50 € | 6 | shared-floor | Haupthaus, 1st floor |
+| 8 | 103.00 € | 2 | private | Haupthaus, 1st floor |
+| 9 | 103.00 € | 2 | private | Haupthaus, 1st floor |
+| 10 | 88.50 € | 6 | shared-floor | Haupthaus, 1st floor |
+| 11 | 88.50 € | 7 | shared-floor | Haupthaus, 1st floor |
+| 12 | 88.50 € | 5 | shared-floor | Haupthaus, 2nd floor |
+| 14 | 88.50 € | 4 | shared-floor | Haupthaus, 2nd floor |
+| 15 | 88.50 € | 4 | shared-floor | Haupthaus, 2nd floor |
+| 16 | 88.50 € | 5 | shared-floor | Haupthaus, 2nd floor |
+| 17 | 103.00 € | 2 | private | Haupthaus, 2nd floor |
+| 18 | 103.00 € | 2 | private | Haupthaus, 2nd floor |
+| 19 | 88.50 € | 4 | shared-floor | Haupthaus, 2nd floor |
+| 20 | 88.50 € | 2 | shared-floor | Haupthaus, 2nd floor |
+| 31 | 103.00 € | 2 | private | Gartenhaus, ground floor |
+| 32 | 103.00 € | 4 | private | Gartenhaus, ground floor |
+| 33 | 103.00 € | 4 | private | Gartenhaus, ground floor |
+| 34 | 103.00 € | 4 | private | Gartenhaus, ground floor |
+| 35 | 103.00 € | 8 | private | Gartenhaus, 1st floor; apartment with two sleeping rooms and common room; suitable for two friendly families |
+| 36 | 103.00 € | 4 | private | Gartenhaus, 1st floor; apartment with two sleeping rooms and common room; suitable for two friendly families |
+| 37 | 103.00 € | 8 | private | Gartenhaus, 1st floor; apartment with two sleeping rooms and common room; suitable for two friendly families |
+| 41 | 103.00 € | 6 | private | Blockhaus, ground floor |
+| 42 | 103.00 € | 6 | private | Blockhaus, ground floor |
+| 43 | 103.00 € | 4 | private | Blockhaus, ground floor |
+| 44 | 103.00 € | 4 | private | Blockhaus, ground floor |
+| 51 | 88.50 € | 4 | remote-shared | Bungalow |
+| 52 | 88.50 € | 2 | remote-shared | Bungalow |
+| 61 | 88.50 € | 4 | remote-shared | Schlaffass |
+| 62 | 88.50 € | 4 | remote-shared | Schlaffass |
+| 63 | 88.50 € | 4 | remote-shared | Schlaffass |
+| 64 | 88.50 € | 4 | remote-shared | Schlaffass |
+| 65 | 88.50 € | 4 | remote-shared | Schlaffass |
+| 66 | 88.50 € | 4 | remote-shared | Schlaffass |
+
+The source inventory intentionally has no room 13; room numbering is preserved
+as supplied. Apartment capacities are normalized from `2×4` and `2×2` sleeping
+rooms to 8 and 4 beds respectively.
+
+At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
+103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
+not a booking or billing rule.
+
+## 3. Event vocabulary
 
 The profile defines concrete property and relationship tags, including:
 
@@ -51,7 +107,7 @@ The profile may derive generic capabilities such as `indoor`, `ensuite`,
 `ground_floor`, and `accessible` from those properties. It configures the generic
 resolver rather than adding new resolver operators.
 
-## 3. Room policy
+## 4. Room policy
 
 The profile uses family residue parties, child-room allocation before party
 formation, strictest-strength requirement inheritance, mutual-required co-room
@@ -62,7 +118,7 @@ Required and preferred room requirements use the generic strength model. Concret
 weights, age bands, minimum child-room occupancy, room designations, and capacity
 values are profile parameters.
 
-## 4. Workshop policy
+## 5. Workshop policy
 
 The profile uses one ordered ranking per person and slot. Workshop assignment
 uses the generic ordered-choice and fairness mechanisms with these event policies:
@@ -74,13 +130,13 @@ uses the generic ordered-choice and fairness mechanisms with these event policie
 - cancel under-subscribed workshops according to configured minimum capacity;
 - support configured co-assignment groups.
 
-## 5. Profile metadata and copy
+## 6. Profile metadata and copy
 
 The profile supplies the actual event name, date, preference deadline, locale,
 public description, family-facing labels, admin-facing labels, and email copy.
 These values are event configuration and are included in the configuration hash.
 
-## 6. First-deployment boundary
+## 7. First-deployment boundary
 
 The profile is deployed separately with its own database and operational
 configuration. It does not introduce runtime tenancy or require unused room or
