@@ -16,9 +16,8 @@ type Event<T extends string, P> = {
 }
 
 type Actor =
-  | `family:${FamilyId}`   // a family acting on its own behalf
-  | `admin:${FamilyId}`    // an admin acting on someone else's behalf
-  | 'system'               // only ever PlanComputed
+  | string                // authenticated principal
+  | 'system'               // only ever PlanSnapshotted
 ```
 
 Every payload has a zod schema in `src/events/types.ts`. The schema is used twice:
@@ -69,13 +68,6 @@ replaying to that point.
 
 *Side effect:* invalidate all sessions for that family. The old address must not
 retain access.
-
-### `FamilyAdminFlagSet`
-```ts
-{ family_id: string, is_admin: boolean }
-```
-Admin only. There must be at least one admin family at all times; the command
-handler refuses to clear the last one.
 
 ### `PersonAdded`
 ```ts
@@ -140,9 +132,8 @@ Full restatement of the above.
 }
 ```
 `reason` is required when the designation is `blocked`. This is the event that
-retires `OPERATIONAL` pins: once "Room 7's heater is broken" is expressed as a
-block, the pins that were working around it become redundant and the retirement
-loop will say so.
+records a blocked-space fact. Any compensating constraints remain visible in the
+event history and may be cleared explicitly.
 
 *Invariant:* `designation = 'child'` requires both age bounds. A children's room
 with no age band is a trap.
@@ -154,8 +145,8 @@ with no age band is a trap.
   sleeps: 1 | 2, sort_key: number }
 ```
 Places are *generated* by the projector from `sleeps`, never by an event. Place
-ids are deterministic: `plc_${bed_id_suffix}_${idx}`. This matters because pins
-may target a Place, and a Place id must survive a projection rebuild.
+ids are deterministic: `plc_${bed_id_suffix}_${idx}`. This matters because
+constraints may target a Place, and a Place id must survive a projection rebuild.
 
 ### `RoomAdjacencySet`
 ```ts
@@ -166,47 +157,54 @@ projector from one event.
 
 ---
 
-## Preferences
+## Labels and constraints
 
-The only events a non-admin family may emit, and only about itself.
+Families may set labels only on themselves or their own people. An allowlisted
+admin may set any domain label. The resolver validates both built-in labels and
+custom matching definitions before append.
 
-### `TagSet`
+### `LabelSet`
 ```ts
 {
-  entity_type: 'room' | 'family' | 'person' | 'workshop'
   entity_id: string
-  tag: string
-  value: string | null              // required iff the tag declares a param
+  key: string
+  value: string
   strength: 'required' | 'preferred' | null
 }
 ```
-Replaces `RoomPreferenceStated`, `ChildRoomOptInSet`, `CoRoomRequested` and
-`AdminKeptApart`. Validated against the registry before append — the five
-checks in [14-tags](14-tags.md) §4: the tag exists (or resolves through an
-alias), the scope matches `entity_type`, `value` is present iff the tag
-declares a `param` and names an entity that exists and is not withdrawn, the
-strength is legal for the tag, and the registry's `validFor` predicate passes.
 
-*Authorisation:* a family may `TagSet` / `TagCleared` only on entities it owns
-(itself, or its own people), for tags declaring `familyFacing`, at strengths
-that control permits ([14-tags](14-tags.md) §4). Everything else is
-admin-only.
+This is the one event for intrinsic facts, preferences, capabilities, and admin
+decisions. Values may be scalar facts or stable entity ids. For example:
 
-Rule 2 above says payloads are complete, not deltas. `TagSet` names a single
-tag, which reads like a delta and is not: a tag assignment is one fact, not a
-field within a record, so a per-tag event is a complete statement about that
-fact.
+```ts
+{ entity_id: 'per_42', key: 'needs', value: 'room-with-garden-view', strength: 'required' }
+{ entity_id: 'rm_07', key: 'provides', value: 'room-with-garden-view', strength: null }
+```
 
-### `TagCleared`
+### `LabelCleared`
+```ts
+{ entity_id: string, key: string, value: string | null }
+```
+
+`value: null` clears every current value for the key. The original label event
+remains in the log.
+
+### `ConstraintDefined`
 ```ts
 {
-  entity_type: string
-  entity_id: string
-  tag: string
-  value: string | null              // null clears every value for this tag
+  key: string,
+  label: string,
+  description: string,
+  operator: 'needs-provides' | 'excludes' | 'groups-with' | 'separates-from',
+  needs_scopes: string[],
+  provides_scopes: string[],
+  strength: 'required' | 'preferred'
 }
 ```
-Replaces `CoRoomRequestWithdrawn`.
+
+Defines a custom matching vocabulary. It contains no executable code; the fixed
+resolver implements the operators. This replaces the former pin-to-registry
+promotion path.
 
 ### `WorkshopPreferencesRanked`
 ```ts
@@ -256,89 +254,37 @@ the next run anyway.
 
 ---
 
-## Admin judgement
+## Admin constraints
 
-The events that make the system teachable. All require a `reason_code`.
+Admin judgement uses the same label mechanism as attendee preferences. A board
+drag creates a custom constraint; clearing its label is the undo operation.
 
-### `AdminPinned`
-```ts
-{
-  pin_id: string,
-  kind: 'room' | 'workshop',
-  person_ids: string[],              // sorted
-  target_room_id?: string,
-  target_place_id?: string,
-  target_workshop_id?: string,
-  reason_code: ReasonCode,
-  note: string | null,
-  solver_said: { room_id?: string, workshop_id?: string, score: number } | null
-}
-```
+### `LabelSet` for admin decisions
 
-`solver_said` is captured from the current draft plan at the moment of pinning.
-It is the counterfactual, and it is what makes the retirement loop cheap.
-
-`reason_code` may be `UNCLASSIFIED` at creation. This is deliberate: requiring a
-taxonomy decision in the middle of a drag would make admins avoid the board.
-Unclassified pins are visible debt and the dashboard nags about them.
-
-### `AdminUnpinned`
-```ts
-{
-  pin_id: string,
-  reason: 'absorbed' | 'obsolete' | 'mistake',
-  by_version: string | null          // solver version that absorbed it
-}
-```
-
-`absorbed` is the good outcome: the solver now reaches the same answer unaided.
-`obsolete` means the underlying situation changed (the family withdrew).
-`mistake` means the pin should not have been created.
-
-### `AdminPinReasonSet`
-```ts
-{ pin_id: string, reason_code: ReasonCode, note: string | null }
-```
-Classifies an `UNCLASSIFIED` pin after the fact. Separate event so the dashboard
-nag has something to resolve against.
-
-### `AdminMergedParties`
-```ts
-{ person_ids: string[], reason_code: ReasonCode, note: string | null }
-```
-Forces the named people into one party regardless of what preference-derived
-party formation would do. Overrides non-mutual requests, the absence of requests,
-and family boundaries.
-
-### `AdminSplitParty`
-```ts
-{ groups: string[][], reason_code: ReasonCode, note: string | null }
-```
-Forces the named people apart into the given groups. Each inner array becomes its
-own party. Every person named must currently be in the same derived party;
-validation rejects otherwise, because a split that spans parties is almost always
-a mis-click.
+The admin board emits `LabelSet` events using a `ConstraintDefined` operator.
+Exact room placement, co-assignment, separation, and other judgement all use the
+same stable entity references and remain visible in the event history.
 
 ---
 
 ## Solver and publication
 
-### `PlanComputed`
+### `PlanSnapshotted`
 ```ts
-{ plan_id: number, input_seq: number, solver_version: string,
-  config_hash: string, output_hash: string }
+{ snapshot_id: string, input_seq: number, solver_version: string,
+  config_hash: string, output_hash: string, body: Plan }
 ```
-Actor is always `system`. Emitted after a successful solve and store. The only
-event the application emits on its own behalf.
+Actor is always `system`. The complete immutable plan body is stored in the log.
 
 Note `input_seq` will always be `seq - 1` relative to this event, since computing
 the plan appends to the log. Harmless, but worth knowing when reading raw logs.
 
 ### `PlanPublished`
 ```ts
-{ plan_id: number, notify: boolean, note: string | null }
+{ snapshot_id: string, notify: boolean, note: string | null }
 ```
-Transitions the plan to `published` and the previous one to `superseded`. If
+Transitions the snapshot to `published` and the previous published snapshot to
+`superseded`. If
 `notify`, the diff is computed and change emails are queued.
 
 *Invariant:* the plan must be `draft`. Re-publishing a superseded plan is not
