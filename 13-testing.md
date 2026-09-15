@@ -32,7 +32,7 @@ them, and the output hash must be identical. `labels` is one of the arrays the
 shuffler permutes — this proves the generic label input is order-independent.
 
 This single test catches almost every violation of the determinism contract in
-[04-solver-rooms](04-solver-rooms.md) §1:
+[04-solver-rooms](05-room-assignment.md) §1:
 
 - an unsorted collection someone added and forgot to sort — **caught**
 - a tiebreak that falls through to input order — **caught**
@@ -178,7 +178,7 @@ capacity exactly equal to demand, capacity one short.
 
 ## 4. The constraint regression corpus
 
-From [06-pins-and-evolution](06-pins-and-evolution.md) §5. Every active or
+From [06-pins-and-evolution](07-constraint-health.md) §5. Every active or
 cleared custom constraint can be a test case authored by a domain expert.
 
 ```ts

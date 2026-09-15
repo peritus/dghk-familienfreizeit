@@ -25,7 +25,7 @@ mock-up below is an illustration of what the 2026 registry produces, labelled
 as such so nobody hard-codes it.
 
 `control` is a closed union, and this is the thing to think about up front —
-see [15-event-config](15-event-config.md) §5:
+see [15-event-config](15-event-profiles.md) §5:
 
 | `control` | Renders | Writes |
 |---|---|---|

@@ -1,5 +1,9 @@
 # 02 — Data model
 
+This document defines the generic data model shared by event profiles. Concrete
+tags, values, module selection, and event policies belong in the event profile;
+they must not require new typed property columns or domain foreign keys.
+
 SQLite dialect, targeting Cloudflare D1. All DDL below is the real thing; it is
 intended to be copied into migrations, not paraphrased.
 

@@ -79,7 +79,7 @@ day for that possibility.
 
 *Families can use it. Two to three days.*
 
-- Magic link, sessions, rate limits, the ten rules from [09-auth](09-auth.md)
+- Magic link, sessions, rate limits, the ten rules from [09-auth](10-authentication.md)
 - The family portal: a renderer over `familyFacing` registry entries, not
   hand-written sections — this keeps the milestone compact, and
   couples the portal to the registry by design
@@ -110,7 +110,7 @@ arrive; the collection window should open as early as possible.
 understand what happened each time.
 
 Watch the line count on `client/board.ts`. Past ~600 lines, take the React
-escape hatch described in [10-frontend-stack](10-frontend-stack.md) §1 rather
+escape hatch described in [10-frontend-stack](11-frontend.md) §1 rather
 than continuing.
 
 ---
@@ -176,7 +176,7 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 - Copy review, German throughout the family surface
 - Accessibility pass: keyboard, contrast, focus, reduced motion
 - Deliverability testing against GMX, web.de, Gmail, Outlook
-- The pre-event runbook from [11-deployment](11-deployment.md) §9
+- The pre-event runbook from [11-deployment](12-deployment.md) §9
 
 ---
 

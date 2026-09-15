@@ -1,5 +1,9 @@
 # 05 — Room assignment
 
+This document specifies reusable room-assignment mechanisms. A profile decides
+whether the room modules are enabled and supplies concrete room tags, values,
+policies, and pure evaluators.
+
 The core of the system. Everything else is plumbing around this file.
 
 ```ts
@@ -105,7 +109,7 @@ Sorting keys makes the hash depend on content only.
 
 ### The test that proves all seven
 
-In [12-testing](12-testing.md), but stated here because it is the point:
+In [12-testing](13-testing.md), but stated here because it is the point:
 
 **Shuffle invariance.** Take a snapshot, randomly permute every array in it,
 re-sort via `snapshot.ts`, solve, and assert the output hash is unchanged. Run it
@@ -132,7 +136,7 @@ type Snapshot = Readonly<{
 ```
 
 `capabilities` and active constraints are materialised once by the resolver,
-from typed labels and built-in derivations ([14-tags](14-tags.md) §3).
+from typed labels and built-in derivations ([14-tags](04-labels-and-constraints.md) §3).
 
 ```ts
 type SolverConfig = Readonly<{
@@ -156,7 +160,7 @@ Blocked rooms likewise. The solver never sees data it must remember to ignore.
 ## 3. Preflight, then Phase A — Party formation
 
 **Preflight runs first**, before any placement, over the snapshot alone. C1–C9
-per [14-tags](14-tags.md) §6. Error severity does not block computing a plan —
+per [14-tags](04-labels-and-constraints.md) §6. Error severity does not block computing a plan —
 an admin needs to see the plan to understand the error — but it blocks
 publishing without an explicit acknowledgement.
 
@@ -176,7 +180,7 @@ type Party = {
 ```
 
 `requirements` is the strictest-strength union of member families'
-requirement tags ([14-tags](14-tags.md) §5.3), consumed by
+requirement tags ([14-tags](04-labels-and-constraints.md) §5.3), consumed by
 `rules/hard/tagRequirements.ts` and `rules/soft/tagPreferences.ts`.
 
 `size` and `bedDemand` differ whenever an infant is present. Capacity checks use
@@ -304,7 +308,7 @@ A sorted `Party[]`. Sort order: `bedDemand` desc, then first member's
 looking at any room.
 
 Party requirements are derived as a strictest-strength union of member
-families' requirement tags ([14-tags](14-tags.md) §5.3), and party provenance
+families' requirement tags ([14-tags](04-labels-and-constraints.md) §5.3), and party provenance
 names which member contributed each requirement — a merged party's `required`
 tag came from one specific family, and admins reviewing the party screen need
 to know which one.
@@ -425,7 +429,7 @@ or adds a matching constraint for Room 31.
 A short table of named integer terms, living in config, stored with every plan.
 
 The `Weights` type loses eight terms to the registry — each now lives as a
-field on its tag ([15-event-config](15-event-config.md) §4):
+field on its tag ([15-event-config](15-event-profiles.md) §4):
 
 | Geometry term | Configured as |
 |---|---|
@@ -452,7 +456,7 @@ remaining places regardless of which tags are involved.
 
 Defaults shown. They are a starting point, not a truth; expect to tune them in
 the first week with `scripts/tune.ts` against an exported event log
-([15-event-config](15-event-config.md) §4), and to record each change as a
+([15-event-config](15-event-profiles.md) §4), and to record each change as a
 deploy of `event.ts` rather than an event.
 
 Three notes on why these particular terms carry the scale they do, kept
@@ -618,12 +622,12 @@ improvement, and that is the honest report.
 
 **Typos become silence.** `room-with=fam_72` for `fam_27` — nothing errors, the
 merge simply never happens. Append-time validation and preflight C2 both catch
-it; neither is optional. See [14-tags](14-tags.md) §9.
+it; neither is optional. See [14-tags](04-labels-and-constraints.md) §9.
 
 **Derived-and-assigned drift.** A capability with a `derive` must reject direct
 assignments, or you get two answers to "does Room 14 have an ensuite". See
-[14-tags](14-tags.md) §9.
+[14-tags](04-labels-and-constraints.md) §9.
 
 **Requirement inflation through merges.** The strictest-strength union of a
 merged party's requirements is correct and surprising — see A.5 above and
-[14-tags](14-tags.md) §9.
+[14-tags](04-labels-and-constraints.md) §9.

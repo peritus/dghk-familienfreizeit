@@ -1,5 +1,9 @@
 # 06 — Workshop assignment
 
+This document specifies reusable workshop-assignment mechanisms. A profile
+decides whether workshop modules are enabled and supplies concrete ranking,
+eligibility, capacity, fairness, and co-assignment policy.
+
 A separate pure function, same contract as the room solver.
 
 ```ts
@@ -131,7 +135,7 @@ member `person_id`.
 If a group's size exceeds the remaining capacity of every workshop it could
 otherwise claim, the group is split and reported rather than cascaded — the
 same shape as the room solver's unplaceable-merge guard. Trace format in
-[14-tags](14-tags.md) §7.
+[14-tags](04-labels-and-constraints.md) §7.
 
 ### On people with no preferences
 
@@ -257,4 +261,4 @@ enter these together, and the UI does present them together — but they are
 per-person data, because a 9-year-old and a 40-year-old do not want the same
 workshop. Do not let the form shape collapse the model shape. This is also the
 justification for keeping the ranking value scoped to one person and slot — see
-[14-tags](14-tags.md) §7.
+[14-tags](04-labels-and-constraints.md) §7.

@@ -1,4 +1,8 @@
-# 03 — Event catalogue
+# 03 — Event model
+
+This document defines the generic event envelope and lifecycle. Event profiles
+may contribute event types through selected modules, but the append, replay,
+validation, and projection rules are shared by every deployment.
 
 The complete write vocabulary. Adding an event type means adding to this file, to
 `src/events/types.ts`, and to the projector. Nothing else.
@@ -236,7 +240,7 @@ the latter shows up in the admin's chase list.
 not exceed the number of workshops in the slot.
 
 This stays typed rather than becoming a tag, deliberately (D13) — see
-[14-tags](14-tags.md) §7.
+[14-tags](04-labels-and-constraints.md) §7.
 
 ---
 

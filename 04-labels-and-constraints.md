@@ -1,5 +1,10 @@
 # 04 — Labels and constraints
 
+Labels are the generic storage mechanism. A profile supplies the concrete tag
+vocabulary, values, scopes, and UI metadata that generic modules interpret.
+Generic resolver operators remain fixed; event profiles cannot upload executable
+operators.
+
 A single mechanism for intrinsic facts, preferences, capabilities, relations,
 and admin decisions. It covers both event-specific properties and matching
 constraints without adding entity-specific property columns.
@@ -215,7 +220,7 @@ export const tagRequirements: Rule = {
 
 Its soft counterpart, `rules/soft/tagPreferences.ts`, is the same loop over
 `strength === 'preferred'`, returning `+weight` on satisfaction and `+penalty`
-on violation (see [15-event-config](15-event-config.md) §4 for the two-field
+on violation (see [15-event-config](15-event-profiles.md) §4 for the two-field
 convention).
 
 Two requirement shapes are supported, and the distinction matters:
@@ -274,7 +279,7 @@ six now needs a six-place ensuite room that may not exist. The unplaceable-merge
 guard catches the capacity case; this one surfaces as preflight C4 with the
 requirement named. It is the correct semantics — they *are* sharing a room — but
 it surprises people, so the party card in
-[07-admin-ux](07-admin-ux.md) §4 shows which member contributed each requirement.
+[07-admin-ux](08-admin-interface.md) §4 shows which member contributed each requirement.
 
 ---
 
@@ -381,7 +386,7 @@ is visibly reported.
 
 **Derived-and-assigned drift.** A capability with a `derive` must reject
 assignments, or you get two answers to "does Room 14 have an ensuite". Enforced
-at append time and tested in [12-testing](12-testing.md).
+at append time and tested in [12-testing](13-testing.md).
 
 **Requirement inflation through merges.** See §5.3. The strictest-strength union
 is correct and surprising.
@@ -393,5 +398,5 @@ obvious in the admin UI.
 
 **Canonical ordering.** Labels are an array in the snapshot and must be sorted
 like every other one: `entity_id`, `key`, `value`.
-[04-solver-rooms](04-solver-rooms.md) §1 R1 applies unchanged, and the
+[04-solver-rooms](05-room-assignment.md) §1 R1 applies unchanged, and the
 shuffle-invariance test covers it once the array is added to the snapshot.
