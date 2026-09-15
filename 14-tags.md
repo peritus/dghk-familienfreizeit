@@ -1,50 +1,50 @@
 # 14 — Tags
 
-**Status:** rev2. Supersedes parts of [02-data-model](02-data-model.md) §4,
+**Status:** rev3. Supersedes parts of [02-data-model](02-data-model.md) §4,
 [03-events](03-events.md) (five event types), and
 [04-solver-rooms](04-solver-rooms.md) §2, §3 and §5. See
-[rev2-delta](rev2-delta.md) for the precise list.
+[rev3-delta](rev3-delta.md) for the precise list.
 
-A single mechanism replacing four preference tables and five event types, and
-turning most future constraints from a migration into a registry entry.
+A single mechanism for intrinsic facts, preferences, capabilities, relations,
+and admin decisions. It replaces special-case preference and pin mechanisms.
 
-The vocabulary lives in code — see [15-event-config](15-event-config.md). This
-document covers what tags *are*, how they are stored, and how the solver
-consumes them.
+Built-in vocabulary lives in code; custom matching keys are defined by events
+and use only the fixed resolver operators in this document. This document
+covers labels, constraints, and how the solver consumes them.
 
 ---
 
 ## 1. What a tag is
 
-A named fact about an entity, optionally pointing at another entity, optionally
-carrying a strength.
+A typed key/value fact about an entity, optionally pointing at another entity and
+optionally carrying a strength.
 
 ```
-#ensuite                          a room has its own bathroom
-#needs-ensuite (required)         a family cannot accept a room without one
-#needs-ensuite (preferred)        a family would rather have one
-#room-with=fam_27                 this family wants to room with family 27
-#child-room-ok                    this child may sleep in a children's room
-#sole-occupancy (required)        this family will not share with another
+provides=ensuite                  a room has its own bathroom
+needs=needs-ensuite (required)     a family cannot accept a room without one
+needs=room-with-garden-view        a person needs a matching room capability
+provides=room-with-garden-view     a room offers that capability
+needs=child-room-ok                this child may sleep in a children's room
+separates-from=family_27           this family must not share with family 27
 ```
 
-Four kinds, declared in the registry:
+Built-in definitions and custom definitions declare the resolver operator:
 
 | Kind | Scope | Strength | Meaning |
 |---|---|---|---|
-| `capability` | room | — | The room offers something |
-| `requirement` | family, person | required / preferred | The holder needs or wants something |
-| `relation` | family, person | required / preferred | A constraint between two entities |
+| `needs-provides` | family, person → space/workshop | required / preferred | The holder needs a matching capability |
+| `excludes` | entity → entity/value | required / preferred | The holder rejects a match |
+| `groups-with` / `separates-from` | family, person | required / preferred | A relation between entities |
 | `descriptive` | any | — | Recorded for humans; the solver ignores it |
 
 `descriptive` exists so that admins can annotate without inventing a constraint.
-A tag the solver reads is a decision; a tag it ignores is a note.
+A label the solver reads is a decision; one it ignores is a note.
 
 ### The three-value scale collapses
 
 rev1's `family_room_pref.ensuite ∈ {required, preferred, indifferent}` becomes:
 
-| rev1 | rev2 |
+| rev1 | rev3 |
 |---|---|
 | `required` | `needs-ensuite` at strength `required` |
 | `preferred` | `needs-ensuite` at strength `preferred` |
@@ -52,64 +52,56 @@ rev1's `family_room_pref.ensuite ∈ {required, preferred, indifferent}` becomes
 
 `indifferent` stops being a value and becomes an absence, which is what it always
 meant. The tri-state control in the family portal writes one of two strengths or
-deletes the row. `sharing ∈ {happy, prefer_not, refuse}` maps the same way onto
-`sole-occupancy`: absent, `preferred`, `required`.
+clears the label.
 
 ---
 
 ## 2. Storage
 
-One table. It replaces `family_room_pref`, `child_room_optin`,
-`co_room_request` and `keep_apart`.
+One generic projection. It replaces `family_room_pref`, `child_room_optin`,
+`co_room_request`, `keep_apart`, and admin pin events.
 
 ```sql
-CREATE TABLE tag_assignment (
-  entity_type TEXT NOT NULL CHECK (entity_type IN ('room','family','person','workshop')),
+CREATE TABLE label (
   entity_id   TEXT NOT NULL,
-  tag         TEXT NOT NULL,
-  value       TEXT NOT NULL DEFAULT '',
+  key         TEXT NOT NULL,
+  value       TEXT NOT NULL,
   strength    TEXT          CHECK (strength IN ('required','preferred')),
   set_at      TEXT NOT NULL,
   set_by      TEXT NOT NULL,             -- actor string from the event
-  PRIMARY KEY (entity_type, entity_id, tag, value)
+  PRIMARY KEY (entity_id, key, value)
 );
 
-CREATE INDEX tag_by_tag    ON tag_assignment(tag, entity_type, entity_id);
-CREATE INDEX tag_by_value  ON tag_assignment(tag, value) WHERE value <> '';
+CREATE INDEX label_by_key_value ON label(key, value, entity_id);
 ```
 
 Three details that are not arbitrary.
 
-**`value` is `NOT NULL DEFAULT ''`, not nullable.** SQLite permits NULLs in the
-columns of an ordinary table's `PRIMARY KEY` — a documented deviation from the
-standard — which would make `(fam_17, 'needs-ensuite', NULL)` insertable twice.
-An empty string is ugly and it is enforceable. Non-parameterised tags always
-store `''`.
+**`value` is non-null.** Every label has a canonical scalar or entity-id value,
+so the generic projection has one unambiguous key.
 
-**The reference lives in `value`, not in the tag string.** `#room-with=fam_27` is
-the mental model and the label an admin sees; storage keeps `tag = 'room-with'`
-and `value = 'fam_27'`. That gives an indexable lookup, makes mutuality a plain
-self-join, and means the registry holds one entry per relation rather than one
-per family.
+**The reference lives in `value`, not in the key.** `needs=family_27` is
+the mental model and the label an admin sees. The resolver indexes the key and
+value without requiring a foreign key in the label projection.
 
-**`tag` carries no foreign key.** The registry is code, so there is nothing to
-reference. Validity is enforced on append (§4) and on replay (preflight C7).
+**Keys carry no foreign key.** Built-in definitions are code and custom
+definitions are events. Validity is enforced on append and replay by the
+resolver schema.
 
-### Mutuality is a self-join
+### Matching is a resolver join
 
 ```sql
-SELECT a.entity_id AS from_id, a.value AS to_id
-FROM tag_assignment a
-JOIN tag_assignment b
-  ON b.tag = a.tag
- AND b.entity_id = a.value
- AND b.value     = a.entity_id
-WHERE a.tag = 'room-with'
-  AND a.strength = 'required' AND b.strength = 'required'
-  AND a.entity_id < a.value;
+SELECT need.entity_id, provide.entity_id
+FROM label need
+JOIN label provide
+  ON provide.key = 'provides'
+ AND provide.value = need.value
+WHERE need.key = 'needs'
+  AND need.strength IN ('required', 'preferred');
 ```
 
-Same shape as rev1's `co_room_request` join. Nothing lost.
+The SQL illustrates the shape only; the constraint resolver owns scope checks,
+party formation, symmetry, and diagnostics.
 
 ### What stays typed
 
@@ -124,7 +116,7 @@ drift:
 | `place` rows | Capacity is `count(places)`, and published output names beds |
 | `workshop.capacity`, `min_capacity`, age bounds | Counted and compared, not matched |
 | `workshop_pref` | A dense ordered list — see §7 |
-| `pin` | Its own taxonomy and lifecycle |
+| `plan snapshot` | Immutable historical artifact, stored in the event log |
 
 **The absorption principle**, stated once so the next decision is easy:
 
@@ -136,18 +128,17 @@ drift:
 
 ## 3. Capabilities come from two places
 
-A room's capability set is the union of what is derived from its columns and what
-is assigned in `tag_assignment`:
+A room's capability set is the union of what is derived from its labels and what
+is assigned through `provides` labels:
 
 ```ts
-function capabilities(room: Room, assigned: TagAssignment[]): ReadonlySet<Tag> {
+function capabilities(room: Room, assigned: Label[]): ReadonlySet<string> {
   const out = new Set<Tag>()
-  for (const [tag, def] of registryEntries('capability')) {
-    if (def.derive?.(room)) out.add(tag)
+  for (const [key, def] of registryEntries('capability')) {
+    if (def.derive?.(room)) out.add(key)
   }
   for (const a of assigned) {
-    if (a.entity_type === 'room' && a.entity_id === room.id
-        && registry[a.tag]?.kind === 'capability') out.add(a.tag)
+    if (a.entity_id === room.id && a.key === 'provides') out.add(a.value)
   }
   return out
 }
@@ -159,8 +150,8 @@ migration for every new room property:
 
 - `ensuite` and `ground-floor` **derive** from `has_ensuite` and `floor`. No
   double entry, no drift, no hand-tagging 40 rooms.
-- `near-the-hall`, invented in week three, is **assigned** in `tag_assignment`.
-  No migration.
+- `near-the-hall`, invented in week three, is **assigned** as a `provides` label.
+  No migration or code deployment.
 - If `near-the-hall` turns out to matter every year, it graduates to a column
   with a `derive`, and the assignments are deleted.
 
@@ -172,17 +163,14 @@ for the same fact is exactly what the derivation was added to avoid.
 
 ## 4. Validation on append
 
-`TagSet` is validated against the registry before it is appended
-([03-events](03-events.md)). Five checks, all cheap:
+`LabelSet` is validated against built-in or event-defined schemas before it is
+appended ([03-events](03-events.md)). The checks are:
 
-1. **Tag exists** in the registry, or resolves through an `alias`.
-2. **Scope matches** — `registry[tag].scope` includes `entity_type`.
-3. **`value` is present iff the tag declares a `param`**, and names an entity of
-   the declared type that exists and is not withdrawn.
-4. **Strength is legal** — `required` only if the registry permits it;
-   capabilities reject strength entirely.
-5. **`validFor` passes** — the registry's predicate on the entity, e.g.
-   `child-room-ok` requires `role === 'child'`.
+1. **Key exists** in built-in or custom definitions.
+2. **Scope matches** the entity kind and operator.
+3. **Value type matches** the definition and entity references resolve.
+4. **Strength is legal** for the constraint.
+5. **Cardinality and validity pass**, including `child-room-ok` only on children.
 
 Failures are field-level errors on the form, never silent. Because `type Tag =
 keyof typeof registry`, a bad tag in *code* is a compile error, and a zod enum
@@ -195,14 +183,14 @@ report names them.
 
 ### Authorisation
 
-A family may `TagSet` / `TagCleared` only:
+A family may `LabelSet` / `LabelCleared` only:
 
 - on entities it owns (itself, or its own people);
 - for tags declaring `familyFacing`;
 - at strengths that control permits.
 
-Everything else is admin-only. `apart-from` declares `adminOnly: true` and is
-never rendered in the portal.
+Everything else is admin-only. Admin-only labels are never rendered in the
+family portal.
 
 ---
 
@@ -367,10 +355,9 @@ exactly one tag kind and NULL on roughly 95% of rows.
 CREATE UNIQUE INDEX ON workshop_pref(person_id, slot_id, rank);
 ```
 
-works because `slot_id` is a real column. In `tag_assignment` there is no slot —
-it is implied by the workshop, which sits in `value` as an opaque string. So
-"no two ranks collide within a slot" cannot be an index; it becomes a
-hand-written check.
+works because `slot_id` is a real column. Generic labels do not provide that
+database-level grouping, so "no two ranks collide within a slot" would become a
+resolver check.
 
 [02-data-model](02-data-model.md) argues throughout that the constraints worth
 having are the ones the database refuses to violate — the same reasoning behind
@@ -406,14 +393,14 @@ shape as the unplaceable-merge guard.
 
 ---
 
-## 8. What rev2 removes
+## 8. What rev3 removes
 
-| rev1 | rev2 |
+| rev1 | rev3 |
 |---|---|
-| `family_room_pref` | `tag_assignment` |
-| `child_room_optin` | `tag_assignment` (`child-room-ok`) |
-| `co_room_request` | `tag_assignment` (`room-with`) |
-| `keep_apart` | `tag_assignment` (`apart-from`) |
+| `family_room_pref` | generic `label` (`needs`) |
+| `child_room_optin` | generic `label` (`needs`) |
+| `co_room_request` | generic `label` (`groups-with`) |
+| `keep_apart` | generic `label` (`separates-from`) |
 | `RoomPreferenceStated` | `TagSet` / `TagCleared` |
 | `ChildRoomOptInSet` | `TagSet` / `TagCleared` |
 | `CoRoomRequested` | `TagSet` |
@@ -422,8 +409,8 @@ shape as the unplaceable-merge guard.
 | `soft/ensuite.ts`, `indoor.ts`, `coRoom.ts`, `crossFamily.ts` | `soft/tagPreferences.ts` |
 | `hard/keepApart.ts`, `accessibility.ts` | `hard/tagRequirements.ts` |
 
-Four tables and five event types become one table and two event types. Eight rule
-files become two.
+Four tables, five event types, and admin pins become one label stream plus a
+small fixed resolver vocabulary. Eight rule files remain two generic handlers.
 
 `hard/capacity.ts` and `hard/designation.ts` **stay** — they are structural
 geometry, not tag matching, and forcing them through the tag handler would make
@@ -446,12 +433,12 @@ at append time and tested in [12-testing](12-testing.md).
 **Requirement inflation through merges.** See §5.3. The strictest-strength union
 is correct and surprising.
 
-**Tags as a dumping ground.** `descriptive` is the pressure valve — annotations
+**Labels as a dumping ground.** `descriptive` is the pressure valve — annotations
 that the solver ignores. Without it, admins will reach for a constraint-kind tag
 to record a note, and the solver will act on it. Make `descriptive` easy and
 obvious in the admin UI.
 
-**Canonical ordering.** Tag assignments are an array in the snapshot and must be
-sorted like every other one: `entity_type`, `entity_id`, `tag`, `value`.
+**Canonical ordering.** Labels are an array in the snapshot and must be sorted
+like every other one: `entity_id`, `key`, `value`.
 [04-solver-rooms](04-solver-rooms.md) §1 R1 applies unchanged, and the
 shuffle-invariance test covers it once the array is added to the snapshot.

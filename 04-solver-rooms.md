@@ -14,7 +14,7 @@ it produces byte-identical output, on any machine, at any time, forever.
 ## 1. The determinism contract
 
 This is not a coding-style preference. It is the property that makes re-runs
-safe, pin retirement computable, regression testing a hash comparison, and
+safe, constraint health computable, regression testing a hash comparison, and
 publishing twice a non-event for the forty families who did not move.
 
 Seven rules. Each has a way it actually gets broken.
@@ -37,8 +37,8 @@ sort it. Mitigation: `snapshot.ts` has one `freezeSorted()` helper and a test
 that walks every array property of the Snapshot asserting it is sorted and
 frozen.
 
-`tagAssignments` is covered by R1 like every other array, sorted by
-`entity_type`, `entity_id`, `tag`, `value`.
+`labels` is covered by R1 like every other array, sorted by
+`entity_id`, `key`, `value`.
 
 `Array.prototype.sort` is stable per ES2019, so a comparator chain is safe — but
 do not *rely* on stability. Always terminate the chain in an id comparison so the
@@ -125,16 +125,14 @@ type Snapshot = Readonly<{
   rooms:           readonly Room[]
   places:          readonly Place[]
   adjacency:       readonly Adjacency[]
-  tagAssignments:  readonly TagAssignment[]
+  labels:          readonly Label[]
   capabilities:    ReadonlyMap<RoomId, ReadonlySet<Tag>>
-  pins:            readonly Pin[]
-  partyOverrides:  readonly PartyOverride[]
+  constraints:     readonly Constraint[]
 }>
 ```
 
-`capabilities` is materialised once, from derivations plus assignments
-([14-tags](14-tags.md) §3), replacing `roomPrefs`, `childOptIns`,
-`coRoomRequests` and `keepAparts`.
+`capabilities` and active constraints are materialised once by the resolver,
+from typed labels and built-in derivations ([14-tags](14-tags.md) §3).
 
 ```ts
 type SolverConfig = Readonly<{
@@ -185,7 +183,7 @@ requirement tags ([14-tags](14-tags.md) §5.3), consumed by
 `bedDemand`. Everything a human reads shows `size`.
 
 `key` is derived and therefore **unstable** — it changes when membership changes.
-Nothing may persist a party key as a reference. Pins reference people. The key
+Nothing may persist a party key as a reference. Constraints reference people. The key
 exists only to correlate a party across the phases of a single run and to label
 rows in the trace.
 
@@ -205,7 +203,7 @@ residue.**
 eligible = persons where
     role = 'child'
   and has tag 'child-room-ok'
-  and not pinned to a non-child room
+  and not constrained to a non-child room
   and ageAt(birthdate, eventDate) within some child room's band
 
 sort eligible by:
@@ -230,7 +228,8 @@ family parties.
 
 Because there is no adult-supervision requirement, a children's room needs no
 further constraint beyond the age band. If that changes, it becomes one more hard
-rule in `rules/hard/` and the pins it was working around become retirable.
+rule in `rules/hard/`; the generic constraints that expressed the workaround can
+then be cleared.
 
 **Trace output for this step, per child room:**
 
@@ -255,7 +254,7 @@ A family reduced to one person produces a party of one, and those fragment the
 plan badly — see the `orphanBed` penalty in §5 and the warning in §7.
 
 Requirements are lifted from the family's requirement-tag assignments
-directly: each `tag_assignment` at strength `required` or `preferred` becomes
+directly: each `needs` label at strength `required` or `preferred` becomes
 one entry in `party.requirements`.
 
 ### A.3 Merges from mutual-required relation tags
@@ -315,21 +314,22 @@ to know which one.
 
 ## 4. Phases 0–4 — Placement
 
-### Phase 0 — Pins as hard constraints
+### Phase 0 — Admin constraints as hard constraints
 
-For each active pin of `kind = 'room'`, in `created_at` then `id` order:
+For each active required admin constraint, in event sequence then constraint-key
+order:
 
-1. Resolve `person_ids` to parties.
-2. **If the pin's people span more than one party** → conflict. Skip the pin,
+1. Resolve the constraint's people to parties.
+2. **If the constraint's people span more than one party** → conflict. Skip it,
    record it in `plan.conflicts`, trace it. Do not attempt a partial placement.
-   This happens when a pin was created and then party formation changed under it,
-   and the admin needs to know rather than have it silently half-applied.
-3. If the target room has insufficient free places → conflict, skip, trace.
+   This happens when a constraint was created and then party formation changed
+   under it, and the admin needs to know rather than have it silently half-applied.
+3. If the matching room has insufficient free places → conflict, skip, trace.
 4. Otherwise place the party, decrement the room's free places, mark the party
    placed.
 
 Conflicts are surfaced on the dashboard as a blocking review item. A plan with
-unresolved pin conflicts can be computed but should not be publishable without an
+unresolved constraint conflicts can be computed but should not be publishable without an
 explicit acknowledgement.
 
 ### Phase 1 — Forced placements, to fixpoint
@@ -417,7 +417,7 @@ For each still-unplaced party, evaluate every room and report:
 > would place this party.
 
 That last sentence is the product. An admin reads it and either calls the family
-or pins the party into Room 31.
+or adds a matching constraint for Room 31.
 
 ---
 
@@ -529,8 +529,8 @@ type Plan = {
     reason: string
     nearMiss: { roomId: string, failedRules: string[] } | null
   }>
-  conflicts: Array<{                     // pins that could not be applied
-    pinId: string
+  conflicts: Array<{                     // constraints that could not be applied
+    constraintKey: string
     reason: string
   }>
   preflight: PreflightFinding[]
@@ -558,8 +558,8 @@ quality to a non-technical organiser.
 
 ```ts
 type TraceEntry = {
-  phase: 'parties' | 'pins' | 'forced' | 'greedy' | 'repair' | 'unplaced'
-  subject: string           // party key or pin id
+  phase: 'parties' | 'constraints' | 'forced' | 'greedy' | 'repair' | 'unplaced'
+  subject: string           // party key or constraint key
   text: string              // the human-readable line
   detail?: {
     chosen?: { roomId: string, score: number, terms: Array<[string, number]> }
@@ -579,7 +579,7 @@ A rendered greedy entry:
 Every number in that block traces to a named weight in a stored config. An admin
 who disagrees can point at the term rather than at the outcome, which is a much
 more productive conversation and usually ends in a weight change rather than a
-pin.
+constraint.
 
 ---
 
@@ -595,9 +595,9 @@ the real fix is the party review screen: admins see the size-1 parties listed
 first and can merge them or talk to the families. Consider a dashboard warning at
 more than five size-1 parties.
 
-**Pin conflicts after party changes.** A pin created when Jonas was in his
-family's party becomes a spanning pin once he moves to a children's room. Phase 0
-reports the conflict; it does not guess. Admins resolve it by re-pinning.
+**Constraint conflicts after party changes.** A constraint created when Jonas was
+in his family's party may span parties once he moves to a children's room. Phase
+0 reports the conflict; it does not guess. Admins clear or revise the labels.
 
 **Merge cascades.** Mutual `must` requests are transitive through union-find:
 A↔B and B↔C produces one party of all three, even though A and C never asked for

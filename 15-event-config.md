@@ -1,13 +1,13 @@
 # 15 — Event configuration
 
-**Status:** rev2. Supersedes [03-events](03-events.md) `SolverConfigChanged`,
+**Status:** rev3. Supersedes [03-events](03-events.md) `SolverConfigChanged`,
 [04-solver-rooms](04-solver-rooms.md) §5 `Weights`, and
 [11-deployment](11-deployment.md) §1 `vars.EVENT_DATE`. See
-[rev2-delta](rev2-delta.md).
+[rev3-delta](rev3-delta.md).
 
-The tag registry, the solver's weights, and the phase switches for **this**
-event, in one TypeScript file per event. A config change requires a deploy, and
-that is accepted.
+The built-in registry, solver weights, and phase switches for **this** event live
+in one TypeScript file. Runtime custom constraint definitions are stored in the
+event log and use only the fixed generic resolver; they require no deploy.
 
 ---
 
@@ -61,6 +61,24 @@ later. No separate document to drift.
 
 ## 2. Shape
 
+Built-in definitions may use typed `capability`, `requirement`, and `relation`
+helpers. Runtime definitions are data-only:
+
+```ts
+ConstraintDefined {
+  key: 'room-with-garden-view',
+  label: 'Zimmer mit Gartenblick',
+  description: 'Requested by the organiser.',
+  operator: 'needs-provides',
+  needsScopes: ['person', 'family'],
+  providesScopes: ['space'],
+  strength: 'required'
+}
+```
+
+The resolver owns the meaning of `needs-provides`, `excludes`,
+`groups-with`, and `separates-from`. Admins cannot upload executable rules.
+
 ```ts
 // events/2026-familienwochenende/event.ts
 
@@ -103,7 +121,7 @@ export default defineEvent({
 
     'ground-floor': capability({
       doc: `Derived from the floor number. Added in 1.3.0 after three
-            MISSING_CONSTRAINT pins all turned out to be about stairs.`,
+            earlier admin constraints all turned out to be about stairs.`,
       label: 'Erdgeschoss',
       derive: room => room.floor === 0,
     }),
@@ -134,7 +152,7 @@ export default defineEvent({
     }),
 
     'needs-ground-floor': requirement({
-      doc: 'Mobility. Replaced three pins in 1.3.0.',
+      doc: 'Mobility. Replaced earlier admin constraints in 1.3.0.',
       satisfiedBy: 'ground-floor',
       weight: 5,
       familyFacing: { label: 'Erdgeschoss', control: 'tri-state' },
@@ -264,12 +282,12 @@ Declaring both `weight` and `penalty` is legal and means the term is worth
 `weight − penalty` in total swing. Most tags declare one.
 
 `required` strengths are never scored. They prune. That distinction is the whole
-reason the three-value scale exists and it survives rev2 intact.
+reason the three-value scale exists and it survives rev3 intact.
 
 ### Weights are code, not data
 
 rev1 had `SolverConfigChanged` carrying the weight table as an event.
-**rev2 drops that event.** Weights live in `event.ts`.
+**rev3 drops that event.** Weights live in `event.ts`.
 
 The argument that settles it: because the solver is pure and the snapshot is
 derivable from the event log, weight tuning never has to happen in production.
@@ -385,7 +403,7 @@ projection, ignore it in the solver, report it.
 ```
 
 Aliases resolve on append and on replay. Worth adding from the start — the first
-rename otherwise means either a data migration over `tag_assignment` or a log
+rename otherwise means either a data migration over the label projection or a log
 that no longer replays. `defineEvent` rejects an alias colliding with another
 tag or alias.
 
@@ -396,7 +414,7 @@ tag or alias.
 3. Preflight C7 reports them with counts.
 4. Optionally clean up with `TagCleared` events.
 
-Never delete rows from `tag_assignment` directly. The projection is rebuilt from
+Never delete rows from the label projection directly. It is rebuilt from
 the log, so a direct delete is undone on the next rebuild.
 
 ---
@@ -418,7 +436,7 @@ the config and nothing else, which is only possible because both are pure.
 
 ---
 
-## 8. What rev2 removes
+## 8. What rev3 removes
 
 | rev1 | rev2 |
 |---|---|
