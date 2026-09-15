@@ -73,7 +73,7 @@ are stored as constraints rather than as edits.
 | 03 | [Event catalogue](03-events.md) | The complete write-side vocabulary |
 | 04 | [Room solver](04-solver-rooms.md) | Party formation, placement, scoring, determinism |
 | 05 | [Workshop solver](05-solver-workshops.md) | Fairness objective, slot handling, cancellation |
-| 06 | [Constraints and evolution](06-pins-and-evolution.md) | Custom constraints, history, regression corpus |
+| 06 | [Constraints and evolution](06-pins-and-evolution.md) | Custom constraints, health, regression corpus |
 | 07 | [Admin UX](07-admin-ux.md) | Every admin screen, the board in detail |
 | 08 | [Attendee UX](08-attendee-ux.md) | The family portal, copy, privacy boundaries |
 | 09 | [Authentication](09-auth.md) | Magic link implementation, sessions, threat model |
@@ -92,12 +92,11 @@ consequence.
 Used consistently throughout. Where a word here differs from ordinary usage, this
 document wins.
 
-**Family** — the unit of identity and authentication. Exactly one email address.
-Has a display name and one or more People. May be flagged as admin.
+**Family** — a typed entity representing the unit of identity and
+authentication. Its email, display name, and membership labels are event-backed.
 
-**Person** — one human. Belongs to exactly one Family. Has a birthdate (used to
-compute age *at the event date*, never age today) and a flag for whether they
-occupy a bed — an infant sharing a parent's bed does not.
+**Person** — a typed entity representing one human. Birthdate, role, bed demand,
+and family membership are labels interpreted by event configuration.
 
 **Party** — a set of People who must be placed in the same room. *Derived*, not
 stored as ground truth. One Family can yield several Parties; one Party can span
@@ -207,14 +206,14 @@ being the single writer of assignments.
 ### D7 — Constraints carry human-readable explanations
 
 *Chosen.* Admin-created constraints carry a label and explanation. The event
-history supplies author and timing; a separate pin taxonomy is unnecessary.
+the event log supplies author and timing; a separate pin taxonomy is unnecessary.
 
 *Why:* the value of recording intent is being able to explain and review the
 constraint. The resolver reports active, missing, contradictory, and redundant
 constraints directly.
 
-*Amended in rev3:* admin judgement is represented directly by custom matching
-constraints rather than a pin that later becomes a registry entry.
+Admin judgement is represented directly by custom matching constraints rather
+than a separate override mechanism.
 
 ### D8 — No React in v1
 
@@ -261,9 +260,10 @@ dynamic evaluation or code deployment.
 *Chosen.* `SolverConfigChanged` is dropped. Tuning happens offline against an
 exported event log. Rationale in [15-event-config](15-event-config.md) §4.
 
-### D13 — Workshop rankings stay typed in `workshop_pref`
+### D13 — Workshop rankings are structured labels
 
-*Chosen.* Tags do not absorb dense ordered lists. Rationale in
+*Chosen.* Structured label values and the `ordered-choice` resolver operator
+preserve dense ordered lists without a special property table. Rationale in
 [14-tags](14-tags.md) §7.
 
 ### D14 — `familyFacing` in the registry drives the family portal
