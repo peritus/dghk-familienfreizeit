@@ -13,7 +13,7 @@ is tables and forms, and should be boring on purpose.
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/admin` | Dashboard | Status, staleness, pin health, what needs attention |
+| `/admin` | Dashboard | Status, staleness, constraint health, what needs attention |
 | `/admin/families` | Families | Table, import, invite, chase list |
 | `/admin/families/:id` | Family detail | People, preferences, full event history |
 | `/admin/inventory` | Inventory | Buildings, rooms, beds, designations |
@@ -21,12 +21,11 @@ is tables and forms, and should be boring on purpose.
 | `/admin/board` | The board | Room assignment by drag and drop |
 | `/admin/plans` | Plans | List, diff, publish |
 | `/admin/plans/:a/diff/:b` | Plan diff | What moved and why |
-| `/admin/pins` | Pins | Triage, health, retirement |
 | `/admin/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
-| `/admin/constraints` | Constraints | Registry reference, preflight findings, tag usage counts |
+| `/admin/constraints` | Constraints | Create, inspect, clear, and explain matching constraints |
 
-`/admin/constraints` is read-only. The registry is code; the screen renders
-it, shows which tags are in use and by how many entities, and lists current
+`/admin/constraints` renders built-in and custom definitions, shows which labels
+are in use and by how many entities, and lists current
 preflight findings. It is where an admin looks to answer "what can I even ask
 for".
 
@@ -51,7 +50,7 @@ accurate count of consequences. If the re-solve produces the same hash:
 > Published 3 days ago · plan #7
 > 14 events since, none affecting assignments. **Up to date.**
 
-**Blocking items**, only when present. Preflight findings, pin conflicts,
+**Blocking items**, only when present. Preflight findings, constraint conflicts,
 unplaceable parties, refused merges, workshops below minimum. Each links
 directly to the thing.
 
@@ -61,10 +60,11 @@ warning and should be the most prominent thing on the screen when it fires:
 > ⚠ **needs-ensuite: 19 beds required, 14 available.** Five people cannot be
 > placed however the rooms are arranged. *See affected families →*
 
-> ⚠ **2 pin conflicts** — pinned people are no longer in one party.
+> ⚠ **2 constraint conflicts** — constrained people are no longer in one party.
 > ⚠ **1 party cannot be placed** — Braun ×5 requires ensuite; none free.
 
-**Pin health.** The panel from [06-pins-and-evolution](06-pins-and-evolution.md).
+**Constraint health.** Active constraints with no provider, contradictions, and
+constraints currently doing no work.
 
 **Chase list.** Families who have not logged in, or who have logged in but
 submitted nothing. With a "send reminder" action that emails the lot.
@@ -76,7 +76,7 @@ submitted nothing. With a "send reminder" action that emails the lot.
 **Quality numbers.** Small, at the bottom, trending.
 
 > 3 orphan beds · 19/24 co-room wishes satisfied · 4 people with no top-two choice
-> · 11 pins required (was 19 at v1.3.0)
+> · 11 active constraints (was 19 at v1.3.0)
 
 ---
 
@@ -85,8 +85,8 @@ submitted nothing. With a "send reminder" action that emails the lot.
 A table. Sortable, filterable, 55 rows.
 
 Columns: family, email, people, preferences stated, workshops ranked, last seen,
-pins. Filter chips across the top for the common questions: *no login*, *no room
-preference*, *incomplete workshops*, *has pins*.
+constraints. Filter chips include *no login*, *no room preference*, *incomplete
+workshops*, and *has constraints*.
 
 **Import.** Paste a CSV or upload one. Parse with papaparse, show a preview table
 with per-row validation before anything is written:
@@ -105,8 +105,8 @@ order), `roles`. Be generous about header naming and show what was matched.
 **Family detail** shows people, current preferences, and — the useful part — the
 complete event history for that family, rendered as prose. The preferences
 block renders tag assignments with their strengths and labels from the
-registry. The event history renders `TagSet` / `TagCleared` in prose using
-`registry[tag].label`, so it reads the same as before:
+registry. The event history renders `LabelSet` / `LabelCleared` in prose using
+the built-in or custom constraint definition:
 
 > 12 Sep 14:22 · *Organiser Anna, on behalf of this family* · set Eigenes Bad
 > to preferred, Drinnen schlafen to required.
@@ -114,9 +114,8 @@ registry. The event history renders `TagSet` / `TagCleared` in prose using
 > the dark, would like a room with a window onto the courtyard."
 > 14 Sep 09:01 · *This family* · set Möchte ins Kinderzimmer for Jonas (9).
 
-That admin-on-behalf-of attribution is what makes scenario 1c honest — a family
-can see that an organiser entered something for them, and an organiser can see
-which entries came from an email rather than from the family directly.
+The event actor identifies the authenticated principal while the subject
+identifies the affected family or person. No separate on-behalf-of role is needed.
 
 ---
 
@@ -213,12 +212,12 @@ drop without opening anything:
 - **Attribute chips**: ensuite, outside, accessible, child room with its age band.
 - **Occupants**, one line per party with size.
 - **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
-  `⚲` pinned.
+  `⚲` constrained by an admin rule.
 
 Colour alone never carries meaning. The neobrutalism palette is high-contrast and
-tempting to lean on, but a pinned room and a warned room must be
+tempting to lean on, but a constrained room and a warned room must be
 distinguishable in greyscale and by anyone with a colour vision deficiency. Use
-the glyph plus a border treatment: pinned rooms get a doubled border, warned
+the glyph plus a border treatment: constrained rooms get a doubled border, warned
 rooms get a hatched top edge.
 
 ### Drag interaction
@@ -231,12 +230,12 @@ the same toolchain behind Trello and Jira.
   bed-level view handles the exceptions (see below).
 - **On drag start**, rooms that cannot accept the party dim and lose their drop
   affordance. Rooms that can accept it but would incur a penalty show the penalty
-  as a ghost chip, its text read from `registry[tag].label` rather than
+  as a ghost chip, its text read from the constraint definition rather than
   hard-coded: `−12 Zimmer teilen`.
-- **On drop**, the move applies optimistically, a pin is emitted, the solver
+- **On drop**, the move applies optimistically, a custom constraint is emitted, the solver
   re-runs server-side, and the board reconciles with the authoritative result.
 - **If the re-solve moves anything else**, those cards flash once and a summary
-  toast appears: *"Pinned Braun ×5 to Room 03. 2 other parties moved. See what
+toast appears: *"Constraint added for Braun ×5 → Room 03. 2 other parties moved. See what
   changed →"*. Cascading moves are the main way a board like this surprises
   people; showing them immediately is the difference between trust and
   suspicion.
@@ -265,7 +264,7 @@ optional.
 | `Space` | Add to selection |
 | `Enter` | Open the room picker for the selection |
 | `r` then digits | Assign directly to a room number |
-| `u` | Unpin the selected party |
+| `u` | Clear the selected party's admin constraint |
 | `z` | Undo the last action |
 | `Esc` | Clear selection |
 
@@ -277,22 +276,22 @@ prefer it.
 
 Click into a room to see individual places. Needed for the real cases: who gets
 the bottom bunk, which family takes the double, who is next to the window. Drag
-people between places within the room; emits a place-targeted pin.
+people between places within the room; emits a place-targeted constraint.
 
 Kept out of the main board deliberately. Surfacing 120 places at once is noise
 when the actual question is almost always "which room".
 
 ### Undo
 
-`z`, and a button. Implemented as `AdminUnpinned { reason: 'mistake' }` followed
-by a re-solve. Because every board action is a pin, undo is free — there is no
-separate undo stack to maintain and no way for it to drift from reality.
+`z`, and a button. Implemented as `LabelCleared` followed by a re-solve. Because
+every board action is an event-backed constraint, undo is free and cannot drift
+from reality.
 
 ### Concurrency
 
 Three admins, optimistic locking.
 
-Every board mutation carries the `plan_id` it was computed against. If the
+Every board mutation carries the `snapshot_id` it was computed against. If the
 server's current draft has moved on, it returns 409 with the current state and
 the board shows:
 
@@ -324,8 +323,8 @@ plan #7 (published 12 Sep)  →  plan #8 (draft)
 BECAUSE OF NEW PREFERENCES (4 people)
   Weber ×4   Raum 01 → Raum 07   Weber stated ensuite required (14 Sep)
 
-BECAUSE OF YOUR PINS (5 people)
-  Braun ×5   Raum 12 → Raum 03   pinned by Anna, 15 Sep, SCORING_DISAGREEMENT
+BECAUSE OF ADMIN CONSTRAINTS (5 people)
+  Braun ×5   Raum 12 → Raum 03   Zimmer mit Gartenblick, added by Anna, 15 Sep
 
 KNOCK-ON (2 people)
   Koch ×2    Raum 03 → Raum 02   displaced by the above
@@ -334,10 +333,10 @@ UNCHANGED  46 people
 ```
 
 Grouping by cause is what makes the diff readable. A flat list of eleven moves
-tells an admin nothing; three moves attributed to a preference change, five to
-their own pin, and two as knock-on tells them whether to publish.
+tells an admin nothing; moves attributed to a preference or custom constraint,
+with the remainder marked knock-on, tell them whether to publish.
 
-Attribution is derivable: a move is caused by a pin if a pin targets those people;
+Attribution is derivable: a move is caused by a constraint if its labels affect those people;
 by a preference if events affecting that family exist between the two
 `input_seq` values; otherwise it is knock-on.
 
@@ -345,22 +344,12 @@ Publishing from this screen shows exactly who will be emailed.
 
 ---
 
-## 7. Pins
+## 7. Constraints
 
-Three tabs: **needs a reason**, **health**, **all**.
-
-Each pin row shows the people, the target, what the solver wanted
-(`solver_said`), the reason code, and the note. Inline reason-code editing —
-classification should take one click, not a dialog.
-
-Grouping by reason code with notes visible is the triage workflow from
-[06-pins-and-evolution](06-pins-and-evolution.md) §7. Three `MISSING_CONSTRAINT`
-pins all mentioning stairs is a rule, and this screen is where that becomes
-visible.
-
-The triage screen gains a "this cluster looks like a tag" grouping: pins
-sharing a `reason_code` and overlapping note keywords, surfaced together.
-Optional, and the highest-value small feature on this screen.
+Each constraint row shows its label, explanation, needs, providers, strength,
+and current resolver status. Admins can create a custom matching definition,
+apply it to entities, or clear an application. Missing providers and
+contradictions are visible immediately.
 
 ---
 
@@ -386,10 +375,10 @@ The interface's voice, applied consistently.
 **Errors state what happened and what to do.** Not "Invalid input" but "Row 31:
 birthdate `31.02.2015` is not a date. Use `DD.MM.YYYY`."
 
-**Empty states are invitations.** Not "No pins" but "No pins yet. When you
-override the solver on the board, the reason will be recorded here."
+**Empty states are invitations.** Not "No constraints" but "No constraints yet.
+Add one when the plan needs a human rule."
 
-**Numbers get units and comparison.** Not "11" but "11 pins required (was 19)".
+**Numbers get units and comparison.** Not "11" but "11 active constraints (was 19)".
 
 **No apologies, no exclamation marks, no "Oops".** These are organisers doing
 administrative work; the interface should be a competent colleague.
@@ -399,6 +388,6 @@ copy should be German with an English fallback (`family.locale`). Admin-facing
 copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
 
-Admin-facing tag labels come from `registry[tag].label` and family-facing text
+Admin-facing labels come from the built-in or custom definition and family-facing text
 from `familyFacing.label`, so the two audiences can be worded differently for
 the same tag.

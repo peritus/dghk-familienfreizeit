@@ -29,10 +29,10 @@ see [15-event-config](15-event-config.md) §5:
 
 | `control` | Renders | Writes |
 |---|---|---|
-| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `TagCleared` |
-| `toggle` | one checkbox | `TagSet` with no strength, or `TagCleared` |
-| `family-picker` | searchable family list, multi-select | one `TagSet` per selection, `value` = family id |
-| `person-picker` | people within the same family | one `TagSet` per selection, `value` = person id |
+| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `LabelCleared` |
+| `toggle` | one checkbox | `LabelSet` with no strength, or `LabelCleared` |
+| `family-picker` | searchable family list, multi-select | one `LabelSet` per selection, `value` = family id |
+| `person-picker` | people within the same family | one `LabelSet` per selection, `value` = person id |
 
 Adding a tag that reuses an existing control is a **one-file change**; adding a
 *new kind* of control is two files.
@@ -154,7 +154,7 @@ Decided explicitly, because the defaults are wrong in both directions.
 | Names of children in their child's children's room, after publication | Yes |
 | Bed labels within their own rooms | Yes |
 | Any draft plan | No |
-| Scores, parties, traces, pins | No |
+| Scores, parties, traces, admin constraints | No |
 | Admin notes about them | **No** — free text is theirs, admin notes are not |
 | Tags declaring `adminOnly` | **Never**, regardless of `familyFacing` |
 | `descriptive` tags | Never |
@@ -188,7 +188,7 @@ privacy failure available to this application.
 ## 3. Interaction details
 
 **Everything saves on change.** No save button, no draft state. A radio click
-emits a `TagSet` (or `TagCleared`) and shows an inline confirmation:
+emits a `LabelSet` (or `LabelCleared`) and shows an inline confirmation:
 *"Gespeichert um 14:22."* Families in their forties on a phone in a kitchen will
 not find a save button at the bottom of a long page, and losing their input
 once means they will not come back.
