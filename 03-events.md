@@ -170,42 +170,43 @@ projector from one event.
 
 The only events a non-admin family may emit, and only about itself.
 
-### `RoomPreferenceStated`
+### `TagSet`
 ```ts
 {
-  family_id: string,
-  ensuite: 'required' | 'preferred' | 'indifferent',
-  indoor:  'required' | 'preferred' | 'indifferent',
-  sharing: 'happy' | 'prefer_not' | 'refuse',
-  free_text: string | null
+  entity_type: 'room' | 'family' | 'person' | 'workshop'
+  entity_id: string
+  tag: string
+  value: string | null              // required iff the tag declares a param
+  strength: 'required' | 'preferred' | null
 }
 ```
+Replaces `RoomPreferenceStated`, `ChildRoomOptInSet`, `CoRoomRequested` and
+`AdminKeptApart`. Validated against the registry before append — the five
+checks in [14-tags](14-tags.md) §4: the tag exists (or resolves through an
+alias), the scope matches `entity_type`, `value` is present iff the tag
+declares a `param` and names an entity that exists and is not withdrawn, the
+strength is legal for the tag, and the registry's `validFor` predicate passes.
 
-### `ChildRoomOptInSet`
+*Authorisation:* a family may `TagSet` / `TagCleared` only on entities it owns
+(itself, or its own people), for tags declaring `familyFacing`, at strengths
+that control permits ([14-tags](14-tags.md) §4). Everything else is
+admin-only.
+
+Rule 2 above says payloads are complete, not deltas. `TagSet` names a single
+tag, which reads like a delta and is not: a tag assignment is one fact, not a
+field within a record, so a per-tag event is a complete statement about that
+fact.
+
+### `TagCleared`
 ```ts
-{ person_id: string, opted_in: boolean }
+{
+  entity_type: string
+  entity_id: string
+  tag: string
+  value: string | null              // null clears every value for this tag
+}
 ```
-*Authorisation:* the person must belong to the emitting family. A family cannot
-opt another family's child into anything.
-
-*Validation:* refuse if `role !== 'child'`. Adults do not go in children's rooms,
-and letting the event through creates a class of party-formation bug that is
-tedious to trace.
-
-### `CoRoomRequested`
-```ts
-{ from_family_id: string, to_family_id: string, strength: 'must' | 'prefer' }
-```
-Directed. Mutuality is derived at solve time. Re-emitting with a different
-strength replaces the previous value.
-
-*UX note:* the requesting family sees whether the request is reciprocated. See
-[08-attendee-ux](08-attendee-ux.md) for what this may and may not reveal.
-
-### `CoRoomRequestWithdrawn`
-```ts
-{ from_family_id: string, to_family_id: string }
-```
+Replaces `CoRoomRequestWithdrawn`.
 
 ### `WorkshopPreferencesRanked`
 ```ts
@@ -221,6 +222,9 @@ the latter shows up in the admin's chase list.
 
 *Validation:* every id must belong to the named slot; no duplicates; length must
 not exceed the number of workshops in the slot.
+
+This stays typed rather than becoming a tag, deliberately (D13) — see
+[14-tags](14-tags.md) §7.
 
 ---
 
@@ -315,31 +319,9 @@ own party. Every person named must currently be in the same derived party;
 validation rejects otherwise, because a split that spans parties is almost always
 a mis-click.
 
-### `AdminKeptApart`
-```ts
-{ family_a: string, family_b: string, note: string | null }
-```
-Symmetric hard rule: these two families never share a room. Never shown to
-families.
-
 ---
 
 ## Solver and publication
-
-### `SolverConfigChanged`
-```ts
-{
-  config_hash: string,
-  solver_version: string,
-  weights: Record<string, number>,   // the complete weight table
-  event_date: string,
-  max_repair_passes: number,
-  seed: number | null
-}
-```
-The full config is carried, not a diff, so any historical plan's config is
-readable from the log without reconstruction. `config_hash` is
-`sha256(canonical(weights + eventDate + maxRepairPasses + seed))`.
 
 ### `PlanComputed`
 ```ts
@@ -370,6 +352,7 @@ Worth writing down, because the boundary blurs under pressure.
 
 | Not an event | Why | Where it lives |
 |---|---|---|
+| Registry changes (adding, removing or reweighting a tag) | Code, versioned in git; covered by `config_hash` | `events/<event>/event.ts` |
 | Magic link issued / redeemed | Operational secret handling | `magic_link` |
 | Session created / destroyed | Operational | `session` |
 | Email sent, delivered, bounced | Operational telemetry | `email_log` |

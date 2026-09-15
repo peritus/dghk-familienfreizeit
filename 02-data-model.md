@@ -144,6 +144,12 @@ CREATE UNIQUE INDEX room_number_idx ON room(building_id, number);
 CREATE INDEX room_sort_idx ON room(sort_key, id);
 ```
 
+`has_ensuite`, `is_outside`, `is_accessible` and `floor` are the **derivation
+source** for the `ensuite`, `indoor`, `accessible` and `ground-floor`
+capabilities in the tag registry — see [14-tags](14-tags.md) §3. A capability
+with a `derive` rejects direct assignment; these four columns remain the only
+way to set the corresponding capability.
+
 `designation` is the mechanism behind children's rooms. A room designated
 `child` with `child_min_age = 8, child_max_age = 14` is the only kind of room
 the child pool can be placed into, and general parties cannot be placed there.
@@ -182,7 +188,7 @@ solver counts capacity it counts Places.
 
 ### Adjacency
 
-Used only by the `coRoomAdjacent` soft rule.
+Used only by the `room-with.adjacentWeight` soft term.
 
 ```sql
 CREATE TABLE room_adjacency (
@@ -203,94 +209,42 @@ need to normalise the pair.
 
 ## 4. Preferences
 
-All of these are projections of family-emitted events. None are written directly.
+Superseded by [14-tags](14-tags.md) §2. One table, `tag_assignment`, replaces
+`family_room_pref`, `child_room_optin`, `co_room_request` and `keep_apart`:
 
 ```sql
-CREATE TABLE family_room_pref (
-  family_id  TEXT PRIMARY KEY REFERENCES family(id),
-  ensuite    TEXT NOT NULL DEFAULT 'indifferent'
-             CHECK (ensuite IN ('required','preferred','indifferent')),
-  indoor     TEXT NOT NULL DEFAULT 'indifferent'
-             CHECK (indoor IN ('required','preferred','indifferent')),
-  sharing    TEXT NOT NULL DEFAULT 'happy'
-             CHECK (sharing IN ('happy','prefer_not','refuse')),
-  free_text  TEXT,
-  updated_at TEXT NOT NULL
+CREATE TABLE tag_assignment (
+  entity_type TEXT NOT NULL CHECK (entity_type IN ('room','family','person','workshop')),
+  entity_id   TEXT NOT NULL,
+  tag         TEXT NOT NULL,
+  value       TEXT NOT NULL DEFAULT '',
+  strength    TEXT          CHECK (strength IN ('required','preferred')),
+  set_at      TEXT NOT NULL,
+  set_by      TEXT NOT NULL,             -- actor string from the event
+  PRIMARY KEY (entity_type, entity_id, tag, value)
 );
+
+CREATE INDEX tag_by_tag    ON tag_assignment(tag, entity_type, entity_id);
+CREATE INDEX tag_by_value  ON tag_assignment(tag, value) WHERE value <> '';
 ```
 
-The three-value scale is the whole design. `required` becomes a hard rule that
-prunes rooms; `preferred` becomes a scored term; `indifferent` is absent from
-scoring entirely. Collapsing this to a boolean is the single most tempting
-simplification here and it destroys the solver's ability to distinguish "cannot"
-from "would rather not" — which is exactly the distinction admins need to see
-when the plan is tight.
+Three pieces of rationale from rev1's per-preference tables survive the change
+and are load-bearing:
 
-`sharing = 'refuse'` means the family will not share a room with another family.
-It is a hard rule. Use sparingly; if half the families refuse, the plan is
-infeasible and the error message should say so plainly rather than leaving forty
-parties unplaced.
-
-`free_text` is shown to admins on the party review screen and is never read by
-the solver. It is where "our youngest is scared of the dark" lives, and it is the
-raw material from which new rules get written.
-
-```sql
-CREATE TABLE child_room_optin (
-  person_id  TEXT PRIMARY KEY REFERENCES person(id),
-  opted_in   INTEGER NOT NULL CHECK (opted_in IN (0,1)),
-  updated_at TEXT NOT NULL,
-  updated_by TEXT NOT NULL          -- actor string from the event
-);
-```
-
-Per child, not per family. Two siblings can make different choices, and they
-frequently will.
-
-```sql
-CREATE TABLE co_room_request (
-  from_family_id TEXT NOT NULL REFERENCES family(id),
-  to_family_id   TEXT NOT NULL REFERENCES family(id),
-  strength       TEXT NOT NULL CHECK (strength IN ('must','prefer')),
-  created_at     TEXT NOT NULL,
-  PRIMARY KEY (from_family_id, to_family_id),
-  CHECK (from_family_id <> to_family_id)
-);
-```
-
-Directed on purpose. Mutuality is a *derived* property:
-
-```sql
-SELECT a.from_family_id, a.to_family_id
-FROM co_room_request a
-JOIN co_room_request b
-  ON b.from_family_id = a.to_family_id
- AND b.to_family_id   = a.from_family_id
-WHERE a.strength = 'must' AND b.strength = 'must'
-  AND a.from_family_id < a.to_family_id;
-```
-
-Only mutual `must` pairs merge parties. A one-sided request, or a mutual
-`prefer`, becomes a scored term. This is the asymmetry that makes the feature
-socially workable: family A can want to room with family B without family B being
-forced into it, and the UI can tell A honestly that the request is not yet
-reciprocated.
-
-```sql
-CREATE TABLE keep_apart (
-  family_a   TEXT NOT NULL REFERENCES family(id),
-  family_b   TEXT NOT NULL REFERENCES family(id),
-  note       TEXT,
-  created_at TEXT NOT NULL,
-  PRIMARY KEY (family_a, family_b),
-  CHECK (family_a < family_b)
-);
-```
-
-Admin-only, never surfaced to families, symmetric by construction via the
-`CHECK`. This exists because "these two families should not share a room" is real
-and recurring, and without a home in the model it becomes an `IRREDUCIBLE` pin
-that can never be retired. See [06-pins-and-evolution](06-pins-and-evolution.md).
+- **The three-value scale argument.** rev1 distinguished `required` (hard rule,
+  prunes rooms), `preferred` (scored term) and `indifferent` (absent from
+  scoring). This is now expressed as strength versus absence: a tag assignment
+  at `required` or `preferred`, or no row at all. Collapsing this to a boolean
+  destroys the solver's ability to distinguish "cannot" from "would rather
+  not" — which is exactly the distinction admins need to see when the plan is
+  tight.
+- **The mutuality-is-derived argument.** rev1 derived mutual co-room requests
+  and keep-apart symmetry from directed rows. This is now a self-join over
+  `tag_assignment`; see [14-tags](14-tags.md) §2.
+- **The `free_text` distinction.** Free text is the family's and visible to
+  them; admin notes are separate. This is now a `descriptive` tag plus a note
+  field, and the privacy boundary in [08-attendee-ux](08-attendee-ux.md) §2 is
+  unchanged.
 
 ---
 
@@ -341,6 +295,10 @@ slot, dense from 1.
 `min_capacity` drives cancellation: a workshop that attracts fewer than its
 minimum is cancelled and its slot is re-solved. Handled deterministically in
 [05-solver-workshops](05-solver-workshops.md).
+
+`workshop_pref` is deliberately not folded into the tag model — see
+[14-tags](14-tags.md) §7, so a future reader does not assume it was an
+oversight.
 
 ---
 
