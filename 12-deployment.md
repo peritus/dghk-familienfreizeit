@@ -61,7 +61,7 @@ This application server-renders every route, so static assets should 404 through
 to the Worker and let the router decide.
 
 `EVENT_DATE` and `PREFERENCE_DEADLINE` move to `meta.date` and
-`meta.preferenceDeadline` in `event.ts` ([15-event-config](15-event-config.md)
+`meta.preferenceDeadline` in `event.ts` ([15-event-config](15-event-profiles.md)
 §8) — every age in the solver is computed against `meta.date`, which makes it
 a solver input that belongs in `config_hash`. `EVENT_NAME`, `PUBLIC_URL` and
 `EMAIL_FROM` **stay** — they are deployment facts, not solver inputs, and must
@@ -123,7 +123,7 @@ and a direct insert is undone on the next rebuild.
 ## Weight tuning
 
 There is no weight-editing screen, and this is deliberate. The offline
-workflow, from [15-event-config](15-event-config.md) §4:
+workflow, from [15-event-config](15-event-profiles.md) §4:
 
 ```bash
 wrangler d1 execute bettenplan --remote --json \

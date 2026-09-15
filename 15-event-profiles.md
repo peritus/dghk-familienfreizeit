@@ -26,9 +26,9 @@ So embedded JavaScript must be **compiled, not interpreted** — which means eit
 plain TypeScript or a codegen step over some other source format.
 
 **Strings defeat the determinism contract's enforcement.**
-[12-testing](12-testing.md) §5 relies on `no-restricted-globals` catching `Date`
+[12-testing](13-testing.md) §5 relies on `no-restricted-globals` catching `Date`
 and `Math` inside `src/solver/**`. A lint rule cannot see into a string literal.
-[04-solver-rooms](04-solver-rooms.md) §1's seven rules would become seven things
+[04-solver-rooms](05-room-assignment.md) §1's seven rules would become seven things
 you hope nobody does.
 
 Worth knowing while writing a deterministic solver on this platform: Workers'
@@ -46,7 +46,7 @@ format offers it.
 ### The docs live in the config
 
 `doc` is **mandatory** on every registry entry, enforced by the type. Same
-principle as [04-solver-rooms](04-solver-rooms.md) §5: a rule that cannot explain
+principle as [04-solver-rooms](05-room-assignment.md) §5: a rule that cannot explain
 itself does not ship.
 
 One source feeds three surfaces: the generated trace text, the help text in the
@@ -217,7 +217,7 @@ export default defineEvent({
 `defineEvent` validates at module load and throws on a bad registry — a
 `satisfiedBy` naming a non-capability, a `derive` on a requirement, a scope that
 contradicts a `validFor`. The Worker fails to boot rather than solving wrongly,
-and [12-testing](12-testing.md) asserts the same thing in CI so it never reaches
+and [12-testing](13-testing.md) asserts the same thing in CI so it never reaches
 a deploy.
 
 `type Tag = keyof typeof tags` flows everywhere. A typo in a rule file is a
@@ -334,7 +334,7 @@ against other builds of the same file.
 
 ## 5. `familyFacing` drives the portal
 
-[08-attendee-ux](08-attendee-ux.md)'s preferences page is a **renderer over the
+[08-attendee-ux](09-family-portal.md)'s preferences page is a **renderer over the
 registry**. Sections 2, 3 and 4 of that page are generated: every tag declaring
 `familyFacing` produces a control, in registry order, grouped by scope.
 
@@ -416,7 +416,7 @@ functions with no I/O, so this does not weaken
 unchanged: the solver still imports nothing from `src/db`, `src/routes` or
 `src/lib`.
 
-The ESLint restriction in [12-testing](12-testing.md) §5 extends to
+The ESLint restriction in [12-testing](13-testing.md) §5 extends to
 `src/config/**` — no `Date`, no `Math`, no I/O in a `derive` or a `check`. They
 run inside the solver and are bound by the same contract.
 

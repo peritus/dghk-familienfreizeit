@@ -146,7 +146,7 @@ Each party renders as a card:
 Provenance is the content. An admin reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
 Each requirement names which member family contributed it
-([14-tags](14-tags.md) §5.3) — a merged party's `required` tag binding
+([14-tags](04-labels-and-constraints.md) §5.3) — a merged party's `required` tag binding
 everyone is correct but surprising, and the card is where that surfaces.
 
 **Warnings inline, at the top:**

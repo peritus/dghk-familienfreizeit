@@ -228,7 +228,7 @@ admin tool with roughly eight distinct interactive elements.
 *Revisit if:* the board's interaction model outgrows ~600 lines of vanilla
 TypeScript, or the attendee preference form needs a real combobox. The escape
 hatch is mounting React on the board route alone; see
-[10-frontend-stack](10-frontend-stack.md).
+[10-frontend-stack](11-frontend.md).
 
 ### D9 — No Vite
 
@@ -247,7 +247,7 @@ has no passwords, no OAuth, no registration, no organisations and no 2FA. What
 remains is one flow, fully under our control, and a per-request instantiation
 dance on Workers.
 
-*Non-negotiable rules* are in [09-auth](09-auth.md). Follow them exactly or use
+*Non-negotiable rules* are in [09-auth](10-authentication.md). Follow them exactly or use
 the library instead.
 
 ### D11 — Built-in rules live in code; custom matching keys live in the event log
@@ -259,15 +259,15 @@ dynamic evaluation or code deployment.
 ### D12 — Weights live in code
 
 *Chosen.* `SolverConfigChanged` is dropped. Tuning happens offline against an
-exported event log. Rationale in [15-event-config](15-event-config.md) §4.
+exported event log. Rationale in [15-event-config](15-event-profiles.md) §4.
 
 ### D13 — Workshop rankings are structured labels
 
 *Chosen.* Structured label values and the `ordered-choice` resolver operator
 preserve dense ordered lists without a special property table. Rationale in
-[14-tags](14-tags.md) §7.
+[14-tags](04-labels-and-constraints.md) §7.
 
 ### D14 — `familyFacing` in the registry drives the family portal
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
-[15-event-config](15-event-config.md) §5.
+[15-event-config](15-event-profiles.md) §5.

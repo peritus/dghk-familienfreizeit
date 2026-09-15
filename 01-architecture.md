@@ -159,7 +159,7 @@ it. It makes the published result directly readable from the event log and
 keeps it independent of future solver or configuration changes.
 
 `config_hash` is now computed at runtime from the code config object rather
-than from a stored weight table. See [15-event-config](15-event-config.md) §4
+than from a stored weight table. See [15-event-config](15-event-profiles.md) §4
 for what goes into it, including the requirement that function bodies are
 hashed by source.
 
