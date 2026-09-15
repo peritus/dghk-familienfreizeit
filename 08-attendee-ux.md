@@ -18,6 +18,29 @@ One scrolling page, not a wizard. A wizard implies a one-time completion; this i
 a form people will return to three times over six weeks as they change their
 minds. Everything saves on change.
 
+Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
+zusammen?") are **generated from the registry** (D14): every tag declaring
+`familyFacing` produces a control, in registry order, grouped by scope. The
+mock-up below is an illustration of what the 2026 registry produces, labelled
+as such so nobody hard-codes it.
+
+`control` is a closed union, and this is the thing to think about up front —
+see [15-event-config](15-event-config.md) §5:
+
+| `control` | Renders | Writes |
+|---|---|---|
+| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `TagCleared` |
+| `toggle` | one checkbox | `TagSet` with no strength, or `TagCleared` |
+| `family-picker` | searchable family list, multi-select | one `TagSet` per selection, `value` = family id |
+| `person-picker` | people within the same family | one `TagSet` per selection, `value` = person id |
+
+Adding a tag that reuses an existing control is a **one-file change**; adding a
+*new kind* of control is two files.
+
+`invert: true` on `sole-occupancy` flips the labels so the portal reads
+"Zimmer teilen: gerne / lieber nicht / auf keinen Fall" while the stored tag
+stays positively named. Presentation only.
+
 ```
 Willkommen, Familie Müller
 
@@ -133,6 +156,8 @@ Decided explicitly, because the defaults are wrong in both directions.
 | Any draft plan | No |
 | Scores, parties, traces, pins | No |
 | Admin notes about them | **No** — free text is theirs, admin notes are not |
+| Tags declaring `adminOnly` | **Never**, regardless of `familyFacing` |
+| `descriptive` tags | Never |
 
 **Reciprocity is visible; the request is not.** If the Müllers request the
 Schmidts, the Müllers see "noch keine Antwort" until the Schmidts request them
@@ -154,15 +179,19 @@ they're flexible about the ensuite", that goes in an admin-only note field.
 Conflating them means either admins self-censor or families read something they
 should not have.
 
+`apart-from` declares no `familyFacing` *and* `adminOnly: true`, deliberately
+doubled, because exposing keep-apart relations to families would be the worst
+privacy failure available to this application.
+
 ---
 
 ## 3. Interaction details
 
 **Everything saves on change.** No save button, no draft state. A radio click
-emits the event and shows an inline confirmation: *"Gespeichert um 14:22."*
-Families in their forties on a phone in a kitchen will not find a save button at
-the bottom of a long page, and losing their input once means they will not come
-back.
+emits a `TagSet` (or `TagCleared`) and shows an inline confirmation:
+*"Gespeichert um 14:22."* Families in their forties on a phone in a kitchen will
+not find a save button at the bottom of a long page, and losing their input
+once means they will not come back.
 
 **Progressive enhancement throughout.** Every control is inside a real `<form>`
 that works with JavaScript disabled, posting and redirecting. htmx intercepts to
@@ -178,7 +207,8 @@ mismatch.
 **Ineligibility is explained, not hidden.** Emma's children's-room checkbox is
 disabled with the reason next to it, not removed. A missing option makes people
 think the site is broken; a disabled option with a reason answers the question
-before they ask.
+before they ask. This is now driven by `validFor` — a control whose predicate
+fails renders disabled with the reason.
 
 **Workshop ranking is drag-to-order on desktop and numbered selects on mobile.**
 The same underlying data. Do not build a mobile drag interaction; numbered
