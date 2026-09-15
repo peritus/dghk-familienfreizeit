@@ -66,8 +66,8 @@ eligible(person, workshop) :=
  and (workshop.max_age is null or ageAt(person) <= workshop.max_age)
  and workshop is not cancelled
 
-── Step 0: pins ──────────────────────────────────────────────
-Apply workshop pins for this slot. Decrement capacity. Mark those
+── Step 0: constraints ───────────────────────────────────────
+Apply required workshop constraints for this slot. Decrement capacity. Mark those
 people assigned for this slot. Conflicts (over-capacity, ineligible)
 are reported, never silently resolved.
 
@@ -166,7 +166,7 @@ type WorkshopPlan = {
   assignments: Array<{ personId: string, workshopId: string, slotId: string }>
   cancelled: Array<{ workshopId: string, intake: number, minCapacity: number }>
   unassigned: Array<{ personId: string, slotId: string, reason: string }>
-  conflicts: Array<{ pinId: string, reason: string }>
+  conflicts: Array<{ constraintKey: string, reason: string }>
   trace: TraceEntry[]
   stats: {
     perSlot: Array<{
@@ -209,10 +209,11 @@ And per slot, a summary:
 
 ---
 
-## 5. Workshop pins
+## 5. Workshop constraints
 
-Same taxonomy as room pins, same retirement loop. See
-[06-pins-and-evolution](06-pins-and-evolution.md).
+The same generic constraint resolver is used for workshop matching. A custom
+`needs-provides` or `groups-with` label is visible in the trace and can be
+cleared by an admin; there is no separate pin lifecycle.
 
 Common real cases and where they belong:
 
@@ -220,15 +221,13 @@ Common real cases and where they belong:
 |---|---|---|
 | "Lena must be with her brother, she's anxious" | `MISSING_CONSTRAINT` | A `workshop-with` tag |
 | "This workshop needs one older kid to help" | `MISSING_CONSTRAINT` | A per-workshop age-mix rule |
-| "Tim's rankings were entered wrong" | `MISSING_DATA` | Fix the ranking; pin becomes obsolete |
+| "Tim's rankings were entered wrong" | — | Fix the ranking; clear any compensating constraint |
 | "Klettern needs 2 free spots for late signups" | `OPERATIONAL` | Model reserved capacity on the workshop |
 | "Ada would hate this even though she ranked it" | `IRREDUCIBLE` | Nothing; genuinely a judgement call |
 
-That third row is worth noticing: it is not really a pin at all. The right move
-is to correct the preference event, after which the pin is `obsolete`. The pin
-screen should suggest this when a pin's target matches a stated preference the
-solver did not honour for capacity reasons — often the admin is working around
-bad data rather than a bad algorithm.
+Correcting the ranking is preferable to leaving a compensating constraint in
+place. The constraint screen should suggest clearing one when it duplicates a
+stated preference that was previously missed because of bad data.
 
 ---
 
