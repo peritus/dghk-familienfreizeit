@@ -148,7 +148,7 @@ Otherwise non-participation would be rewarded with priority.
 
 ## 3. No clash, structurally
 
-The unique index `plan_workshop_assignment(snapshot_id, person_id, slot_id)` makes a
+The snapshot validator's uniqueness check for `(person_id, slot_id)` makes a
 double-booking unstorable.
 
 The solver assigns at most one workshop per person per slot by construction —

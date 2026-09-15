@@ -58,7 +58,7 @@ have surprises in it, and they should surface now rather than in M3.
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain HTML rendering of it
-- plan snapshot projection, `PlanSnapshotted`
+- immutable `PlanSnapshotted` event payloads
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
