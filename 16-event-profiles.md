@@ -42,11 +42,11 @@ rooms without workshops, workshops without rooms, or both.
 
 A generic module declares its stable id, version, dependencies, and contributed
 contracts. Contributions may include event schemas, entity kinds, tags,
-validation, solver stages, traces, routes, views, and test contracts.
+validation, solver stages, traces, API handlers, screens, and test contracts.
 
 Dependencies are strict: a missing or incompatible dependency fails profile
 validation. A disabled module contributes no required data, solver stage, trace
-section, route, view, or fixture.
+section, API handler, screen, or fixture.
 
 Module implementations own mechanisms. Profiles supply parameters, concrete tag
 definitions, user-facing copy, weights, phase limits, and deterministic

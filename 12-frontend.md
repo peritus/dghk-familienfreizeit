@@ -1,238 +1,182 @@
 # 11 — Frontend
 
-Server-rendered HTML, one JavaScript island, no client framework.
+One React application for every screen, built from copied neobrutalism
+components, talking to a small JSON API.
 
 ---
 
 ## 1. The decision and its boundary
 
-The application has roughly eight distinct interactive elements: a search field,
-a set of radio groups, a ranked list, a dialog, a toast, a table filter, a CSV
-preview, and the board. Seven of those are a form control and a server round
-trip. One is a genuine client-side application.
+The derived world is the read side of the application
+([architecture](01-architecture.md)), and it already runs in the browser. The admin
+screens are views over it: the dashboard, families, party review, the board, plan
+diffs, workshops, and constraints all render `derive(committed ++ pending)`. The
+pending list is shared by every one of them — party review merges and splits into it
+just as the board drags into it. That is a client application with one piece of
+state and a pure function over it, which is exactly the shape React is built for.
 
-So: server-render everything with `hono/jsx`, and pay for a client runtime
-exactly once, on the board.
+So: render everything in React, admin and attendee view alike, and keep the server
+to authentication, the event log, and side effects.
 
-**Base UI was considered and rejected on this basis.** It is a library of
-unstyled React components built by maintainers from Radix, Floating UI and
-Material UI, and shadcn/ui made it the default primitive layer in July 2026. It
-is good. It is also React-only, so adopting it means the whole client runtime for
-seven form controls.
+What that buys, concretely:
 
-**neobrutalism.dev contributes the theme, not the components.** It is a
-shadcn-style registry, so the components are React and unusable here. The
-*look* — thick borders, hard offset shadows, saturated flats, no radius — is
-about sixty lines of CSS. Copy the tokens, hand-write the elements.
+- **One pending list across screens.** It lives in one reducer at the root of the
+  admin application, so every screen sees the same unapplied work.
+- **No hand-written rendering engine for the board.** Re-deriving on every drag,
+  keeping selection, focus, and drag state across renders, flashing moved cards —
+  this is component state and reconciliation, not DOM bookkeeping.
+- **Accessible primitives instead of hand-written ones.** The family picker, the room
+  picker, merge and split dialogs, toasts, radio groups, and selects come from
+  maintained components with keyboard and ARIA behaviour already correct.
+- **Almost no per-screen server code.** Admin screens need no routes of their own;
+  they read the log once and write through apply.
+- **One way to render.** Every screen is a component, and every request returns
+  JSON.
 
-**The escape hatch**, if the board outgrows vanilla TypeScript or the preference
-form needs a real combobox: mount React on `/admin/board` alone, keep `hono/jsx`
-everywhere else. Two JSX pragmas in one repo is a genuine wart — it needs a
-per-directory `tsconfig.json` and it will confuse a newcomer once — but it is a
-smaller wart than a client runtime on every page. Revisit at ~600 lines of
-`client/board.ts`.
-
-That threshold counts interaction code only. The board bundle also carries
-`src/derive/**` and `src/solver/**`, which are shared with the Worker and are not
-written to be read as browser code; growth there says nothing about whether the
-interaction layer needs a framework.
+The attendee view requires JavaScript. It is a small bundle that never contains the
+admin screens or the solver, loads on any browser released in the last several
+years, and saves on change through ordinary requests.
 
 ---
 
 ## 2. Build
 
-No Vite. Three commands.
+Vite with the Cloudflare plugin. One dev server runs the Worker in `workerd` and
+serves the application with hot reload; one build produces both.
 
 ```jsonc
 {
   "scripts": {
-    "dev":        "run-p dev:*",
-    "dev:worker": "wrangler dev",
-    "dev:css":    "tailwindcss -i src/app.css -o public/app.css --watch",
-    "dev:board":  "esbuild src/client/board.ts --bundle --format=esm --outfile=public/board.js --watch",
-
-    "build":      "run-s build:*",
-    "build:css":  "tailwindcss -i src/app.css -o public/app.css --minify",
-    "build:board":"esbuild src/client/board.ts --bundle --format=esm --minify --outfile=public/board.js",
-
-    "deploy":     "npm run build && wrangler deploy",
-
-    "tune":       "tsx scripts/tune.ts"
+    "dev":       "vite",
+    "build":     "vite build",
+    "preview":   "vite preview",
+    "deploy":    "vite build && wrangler deploy",
+    "typecheck": "tsc -b",
+    "tune":      "tsx scripts/tune.ts"
   }
 }
 ```
 
-Wrangler's own esbuild handles the Worker's TypeScript and JSX. Tailwind's CLI
-handles CSS. One direct esbuild call handles the island. `tune` is Node, not
-Worker code, and needs no wrangler. Nothing else.
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { cloudflare } from '@cloudflare/vite-plugin'
 
-`tsconfig.json`:
-
-```jsonc
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "types": ["./worker-configuration.d.ts"]
-  }
-}
+export default defineConfig({
+  plugins: [react(), tailwindcss(), cloudflare()],
+})
 ```
 
-`noUncheckedIndexedAccess` is worth the friction here specifically because the
-solver indexes into arrays constantly and an off-by-one there produces a wrong
-plan rather than a crash.
+`tune` is Node, not Worker code, and runs outside Vite.
+
+TypeScript is split by runtime, because the Worker and the browser have different
+globals:
+
+```
+tsconfig.json           references only
+tsconfig.app.json       src/** except src/worker/** and src/modules/*/worker/**   DOM lib, jsx: react-jsx
+tsconfig.worker.json    src/** except src/app/** and src/modules/*/app/**         worker-configuration.d.ts
+```
+
+Both enable `strict` and `noUncheckedIndexedAccess`. The latter is worth the
+friction here specifically because the solver indexes into arrays constantly and an
+off-by-one there produces a wrong plan rather than a crash.
 
 `worker-configuration.d.ts` is generated by `wrangler types`. Commit it.
 
 ---
 
-## 3. Server rendering with `hono/jsx`
+## 3. Application shape
 
-JSX that compiles to string concatenation on the server. No virtual DOM, no
-hydration, nothing shipped to the browser.
-
-```tsx
-// src/views/layout.tsx
-import { jsxRenderer } from 'hono/jsx-renderer'
-
-export const layout = jsxRenderer(({ children, title }) => (
-  <html lang="de">
-    <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>{title} · DGHK Familienfreizeit</title>
-      <link rel="stylesheet" href="/app.css" />
-    </head>
-    <body class="nb-page">{children}</body>
-  </html>
-))
+```
+src/app/
+  main.tsx              router, session probe, lazy-loads the admin application
+  portal/               login, preferences page, assignment page
+  admin/
+    AdminApp.tsx        loads the log, owns the pending reducer, derives the world
+    screens/            dashboard, families, parties, board, plans, workshops, constraints
+  components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
+**Routing** is `wouter`: path patterns with parameters for the dozen routes in the
+[admin interface](09-admin-interface.md) and the portal. `/admin/**` is a lazy
+chunk, so a family's phone never downloads the admin screens or the solver.
+
+**Admin state** is one reducer:
+
 ```tsx
-// src/routes/admin/dashboard.tsx
-app.get('/admin', requireAdmin, async (c) => {
-  const status = await planStatus(c.env.DB)
-  return c.render(<Dashboard status={status} />, { title: 'Übersicht' })
-})
+function AdminApp() {
+  const { committed, configHash } = useLog()            // GET /api/admin/log, once
+  const [pending, dispatch] = useReducer(pendingReducer, [])
+  const world = useMemo(() => derive([...committed, ...pending], config), [committed, pending])
+  …
+}
 ```
 
-Components are plain functions returning JSX. There is no state, no effects, no
-lifecycle. If a component needs data it takes a prop; the route fetches it.
+Every screen receives `world` and `dispatch`. Actions append a pending event, pop
+one for undo, clear the list for discard, or apply. There is no state manager and no
+data-fetching library: the admin application makes three kinds of request — load
+the log, apply pending events, and trigger emails.
 
-**Escaping.** `hono/jsx` escapes interpolated values by default. `raw()` exists
-and should appear nowhere in this codebase. Family free text, admin notes and
-workshop titles are all user-supplied and all rendered as `{value}`.
+**Portal state** is the family's view from `GET /api/family/view`, which the server
+derives from the events before the latest publication and filters to that family
+([attendee view](10-family-portal.md)). A control change posts the label event and
+re-renders from the response.
+
+**Escaping.** React escapes interpolated values by default.
+`dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, admin
+notes, and workshop titles are all user-supplied and all rendered as `{value}`.
 
 The attendee preferences page is a renderer over `attendeeFacing` occasion-profile entries
 rather than hand-written JSX ([attendee view](10-family-portal.md) §1): each
-`control` value maps one-to-one onto a component in `src/views/controls/`.
+`control` value maps one-to-one onto a component in `src/app/portal/controls/`.
 
 ---
 
-## 4. htmx
+## 4. Components
 
-Included for partial updates. ~14kB, no build step, attribute-driven.
+[neobrutalism.dev](https://www.neobrutalism.dev) is a shadcn-style registry built on
+Base UI. The CLI copies component source into `src/app/components/ui/`; the code is
+ours to read and edit, not a dependency to upgrade.
 
-```tsx
-<form
-  hx-post="/family/preferences"
-  hx-trigger="change"
-  hx-target="#pref-status"
-  hx-swap="innerHTML"
-  method="post"
-  action="/family/preferences"
->
-  …
-  <span id="pref-status" />
-</form>
+```bash
+npx shadcn@latest init https://neobrutalism.dev/r/styling/<palette>.json
+npx shadcn@latest add <component URL from its neobrutalism.dev page>
 ```
 
-Both `hx-post` and `method`/`action` are present on purpose. Without JavaScript
-the form posts and redirects; with it, htmx intercepts and swaps a fragment.
-Every mutating route therefore returns either a full page or a fragment depending
-on the `HX-Request` header:
+The components in use, and that is the complete list:
 
-```tsx
-const fragment = c.req.header('HX-Request') === 'true'
-return fragment
-  ? c.html(<SavedAt at={now} />)
-  : c.redirect('/family?saved=1')
-```
+| Component | Used for |
+|---|---|
+| Button, Card, Badge | everywhere |
+| Input, Textarea, Checkbox, Radio Group, Select | portal controls, admin forms, CSV paste |
+| Combobox | family picker, person picker, room picker, party search |
+| Dialog, Alert Dialog | merge and split, publish confirmation, discard pending |
+| Table | families, CSV preview, plans, constraints, workshop fill |
+| Tabs | building filter on the board, before and after publication in the portal |
+| Toast | "Gespeichert um 14:22", "Applied", apply conflicts |
 
-That two-line pattern is the whole progressive-enhancement story. It is worth the
-discipline because the attendee view will be opened on devices nobody tested.
+The families table sorts and filters 55 rows with `useMemo`; it does not need the
+registry's data-table wrapper or a table library. Adding a component to this list is
+a deliberate decision, the same as adding a dependency.
 
-**htmx is the first thing to cut** if the dependency count needs to come down.
-Plain forms with redirects work everywhere; the cost is a full page render per
-change, which at this size is a few milliseconds.
+Rules for copied components:
+
+- Change them in place when the application needs different behaviour. They are
+  source, not a vendored package.
+- Screens compose components; components never import from screens, the world, or
+  the API.
 
 ---
 
 ## 5. Styling
 
-Tailwind v4, CSS-first config, with the neobrutalism tokens as the theme.
-
-```css
-/* src/app.css */
-@import "tailwindcss";
-
-@theme {
-  --color-bg:        #fdf6e3;
-  --color-surface:   #ffffff;
-  --color-ink:       #000000;
-  --color-accent:    #ff5c00;
-  --color-ok:        #4ade80;
-  --color-warn:      #facc15;
-  --color-danger:    #ef4444;
-
-  --radius-nb:       0px;
-  --border-nb:       3px;
-  --shadow-nb:       4px 4px 0 var(--color-ink);
-  --shadow-nb-lg:    6px 6px 0 var(--color-ink);
-}
-
-@layer components {
-  .nb-card {
-    @apply bg-[--color-surface] border-[length:--border-nb] border-[--color-ink]
-           rounded-[--radius-nb] p-4;
-    box-shadow: var(--shadow-nb);
-  }
-
-  .nb-btn {
-    @apply inline-flex items-center gap-2 px-4 py-2 font-bold
-           bg-[--color-accent] text-[--color-ink]
-           border-[length:--border-nb] border-[--color-ink]
-           rounded-[--radius-nb] cursor-pointer;
-    box-shadow: var(--shadow-nb);
-    transition: transform 80ms, box-shadow 80ms;
-  }
-  .nb-btn:hover  { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--color-ink); }
-  .nb-btn:active { transform: translate(4px, 4px); box-shadow: none; }
-
-  .nb-input {
-    @apply w-full px-3 py-2 bg-[--color-surface]
-           border-[length:--border-nb] border-[--color-ink] rounded-[--radius-nb];
-  }
-  .nb-input:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-nb);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nb-btn { transition: none; }
-}
-```
-
-The elements to hand-write, and that is the complete list: `nb-card`, `nb-btn`,
-`nb-input`, `nb-select`, `nb-checkbox`, `nb-radio`, `nb-badge`, `nb-table`. A
-dialog uses native `<dialog>` with the card treatment. A toast is a positioned
-card with a CSS animation.
+Tailwind v4 through its Vite plugin, with the palette and tokens written by the
+registry's `init` into `src/app/globals.css`. Screens use utility classes and the
+components' variants; there is no hand-written component CSS beyond what the
+registry installs.
 
 ### Quality floor
 
@@ -246,50 +190,29 @@ Non-negotiable regardless of the style:
   full stop.
 - **Never colour alone.** Every status that has a colour also has a glyph or a
   border treatment. On the board this is explicit; apply it everywhere.
-- **`prefers-reduced-motion` respected.** The press-down button transform is the
-  only motion in the application and it is an action response, which is the kind
-  worth keeping — but it still respects the preference.
+- **`prefers-reduced-motion` respected.** The press-down button transform is an
+  action response, which is the kind of motion worth keeping — but it still respects
+  the preference.
 - **Responsive to 360px.** The attendee view will be used on phones. The admin
   board will not, and does not need to be.
 
 ---
 
-## 6. The board island
+## 6. The board
 
-The only browser bundle. Vanilla TypeScript plus
-`@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB core, written in
-TypeScript, and the same toolchain behind Trello and Jira.
+A screen of the admin application like any other, with the most interaction.
+Drag and drop is `@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB
+core, attached to room cards and party chips from effects.
 
-### Server responsibility
-
-The board's HTML is server-rendered complete: every room card, every party chip,
-every glyph, with data attributes carrying the ids.
-
-```html
-<div class="nb-card board-room"
-     data-room-id="rm_0014"
-     data-free-places="2"
-     data-ensuite="1">
-  …
-</div>
-```
-
-If the script fails to load, the board is a read-only view of the plan that still
-renders correctly. That is worth having.
-
-### Client responsibility
-
-Roughly 400 lines of interaction, four concerns:
+### Responsibilities
 
 ```
 draggable()   party chips become draggable
 dropTarget()  room cards accept drops, with a canDrop predicate
 monitor()     global drag state → dim infeasible rooms, show penalty ghosts
-              → selection, keyboard handling, pending list, re-derive
+reducer       selection, keyboard handling, pending list
+world         derive(committed ++ pending), memoised
 ```
-
-Plus the shared derivation core, `src/derive/**` and `src/solver/**`, bundled
-unchanged from the Worker's copy.
 
 The feasibility predicate is the real one. `canDrop` asks `derive` what happens if
 this constraint is appended, so an infeasible room is dimmed because it is
@@ -299,22 +222,22 @@ rather than because a cheap approximation guessed so.
 ### Mutation cycle
 
 ```
-1. append the event to the pending list
+1. dispatch the event onto the pending list
 2. world = derive(committed ++ pending, config)
-3. render the board from world
+3. React renders the board from world
 4. if more than this party moved → flash them, show the summary
 ```
 
 No network, and no reconcile step, because there is nothing to reconcile: the world
 on screen was computed the same way the server would compute it.
 
-Applying is the only request the board makes after load:
+Applying is the only write the admin application makes:
 
 ```
-POST /admin/api/sandbox/apply
+POST /api/admin/apply
      { input_seq, events[], output_hash, config_hash, solver_version }
 
-  409 → the log moved; response carries the new events, board re-derives on them
+  409 → the log moved; response carries the new events, the application re-derives on them
   200 → applied; response carries the server's output_hash
 ```
 
@@ -323,9 +246,9 @@ that the world the admin acted on is the world it derived; the determinism contr
 ([room assignment](05-room-assignment.md) §1) says the two agree, so a mismatch is
 reported as a defect rather than smoothed over.
 
-A stale bundle must not derive at all. The page is served with the Worker's
+A stale bundle must not derive at all. The log response carries the Worker's
 `config_hash`, and a bundle whose profile hashes differently refuses to open the
-board and asks for a reload.
+admin application and asks for a reload.
 
 ---
 
@@ -334,53 +257,56 @@ board and asks for a reload.
 ```jsonc
 {
   "dependencies": {
-    "hono":                                  "^4.12",  // server + JSX + routing
-    "@hono/zod-validator":                   "^0.7",   // request validation middleware
-    "zod":                                   "^4",     // event schemas, form schemas
-    "drizzle-orm":                           "^0.44",  // typed queries over projections
-    "papaparse":                             "^5",     // CSV import; quoted commas
-    "@atlaskit/pragmatic-drag-and-drop":     "^1",     // board (browser)
-    "htmx.org":                              "^2"      // partial updates (browser)
+    "hono":                                  "^4.12",  // Worker routing for the JSON API
+    "zod":                                   "^4",     // event and request schemas, shared by client and Worker
+    "react":                                 "^19",
+    "react-dom":                             "^19",
+    "wouter":                                "^3",     // client routing
+    "papaparse":                             "^5",     // CSV import in the browser; quoted commas
+    "@atlaskit/pragmatic-drag-and-drop":     "^1"      // board
+    // plus the packages the shadcn CLI adds for the copied components
   },
   "devDependencies": {
-    "wrangler":                              "^4",
-    "esbuild":                               "^0.25",
-    "@tailwindcss/cli":                      "^4",
+    "vite":                                  "^7",
+    "@cloudflare/vite-plugin":               "^1",
+    "@vitejs/plugin-react":                  "^5",
+    "@tailwindcss/vite":                     "^4",
     "tailwindcss":                           "^4",
-    "drizzle-kit":                           "^0.31",
-    "npm-run-all2":                          "^8",
+    "wrangler":                              "^4",
     "typescript":                            "^5",
+    "@types/react":                          "^19",
+    "@types/react-dom":                      "^19",
     "@types/papaparse":                      "^5",
     "vitest":                                "^3",
     "@cloudflare/vitest-pool-workers":       "^0",
-    "tsx":                                    "^4"
+    "tsx":                                   "^4"      // runs scripts/tune.ts under Node
   }
 }
 ```
 
-Versions are indicative. Let npm resolve and commit the lockfile. This design adds no
-runtime dependencies: the active profile is code in the repo and both handlers are
-code. `tsx` is added to devDependencies for the tune script.
+Versions are indicative. Let npm resolve and commit the lockfile. The packages the
+shadcn CLI adds for copied components — Base UI and its small styling helpers — are
+reviewed when a component is added, like any other dependency.
 
 **The derivation core has zero dependencies.** `src/derive/**` and `src/solver/**`
-import only from themselves and from TypeScript's standard library. That is deliberate: the most important
-code in the project should be readable without knowing any framework, and
-auditable by someone who does not know this stack. It imports `src/config/**`,
-which is also dependency-free —
-"imports only from itself" to "imports only from itself and the occasion config,
-both of which are dependency-free".
+import only from themselves, from `src/config/**`, and from TypeScript's standard
+library; `src/config/**` is dependency-free as well. That is deliberate: the most
+important code in the project should be readable without knowing any framework, and
+auditable by someone who does not know this stack. React never reaches into it.
 
 **Deliberately absent:**
 
 | Not used | Because |
 |---|---|
-| React, Vue, Svelte | Seven form controls and one island |
-| Base UI, Radix, shadcn | React-only; see §1 |
-| Vite, any bundler plugin | Wrangler and esbuild are enough |
+| Server-rendered HTML templates | One rendering model; the world is derived in the browser anyway |
+| htmx or other partial-update libraries | React owns updates; requests return JSON |
+| A meta-framework (Next.js, Remix, TanStack Start) | No server rendering to organise; the Worker is an API |
 | A state manager | The state is a list of events and a pure function over it |
-| tRPC | Hono's RPC client exists if ever needed |
-| Prisma | Heavier than Drizzle on Workers, no gain on SQLite |
+| A data-fetching library | Three admin requests and two portal requests |
+| A table library | 55 rows, sorted and filtered in `useMemo` |
+| tRPC | Shared zod schemas type both ends |
+| An ORM | Only the event log and operational tables are stored; see [data model](02-data-model.md) |
 | An auth library | See [authentication](11-authentication.md) |
 | A solver or LP library | Reviewability beats optimality here |
 | A date library | One function, `ageAt()`, over ISO strings |
-| A CSS-in-JS library | Tailwind and sixty lines of tokens |
+| A CSS-in-JS library | Tailwind and the registry's tokens |

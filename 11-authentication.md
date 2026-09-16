@@ -32,8 +32,10 @@ The relevant lesson is not "the library is bad" but that **the vulnerability
 class lives in the interaction between registration and passwordless sign-in**,
 and removing registration removes the class.
 
-If you do use the library instead: pin `>= 1.6.22`, disable email/password
-entirely, and keep registration closed.
+Adopting the library would mean revising D10 and D2 in [decisions](17-decisions.md):
+it stores its own user and session tables beside the event log. If that revision is
+ever accepted, pin `>= 1.6.22`, disable email/password entirely, and keep
+registration closed.
 
 ---
 
@@ -41,14 +43,14 @@ entirely, and keep registration closed.
 
 ```
 ┌── request ──────────────────────────────────────────────────┐
-│ POST /login { email }                                       │
+│ POST /api/login { email }                                   │
 │   rate-limit check                                          │
-│   look up family by email (COLLATE NOCASE)                  │
+│   resolve email: admin allowlist, or family in derive(log)  │
 │   if found:                                                 │
 │     token = base64url(crypto.getRandomValues(32 bytes))     │
-│     INSERT magic_link (sha256(token), principal_id, now+15min) │
+│     INSERT magic_link (sha256(token), email, now+15min)     │
 │     send email containing https://…/auth/{token}            │
-│   ALWAYS return the same 200 page                           │
+│   ALWAYS return the same 200 response                       │
 └─────────────────────────────────────────────────────────────┘
 
 ┌── redeem ───────────────────────────────────────────────────┐
@@ -56,10 +58,10 @@ entirely, and keep registration closed.
 │   DELETE FROM magic_link                                    │
 │     WHERE token_hash = sha256(:token)                       │
 │       AND expires_at > now                                  │
-│     RETURNING principal_id                                  │
-│   if no row → generic "link expired or already used" page   │
+│     RETURNING email                                         │
+│   if no row → 302 to the "link expired or used" screen      │
 │   session = base64url(32 random bytes)                      │
-│   INSERT session (sha256(session), principal_id, now+30d)   │
+│   INSERT session (sha256(session), email, now+30d)          │
 │   Set-Cookie; 302 to /                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -69,7 +71,7 @@ entirely, and keep registration closed.
 ```sql
 DELETE FROM magic_link
  WHERE token_hash = ?1 AND expires_at > ?2
- RETURNING principal_id;
+ RETURNING email;
 ```
 
 One statement. Atomic in SQLite. Returns a row exactly once, ever.
@@ -98,7 +100,7 @@ Admin authorization is checked against the verified login email and allowlist on
 every admin request. The special URL is routing, not a credential; knowing it
 never grants access.
 
-Follow all of these or use the library instead. Each has a failure mode that is
+Follow all of these. Each has a failure mode that is
 not obvious from reading the happy path.
 
 **1 — Tokens are single-use, by deletion, in one statement.**
@@ -113,8 +115,8 @@ Not `Math.random`, not a UUID, not a timestamp with a suffix. 256 bits of
 entropy makes guessing irrelevant, which is what lets the rest of the design be
 simple.
 
-**4 — `POST /login` responds identically whether or not the address exists.**
-Same status, same page, same timing envelope. This is an invite-only application
+**4 — `POST /api/login` responds identically whether or not the address exists.**
+Same status, same body, same timing envelope. This is an invite-only application
 for a private event; whether an address is on the guest list is not public
 information.
 
@@ -130,9 +132,10 @@ navigation from an email client, and `Strict` would drop the cookie on arrival.
 **7 — Sessions are stored hashed too.**
 A read-only database leak should not yield usable sessions.
 
-**8 — Changing a family's email destroys its sessions.**
-`FamilyEmailChanged` deletes every row in `session` for that family. Otherwise
-the old address retains access indefinitely.
+**8 — Sessions name an address, and the address is resolved per request.**
+A session stores the verified email, never a family id. After
+`FamilyEmailChanged` the old address resolves to no family, so its sessions stop
+granting access on the next request. There is no session cleanup to forget.
 
 **9 — Nothing about authentication enters the event log.**
 No tokens, no hashes, no session ids, not even `LoginSucceeded`. The event log is
@@ -147,31 +150,35 @@ requires a deploy for now, and the lookup uses the verified session identity.
 ## 4. Sessions
 
 ```ts
-async function currentFamily(c: Context): Promise<Family | null> {
+async function currentPrincipal(c: Context): Promise<Principal | null> {
   const raw = getCookie(c, 'sid')
   if (!raw) return null
 
-  const hash = await sha256(raw)
   const row = await c.env.DB.prepare(
-    `SELECT f.* FROM session s
-       JOIN principal p ON p.id = s.principal_id
-      WHERE s.token_hash = ?1 AND s.expires_at > ?2`
-  ).bind(hash, nowIso()).first<Family>()
+    `SELECT email FROM session WHERE token_hash = ?1 AND expires_at > ?2`
+  ).bind(await sha256(raw), nowIso()).first<{ email: string }>()
+  if (!row) return null
 
-  return row ?? null
+  if (isAllowlistedAdmin(row.email)) return { kind: 'admin', email: row.email }
+  const family = familyByEmail(await worldAtHead(c.env.DB), row.email)
+  return family ? { kind: 'family', email: row.email, family } : null
 }
 ```
 
-Two middlewares, used as route guards:
+Two middlewares, used as API route guards:
 
 ```ts
-const requireFamily = async (c, next) => { … }   // 302 to /login
+const requireFamily = async (c, next) => { … }   // 401; the application shows the login screen
 const requireAdmin  = async (c, next) => { … }   // 404, not 403
 ```
 
-**Admin routes return 404, not 403.** A logged-in non-admin family probing
-`/admin` should not learn that the route exists. There is no legitimate reason a
+**Admin API routes return 404, not 403.** A logged-in non-admin family probing
+`/api/admin` should not learn that the routes exist. There is no legitimate reason a
 family would land there, so there is no usability cost to the lie.
+
+The admin application's code is a static asset, like any frontend bundle, and
+anyone can download it. It contains no data. Everything it shows arrives through
+`/api/admin/*`, which checks the allowlist on every request.
 
 Sessions last 30 days for families — long enough to cover a six-week run-up with
 one login — and 7 days for admins, refreshed on use. Admins log in weekly anyway;
@@ -191,10 +198,10 @@ Honest about what this defends against and what it does not.
 | Database read leak | Tokens and sessions stored hashed |
 | Session theft via XSS | `HttpOnly`; plus no user-generated HTML is ever rendered unescaped |
 | CSRF | `SameSite=Lax` plus origin checking on every mutating request |
-| Address enumeration | Uniform response on `/login` |
+| Address enumeration | Uniform response on `/api/login` |
 | Login-endpoint abuse as a spam relay | Rate limits on address and IP |
 | Timing attacks on token comparison | No comparison exists; lookup is by hash |
-| Admin privilege escalation | Flag read from the database per request |
+| Admin privilege escalation | Allowlist checked against the verified address per request |
 | **Shared mailbox access** | **Not handled — see below** |
 | **Forwarded magic link within 15 minutes** | **Not handled — see below** |
 

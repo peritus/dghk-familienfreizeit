@@ -11,14 +11,13 @@ Durable Objects.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dghk-familienfreizeit",
-  "main": "src/index.ts",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
 
   "assets": {
-    "directory": "./public",
-    "binding": "ASSETS",
-    "not_found_handling": "none"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/auth/*"]
   },
 
   "d1_databases": [
@@ -53,32 +52,39 @@ Durable Objects.
 }
 ```
 
-`not_found_handling: "none"` matters. The SPA fallback modes intercept navigation
-requests *before* the Worker runs, which would break the magic-link redemption
-route — a top-level navigation to `/auth/:token` that never reaches the handler.
-This application server-renders every route, so static assets should 404 through
-to the Worker and let the router decide.
+`run_worker_first` matters. The single-page-application fallback answers
+navigation requests with `index.html` *before* the Worker runs, which is what the
+React router needs for `/admin/board` and every other client route. It would also
+swallow the magic-link redemption — a top-level navigation to `/auth/:token` — and
+any API call made by navigation. Listing `/api/*` and `/auth/*` sends those to the
+Worker first; everything else is the application.
+
+The Cloudflare Vite plugin reads this file, builds the Worker and the application
+together, and writes the deployable configuration into the build output, so
+`wrangler deploy` runs after `vite build`.
 
 `EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
 occasion profile ([occasion profiles](16-event-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
-### The board bundle
+### The application bundles
 
-The board bundle carries `src/derive/**`, `src/solver/**`, and the active profile
-alongside the interaction code, because the board derives locally
-([frontend](12-frontend.md) §6). All of it is dependency-free TypeScript and
-minifies accordingly.
+The build produces an entry chunk for login and the attendee view, and a lazy admin
+chunk. The admin chunk carries `src/derive/**`, `src/solver/**`, and the active
+profile alongside the admin screens, because the admin application derives locally
+([frontend](12-frontend.md) §3). The derivation core is dependency-free TypeScript
+and minifies accordingly.
 
 Two rules keep that honest:
 
-- **A size budget, checked in CI.** The build fails if the bundle exceeds it. The
-  budget exists so that growth is a decision rather than a drift; raise it
-  deliberately when there is a reason.
-- **The profile hash travels with the page.** The board is served the Worker's
-  `config_hash` and refuses to derive if its own bundled profile hashes
-  differently. A deploy that updates the Worker while a browser holds yesterday's
+- **A size budget per chunk, checked in CI.** The build fails if the portal entry
+  or the admin chunk exceeds its budget, and if the portal entry ever contains
+  solver code. The budget exists so that growth is a decision rather than a drift;
+  raise it deliberately when there is a reason.
+- **The profile hash travels with the log.** The admin log response carries the
+  Worker's `config_hash`, and the admin application refuses to derive if its own
+  bundled profile hashes differently. A deploy that updates the Worker while a browser holds yesterday's
   bundle then produces a reload prompt rather than a plan computed against the
   wrong vocabulary.
 
@@ -86,29 +92,14 @@ Two rules keep that honest:
 
 ## 2. Migrations
 
-Drizzle generates, Wrangler applies.
+Hand-written SQL, applied by Wrangler. The schema is the `event` table and the
+operational tables in [data model](02-data-model.md); nothing else is stored, so
+there is no ORM and no schema generator.
 
 ```bash
-npm run db:generate                             # drizzle-kit → migrations/*.sql
+npx wrangler d1 migrations create dghk-familienfreizeit <name>   # migrations/NNNN_<name>.sql
 npx wrangler d1 migrations apply dghk-familienfreizeit --local
 npx wrangler d1 migrations apply dghk-familienfreizeit --remote
-```
-
-```ts
-// drizzle.config.ts
-import { defineConfig } from 'drizzle-kit'
-
-export default defineConfig({
-  schema: './src/db/schema.ts',
-  out: './migrations',
-  dialect: 'sqlite',
-  driver: 'd1-http',
-  dbCredentials: {
-    accountId:  process.env.CLOUDFLARE_ACCOUNT_ID!,
-    databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
-    token:      process.env.CLOUDFLARE_D1_TOKEN!,
-  },
-})
 ```
 
 ### Rules
@@ -120,18 +111,12 @@ export default defineConfig({
 on a live event database is not a thing anyone will do correctly under pressure;
 the recovery path is a restore, covered in §6.
 
-**Drizzle's schema covers projections only.** The `event` table is created by a
-hand-written migration and queried with raw SQL. It has one writer and two
-readers and does not benefit from an ORM.
+**Never edit a migration after applying it anywhere.** Add a new one.
 
-**Never edit a generated migration after applying it anywhere.** Add a new one.
-
-**The `label` migration** drops the four preference tables and pin projection it
-is handled in the same migration. No data migration is needed if this lands
-before real preferences are collected. If it lands after, write a one-off
-script that reads old projections or legacy events and emits `LabelSet` events — do not insert
-into `label` directly, because the projection is rebuilt from the log
-and a direct insert is undone on the next rebuild.
+**Domain model changes are not migrations.** A new label key, entity kind, or
+constraint operator changes the fold and the profile, not the database. If old
+events stop parsing, write a one-off script that reads the log and appends
+corrective events through the ordinary append. Never edit event rows.
 
 ---
 
@@ -284,9 +269,9 @@ wrangler d1 export dghk-familienfreizeit --remote --output=backup-$(date +%F).sq
 Put it somewhere that is not Cloudflare. Run it before every migration and before
 every publication.
 
-**The event log is the real backup.** Every projection, every plan, every
-assignment is derivable from `event`. If everything else is lost but the event
-table survives, the application rebuilds completely. Weekly:
+**The event log is the real backup.** Every read model, every plan, every
+assignment is derived from `event`. If everything else is lost but the event
+table survives, only sessions are gone, and families log in again. Weekly:
 
 ```bash
 wrangler d1 execute dghk-familienfreizeit --remote --json \
@@ -324,6 +309,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm run build
       - run: npx wrangler d1 migrations apply dghk-familienfreizeit --remote
       - run: npx wrangler deploy
         env:
@@ -385,10 +371,12 @@ plan to have printed the right thing.
 
 | | |
 |---|---|
-| Workers | Free tier covers it several times over |
-| D1 | Free tier; the database is a few megabytes |
+| Workers | Workers Paid, about $5 a month — the CPU allowance per request ([decisions](17-decisions.md) D1) |
+| D1 | Included in the Workers Paid allowance; the database is a few megabytes |
 | Resend | Free tier: ~200 emails covers invitations, reminders and changes |
 | Domain | Whatever you already pay |
 
-Realistically zero. The Workers Paid plan becomes relevant only if you switch to
-Cloudflare Email Sending for arbitrary recipients.
+About five dollars a month. The Paid plan is chosen for CPU time, not traffic: every
+portal and dashboard request derives the plan ([decisions](17-decisions.md) D1). It
+also makes Cloudflare Email Sending to arbitrary recipients available, should that
+replace Resend.

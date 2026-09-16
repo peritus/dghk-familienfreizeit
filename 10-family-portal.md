@@ -12,6 +12,11 @@ which settles the largest privacy question structurally: an attendee's view is
 computed from the events before the latest publication, so unpublished work is not
 hidden from them, it is simply not in the list they derive from.
 
+The Worker performs that derivation and returns only the signed-in family's view
+(`GET /api/family/view`), filtered by the boundaries in §2. The event log never
+reaches a family's browser, and the portal bundle contains neither the solver nor
+the admin screens.
+
 ---
 
 ## 1. Two states
@@ -197,11 +202,11 @@ emits a `LabelSet` (or `LabelCleared`) and shows an inline confirmation:
 not find a save button at the bottom of a long page, and losing their input
 once means they will not come back.
 
-**Progressive enhancement throughout.** Every control is inside a real `<form>`
-that works with JavaScript disabled, posting and redirecting. htmx intercepts to
-swap fragments in place. This is not principle for its own sake — it is the
-cheapest way to be sure the form works on whatever ancient Android tablet
-someone uses.
+**One request per change, and the response is the truth.** Each control posts its
+label event as it changes and renders the confirmation from the response. A failed
+save returns the control to its stored state and says so in plain words; nothing is
+queued in the browser, so what a family sees is what was saved. Keep the portal
+bundle small and test it on an old, slow phone — that is the device it will meet.
 
 **Age is computed and shown.** "Jonas (9)" uses the age at the event date, not
 today. If a child turns 9 the week before, they are shown as 9 throughout, which
