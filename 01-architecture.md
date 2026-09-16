@@ -176,16 +176,16 @@ None of that applies here. Concretely:
 At that size, `SELECT * FROM event ORDER BY seq` and a fold in memory is a
 sub-millisecond operation. So:
 
-**Projections are never updated incrementally. They are dropped and rebuilt.**
+**Projections are never stored. They are folded from the log on every read.**
 
 This removes the single largest source of bugs in event-sourced systems. A
-projection cannot drift from the log, because it is never older than the last
-rebuild. If you suspect a projection is wrong, you delete it. There is no repair
-procedure because there is nothing to repair.
+projection cannot drift from the log, because there is no stored copy to drift.
+There is no rebuild step that can fail after an append, no two rebuilds racing each
+other, and no repair procedure, because there is nothing to repair.
 
-**There is no eventual consistency.** A command appends an event and then, in the
-same request, rebuilds the projections it affects and returns the new state.
-The user sees their write immediately. The asynchrony that usually forces
+**There is no eventual consistency.** A command appends its events and the
+response is derived from the log that includes them. The user sees their write
+immediately. The asynchrony that usually forces
 "your change may take a moment to appear" copy simply does not exist.
 
 The same arithmetic is why the board can derive at all. Two to four thousand
@@ -194,8 +194,8 @@ once when the board loads. An admin tool on a laptop can hold the entire history
 the event in memory and fold it on every drag without noticing.
 
 If the event count ever approaches five figures — it will not, but if — the
-change is to cache the folded projection in a KV namespace keyed by `max(seq)`.
-That is a ten-line change. Do not pre-build it.
+change is to memoise the fold in the Worker isolate, keyed by `max(seq)`. That is
+a ten-line change and still stores nothing. Do not pre-build it.
 
 ## Request lifecycle
 
@@ -203,16 +203,18 @@ Every mutating request follows the same five steps. Deviating from this shape is
 how the architecture rots.
 
 ```
-1. AUTHENTICATE   resolve session cookie → family, or reject
-2. VALIDATE       zod-parse the body; reject with field errors on failure
-3. AUTHORISE      may this family emit this event about this subject?
-4. APPEND         INSERT INTO event (...) — a single statement, no transaction
-5. PROJECT        rebuild affected projections; return fresh HTML
+1. AUTHENTICATE   session cookie → verified email → admin (allowlist) or family (derived), or reject
+2. VALIDATE       zod-parse the body, then check invariants against derive(log at head)
+3. AUTHORISE      may this principal emit these events about these subjects?
+4. APPEND         one batch(), seq = head + 1, head + 2, …
+5. RESPOND        derive from the log including the new events; return the result
 ```
 
-Step 4 is one statement on purpose. D1 has no interactive transactions, so any
-write path that needs more than one statement to be atomic is a design smell.
-Appending to a log never does.
+Step 4 is one `batch()` on purpose. D1 has no interactive transactions, but a batch
+is atomic, and assigning `seq` from the head step 2 derived turns the primary key
+into a compare-and-swap: if the log moved in between, the batch collides and
+nothing is written, so the invariants step 2 checked still hold for what lands. A
+write path that needs anything beyond appending events is a design smell.
 
 ### Authorisation rules
 
@@ -230,12 +232,15 @@ for another family.
 
 ## Read models
 
-One kind. `entity`, `label`, `constraint_definition`, and query indexes.
+None are stored. `World` is the read model: typed entities, labels, constraint
+definitions, the plan, and its diagnostics, built in memory by `derive` for the
+events the reader may see. Stable URLs, authentication lookup, and every screen
+read it the same way.
 
-These are `fold`'s output, persisted. They exist for stable URLs, authentication
-lookup, and query shape — not for derivation, which folds in memory and never
-reads them. Never written to directly outside the projector. If you find an
-`UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
+The database holds the event log and operational tables
+([data model](02-data-model.md) §6), nothing else. If you find a table holding
+families, rooms, or labels, or a query that reads event payloads to answer a domain
+question, it is a bug.
 
 Plans are derived rather than maintained as authoritative state. Every screen derives
 the plan from the events it is allowed to see, and `derive` validates assignment
@@ -320,11 +325,8 @@ src/
     append.ts             the only place that INSERTs into event
   derive/
     index.ts              derive(events, config) — pure
-    fold.ts               events → projections — pure, no I/O
+    fold.ts               events → entities, labels, definitions — pure, no I/O
     diff.ts               diff(world, world) → Change[] — pure
-  project/
-    index.ts              rebuild(db) = persist(db, fold(readEvents(db)))
-    entities.ts  labels.ts  constraints.ts  workshops.ts
   modules/
     <module>/             generic contract, implementation, views, and tests
   config/
@@ -348,8 +350,8 @@ src/
   client/
     board.ts              the one browser bundle
   db/
-    schema.ts             drizzle schema for projections
-    raw.ts                hand-written SQL for the event log
+    events.ts             read the log; the seq-guarded batch insert
+    operational.ts        sessions, magic links, rate limits, email log
   lib/
     auth.ts  email.ts  csv.ts  dates.ts
 events/
@@ -358,7 +360,7 @@ scripts/
   tune.ts                 offline weight sweep, Node not Worker
 ```
 
-Four boundaries are load-bearing and should be enforced in review:
+Three boundaries are load-bearing and should be enforced in review:
 
 - **`src/solver/**` imports nothing from `src/db`, `src/routes`, or `src/lib`.**
   It is pure TypeScript over plain data. It may import selected module contracts
@@ -368,8 +370,6 @@ Four boundaries are load-bearing and should be enforced in review:
   the routes, by the solver's callers, and by the browser bundle, so a stray
   import of `src/db` there would take the database with it into the client.
 - **Only `src/events/append.ts` writes to `event`.**
-- **Only `src/project/**` writes to projection tables.** `src/derive/fold.ts`
-  computes them; nothing outside `src/project/**` persists them.
 
-An ESLint `no-restricted-imports` rule covers the first two. The other two are a
+An ESLint `no-restricted-imports` rule covers the first two. The third is a
 code review habit, and a grep in CI if you want the belt as well as the braces.

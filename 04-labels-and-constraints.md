@@ -60,54 +60,52 @@ clears the label.
 
 ---
 
-## 2. Storage
+## 2. Representation
 
-One generic projection stores properties and constraints for every typed entity.
-The entity tables remain useful identity registries; this table owns their
-domain attributes and relationships. Its schema is defined once, in
-[data model](02-data-model.md) §3, as the shape the fold produces.
+Labels are never stored as rows of their own. The fold produces one generic label
+collection holding properties and constraints for every typed entity. Typed
+entities stay identity only; labels own their domain attributes and
+relationships. The shape is defined once, in [data model](02-data-model.md) §3.
 
 Three details of that shape are not arbitrary.
 
 **The value is non-null.** Every label has a canonical scalar or entity-id
-value, so the generic projection has one unambiguous key.
+value, so a label has one unambiguous key.
 
 **The reference lives in the value, not in the key.** `needs=family_27` is
 the mental model and the label an admin sees. The resolver indexes the key and
-value without requiring a foreign key in the label projection.
+value without requiring a foreign key.
 
 **The lifetime is a pair of sequence numbers, not a timestamp and an actor.**
-The event that produced a row already carries `at` and `actor`, and sequence
+The event that produced a label already carries `at` and `actor`, and sequence
 bounds are what let the same fold run to an earlier point in the log.
 
 **Keys carry no foreign key.** Built-in definitions are code and custom
 definitions are events. Validity is enforced on append and replay by the
 resolver schema.
 
-### Matching is a resolver join
+### Matching is a resolver lookup
 
-```sql
-SELECT need.entity_id, provide.entity_id
-FROM label need
-JOIN label provide
-  ON provide.key = 'provides'
- AND provide.value = need.value
-WHERE need.key = 'needs'
-  AND need.strength IN ('required', 'preferred');
+```ts
+const providers = world.labels.byKeyValue('provides')     // value → entity ids
+const matches = world.labels
+  .live('needs')
+  .filter(need => need.strength !== null)
+  .flatMap(need => (providers.get(need.value) ?? []).map(p => [need.entity_id, p]))
 ```
 
-The SQL illustrates the shape only; the constraint resolver owns scope checks,
+The code illustrates the shape only; the constraint resolver owns scope checks,
 party formation, symmetry, and diagnostics.
 
 ### What stays typed
 
-The typed tables stay, but only as identity registries. All domain properties
+Typed entities stay, but only as identity. All domain properties
 are labels, including names, dates, booleans, enums, quantities, capabilities,
 and relationships. The resolver interprets labels according to event config.
 
-The only non-label domain-shaped projections are solver outputs such as plan
-assignments, whose indexes assert that the resolver did not double-book an
-entity. They are not authoritative inputs.
+The only non-label domain-shaped values are solver outputs such as plan
+assignments. `derive` asserts that the resolver did not double-book an entity
+before it returns a world. They are not authoritative inputs.
 
 ---
 
@@ -161,7 +159,7 @@ enum derived from the same object makes a bad tag from a *request* a validation
 error. There is no path by which an unknown tag enters the log.
 
 Tags removed from the profile mid-run are the one remaining case, handled as
-preflight C7 (§6): the projection retains them, the solver ignores them, the
+preflight C7 (§6): the fold retains them, the solver ignores them, the
 report names them.
 
 ### Authorisation
@@ -340,7 +338,7 @@ checks that no two ranks collide for one person and slot.
 Workshop rankings remain ordered values, represented by the `ordered-choice`
 constraint operator.
 
-All workshop properties use the label projection:
+All workshop properties are labels:
 
 | Fact about a workshop | Mechanism |
 |---|---|

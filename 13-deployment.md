@@ -86,29 +86,14 @@ Two rules keep that honest:
 
 ## 2. Migrations
 
-Drizzle generates, Wrangler applies.
+Hand-written SQL, applied by Wrangler. The schema is the `event` table and the
+operational tables in [data model](02-data-model.md); nothing else is stored, so
+there is no ORM and no schema generator.
 
 ```bash
-npm run db:generate                             # drizzle-kit → migrations/*.sql
+npx wrangler d1 migrations create dghk-familienfreizeit <name>   # migrations/NNNN_<name>.sql
 npx wrangler d1 migrations apply dghk-familienfreizeit --local
 npx wrangler d1 migrations apply dghk-familienfreizeit --remote
-```
-
-```ts
-// drizzle.config.ts
-import { defineConfig } from 'drizzle-kit'
-
-export default defineConfig({
-  schema: './src/db/schema.ts',
-  out: './migrations',
-  dialect: 'sqlite',
-  driver: 'd1-http',
-  dbCredentials: {
-    accountId:  process.env.CLOUDFLARE_ACCOUNT_ID!,
-    databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
-    token:      process.env.CLOUDFLARE_D1_TOKEN!,
-  },
-})
 ```
 
 ### Rules
@@ -120,18 +105,12 @@ export default defineConfig({
 on a live event database is not a thing anyone will do correctly under pressure;
 the recovery path is a restore, covered in §6.
 
-**Drizzle's schema covers projections only.** The `event` table is created by a
-hand-written migration and queried with raw SQL. It has one writer and two
-readers and does not benefit from an ORM.
+**Never edit a migration after applying it anywhere.** Add a new one.
 
-**Never edit a generated migration after applying it anywhere.** Add a new one.
-
-**The `label` migration** drops the four preference tables and pin projection it
-is handled in the same migration. No data migration is needed if this lands
-before real preferences are collected. If it lands after, write a one-off
-script that reads old projections or legacy events and emits `LabelSet` events — do not insert
-into `label` directly, because the projection is rebuilt from the log
-and a direct insert is undone on the next rebuild.
+**Domain model changes are not migrations.** A new label key, entity kind, or
+constraint operator changes the fold and the profile, not the database. If old
+events stop parsing, write a one-off script that reads the log and appends
+corrective events through the ordinary append. Never edit event rows.
 
 ---
 
@@ -284,9 +263,9 @@ wrangler d1 export dghk-familienfreizeit --remote --output=backup-$(date +%F).sq
 Put it somewhere that is not Cloudflare. Run it before every migration and before
 every publication.
 
-**The event log is the real backup.** Every projection, every plan, every
-assignment is derivable from `event`. If everything else is lost but the event
-table survives, the application rebuilds completely. Weekly:
+**The event log is the real backup.** Every read model, every plan, every
+assignment is derived from `event`. If everything else is lost but the event
+table survives, only sessions are gone, and families log in again. Weekly:
 
 ```bash
 wrangler d1 execute dghk-familienfreizeit --remote --json \

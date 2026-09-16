@@ -106,25 +106,32 @@ which were merely inherited.
 ### D1 — Cloudflare Workers + D1
 
 *Chosen.* The whole application is one Worker with one SQLite-backed database.
-At 150 attendees the data is perhaps 3,000 rows total. The interesting engineering
+At 150 attendees the event log is perhaps 3,000 rows. The interesting engineering
 is in the solver, not in scale.
 
 *Consequence:* D1 has no interactive transactions. Every mutation must be a
 single statement or a `batch()`. This shapes the write path throughout and is one
-reason the event log is append-only — appends never need a transaction.
+reason the event log is append-only: a batch whose `seq` values follow the head it
+derived from is its own compare-and-swap.
 
-### D2 — CQRS with full projection rebuilds
+### D2 — Event log with in-memory read models
 
-*Chosen.* An append-only event log is the source of truth. Read models are
-derived and disposable.
+*Chosen.* An append-only event log is the only stored domain state. Read models
+are folded in memory for every read and never persisted.
 
 *Rejected alternative:* direct mutation of state tables. It is simpler on day one
 and loses the audit trail, the replayability, and the ability to ask "what did the
 plan look like when we emailed everyone on the 14th".
 
-*Why it is cheap here:* the log will hold low thousands of rows. Projections
-rebuild from scratch in milliseconds, so none of the hard parts of CQRS —
-incremental projections, catch-up subscriptions, eventual consistency — apply.
+*Rejected alternative:* persisted projection tables rebuilt after each append. The
+rebuild is a second write that can fail after the append or race another request's
+rebuild, leaving tables that disagree with the log until someone notices. Derivation
+never reads them, so they would exist only for lookups the world already answers.
+
+*Why it is cheap here:* the log will hold low thousands of rows. Folding it from
+scratch takes milliseconds, so none of the hard parts of CQRS — incremental
+projections, catch-up subscriptions, eventual consistency, cache invalidation —
+apply.
 See [01-architecture](01-architecture.md).
 
 ### D3 — The solver is a pure function

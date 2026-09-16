@@ -50,12 +50,12 @@ deferred belongs after it.
 
 *Usable by an admin to enter data. Two days.*
 
-- Event table, append function, projector skeleton
+- Event table, the `seq`-guarded append, fold skeleton
 - `BuildingAdded`, `RoomAdded`, `BedAdded`, `RoomDesignationChanged`
 - Place generation from `bed.sleeps`
 - `FamilyInvited`, `PersonAdded` fixtures for solver development; family-facing
   onboarding is deferred
-- The generic `label` projection and a minimal built-in tag vocabulary (capabilities plus
+- Generic labels in the fold and a minimal built-in tag vocabulary (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
 - Admin inventory screens — plain tables
 - Magic-link authentication, sessions, rate limits, and the code-level admin allowlist
@@ -79,14 +79,14 @@ surprises in it, and they should surface now rather than in M2.
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain HTML rendering of it
-- `derive(events, config)` and `diff` — the fold lifted clear of the database
+- `derive(events, config)` and `diff` as the only read path
 - `PlanPublished` identifying the plan's `input_seq`, with the reviewed `output_hash`
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
 
 **Done when:** you can derive a plan from the real inventory and real families
-(with preferences entered by hand into the database) and read the trace top to
+(with preferences entered by hand as events) and read the trace top to
 bottom without confusion, and you can say whether the ensuite requests are
 satisfiable — preflight C8.
 
@@ -207,9 +207,9 @@ transport, parking, payments, and mobile-first administration.
 
 ## Sequencing rationale
 
-**Why derivation lands with the solver.** Lifting the fold clear of the database
-costs almost nothing while the projector is being written and is an awkward retrofit
-afterwards, and everything from M4 onward — the board's pending list, publication,
+**Why derivation lands with the solver.** Every read already goes through the
+fold, so making `derive` the solver's entry point costs almost nothing now and is an
+awkward retrofit afterwards, and everything from M4 onward — the board's pending list, publication,
 and constraint health — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
