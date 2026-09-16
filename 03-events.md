@@ -222,23 +222,8 @@ Defines a custom matching vocabulary. It contains no executable code; the fixed
 resolver implements the operators. Definitions and assignments remain ordinary
 event-log data.
 
-### `WorkshopPreferencesRanked`
-```ts
-{
-  person_id: string,
-  slot_id: string,
-  ranked_workshop_ids: string[]     // dense, ordered, best first
-}
-```
-Full restatement of that person's ranking for that slot. An empty array means
-"no preference", which is meaningfully different from never having submitted —
-the latter shows up in the admin's chase list.
-
-*Validation:* every id must belong to the named slot; no duplicates; length must
-not exceed the number of workshops in the slot.
-
-This stays typed rather than becoming a tag, deliberately (D13) — see
-[labels and constraints](04-labels-and-constraints.md) §7.
+Workshop rankings are `LabelSet` and `LabelCleared` events on `prefers-workshop`
+with structured values (D13); see [labels and constraints](04-labels-and-constraints.md) §7.
 
 ---
 

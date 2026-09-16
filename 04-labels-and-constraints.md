@@ -333,7 +333,20 @@ definition.
 The resolver validates the ordering constraint:
 
 The structured label value contains the slot, workshop, and rank. The resolver
-checks that no two ranks collide for one person and slot.
+checks that no two ranks collide for one person and slot, and that ranks for a slot
+are dense from 1.
+
+```text
+person:123  prefers-workshop={"slot":"slot_sat-morning","workshop":"ws_4","rank":1}
+person:123  prefers-workshop={"slot":"slot_sat-morning","workshop":"ws_2","rank":2}
+person:123  prefers-workshop={"slot":"slot_sat-afternoon","workshop":null,"rank":null}
+```
+
+A `workshop: null` value states "no preference" for that slot. It is meaningfully
+different from having no `prefers-workshop` label for the slot at all — the latter
+shows up in the admin's chase list — and `ordered-choice` rejects it alongside
+ranked values for the same slot. Re-ranking a slot clears its labels and sets the
+new ones in one append.
 
 Workshop rankings remain ordered values, represented by the `ordered-choice`
 constraint operator.
