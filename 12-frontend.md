@@ -39,6 +39,31 @@ The attendee view requires JavaScript. It is a small bundle that never contains 
 admin screens or the solver, loads on any browser released in the last several
 years, and saves on change through ordinary requests.
 
+### Development event-log debug view
+
+Development mode includes an explicitly non-production debug view for editing the
+KDL event log in a `Textarea`. It is an editor and inspection surface, not a new
+state model or a replacement for the admin application:
+
+```text
+KDL Textarea → parse → validate → Event[] → derive(events, config)
+                                      │
+                                      └→ world, plan, diagnostics, trace
+```
+
+The view shows parse and event-schema errors with file/line locations and updates
+the derived output only after the current text parses and validates. It may load
+from or export to the configured `TextFileEventSource`, so the same KDL parser,
+serializer, defaults, and validation rules apply to both the textarea and the
+file-backed source. Export/download is optional convenience; the authored KDL
+text remains the source for the experiment.
+
+The route and bundle are development-only. They are not included in production
+navigation, do not bypass authentication or authorization for production APIs,
+and cannot select a filesystem source in a production build. The view is intended
+to make a fixture immediately inspectable: edit a family, person, inventory item,
+or label and see the resolver, plan, diagnostics, and trace respond.
+
 ---
 
 ## 2. Build

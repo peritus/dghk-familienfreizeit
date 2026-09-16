@@ -70,8 +70,8 @@ views—does not belong in this table.
 ## 2. Development text representation
 
 The production event source is D1. Development and tests may instead load the
-same event model from a KDL text file through `TextFileEventSource`. [KDL](https://kdl.dev/spec/)
-is a standard node-oriented document language whose properties use `key=value`
+same event model from a KDL text file through `TextFileEventSource`. KDL is a
+standard node-oriented document language whose properties use `key=value`
 syntax. The project uses a deliberately small subset:
 
 ```kdl

@@ -9,6 +9,12 @@ The wireframes are ASCII plans, not pixel-perfect artwork. They establish
 information hierarchy, actions, states, and responsive behavior before React
 implementation begins.
 
+Development also provides a non-production KDL event-log debug view. It is not
+an admin or attendee surface and is intentionally absent from the route catalog
+below. It exposes the shared text fixture/source through a textarea, validates
+the text, and renders the ordinary derived world and solver trace for
+experimentation.
+
 ## Screen catalog
 
 | ID | Screen | Route or entry point |
