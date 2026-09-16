@@ -60,6 +60,8 @@ building on it.
 - Place generation from `bed.sleeps`
 - `FamilyInvited`, `PersonAdded` fixtures for solver development; attendee-facing
   onboarding is deferred
+- KDL event-log fixtures are the canonical authored inputs for development and
+  tests; the same parsed events seed D1 integration tests and local experiments
 - Generic labels in the fold and a minimal built-in tag vocabulary (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
 - Admin inventory screens — plain tables
@@ -68,6 +70,15 @@ building on it.
 **Done when:** the real hostel's rooms and beds are entered and an administrator
 can sign in. Do this with real inventory data as early as possible; it will have
 surprises in it, and they should surface now rather than in M2.
+
+### Development event-log sandbox
+
+Throughout M1–M8, development may select `TextFileEventSource` instead of
+`D1EventSource` with an explicit development-only configuration. The source reads
+the KDL event-log fixtures and the admin application can inspect the resulting
+derived world without requiring a populated D1 database. The same KDL loader is
+used by tests, so a scenario can move from a fixture to the UI without being
+translated into another data format.
 
 ---
 

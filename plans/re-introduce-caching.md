@@ -68,7 +68,8 @@ removed projection tables.
    - Only one module (`src/db/cache.ts`) reads or writes it.
    - A test asserts that a cache hit's `output_hash` equals a fresh derive's.
 3. **D1 revision is conditional on a measurement**, not an assumption:
-   - Add an M0/M2 task: benchmark in `workerd` against `events/…full-event.json`:
+   - Add an M0/M2 task: benchmark in `workerd` against
+     `test/fixtures/event-logs/full-event.kdl`:
      (a) fold at head, (b) cache-hit attendee view, (c) cold solve.
    - (a) and (b) within ~5 ms CPU → the free tier is viable for everything except a
      cold miss.
