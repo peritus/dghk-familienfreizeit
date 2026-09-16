@@ -21,7 +21,7 @@ immediately.
 
 ```ts
 test('solver output is invariant under input permutation', () => {
-  const base = loadSolverInput('fixtures/full-event.json')
+  const base = loadEventLog('test/fixtures/event-logs/full-event.kdl')
   const expected = sha256(canonical(solve(base, defaultConfig)))
 
   for (let seed = 0; seed < 50; seed++) {
@@ -60,7 +60,7 @@ that they cannot disagree.
 
 ```ts
 test('the browser bundle derives what the Worker derives', async () => {
-  const log = loadLog('fixtures/full-event.json')
+  const log = loadEventLog('test/fixtures/event-logs/full-event.kdl')
   const here  = sha256(canonical(derive(log, defaultConfig).plan))
   const there = await deriveInBundle(log)      // the built admin chunk, in a DOM env
   expect(there).toBe(here)
@@ -77,23 +77,44 @@ agree to, and that is worse than the board being slow.
 
 ---
 
-## 2. Golden plans
+## 2. Canonical KDL event fixtures
+
+Authored event-log inputs use KDL, the project’s restricted command-oriented
+profile described in [the event model](03-events.md). There is one shared
+`loadEventLog(path)` loader. It parses KDL, validates the event payloads and
+replay invariants, and returns the same `Event[]` used by production derivation.
+
+Every event-driven test uses this loader, including fold and solver tests,
+constraint-health fixtures, API tests, D1 integration tests, and the
+browser/Worker agreement test. D1 tests seed their database from the parsed KDL
+events; they do not maintain a second JSON fixture for the same log.
+
+The canonical fixture tree is:
+
+```text
+test/fixtures/event-logs/
+  minimal.kdl            6 families, 4 rooms — readable by hand
+  full-event.kdl         55 families, 40 rooms — realistic
+  tight.kdl              capacity == demand exactly
+  oversubscribed.kdl     demand > capacity; things must be unplaced
+  fragmented.kdl         many children opted in; many size-1 parties
+  conflicted.kdl         constraints that span parties after a change
+  constraint-heavy.kdl   many relations, several merge cascades
+  infeasible.kdl         trips preflight C8
+```
+
+The parser reports file and line locations, rejects duplicate properties, and
+uses deterministic envelope defaults unless a fixture supplies historical
+metadata explicitly. JSON remains valid for API messages, serialized rows,
+canonical hashes, and derived results, but authored event-log JSON must not be
+maintained alongside KDL. If a boundary requires JSON, generate it from the
+parsed KDL events in the test rather than adding a parallel fixture.
+
+## 3. Golden plans
 
 Fixture event logs with their expected output hashes, checked on every change.
 Each case is `derive(log, config)`, so a golden test exercises the fold, the
 solver input builder, and the solver together rather than the solver alone.
-
-```
-test/fixtures/solver-inputs/
-  minimal.json            6 families, 4 rooms — readable by hand
-  full-event.json         55 families, 40 rooms — realistic
-  tight.json              capacity == demand exactly
-  oversubscribed.json     demand > capacity; things must be unplaced
-  fragmented.json         many children opted in; many size-1 parties
-  conflicted.json         constraints that span parties after a change
-  constraint-heavy.json   many relations, several merge cascades
-  infeasible.json         trips preflight C8
-```
 
 Golden fixtures must record the profile they were recorded against, since a
 profile change legitimately changes output. Store `config_hash` alongside
@@ -131,7 +152,7 @@ committed so the change shows up in the pull request.
 
 ---
 
-## 3. Property tests
+## 4. Property tests
 
 Invariants that must hold for every plan from every solver input. These are the
 assertions that catch bugs the golden fixtures happen not to exercise.
@@ -206,7 +227,7 @@ capacity exactly equal to demand, capacity one short.
 
 ---
 
-## 4. The constraint regression corpus
+## 5. The constraint regression corpus
 
 From [constraint health](08-constraint-health.md) §5. Every active or
 cleared custom constraint can be a test case authored by a domain expert. It is the
@@ -218,7 +239,7 @@ describe('constraint corpus', () => {
 
   describe('cleared constraints must remain represented by resolver rules', () => {
     test.each(constraints.filter(c => c.clearedAt))('$description', (c) => {
-      const log = loadLog(c.seq)
+  const log = loadEventLog(c.seq)
       const { plan } = derive(without(log, c), defaultConfig)
       expect(satisfies(plan, c)).toBe(true)
     })
@@ -226,7 +247,7 @@ describe('constraint corpus', () => {
 
   describe('active constraints — informational health checks', () => {
     test.each(constraints.filter(c => !c.clearedAt))('$description', (c) => {
-      const log = loadLog(c.seq)
+  const log = loadEventLog(c.seq)
       const { plan } = derive(without(log, c), defaultConfig)
       if (satisfies(plan, c)) {
         console.log(`✨ now satisfied without custom constraint: ${c.description}`)
@@ -269,7 +290,7 @@ verbatim, since it is the one an organiser acts on.
 
 ---
 
-## 5. Lint rules as tests
+## 6. Lint rules as tests
 
 Some parts of the determinism contract are better enforced statically.
 
@@ -314,7 +335,7 @@ the most likely way the contract degrades over six weeks of changes.
 
 ---
 
-## 6. Integration tests
+## 7. Integration tests
 
 Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
@@ -358,7 +379,7 @@ Also covered:
 
 ---
 
-## 7. What is not tested
+## 8. What is not tested
 
 Recorded so the gaps are deliberate.
 
@@ -375,9 +396,9 @@ Recorded so the gaps are deliberate.
 
 ---
 
-## 8. Fixtures as documentation
+## 9. Fixtures as documentation
 
-`test/fixtures/solver-inputs/minimal.json` should be readable and hand-checkable: six
+`test/fixtures/event-logs/minimal.kdl` should be readable and hand-checkable: six
 families, four rooms, one children's room, one mutual co-room request, one
 `prefer_not`. Small enough that a person can work out the right answer with a
 pencil and verify the solver agrees.
