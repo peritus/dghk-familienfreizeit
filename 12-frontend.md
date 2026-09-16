@@ -1,5 +1,7 @@
 # 11 — Frontend
 
+The planned surfaces are indexed in the [UI screen catalog](ui/README.md).
+
 One React application for every screen, built from copied neobrutalism
 components, talking to a small JSON API.
 

@@ -1,5 +1,8 @@
 # 10 — Authentication
 
+The UI plans are [request login link](ui/01-login.md) and [invalid or expired
+link](ui/02-login-link-invalid.md).
+
 Magic link, no passwords, invite-only. One login per family. Admin access is a
 code-level allowlist of verified email addresses, exposed through a separate
 admin URL and UI.

@@ -1,5 +1,9 @@
 # 09 — Attendee view
 
+The screen plans are [attendee preferences](ui/03-attendee-preferences.md) and
+[published attendee assignment](ui/04-attendee-assignment.md). They are
+English planning examples; attendee copy follows [the translation guidelines](18-german-translation-guidelines.md).
+
 One email per family. One login. One page before publication, a different page
 after.
 
