@@ -35,10 +35,10 @@ deferred belongs after it.
 
 *Nothing usable yet. Half a day.*
 
-- `npm create hono@latest`, strip to the Cloudflare Workers target
+- Vite, React, and `@cloudflare/vite-plugin`; Hono mounted in `src/worker`
 - Wrangler, D1 created, migrations wired
-- Tailwind CLI, the neobrutalism token block, the eight elements
-- `wrangler dev` serving a page with a button that looks right
+- The neobrutalism registry `init`, with Button and Card copied in
+- `vite` serving the application, one API route, and a button that looks right
 - Vitest with `@cloudflare/vitest-pool-workers` running one trivial test
 - CI green
 
@@ -78,7 +78,7 @@ surprises in it, and they should surface now rather than in M2.
   guard
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
-- Trace construction and a plain HTML rendering of it
+- Trace construction and a plain-text rendering of it
 - `derive(events, config)` and `diff` as the only read path
 - `PlanPublished` identifying the plan's `input_seq`, with the reviewed `output_hash`
 - Shuffle-invariance test, golden fixtures, property tests
@@ -104,7 +104,7 @@ day for that possibility.
 - The family portal: a renderer over `familyFacing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
   couples the portal to the profile by design
-- htmx save-on-change with the progressive-enhancement fallback
+- Save-on-change with a per-control confirmation and a visible failure state
 - Invitation and reminder emails
 - Admin chase list
 
@@ -120,8 +120,8 @@ Send the real invitations only after this deferred milestone is delivered.
 *The admin tool becomes real. Three to four days.*
 
 - Party review screen with provenance, merge and split
-- Board: server-rendered cards, room grouping, status glyphs
-- The island: pragmatic-drag-and-drop, multi-select, keyboard
+- Board: room cards, room grouping, status glyphs
+- Board interaction: pragmatic-drag-and-drop, multi-select, keyboard
 - The pending list, deriving locally on every action; apply and discard
 - Custom constraint definitions and `needs/provides` label application
 - Undo by popping a pending event
@@ -131,10 +131,6 @@ Send the real invitations only after this deferred milestone is delivered.
 **Done when:** an organiser who has not seen the code can rearrange a plan and
 understand what happened each time, and can add and clear a human-readable
 matching constraint.
-
-Watch the line count on `client/board.ts` — the interaction code, not the shared
-derivation core it bundles. Past ~600 lines, take the React escape hatch described
-in [frontend](12-frontend.md) §1 rather than continuing.
 
 ---
 
@@ -237,14 +233,13 @@ workshops half-built alongside.
 
 If time runs short, in the order they should go:
 
-1. **htmx.** Plain forms and redirects. Loses polish, costs nothing functional.
-2. **The bed-level view.** Room-level assignment is enough; bed allocation within
+1. **The bed-level view.** Room-level assignment is enough; bed allocation within
    a room can be a piece of paper taped to the door.
-3. **The plan diff.** Publish without it and email everyone rather than only the
+2. **The plan diff.** Publish without it and email everyone rather than only the
    affected families. Worse, not broken.
-4. **Multi-select on the board.** Drag one party at a time. Slower, still better
+3. **Multi-select on the board.** Drag one party at a time. Slower, still better
    than a spreadsheet.
-5. **Constraint-health dashboard.** Keep the underlying custom constraint
+4. **Constraint-health dashboard.** Keep the underlying custom constraint
    lifecycle and explanations; defer the reporting surface.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint
