@@ -118,6 +118,17 @@ replaying the event log up to a specific sequence number.
 **Plan** — the solver's output: assignments, unplaced parties, and a full
 decision trace. Stored immutably. Either `draft`, `published`, or `superseded`.
 
+**World** — the complete derived state for one list of events: projections, plan,
+diagnostics, and trace. Produced by `derive(events, config)`. Never stored, always
+recomputed; the published plan body is the one frozen copy.
+
+**Pending events** — events an admin has created on the board and not yet applied.
+Held in their browser, never on the server. The board derives from
+`committed ++ pending`.
+
+**Sandbox** — the board with a non-empty pending list. Not a mode: an empty pending
+list is the ordinary case and needs no separate code path.
+
 **Trace** — the human-readable record of why the solver did what it did. One line
 per decision, including the alternatives it rejected. Not a debug log; a
 first-class deliverable that admins read.
@@ -271,3 +282,31 @@ preserve dense ordered lists without a special property table. Rationale in
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
 [event profiles](15-event-profiles.md) §6.
+
+### D15 — Derivation is a named primitive, and the client may call it
+
+*Chosen.* `derive(events, config) → World` and `diff(World, World)` are the read
+side of the application. The board holds a list of pending events and renders
+`derive(committed ++ pending)`, deriving locally as the admin works and appending
+only when they apply.
+
+*Rejected alternative:* a sandbox mode beside the existing board, where each drag
+posts a constraint, the server re-solves, and the board reconciles from the
+response. It needs a second derivation path, a client feasibility check that is
+allowed to disagree with the real one, and a round trip per experiment.
+
+*Why:* the property was already bought and not spent. D3 makes the solver pure and
+dependency-free, so it runs in a browser unchanged; only the fold had to be lifted
+out of the database to follow it. Naming the primitive also collapses machinery
+that existed because it was missing — staleness, plan diffs, change emails,
+constraint redundancy, and the regression corpus are all the same two calls.
+
+*Consequence:* experiments stay out of the log. An admin who tries four
+arrangements appends the events for the one they chose, so constraints in the log
+are decisions rather than sediment, and [constraint health](07-constraint-health.md)
+reasons only about constraints someone meant.
+
+*Cost:* the admin bundle carries the derivation core, and two runtimes execute one
+algorithm. The first is dependency-free TypeScript and is budgeted in
+[deployment](12-deployment.md); the second is held by a cross-runtime agreement
+test in [testing](13-testing.md).

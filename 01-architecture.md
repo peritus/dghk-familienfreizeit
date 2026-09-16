@@ -3,39 +3,94 @@
 ## The shape in one diagram
 
 ```
-                            ┌─────────────────────────────────┐
-  family portal ──commands──▶│           event log             │
-  admin UI     ──commands──▶│  append-only, monotonic seq     │
-                            └────────────────┬────────────────┘
-                                             │  replay (full)
-                                             ▼
-                            ┌─────────────────────────────────┐
-                            │          projections            │
-                            │  entities, labels, constraints │
-                            └────────────────┬────────────────┘
-                                             │  freeze + sort
-                                             ▼
-                            ┌─────────────────────────────────┐
-                            │           snapshot              │
-                            │   pure data, cut at an event seq│
-                            └────────────────┬────────────────┘
-                                             │
-                                  solve(snapshot, config)
-                                             │  pure, deterministic
-                                             ▼
-                            ┌─────────────────────────────────┐
-                            │             plan                │
-                            │  assignments + unplaced + trace │
-                            │  draft → published → superseded │
-                            └────────────────┬────────────────┘
-                                             │
-                        admins read ─────────┤
-                        attendees read ──────┘  (published only)
+      committed events                 pending events
+      the log, append-only             held by one admin, not yet applied
+              │                                │
+              └────────────────┬───────────────┘
+                               ▼
+        ┌──────────────────────────────────────────────┐
+        │            derive(events, config)            │
+        │                                              │
+        │     fold      events      → projections      │
+        │     snapshot  projections → frozen, sorted   │
+        │     solve     snapshot    → plan + trace     │
+        │                                              │
+        │             pure · deterministic             │
+        └──────────────────────┬───────────────────────┘
+                               ▼
+        ┌──────────────────────────────────────────────┐
+        │                    world                     │
+        │      projections · plan · diagnostics        │
+        └──────────────────────┬───────────────────────┘
+                               │
+              diff(world, world) → what changed, and why
+                               │
+          admins read ─────────┤
+          attendees read ──────┘  (published only)
 ```
 
 Everything flows in one direction. There is no path by which an attendee or an
-admin writes an assignment. The solver is the only writer of assignments, and its
-only inputs are the event log and a config.
+admin writes an assignment. `derive` is the only producer of assignments, and its
+only inputs are a list of events and a config.
+
+## Derivation is the read side
+
+Two pure functions carry the whole read side of the application.
+
+```ts
+derive(events: Event[], config: Config): World   // projections, plan, diagnostics
+diff(a: World, b: World): Change[]               // what moved, grouped by cause
+```
+
+Neither performs I/O, reads a clock, or uses randomness. `derive` is the fold, the
+snapshot builder, and the solver composed; it inherits the determinism contract in
+[room assignment](05-room-assignment.md) §1 whole, so identical event lists produce
+byte-identical worlds on any machine.
+
+Three consequences are worth stating, because most of this document rests on them.
+
+**Every question about state is a call on `derive`.** Current state is
+`derive(committed)`. State as of last Tuesday is `derive(committed up to that seq)`.
+What the plan would look like without one constraint is `derive(committed ∖ c)`.
+Counterfactual derivation is not a special capability; it is the ordinary use.
+
+**Every question about change is a call on `diff`.** Staleness, the plan diff
+between two publications, the change emails, and whether a constraint is still
+doing any work are one function over two worlds.
+
+**Events need not be committed to be derived from.** `derive` takes a list, and it
+does not care where the list came from. That is what makes the next section
+possible.
+
+## Pending events
+
+An admin working on the board holds a list of **pending events**: ordinary events,
+in the existing vocabulary, that have not been appended to the log. The board
+renders `derive(committed ++ pending)`.
+
+Usually `pending` is empty and the board shows the same world the server has. When
+an admin drags a party, the move appends a constraint to `pending` and the board
+re-derives locally — no request, no approximation, the real solver over the real
+constraints. Applying flushes `pending` to the log in one append; discarding drops
+it. An empty pending list is not a special case, so there is no second code path
+and no mode to be in.
+
+This is the difference between recording a decision and recording the search for
+one. An admin who tries four arrangements before choosing appends the events for
+the arrangement they chose, and the log stays a record of judgement rather than of
+experiment.
+
+**The trust boundary does not move.** A client never submits a world. It submits
+events, which the server validates, authorises, and appends exactly as it does for
+any other command, and then derives for itself. The world the admin saw locally is
+a *prediction*; because `derive` is pure, the prediction is checkable, and the apply
+request carries the `output_hash` the client derived so the server can compare after
+appending. Agreement is what the determinism contract guarantees; disagreement is a
+bug to report, and the server's world is authoritative either way.
+
+Pending events live in the admin's browser for as long as that tab is open. They are
+never stored on the server, never shared between admins, and never visible to
+attendees.
 
 ## Module profiles
 
@@ -133,8 +188,10 @@ Two distinct kinds, with different lifetimes.
 
 `entity`, `label`, `constraint_definition`, and query indexes.
 
-Rebuilt from the log. Never written to directly outside the projector. If you
-find an `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
+These are `fold`'s output, persisted. They exist for stable URLs, authentication
+lookup, and query shape — not for derivation, which folds in memory and never
+reads them. Never written to directly outside the projector. If you find an
+`UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
 
 ### Plan snapshots — immutable, kept forever
 
@@ -243,8 +300,12 @@ src/
   events/
     types.ts              discriminated union + zod schemas
     append.ts             the only place that INSERTs into event
+  derive/
+    index.ts              derive(events, config) — pure
+    fold.ts               events → projections — pure, no I/O
+    diff.ts               diff(world, world) → Change[] — pure
   project/
-    index.ts              rebuild(db, scope) — the only writer of projections
+    index.ts              rebuild(db) = persist(db, fold(readEvents(db)))
     entities.ts  labels.ts  constraints.ts  workshops.ts
   modules/
     <module>/             generic contract, implementation, views, and tests
@@ -279,14 +340,18 @@ scripts/
   tune.ts                 offline weight sweep, Node not Worker
 ```
 
-Three boundaries are load-bearing and should be enforced in review:
+Four boundaries are load-bearing and should be enforced in review:
 
 - **`src/solver/**` imports nothing from `src/db`, `src/routes`, or `src/lib`.**
   It is pure TypeScript over plain data. It may import selected module contracts
   and the active profile, which are also pure data and pure functions with no
   I/O. The ESLint determinism rules extend to profile code.
+- **`src/derive/**` is pure and holds the same restrictions.** It is imported by
+  the routes, by the solver's callers, and by the browser bundle, so a stray
+  import of `src/db` there would take the database with it into the client.
 - **Only `src/events/append.ts` writes to `event`.**
-- **Only `src/project/**` writes to projection tables.**
+- **Only `src/project/**` writes to projection tables.** `src/derive/fold.ts`
+  computes them; nothing outside `src/project/**` persists them.
 
-An ESLint `no-restricted-imports` rule covers the first. The other two are a code
-review habit, and a grep in CI if you want the belt as well as the braces.
+An ESLint `no-restricted-imports` rule covers the first two. The other two are a
+code review habit, and a grep in CI if you want the belt as well as the braces.
