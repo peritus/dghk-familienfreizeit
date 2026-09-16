@@ -53,7 +53,7 @@ deferred belongs after it.
 - Event table, append function, projector skeleton
 - `BuildingAdded`, `RoomAdded`, `BedAdded`, `RoomDesignationChanged`
 - Place generation from `bed.sleeps`
-- `FamilyInvited`, `PersonAdded` fixtures for solver development; family-facing
+- `FamilyInvited`, `PersonAdded` fixtures for solver development; attendee-facing
   onboarding is deferred
 - The generic `label` projection and a minimal built-in tag vocabulary (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
@@ -97,11 +97,11 @@ day for that possibility.
 
 ---
 
-## M3 — Deferred family preferences and portal
+## M3 — Deferred attendee preferences and view
 
 *Post-initial-release work. Two to three days.*
 
-- The family portal: a renderer over `familyFacing` profile tags, not
+- The attendee view: a renderer over `attendeeFacing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
   couples the portal to the profile by design
 - htmx save-on-change with the progressive-enhancement fallback
@@ -224,7 +224,7 @@ meet reality before it meets the solver.
 
 **Why administrator access lands in M1.** Every initial-release surface is an
 admin surface, so the magic-link flow and code-level allowlist belong with the
-inventory rather than as a stopgap. Family-facing authentication and preference
+inventory rather than as a stopgap. Attendee-facing authentication and preference
 collection remain deferred to M3.
 
 **Why publication before workshops.** Room assignment is the thing people are

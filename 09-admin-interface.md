@@ -438,11 +438,11 @@ Add one when the plan needs a human rule."
 **No apologies, no exclamation marks, no "Oops".** These are organisers doing
 administrative work; the interface should be a competent colleague.
 
-**German or English.** The audience is a German Jugendherberge. Family-facing
+**German or English.** The audience is a German Jugendherberge. Attendee-facing
 copy should be German with an English fallback (`family.locale`). Admin-facing
 copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
 
-Admin-facing labels come from the built-in or custom definition and family-facing text
-from `familyFacing.label`, so the two audiences can be worded differently for
+Admin-facing labels come from the built-in or custom definition and attendee-facing text
+from `attendeeFacing.label`, so the two audiences can be worded differently for
 the same tag.
