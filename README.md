@@ -186,27 +186,32 @@ constraints directly.
 Admin judgement is represented directly by custom matching constraints rather
 than a separate override mechanism.
 
-### D8 — No React in the admin surface
+### D8 — React for every screen
 
-*Chosen.* Server-rendered `hono/jsx`, hand-written elements on a copied
-neobrutalism theme, one vanilla island for the board.
+*Chosen.* One React application for the admin tool and the family portal, built
+from neobrutalism.dev components copied in through the shadcn CLI, over a small
+JSON API on the Worker.
 
-*Rejected alternative:* React with Base UI and the neobrutalism registry. Base UI
-is React-only, so choosing it re-introduces the entire client runtime for an
-admin tool with roughly eight distinct interactive elements.
+*Rejected alternative:* server-rendered `hono/jsx` pages with htmx for partial
+updates and a vanilla TypeScript island for the board. It looks smaller on a
+dependency list and is larger in code: the pending list is needed on party review
+as well as the board, the board has to re-render a derived world without losing
+selection or drag state, and comboboxes, dialogs, and toasts would all be written
+by hand. Every screen would also need its own route, form handlers, and
+full-page-or-fragment responses.
 
-*Revisit if:* the board's interaction model outgrows ~600 lines of vanilla
-TypeScript, or the attendee preference form needs a real combobox. The escape
-hatch is mounting React on the board route alone; see
+*Consequence:* the family portal requires JavaScript. The portal bundle excludes the
+admin screens and the solver, and saves on change with ordinary requests. See
 [frontend](12-frontend.md).
 
-### D9 — No Vite
+### D9 — Vite with the Cloudflare plugin
 
-*Chosen.* `wrangler dev` (which bundles TypeScript and JSX via esbuild), the
-Tailwind CLI, and one direct `esbuild` invocation for the board island.
+*Chosen.* `vite` runs the Worker in `workerd` and the React application with hot
+reload from one dev server; `vite build` produces both. Tailwind runs as a Vite
+plugin.
 
-*Why:* three watchers and no plugin ecosystem. The Vite plugin exists to solve
-problems this project does not have.
+*Why:* one tool runs the Worker, the application, and Tailwind, and it is the build
+the React and shadcn toolchains already assume.
 
 ### D10 — Hand-rolled magic link, no auth library
 
@@ -263,9 +268,9 @@ no filter to forget, because an attendee's derivation cannot reach past its inpu
 ### D15 — Derivation is a named primitive, and the client may call it
 
 *Chosen.* `derive(events, config) → World` and `diff(World, World)` are the read
-side of the application. The board holds a list of pending events and renders
-`derive(committed ++ pending)`, deriving locally as the admin works and appending
-only when they apply.
+side of the application. The admin application holds a list of pending events and
+renders every screen from `derive(committed ++ pending)`, deriving locally as the
+admin works and appending only when they apply.
 
 *Rejected alternative:* a sandbox mode beside the existing board, where each drag
 posts a constraint, the server re-solves, and the board reconciles from the
@@ -273,8 +278,8 @@ response. It needs a second derivation path, a client feasibility check that is
 allowed to disagree with the real one, and a round trip per experiment.
 
 *Why:* the property was already bought and not spent. D3 makes the solver pure and
-dependency-free, so it runs in a browser unchanged; only the fold had to be lifted
-out of the database to follow it. Naming the primitive also collapses machinery
+dependency-free, so it runs in a browser unchanged, and the fold is pure for the
+same reason. Naming the primitive also collapses machinery
 that existed because it was missing — staleness, plan diffs, change emails,
 constraint redundancy, and the regression corpus are all the same two calls.
 
