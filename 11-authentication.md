@@ -32,8 +32,10 @@ The relevant lesson is not "the library is bad" but that **the vulnerability
 class lives in the interaction between registration and passwordless sign-in**,
 and removing registration removes the class.
 
-If you do use the library instead: pin `>= 1.6.22`, disable email/password
-entirely, and keep registration closed.
+Adopting the library would mean revising D10 and D2 in [decisions](17-decisions.md):
+it stores its own user and session tables beside the event log. If that revision is
+ever accepted, pin `>= 1.6.22`, disable email/password entirely, and keep
+registration closed.
 
 ---
 
@@ -98,7 +100,7 @@ Admin authorization is checked against the verified login email and allowlist on
 every admin request. The special URL is routing, not a credential; knowing it
 never grants access.
 
-Follow all of these or use the library instead. Each has a failure mode that is
+Follow all of these. Each has a failure mode that is
 not obvious from reading the happy path.
 
 **1 — Tokens are single-use, by deletion, in one statement.**
