@@ -184,6 +184,9 @@ The profile supplies the actual event name, date, preference deadline, locale,
 public description, family-facing labels, admin-facing labels, and email copy.
 These values are event configuration and are included in the configuration hash.
 
+For this deployment, the event runs from `2027-04-30` through `2027-05-02`,
+inclusive. The user-facing German dates are 30.04.2027 to 02.05.2027.
+
 ## 8. First-deployment boundary
 
 The profile is deployed separately with its own database and operational
