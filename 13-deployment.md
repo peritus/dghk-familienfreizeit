@@ -371,10 +371,12 @@ plan to have printed the right thing.
 
 | | |
 |---|---|
-| Workers | Free tier covers it several times over |
-| D1 | Free tier; the database is a few megabytes |
+| Workers | Workers Paid, about $5 a month — the CPU allowance per request ([decisions](17-decisions.md) D1) |
+| D1 | Included in the Workers Paid allowance; the database is a few megabytes |
 | Resend | Free tier: ~200 emails covers invitations, reminders and changes |
 | Domain | Whatever you already pay |
 
-Realistically zero. The Workers Paid plan becomes relevant only if you switch to
-Cloudflare Email Sending for arbitrary recipients.
+About five dollars a month. The Paid plan is chosen for CPU time, not traffic: every
+portal and dashboard request derives the plan ([decisions](17-decisions.md) D1). It
+also makes Cloudflare Email Sending to arbitrary recipients available, should that
+replace Resend.

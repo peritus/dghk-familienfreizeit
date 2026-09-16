@@ -39,10 +39,15 @@ deferred belongs after it.
 - Wrangler, D1 created, migrations wired
 - The neobrutalism registry `init`, with Button and Card copied in
 - `vite` serving the application, one API route, and a button that looks right
-- Vitest with `@cloudflare/vitest-pool-workers` running one trivial test
+- Vitest with `@cloudflare/vitest-pool-workers` running one trivial test in `workerd`
+  from the same `vite.config.ts` the build uses
+- The Worker deployed on the Workers Paid plan
 - CI green
 
-**Done when:** a pull request runs tests and deploys to preview automatically.
+**Done when:** a pull request runs tests and deploys to preview automatically, and
+the Vite plugin, Vitest, and the Workers pool are on versions that work together
+(D9). If that pairing cannot be made to work, stop and put D9 up for review before
+building on it.
 
 ---
 
