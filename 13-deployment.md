@@ -11,14 +11,13 @@ Durable Objects.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dghk-familienfreizeit",
-  "main": "src/index.ts",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
 
   "assets": {
-    "directory": "./public",
-    "binding": "ASSETS",
-    "not_found_handling": "none"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/auth/*"]
   },
 
   "d1_databases": [
@@ -53,32 +52,39 @@ Durable Objects.
 }
 ```
 
-`not_found_handling: "none"` matters. The SPA fallback modes intercept navigation
-requests *before* the Worker runs, which would break the magic-link redemption
-route — a top-level navigation to `/auth/:token` that never reaches the handler.
-This application server-renders every route, so static assets should 404 through
-to the Worker and let the router decide.
+`run_worker_first` matters. The single-page-application fallback answers
+navigation requests with `index.html` *before* the Worker runs, which is what the
+React router needs for `/admin/board` and every other client route. It would also
+swallow the magic-link redemption — a top-level navigation to `/auth/:token` — and
+any API call made by navigation. Listing `/api/*` and `/auth/*` sends those to the
+Worker first; everything else is the application.
+
+The Cloudflare Vite plugin reads this file, builds the Worker and the application
+together, and writes the deployable configuration into the build output, so
+`wrangler deploy` runs after `vite build`.
 
 `EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
 event profile ([event profiles](16-event-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
-### The board bundle
+### The application bundles
 
-The board bundle carries `src/derive/**`, `src/solver/**`, and the active profile
-alongside the interaction code, because the board derives locally
-([frontend](12-frontend.md) §6). All of it is dependency-free TypeScript and
-minifies accordingly.
+The build produces an entry chunk for login and the family portal, and a lazy admin
+chunk. The admin chunk carries `src/derive/**`, `src/solver/**`, and the active
+profile alongside the admin screens, because the admin application derives locally
+([frontend](12-frontend.md) §3). The derivation core is dependency-free TypeScript
+and minifies accordingly.
 
 Two rules keep that honest:
 
-- **A size budget, checked in CI.** The build fails if the bundle exceeds it. The
-  budget exists so that growth is a decision rather than a drift; raise it
-  deliberately when there is a reason.
-- **The profile hash travels with the page.** The board is served the Worker's
-  `config_hash` and refuses to derive if its own bundled profile hashes
-  differently. A deploy that updates the Worker while a browser holds yesterday's
+- **A size budget per chunk, checked in CI.** The build fails if the portal entry
+  or the admin chunk exceeds its budget, and if the portal entry ever contains
+  solver code. The budget exists so that growth is a decision rather than a drift;
+  raise it deliberately when there is a reason.
+- **The profile hash travels with the log.** The admin log response carries the
+  Worker's `config_hash`, and the admin application refuses to derive if its own
+  bundled profile hashes differently. A deploy that updates the Worker while a browser holds yesterday's
   bundle then produces a reload prompt rather than a plan computed against the
   wrong vocabulary.
 
@@ -303,6 +309,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm run build
       - run: npx wrangler d1 migrations apply dghk-familienfreizeit --remote
       - run: npx wrangler deploy
         env:
