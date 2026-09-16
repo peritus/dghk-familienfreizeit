@@ -7,7 +7,7 @@ eligibility, capacity, fairness, and co-assignment policy.
 A separate pure function, same contract as the room solver.
 
 ```ts
-solveWorkshops(snapshot: Snapshot, config: SolverConfig): WorkshopPlan
+solveWorkshops(solverInput: SolverInput, config: SolverConfig): WorkshopPlan
 ```
 
 Structurally simpler than room assignment — people are individuals here, not
@@ -169,7 +169,7 @@ Otherwise non-participation would be rewarded with priority.
 
 ## 4. No clash, structurally
 
-The snapshot validator's uniqueness check for `(person_id, slot_id)` makes a
+The solver input validator's uniqueness check for `(person_id, slot_id)` makes a
 double-booking unstorable.
 
 The solver assigns at most one workshop per person per slot by construction —
