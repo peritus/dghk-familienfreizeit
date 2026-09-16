@@ -62,3 +62,40 @@ board may become a list view and the side rail may move above the rooms.
 - empty states explain what the user can do next;
 - respect reduced-motion preferences;
 - dialogs trap focus and return focus to their triggering control.
+
+## Neobrutalist component contract
+
+The component contract follows the [neobrutalism Alert Dialog
+documentation](https://www.neobrutalism.dev/docs/alert-dialog): strong black
+outlines, offset shadows, direct labels, and deliberate primary actions.
+
+Use this composition for every action that applies, discards, publishes, sends,
+or clears something:
+
+```text
+AlertDialog
+└─ AlertDialogTrigger asChild → Button
+   AlertDialogContent
+   ├─ AlertDialogHeader
+   │  ├─ AlertDialogTitle
+   │  └─ AlertDialogDescription
+   └─ AlertDialogFooter
+      ├─ AlertDialogCancel
+      └─ AlertDialogAction
+```
+
+The description states the concrete consequence. `AlertDialogAction` is the
+high-contrast offset-shadow primary action; `AlertDialogCancel` is the quieter
+outlined alternative.
+
+## Component inventory
+
+| Need | Component |
+|---|---|
+| hierarchy and status | `Card`, `Badge`, `Alert` |
+| actions | `Button`, `AlertDialog` |
+| data entry | `Label`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `Select` |
+| search and selection | `Combobox`, `Popover`, `Command` |
+| dense data | `Table`, `Tabs`, `ScrollArea` |
+| navigation and mobile | `Sidebar`, `Sheet`, `Drawer`, `Breadcrumb` |
+| feedback and loading | `Sonner`, `Skeleton`, `Tooltip` |
