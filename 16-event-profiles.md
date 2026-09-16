@@ -3,7 +3,7 @@
 An occasion profile composes generic modules for one deployment. It is the
 authoritative source for that deployment's module selection, vocabulary, policy,
 copy, and pure evaluators. The first deployed profile is documented separately
-in [events/familienfreizeit-2027](events/familienfreizeit-2027.md).
+in [profiles/familienfreizeit-2027](profiles/familienfreizeit-2027.md).
 
 ## 1. Profile shape
 
