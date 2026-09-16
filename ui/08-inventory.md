@@ -26,3 +26,11 @@ pending-change count rather than silently applying them.
 Use table semantics for dense rows, explicit labels for capabilities, and a
 non-color marker for blocked rooms. At narrow widths, buildings become stacked
 sections and room rows become cards.
+
+## Neobrutalist redesign and components
+
+Use `Sidebar`, `Tabs` for building/designation filters, `Card` for each building,
+and `Table` for room rows. Add/edit uses a `Dialog` with `Label`, `Input`,
+`Select`, and `Checkbox`. Saving a change that affects the plan uses the
+canonical `AlertDialog` pair of `AlertDialogCancel` and `AlertDialogAction`;
+blocked rooms use an `Alert` plus a textual `Badge`.

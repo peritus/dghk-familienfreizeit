@@ -27,3 +27,11 @@ named by row. The empty table offers import and manual invite actions.
 The table has a caption, sortable headers, row links, and a non-color status
 label. On narrow screens, filters wrap and each family becomes a labeled card;
 the import preview may scroll horizontally inside its own region.
+
+## Neobrutalist redesign and components
+
+Use `Sidebar`, `Input`, `Badge`, `Button`, and `Table` for the main view. Import
+is a `Dialog` containing `Tabs` for upload/paste, `Textarea` for pasted CSV,
+and a preview `Table`. The final import action uses `AlertDialog` with
+`AlertDialogTitle` naming the number of families and `AlertDialogDescription`
+stating that the operation is all-or-nothing.

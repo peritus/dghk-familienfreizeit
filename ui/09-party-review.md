@@ -28,3 +28,11 @@ Children's room allocation appears as a separate section before parties.
 The cards preserve provenance in reading order. Buttons have descriptive names;
 warnings are text plus glyph/border, and the pending count is announced after a
 merge or split.
+
+## Neobrutalist redesign and components
+
+Render each party as a `Card` with a doubled border when constrained and
+`Badge` chips for people, bed demand, and provenance. Use `Button` for Merge and
+Split; the resulting constraint preview appears in a `Dialog`. Refusing a
+merge uses `Alert`. Applying or discarding the shared pending list uses the
+canonical `AlertDialog` composition.

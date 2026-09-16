@@ -27,3 +27,10 @@ event history for one family. Route: `/admin/families/:id`. Governing spec:
 Separate attendee free text from admin-only notes. Loading, missing-family,
 and stale-log states explain what happened and offer retry. History is prose,
 not raw JSON, and is keyboard-readable in chronological order.
+
+## Neobrutalist redesign and components
+
+Compose the page from `Breadcrumb`, `Card`, `Badge`, and `Tabs` for people,
+preferences, and history. Use `Button` for editing and invite actions, with
+`Dialog` for the edit form. History entries use a thick left border and actor
+`Badge`, not colored timeline dots alone.
