@@ -1,6 +1,4 @@
-# Bettenplan — modular event planning
-
-Working name. Replace freely.
+# DGHK Familienfreizeit — modular event planning
 
 ## What this is
 
@@ -36,62 +34,8 @@ the admins will go back to a spreadsheet. Stability across runs is a feature, an
 it is the reason the solver is a pure deterministic function and admin decisions
 are stored as constraints rather than as edits.
 
-## Scope
-
-**In scope for the initial release**
-
-- Admin-managed inventory: buildings, rooms, beds, room designations.
-- Family import from a spreadsheet, invitation by email.
-- Family self-service: their people, room preferences, children's-room opt-ins,
-  co-rooming requests, workshop rankings.
-- Magic-link authentication, one login per family, and a code-level admin allowlist.
-- Deterministic room assignment with a full human-readable explanation.
-- Deterministic workshop assignment with an explicit fairness objective.
-- Drag-and-drop admin board that writes constraints, not assignments.
-- Deterministic plans, publication, and change emails on re-publication.
-- Custom, human-readable matching constraints that admins can add and clear.
-- Per-person food preferences and allergy notes, as configured by the first
-  deployed event profile.
-- Family-contributed materials and workshop-linked supplies, as configured by
-  the first deployed event profile.
-
-**Explicitly out of scope**
-
-- Payments, invoicing, deposits.
-- Food-service execution, menus, and allergy enforcement. The first event
-  records per-person dietary preferences and allergy notes; operational meal
-  planning remains outside this specification.
-- Arrival and departure logistics, transport, parking.
-- Runtime multi-event tenancy. One event profile and one database per
-  deployment. A second event is a second deployment.
-- Real-time collaborative editing. Three admins, optimistic concurrency, 409 on
-  conflict. Durable Objects are not needed and would not earn their complexity.
-- Mobile-first admin. Attendee pages are responsive; the board is a desktop tool.
-
-## Reading order
-
-| # | Document | What it settles |
-|---|---|---|
-| 01 | [Architecture](01-architecture.md) | Module composition, request lifecycle, and boundaries |
-| 02 | [Data model](02-data-model.md) | Generic identity, labels, relationships, and projections |
-| 03 | [Event model](03-events.md) | Generic event envelope, replay, and lifecycle |
-| 04 | [Labels and constraints](04-labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
-| 05 | [Room assignment](05-room-assignment.md) | Generic room modules and deterministic placement |
-| 06 | [Workshop assignment](06-workshop-assignment.md) | Generic ranking and workshop modules |
-| 07 | [Materials coordination](07-materials.md) | Generic requests, commitments, and fulfillment |
-| 08 | [Constraint health](08-constraint-health.md) | Preflight, diagnostics, and regression corpus |
-| 09 | [Admin interface](09-admin-interface.md) | Generic admin surfaces and module-provided screens |
-| 10 | [Family portal](10-family-portal.md) | Generic family-facing controls and privacy |
-| 11 | [Authentication](11-authentication.md) | Magic links, sessions, and threat model |
-| 12 | [Frontend](12-frontend.md) | Rendering, enhancement, styling, and board island |
-| 13 | [Deployment](13-deployment.md) | One profile per deployment, migrations, secrets, email |
-| 14 | [Testing](14-testing.md) | Generic module contracts and event fixtures |
-| 15 | [Roadmap](15-roadmap.md) | Delivery milestones and cut lines |
-| 16 | [Event profiles](16-event-profiles.md) | Profile contract and configuration rules |
-| — | [familienfreizeit-2027](events/familienfreizeit-2027.md) | First deployed event profile |
-
-Start with 01, 02, 04, 05, 06, 07, and 16. Those documents carry the module and
-profile design. The remaining documents specify its product and operations.
+See [15-roadmap.md](15-roadmap.md) for the release scope, implementation order,
+document reading order, cut lines, and deferred work.
 
 ## Glossary
 
@@ -235,7 +179,7 @@ constraints directly.
 Admin judgement is represented directly by custom matching constraints rather
 than a separate override mechanism.
 
-### D8 — No React in the initial release
+### D8 — No React in the admin surface
 
 *Chosen.* Server-rendered `hono/jsx`, hand-written elements on a copied
 neobrutalism theme, one vanilla island for the board.
