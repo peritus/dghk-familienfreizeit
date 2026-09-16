@@ -1,5 +1,8 @@
 # DGHK Familienfreizeit — modular event planning
 
+German attendee-facing terminology and translation rules live in the
+[German translation guidelines](17-german-translation-guidelines.md).
+
 ## What this is
 
 A small web application composed from reusable event modules. A deployment
