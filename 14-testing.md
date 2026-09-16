@@ -165,7 +165,7 @@ const invariants = [
   ['no workshop exceeds capacity',
     (p, s) => /* … */],
 
-  ['every child in a child room is within its age band',
+  ['every child-room assignment satisfies the child-group requirement',
     (p, s) => /* … */],
 
   ['every label names a built-in or custom definition or is reported',

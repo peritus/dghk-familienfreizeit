@@ -55,7 +55,7 @@ discover the problem in the solver.
 Setup event payloads are complete command inputs, not a second data model. The
 projector creates the typed entity identity and emits the payload's mutable
 values as labels. For example, `PersonAdded.role`, `birthdate`, and
-`occupies_bed` become labels on the new person; `RoomAdded.kind`, `floor`, and
+`does_not_need_a_bed` become labels on the new person; `RoomAdded.kind`, `floor`, and
 capacity-related values do the same for the room. Event-specific config defines
 which labels are legal and how the resolver uses them.
 
@@ -92,7 +92,7 @@ retain access.
   given_name: string, family_name: string,
   birthdate: string | null,
   role: 'adult' | 'child' | 'infant',
-  occupies_bed: boolean,
+  does_not_need_a_bed: boolean,
   needs_accessible: boolean
 }
 ```
@@ -100,8 +100,7 @@ Emitted by the family or by an allowlisted admin.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
 registered as an adult by their family and that is their call. The solver uses
-`role` for supervision-adjacent rules and `ageAt()` for age bands; they are
-different questions.
+`role` for role-based rules; it does not turn role into a bed exception.
 
 ### `PersonUpdated`
 ```ts
@@ -129,7 +128,7 @@ Excludes the person from all future snapshots. Historical plans keep them.
   room_id: string, building_id: string, number: string,
   floor: number | null,
   kind: string,                 // values are validated by the active profile
-  has_ensuite: boolean, is_outside: boolean, is_accessible: boolean,
+  is_accessible: boolean,
   sort_key: number
 }
 ```
@@ -142,8 +141,6 @@ Full restatement of the above.
 {
   room_id: string,
   designation: 'general' | 'child' | 'staff' | 'blocked',
-  child_min_age: number | null,
-  child_max_age: number | null,
   reason: string | null
 }
 ```
@@ -151,8 +148,8 @@ Full restatement of the above.
 records a blocked-space fact. Any compensating constraints remain visible in the
 event history and may be cleared explicitly.
 
-*Invariant:* `designation = 'child'` requires both age bounds. A children's room
-with no age band is a trap.
+*Invariant:* `designation = 'blocked'` requires a reason. A child room's eligible
+children are determined by explicit child-group labels, not an age band.
 
 ### `BedAdded` / `BedUpdated` / `BedRemoved`
 ```ts
