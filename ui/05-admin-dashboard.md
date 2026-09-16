@@ -37,3 +37,12 @@ needs attention” and still shows plan freshness and quality numbers.
 Cards link to the exact affected screen. Reminder sending requires confirmation
 and reports a result. Keyboard users reach urgent items before quality numbers;
 the heading for the attention region is announced when new findings appear.
+
+## Neobrutalist redesign and components
+
+Use a `Sidebar` for admin navigation, `Card` for plan status and each urgent
+group, `Badge` for plan freshness, and `Alert` for findings. Reminder sending
+uses the canonical `AlertDialog` composition: `AlertDialogTrigger` + `Button`,
+`AlertDialogContent`, `AlertDialogHeader`, `AlertDialogTitle`,
+`AlertDialogDescription`, `AlertDialogFooter`, `AlertDialogCancel`, and
+`AlertDialogAction`. The action description names the number of recipients.

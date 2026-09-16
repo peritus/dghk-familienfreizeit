@@ -32,3 +32,15 @@ requires confirmation.
 The board becomes a searchable unplaced list followed by a room list. Each party
 has a “Move to room” action; do not require drag-and-drop on touch devices. The
 pending bar remains sticky at the bottom without covering the final control.
+
+## Neobrutalist redesign and components
+
+Use `Sidebar`, `Input` or `Combobox` for party search, `Tabs` for buildings,
+`Card` for rooms and parties, and `Badge` for capacity and constraint status.
+Room cards keep the thick outline and offset shadow; infeasible cards use an
+`Alert`-style border and explanatory text. Apply and Discard each use
+`AlertDialog` with the complete `AlertDialogTrigger`, `AlertDialogContent`,
+`AlertDialogHeader`, `AlertDialogTitle`, `AlertDialogDescription`,
+`AlertDialogFooter`, `AlertDialogCancel`, and `AlertDialogAction` composition.
+On touch devices,
+`Drawer` supplies the “Move to room” picker.
