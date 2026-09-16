@@ -47,7 +47,7 @@ profile explicitly permits that.
 The module exposes a deterministic, side-effect-free resolver:
 
 ```ts
-resolveMaterials(snapshot: Snapshot, config: MaterialsConfig): MaterialsPlan
+resolveMaterials(solverInput: SolverInput, config: MaterialsConfig): MaterialsPlan
 ```
 
 It validates configured categories and record labels, resolves requester and
