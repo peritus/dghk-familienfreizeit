@@ -11,6 +11,9 @@ is tables and forms, and should be boring on purpose.
 
 ## 1. Screen inventory
 
+Detailed UI plans live in the [UI screen catalog](ui/README.md), including
+English ASCII wireframes, state behavior, accessibility, and responsive notes.
+
 | Route | Screen | Purpose |
 |---|---|---|
 | `/admin` | Dashboard | Status, staleness, constraint health, what needs attention |
