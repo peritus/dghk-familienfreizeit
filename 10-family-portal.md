@@ -28,7 +28,7 @@ zusammen?") are **generated from the active event profile**: every tag declaring
 mock-up below is explanatory only; no event-specific form is hard-coded here.
 
 `control` is a closed union, and this is the thing to think about up front —
-see [event profiles](15-event-profiles.md) §6:
+see [event profiles](16-event-profiles.md) §6:
 
 | `control` | Renders | Writes |
 |---|---|---|

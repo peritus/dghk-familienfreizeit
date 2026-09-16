@@ -129,7 +129,7 @@ and should appear nowhere in this codebase. Family free text, admin notes and
 workshop titles are all user-supplied and all rendered as `{value}`.
 
 The family preferences page is a renderer over `familyFacing` event-profile entries
-rather than hand-written JSX ([family portal](09-family-portal.md) §1): each
+rather than hand-written JSX ([family portal](10-family-portal.md) §1): each
 `control` value maps one-to-one onto a component in `src/views/controls/`.
 
 ---
@@ -380,7 +380,7 @@ both of which are dependency-free".
 | A state manager | The state is a list of events and a pure function over it |
 | tRPC | Hono's RPC client exists if ever needed |
 | Prisma | Heavier than Drizzle on Workers, no gain on SQLite |
-| An auth library | See [authentication](10-authentication.md) |
+| An auth library | See [authentication](11-authentication.md) |
 | A solver or LP library | Reviewability beats optimality here |
 | A date library | One function, `ageAt()`, over ISO strings |
 | A CSS-in-JS library | Tailwind and sixty lines of tokens |

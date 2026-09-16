@@ -60,7 +60,7 @@ This application server-renders every route, so static assets should 404 through
 to the Worker and let the router decide.
 
 `EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
-event profile ([event profiles](15-event-profiles.md)) because they are solver
+event profile ([event profiles](16-event-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
@@ -68,7 +68,7 @@ enter `config_hash`.
 
 The board bundle carries `src/derive/**`, `src/solver/**`, and the active profile
 alongside the interaction code, because the board derives locally
-([frontend](11-frontend.md) §6). All of it is dependency-free TypeScript and
+([frontend](12-frontend.md) §6). All of it is dependency-free TypeScript and
 minifies accordingly.
 
 Two rules keep that honest:
@@ -138,7 +138,7 @@ and a direct insert is undone on the next rebuild.
 ## Weight tuning
 
 There is no weight-editing screen, and this is deliberate. The offline
-workflow, from [event profiles](15-event-profiles.md) §4:
+workflow, from [event profiles](16-event-profiles.md) §4:
 
 ```bash
 wrangler d1 execute bettenplan --remote --json \

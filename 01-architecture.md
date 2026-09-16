@@ -134,7 +134,7 @@ also mean **every difference between two plans has exactly one attributable caus
 new events, retuned weights, or new code. You never have to wonder which.
 
 `config_hash` is computed at runtime from the code config object. See
-[event profiles](15-event-profiles.md) §4 for what goes into it, including the
+[event profiles](16-event-profiles.md) §4 for what goes into it, including the
 requirement that function bodies are hashed by source.
 
 ## Module profiles

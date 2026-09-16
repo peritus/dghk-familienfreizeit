@@ -78,18 +78,19 @@ are stored as constraints rather than as edits.
 | 04 | [Labels and constraints](04-labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
 | 05 | [Room assignment](05-room-assignment.md) | Generic room modules and deterministic placement |
 | 06 | [Workshop assignment](06-workshop-assignment.md) | Generic ranking and workshop modules |
-| 07 | [Constraint health](07-constraint-health.md) | Preflight, diagnostics, and regression corpus |
-| 08 | [Admin interface](08-admin-interface.md) | Generic admin surfaces and module-provided screens |
-| 09 | [Family portal](09-family-portal.md) | Generic family-facing controls and privacy |
-| 10 | [Authentication](10-authentication.md) | Magic links, sessions, and threat model |
-| 11 | [Frontend](11-frontend.md) | Rendering, enhancement, styling, and board island |
-| 12 | [Deployment](12-deployment.md) | One profile per deployment, migrations, secrets, email |
-| 13 | [Testing](13-testing.md) | Generic module contracts and event fixtures |
-| 14 | [Roadmap](14-roadmap.md) | Delivery milestones and cut lines |
-| 15 | [Event profiles](15-event-profiles.md) | Profile contract and configuration rules |
+| 07 | [Materials coordination](07-materials.md) | Generic requests, commitments, and fulfillment |
+| 08 | [Constraint health](08-constraint-health.md) | Preflight, diagnostics, and regression corpus |
+| 09 | [Admin interface](09-admin-interface.md) | Generic admin surfaces and module-provided screens |
+| 10 | [Family portal](10-family-portal.md) | Generic family-facing controls and privacy |
+| 11 | [Authentication](11-authentication.md) | Magic links, sessions, and threat model |
+| 12 | [Frontend](12-frontend.md) | Rendering, enhancement, styling, and board island |
+| 13 | [Deployment](13-deployment.md) | One profile per deployment, migrations, secrets, email |
+| 14 | [Testing](14-testing.md) | Generic module contracts and event fixtures |
+| 15 | [Roadmap](15-roadmap.md) | Delivery milestones and cut lines |
+| 16 | [Event profiles](16-event-profiles.md) | Profile contract and configuration rules |
 | — | [familienfreizeit-2027](events/familienfreizeit-2027.md) | First deployed event profile |
 
-Start with 01, 02, 04, 05, 06, and 15. Those documents carry the module and
+Start with 01, 02, 04, 05, 06, 07, and 16. Those documents carry the module and
 profile design. The remaining documents specify its product and operations.
 
 ## Glossary
@@ -250,7 +251,7 @@ admin tool with roughly eight distinct interactive elements.
 *Revisit if:* the board's interaction model outgrows ~600 lines of vanilla
 TypeScript, or the attendee preference form needs a real combobox. The escape
 hatch is mounting React on the board route alone; see
-[frontend](11-frontend.md).
+[frontend](12-frontend.md).
 
 ### D9 — No Vite
 
@@ -269,7 +270,7 @@ has no passwords, no OAuth, no registration, no organisations and no 2FA. What
 remains is one flow, fully under our control, and a per-request instantiation
 dance on Workers.
 
-*Non-negotiable rules* are in [authentication](10-authentication.md). Follow them exactly or use
+*Non-negotiable rules* are in [authentication](11-authentication.md). Follow them exactly or use
 the library instead.
 
 ### D11 — Built-in rules live in code; custom matching keys live in the event log
@@ -281,7 +282,7 @@ dynamic evaluation or code deployment.
 ### D12 — Weights live in code
 
 *Chosen.* `SolverConfigChanged` is dropped. Tuning happens offline against an
-exported event log. Rationale in [event profiles](15-event-profiles.md) §4.
+exported event log. Rationale in [event profiles](16-event-profiles.md) §4.
 
 ### D13 — Workshop rankings are structured labels
 
@@ -292,7 +293,7 @@ preserve dense ordered lists without a special property table. Rationale in
 ### D14 — `familyFacing` in the event profile drives the family portal
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
-[event profiles](15-event-profiles.md) §6.
+[event profiles](16-event-profiles.md) §6.
 
 ### D16 — Publication is a horizon, not a stored plan
 
@@ -336,10 +337,10 @@ constraint redundancy, and the regression corpus are all the same two calls.
 
 *Consequence:* experiments stay out of the log. An admin who tries four
 arrangements appends the events for the one they chose, so constraints in the log
-are decisions rather than sediment, and [constraint health](07-constraint-health.md)
+are decisions rather than sediment, and [constraint health](08-constraint-health.md)
 reasons only about constraints someone meant.
 
 *Cost:* the admin bundle carries the derivation core, and two runtimes execute one
 algorithm. The first is dependency-free TypeScript and is budgeted in
-[deployment](12-deployment.md); the second is held by a cross-runtime agreement
-test in [testing](13-testing.md).
+[deployment](13-deployment.md); the second is held by a cross-runtime agreement
+test in [testing](14-testing.md).
