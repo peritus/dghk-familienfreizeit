@@ -288,28 +288,29 @@ same stable entity references and remain visible in the event history.
 ### `PlanPublished`
 ```ts
 {
-  input_seq: number, solver_version: string,
-  config_hash: string, output_hash: string,
-  body: Plan,
+  solver_version: string, config_hash: string, output_hash: string,
   notify: boolean, note: string | null
 }
 ```
 
-The one event about plans. It records that an admin chose the world derived at
-`input_seq` and carries that world's complete plan body, frozen, so the published
-result stays readable from the log independently of later solver or profile
-versions.
+The one event about plans, and it records a decision rather than a result: everything
+before this event is what attendees are being told. Its own `seq` is the attendee
+horizon, so it carries no position — it is one.
 
-The latest `PlanPublished` is the active publication; an earlier one is superseded
-by a later one. Nothing stores that status — it is what "latest" means. If
-`notify`, the diff against the previous publication is computed and change emails
-are queued.
+`output_hash` is the plan the admin reviewed. It is checked on append: the server
+derives at the position the event would occupy and refuses if the hashes differ,
+which means the log moved while the admin was reading. A board apply guards itself
+the same way, on the position its pending events were composed against; publication
+guards on the plan itself, because that is what the admin actually read. Either way
+the guard is what makes a sequence number on the payload unnecessary — you publish
+the log as it stands, or you review it again.
 
-*Invariant:* `input_seq` must be greater than that of the current publication.
-Publishing an older world is not supported; derive a current one instead.
+The latest `PlanPublished` is the active publication; an earlier one is superseded by
+a later one. Nothing stores that status — it is what "latest" means. If `notify`, the
+diff across the two horizons is computed and change emails are queued.
 
-*Note:* the body is computed by the server, but the actor is the admin who
-published. Publishing is the decision; the body is its evidence.
+*Note:* the hash is computed by the server, but the actor is the admin who published.
+Publishing is the decision; the hash is what they decided about.
 
 ---
 
@@ -327,13 +328,15 @@ Worth writing down, because the boundary blurs under pressure.
 | Projection rebuild | Derivation, not decision | nowhere |
 | Workshop auto-cancelled for under-subscription | Derivation; re-derives next run | plan trace |
 | Party formation results | Derivation | plan trace |
-| An unpublished plan | Derivation; `derive()` reproduces it in milliseconds | nowhere |
+| A plan, published or not | Derivation; `derive()` reproduces it at any horizon | nowhere |
 | Pending events on an admin's board | Not yet decided; discarding one must leave no trace | that admin's browser |
 
 The test: **would replaying the log without this produce a different plan?** If
 no, it is not an event. Party formation is derived from labels and constraints,
-both of which *are* events; the formation itself is not. An unpublished plan fails
-the same test, which is why only publication writes a plan body.
+both of which *are* events; the formation itself is not. A plan fails the same test
+at every horizon, published included, which is why no plan body is written anywhere.
+What publication records is the decision to move a horizon, and a hash of what the
+admin saw when they made it.
 
 Pending events are the interesting case, because they are events in every respect
 except that nobody has committed to them. Applying them appends them here through

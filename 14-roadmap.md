@@ -63,12 +63,12 @@ have surprises in it, and they should surface now rather than in M3.
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain HTML rendering of it
 - `derive(events, config)` and `diff` — the fold lifted clear of the database
-- immutable `PlanPublished` plan bodies
+- `PlanPublished` as a horizon marker, with the reviewed `output_hash`
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
 
-**Done when:** you can compute a plan from the real inventory and real families
+**Done when:** you can derive a plan from the real inventory and real families
 (with preferences entered by hand into the database) and read the trace top to
 bottom without confusion, and you can say whether the ensuite requests are
 satisfiable — preflight C8.
@@ -127,8 +127,9 @@ in [frontend](11-frontend.md) §1 rather than continuing.
 *Attendees get answers. Two days.*
 
 - Plan diff, grouped by cause
-- Publish flow, the one-published-plan index, supersession
-- The attendee assignment view, with a print stylesheet
+- Publish flow: the horizon marker and the hash compare-and-swap
+- The attendee assignment view, derived at the publication horizon, with a print
+  stylesheet
 - Change emails computed from the diff
 - Dashboard staleness with the background derivation
 
