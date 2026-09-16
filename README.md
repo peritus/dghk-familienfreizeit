@@ -52,6 +52,8 @@ are stored as constraints rather than as edits.
 - Custom, human-readable matching constraints that admins can add and clear.
 - Per-person food preferences and allergy notes, as configured by the first
   deployed event profile.
+- Family-contributed materials and workshop-linked supplies, as configured by
+  the first deployed event profile.
 
 **Explicitly out of scope**
 

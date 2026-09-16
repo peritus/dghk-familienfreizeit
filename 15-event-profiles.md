@@ -25,6 +25,7 @@ export default defineEvent({
     rooms({ ... }),
     sleepingParties({ ... }),
     workshops({ ... }),
+    materials({ ... }),
   ],
 
   tags: {
@@ -63,6 +64,12 @@ those labels. A profile may define:
 - capabilities derived from properties, such as `indoor` or `ensuite`;
 - requirements, relations, descriptive notes, scopes, cardinality, aliases,
   strengths, and family-facing controls.
+
+The generic materials module contributes durable material-request and
+material-commitment records, validation, and fulfillment projections. Profiles
+choose category values, labels, and whether records are general event material
+or linked to a workshop. Material names, quantities, and notes remain labels
+rather than new domain columns.
 
 The resolver operators remain generic and fixed. A profile maps its tags to those
 operators but cannot add executable runtime operators.
