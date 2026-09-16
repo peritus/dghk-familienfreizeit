@@ -1,8 +1,8 @@
 # Familienfreizeit 2027 event profile
 
 This is the first deployed event profile for Bettenplan. It selects and
-configures generic room and workshop modules; it does not define a separate
-application architecture.
+configures generic room, workshop, food-preferences, and materials modules; it
+does not define a separate application architecture.
 
 ## 1. Selected modules
 
@@ -18,7 +18,9 @@ The profile enables:
 - workshop slots and workshops;
 - ordered per-person workshop rankings;
 - workshop age eligibility, capacity, cancellation, fairness, and co-assignment;
+- workshop audience and person-to-workshop leadership;
 - food preferences with one per-person diet value and optional allergy text;
+- materials contributed by families and linked to workshops;
 - admin board, family portal, notifications, and constraint health.
 
 Room adjacency is not selected for the first deployment. The generic extension
@@ -126,6 +128,8 @@ The profile defines concrete property and relationship tags, including:
 | `child_room_ok` | per-child opt-in |
 | `sole_occupancy` | do-not-share requirement |
 | `workshop_with` | workshop co-assignment relation |
+| `workshop_audience` | `children` or `adults` participation audience |
+| `leads_workshop` | person-to-workshop leadership relation; zero or more leaders |
 | `prefers_workshop` | ordered workshop choice |
 | `called_them` | descriptive admin note |
 
@@ -176,9 +180,51 @@ uses the generic ordered-choice and fairness mechanisms with these event policie
 - then maximize total rank satisfaction;
 - enforce age eligibility and capacity;
 - cancel under-subscribed workshops according to configured minimum capacity;
-- support configured co-assignment groups.
+- support configured co-assignment groups;
+- classify workshops as `children` or `adults` for participation eligibility;
+- allow zero or more leaders for children’s workshops, including child leaders.
 
-## 7. Profile metadata and copy
+Leadership does not consume participant capacity unless configured separately.
+The profile does not require every children’s workshop to have a leader.
+
+## 7. Materials
+
+The generic `materials` module is enabled for this event. It keeps requests and
+commitments as separate records:
+
+| Record | Meaning |
+|---|---|
+| `material_request` | A family or workshop says that an item is needed; it remains open until fulfilled or explicitly cancelled. |
+| `material_commitment` | A family or person pledges to bring an item; it can be withdrawn independently. |
+| `fulfills` | A generic relationship connecting a commitment to the request it satisfies. |
+
+The configured categories are:
+
+| Category | Meaning |
+|---|---|
+| `snacks` | food and drinks brought for shared use |
+| `games` | games and play materials |
+| `material` | other equipment or workshop supplies |
+
+Requests and commitments have a category, item name, quantity or description
+text, and requester or contributor labels. They may be general event records or
+linked to a workshop. A workshop-linked request may additionally identify the
+person it concerns, such as the child named in a workshop materials list.
+
+Quantities remain text so entries such as `2-3 Packs`, `5 Liter`, and `4x` are
+preserved without pretending they share a unit or measurement model. Multiple
+commitments may partially or fully satisfy one request. Outstanding quantity
+and request status are derived from the current commitments; withdrawing a
+commitment leaves the underlying request open.
+
+The event profile can represent examples such as snacks, apple juice, napkins,
+reusable or disposable tableware, an espresso machine with its safety inspection
+note and accessories, and workshop-specific supplies such as paint or textile
+markers. The supplied examples do not contain a complete normalized family or
+person mapping, so they define the supported shape rather than creating
+invented assignments.
+
+## 8. Profile metadata and copy
 
 The profile supplies the actual event name, date, preference deadline, locale,
 public description, family-facing labels, admin-facing labels, and email copy.
@@ -187,7 +233,7 @@ These values are event configuration and are included in the configuration hash.
 For this deployment, the event runs from `2027-04-30` through `2027-05-02`,
 inclusive. The user-facing German dates are 30.04.2027 to 02.05.2027.
 
-## 8. First-deployment boundary
+## 9. First-deployment boundary
 
 The profile is deployed separately with its own database and operational
 configuration. It does not introduce runtime tenancy or require unused room or

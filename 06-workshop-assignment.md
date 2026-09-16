@@ -13,9 +13,26 @@ solveWorkshops(snapshot: Snapshot, config: SolverConfig): WorkshopPlan
 Structurally simpler than room assignment — people are individuals here, not
 parties — but the fairness requirement makes the objective more interesting.
 
+## 1. Workshop audience and leadership
+
+The generic workshop model supports an event-configured participation audience.
+A workshop may be for children, adults, or another profile-defined audience.
+Audience eligibility controls participation; it does not by itself determine
+who leads the workshop.
+
+`leads_workshop` is a many-to-many person-to-workshop relation. A workshop may
+have zero, one, or many leaders, and a person may lead many workshops. The
+generic model permits both adults and children to lead. An event profile may
+constrain leader roles or require a leader, but those assumptions do not belong
+in the generic solver.
+
+Leadership is distinct from workshop assignment. A leader is not automatically
+counted as a participant or as consuming workshop capacity; an event profile
+must state that policy explicitly if it applies.
+
 ---
 
-## 1. What "fair" means, decided explicitly
+## 2. What "fair" means, decided explicitly
 
 "Fair" is not a property an algorithm can have by accident, and it is not a thing
 you can leave to a scoring function's discretion. It has to be a stated
@@ -55,7 +72,7 @@ improves your odds later, which is what people mean by fair when they say it.
 
 ---
 
-## 2. Algorithm
+## 3. Algorithm
 
 Slots are processed in `slot.sort_key` then `slot.id` order — chronological. The
 ledger threads through.
@@ -150,7 +167,7 @@ Otherwise non-participation would be rewarded with priority.
 
 ---
 
-## 3. No clash, structurally
+## 4. No clash, structurally
 
 The snapshot validator's uniqueness check for `(person_id, slot_id)` makes a
 double-booking unstorable.
@@ -163,7 +180,7 @@ Saturday morning.
 
 ---
 
-## 4. Output
+## 5. Output
 
 ```ts
 type WorkshopPlan = {
@@ -213,7 +230,7 @@ And per slot, a summary:
 
 ---
 
-## 5. Workshop constraints
+## 6. Workshop constraints
 
 The same generic constraint resolver is used for workshop matching. A custom
 `needs-provides` or `groups-with` label is visible in the trace and can be
@@ -235,7 +252,7 @@ stated preference that was previously missed because of bad data.
 
 ---
 
-## 6. Sharp edges
+## 7. Sharp edges
 
 **Capacity far exceeding demand.** If total workshop capacity greatly exceeds
 headcount, almost everyone gets their first choice, the ledger never engages, and
