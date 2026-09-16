@@ -29,6 +29,35 @@ type Event<T extends string, P> = {
 type Actor = string      // the authenticated principal, always
 ```
 
+## KDL event-log format
+
+Development and test event logs may be authored as KDL documents. Each
+top-level node represents one event: its name is the event type and its
+properties are the payload fields.
+
+```kdl
+FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
+PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role="adult" does_not_need_a_bed=#false needs_accessible=#false
+```
+
+The project accepts a restricted KDL profile: one event node per line, no
+positional arguments, and no child blocks. Blank lines and comments are allowed.
+The parser reports syntax errors with file and line locations, rejects duplicate
+properties, and maps only known event properties. Semantic validation then uses
+the ordinary event payload schemas and replay invariants; KDL does not define a
+new event vocabulary.
+
+For ordinary authored fixtures, the loader supplies deterministic envelope
+metadata: file order becomes `seq`, `actor` is `fixture`, `at` is a fixed test
+timestamp, and `subject` is null unless a fixture explicitly supplies it. Tests
+that exercise historical ordering or envelope behavior may provide `seq`, `at`,
+`actor`, and `subject` as reserved properties. The loader must reject conflicting
+or duplicate envelope fields.
+
+KDL is the canonical authored representation for development and test event
+logs. JSON may still represent API messages, serialized event rows, canonical
+hash inputs, and derived results.
+
 Every payload has a zod schema in `src/events/types.ts`. The schema is used twice:
 to validate on append, and to validate on replay. Validating on replay sounds
 redundant and is not — it catches the case where a schema changed and old events

@@ -239,13 +239,45 @@ events the reader may see. Stable URLs, authentication lookup, and every screen
 read it the same way.
 
 The database holds the event log and operational tables
-([data model](02-data-model.md) §6), nothing else. If you find a table holding
+([data model](02-data-model.md) §7), nothing else. If you find a table holding
 families, rooms, or labels, or a query that reads event payloads to answer a domain
 question, it is a bug.
 
 Plans are derived rather than maintained as authoritative state. Every screen derives
 the plan from the events it is allowed to see, and `derive` validates assignment
 uniqueness before returning a world, so there is no assignment table or plan table.
+
+## Event sources
+
+The derivation boundary consumes `Event[]`, independent of where the events came
+from. Production uses a D1-backed event source. Development and tests may use a
+text-file event source, selected explicitly by development configuration:
+
+```ts
+interface EventSource {
+  load(): Promise<Event[]>
+  append(events: Event[]): Promise<void>
+  export(): Promise<string>
+}
+```
+
+`TextFileEventSource` is a development and test adapter. Its filesystem access
+belongs to the Vite development host, not to the Worker runtime. The Worker,
+browser application, fold, resolver, and solver exchange only validated
+`Event[]`; none may import filesystem APIs or know which source was selected.
+
+The text source uses KDL (the KDL Document Language) as its authored format. A
+restricted project profile uses one top-level KDL node per event, with the node
+name as the event type and KDL properties as payload fields. File order is the
+event order. The source supplies deterministic envelope metadata when the file
+omits it and validates the resulting events with the same schemas used for D1
+replay.
+
+This source exists to make local experimentation, fixture authoring, and UI
+development quick. It is not an alternative production persistence mechanism,
+does not bypass authentication or authorization, and must be rejected by
+production configuration. The D1 event table remains the production domain
+store and the only persisted domain state.
 
 ## Staleness
 
