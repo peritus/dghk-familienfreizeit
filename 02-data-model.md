@@ -94,13 +94,6 @@ The event config may declare additional typed kinds without changing the core
 schema. For example, a festival may add `venue`, `vendor`, or `session`; a day
 workshop may use only `person`, `space`, `workshop`, and `slot`.
 
-The generic materials module may add `material_request` and
-`material_commitment` entity kinds without changing this core schema. A request
-and a commitment are intentionally separate records: a withdrawn commitment
-does not erase or close the request. The relationship that a commitment
-satisfies a request is a label resolved by the configured constraint resolver,
-not a foreign key.
-
 ## 3. Labels
 
 Labels carry all properties, capabilities, preferences, and references to other
