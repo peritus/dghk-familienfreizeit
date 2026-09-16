@@ -67,7 +67,7 @@ future extension with an explicit unit model.
 
 ## 4. Profile configuration
 
-An event profile selects the module and supplies:
+An occasion profile selects the module and supplies:
 
 - the category vocabulary and localized labels;
 - allowed requester and contributor kinds;

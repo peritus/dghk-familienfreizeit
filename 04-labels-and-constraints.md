@@ -4,11 +4,11 @@ Labels are the generic storage mechanism. A profile supplies the concrete tag
 vocabulary, values, scopes, and UI metadata that generic modules interpret. The
 examples in this document use placeholders; the concrete 2027 vocabulary is in
 [the Familienfreizeit profile](events/familienfreizeit-2027.md).
-Generic resolver operators remain fixed; event profiles cannot upload executable
+Generic resolver operators remain fixed; occasion profiles cannot upload executable
 operators.
 
 A single mechanism for intrinsic facts, preferences, capabilities, relations,
-and admin decisions. It covers both event-specific properties and matching
+and admin decisions. It covers both occasion-specific properties and matching
 constraints without adding entity-specific property columns.
 
 Built-in vocabulary lives in code; custom matching keys are defined by events
@@ -45,7 +45,7 @@ A label the solver reads is a decision; one it ignores is a note.
 
 ### The three-value scale collapses
 
-An event-specific three-way preference is represented as a required label, a
+An occasion-specific three-way preference is represented as a required label, a
 preferred label, or no label:
 
 | Preference | Stored form |
@@ -103,7 +103,7 @@ party formation, symmetry, and diagnostics.
 
 The typed tables stay, but only as identity registries. All domain properties
 are labels, including names, dates, booleans, enums, quantities, capabilities,
-and relationships. The resolver interprets labels according to event config.
+and relationships. The resolver interprets labels according to occasion config.
 
 The only non-label domain-shaped projections are solver outputs such as plan
 assignments, whose indexes assert that the resolver did not double-book an
@@ -128,7 +128,7 @@ function capabilities(room: Entity, labels: Label[]): ReadonlySet<string> {
 }
 ```
 
-This is the mechanism that keeps event configuration reusable without forcing a
+This is the mechanism that keeps occasion configuration reusable without forcing a
 schema migration for every new property:
 
 - `private-sanitary` and `ground-floor` may be configured as derived capabilities
@@ -214,7 +214,7 @@ export const tagRequirements: Rule = {
 
 Its soft counterpart, `rules/soft/tagPreferences.ts`, is the same loop over
 `strength === 'preferred'`, returning `+weight` on satisfaction and `+penalty`
-on violation (see [event profiles](16-event-profiles.md) §4 for the two-field
+on violation (see [occasion profiles](16-event-profiles.md) §4 for the two-field
 convention).
 
 Two requirement shapes are supported, and the distinction matters:

@@ -1,6 +1,6 @@
 # 16 — Event profiles
 
-An event profile composes generic modules for one deployment. It is the
+An occasion profile composes generic modules for one deployment. It is the
 authoritative source for that deployment's module selection, vocabulary, policy,
 copy, and pure evaluators. The first deployed profile is documented separately
 in [events/familienfreizeit-2027](events/familienfreizeit-2027.md).
@@ -8,7 +8,7 @@ in [events/familienfreizeit-2027](events/familienfreizeit-2027.md).
 ## 1. Profile shape
 
 The implementation profile is a typed TypeScript value at
-`events/familienfreizeit-2027.ts`. The profile builder validates the composition
+`profiles/familienfreizeit-2027.ts`. The profile builder validates the composition
 at build time and exposes one active profile to the application.
 
 ```ts
@@ -93,9 +93,9 @@ and locale-specific copy. A disabled module has no corresponding UI surface.
 
 ## 7. Deployment boundary
 
-One event profile and one database belong to one deployment. Supporting another
-event means composing another profile and deploying it separately; this design
+One occasion profile and one database belong to one deployment. Supporting another
+occasion means composing another profile and deploying it separately; this design
 does not introduce runtime multi-event tenancy.
 
 The profile is not an example configuration. It is the source of truth for the
-first deployed event, while this document defines the reusable profile contract.
+first deployed occasion, while this document defines the reusable profile contract.

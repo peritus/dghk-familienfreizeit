@@ -22,12 +22,12 @@ who leads the workshop.
 
 `leads_workshop` is a many-to-many person-to-workshop relation. A workshop may
 have zero, one, or many leaders, and a person may lead many workshops. The
-generic model permits both adults and children to lead. An event profile may
+generic model permits both adults and children to lead. An occasion profile may
 constrain leader roles or require a leader, but those assumptions do not belong
 in the generic solver.
 
 Leadership is distinct from workshop assignment. A leader is not automatically
-counted as a participant or as consuming workshop capacity; an event profile
+counted as a participant or as consuming workshop capacity; an occasion profile
 must state that policy explicitly if it applies.
 
 ---

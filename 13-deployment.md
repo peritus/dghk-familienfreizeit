@@ -60,7 +60,7 @@ This application server-renders every route, so static assets should 404 through
 to the Worker and let the router decide.
 
 `EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
-event profile ([event profiles](16-event-profiles.md)) because they are solver
+occasion profile ([occasion profiles](16-event-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
@@ -138,7 +138,7 @@ and a direct insert is undone on the next rebuild.
 ## Weight tuning
 
 There is no weight-editing screen, and this is deliberate. The offline
-workflow, from [event profiles](16-event-profiles.md) §4:
+workflow, from [occasion profiles](16-event-profiles.md) §4:
 
 ```bash
 wrangler d1 execute dghk-familienfreizeit --remote --json \
@@ -147,7 +147,7 @@ npm run tune
 ```
 
 Export the event log, run `npm run tune`, read the trade-off table, edit the
-active event profile, and deploy.
+active occasion profile, and deploy.
 
 ---
 

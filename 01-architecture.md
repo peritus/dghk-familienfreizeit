@@ -133,17 +133,17 @@ also mean **every difference between two plans has exactly one attributable caus
 new events, retuned weights, or new code. You never have to wonder which.
 
 `config_hash` is computed at runtime from the code config object. See
-[event profiles](16-event-profiles.md) §4 for what goes into it, including the
+[occasion profiles](16-event-profiles.md) §4 for what goes into it, including the
 requirement that function bodies are hashed by source.
 
 ## Module profiles
 
 The application is assembled from typed modules. This resembles feature flags at
 the selection boundary, but module composition is a build-time property rather
-than a runtime rollout switch. It is part of the event profile and therefore part
+than a runtime rollout switch. It is part of the occasion profile and therefore part
 of the configuration hash used to identify a plan.
 
-An event profile explicitly selects its modules. A selected module may contribute
+An occasion profile explicitly selects its modules. A selected module may contribute
 event schemas, labels, validation, solver stages, traces, routes, views, and test
 contracts. Modules declare dependencies; a profile that omits a required
 dependency fails validation before deployment. A disabled module contributes no
@@ -329,7 +329,7 @@ src/
     <module>/             generic contract, implementation, views, and tests
   config/
     define.ts             profile builders and tag constructors
-    index.ts               re-exports the active event profile
+    index.ts               re-exports the active occasion profile
   solver/
     index.ts              solve(solverInput, config) — pure
     solver-input.ts       projections → frozen sorted SolverInput
@@ -352,8 +352,8 @@ src/
     raw.ts                hand-written SQL for the event log
   lib/
     auth.ts  email.ts  csv.ts  dates.ts
-events/
-  familienfreizeit-2027.ts  the first deployed event profile
+profiles/
+  familienfreizeit-2027.ts  the first deployed occasion profile
 scripts/
   tune.ts                 offline weight sweep, Node not Worker
 ```

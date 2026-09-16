@@ -1,7 +1,7 @@
 # 02 — Data model
 
-This document defines the generic data model shared by event profiles. Concrete
-tags, values, module selection, and event policies belong in the event profile;
+This document defines the generic data model shared by occasion profiles. Concrete
+tags, values, module selection, and occasion policies belong in the occasion profile;
 they must not require new typed property columns or domain foreign keys.
 
 SQLite dialect, targeting Cloudflare D1. All DDL below is the real thing; it is
@@ -25,7 +25,7 @@ Conventions:
 
 - Primary keys are text, prefixed (`fam_`, `per_`, `rm_`, `bed_`, `plc_`).
 - Timestamps are ISO-8601 UTC strings. SQLite has no date type.
-- Label values are canonical JSON scalars or objects, validated by event config.
+- Label values are canonical JSON scalars or objects, validated by occasion config.
 - `sort_key` is the deterministic ordering anchor for every solver input.
 
 ## 1. The write side
@@ -87,10 +87,10 @@ CREATE TABLE workshop (id TEXT PRIMARY KEY REFERENCES entity(id));
 ```
 
 The `kind` value must match the typed table in the projector. This is an
-identity assertion, not a domain rule. Domain rules belong to event config and
+identity assertion, not a domain rule. Domain rules belong to occasion config and
 the resolver.
 
-The event config may declare additional typed kinds without changing the core
+The occasion config may declare additional typed kinds without changing the core
 schema. For example, a festival may add `venue`, `vendor`, or `session`; a day
 workshop may use only `person`, `space`, `workshop`, and `slot`.
 

@@ -1,7 +1,7 @@
 # 13 — Testing
 
 Testing is layered like the application. Generic module contract tests prove
-reusable behavior; each event profile supplies fixtures, golden plans, tag
+reusable behavior; each occasion profile supplies fixtures, golden plans, tag
 validation cases, and enabled-module integration cases. A profile never needs
 tests for modules it did not select.
 
