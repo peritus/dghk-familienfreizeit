@@ -48,7 +48,7 @@ are stored as constraints rather than as edits.
 - Deterministic room assignment with a full human-readable explanation.
 - Deterministic workshop assignment with an explicit fairness objective.
 - Drag-and-drop admin board that writes constraints, not assignments.
-- Plan snapshots, publication, and change emails on re-publication.
+- Plan solver inputs, publication, and change emails on re-publication.
 - Custom, human-readable matching constraints that admins can add and clear.
 - Per-person food preferences and allergy notes, as configured by the first
   deployed event profile.
@@ -117,22 +117,18 @@ Places. This is the atomic unit of capacity. Rooms have Beds; Beds have Places.
 needing a room capability or two people needing to stay together. Constraints
 reference stable entities, never derived Parties.
 
-**Snapshot** — the complete, frozen, sorted input to the solver, built by folding
-the event log up to a specific sequence number. A stage inside `derive`, not
-something stored.
+**Plan** — the complete solver result for the event log through an `input_seq`:
+assignments, unplaced parties, diagnostics, and a full decision trace. Plans are
+deterministic values derived on demand. A plan's identity is its `input_seq`,
+`config_hash`, and `solver_version`.
 
-**Plan** — the solver's output: assignments, unplaced parties, and a full decision
-trace. Derived on demand at a horizon, never stored. Identified by that horizon
-together with `config_hash` and `solver_version`.
-
-**Horizon** — the position in the log that decides which events count for one
-audience. Admins derive at the log head; attendees derive at the latest
-publication; the admin doing the work derives past the head, at their own pending
-events.
+**Publication** — the decision that a specific plan is what attendees should see.
+`PlanPublished` records that decision and the plan's `output_hash`; it does not
+create a second kind of plan.
 
 **World** — the complete derived state for one list of events: projections, plan,
 diagnostics, and trace. Produced by `derive(events, config)`. Never stored, always
-recomputed; the published plan body is the one frozen copy.
+recomputed; the plan referenced by the latest publication is the one attendees see.
 
 **Pending events** — events an admin has created on the board and not yet applied.
 Held in their browser, never on the server. The board derives from
@@ -155,7 +151,7 @@ is `events/familienfreizeit-2027.ts`.
 **Strength** — `required` (prunes rooms) or `preferred` (scored). An absent tag
 assignment means indifferent.
 
-**Preflight** — checks run on the snapshot before party formation, catching
+**Preflight** — checks run on a plan's solver input before party formation, catching
 infeasibility and contradictions before any placement runs.
 
 ## Decision log
@@ -189,13 +185,13 @@ See [01-architecture](01-architecture.md).
 
 ### D3 — The solver is a pure function
 
-*Chosen.* `solve(snapshot, config) → plan`. No I/O, no clock, no randomness.
+*Chosen.* `solve(solverInput, config) → plan`. No I/O, no clock, no randomness.
 Identical inputs produce byte-identical output, forever.
 
 *Why:* it makes every other good property possible. Re-runs are stable, so
 publishing twice does not shuffle people arbitrarily. Counterfactuals are cheap,
 so constraint health can be computed rather than guessed. Regression testing is a
-hash comparison. Reproducing a complaint is `solve(snapshot@seq)`.
+hash comparison. Reproducing a complaint is `solve(solverInputAt(input_seq))`.
 
 ### D4 — Sorted greedy with bounded repair, not integer programming
 
@@ -295,27 +291,23 @@ preserve dense ordered lists without a special property table. Rationale in
 *Chosen.* The preferences page becomes a renderer. Rationale in
 [event profiles](16-event-profiles.md) §6.
 
-### D16 — Publication is a horizon, not a stored plan
+### D16 — Publication identifies a plan; it does not create another plan
 
-*Chosen.* `PlanPublished` marks a position in the log. Everything before it is what
-attendees are told, so the marker carries a hash of what the admin reviewed and no
-plan body. Every audience — the working admin, the other admins, the attendees —
-derives from the same list cut at a different point.
+*Chosen.* `PlanPublished` identifies the plan derived from the events before the
+publication event. It carries the hash of what the admin reviewed. Every audience
+derives the same kind of plan from the events visible to that audience: the working
+admin may include pending events, other admins use the log head, and attendees use
+the events before the latest publication.
 
-*Rejected alternative:* store the full plan body on publication, so a published
-result stays readable even after the solver or profile changes.
+*Rejected alternative:* store a second published-plan type alongside the ordinary
+plan, so publication would have a separate result shape.
 
-*Why it loses:* it is a code-versioning problem answered inside the event log.
-`solver_version` and git already answer it, and the stored body actively hides the
-one thing worth knowing — that deployed code has stopped agreeing with what
-attendees were told. Comparing a recorded `output_hash` against a fresh derivation
-surfaces that as ordinary staleness; a stored body renders happily and says nothing.
-The body is also the only thing large enough to matter in a log the admin board now
-downloads whole: a hundred kilobytes with its trace, several times over, against a
-decision log measured in hundreds of kilobytes total.
+*Why it loses:* publication is a state of a plan, not a second domain object.
+`solver_version`, `config_hash`, and `output_hash` identify and verify the plan
+without introducing another vocabulary layer.
 
 *Consequence:* attendee privacy stops being a rule and becomes a data path. There is
-no filter to forget, because an attendee's derivation cannot reach past its horizon.
+no filter to forget, because an attendee's derivation cannot reach past its input sequence.
 
 ### D15 — Derivation is a named primitive, and the client may call it
 

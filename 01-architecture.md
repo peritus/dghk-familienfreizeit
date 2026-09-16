@@ -12,8 +12,8 @@
         │            derive(events, config)            │
         │                                              │
         │     fold      events      → projections      │
-        │     snapshot  projections → frozen, sorted   │
-        │     solve     snapshot    → plan + trace     │
+        │     solver input  projections → frozen, sorted   │
+        │     solve     solver input    → plan + trace     │
         │                                              │
         │             pure · deterministic             │
         └──────────────────────┬───────────────────────┘
@@ -43,7 +43,7 @@ diff(a: World, b: World): Change[]               // what moved, grouped by cause
 ```
 
 Neither performs I/O, reads a clock, or uses randomness. `derive` is the fold, the
-snapshot builder, and the solver composed; it inherits the determinism contract in
+solver input builder, and the solver composed; it inherits the determinism contract in
 [room assignment](05-room-assignment.md) §1 whole, so identical event lists produce
 byte-identical worlds on any machine.
 
@@ -107,11 +107,10 @@ One function, one list, cut at three points. The two admin cuts differ by whethe
 change has been appended yet, which is what **Apply** does. The attendee cut differs
 by whether it has been published, which is what **Publish** does.
 
-**Publication is a marker, not a record.** `PlanPublished` says that everything
-before it is what attendees are being told. Its own position in the log is the
-horizon, so it carries no sequence number — it is one. The latest such marker is the
-active publication, and earlier ones are history; nothing stores that status because
-"latest" already says it.
+**Publication is a record about a plan.** `PlanPublished` says that the plan derived
+from the events before it is what attendees are being told. Its own position in the
+log identifies the plan's `input_seq`. The latest such event is the active
+publication; earlier events remain publication history.
 
 ```
 PlanPublished
@@ -128,7 +127,7 @@ derivation disagrees, which means the log moved while they were reading. And it 
 the record of what was actually sent, which is what makes code drift detectable
 rather than silent.
 
-**A plan's identity is the horizon it was derived at.** That, `config_hash`, and
+**A plan's identity is the input sequence it was derived at.** That, `config_hash`, and
 `solver_version` name it completely, which is why there is no plan id. Those three
 also mean **every difference between two plans has exactly one attributable cause** —
 new events, retuned weights, or new code. You never have to wonder which.
@@ -238,13 +237,13 @@ lookup, and query shape — not for derivation, which folds in memory and never
 reads them. Never written to directly outside the projector. If you find an
 `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
 
-No plan is stored, published or otherwise. Every screen derives at its horizon, and
-`derive` validates assignment uniqueness before returning a world, so there is no
-assignment table and no plan table either.
+Plans are derived rather than maintained as authoritative state. Every screen derives
+the plan from the events it is allowed to see, and `derive` validates assignment
+uniqueness before returning a world, so there is no assignment table or plan table.
 
 ## Staleness
 
-The distance between the attendee horizon and the log head:
+The distance between the latest published plan's input sequence and the log head:
 
 ```sql
 SELECT (SELECT MAX(seq) FROM event) - seq AS events_behind
@@ -254,7 +253,7 @@ ORDER BY seq DESC
 LIMIT 1;
 ```
 
-`events_behind > 0` means attendees may be looking at something older than what the
+`events_behind > 0` means attendees may be looking at a plan older than what the
 admins have. The dashboard shows it permanently. It is the single most important
 number on the screen, because it is the one that answers "do I need to do anything
 today".
@@ -262,10 +261,10 @@ today".
 Not every event should make a plan stale — a family correcting the spelling of a
 name does not change any assignment. Rather than filtering event types (fragile, and
 it will be wrong the first time someone adds an event type), compute staleness
-properly, by deriving at both horizons:
+properly, by deriving the published plan and the current plan:
 
 ```
-diff(derive(attendee horizon), derive(log))
+diff(derive(log before latest PlanPublished), derive(log))
 ```
 
 Empty → "up to date despite N new events". Non-empty → "N changes would move M
@@ -275,8 +274,8 @@ milliseconds, and it turns a scary number into an accurate one.
 ### Code drift
 
 Events are one of three things that move a plan; the others are retuned weights and
-new code, and both arrive by deploy rather than by append. Deriving at the attendee
-horizon and comparing to the recorded `output_hash` catches them:
+new code, and both arrive by deploy rather than by append. Deriving the published
+plan and comparing it to the recorded `output_hash` catches them:
 
 > ⚠ Publication #7 was made under solver 2.1.0. The deployed solver derives a
 > different plan from the same events. **Review and re-publish →**
@@ -288,16 +287,16 @@ disagree with it in silence.
 
 ## Publication and change notification
 
-Publishing moves the attendee horizon and, optionally, runs the emails.
+Publishing records the current plan as the attendee plan and, optionally, runs the emails.
 
 ```
 1. Admin reviews the current plan and its diff against the published one.
 2. Admin publishes → PlanPublished { output_hash, …, notify, note }
    — refused with the diff if the server derives a different output_hash
-3. If notify: diff across the two horizons, email only affected families
+3. If notify: diff the previously published plan against the new plan, email only affected families
 ```
 
-Step 3 is a `for` loop over `diff(derive(previous horizon), derive(new horizon))`. A
+Step 3 is a `for` loop over `diff(previous published plan, new plan)`. A
 family is affected if any of its people changed room, place, or workshop — which is
 what a `Change` records.
 
@@ -332,8 +331,8 @@ src/
     define.ts             profile builders and tag constructors
     index.ts               re-exports the active event profile
   solver/
-    index.ts              solve(snapshot, config) — pure
-    snapshot.ts           projections → frozen sorted Snapshot
+    index.ts              solve(solver input, config) — pure
+    solver input.ts           projections → frozen sorted SolverInput
     preflight.ts           C1–C9
     parties.ts            phase A
     place.ts              phases 0-3

@@ -46,8 +46,8 @@ CREATE INDEX event_type_idx    ON event(type, seq);
 CREATE INDEX event_subject_idx ON event(subject, seq);
 ```
 
-`seq` is the total order of the system. A snapshot fixes the solver input at one
-sequence number. Events are never deleted.
+`seq` is the total order of the system. A plan records the `input_seq` through which
+its solver input was built. Events are never deleted.
 
 `actor` identifies the authenticated principal. Admin authorization comes from
 the verified login identity and a code-level allowlist, not from a domain label.
@@ -254,5 +254,5 @@ CREATE TABLE email_log (
 ## Cleanup
 
 Expired magic links, sessions, and rate-limit buckets may be deleted. Domain
-events, labels, constraint definitions, snapshots, and withdrawn entities are
+events, labels, constraint definitions, and withdrawn entities are
 never deleted.
