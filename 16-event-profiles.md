@@ -81,9 +81,9 @@ The configuration hash includes profile metadata, selected module ids and
 versions, module parameters, tags, phases, weights, and the source of profile
 functions. This makes configuration changes visible in plan metadata.
 
-Historical plan bodies remain authoritative. The currently deployed profile is
-used for new solves; retaining a plan body does not promise that a later profile
-can reproduce the historical solve exactly.
+Historical plan metadata remains authoritative. The currently deployed profile is
+used for new solves; the recorded solver and configuration versions identify the
+implementation that produced an earlier plan.
 
 ## 6. UI and copy
 

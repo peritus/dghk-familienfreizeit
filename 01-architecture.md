@@ -92,7 +92,7 @@ Pending events live in the admin's browser for as long as that tab is open. They
 never stored on the server, never shared between admins, and never visible to
 attendees.
 
-## Horizons
+## Plan inputs
 
 `derive` takes a list of events, so the only question any screen has to answer is
 which events count. Three answers, and they are the whole visibility model:
@@ -109,7 +109,7 @@ by whether it has been published, which is what **Publish** does.
 
 **Publication is a record about a plan.** `PlanPublished` says that the plan derived
 from the events before it is what attendees are being told. Its own position in the
-log identifies the plan's `input_seq`. The latest such event is the active
+log identifies the preceding plan's `input_seq`. The latest such event is the active
 publication; earlier events remain publication history.
 
 ```
@@ -162,7 +162,7 @@ places, or sleeping-party formation. The first deployed profile enables both.
 ## Why CQRS is cheap at this size
 
 CQRS and event sourcing usually cost a lot: incremental projections that can
-drift, catch-up subscriptions, snapshotting strategies, eventual consistency in
+drift, catch-up subscriptions, derived-state caching, eventual consistency in
 the UI, and the operational burden of a log you can never fully replay because
 it is too big.
 
@@ -290,7 +290,7 @@ disagree with it in silence.
 Publishing records the current plan as the attendee plan and, optionally, runs the emails.
 
 ```
-1. Admin reviews the current plan and its diff against the published one.
+1. Admin reviews the current plan and its diff against the previously published plan.
 2. Admin publishes → PlanPublished { output_hash, …, notify, note }
    — refused with the diff if the server derives a different output_hash
 3. If notify: diff the previously published plan against the new plan, email only affected families
@@ -331,8 +331,8 @@ src/
     define.ts             profile builders and tag constructors
     index.ts               re-exports the active event profile
   solver/
-    index.ts              solve(solver input, config) — pure
-    solver input.ts           projections → frozen sorted SolverInput
+    index.ts              solve(solverInput, config) — pure
+    solver-input.ts       projections → frozen sorted SolverInput
     preflight.ts           C1–C9
     parties.ts            phase A
     place.ts              phases 0-3

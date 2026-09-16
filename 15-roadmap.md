@@ -53,7 +53,7 @@ have surprises in it, and they should surface now rather than in M3.
 
 *The riskiest milestone. Do it third, not last. Three to four days.*
 
-- `snapshot.ts` with the freeze-and-sort discipline
+- `solver-input.ts` with the freeze-and-sort discipline
 - Preflight, C1–C9
 - The two generic handlers, `tagRequirements` and `tagPreferences`, replacing
   eight rule files — the generic handlers keep the implementation small
@@ -63,7 +63,7 @@ have surprises in it, and they should surface now rather than in M3.
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain HTML rendering of it
 - `derive(events, config)` and `diff` — the fold lifted clear of the database
-- `PlanPublished` as a horizon marker, with the reviewed `output_hash`
+- `PlanPublished` identifying the plan's `input_seq`, with the reviewed `output_hash`
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
@@ -127,8 +127,8 @@ in [frontend](12-frontend.md) §1 rather than continuing.
 *Attendees get answers. Two days.*
 
 - Plan diff, grouped by cause
-- Publish flow: the horizon marker and the hash compare-and-swap
-- The attendee assignment view, derived at the publication horizon, with a print
+- Publish flow: the publication event and the hash compare-and-swap
+- The attendee assignment view, derived from the plan selected by publication, with a print
   stylesheet
 - Change emails computed from the diff
 - Dashboard staleness with the background derivation
