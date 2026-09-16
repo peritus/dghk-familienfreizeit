@@ -28,3 +28,9 @@ Use the same full-width mobile card as UI-01. The page has one primary action,
 an informative status heading, and a logical focus target on the recovery
 button. A network failure while requesting a new link returns to UI-01 with a
 generic retry message.
+
+## Neobrutalist redesign and components
+
+Use one `Card` with the expired state in an `Alert`, followed by one primary
+`Button`. Do not style the failure as red-only: pair its `Badge` or border
+treatment with the plain-language heading and recovery action.
