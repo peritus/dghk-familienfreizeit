@@ -112,11 +112,14 @@ Places. This is the atomic unit of capacity. Rooms have Beds; Beds have Places.
 needing a room capability or two people needing to stay together. Constraints
 reference stable entities, never derived Parties.
 
-**Snapshot** — the complete, frozen, sorted input to the solver, built by
-replaying the event log up to a specific sequence number.
+**Snapshot** — the complete, frozen, sorted input to the solver, built by folding
+the event log up to a specific sequence number. A stage inside `derive`, not
+something stored.
 
-**Plan** — the solver's output: assignments, unplaced parties, and a full
-decision trace. Stored immutably. Either `draft`, `published`, or `superseded`.
+**Plan** — the solver's output: assignments, unplaced parties, and a full decision
+trace. Derived on demand and identified by the log position it was derived from.
+Publishing freezes one copy in the log, and the latest published plan is the
+active one.
 
 **World** — the complete derived state for one list of events: projections, plan,
 diagnostics, and trace. Produced by `derive(events, config)`. Never stored, always

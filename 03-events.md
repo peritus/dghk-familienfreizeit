@@ -26,9 +26,7 @@ type Event<T extends string, P> = {
   payload: P
 }
 
-type Actor =
-  | string                // authenticated principal
-  | 'system'               // only ever PlanSnapshotted
+type Actor = string      // the authenticated principal, always
 ```
 
 Every payload has a zod schema in `src/events/types.ts`. The schema is used twice:
@@ -285,28 +283,33 @@ same stable entity references and remain visible in the event history.
 
 ---
 
-## Solver and publication
-
-### `PlanSnapshotted`
-```ts
-{ snapshot_id: string, input_seq: number, solver_version: string,
-  config_hash: string, output_hash: string, body: Plan }
-```
-Actor is always `system`. The complete immutable plan body is stored in the log.
-
-Note `input_seq` will always be `seq - 1` relative to this event, since computing
-the plan appends to the log. Harmless, but worth knowing when reading raw logs.
+## Publication
 
 ### `PlanPublished`
 ```ts
-{ snapshot_id: string, notify: boolean, note: string | null }
+{
+  input_seq: number, solver_version: string,
+  config_hash: string, output_hash: string,
+  body: Plan,
+  notify: boolean, note: string | null
+}
 ```
-Marks this snapshot as the published result. The latest `PlanPublished` event is
-the active publication; a later publication supersedes it. If `notify`, the
-diff is computed and change emails are queued.
 
-*Invariant:* the snapshot must not already be published. Re-publishing an older
-snapshot is not supported; re-run the solver instead.
+The one event about plans. It records that an admin chose the world derived at
+`input_seq` and carries that world's complete plan body, frozen, so the published
+result stays readable from the log independently of later solver or profile
+versions.
+
+The latest `PlanPublished` is the active publication; an earlier one is superseded
+by a later one. Nothing stores that status — it is what "latest" means. If
+`notify`, the diff against the previous publication is computed and change emails
+are queued.
+
+*Invariant:* `input_seq` must be greater than that of the current publication.
+Publishing an older world is not supported; derive a current one instead.
+
+*Note:* the body is computed by the server, but the actor is the admin who
+published. Publishing is the decision; the body is its evidence.
 
 ---
 
@@ -324,7 +327,15 @@ Worth writing down, because the boundary blurs under pressure.
 | Projection rebuild | Derivation, not decision | nowhere |
 | Workshop auto-cancelled for under-subscription | Derivation; re-derives next run | plan trace |
 | Party formation results | Derivation | plan trace |
+| An unpublished plan | Derivation; `derive()` reproduces it in milliseconds | nowhere |
+| Pending events on an admin's board | Not yet decided; discarding one must leave no trace | that admin's browser |
 
 The test: **would replaying the log without this produce a different plan?** If
 no, it is not an event. Party formation is derived from labels and constraints,
-both of which *are* events; the formation itself is not.
+both of which *are* events; the formation itself is not. An unpublished plan fails
+the same test, which is why only publication writes a plan body.
+
+Pending events are the interesting case, because they are events in every respect
+except that nobody has committed to them. Applying them appends them here through
+the ordinary path — validated, authorised, and written in one `batch()` so the set
+lands whole or not at all. Discarding them does nothing at all, which is the point.
