@@ -12,7 +12,7 @@ The profile enables:
   UI modules;
 - room inventory with buildings, rooms, beds, places, and capacity;
 - sleeping-party formation and deterministic room assignment;
-- children’s rooms with event-configured age bands, opt-in, minimum occupancy,
+- children’s rooms with explicit child-group capabilities and minimum occupancy,
   and family fallback;
 - co-rooming and keep-apart relations;
 - workshop slots and workshops;
@@ -113,29 +113,51 @@ The profile defines concrete property and relationship tags, including:
 
 | Tag | Purpose |
 |---|---|
-| `room_type` | room, bungalow, or tent |
-| `floor` | room floor |
 | `designation` | general, child, staff, or blocked room |
-| `child_min_age` / `child_max_age` | children’s-room age band |
-| `has_ensuite` | room bathroom fact |
-| `is_outside` | indoor/outdoor room fact |
 | `is_accessible` | accessibility fact |
 | `role` | adult, child, or infant |
-| `occupies_bed` | whether a person consumes a place |
+| `does_not_need_a_bed` | explicit exception to the default bed demand |
 | `needs_accessible` | accessibility requirement fact |
 | `room_with` | co-room relation |
 | `apart_from` | keep-apart relation |
-| `child_room_ok` | per-child opt-in |
+| `provides_child_group` | room capability naming a child group |
+| `needs_child_group` | child requirement naming a child group |
 | `sole_occupancy` | do-not-share requirement |
 | `workshop_with` | workshop co-assignment relation |
 | `workshop_audience` | `children` or `adults` participation audience |
 | `leads_workshop` | person-to-workshop leadership relation; zero or more leaders |
 | `prefers_workshop` | ordered workshop choice |
-| `called_them` | descriptive admin note |
 
-The profile may derive generic capabilities such as `indoor`, `ensuite`,
-`ground_floor`, and `accessible` from those properties. It configures the generic
-resolver rather than adding new resolver operators.
+`room_type`, `building`, and `floor` are already defined by the room inventory's
+room-tag vocabulary above. This table lists only additional event vocabulary.
+The child-group labels use the generic `needs-provides` resolver operator:
+rooms provide a stable child-group entity and children need that same entity.
+There is no age-band or opt-in rule.
+
+### Tag semantics
+
+| Tag | Applies to | Semantics |
+|---|---|---|
+| `designation` | room | Declares whether a room is `general`, `child`, `staff`, or `blocked`; blocked rooms require a reason. |
+| `is_accessible` | room | States that the room provides the configured accessibility capability. |
+| `role` | person | States `adult`, `child`, or `infant`; it is supplied data, not derived from birthdate. |
+| `does_not_need_a_bed` | person | Defaults to false. When true, the person contributes no bed demand while remaining part of the family and other assignments. |
+| `needs_accessible` | person or family | Requires or prefers an accessible room, according to label strength. |
+| `room_with` | family or person | Requests co-rooming with another stable entity; required values form a group, preferred values remain soft. |
+| `apart_from` | family or person | Requires or prefers separation from another stable entity; it conflicts with a required `room_with`. |
+| `provides_child_group` | child room | Names the stable child-group capability that this room offers. |
+| `needs_child_group` | child | Names the stable child group whose room capability the child requires. |
+| `sole_occupancy` | family or person | Requires that the resulting room or sleeping unit contain no unrelated occupants. |
+| `workshop_with` | person | Requests co-assignment with another person for a workshop slot; required values form a group. |
+| `workshop_audience` | workshop | Restricts participation to the configured audience, here `children` or `adults`. |
+| `leads_workshop` | person | Records that a person leads a workshop; zero or more leaders are allowed, including children. |
+| `prefers_workshop` | person | Stores an ordered workshop ranking scoped to one slot. |
+
+`needs_accessible`, `room_with`, `apart_from`, `sole_occupancy`, and
+`workshop_with` use the generic required/preferred strength model. The two
+child-group tags are a `needs-provides` match: a child requires the group and a
+child room provides it. They are not an age rule, an opt-in flag, or a free-form
+note.
 
 ## 4. Food preferences
 
@@ -161,14 +183,14 @@ inventing person or family assignments.
 
 ## 5. Room policy
 
-The profile uses family residue parties, child-room allocation before party
+The profile uses family residue parties, child-group allocation before party
 formation, strictest-strength requirement inheritance, mutual-required co-room
 merging, one-sided soft co-room preferences, keep-apart constraints, and
 deterministic greedy placement with bounded repair.
 
 Required and preferred room requirements use the generic strength model. Concrete
-weights, age bands, minimum child-room occupancy, room designations, and capacity
-values are profile parameters.
+weights, child-group assignments, minimum child-room occupancy, room
+designations, and capacity values are profile parameters.
 
 ## 6. Workshop policy
 

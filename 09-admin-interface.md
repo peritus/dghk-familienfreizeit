@@ -171,7 +171,7 @@ happens before party formation and determines everything after:
 > Jonas Müller (9), Lena Schmidt (11), Ada Weber (10), Nils Weber (13), Mia Braun (8)
 > 1 place free.
 >
-> **Not placed:** Tim Braun (7) — below the age band for every children's room.
+> **Not placed:** Tim Braun — no matching child-group room was available.
 > Returned to the Braun family party.
 
 ---
@@ -212,7 +212,7 @@ drop without opening anything:
 - **Number and place count**, with filled and free places as discrete marks
   (`●●●○○`). Discrete marks rather than a bar, because the question is always
   "how many more fit", and counting five dots is faster than reading "3/5".
-- **Attribute chips**: ensuite, outside, accessible, child room with its age band.
+- **Attribute chips**: sanitary arrangement, accessible, and child-group capability.
 - **Occupants**, one line per party with size.
 - **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
   `⚲` constrained by an admin rule.
@@ -411,7 +411,7 @@ preference heatmap — people down one axis, workshops across, cells shaded by
 rank. It makes oversubscription and dead workshops obvious at a glance, which is
 the information needed to adjust capacities before running the solver.
 
-Warnings: below minimum capacity, no eligible participants, age bands that
+Warnings: below minimum capacity, no eligible participants, child-group mappings that
 partition the population and strand people.
 
 ---

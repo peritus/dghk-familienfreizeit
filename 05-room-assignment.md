@@ -172,7 +172,7 @@ type Party = {
   key: string                  // sha256(sorted person ids).slice(0,12)
   personIds: readonly string[] // sorted
   size: number                 // headcount
-  bedDemand: number            // count of persons with occupies_bed = 1
+  bedDemand: number            // count of persons with does_not_need_a_bed = false
   requirements: readonly { tag: Tag, strength: 'required' | 'preferred' }[]
   provenance: readonly string[]   // human-readable lines, per requirement
 }
@@ -190,14 +190,13 @@ Nothing may persist a party key as a reference. Constraints reference people. Th
 exists only to correlate a party across the phases of a single run and to label
 rows in the trace.
 
-### A.1 Children's rooms, allocated first
+### A.1 Child groups, allocated first
 
 This ordering is the single most important sequencing decision in the solver.
 
-A child who opts into a children's room but does not get a place must fall back
-to their family. If family parties are formed first, that fallback mutates a
-party's size after placement reasoning has begun, and determinism dies in the
-patching.
+A child whose requested child group does not get a place must fall back to their
+family. If family parties are formed first, that fallback mutates a party's size
+after placement reasoning has begun, and determinism dies in the patching.
 
 So: **allocate children's-room places, then form family parties from the
 residue.**
@@ -205,9 +204,8 @@ residue.**
 ```
 eligible = persons where
     role = 'child'
-  and has tag 'child-room-ok'
+  and has a 'needs_child_group' label
   and not constrained to a non-child room
-  and ageAt(birthdate, eventDate) within some child room's band
 
 sort eligible by:
   1. needs_accessible desc
@@ -218,7 +216,8 @@ sort eligible by:
 childRooms = rooms where designation = 'child', sorted by (sort_key, id)
 
 for each childRoom in order:
-    candidates = eligible not yet placed, whose age fits this room's band
+    candidates = eligible not yet placed, whose 'needs_child_group' value is
+                 provided by this room
     take up to childRoom.placeCount, in eligible order
     if taken count < phases.childRooms.minOccupants: release them back to the pool
     else: place them, emit trace
@@ -229,21 +228,21 @@ for each childRoom in order:
 child, and a wasted bed. Refuse it. The released children return to their
 family parties.
 
-Because there is no adult-supervision requirement, a children's room needs no
-further constraint beyond the age band. If that changes, it becomes one more hard
-rule in `rules/hard/`; the generic constraints that expressed the workaround can
-then be cleared.
+Child-group matching is explicit: a child carries `needs_child_group=childgroupA`
+and a compatible child room carries `provides_child_group=childgroupA`. There is
+no implicit age-band or opt-in rule. If a group needs adult supervision, that is
+modeled separately through the generic person/room relationships.
 
 **Trace output for this step, per child room:**
 
-> `K3` (Haus B, Raum 22, 6 places, ages 8–14) ← 5 children: Müller Jonas (9),
-> Schmidt Lena (11), Weber Ada (10), Weber Nils (13), Braun Mia (8).
-> 1 place left empty. Braun Tim (7) not eligible: age below band.
+> `K3` (Haus B, Raum 22, 6 places, childgroupA) ← 5 children: Müller Jonas,
+> Schmidt Lena, Weber Ada, Weber Nils, Braun Mia.
+> 1 place left empty. Braun Tim has no matching child-group requirement.
 
 **Trace output for a released child:**
 
-> Müller Jonas (9) opted into a children's room; `K3` and `K7` were full.
-> Returned to family party. Müller party size 2 → 3.
+> Müller Jonas needs `childgroupA`; `K3` and `K7` were full. Returned to family
+> party. Müller party size 2 → 3.
 
 That second line is exactly what an admin needs when the family emails asking why
 Jonas is not with his friends.

@@ -27,7 +27,7 @@ provides=ensuite                  a room has its own bathroom
 needs=needs-ensuite (required)     a family cannot accept a room without one
 needs=room-with-garden-view        a person needs a matching room capability
 provides=room-with-garden-view     a room offers that capability
-needs=child-room-ok                this child may sleep in a children's room
+needs=childgroupA                  this child needs a room providing childgroupA
 separates-from=family_27           this family must not share with family 27
 ```
 
@@ -114,7 +114,7 @@ entity. They are not authoritative inputs.
 ## 3. Capabilities come from labels
 
 A room's capability set is read from its `provides` labels. Properties such as
-`has-ensuite=true`, `floor=0`, and `is-accessible=true` are labels too. A
+`sanitary=private`, `floor=0`, and `is-accessible=true` are labels too. A
 configured resolver may derive a capability from those labels, but the derived
 value is never stored as a competing column or manually assigned fact:
 
@@ -131,8 +131,8 @@ function capabilities(room: Entity, labels: Label[]): ReadonlySet<string> {
 This is the mechanism that keeps event configuration reusable without forcing a
 schema migration for every new property:
 
-- `ensuite` and `ground-floor` may be configured as derived capabilities from
-  `has-ensuite` and `floor`. No duplicate property columns are needed.
+- `private-sanitary` and `ground-floor` may be configured as derived capabilities
+  from `sanitary` and `floor`. No duplicate property columns are needed.
 - `near-the-hall`, invented in week three, is **assigned** as a `provides` label.
   No migration or code deployment.
 - If `near-the-hall` turns out to matter every year, it can become a built-in
@@ -152,7 +152,8 @@ appended ([03-events](03-events.md)). The checks are:
 2. **Scope matches** the entity kind and operator.
 3. **Value type matches** the definition and entity references resolve.
 4. **Strength is legal** for the constraint.
-5. **Cardinality and validity pass**, including `child-room-ok` only on children.
+5. **Cardinality and validity pass**, including child-group requirements only on
+   children and child-group capabilities only on child rooms.
 
 Failures are field-level errors on the form, never silent. Because `type Tag =
 keyof typeof profile.tags`, a bad tag in *code* is a compile error, and a zod
@@ -292,7 +293,7 @@ placement runs.
 | C3 | Contradictory tags on one entity (`sole-occupancy: required` with any `room-with: required`) | error |
 | C4 | A mutual-required component's bed demand exceeds the largest feasible room | error |
 | C5 | Scope violation — a person-scoped tag on a family | error |
-| C6 | `validFor` failure — `child-room-ok` on an adult | warning |
+| C6 | `validFor` failure — a child-group requirement on a non-child person or a child-group capability on a non-child room | warning |
 | C7 | An assignment names a tag no longer in the profile | warning |
 | C8 | **Requirement arithmetic** — demand for a capability exceeds supply | error |
 | C9 | A transitive merge cascade produced a party nobody asked for | info |
