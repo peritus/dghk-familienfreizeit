@@ -26,11 +26,14 @@ English ASCII wireframes, state behavior, accessibility, and responsive notes.
 | `/admin/plans/:a/diff/:b` | Plan diff | What moved and why |
 | `/admin/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
 | `/admin/constraints` | Constraints | Create, inspect, clear, and explain matching constraints |
+| `/admin/reports` | Reports | Printable operational reports with audience and sensitivity scopes |
 
 Every screen is a view over the admin application's world
 ([frontend](12-frontend.md) §3). None has a server route of its own: the application
 loads the committed log once, derives, and writes only through apply and the email
-actions.
+actions. Reports follow the same rule and are defined in [reports](19-reports.md);
+shared attendee reports are rendered from the published world through the family
+portal rather than becoming admin-only exports.
 
 `/admin/constraints` renders built-in and custom definitions, shows which labels
 are in use and by how many entities, and lists current

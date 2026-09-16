@@ -95,14 +95,20 @@ attendees.
 
 ## Plan inputs
 
-`derive` takes a list of events, so the only question any screen has to answer is
-which events count. Three answers, and they are the whole visibility model:
+`derive` takes a list of events, so the only question any screen or report has to
+answer is which events count. Three answers, and they are the whole visibility
+model:
 
 ```
 the working admin    derive(log ++ their pending events)
 every other admin    derive(log)
 attendees            derive(log before the latest PlanPublished)
 ```
+
+Reports use these same cuts and are audience-scoped rather than admin-only by
+default. Shared coordination reports such as materials and the workshop
+programme are available to authenticated attendees when their fields are safe to
+share. The complete report contract and catalogue are in [reports](19-reports.md).
 
 One function, one list, cut at three points. The two admin cuts differ by whether a
 change has been appended yet, which is what **Apply** does. The attendee cut differs
