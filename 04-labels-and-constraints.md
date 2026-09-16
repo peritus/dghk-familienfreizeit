@@ -64,30 +64,21 @@ clears the label.
 
 One generic projection stores properties and constraints for every typed entity.
 The entity tables remain useful identity registries; this table owns their
-domain attributes and relationships.
+domain attributes and relationships. Its schema is defined once, in
+[data model](02-data-model.md) §3, as the shape the fold produces.
 
-```sql
-CREATE TABLE label (
-  entity_id   TEXT NOT NULL,
-  key         TEXT NOT NULL,
-  value       TEXT NOT NULL,
-  strength    TEXT          CHECK (strength IN ('required','preferred')),
-  set_at      TEXT NOT NULL,
-  set_by      TEXT NOT NULL,             -- actor string from the event
-  PRIMARY KEY (entity_id, key, value)
-);
+Three details of that shape are not arbitrary.
 
-CREATE INDEX label_by_key_value ON label(key, value, entity_id);
-```
+**The value is non-null.** Every label has a canonical scalar or entity-id
+value, so the generic projection has one unambiguous key.
 
-Three details that are not arbitrary.
-
-**`value` is non-null.** Every label has a canonical scalar or entity-id value,
-so the generic projection has one unambiguous key.
-
-**The reference lives in `value`, not in the key.** `needs=family_27` is
+**The reference lives in the value, not in the key.** `needs=family_27` is
 the mental model and the label an admin sees. The resolver indexes the key and
 value without requiring a foreign key in the label projection.
+
+**The lifetime is a pair of sequence numbers, not a timestamp and an actor.**
+The event that produced a row already carries `at` and `actor`, and sequence
+bounds are what let the same fold run to an earlier point in the log.
 
 **Keys carry no foreign key.** Built-in definitions are code and custom
 definitions are events. Validity is enforced on append and replay by the
@@ -147,7 +138,7 @@ schema migration for every new property:
 - If `near-the-hall` turns out to matter every year, it can become a built-in
   configured capability without changing the database schema.
 
-One rule: **a capability is derived or assigned, never both.** A registry entry
+One rule: **a capability is derived or assigned, never both.** A profile tag
 with a derivation rejects direct `provides` assignments at append time.
 
 ---
@@ -164,11 +155,11 @@ appended ([03-events](03-events.md)). The checks are:
 5. **Cardinality and validity pass**, including `child-room-ok` only on children.
 
 Failures are field-level errors on the form, never silent. Because `type Tag =
-keyof typeof registry`, a bad tag in *code* is a compile error, and a zod enum
-derived from the same object makes a bad tag from a *request* a validation error.
-There is no path by which an unknown tag enters the log.
+keyof typeof profile.tags`, a bad tag in *code* is a compile error, and a zod
+enum derived from the same object makes a bad tag from a *request* a validation
+error. There is no path by which an unknown tag enters the log.
 
-Tags removed from the registry mid-run are the one remaining case, handled as
+Tags removed from the profile mid-run are the one remaining case, handled as
 preflight C7 (§6): the projection retains them, the solver ignores them, the
 report names them.
 
@@ -201,7 +192,7 @@ export const tagRequirements: Rule = {
     const missing: Tag[] = []
 
     for (const req of party.requirements) {
-      const def = registry[req.tag]
+      const def = profile.tags[req.tag]
       const ok = def.satisfiedBy
         ? have.has(def.satisfiedBy)
         : def.check!(party, room, ctx)       // structural, e.g. sole-occupancy
@@ -214,7 +205,7 @@ export const tagRequirements: Rule = {
   describe(party, room, ctx) {
     const missing = /* as above */
     return missing.length
-      ? `${roomLabel(room)} fehlt: ${missing.map(t => registry[t].label).join(', ')}`
+      ? `${roomLabel(room)} fehlt: ${missing.map(t => profile.tags[t].label).join(', ')}`
       : null
   },
 }
@@ -302,7 +293,7 @@ placement runs.
 | C4 | A mutual-required component's bed demand exceeds the largest feasible room | error |
 | C5 | Scope violation — a person-scoped tag on a family | error |
 | C6 | `validFor` failure — `child-room-ok` on an adult | warning |
-| C7 | An assignment names a tag no longer in the registry | warning |
+| C7 | An assignment names a tag no longer in the profile | warning |
 | C8 | **Requirement arithmetic** — demand for a capability exceeds supply | error |
 | C9 | A transitive merge cascade produced a party nobody asked for | info |
 

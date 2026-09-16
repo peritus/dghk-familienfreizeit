@@ -149,8 +149,7 @@ type SolverConfig = Readonly<{
 }>
 ```
 
-`eventDate` now comes from `meta.date` in the registry rather than an
-environment variable.
+`eventDate` comes from `meta.date` in the event profile.
 
 Withdrawn people are excluded when the snapshot is built, not filtered later.
 Blocked rooms likewise. The solver never sees data it must remember to ignore.
@@ -428,8 +427,8 @@ or adds a matching constraint for Room 31.
 
 A short table of named integer terms, living in config, stored with every plan.
 
-The `Weights` type loses eight terms to the registry — each now lives as a
-field on its tag ([event profiles](15-event-profiles.md) §4):
+Geometry terms live on `Weights`. Every tag-specific term lives as a field on
+its own tag instead ([event profiles](15-event-profiles.md) §4):
 
 | Geometry term | Configured as |
 |---|---|
@@ -495,7 +494,7 @@ interface Rule {
 
 **`describe` is mandatory. A rule that cannot explain itself does not ship.**
 The two generic handlers, `tagRequirements` and `tagPreferences`, get their
-`describe` text from `registry[tag].label`.
+`describe` text from `profile.tags[tag].label`.
 
 That single constraint is what keeps the trace readable as the rule set grows
 from eleven terms to thirty. Explanation lives immediately next to logic, in the

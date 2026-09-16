@@ -105,7 +105,7 @@ order), `roles`. Be generous about header naming and show what was matched.
 **Family detail** shows people, current preferences, and — the useful part — the
 complete event history for that family, rendered as prose. The preferences
 block renders tag assignments with their strengths and labels from the
-registry. The event history renders `LabelSet` / `LabelCleared` in prose using
+profile. The event history renders `LabelSet` / `LabelCleared` in prose using
 the built-in or custom constraint definition:
 
 > 12 Sep 14:22 · *Organiser Anna, on behalf of this family* · set Eigenes Bad
@@ -157,9 +157,10 @@ everyone is correct but surprising, and the card is where that surfaces.
 > ⚠ Preflight C4: merged party Müller + Schmidt + Weber needs a six-place
 > ensuite room (Schmidt's requirement); no such room exists.
 
-**Merge and split** open a small dialog that requires a reason code (defaulting
-to `UNCLASSIFIED` with a nudge) and emit `AdminMergedParties` /
-`AdminSplitParty`.
+**Merge and split** open a small dialog and emit `groups-with` or
+`separates-from` labels on the people concerned. There is no party override
+event and no reason code: the constraint's own description says why, and party
+formation re-derives from it like any other constraint.
 
 **Children's room allocation** gets its own section on this page, since it
 happens before party formation and determines everything after:

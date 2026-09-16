@@ -37,7 +37,7 @@ inadequate.
 - `BuildingAdded`, `RoomAdded`, `BedAdded`, `RoomDesignationChanged`
 - Place generation from `bed.sleeps`
 - `FamilyInvited`, `PersonAdded`
-- The generic `label` projection and a minimal built-in registry (capabilities plus
+- The generic `label` projection and a minimal built-in tag vocabulary (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
 - CSV import with a validating preview
 - Admin inventory and families screens — plain tables
@@ -84,9 +84,9 @@ day for that possibility.
 *Families can use it. Two to three days.*
 
 - Magic link, sessions, rate limits, the ten rules from [authentication](10-authentication.md)
-- The family portal: a renderer over `familyFacing` registry entries, not
+- The family portal: a renderer over `familyFacing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
-  couples the portal to the registry by design
+  couples the portal to the profile by design
 - htmx save-on-change with the progressive-enhancement fallback
 - Invitation and reminder emails
 - Admin chase list
@@ -176,7 +176,7 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 *Continuous, through the run-up.*
 
 - `scripts/tune.ts` and a weight-tuning pass against the real exported log
-- New built-in registry entries from recurring custom constraints
+- New built-in profile tags from recurring custom constraints
 - Copy review, German throughout the family surface
 - Accessibility pass: keyboard, contrast, focus, reduced motion
 - Deliverability testing against GMX, web.de, Gmail, Outlook
@@ -221,9 +221,9 @@ If time runs short, in the order they should go:
    than a spreadsheet.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint
-definitions, or the registry. Each is cheap to build and expensive to retrofit, and each is
+definitions, or the profile. Each is cheap to build and expensive to retrofit, and each is
 load-bearing for something else. A solver without a trace is a black box
-nobody will trust; unexplained constraints are permanent sediment. The registry
+nobody will trust; unexplained constraints are permanent sediment. The profile
 is **not cuttable** — it consolidates the matching model and event vocabulary, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
 to C8 alone, which carries most of the value.
@@ -241,7 +241,7 @@ to C8 alone, which carries most of the value.
 | Capacity is genuinely insufficient | Low | The unplaced report names the binding constraint early |
 | Solver is chaotic — small input changes move many people | Low | The `movedCount` integration test catches it |
 | Scope creep into catering, transport, payments | **High** | The scope section in the README; say no |
-| Registry vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; C7 makes removals visible; a rename costs nothing |
+| Profile vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; C7 makes removals visible; a rename costs nothing |
 
 The two highest-likelihood risks are both about data rather than software.
 Families will not fill in the form, and the room inventory will be wrong. Plan
