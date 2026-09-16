@@ -370,14 +370,17 @@ The week before, in order:
 
 1. **Freeze the schema.** No migrations after this point without a very good
    reason.
-2. **Export everything.** Event log, full database, and the current published plan as a
-   PDF.
+2. **Verify access to the reports.** Confirm that the current published plan and
+   the shared attendee reports are visible in the browser, and that the admin
+   reports show the expected data cut. Reports are not downloadable; print any
+   paper copies needed for the event from their browser print views.
 2a. **Run `npm run tune`** against the exported log and confirm the deployed
     weights are the ones you settled on.
 2b. **Confirm preflight is clean**, or that every error-severity finding has
     been acknowledged.
-3. **Print the plan.** Room lists per building, workshop lists per slot, a master
-   sheet. The hostel's wifi will be bad and someone will need paper.
+3. **Print the required reports.** Use the report print styles for room lists per
+   building, workshop lists per slot, the master sheet, and any confidential
+   operational sheets. The hostel's wifi will be bad and someone will need paper.
 4. **Verify one magic link end to end** against a real address on the actual
    production domain.
 5. **Check the published plan is the one you think it is** — the latest

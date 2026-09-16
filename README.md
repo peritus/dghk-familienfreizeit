@@ -3,6 +3,9 @@
 German attendee-facing terminology and translation rules live in the
 [German translation guidelines](18-german-translation-guidelines.md).
 
+The report catalogue, audience scopes, responsive behavior, and browser print
+contract live in [reports](19-reports.md).
+
 ## What this is
 
 A small web application composed from reusable event modules. A deployment
