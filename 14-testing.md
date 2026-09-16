@@ -9,8 +9,8 @@ Vitest with `@cloudflare/vitest-pool-workers`, which runs tests inside `workerd`
 against a real D1 instance rather than a mock.
 
 The testing effort is deliberately lopsided. The solver gets most of it, because
-the solver is where a bug produces a wrong answer that looks right. Routes and
-views get smoke tests, because a bug there produces a 500 that someone notices
+the solver is where a bug produces a wrong answer that looks right. API routes and
+screens get smoke tests, because a bug there produces a 500 that someone notices
 immediately.
 
 ---
@@ -54,15 +54,15 @@ in §5 are for.
 
 ### Cross-runtime agreement
 
-Second in importance, and the one that holds the admin board honest. The same
-derivation runs in two places — the Worker and the browser bundle — so the test is
+Second in importance, and the one that holds the admin application honest. The same
+derivation runs in two places — the Worker and the admin chunk — so the test is
 that they cannot disagree.
 
 ```ts
 test('the browser bundle derives what the Worker derives', async () => {
   const log = loadLog('fixtures/full-event.json')
   const here  = sha256(canonical(derive(log, defaultConfig).plan))
-  const there = await deriveInBundle(log)      // the built board bundle, in a DOM env
+  const there = await deriveInBundle(log)      // the built admin chunk, in a DOM env
   expect(there).toBe(here)
 })
 ```
@@ -71,9 +71,9 @@ test('the browser bundle derives what the Worker derives', async () => {
 also catches a bundler transform that changes behaviour — the one way two copies of
 identical source can diverge.
 
-This test is what permits the board to treat its locally derived plan as real. If it
-ever fails, the board is showing admins something the server will not agree to, and
-that is worse than the board being slow.
+This test is what permits the admin application to treat its locally derived plan as
+real. If it ever fails, the board is showing admins something the server will not
+agree to, and that is worse than the board being slow.
 
 ---
 
@@ -255,7 +255,7 @@ wrongly:
 - every `satisfiedBy` names a tag whose kind is `capability`;
 - every `param` names a valid entity type;
 - no alias collides with another tag or alias;
-- every `attendeeFacing.control` has a renderer in `src/views/controls/`;
+- every `attendeeFacing.control` has a renderer in `src/app/portal/controls/`;
 - every tag depending on a phase is disabled when that phase is;
 - `defineEvent` throws on each of the above when deliberately broken.
 
@@ -283,7 +283,7 @@ Some parts of the determinism contract are better enforced statically.
         { "name": "Math",   "message": "No Math.random in the solver. Use rng.ts." }
       ],
       "no-restricted-imports": ["error", {
-        "patterns": ["../db/*", "../routes/*", "../lib/*"],
+        "patterns": ["**/worker/**", "**/app/**"],
         "message": "The solver is pure. Pass data in via the solver input."
       }]
     }
@@ -294,7 +294,7 @@ Some parts of the determinism contract are better enforced statically.
 These overrides extend to `src/derive/**` and `src/config/**`. Profile evaluators
 (`derive`, `check`, `validFor`) run inside the solver and are bound by the same
 contract, and the fold is bound by it because the same code runs in a browser,
-where a stray `src/db` import would be a bundling failure rather than a subtle one.
+where a stray `src/worker` import would be a bundling failure rather than a subtle one.
 
 Plus one structural test, which catches the case a lint rule cannot:
 
@@ -362,9 +362,10 @@ Also covered:
 
 Recorded so the gaps are deliberate.
 
-- **Views.** Smoke tests that every route returns 200 for an authorised user and
-  302/404 otherwise. No plan tests of HTML — they break on every copy change
-  and catch nothing.
+- **Screens.** Smoke tests that every API route returns 200 for an authorised
+  principal and 401/404 otherwise, and that every screen renders from a fixture
+  world without throwing. No snapshot tests of markup — they break on every copy
+  change and catch nothing.
 - **The board's drag interaction.** Manually tested. A Playwright suite for
   pragmatic-drag-and-drop would cost more to maintain than the feature and would
   be flaky. The *server* side of every board action is tested through the API.

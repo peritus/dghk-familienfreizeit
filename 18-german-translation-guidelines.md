@@ -1,4 +1,4 @@
-# 17 — German translation guidelines
+# 18 — German translation guidelines
 
 English is the source language for code, configuration, and technical
 documentation. German is the default language for attendee-facing copy. This
