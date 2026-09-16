@@ -43,10 +43,10 @@ entirely, and keep registration closed.
 ┌── request ──────────────────────────────────────────────────┐
 │ POST /login { email }                                       │
 │   rate-limit check                                          │
-│   look up family by email (COLLATE NOCASE)                  │
+│   resolve email: admin allowlist, or family in derive(log)  │
 │   if found:                                                 │
 │     token = base64url(crypto.getRandomValues(32 bytes))     │
-│     INSERT magic_link (sha256(token), principal_id, now+15min) │
+│     INSERT magic_link (sha256(token), email, now+15min)     │
 │     send email containing https://…/auth/{token}            │
 │   ALWAYS return the same 200 page                           │
 └─────────────────────────────────────────────────────────────┘
@@ -56,10 +56,10 @@ entirely, and keep registration closed.
 │   DELETE FROM magic_link                                    │
 │     WHERE token_hash = sha256(:token)                       │
 │       AND expires_at > now                                  │
-│     RETURNING principal_id                                  │
+│     RETURNING email                                         │
 │   if no row → generic "link expired or already used" page   │
 │   session = base64url(32 random bytes)                      │
-│   INSERT session (sha256(session), principal_id, now+30d)   │
+│   INSERT session (sha256(session), email, now+30d)          │
 │   Set-Cookie; 302 to /                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -69,7 +69,7 @@ entirely, and keep registration closed.
 ```sql
 DELETE FROM magic_link
  WHERE token_hash = ?1 AND expires_at > ?2
- RETURNING principal_id;
+ RETURNING email;
 ```
 
 One statement. Atomic in SQLite. Returns a row exactly once, ever.
@@ -130,9 +130,10 @@ navigation from an email client, and `Strict` would drop the cookie on arrival.
 **7 — Sessions are stored hashed too.**
 A read-only database leak should not yield usable sessions.
 
-**8 — Changing a family's email destroys its sessions.**
-`FamilyEmailChanged` deletes every row in `session` for that family. Otherwise
-the old address retains access indefinitely.
+**8 — Sessions name an address, and the address is resolved per request.**
+A session stores the verified email, never a family id. After
+`FamilyEmailChanged` the old address resolves to no family, so its sessions stop
+granting access on the next request. There is no session cleanup to forget.
 
 **9 — Nothing about authentication enters the event log.**
 No tokens, no hashes, no session ids, not even `LoginSucceeded`. The event log is
@@ -147,18 +148,18 @@ requires a deploy for now, and the lookup uses the verified session identity.
 ## 4. Sessions
 
 ```ts
-async function currentFamily(c: Context): Promise<Family | null> {
+async function currentPrincipal(c: Context): Promise<Principal | null> {
   const raw = getCookie(c, 'sid')
   if (!raw) return null
 
-  const hash = await sha256(raw)
   const row = await c.env.DB.prepare(
-    `SELECT f.* FROM session s
-       JOIN principal p ON p.id = s.principal_id
-      WHERE s.token_hash = ?1 AND s.expires_at > ?2`
-  ).bind(hash, nowIso()).first<Family>()
+    `SELECT email FROM session WHERE token_hash = ?1 AND expires_at > ?2`
+  ).bind(await sha256(raw), nowIso()).first<{ email: string }>()
+  if (!row) return null
 
-  return row ?? null
+  if (isAllowlistedAdmin(row.email)) return { kind: 'admin', email: row.email }
+  const family = familyByEmail(await worldAtHead(c.env.DB), row.email)
+  return family ? { kind: 'family', email: row.email, family } : null
 }
 ```
 
@@ -194,7 +195,7 @@ Honest about what this defends against and what it does not.
 | Address enumeration | Uniform response on `/login` |
 | Login-endpoint abuse as a spam relay | Rate limits on address and IP |
 | Timing attacks on token comparison | No comparison exists; lookup is by hash |
-| Admin privilege escalation | Flag read from the database per request |
+| Admin privilege escalation | Allowlist checked against the verified address per request |
 | **Shared mailbox access** | **Not handled — see below** |
 | **Forwarded magic link within 15 minutes** | **Not handled — see below** |
 
