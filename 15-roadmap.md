@@ -138,7 +138,7 @@ in [frontend](12-frontend.md) §1 rather than continuing.
 
 ---
 
-## M5 — Snapshots and publication
+## M5 — Plans and publication
 
 *Attendees get answers. Two days.*
 
