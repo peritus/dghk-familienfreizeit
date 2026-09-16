@@ -77,3 +77,14 @@ show an editable state; after publication this route becomes UI-04.
 
 Controls need visible labels, grouped radio semantics, touch targets of at least
 44px, keyboard navigation, and text equivalents for pending or mutual requests.
+
+## Neobrutalist redesign and components
+
+Make each numbered section a `Card` with a bold heading and small completion
+`Badge`. Use `RadioGroup` for tri-state preferences, `Combobox` for family
+search, `Checkbox` for child choices, `Select` for workshop ranks, and
+`Textarea` for the note. Use `Sonner` for save feedback.
+
+On mobile, cards remain stacked and controls become full-width. A picker uses a
+`Drawer` or `Sheet`; the selected result stays visible as a bordered `Badge`
+row.
