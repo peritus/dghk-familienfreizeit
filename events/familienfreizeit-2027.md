@@ -18,6 +18,7 @@ The profile enables:
 - workshop slots and workshops;
 - ordered per-person workshop rankings;
 - workshop age eligibility, capacity, cancellation, fairness, and co-assignment;
+- food preferences with one per-person diet value and optional allergy text;
 - admin board, family portal, notifications, and constraint health.
 
 Room adjacency is not selected for the first deployment. The generic extension
@@ -132,7 +133,29 @@ The profile may derive generic capabilities such as `indoor`, `ensuite`,
 `ground_floor`, and `accessible` from those properties. It configures the generic
 resolver rather than adding new resolver operators.
 
-## 4. Room policy
+## 4. Food preferences
+
+The generic `foodPreferences` module is enabled for this event. Its authoritative
+data is attached to each person, not to the family: every person has exactly one
+configured `diet` value, and may have one `allergies_text` value.
+
+| Label | Scope | Values or format | Cardinality |
+|---|---|---|---|
+| `diet` | person | `vegetarian`, `vegan`, `carnivore`, or `pesco-vegetarian` | exactly one |
+| `allergies_text` | person | free text, retained as entered | zero or one |
+
+`pesco-vegetarian` is an explicit event-configured vocabulary value. Diet is
+mutually exclusive; a person cannot carry multiple diet values. Allergy text is
+independent of diet and preserves quantities and wording from the source data,
+for example `1 x Eier` or `2x Beifuß (sehr starke Allergie)`.
+
+Family-level food tables are derived projections: they count persons by diet
+and count persons with non-empty `allergies_text`. They are not an alternative
+authoritative family-level model. The supplied source rows do not include
+family names, so this profile records the model and vocabulary without
+inventing person or family assignments.
+
+## 5. Room policy
 
 The profile uses family residue parties, child-room allocation before party
 formation, strictest-strength requirement inheritance, mutual-required co-room
@@ -143,7 +166,7 @@ Required and preferred room requirements use the generic strength model. Concret
 weights, age bands, minimum child-room occupancy, room designations, and capacity
 values are profile parameters.
 
-## 5. Workshop policy
+## 6. Workshop policy
 
 The profile uses one ordered ranking per person and slot. Workshop assignment
 uses the generic ordered-choice and fairness mechanisms with these event policies:
@@ -155,13 +178,13 @@ uses the generic ordered-choice and fairness mechanisms with these event policie
 - cancel under-subscribed workshops according to configured minimum capacity;
 - support configured co-assignment groups.
 
-## 6. Profile metadata and copy
+## 7. Profile metadata and copy
 
 The profile supplies the actual event name, date, preference deadline, locale,
 public description, family-facing labels, admin-facing labels, and email copy.
 These values are event configuration and are included in the configuration hash.
 
-## 7. First-deployment boundary
+## 8. First-deployment boundary
 
 The profile is deployed separately with its own database and operational
 configuration. It does not introduce runtime tenancy or require unused room or

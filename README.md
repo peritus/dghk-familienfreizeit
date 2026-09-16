@@ -50,13 +50,15 @@ are stored as constraints rather than as edits.
 - Drag-and-drop admin board that writes constraints, not assignments.
 - Plan snapshots, publication, and change emails on re-publication.
 - Custom, human-readable matching constraints that admins can add and clear.
+- Per-person food preferences and allergy notes, as configured by the first
+  deployed event profile.
 
 **Explicitly out of scope**
 
 - Payments, invoicing, deposits.
-- Catering, dietary requirements, allergies. (If these arrive, they are a new
-  preference type and a new hard rule — the architecture absorbs them, but
-  do not build them speculatively.)
+- Food-service execution, menus, and allergy enforcement. The first event
+  records per-person dietary preferences and allergy notes; operational meal
+  planning remains outside this specification.
 - Arrival and departure logistics, transport, parking.
 - Runtime multi-event tenancy. One event profile and one database per
   deployment. A second event is a second deployment.
