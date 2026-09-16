@@ -111,7 +111,7 @@ registered as an adult by their family and that is their call. The solver uses
 ```ts
 { person_id: string, reason: string | null }
 ```
-Excludes the person from all future snapshots. Historical plans keep them.
+Excludes the person from newly derived plans. Historical plans keep them.
 
 ---
 
@@ -290,9 +290,9 @@ same stable entity references and remain visible in the event history.
 }
 ```
 
-The one event about plans, and it records a decision rather than a result: everything
-before this event is what attendees are being told. Its own `seq` is the attendee
-horizon, so it carries no position — it is one.
+The one event about plans, and it records the decision that the plan derived from
+events before this event is what attendees are being told. Its own `seq` identifies
+the plan's `input_seq`.
 
 `output_hash` is the plan the admin reviewed. It is checked on append: the server
 derives at the position the event would occupy and refuses if the hashes differ,
@@ -303,8 +303,8 @@ the guard is what makes a sequence number on the payload unnecessary — you pub
 the log as it stands, or you review it again.
 
 The latest `PlanPublished` is the active publication; an earlier one is superseded by
-a later one. Nothing stores that status — it is what "latest" means. If `notify`, the
-diff across the two horizons is computed and change emails are queued.
+a later one. If `notify`, the diff between the old published plan and the new plan is
+computed and change emails are queued.
 
 *Note:* the hash is computed by the server, but the actor is the admin who published.
 Publishing is the decision; the hash is what they decided about.
@@ -325,15 +325,15 @@ Worth writing down, because the boundary blurs under pressure.
 | Projection rebuild | Derivation, not decision | nowhere |
 | Workshop auto-cancelled for under-subscription | Derivation; re-derives next run | plan trace |
 | Party formation results | Derivation | plan trace |
-| A plan, published or not | Derivation; `derive()` reproduces it at any horizon | nowhere |
+| A plan, whether published or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
 | Pending events on an admin's board | Not yet decided; discarding one must leave no trace | that admin's browser |
 
 The test: **would replaying the log without this produce a different plan?** If
 no, it is not an event. Party formation is derived from labels and constraints,
 both of which *are* events; the formation itself is not. A plan fails the same test
-at every horizon, published included, which is why no plan body is written anywhere.
-What publication records is the decision to move a horizon, and a hash of what the
-admin saw when they made it.
+for every input sequence, including the one published, which is why publication does
+not create a second plan type. What publication records is the decision and a hash of
+the plan the admin saw when making it.
 
 Pending events are the interesting case, because they are events in every respect
 except that nobody has committed to them. Applying them appends them here through
