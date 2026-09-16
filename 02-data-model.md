@@ -67,7 +67,36 @@ the verified login identity and a code-level allowlist, not from a domain label.
 Operational data—sessions, magic links, rate limits, delivery receipts, and page
 views—does not belong in this table.
 
-## 2. Typed entity identity
+## 2. Development text representation
+
+The production event source is D1. Development and tests may instead load the
+same event model from a KDL text file through `TextFileEventSource`. [KDL](https://kdl.dev/spec/)
+is a standard node-oriented document language whose properties use `key=value`
+syntax. The project uses a deliberately small subset:
+
+```kdl
+FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
+PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role="adult" does_not_need_a_bed=#false needs_accessible=#false
+```
+
+The first token is the event type. All remaining entries must be properties;
+positional arguments and child blocks are not allowed. Blank lines, ordinary KDL
+comments, and UTF-8 are supported. Duplicate properties are errors even though
+KDL otherwise permits the rightmost property to shadow earlier ones.
+
+The loader maps node properties to an existing event payload, applies the same
+schema and invariant checks as D1 replay, and then constructs the complete event
+envelope. Unless explicitly supplied for a historical fixture, `seq` is the
+one-based file position, `actor` is `fixture`, `at` is a fixed deterministic
+timestamp, and `subject` is null or the event's natural subject. No domain
+meaning is assigned by the text format itself.
+
+KDL files are authored inputs, not a second domain model. `Event[]` remains the
+boundary passed to `derive`, and authored KDL fixtures are the canonical event
+inputs for development and tests. JSON remains appropriate for API payloads,
+canonical hashes, and derived output.
+
+## 3. Typed entity identity
 
 The generic entity record is the common identity and lifecycle shape.
 
@@ -94,7 +123,7 @@ The occasion config may declare additional typed kinds without changing the core
 model. For example, a festival may add `venue`, `vendor`, or `session`; a day
 workshop may use only `person`, `space`, `workshop`, and `slot`.
 
-## 3. Labels
+## 4. Labels
 
 Labels carry all properties, capabilities, preferences, and references to other
 entities. A value that names another entity is still just a value; the resolver
@@ -145,7 +174,7 @@ workshop:9  offered-in=slot_sat-morning
 These labels do not become lookups owned by application code. The resolver
 checks entity kinds, cardinality, ownership, and validity when it resolves them.
 
-## 4. Constraint definitions
+## 5. Constraint definitions
 
 Event-specific matching vocabulary is data in the event log and has a generic
 derived shape:
@@ -171,7 +200,7 @@ The resolver is the only component allowed to turn labels and definitions into
 relationships, capabilities, parties, assignments, or diagnostics. The indexes
 the fold builds support lookup; they do not define semantics.
 
-## 5. Capacity and ordered choices
+## 6. Capacity and ordered choices
 
 Capacity remains represented by entities and labels, not special property
 columns. A `place` entity is the atomic sleeping position. A double bed has two
@@ -189,7 +218,7 @@ exposes the ordered list to the workshop solver. This keeps the core model
 generic while preserving the invariant that an ordered preference is not an
 unordered set.
 
-## 6. Operational tables
+## 7. Operational tables
 
 Operational tables identify people by verified email address, never by entity
 id. They are not domain state and are never read by the solver.
