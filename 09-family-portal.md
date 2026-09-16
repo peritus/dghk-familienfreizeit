@@ -5,8 +5,12 @@ after.
 
 The design constraint that shapes everything: **families state preferences and
 never see machinery.** No scores, no parties, no solver, no other families'
-preferences, no unpublished plans. The word "algorithm" does not appear anywhere in
-this interface.
+preferences. The word "algorithm" does not appear anywhere in this interface.
+
+The portal derives at the publication horizon ([architecture](01-architecture.md)),
+which settles the largest privacy question structurally: an attendee's view is
+computed from the events before the latest publication, so unpublished work is not
+hidden from them, it is simply not in the list they derive from.
 
 ---
 
@@ -140,7 +144,9 @@ the signal there is bad.
 
 ## 2. Privacy boundaries
 
-Decided explicitly, because the defaults are wrong in both directions.
+Decided explicitly, because the defaults are wrong in both directions. The rows
+below are the ones that need deciding; anything about *when* something becomes
+visible is already answered by the horizon, and needs no rule.
 
 | Data | Visible to the family? |
 |---|---|
@@ -149,10 +155,9 @@ Decided explicitly, because the defaults are wrong in both directions.
 | **Whether a co-room request is reciprocated** | **Yes — see below** |
 | Other families' room preferences | No |
 | Other families' co-room requests, including ones naming them | **No** |
-| Names of families sharing their room, after publication | Yes |
-| Names of children in their child's children's room, after publication | Yes |
+| Names of families sharing their room | Yes |
+| Names of children in their child's children's room | Yes |
 | Bed labels within their own rooms | Yes |
-| Any unpublished plan | No |
 | Scores, parties, traces, admin constraints | No |
 | Admin notes about them | **No** — free text is theirs, admin notes are not |
 | Tags declaring `adminOnly` | **Never**, regardless of `familyFacing` |
