@@ -63,6 +63,31 @@ The Cloudflare Vite plugin reads this file, builds the Worker and the applicatio
 together, and writes the deployable configuration into the build output, so
 `wrangler deploy` runs after `vite build`.
 
+## Development-only text event source
+
+The normal source is D1. Local development and tests may explicitly select a
+filesystem-backed source in the Vite development host:
+
+```text
+EVENT_SOURCE=d1
+EVENT_SOURCE=text-file
+TEXT_EVENT_FILE=./test/fixtures/event-logs/full-event.kdl
+```
+
+`EVENT_SOURCE` defaults to `d1`. Selecting `text-file` requires development
+configuration and a KDL file; startup fails closed when either is absent. The
+source implements the same load, append, validation, and export contract as D1,
+so the Worker-facing API and browser-facing `Event[]` do not change. Filesystem
+APIs are confined to the development host and must not be imported by the Worker,
+browser production bundle, derive code, resolver, or solver.
+
+The development textarea debug view uses this same source and parser. It may
+reload and export the configured file and renders the derived world, plan,
+diagnostics, and trace for the current valid text. It is not part of production
+navigation, deployment, or authentication, and text-file mode must be rejected
+by production configuration even if an environment variable is accidentally
+present.
+
 `EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
 occasion profile ([occasion profiles](16-event-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
