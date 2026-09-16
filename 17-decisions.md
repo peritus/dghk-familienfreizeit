@@ -250,3 +250,30 @@ There is no filter to forget, because the Worker derives an attendee's view from
 events before the latest publication and cannot reach past them. What a family may
 see of *other* families within that plan is a filter, applied by the Worker before
 the view leaves it ([attendee view](10-family-portal.md) §2).
+
+## D17 — KDL is the canonical development and test event-log format
+
+*Chosen.* Development and tests use a shared KDL event-log loader, and may select
+`TextFileEventSource` instead of `D1EventSource`. The restricted format has one
+top-level node per event, uses the node name as the event type and properties as
+payload fields, and preserves file order as event order. The loader applies the
+ordinary event schemas and replay invariants before passing `Event[]` to
+`derive(events, config)`.
+
+The development application also provides a non-production textarea debug view
+over the same parser and source. Editing valid KDL re-derives the ordinary world,
+plan, diagnostics, and trace; it does not create a separate sandbox state model.
+
+*Rejected alternative:* maintain hand-authored JSON event fixtures and a custom
+line-oriented grammar for the local file source. That duplicates the event input
+language and makes fixtures less useful for direct UI experimentation.
+
+*Why:* KDL already provides node names, `key=value` properties, quoting, typed
+values, comments, and a parser/stringifier ecosystem. A project-specific profile
+can restrict its broader document features without reimplementing lexical parsing.
+
+*Consequence:* KDL is the canonical authored event-log representation across
+development, fixtures, and tests. JSON remains valid for API messages, serialized
+D1 rows, canonical hashes, and derived output. D1 remains the only production
+domain store; filesystem access and the textarea route are rejected from
+production builds and configuration.
