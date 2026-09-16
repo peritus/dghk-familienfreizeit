@@ -39,3 +39,9 @@ rules.
 Mobile variants are required for attendee screens and recommended for shared
 authentication screens. Admin screens are laptop-first; their narrow behavior
 is documented only where a useful fallback exists.
+
+## Component notation
+
+Screen files use the component names from [Design system and shell](00-design-system.md).
+The Alert Dialog names follow the [neobrutalism Alert Dialog
+documentation](https://www.neobrutalism.dev/docs/alert-dialog).
