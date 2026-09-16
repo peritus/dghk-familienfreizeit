@@ -173,7 +173,6 @@ Small enough to state completely:
 |---|---|
 | Family | Label/constraint events on entities it owns, for family-facing controls |
 | Allowlisted admin | Everything, through the admin UI |
-| System | `PlanSnapshotted` only |
 
 An allowlisted admin may enter a constraint for any entity. The actor identifies
 the authenticated principal and the subject identifies the affected entity. There
@@ -193,60 +192,63 @@ lookup, and query shape — not for derivation, which folds in memory and never
 reads them. Never written to directly outside the projector. If you find an
 `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
 
-### Plan snapshots — immutable, kept forever
+### Published plans — immutable, kept forever
 
-A plan snapshot is one `PlanSnapshotted` event row: a record of what we computed
-and, sometimes, what we told people. Its complete body is in the event payload.
-It is never regenerated from current code when answering questions about a
-published plan.
+A published plan is one `PlanPublished` event row: a record of what we computed
+and what we told people. Its complete body is in the event payload. It is never
+regenerated from current code when answering questions about a published plan.
 
 ```
-PlanSnapshotted event
-  snapshot_id
-  input_seq       the event.seq the snapshot was cut at
+PlanPublished event
+  input_seq       the event.seq the plan was derived from
   solver_version  semver of src/solver
   config_hash     sha256 of the canonicalised config object
   output_hash     sha256 of the canonicalised plan body
   body            the full Plan JSON, including trace
-  status          draft | published | superseded
+  notify          whether change emails were queued
+  note            optional admin note
 ```
 
-The complete body is required even though a pure solver can usually reproduce
-it. It makes the published result directly readable from the event log and
-keeps it independent of future solver or configuration changes.
+The complete body is stored even though `derive` can usually reproduce it. It
+makes the published result directly readable from the event log and keeps it
+independent of future solver or profile changes.
 
-`config_hash` is now computed at runtime from the code config object rather
-than from a stored weight table. See [event profiles](15-event-profiles.md) §4
-for what goes into it, including the requirement that function bodies are
-hashed by source.
+Unpublished plans are not stored at all. They are `derive(events)` and cost
+milliseconds, so keeping a copy would only create a second answer to a question
+that already has one.
 
-Those three fields also mean **every difference between two plans has exactly one
-attributable cause**: new events, retuned weights, or new code. You never have to
-wonder which.
+**A plan's identity is the log position it was derived from.** `input_seq`,
+`config_hash`, and `solver_version` name it completely, which is why there is no
+separate plan id: an id would be a second name for `input_seq`. Those three fields
+also mean **every difference between two plans has exactly one attributable
+cause** — new events, retuned weights, or new code. You never have to wonder which.
+
+`config_hash` is computed at runtime from the code config object. See
+[event profiles](15-event-profiles.md) §4 for what goes into it, including the
+requirement that function bodies are hashed by source.
+
+**Publication status is derived, not stored.** The latest `PlanPublished` is the
+active publication and every earlier one is superseded, which the log already says.
+Storing a status on an immutable record would mean mutating it later.
 
 ### Plan reads
 
-For the attendee portal and admin lists, resolve the relevant
-`PlanSnapshotted` event and read its plan body. The solver validates assignment
-uniqueness before emitting that event; no assignment table is needed.
+For the attendee portal, read the body of the latest `PlanPublished`. For admin
+screens showing current or draft state, call `derive`. `derive` validates
+assignment uniqueness before returning a world, so no assignment table is needed.
 
-## Staleness and publication
+## Staleness
 
 ```sql
-SELECT
-  json_extract(pub.payload, '$.snapshot_id') AS snapshot_id,
-  json_extract(snap.payload, '$.input_seq') AS input_seq,
-  (SELECT MAX(seq) FROM event) - json_extract(snap.payload, '$.input_seq') AS events_behind
-FROM event pub
-JOIN event snap
-  ON snap.type = 'PlanSnapshotted'
- AND json_extract(snap.payload, '$.snapshot_id') = json_extract(pub.payload, '$.snapshot_id')
-WHERE pub.type = 'PlanPublished'
-ORDER BY pub.seq DESC
+SELECT (SELECT MAX(seq) FROM event) - json_extract(payload, '$.input_seq')
+         AS events_behind
+FROM event
+WHERE type = 'PlanPublished'
+ORDER BY seq DESC
 LIMIT 1;
 ```
 
-`events_behind > 0` means the published plan no longer reflects stated
+`events_behind > 0` means the published plan may no longer reflect stated
 preferences. The admin dashboard shows this permanently. It is the single most
 important number on the screen, because it is the one that answers "do I need to
 do anything today".
@@ -256,32 +258,27 @@ spelling of a name does not change any assignment. Rather than filtering event
 types (fragile, and it will be wrong the first time someone adds an event type),
 compute staleness properly:
 
-1. New domain events after the published snapshot → mark **potentially stale**,
-   show the count.
-2. On dashboard load, run `solve()` against the current snapshot in the
-   background and compare `output_hash` to the published plan's.
-3. Equal → "up to date despite N new events". Different → "N changes would move
-   M people. Review →".
+```
+diff(derive(events up to input_seq), derive(all events))
+```
 
-That is one extra solve per dashboard load, in the low milliseconds. It turns a
-scary number into an accurate one.
+Empty → "up to date despite N new events". Non-empty → "N changes would move M
+people. Review →". That is one extra derivation per dashboard load, in the low
+milliseconds, and it turns a scary number into an accurate one.
 
 ## Publication and change notification
 
-Publishing is a state transition plus, optionally, an email run.
+Publishing records a world and, optionally, runs the emails.
 
 ```
-1. Admin reviews the draft plan and its diff against the published plan.
-2. Admin publishes    → PlanPublished { snapshot_id, notify: bool }
-3. Previous published plan → status = 'superseded'
-4. New plan            → status = 'published', published_at = now
-5. If notify: diff old vs new snapshots, email only affected families
+1. Admin reviews the current plan and its diff against the published one.
+2. Admin publishes → PlanPublished { input_seq, …hashes, body, notify, note }
+3. If notify: diff the two published worlds, email only affected families
 ```
 
-Step 5 is a `for` loop because both immutable plan bodies are in the event log
-and the solver is deterministic. Compare assignment objects per person between
-the two snapshot IDs; a family is affected if any of its people changed room,
-place, or workshop.
+Step 3 is a `for` loop over `diff(derive(previous), derive(current))`. A family is
+affected if any of its people changed room, place, or workshop — which is what a
+`Change` records.
 
 ## Module layout
 

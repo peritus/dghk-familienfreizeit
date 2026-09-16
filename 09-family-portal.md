@@ -5,7 +5,7 @@ after.
 
 The design constraint that shapes everything: **families state preferences and
 never see machinery.** No scores, no parties, no solver, no other families'
-preferences, no draft plans. The word "algorithm" does not appear anywhere in
+preferences, no unpublished plans. The word "algorithm" does not appear anywhere in
 this interface.
 
 ---
@@ -152,7 +152,7 @@ Decided explicitly, because the defaults are wrong in both directions.
 | Names of families sharing their room, after publication | Yes |
 | Names of children in their child's children's room, after publication | Yes |
 | Bed labels within their own rooms | Yes |
-| Any draft plan | No |
+| Any unpublished plan | No |
 | Scores, parties, traces, admin constraints | No |
 | Admin notes about them | **No** — free text is theirs, admin notes are not |
 | Tags declaring `adminOnly` | **Never**, regardless of `familyFacing` |

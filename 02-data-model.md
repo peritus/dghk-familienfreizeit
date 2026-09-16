@@ -36,7 +36,7 @@ One table. It is the source of truth and the only thing that must never be lost.
 CREATE TABLE event (
   seq     INTEGER PRIMARY KEY AUTOINCREMENT,
   at      TEXT    NOT NULL,
-  actor   TEXT    NOT NULL,          -- authenticated principal | 'system'
+  actor   TEXT    NOT NULL,          -- the authenticated principal
   type    TEXT    NOT NULL,
   subject TEXT,
   payload TEXT    NOT NULL           -- canonical JSON
@@ -119,8 +119,13 @@ CREATE INDEX label_entity_lookup
 ```
 
 The live label projection exposes the latest uncleared value for each configured
-label. Keeping `set_seq` and `cleared_seq` makes replay and temporal snapshots
+label. Keeping `set_seq` and `cleared_seq` makes replay and temporal derivation
 explicit; the event log remains canonical.
+
+This table is the persisted form of one part of `fold`'s output, and the schema
+here is the single definition of that shape. Derivation itself folds in memory and
+never reads it; the table exists for query shape and for the lookups that
+authentication and admin screens need.
 
 Examples:
 
@@ -236,13 +241,13 @@ CREATE TABLE rate_limit (
 );
 
 CREATE TABLE email_log (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  to_email    TEXT NOT NULL,
-  kind        TEXT NOT NULL,
-  snapshot_id TEXT,
-  sent_at     TEXT NOT NULL,
-  provider_id TEXT,
-  error       TEXT
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  to_email     TEXT NOT NULL,
+  kind         TEXT NOT NULL,
+  published_seq INTEGER,
+  sent_at      TEXT NOT NULL,
+  provider_id  TEXT,
+  error        TEXT
 );
 ```
 
