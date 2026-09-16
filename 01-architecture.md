@@ -64,13 +64,14 @@ possible.
 
 ## Pending events
 
-An admin working on the board holds a list of **pending events**: ordinary events,
-in the existing vocabulary, that have not been appended to the log. The board
+An admin working in the admin application holds a list of **pending events**:
+ordinary events, in the existing vocabulary, that have not been appended to the
+log. Every admin screen — the board, party review, the dashboard, plan diffs —
 renders `derive(committed ++ pending)`.
 
-Usually `pending` is empty and the board shows the same world the server has. When
-an admin drags a party, the move appends a constraint to `pending` and the board
-re-derives locally — no request, no approximation, the real solver over the real
+Usually `pending` is empty and every screen shows the same world the server has.
+When an admin drags a party or splits one, the action appends a constraint to
+`pending` and the application re-derives locally — no request, no approximation, the real solver over the real
 constraints. Applying flushes `pending` to the log in one append; discarding drops
 it. An empty pending list is not a special case, so there is no second code path
 and no mode to be in.
@@ -188,9 +189,9 @@ response is derived from the log that includes them. The user sees their write
 immediately. The asynchrony that usually forces
 "your change may take a moment to appear" copy simply does not exist.
 
-The same arithmetic is why the board can derive at all. Two to four thousand
-events is a few hundred kilobytes of JSON, well under a hundred compressed, fetched
-once when the board loads. An admin tool on a laptop can hold the entire history of
+The same arithmetic is why the admin application can derive at all. Two to four
+thousand events is a few hundred kilobytes of JSON, well under a hundred compressed,
+fetched once when the application loads. An admin tool on a laptop can hold the entire history of
 the event in memory and fold it on every drag without noticing.
 
 If the event count ever approaches five figures — it will not, but if — the
@@ -309,33 +310,39 @@ what a `Change` records.
 
 ```
 src/
-  index.ts                Hono app, route mounting
-  routes/
-    public.ts             login, magic-link redemption
-    family.ts             the attendee portal
-    admin/
-      dashboard.ts  families.ts  inventory.ts
-      parties.ts    board.ts     plans.ts
-      constraints.ts workshops.ts
-    api/
-      log.ts              the committed event list, for deriving in the browser
-      apply.ts            append a pending list in one batch
-  events/
-    types.ts              discriminated union + zod schemas
+  worker/                 the Worker; never imported by src/app
+    index.ts              Hono app: API routes, magic-link redemption, cron
+    routes/
+      auth.ts             login, magic-link redemption, logout, session probe
+      family.ts           the signed-in family's view; its label events
+      admin.ts            the committed log, apply, email actions
     append.ts             the only place that INSERTs into event
+    db/
+      events.ts           read the log; the seq-guarded batch insert
+      operational.ts      sessions, magic links, rate limits, email log
+    email.ts
+  app/                    the React application; never imported by src/worker
+    main.tsx              router, session probe, lazy admin chunk
+    portal/               login, preferences, assignment
+    admin/                AdminApp, the pending reducer, screens/
+    components/ui/        copied neobrutalism components
+    csv.ts                papaparse import and preview validation
+  events/
+    types.ts              discriminated union + zod schemas, shared by both runtimes
   derive/
     index.ts              derive(events, config) — pure
     fold.ts               events → entities, labels, definitions — pure, no I/O
     diff.ts               diff(world, world) → Change[] — pure
   modules/
-    <module>/             generic contract, implementation, views, and tests
+    <module>/             generic contract and implementation; app/ screens and
+                          worker/ handlers where the module contributes them; tests
   config/
     define.ts             profile builders and tag constructors
-    index.ts               re-exports the active event profile
+    index.ts              re-exports the active event profile
   solver/
     index.ts              solve(solverInput, config) — pure
     solver-input.ts       projections → frozen sorted SolverInput
-    preflight.ts           C1–C9
+    preflight.ts          C1–C9
     parties.ts            phase A
     place.ts              phases 0-3
     workshops.ts          the workshop solver
@@ -346,30 +353,26 @@ src/
       hard/  capacity.ts ageBand.ts designation.ts tagRequirements.ts
       soft/  exactFit.ts orphanBed.ts tagPreferences.ts
       tagRelations.ts
-  views/                  hono/jsx components
-  client/
-    board.ts              the one browser bundle
-  db/
-    events.ts             read the log; the seq-guarded batch insert
-    operational.ts        sessions, magic links, rate limits, email log
   lib/
-    auth.ts  email.ts  csv.ts  dates.ts
+    dates.ts              ageAt() over ISO strings — pure
 events/
   familienfreizeit-2027.ts  the first deployed event profile
 scripts/
   tune.ts                 offline weight sweep, Node not Worker
 ```
 
-Three boundaries are load-bearing and should be enforced in review:
+Four boundaries are load-bearing and should be enforced in review:
 
-- **`src/solver/**` imports nothing from `src/db`, `src/routes`, or `src/lib`.**
+- **`src/solver/**` imports nothing from `src/worker` or `src/app`.**
   It is pure TypeScript over plain data. It may import selected module contracts
   and the active profile, which are also pure data and pure functions with no
   I/O. The ESLint determinism rules extend to profile code.
 - **`src/derive/**` is pure and holds the same restrictions.** It is imported by
-  the routes, by the solver's callers, and by the browser bundle, so a stray
-  import of `src/db` there would take the database with it into the client.
-- **Only `src/events/append.ts` writes to `event`.**
+  the Worker and by the admin application, so a stray import of `src/worker/db`
+  there would take the database with it into the client.
+- **`src/app/**` and `src/worker/**` never import each other.** They share only
+  event schemas, derivation, the solver, the profile, and module contracts.
+- **Only `src/worker/append.ts` writes to `event`.**
 
-An ESLint `no-restricted-imports` rule covers the first two. The third is a
+An ESLint `no-restricted-imports` rule covers the first three. The fourth is a
 code review habit, and a grep in CI if you want the belt as well as the braces.

@@ -74,11 +74,11 @@ create a second kind of plan.
 diagnostics, and trace. Produced by `derive(events, config)`. Never stored, always
 recomputed; the plan referenced by the latest publication is the one attendees see.
 
-**Pending events** — events an admin has created on the board and not yet applied.
-Held in their browser, never on the server. The board derives from
-`committed ++ pending`.
+**Pending events** — events an admin has created in the admin application and not
+yet applied. Held in their browser, never on the server. Every admin screen derives
+from `committed ++ pending`.
 
-**Sandbox** — the board with a non-empty pending list. Not a mode: an empty pending
+**Sandbox** — the admin application with a non-empty pending list. Not a mode: an empty pending
 list is the ordinary case and needs no separate code path.
 
 **Trace** — the human-readable record of why the solver did what it did. One line

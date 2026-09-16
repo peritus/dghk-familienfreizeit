@@ -41,14 +41,14 @@ entirely, and keep registration closed.
 
 ```
 ┌── request ──────────────────────────────────────────────────┐
-│ POST /login { email }                                       │
+│ POST /api/login { email }                                   │
 │   rate-limit check                                          │
 │   resolve email: admin allowlist, or family in derive(log)  │
 │   if found:                                                 │
 │     token = base64url(crypto.getRandomValues(32 bytes))     │
 │     INSERT magic_link (sha256(token), email, now+15min)     │
 │     send email containing https://…/auth/{token}            │
-│   ALWAYS return the same 200 page                           │
+│   ALWAYS return the same 200 response                       │
 └─────────────────────────────────────────────────────────────┘
 
 ┌── redeem ───────────────────────────────────────────────────┐
@@ -57,7 +57,7 @@ entirely, and keep registration closed.
 │     WHERE token_hash = sha256(:token)                       │
 │       AND expires_at > now                                  │
 │     RETURNING email                                         │
-│   if no row → generic "link expired or already used" page   │
+│   if no row → 302 to the "link expired or used" screen      │
 │   session = base64url(32 random bytes)                      │
 │   INSERT session (sha256(session), email, now+30d)          │
 │   Set-Cookie; 302 to /                                      │
@@ -113,8 +113,8 @@ Not `Math.random`, not a UUID, not a timestamp with a suffix. 256 bits of
 entropy makes guessing irrelevant, which is what lets the rest of the design be
 simple.
 
-**4 — `POST /login` responds identically whether or not the address exists.**
-Same status, same page, same timing envelope. This is an invite-only application
+**4 — `POST /api/login` responds identically whether or not the address exists.**
+Same status, same body, same timing envelope. This is an invite-only application
 for a private event; whether an address is on the guest list is not public
 information.
 
@@ -163,16 +163,20 @@ async function currentPrincipal(c: Context): Promise<Principal | null> {
 }
 ```
 
-Two middlewares, used as route guards:
+Two middlewares, used as API route guards:
 
 ```ts
-const requireFamily = async (c, next) => { … }   // 302 to /login
+const requireFamily = async (c, next) => { … }   // 401; the application shows the login screen
 const requireAdmin  = async (c, next) => { … }   // 404, not 403
 ```
 
-**Admin routes return 404, not 403.** A logged-in non-admin family probing
-`/admin` should not learn that the route exists. There is no legitimate reason a
+**Admin API routes return 404, not 403.** A logged-in non-admin family probing
+`/api/admin` should not learn that the routes exist. There is no legitimate reason a
 family would land there, so there is no usability cost to the lie.
+
+The admin application's code is a static asset, like any frontend bundle, and
+anyone can download it. It contains no data. Everything it shows arrives through
+`/api/admin/*`, which checks the allowlist on every request.
 
 Sessions last 30 days for families — long enough to cover a six-week run-up with
 one login — and 7 days for admins, refreshed on use. Admins log in weekly anyway;
@@ -192,7 +196,7 @@ Honest about what this defends against and what it does not.
 | Database read leak | Tokens and sessions stored hashed |
 | Session theft via XSS | `HttpOnly`; plus no user-generated HTML is ever rendered unescaped |
 | CSRF | `SameSite=Lax` plus origin checking on every mutating request |
-| Address enumeration | Uniform response on `/login` |
+| Address enumeration | Uniform response on `/api/login` |
 | Login-endpoint abuse as a spam relay | Rate limits on address and IP |
 | Timing attacks on token comparison | No comparison exists; lookup is by hash |
 | Admin privilege escalation | Allowlist checked against the verified address per request |

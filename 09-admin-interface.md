@@ -24,6 +24,11 @@ is tables and forms, and should be boring on purpose.
 | `/admin/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
 | `/admin/constraints` | Constraints | Create, inspect, clear, and explain matching constraints |
 
+Every screen is a view over the admin application's world
+([frontend](12-frontend.md) §3). None has a server route of its own: the application
+loads the committed log once, derives, and writes only through apply and the email
+actions.
+
 `/admin/constraints` renders built-in and custom definitions, shows which labels
 are in use and by how many entities, and lists current
 preflight findings. It is where an admin looks to answer "what can I even ask
@@ -88,15 +93,18 @@ Columns: family, email, people, preferences stated, workshops ranked, last seen,
 constraints. Filter chips include *no login*, *no room preference*, *incomplete
 workshops*, and *has constraints*.
 
-**Import.** Paste a CSV or upload one. Parse with papaparse, show a preview table
-with per-row validation before anything is written:
+**Import.** Paste a CSV or upload one. The browser parses it with papaparse and
+validates every row against the derived world — duplicate addresses included — in a
+preview table before anything is written:
 
 > 54 rows parsed. 52 ready, 2 problems.
 > Row 14 — `mueller@example.com` duplicates row 9 (`Mueller@example.com`).
 > Row 31 — birthdate `31.02.2015` is not a date.
 
 Import is all-or-nothing after the preview is accepted. Each family becomes one
-`FamilyInvited` plus one `PersonAdded` per person, appended in order.
+`FamilyInvited` plus one `PersonAdded` per person, sent through apply in one batch.
+The server validates the batch again; if the log moved or a row no longer passes,
+nothing is written and the preview shows why.
 
 Expected columns, documented on the page itself: `email`, `family_name`,
 `given_names` (semicolon-separated), `birthdates` (semicolon-separated, matching
@@ -424,7 +432,7 @@ The interface's voice, applied consistently.
 "Plan published"; "Apply" produces "Applied". Never "Submit".
 
 **There is no compute step, so there is no button for one.** The plan on screen is
-always current, because every page derives it. An admin's verbs are **Apply** —
+always current, because every screen derives it. An admin's verbs are **Apply** —
 other admins see this — and **Publish** — attendees see this.
 
 **Errors state what happened and what to do.** Not "Invalid input" but "Row 31:

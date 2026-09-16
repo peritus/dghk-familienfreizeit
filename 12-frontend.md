@@ -76,8 +76,8 @@ globals:
 
 ```
 tsconfig.json           references only
-tsconfig.app.json       src/app/**, src/derive/**, src/solver/**, src/config/**   DOM lib, jsx: react-jsx
-tsconfig.worker.json    src/worker/**, src/derive/**, src/solver/**, src/config/**  worker-configuration.d.ts
+tsconfig.app.json       src/** except src/worker/** and src/modules/*/worker/**   DOM lib, jsx: react-jsx
+tsconfig.worker.json    src/** except src/app/** and src/modules/*/app/**         worker-configuration.d.ts
 ```
 
 Both enable `strict` and `noUncheckedIndexedAccess`. The latter is worth the
