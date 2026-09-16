@@ -48,7 +48,7 @@ are stored as constraints rather than as edits.
 - Deterministic room assignment with a full human-readable explanation.
 - Deterministic workshop assignment with an explicit fairness objective.
 - Drag-and-drop admin board that writes constraints, not assignments.
-- Plan solver inputs, publication, and change emails on re-publication.
+- Deterministic plans, publication, and change emails on re-publication.
 - Custom, human-readable matching constraints that admins can add and clear.
 - Per-person food preferences and allergy notes, as configured by the first
   deployed event profile.

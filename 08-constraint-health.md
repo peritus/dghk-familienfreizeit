@@ -79,7 +79,8 @@ no bookkeeping of its own, which is why the buckets can be recomputed on every
 dashboard load rather than maintained.
 
 Clearing a constraint is always a human action. Its original `LabelSet` event
-remains history, and historical plan snapshots preserve the result it produced.
+remains history, and replaying the earlier plan's `input_seq` reproduces the result
+it produced.
 
 ## 5. Regression corpus
 

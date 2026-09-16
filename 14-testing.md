@@ -21,18 +21,18 @@ immediately.
 
 ```ts
 test('solver output is invariant under input permutation', () => {
-  const base = loadSnapshot('fixtures/full-event.json')
+  const base = loadSolverInput('fixtures/full-event.json')
   const expected = sha256(canonical(solve(base, defaultConfig)))
 
   for (let seed = 0; seed < 50; seed++) {
-    const shuffled = shuffleEveryArray(base, seed)   // then re-sorted by snapshot.ts
+    const shuffled = shuffleEveryArray(base, seed)   // then re-sorted by solver-input.ts
     const got = sha256(canonical(solve(shuffled, defaultConfig)))
     expect(got).toBe(expected)
   }
 })
 ```
 
-Every array property of the snapshot is permuted, the snapshot builder re-sorts
+Every array property of the solver input is permuted, the solver input builder re-sorts
 them, and the output hash must be identical. `labels` is one of the arrays the
 shuffler permutes — this proves the generic label input is order-independent.
 
@@ -49,7 +49,7 @@ Fifty seeds is arbitrary and enough; a real order dependence fails within a
 handful. It runs in well under a second.
 
 The one thing it does not catch is a dependence on something outside the
-snapshot — the clock, randomness, the environment. That is what the lint rules
+solver input — the clock, randomness, the environment. That is what the lint rules
 in §5 are for.
 
 ### Cross-runtime agreement
@@ -81,10 +81,10 @@ that is worse than the board being slow.
 
 Fixture event logs with their expected output hashes, checked on every change.
 Each case is `derive(log, config)`, so a golden test exercises the fold, the
-snapshot builder, and the solver together rather than the solver alone.
+solver input builder, and the solver together rather than the solver alone.
 
 ```
-test/fixtures/snapshots/
+test/fixtures/solver-inputs/
   minimal.json            6 families, 4 rooms — readable by hand
   full-event.json         55 families, 40 rooms — realistic
   tight.json              capacity == demand exactly
@@ -101,11 +101,11 @@ profile change legitimately changes output. Store `config_hash` alongside
 than reporting an opaque mismatch:
 
 ```ts
-test.each(goldenCases)('golden: $name', ({ snapshot, expectedHash, configHash }) => {
+test.each(goldenCases)('golden: $name', ({ solverInput, expectedHash, configHash }) => {
   if (currentConfigHash() !== configHash) {
     throw new Error(`golden: $name was recorded against a different profile — re-record with npm run test:record`)
   }
-  expect(sha256(canonical(solve(snapshot, defaultConfig)))).toBe(expectedHash)
+  expect(sha256(canonical(solve(solverInput, defaultConfig)))).toBe(expectedHash)
 })
 ```
 
@@ -133,7 +133,7 @@ committed so the change shows up in the pull request.
 
 ## 3. Property tests
 
-Invariants that must hold for every plan from every snapshot. These are the
+Invariants that must hold for every plan from every solver input. These are the
 assertions that catch bugs the golden fixtures happen not to exercise.
 
 ```ts
@@ -144,7 +144,7 @@ const invariants = [
   ['no place holds two people',
     p => unique(p.assignments.map(a => a.placeId))],
 
-  ['every assigned place exists in the snapshot',
+  ['every assigned place exists in the solver input',
     (p, s) => p.assignments.every(a => s.places.some(pl => pl.id === a.placeId))],
 
   ['no room exceeds its place count',
@@ -180,18 +180,18 @@ const invariants = [
 ```
 
 "Conservation of people" is the most valuable and the least obvious: every person
-in the snapshot appears exactly once in `assignments` or once in a party listed
+in the solver input appears exactly once in `assignments` or once in a party listed
 under `unplaced`. A person who silently vanishes — dropped by a filter, lost in a
 merge — is the failure mode that is hardest to notice by eye and worst to
 discover at the hostel.
 
 Run every invariant against every golden fixture, and against generated
-snapshots:
+solver inputs:
 
 ```ts
-test('invariants hold on generated snapshots', () => {
+test('invariants hold on generated solver inputs', () => {
   for (let seed = 0; seed < 200; seed++) {
-    const s = generateSnapshot(seed)     // varies sizes, ratios, constraints
+    const s = generateSolverInput(seed)  // varies sizes, ratios, constraints
     const p = solve(s, defaultConfig)
     for (const [name, check] of invariants) {
       expect(check(p, s), `${name} (seed ${seed})`).toBe(true)
@@ -284,7 +284,7 @@ Some parts of the determinism contract are better enforced statically.
       ],
       "no-restricted-imports": ["error", {
         "patterns": ["../db/*", "../routes/*", "../lib/*"],
-        "message": "The solver is pure. Pass data in via the snapshot."
+        "message": "The solver is pure. Pass data in via the solver input."
       }]
     }
   }]
@@ -299,8 +299,8 @@ where a stray `src/db` import would be a bundling failure rather than a subtle o
 Plus one structural test, which catches the case a lint rule cannot:
 
 ```ts
-test('every snapshot array is sorted and frozen', () => {
-  const s = buildSnapshot(fixtureDb)
+test('every solver input array is sorted and frozen', () => {
+  const s = buildSolverInput(fixtureDb)
   for (const [key, value] of Object.entries(s)) {
     if (!Array.isArray(value)) continue
     expect(Object.isFrozen(value), `${key} not frozen`).toBe(true)
@@ -320,7 +320,7 @@ Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
 
 ```ts
-test('the full loop: import → constraints → solve → snapshot → publish', async () => {
+test('the full loop: import → constraints → solve → plan → publish', async () => {
   const db = await freshDb()
 
   await importFamilies(db, csvFixture)           // 55 families
@@ -351,8 +351,8 @@ Also covered:
 - **Fold**: a pure test, no database. Fold a fixture log, compare against a
   hand-written expectation, then fold twice and assert identical. Persisting it is
   a separate, smaller integration test.
-- **Constraint enforcement**: attempt to emit a snapshot with two assignments for
-  one place and assert snapshot validation fails.
+- **Constraint enforcement**: attempt to give two people the same place and assert
+  solver-input validation fails.
 - **Publication concurrency**: publishing while another plan is published fails
   the event-sequence compare-and-swap.
 
@@ -363,7 +363,7 @@ Also covered:
 Recorded so the gaps are deliberate.
 
 - **Views.** Smoke tests that every route returns 200 for an authorised user and
-  302/404 otherwise. No snapshot tests of HTML — they break on every copy change
+  302/404 otherwise. No plan tests of HTML — they break on every copy change
   and catch nothing.
 - **The board's drag interaction.** Manually tested. A Playwright suite for
   pragmatic-drag-and-drop would cost more to maintain than the feature and would
@@ -376,7 +376,7 @@ Recorded so the gaps are deliberate.
 
 ## 8. Fixtures as documentation
 
-`test/fixtures/snapshots/minimal.json` should be readable and hand-checkable: six
+`test/fixtures/solver-inputs/minimal.json` should be readable and hand-checkable: six
 families, four rooms, one children's room, one mutual co-room request, one
 `prefer_not`. Small enough that a person can work out the right answer with a
 pencil and verify the solver agrees.

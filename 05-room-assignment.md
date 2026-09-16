@@ -607,7 +607,7 @@ catches the case where the cascade grows past any room.
 **Weight tuning is a live wire.** Changing a weight re-solves everything and can
 move dozens of families. Always review the diff before publishing after a weight
 change. The dashboard should refuse to publish a plan whose `config_hash`
-differs from the published one without an explicit "I have reviewed the diff"
+differs from the previously published plan without an explicit "I have reviewed the diff"
 confirmation.
 
 **Capacity exactly equal to headcount.** If total places equals total bed demand,

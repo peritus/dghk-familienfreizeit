@@ -292,7 +292,7 @@ same stable entity references and remain visible in the event history.
 
 The one event about plans, and it records the decision that the plan derived from
 events before this event is what attendees are being told. Its own `seq` identifies
-the plan's `input_seq`.
+the preceding plan's `input_seq`.
 
 `output_hash` is the plan the admin reviewed. It is checked on append: the server
 derives at the position the event would occupy and refuses if the hashes differ,
