@@ -92,6 +92,51 @@ Pending events live in the admin's browser for as long as that tab is open. They
 never stored on the server, never shared between admins, and never visible to
 attendees.
 
+## Horizons
+
+`derive` takes a list of events, so the only question any screen has to answer is
+which events count. Three answers, and they are the whole visibility model:
+
+```
+the working admin    derive(log ++ their pending events)
+every other admin    derive(log)
+attendees            derive(log before the latest PlanPublished)
+```
+
+One function, one list, cut at three points. The two admin cuts differ by whether a
+change has been appended yet, which is what **Apply** does. The attendee cut differs
+by whether it has been published, which is what **Publish** does.
+
+**Publication is a marker, not a record.** `PlanPublished` says that everything
+before it is what attendees are being told. Its own position in the log is the
+horizon, so it carries no sequence number — it is one. The latest such marker is the
+active publication, and earlier ones are history; nothing stores that status because
+"latest" already says it.
+
+```
+PlanPublished
+  output_hash     sha256 of the plan the admin reviewed
+  solver_version  semver of src/solver
+  config_hash     sha256 of the canonicalised config object
+  notify          whether change emails were queued
+  note            optional admin note
+```
+
+`output_hash` does two jobs. It is the concurrency guard — the publish request
+carries the hash the admin reviewed, and the server refuses with the diff if its own
+derivation disagrees, which means the log moved while they were reading. And it is
+the record of what was actually sent, which is what makes code drift detectable
+rather than silent.
+
+**A plan's identity is the horizon it was derived at.** That, `config_hash`, and
+`solver_version` name it completely, which is why there is no plan id. Those three
+also mean **every difference between two plans has exactly one attributable cause** —
+new events, retuned weights, or new code. You never have to wonder which.
+
+`config_hash` is computed at runtime from the code config object. See
+[event profiles](15-event-profiles.md) §4 for what goes into it, including the
+requirement that function bodies are hashed by source.
+
 ## Module profiles
 
 The application is assembled from typed modules. This resembles feature flags at
@@ -186,104 +231,75 @@ for another family.
 
 ## Read models
 
-Two distinct kinds, with different lifetimes.
-
-### Projections — derived, disposable
-
-`entity`, `label`, `constraint_definition`, and query indexes.
+One kind. `entity`, `label`, `constraint_definition`, and query indexes.
 
 These are `fold`'s output, persisted. They exist for stable URLs, authentication
 lookup, and query shape — not for derivation, which folds in memory and never
 reads them. Never written to directly outside the projector. If you find an
 `UPDATE family SET ...` anywhere except in `src/project/`, it is a bug.
 
-### Published plans — immutable, kept forever
-
-A published plan is one `PlanPublished` event row: a record of what we computed
-and what we told people. Its complete body is in the event payload. It is never
-regenerated from current code when answering questions about a published plan.
-
-```
-PlanPublished event
-  input_seq       the event.seq the plan was derived from
-  solver_version  semver of src/solver
-  config_hash     sha256 of the canonicalised config object
-  output_hash     sha256 of the canonicalised plan body
-  body            the full Plan JSON, including trace
-  notify          whether change emails were queued
-  note            optional admin note
-```
-
-The complete body is stored even though `derive` can usually reproduce it. It
-makes the published result directly readable from the event log and keeps it
-independent of future solver or profile changes.
-
-Unpublished plans are not stored at all. They are `derive(events)` and cost
-milliseconds, so keeping a copy would only create a second answer to a question
-that already has one.
-
-**A plan's identity is the log position it was derived from.** `input_seq`,
-`config_hash`, and `solver_version` name it completely, which is why there is no
-separate plan id: an id would be a second name for `input_seq`. Those three fields
-also mean **every difference between two plans has exactly one attributable
-cause** — new events, retuned weights, or new code. You never have to wonder which.
-
-`config_hash` is computed at runtime from the code config object. See
-[event profiles](15-event-profiles.md) §4 for what goes into it, including the
-requirement that function bodies are hashed by source.
-
-**Publication status is derived, not stored.** The latest `PlanPublished` is the
-active publication and every earlier one is superseded, which the log already says.
-Storing a status on an immutable record would mean mutating it later.
-
-### Plan reads
-
-For the attendee portal, read the body of the latest `PlanPublished`. For admin
-screens showing current or draft state, call `derive`. `derive` validates
-assignment uniqueness before returning a world, so no assignment table is needed.
+No plan is stored, published or otherwise. Every screen derives at its horizon, and
+`derive` validates assignment uniqueness before returning a world, so there is no
+assignment table and no plan table either.
 
 ## Staleness
 
+The distance between the attendee horizon and the log head:
+
 ```sql
-SELECT (SELECT MAX(seq) FROM event) - json_extract(payload, '$.input_seq')
-         AS events_behind
+SELECT (SELECT MAX(seq) FROM event) - seq AS events_behind
 FROM event
 WHERE type = 'PlanPublished'
 ORDER BY seq DESC
 LIMIT 1;
 ```
 
-`events_behind > 0` means the published plan may no longer reflect stated
-preferences. The admin dashboard shows this permanently. It is the single most
-important number on the screen, because it is the one that answers "do I need to
-do anything today".
+`events_behind > 0` means attendees may be looking at something older than what the
+admins have. The dashboard shows it permanently. It is the single most important
+number on the screen, because it is the one that answers "do I need to do anything
+today".
 
-Note that not every event should make a plan stale — a family correcting the
-spelling of a name does not change any assignment. Rather than filtering event
-types (fragile, and it will be wrong the first time someone adds an event type),
-compute staleness properly:
+Not every event should make a plan stale — a family correcting the spelling of a
+name does not change any assignment. Rather than filtering event types (fragile, and
+it will be wrong the first time someone adds an event type), compute staleness
+properly, by deriving at both horizons:
 
 ```
-diff(derive(events up to input_seq), derive(all events))
+diff(derive(attendee horizon), derive(log))
 ```
 
 Empty → "up to date despite N new events". Non-empty → "N changes would move M
 people. Review →". That is one extra derivation per dashboard load, in the low
 milliseconds, and it turns a scary number into an accurate one.
 
+### Code drift
+
+Events are one of three things that move a plan; the others are retuned weights and
+new code, and both arrive by deploy rather than by append. Deriving at the attendee
+horizon and comparing to the recorded `output_hash` catches them:
+
+> ⚠ Publication #7 was made under solver 2.1.0. The deployed solver derives a
+> different plan from the same events. **Review and re-publish →**
+
+This is the same loop as any other staleness — review the diff, publish, email the
+families who move — and it is the reason the hash is recorded rather than the plan.
+A stored plan would render happily from its own payload and let the deployed code
+disagree with it in silence.
+
 ## Publication and change notification
 
-Publishing records a world and, optionally, runs the emails.
+Publishing moves the attendee horizon and, optionally, runs the emails.
 
 ```
 1. Admin reviews the current plan and its diff against the published one.
-2. Admin publishes → PlanPublished { input_seq, …hashes, body, notify, note }
-3. If notify: diff the two published worlds, email only affected families
+2. Admin publishes → PlanPublished { output_hash, …, notify, note }
+   — refused with the diff if the server derives a different output_hash
+3. If notify: diff across the two horizons, email only affected families
 ```
 
-Step 3 is a `for` loop over `diff(derive(previous), derive(current))`. A family is
-affected if any of its people changed room, place, or workshop — which is what a
-`Change` records.
+Step 3 is a `for` loop over `diff(derive(previous horizon), derive(new horizon))`. A
+family is affected if any of its people changed room, place, or workshop — which is
+what a `Change` records.
 
 ## Module layout
 

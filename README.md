@@ -117,9 +117,13 @@ the event log up to a specific sequence number. A stage inside `derive`, not
 something stored.
 
 **Plan** — the solver's output: assignments, unplaced parties, and a full decision
-trace. Derived on demand and identified by the log position it was derived from.
-Publishing freezes one copy in the log, and the latest published plan is the
-active one.
+trace. Derived on demand at a horizon, never stored. Identified by that horizon
+together with `config_hash` and `solver_version`.
+
+**Horizon** — the position in the log that decides which events count for one
+audience. Admins derive at the log head; attendees derive at the latest
+publication; the admin doing the work derives past the head, at their own pending
+events.
 
 **World** — the complete derived state for one list of events: projections, plan,
 diagnostics, and trace. Produced by `derive(events, config)`. Never stored, always
@@ -285,6 +289,28 @@ preserve dense ordered lists without a special property table. Rationale in
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
 [event profiles](15-event-profiles.md) §6.
+
+### D16 — Publication is a horizon, not a stored plan
+
+*Chosen.* `PlanPublished` marks a position in the log. Everything before it is what
+attendees are told, so the marker carries a hash of what the admin reviewed and no
+plan body. Every audience — the working admin, the other admins, the attendees —
+derives from the same list cut at a different point.
+
+*Rejected alternative:* store the full plan body on publication, so a published
+result stays readable even after the solver or profile changes.
+
+*Why it loses:* it is a code-versioning problem answered inside the event log.
+`solver_version` and git already answer it, and the stored body actively hides the
+one thing worth knowing — that deployed code has stopped agreeing with what
+attendees were told. Comparing a recorded `output_hash` against a fresh derivation
+surfaces that as ordinary staleness; a stored body renders happily and says nothing.
+The body is also the only thing large enough to matter in a log the admin board now
+downloads whole: a hundred kilobytes with its trace, several times over, against a
+decision log measured in hundreds of kilobytes total.
+
+*Consequence:* attendee privacy stops being a rule and becomes a data path. There is
+no filter to forget, because an attendee's derivation cannot reach past its horizon.
 
 ### D15 — Derivation is a named primitive, and the client may call it
 
