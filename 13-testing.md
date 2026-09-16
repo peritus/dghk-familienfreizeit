@@ -52,11 +52,36 @@ The one thing it does not catch is a dependence on something outside the
 snapshot — the clock, randomness, the environment. That is what the lint rules
 in §5 are for.
 
+### Cross-runtime agreement
+
+Second in importance, and the one that holds the admin board honest. The same
+derivation runs in two places — the Worker and the browser bundle — so the test is
+that they cannot disagree.
+
+```ts
+test('the browser bundle derives what the Worker derives', async () => {
+  const log = loadLog('fixtures/full-event.json')
+  const here  = sha256(canonical(derive(log, defaultConfig).plan))
+  const there = await deriveInBundle(log)      // the built board bundle, in a DOM env
+  expect(there).toBe(here)
+})
+```
+
+`deriveInBundle` runs the artefact that ships, not a re-import of the source, so it
+also catches a bundler transform that changes behaviour — the one way two copies of
+identical source can diverge.
+
+This test is what permits the board to treat its locally derived plan as real. If it
+ever fails, the board is showing admins something the server will not agree to, and
+that is worse than the board being slow.
+
 ---
 
 ## 2. Golden plans
 
-Fixture snapshots with their expected output hashes, checked on every change.
+Fixture event logs with their expected output hashes, checked on every change.
+Each case is `derive(log, config)`, so a golden test exercises the fold, the
+snapshot builder, and the solver together rather than the solver alone.
 
 ```
 test/fixtures/snapshots/
@@ -184,7 +209,8 @@ capacity exactly equal to demand, capacity one short.
 ## 4. The constraint regression corpus
 
 From [constraint health](07-constraint-health.md) §5. Every active or
-cleared custom constraint can be a test case authored by a domain expert.
+cleared custom constraint can be a test case authored by a domain expert. It is the
+same counterfactual the dashboard computes, pinned to a fixed log position.
 
 ```ts
 describe('constraint corpus', () => {
@@ -192,16 +218,16 @@ describe('constraint corpus', () => {
 
   describe('cleared constraints must remain represented by resolver rules', () => {
     test.each(constraints.filter(c => c.clearedAt))('$description', (c) => {
-      const snapshot = loadSnapshot(c.snapshotSeq)
-      const plan = solve(without(snapshot, c), defaultConfig)
+      const log = loadLog(c.seq)
+      const { plan } = derive(without(log, c), defaultConfig)
       expect(satisfies(plan, c)).toBe(true)
     })
   })
 
   describe('active constraints — informational health checks', () => {
     test.each(constraints.filter(c => !c.clearedAt))('$description', (c) => {
-      const snapshot = loadSnapshot(c.snapshotSeq)
-      const plan = solve(without(snapshot, c), defaultConfig)
+      const log = loadLog(c.seq)
+      const { plan } = derive(without(log, c), defaultConfig)
       if (satisfies(plan, c)) {
         console.log(`✨ now satisfied without custom constraint: ${c.description}`)
       }
@@ -250,7 +276,7 @@ Some parts of the determinism contract are better enforced statically.
 ```jsonc
 {
   "overrides": [{
-    "files": ["src/solver/**/*.ts", "src/config/**/*.ts"],
+    "files": ["src/solver/**/*.ts", "src/derive/**/*.ts", "src/config/**/*.ts"],
     "rules": {
       "no-restricted-globals": ["error",
         { "name": "Date",   "message": "Pass eventDate in via config." },
@@ -265,8 +291,10 @@ Some parts of the determinism contract are better enforced statically.
 }
 ```
 
-These overrides extend to `src/config/**` — derivations and checks (`derive`,
-`check`, `validFor`) run inside the solver and are bound by the same contract.
+These overrides extend to `src/derive/**` and `src/config/**`. Profile evaluators
+(`derive`, `check`, `validFor`) run inside the solver and are bound by the same
+contract, and the fold is bound by it because the same code runs in a browser,
+where a stray `src/db` import would be a bundling failure rather than a subtle one.
 
 Plus one structural test, which catches the case a lint rule cannot:
 
@@ -305,7 +333,7 @@ test('the full loop: import → constraints → solve → snapshot → publish',
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  await publish(db, plan2.snapshotId)
+  await publish(db, plan2.inputSeq)
   expect(await publishedCount(db)).toBe(1)
 })
 ```
@@ -320,8 +348,9 @@ Also covered:
 
 - **Auth**: magic link redeems exactly once; a second attempt fails; expiry
   works; rate limits bite; changing an email kills sessions.
-- **Projections**: append events, rebuild, compare against a hand-written
-  expectation. Then rebuild twice and assert identical — rebuild idempotency.
+- **Fold**: a pure test, no database. Fold a fixture log, compare against a
+  hand-written expectation, then fold twice and assert identical. Persisting it is
+  a separate, smaller integration test.
 - **Constraint enforcement**: attempt to emit a snapshot with two assignments for
   one place and assert snapshot validation fails.
 - **Publication concurrency**: publishing while another plan is published fails

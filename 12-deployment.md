@@ -64,6 +64,24 @@ event profile ([event profiles](15-event-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
+### The board bundle
+
+The board bundle carries `src/derive/**`, `src/solver/**`, and the active profile
+alongside the interaction code, because the board derives locally
+([frontend](11-frontend.md) §6). All of it is dependency-free TypeScript and
+minifies accordingly.
+
+Two rules keep that honest:
+
+- **A size budget, checked in CI.** The build fails if the bundle exceeds it. The
+  budget exists so that growth is a decision rather than a drift; raise it
+  deliberately when there is a reason.
+- **The profile hash travels with the page.** The board is served the Worker's
+  `config_hash` and refuses to derive if its own bundled profile hashes
+  differently. A deploy that updates the Worker while a browser holds yesterday's
+  bundle then produces a reload prompt rather than a plan computed against the
+  wrong vocabulary.
+
 ---
 
 ## 2. Migrations
