@@ -72,13 +72,20 @@ The admin dashboard computes health from the current event-log state:
 - constraints currently affecting the plan;
 - constraints that are currently redundant and can be cleared.
 
+The last two are one question asked twice, and it is a counterfactual: derive
+without the constraint and compare. `diff(derive(events ∖ c), derive(events))` is
+empty when `c` is doing no work and names exactly who moves when it is. This needs
+no bookkeeping of its own, which is why the buckets can be recomputed on every
+dashboard load rather than maintained.
+
 Clearing a constraint is always a human action. Its original `LabelSet` event
 remains history, and historical plan snapshots preserve the result it produced.
 
 ## 5. Regression corpus
 
-Constraint fixtures replace pin fixtures. A fixture records a snapshot sequence,
-the constraint labels, expected assignment, and the definition description.
+A constraint fixture records a log position, the constraint labels, the expected
+assignment, and the definition description. Every case is the same counterfactual
+the dashboard runs, pinned to a fixed position so it can be asserted.
 Fixtures for constraints that have been cleared remain useful regression cases:
 
 - cleared constraints should remain satisfied when the corresponding rule is

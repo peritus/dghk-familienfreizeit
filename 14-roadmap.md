@@ -62,7 +62,8 @@ have surprises in it, and they should surface now rather than in M3.
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain HTML rendering of it
-- immutable `PlanSnapshotted` event payloads
+- `derive(events, config)` and `diff` — the fold lifted clear of the database
+- immutable `PlanPublished` plan bodies
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
@@ -105,17 +106,19 @@ arrive; the collection window should open as early as possible.
 
 - Party review screen with provenance, merge and split
 - Board: server-rendered cards, room grouping, status glyphs
-- The island: pragmatic-drag-and-drop, multi-select, keyboard, optimistic move
+- The island: pragmatic-drag-and-drop, multi-select, keyboard
+- The pending list, deriving locally on every action; apply and discard
 - Custom constraint definitions and `needs/provides` label application
-- Undo via `LabelCleared`
-- Optimistic concurrency with 409 handling
+- Undo by popping a pending event
+- Apply-time compare-and-swap with 409 re-derivation
+- The cross-runtime agreement test, before the board is trusted
 
 **Done when:** an organiser who has not seen the code can rearrange a plan and
 understand what happened each time.
 
-Watch the line count on `client/board.ts`. Past ~600 lines, take the React
-escape hatch described in [frontend](11-frontend.md) §1 rather
-than continuing.
+Watch the line count on `client/board.ts` — the interaction code, not the shared
+derivation core it bundles. Past ~600 lines, take the React escape hatch described
+in [frontend](11-frontend.md) §1 rather than continuing.
 
 ---
 
@@ -127,7 +130,7 @@ than continuing.
 - Publish flow, the one-published-plan index, supersession
 - The attendee assignment view, with a print stylesheet
 - Change emails computed from the diff
-- Dashboard staleness with the background re-solve
+- Dashboard staleness with the background derivation
 
 **Done when:** publishing twice in a row with no intervening changes sends zero
 emails. That is the test of the whole determinism argument, and it is worth
@@ -185,6 +188,11 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 ---
 
 ## Sequencing rationale
+
+**Why derivation lands with the solver.** Lifting the fold clear of the database
+costs almost nothing while the projector is being written and is an awkward retrofit
+afterwards, and everything from M4 onward — the board's pending list, the plan diff,
+constraint health — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
 wrong in a way that invalidates other work. A board built on a party model that
