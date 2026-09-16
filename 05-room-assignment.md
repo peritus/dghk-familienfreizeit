@@ -109,7 +109,7 @@ Sorting keys makes the hash depend on content only.
 
 ### The test that proves all seven
 
-In [testing](13-testing.md), but stated here because it is the point:
+In [testing](14-testing.md), but stated here because it is the point:
 
 **Shuffle invariance.** Take a snapshot, randomly permute every array in it,
 re-sort via `snapshot.ts`, solve, and assert the output hash is unchanged. Run it
@@ -428,7 +428,7 @@ or adds a matching constraint for Room 31.
 A short table of named integer terms, living in config, stored with every plan.
 
 Geometry terms live on `Weights`. Every tag-specific term lives as a field on
-its own tag instead ([event profiles](15-event-profiles.md) §4):
+its own tag instead ([event profiles](16-event-profiles.md) §4):
 
 | Geometry term | Configured as |
 |---|---|
@@ -455,7 +455,7 @@ remaining places regardless of which tags are involved.
 
 Defaults shown. They are a starting point, not a truth; expect to tune them in
 the first week with `scripts/tune.ts` against an exported event log
-([event profiles](15-event-profiles.md) §4), and to record each change as a
+([event profiles](16-event-profiles.md) §4), and to record each change as a
 deployment of the event profile rather than an event.
 
 Three notes explain why these particular terms carry the scale they do:

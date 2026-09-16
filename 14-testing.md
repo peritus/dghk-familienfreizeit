@@ -208,7 +208,7 @@ capacity exactly equal to demand, capacity one short.
 
 ## 4. The constraint regression corpus
 
-From [constraint health](07-constraint-health.md) §5. Every active or
+From [constraint health](08-constraint-health.md) §5. Every active or
 cleared custom constraint can be a test case authored by a domain expert. It is the
 same counterfactual the dashboard computes, pinned to a fixed log position.
 

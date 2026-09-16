@@ -343,7 +343,7 @@ since, the server returns 409 with the events it has gained, and the board says:
 Re-deriving is honest work rather than merge logic: the pending events are folded
 onto the newer log and the board shows the resulting plan. Payloads are complete
 restatements ([03-events](03-events.md)) and constraints name stable entities
-([07-constraint-health](07-constraint-health.md) §3), so the result is well defined.
+([08-constraint-health](08-constraint-health.md) §3), so the result is well defined.
 A pending event that names something Anna withdrew surfaces as an ordinary
 constraint diagnostic, not as a conflict the admin has to resolve by hand.
 

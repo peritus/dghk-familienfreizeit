@@ -189,16 +189,8 @@ The profile does not require every children’s workshop to have a leader.
 
 ## 7. Materials
 
-The generic `materials` module is enabled for this event. It keeps requests and
-commitments as separate records:
-
-| Record | Meaning |
-|---|---|
-| `material_request` | A family or workshop says that an item is needed; it remains open until fulfilled or explicitly cancelled. |
-| `material_commitment` | A family or person pledges to bring an item; it can be withdrawn independently. |
-| `fulfills` | A generic relationship connecting a commitment to the request it satisfies. |
-
-The configured categories are:
+The generic `materials` module is enabled for this event. Its configured
+categories and labels are:
 
 | Category | Meaning |
 |---|---|
@@ -206,23 +198,22 @@ The configured categories are:
 | `games` | games and play materials |
 | `material` | other equipment or workshop supplies |
 
-Requests and commitments have a category, item name, quantity or description
-text, and requester or contributor labels. They may be general event records or
-linked to a workshop. A workshop-linked request may additionally identify the
-person it concerns, such as the child named in a workshop materials list.
+Families and workshops may request materials. Families and persons may commit
+to bringing them. Requests and commitments may be general event records or
+linked to a workshop; a workshop-linked request may additionally identify the
+child it concerns.
 
-Quantities remain text so entries such as `2-3 Packs`, `5 Liter`, and `4x` are
-preserved without pretending they share a unit or measurement model. Multiple
-commitments may partially or fully satisfy one request. Outstanding quantity
-and request status are derived from the current commitments; withdrawing a
-commitment leaves the underlying request open.
+The event uses free-text quantities and descriptions, preserving entries such as
+`2-3 Packs`, `5 Liter`, and `4x`. The generic `fulfills` relation explicitly
+connects commitments to requests; withdrawing a commitment leaves the request
+open for another contributor.
 
 The event profile can represent examples such as snacks, apple juice, napkins,
 reusable or disposable tableware, an espresso machine with its safety inspection
 note and accessories, and workshop-specific supplies such as paint or textile
 markers. The supplied examples do not contain a complete normalized family or
-person mapping, so they define the supported shape rather than creating
-invented assignments.
+person mapping, so they define event data shape rather than creating invented
+assignments.
 
 ## 8. Profile metadata and copy
 
