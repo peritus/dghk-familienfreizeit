@@ -1,7 +1,7 @@
 # 07 — Constraint health
 
 Constraint health is a generic diagnostic module. Its checks consume the active
-profile and selected modules; event-specific tags and policies determine which
+profile and selected modules; occasion-specific tags and policies determine which
 findings can occur.
 
 Admin judgement is expressed through the same event-backed constraint system as

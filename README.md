@@ -3,7 +3,7 @@
 ## What this is
 
 A small web application composed from reusable event modules. A deployment
-selects one event profile, which may assign people to rooms, workshops, or both.
+selects one occasion profile, which may assign people to rooms, workshops, or both.
 The first deployed profile is `familienfreizeit-2027`.
 
 Attendees state preferences. They never assign anything. A deterministic
@@ -46,7 +46,7 @@ document wins.
 authentication. Its email, display name, and membership labels are event-backed.
 
 **Person** — a typed entity representing one human. Birthdate, role, bed demand,
-and family membership are labels interpreted by event configuration.
+and family membership are labels interpreted by occasion configuration.
 
 **Party** — a set of People who must be placed in the same room. *Derived*, not
 stored as ground truth. One Family can yield several Parties; one Party can span
@@ -85,12 +85,12 @@ list is the ordinary case and needs no separate code path.
 per decision, including the alternatives it rejected. Not a debug log; a
 first-class deliverable that admins read.
 
-**Tag** — a named fact in an event profile's vocabulary, optionally pointing at
+**Tag** — a named fact in an occasion profile's vocabulary, optionally pointing at
 another entity and optionally carrying a strength. Stored as a generic label.
 
-**Event profile** — the typed composition of modules and the event-specific
+**Occasion profile** — the typed composition of modules and the occasion-specific
 vocabulary, policy, parameters, and copy for one deployment. The first profile
-is `events/familienfreizeit-2027.ts`.
+is `profiles/familienfreizeit-2027.ts`.
 
 **Strength** — `required` (prunes rooms) or `preferred` (scored). An absent tag
 assignment means indifferent.
@@ -222,7 +222,7 @@ dynamic evaluation or code deployment.
 ### D12 — Weights live in code
 
 *Chosen.* `SolverConfigChanged` is dropped. Tuning happens offline against an
-exported event log. Rationale in [event profiles](16-event-profiles.md) §4.
+exported event log. Rationale in [occasion profiles](16-event-profiles.md) §4.
 
 ### D13 — Workshop rankings are structured labels
 
@@ -230,10 +230,10 @@ exported event log. Rationale in [event profiles](16-event-profiles.md) §4.
 preserve dense ordered lists without a special property table. Rationale in
 [labels and constraints](04-labels-and-constraints.md) §7.
 
-### D14 — `attendeeFacing` in the event profile drives the attendee view
+### D14 — `attendeeFacing` in the occasion profile drives the attendee view
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
-[event profiles](16-event-profiles.md) §6.
+[occasion profiles](16-event-profiles.md) §6.
 
 ### D16 — Publication identifies a plan; it does not create another plan
 

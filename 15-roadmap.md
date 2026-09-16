@@ -1,7 +1,7 @@
 # 15 — Roadmap
 
 This is the single source for release scope, implementation order, cut lines,
-and deferred work. It delivers reusable modules and the first deployed event
+and deferred work. It delivers reusable modules and the first deployed occasion
 profile in parallel. Milestones distinguish generic implementation work from
 the concrete configuration and real-data rehearsal for `familienfreizeit-2027`.
 
@@ -252,7 +252,7 @@ definitions, the workshop solver and fairness objective, or the profile. Each
 is cheap to build and expensive to retrofit, and each is load-bearing for
 something else. A solver without a trace is a black box
 nobody will trust; unexplained constraints are permanent sediment. The profile
-is **not cuttable** — it consolidates the matching model and event vocabulary, so
+is **not cuttable** — it consolidates the matching model and occasion vocabulary, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
 to C8 alone, which carries most of the value.
 

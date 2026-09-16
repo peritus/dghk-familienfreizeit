@@ -128,7 +128,7 @@ lifecycle. If a component needs data it takes a prop; the route fetches it.
 and should appear nowhere in this codebase. Family free text, admin notes and
 workshop titles are all user-supplied and all rendered as `{value}`.
 
-The attendee preferences page is a renderer over `attendeeFacing` event-profile entries
+The attendee preferences page is a renderer over `attendeeFacing` occasion-profile entries
 rather than hand-written JSX ([attendee view](10-family-portal.md) §1): each
 `control` value maps one-to-one onto a component in `src/views/controls/`.
 
@@ -367,7 +367,7 @@ import only from themselves and from TypeScript's standard library. That is deli
 code in the project should be readable without knowing any framework, and
 auditable by someone who does not know this stack. It imports `src/config/**`,
 which is also dependency-free —
-"imports only from itself" to "imports only from itself and the event config,
+"imports only from itself" to "imports only from itself and the occasion config,
 both of which are dependency-free".
 
 **Deliberately absent:**

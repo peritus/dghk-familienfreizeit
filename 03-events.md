@@ -317,7 +317,7 @@ Worth writing down, because the boundary blurs under pressure.
 
 | Not an event | Why | Where it lives |
 |---|---|---|
-| Event-profile changes (adding, removing or reweighting a tag) | Code, versioned with the deployment; covered by `config_hash` | `events/<event>.ts` |
+| Occasion-profile changes (adding, removing or reweighting a tag) | Code, versioned with the deployment; covered by `config_hash` | `profiles/<occasion>.ts` |
 | Magic link issued / redeemed | Operational secret handling | `magic_link` |
 | Session created / destroyed | Operational | `session` |
 | Email sent, delivered, bounced | Operational telemetry | `email_log` |

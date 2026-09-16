@@ -1,6 +1,6 @@
-# Familienfreizeit 2027 event profile
+# Familienfreizeit 2027 occasion profile
 
-This is the first deployed event profile for DGHK Familienfreizeit. It selects and
+This is the first deployed occasion profile for DGHK Familienfreizeit. It selects and
 configures generic room, workshop, food-preferences, and materials modules; it
 does not define a separate application architecture.
 
@@ -82,7 +82,7 @@ are normalized from `2×4` and `2×2` sleeping rooms to 8 and 4 beds respectivel
 
 ### Room tags
 
-The inventory uses event-specific tags and derives reusable room capabilities
+The inventory uses occasion-specific tags and derives reusable room capabilities
 from them:
 
 | Tag | Values or derivation | Use |
@@ -100,7 +100,7 @@ from them:
 
 Derived capabilities such as `private-sanitary`, `ground-floor`, and
 `multi-room-unit` are resolver projections, not additional authoritative room
-properties. The event profile decides which of them are exposed as preferences
+properties. The occasion profile decides which of them are exposed as preferences
 or hard requirements.
 
 At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
@@ -129,7 +129,7 @@ The profile defines concrete property and relationship tags, including:
 | `prefers_workshop` | ordered workshop choice |
 
 `room_type`, `building`, and `floor` are already defined by the room inventory's
-room-tag vocabulary above. This table lists only additional event vocabulary.
+room-tag vocabulary above. This table lists only additional occasion vocabulary.
 The child-group labels use the generic `needs-provides` resolver operator:
 rooms provide a stable child-group entity and children need that same entity.
 There is no age-band or opt-in rule.
@@ -195,7 +195,7 @@ designations, and capacity values are profile parameters.
 ## 6. Workshop policy
 
 The profile uses one ordered ranking per person and slot. Workshop assignment
-uses the generic ordered-choice and fairness mechanisms with these event policies:
+uses the generic ordered-choice and fairness mechanisms with these occasion policies:
 
 - minimize people receiving none of their top two choices;
 - then minimize people receiving none of their choices;
@@ -230,7 +230,7 @@ The event uses free-text quantities and descriptions, preserving entries such as
 connects commitments to requests; withdrawing a commitment leaves the request
 open for another contributor.
 
-The event profile can represent examples such as snacks, apple juice, napkins,
+The occasion profile can represent examples such as snacks, apple juice, napkins,
 reusable or disposable tableware, an espresso machine with its safety inspection
 note and accessories, and workshop-specific supplies such as paint or textile
 markers. The supplied examples do not contain a complete normalized family or
@@ -241,7 +241,7 @@ assignments.
 
 The profile supplies the actual event name, date, preference deadline, locale,
 public description, attendee-facing labels, admin-facing labels, and email copy.
-These values are event configuration and are included in the configuration hash.
+These values are occasion configuration and are included in the configuration hash.
 
 For this deployment, the event runs from `2027-04-30` through `2027-05-02`,
 inclusive. The user-facing German dates are 30.04.2027 to 02.05.2027.
@@ -250,4 +250,4 @@ inclusive. The user-facing German dates are 30.04.2027 to 02.05.2027.
 
 The profile is deployed separately with its own database and operational
 configuration. It does not introduce runtime tenancy or require unused room or
-workshop surfaces when a module is absent from another event profile.
+workshop surfaces when a module is absent from another occasion profile.
