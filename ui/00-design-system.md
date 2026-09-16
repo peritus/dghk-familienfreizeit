@@ -2,7 +2,7 @@
 
 ## Audience and purpose
 
-The attendee portal is for non-technical families on phones. The admin tool is
+The attendee view is for non-technical families on phones. The admin tool is
 for a small group of competent organisers on laptops. Both applications share
 visual primitives, but not navigation density.
 
