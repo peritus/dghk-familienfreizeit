@@ -1,8 +1,9 @@
-# 14 — Roadmap
+# 15 — Roadmap
 
-The roadmap delivers reusable modules and the first deployed event profile in
-parallel. Milestones distinguish generic implementation work from the concrete
-configuration and real-data rehearsal for `familienfreizeit-2027`.
+This is the single source for release scope, implementation order, cut lines,
+and deferred work. It delivers reusable modules and the first deployed event
+profile in parallel. Milestones distinguish generic implementation work from
+the concrete configuration and real-data rehearsal for `familienfreizeit-2027`.
 
 Sequenced so that each milestone leaves something usable, and so the riskiest
 work happens while there is still time to change direction.
@@ -11,6 +12,22 @@ The ordering principle: **build the thing that tells you whether the design is
 wrong, first.** That is the solver. Everything else is well-understood work that
 can be estimated; the solver is the part that might reveal the model is
 inadequate.
+
+## Initial release scope
+
+Only these capabilities are in scope for the initial release:
+
+- Admin-managed inventory: buildings, rooms, beds, and room designations.
+- Magic-link authentication with a code-level admin allowlist.
+- Deterministic room assignment with a full human-readable explanation.
+- Deterministic workshop assignment with an explicit fairness objective.
+- Drag-and-drop admin board that writes constraints, not assignments.
+- Deterministic plans identified by `input_seq`, and publication.
+- Custom, human-readable matching constraints that admins can add and clear.
+
+The milestones below are the unified implementation order. Work that supports
+the initial release is included in that release; work explicitly identified as
+deferred belongs after it.
 
 ---
 
@@ -29,23 +46,23 @@ inadequate.
 
 ---
 
-## M1 — Inventory and families
+## M1 — Inventory and administrator access
 
 *Usable by an admin to enter data. Two days.*
 
 - Event table, append function, projector skeleton
 - `BuildingAdded`, `RoomAdded`, `BedAdded`, `RoomDesignationChanged`
 - Place generation from `bed.sleeps`
-- `FamilyInvited`, `PersonAdded`
+- `FamilyInvited`, `PersonAdded` fixtures for solver development; family-facing
+  onboarding is deferred
 - The generic `label` projection and a minimal built-in tag vocabulary (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
-- CSV import with a validating preview
-- Admin inventory and families screens — plain tables
-- Cloudflare Access in front of `/admin` as a stopgap
+- Admin inventory screens — plain tables
+- Magic-link authentication, sessions, rate limits, and the code-level admin allowlist
 
-**Done when:** the real hostel's rooms and beds are entered and the real family
-list is imported. Do this with real data as early as possible; the inventory will
-have surprises in it, and they should surface now rather than in M3.
+**Done when:** the real hostel's rooms and beds are entered and an administrator
+can sign in. Do this with real inventory data as early as possible; it will have
+surprises in it, and they should surface now rather than in M2.
 
 ---
 
@@ -80,11 +97,10 @@ day for that possibility.
 
 ---
 
-## M3 — Preferences and auth
+## M3 — Deferred family preferences and portal
 
-*Families can use it. Two to three days.*
+*Post-initial-release work. Two to three days.*
 
-- Magic link, sessions, rate limits, the ten rules from [authentication](11-authentication.md)
 - The family portal: a renderer over `familyFacing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
   couples the portal to the profile by design
@@ -92,11 +108,10 @@ day for that possibility.
 - Invitation and reminder emails
 - Admin chase list
 
-**Done when:** you have sent yourself an invitation from the production domain,
-logged in on a phone, stated preferences, and seen them in the event log.
+**Done when:** a family can use the portal to state preferences and see them in
+the event log.
 
-Send the real invitations at the end of this milestone. Preferences take weeks to
-arrive; the collection window should open as early as possible.
+Send the real invitations only after this deferred milestone is delivered.
 
 ---
 
@@ -114,7 +129,8 @@ arrive; the collection window should open as early as possible.
 - The cross-runtime agreement test, before the board is trusted
 
 **Done when:** an organiser who has not seen the code can rearrange a plan and
-understand what happened each time.
+understand what happened each time, and can add and clear a human-readable
+matching constraint.
 
 Watch the line count on `client/board.ts` — the interaction code, not the shared
 derivation core it bundles. Past ~600 lines, take the React escape hatch described
@@ -122,20 +138,16 @@ in [frontend](12-frontend.md) §1 rather than continuing.
 
 ---
 
-## M5 — Publication
+## M5 — Snapshots and publication
 
 *Attendees get answers. Two days.*
 
-- Plan diff, grouped by cause
+- Plans identified by `input_seq`
 - Publish flow: the publication event and the hash compare-and-swap
-- The attendee assignment view, derived from the plan selected by publication, with a print
-  stylesheet
-- Change emails computed from the diff
-- Dashboard staleness with the background derivation
+- The published-plan view, derived from the plan selected by publication
 
-**Done when:** publishing twice in a row with no intervening changes sends zero
-emails. That is the test of the whole determinism argument, and it is worth
-verifying explicitly.
+**Done when:** an administrator can publish a reviewed plan and reproduce
+the same deterministic result from the plan identified by its `input_seq`.
 
 ---
 
@@ -144,31 +156,27 @@ verifying explicitly.
 *Two to three days.*
 
 - Slots and workshops in inventory
-- Ranking UI in the family portal
 - The workshop solver with the fairness ledger
-- `workshop-with` co-assignment groups (rankings unchanged)
-- Cancellation sweep
-- Admin workshop screen with the preference heatmap
 - Workshop constraints
 
-Separable from everything before it. If time runs out, workshops can be assigned
-on paper while rooms are not.
+The solver and its fairness objective are initial-release work. Family ranking
+UI, co-assignment groups, cancellation handling, and the preference heatmap are
+post-initial enhancements.
 
 ---
 
-## M7 — Constraint health
+## M7 — Deferred constraint health
 
-*One to two days. The milestone that is easiest to skip and should not be.*
+*Post-initial-release work. One to two days.*
 
 - Retirement loop with the redundant / near / load-bearing buckets
 - The dashboard panel, batch retirement
 - Constraint health screen with missing-provider and contradiction findings
-- Custom constraint definition and label application UI
 - Constraint fixture export and the CI corpus
 - Constraint usage and redundancy metrics
 
-**Done when:** an admin can add, inspect, clear, and regression-test a custom
-constraint without a second override model.
+**Done when:** an admin can inspect constraint health and regression-test the
+custom constraint corpus without a second override model.
 
 This is the milestone that pays off over the following weeks rather than
 immediately, which is exactly why it gets cut under pressure. Do it before M8.
@@ -186,14 +194,23 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 - Deliverability testing against GMX, web.de, Gmail, Outlook
 - The pre-event runbook from [deployment](13-deployment.md) §9
 
+## Post-initial-release work
+
+The following work remains in the detailed milestones as planning context, but
+is not part of the initial release: family import and self-service preference
+collection, food preferences and allergy notes, family-contributed materials,
+workshop-linked supplies, change emails, the constraint-health dashboard,
+multi-event tenancy, collaborative editing, arrival and departure logistics,
+transport, parking, payments, and mobile-first administration.
+
 ---
 
 ## Sequencing rationale
 
 **Why derivation lands with the solver.** Lifting the fold clear of the database
 costs almost nothing while the projector is being written and is an awkward retrofit
-afterwards, and everything from M4 onward — the board's pending list, the plan diff,
-constraint health — is a call on it.
+afterwards, and everything from M4 onward — the board's pending list, publication,
+and constraint health — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
 wrong in a way that invalidates other work. A board built on a party model that
@@ -205,9 +222,10 @@ no fixture will: rooms that are really two rooms, a bungalow with an outdoor
 bathroom, a tent that sleeps four but only comfortably three. The model should
 meet reality before it meets the solver.
 
-**Why auth after the solver.** Nothing in M2 needs a login — admin screens sit
-behind Cloudflare Access, and preferences can be inserted by hand for testing.
-Auth is well-understood work with no design risk, so it waits.
+**Why administrator access lands in M1.** Every initial-release surface is an
+admin surface, so the magic-link flow and code-level allowlist belong with the
+inventory rather than as a stopgap. Family-facing authentication and preference
+collection remain deferred to M3.
 
 **Why publication before workshops.** Room assignment is the thing people are
 anxious about. Getting it published and correct is worth more than having
@@ -222,16 +240,17 @@ If time runs short, in the order they should go:
 1. **htmx.** Plain forms and redirects. Loses polish, costs nothing functional.
 2. **The bed-level view.** Room-level assignment is enough; bed allocation within
    a room can be a piece of paper taped to the door.
-3. **Workshops entirely.** A paper sign-up sheet at the hostel is a fine fallback
-   and has worked for decades.
-4. **The plan diff.** Publish without it and email everyone rather than only the
+3. **The plan diff.** Publish without it and email everyone rather than only the
    affected families. Worse, not broken.
-5. **Multi-select on the board.** Drag one party at a time. Slower, still better
+4. **Multi-select on the board.** Drag one party at a time. Slower, still better
    than a spreadsheet.
+5. **Constraint-health dashboard.** Keep the underlying custom constraint
+   lifecycle and explanations; defer the reporting surface.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint
-definitions, or the profile. Each is cheap to build and expensive to retrofit, and each is
-load-bearing for something else. A solver without a trace is a black box
+definitions, the workshop solver and fairness objective, or the profile. Each
+is cheap to build and expensive to retrofit, and each is load-bearing for
+something else. A solver without a trace is a black box
 nobody will trust; unexplained constraints are permanent sediment. The profile
 is **not cuttable** — it consolidates the matching model and event vocabulary, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
@@ -249,10 +268,10 @@ to C8 alone, which carries most of the value.
 | The board is slower than a spreadsheet for the admin who knows the families | Medium | Keyboard path; multi-select; measure honestly |
 | Capacity is genuinely insufficient | Low | The unplaced report names the binding constraint early |
 | Solver is chaotic — small input changes move many people | Low | The `movedCount` integration test catches it |
-| Scope creep into catering, transport, payments | **High** | The scope section in the README; say no |
+| Scope creep into catering, transport, payments | **High** | The scope section in this roadmap; say no |
 | Profile vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; C7 makes removals visible; a rename costs nothing |
 
 The two highest-likelihood risks are both about data rather than software.
-Families will not fill in the form, and the room inventory will be wrong. Plan
-admin time for chasing and for a walk-through, and treat both as first-class work
-rather than as things that will sort themselves out.
+Families may not fill in a future preference form, and the room inventory will be
+wrong. Plan admin time for the walk-through now; preference chasing belongs to
+the deferred family-portal work.

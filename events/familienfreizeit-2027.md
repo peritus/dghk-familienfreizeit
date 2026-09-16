@@ -1,6 +1,6 @@
 # Familienfreizeit 2027 event profile
 
-This is the first deployed event profile for Bettenplan. It selects and
+This is the first deployed event profile for DGHK Familienfreizeit. It selects and
 configures generic room, workshop, food-preferences, and materials modules; it
 does not define a separate application architecture.
 
@@ -24,7 +24,7 @@ The profile enables:
 - admin board, family portal, notifications, and constraint health.
 
 Room adjacency is not selected for the first deployment. The generic extension
-point remains available for a later profile decision.
+point remains available.
 
 ## 2. Room inventory
 

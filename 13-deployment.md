@@ -10,7 +10,7 @@ Durable Objects.
 ```jsonc
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "bettenplan",
+  "name": "dghk-familienfreizeit",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -24,14 +24,14 @@ Durable Objects.
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "bettenplan",
+      "database_name": "dghk-familienfreizeit",
       "database_id": "<from wrangler d1 create>",
       "migrations_dir": "migrations"
     }
   ],
 
   "vars": {
-    "PUBLIC_URL": "https://bettenplan.example.de",
+    "PUBLIC_URL": "https://dghk-familienfreizeit.example.de",
     "EMAIL_FROM": "Configured event <wochenende@example.de>"
   },
 
@@ -43,11 +43,11 @@ Durable Objects.
 
   "env": {
     "preview": {
-      "name": "bettenplan-preview",
+      "name": "dghk-familienfreizeit-preview",
       "d1_databases": [
-        { "binding": "DB", "database_name": "bettenplan-preview", "database_id": "…" }
+        { "binding": "DB", "database_name": "dghk-familienfreizeit-preview", "database_id": "…" }
       ],
-      "vars": { "PUBLIC_URL": "https://bettenplan-preview.workers.dev" }
+      "vars": { "PUBLIC_URL": "https://dghk-familienfreizeit-preview.workers.dev" }
     }
   }
 }
@@ -90,8 +90,8 @@ Drizzle generates, Wrangler applies.
 
 ```bash
 npm run db:generate                             # drizzle-kit → migrations/*.sql
-npx wrangler d1 migrations apply bettenplan --local
-npx wrangler d1 migrations apply bettenplan --remote
+npx wrangler d1 migrations apply dghk-familienfreizeit --local
+npx wrangler d1 migrations apply dghk-familienfreizeit --remote
 ```
 
 ```ts
@@ -141,7 +141,7 @@ There is no weight-editing screen, and this is deliberate. The offline
 workflow, from [event profiles](16-event-profiles.md) §4:
 
 ```bash
-wrangler d1 execute bettenplan --remote --json \
+wrangler d1 execute dghk-familienfreizeit --remote --json \
   --command "SELECT * FROM event ORDER BY seq" > events.json
 npm run tune
 ```
@@ -272,13 +272,13 @@ Three layers, in increasing order of how much you will regret needing them.
 Covers the "I applied the wrong migration" case.
 
 ```bash
-wrangler d1 time-travel restore bettenplan --timestamp=2026-09-14T09:00:00Z
+wrangler d1 time-travel restore dghk-familienfreizeit --timestamp=2026-09-14T09:00:00Z
 ```
 
 **Weekly export to a file you control.**
 
 ```bash
-wrangler d1 export bettenplan --remote --output=backup-$(date +%F).sql
+wrangler d1 export dghk-familienfreizeit --remote --output=backup-$(date +%F).sql
 ```
 
 Put it somewhere that is not Cloudflare. Run it before every migration and before
@@ -289,7 +289,7 @@ assignment is derivable from `event`. If everything else is lost but the event
 table survives, the application rebuilds completely. Weekly:
 
 ```bash
-wrangler d1 execute bettenplan --remote --json \
+wrangler d1 execute dghk-familienfreizeit --remote --json \
   --command "SELECT * FROM event ORDER BY seq" > events-$(date +%F).json
 ```
 
@@ -324,7 +324,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npx wrangler d1 migrations apply bettenplan --remote
+      - run: npx wrangler d1 migrations apply dghk-familienfreizeit --remote
       - run: npx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -340,7 +340,7 @@ harmless for the few seconds it takes.
 
 | | Local | Preview | Production |
 |---|---|---|---|
-| Database | Miniflare SQLite | `bettenplan-preview` | `bettenplan` |
+| Database | Miniflare SQLite | `dghk-familienfreizeit-preview` | `dghk-familienfreizeit` |
 | Email | console log | Resend test domain | Resend, real domain |
 | Auth | magic link in console | real, seeded admins | real |
 | Data | generated fixtures | anonymised copy | real |

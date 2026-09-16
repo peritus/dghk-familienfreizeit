@@ -105,7 +105,7 @@ export const layout = jsxRenderer(({ children, title }) => (
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>{title} · Bettenplan</title>
+      <title>{title} · DGHK Familienfreizeit</title>
       <link rel="stylesheet" href="/app.css" />
     </head>
     <body class="nb-page">{children}</body>
