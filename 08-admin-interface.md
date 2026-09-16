@@ -43,9 +43,9 @@ Layout, top to bottom, in descending order of urgency:
 > Published 3 days ago · plan #7
 > **14 events since.** Re-running would move **6 people**. *Review changes →*
 
-The "would move 6 people" is computed by the background solve described in
+The "would move 6 people" is `diff(derive(published), derive(all))`, described in
 [01-architecture](01-architecture.md). It turns a scary count of events into an
-accurate count of consequences. If the re-solve produces the same hash:
+accurate count of consequences. If the derivation produces the same hash:
 
 > Published 3 days ago · plan #7
 > 14 events since, none affecting assignments. **Up to date.**
@@ -157,10 +157,12 @@ everyone is correct but surprising, and the card is where that surfaces.
 > ⚠ Preflight C4: merged party Müller + Schmidt + Weber needs a six-place
 > ensuite room (Schmidt's requirement); no such room exists.
 
-**Merge and split** open a small dialog and emit `groups-with` or
-`separates-from` labels on the people concerned. There is no party override
-event and no reason code: the constraint's own description says why, and party
-formation re-derives from it like any other constraint.
+**Merge and split** open a small dialog and append `groups-with` or
+`separates-from` labels on the people concerned to the pending list. There is no
+party override event and no reason code: the constraint's own description says why,
+and party formation re-derives from it like any other constraint. Since party
+formation is the judgement call and the one most worth trying twice, this screen
+benefits from the pending list as much as the board does.
 
 **Children's room allocation** gets its own section on this page, since it
 happens before party formation and determines everything after:
@@ -233,13 +235,39 @@ the same toolchain behind Trello and Jira.
   affordance. Rooms that can accept it but would incur a penalty show the penalty
   as a ghost chip, its text read from the constraint definition rather than
   hard-coded: `−12 Zimmer teilen`.
-- **On drop**, the move applies optimistically, a custom constraint is emitted, the solver
-  re-runs server-side, and the board reconciles with the authoritative result.
-- **If the re-solve moves anything else**, those cards flash once and a summary
-toast appears: *"Constraint added for Braun ×5 → Room 03. 2 other parties moved. See what
-  changed →"*. Cascading moves are the main way a board like this surprises
-  people; showing them immediately is the difference between trust and
+- **On drop**, the constraint is appended to the pending list and the board
+  re-derives locally. There is no request and no optimistic guess to reconcile:
+  what appears is the real plan for those events.
+- **If the re-derivation moves anything else**, those cards flash once and a
+  summary appears: *"Constraint added for Braun ×5 → Room 03. 2 other parties
+  moved. See what changed →"*. Cascading moves are the main way a board like this
+  surprises people; showing them immediately is the difference between trust and
   suspicion.
+
+### Pending changes
+
+Every board action appends an event to the **pending list**
+([01-architecture](01-architecture.md)) rather than to the log. The board renders
+`derive(committed ++ pending)`, so the plan on screen is always the real plan for
+everything the admin has done so far.
+
+A bar along the bottom carries the count and the two ways out:
+
+> **3 pending changes** · Braun ×5 → Raum 03 · Koch ×2 → Raum 02 · Weber split
+> [ Apply ] [ Discard ]
+
+Usually the list is empty and the bar is absent, which is the ordinary state of the
+board rather than a special one.
+
+**Apply** appends the events in order, in one request. The server validates and
+authorises each one exactly as it would a single action, appends them together, and
+derives. **Discard** drops them; because nothing was written, nothing is left
+behind — no cleared labels, no retired constraints, no sediment in the family's
+event history.
+
+This is what makes the board safe to think in. An admin can try an arrangement,
+look at the constraint health and the diff it would produce, and walk away from it
+without having said anything.
 
 ### Multi-select
 
@@ -265,7 +293,7 @@ optional.
 | `Space` | Add to selection |
 | `Enter` | Open the room picker for the selection |
 | `r` then digits | Assign directly to a room number |
-| `u` | Clear the selected party's admin constraint |
+| `u` | Drop the selected party's pending constraint |
 | `z` | Undo the last action |
 | `Esc` | Clear selection |
 
@@ -284,24 +312,33 @@ when the actual question is almost always "which room".
 
 ### Undo
 
-`z`, and a button. Implemented as `LabelCleared` followed by a re-solve. Because
-every board action is an event-backed constraint, undo is free and cannot drift
-from reality.
+`z`, and a button. It pops the last pending event and re-derives. Undo is exact
+rather than compensating: there is no cleared label and no second event recording
+that the first was a mistake, because the first was never committed.
+
+Undoing past the start of the pending list is not undo — the change is published
+history by then, and the way back is a new constraint that says what should happen
+instead.
 
 ### Concurrency
 
 Three admins, optimistic locking.
 
-Every board mutation carries the `snapshot_id` it was computed against. If the
-server's current draft has moved on, it returns 409 with the current state and
-the board shows:
+Apply carries the `input_seq` the pending list was built on. If the log has moved
+since, the server returns 409 with the events it has gained, and the board says:
 
-> Anna changed the plan while you were working. **Reload to see her changes →**
-> Your move was not applied.
+> Anna appended 2 events while you were working. Your 3 pending changes still
+> apply. **[ Re-derive on her changes ]**
 
-No merge logic, no operational transform, no Durable Objects. At three admins the
-collision rate is near zero and the cost of getting merge wrong is much higher
-than the cost of an occasional reload.
+Re-deriving is honest work rather than merge logic: the pending events are folded
+onto the newer log and the board shows the resulting plan. Payloads are complete
+restatements ([03-events](03-events.md)) and constraints name stable entities
+([07-constraint-health](07-constraint-health.md) §3), so the result is well defined.
+A pending event that names something Anna withdrew surfaces as an ordinary
+constraint diagnostic, not as a conflict the admin has to resolve by hand.
+
+No operational transform, no Durable Objects. At three admins the collision rate is
+near zero.
 
 ### Empty state
 
@@ -337,9 +374,12 @@ Grouping by cause is what makes the diff readable. A flat list of eleven moves
 tells an admin nothing; moves attributed to a preference or custom constraint,
 with the remainder marked knock-on, tell them whether to publish.
 
-Attribution is derivable: a move is caused by a constraint if its labels affect those people;
-by a preference if events affecting that family exist between the two
-`input_seq` values; otherwise it is knock-on.
+Attribution is computed, not guessed. For each event between the two positions,
+derive again without it and see whether the move survives; the move is attributed
+to the events whose absence removes it, and to knock-on if none of them does. For
+the ordinary case — a dozen or two events since publication — that is a dozen or two
+derivations of a few milliseconds each, and the answer is exact rather than a rule
+of thumb that is wrong precisely when the plan is most tangled.
 
 Publishing from this screen shows exactly who will be emailed.
 
