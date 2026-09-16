@@ -261,9 +261,19 @@ board rather than a special one.
 
 **Apply** appends the events in order, in one request. The server validates and
 authorises each one exactly as it would a single action, appends them together, and
-derives. **Discard** drops them; because nothing was written, nothing is left
-behind — no cleared labels, no retired constraints, no sediment in the family's
-event history.
+derives. From that moment the other admins see the change, because they derive from
+the same log. Attendees do not — that is what Publish is for.
+
+**Discard** drops them; because nothing was written, nothing is left behind — no
+cleared labels, no retired constraints, no sediment in the family's event history.
+
+The two verbs are the two horizons ([architecture](01-architecture.md)):
+
+| | Apply | Publish |
+|---|---|---|
+| Who starts seeing it | the other admins | attendees |
+| What it writes | the pending events | one marker |
+| Undo | a new constraint, or a correcting event | publish again |
 
 This is what makes the board safe to think in. An admin can try an arrangement,
 look at the constraint health and the diff it would produce, and walk away from it
@@ -345,8 +355,8 @@ near zero.
 An empty board is the first thing a new admin sees, and it should be an
 instruction rather than a void:
 
-> No plan yet. Add rooms and beds in **Inventory**, import families, then
-> **compute a plan**. You can adjust it here afterwards.
+> Nothing to place yet. Add rooms and beds in **Inventory**, then import families.
+> A plan appears here as soon as there is something to put in a room.
 
 ---
 
@@ -356,7 +366,7 @@ Where publication confidence comes from. Two plans side by side, only the
 differences shown, grouped by cause.
 
 ```
-plan #7 (published 12 Sep)  →  plan #8 (draft)
+publication #7 (12 Sep)  →  current
 
 BECAUSE OF NEW PREFERENCES (4 people)
   Weber ×4   Raum 01 → Raum 07   Weber stated ensuite required (14 Sep)
@@ -411,7 +421,11 @@ partition the population and strand people.
 The interface's voice, applied consistently.
 
 **Buttons say what happens, and the result echoes them.** "Publish plan" produces
-"Plan published". "Compute plan" produces "Plan computed". Never "Submit".
+"Plan published"; "Apply" produces "Applied". Never "Submit".
+
+**There is no compute step, so there is no button for one.** The plan on screen is
+always current, because every page derives it. An admin's verbs are **Apply** —
+other admins see this — and **Publish** — attendees see this.
 
 **Errors state what happened and what to do.** Not "Invalid input" but "Row 31:
 birthdate `31.02.2015` is not a date. Use `DD.MM.YYYY`."
