@@ -3,7 +3,7 @@
 Labels are the generic storage mechanism. A profile supplies the concrete tag
 vocabulary, values, scopes, and UI metadata that generic modules interpret. The
 examples in this document use placeholders; the concrete 2027 vocabulary is in
-[the Familienfreizeit profile](events/familienfreizeit-2027.md).
+[the Familienfreizeit profile](profiles/familienfreizeit-2027.md).
 Generic resolver operators remain fixed; occasion profiles cannot upload executable
 operators.
 
