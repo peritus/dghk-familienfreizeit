@@ -30,3 +30,11 @@ affected entities, and the next useful screen.
 Use headings and status text in addition to borders and color. On narrow
 screens, findings come first, then definition cards; the create form is a
 full-height dialog with grouped labels and keyboard-safe focus order.
+
+## Neobrutalist redesign and components
+
+Use `Sidebar`, filter `Tabs`, finding `Alert` cards, definition `Card` rows, and
+textual `Badge` status. Create and inspect use `Dialog` with `Label`, `Input`,
+`Textarea`, `Combobox`, and `Select`. Clearing a definition or applying a
+custom constraint uses the full Alert Dialog recipe, with a consequence-focused
+`AlertDialogDescription` and explicit Cancel/Action buttons.

@@ -27,4 +27,11 @@ people; the screen does not let an organiser assign directly. Empty and
 unranked states distinguish “no response” from “no workshop available”.
 
 The heatmap has a text table alternative and does not use color alone. On
-narrow screens, show one workshop card at a time followed by the ranking list.
+On narrow screens, show one workshop card at a time followed by the ranking list.
+
+## Neobrutalist redesign and components
+
+Use `Sidebar`, a `Select` for slot choice, `Card` for workshop summaries, and
+`Table` for the accessible heatmap. `Badge` marks capacity and ranking status;
+`Tabs` switches between summary and heatmap without changing the selected slot.
+Warnings use `Alert` with a glyph and sentence, never saturated color alone.

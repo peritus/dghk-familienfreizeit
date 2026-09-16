@@ -26,4 +26,14 @@ the draft untouched. An already-published plan is read-only.
 
 Use a real table with row actions and a text summary above the diff. On narrow
 screens, each plan becomes a card and diff groups stack vertically. Publishing
-confirmation is a full-width dialog with focus returned to Publish on cancel.
+Publishing confirmation is a full-width dialog with focus returned to Publish on cancel.
+
+## Neobrutalist redesign and components
+
+Use `Sidebar`, `Table`, `Card`, `Badge`, and `Button` for plan navigation and
+rows. Diff categories use `Tabs` and `Alert` summaries with text labels.
+Publish uses the canonical Alert Dialog component family:
+`AlertDialogTrigger`, `AlertDialogContent`, `AlertDialogHeader`,
+`AlertDialogTitle`, `AlertDialogDescription`, `AlertDialogFooter`,
+`AlertDialogCancel`, and `AlertDialogAction`; the description includes plan
+hash and affected count.
