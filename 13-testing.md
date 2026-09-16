@@ -70,15 +70,15 @@ test/fixtures/snapshots/
   infeasible.json         trips preflight C8
 ```
 
-Golden fixtures must record the registry they were recorded against, since a
-registry change legitimately changes output. Store `config_hash` alongside
-`expectedHash` and fail with a clear message when the registry moved, rather
+Golden fixtures must record the profile they were recorded against, since a
+profile change legitimately changes output. Store `config_hash` alongside
+`expectedHash` and fail with a clear message when the profile moved, rather
 than reporting an opaque mismatch:
 
 ```ts
 test.each(goldenCases)('golden: $name', ({ snapshot, expectedHash, configHash }) => {
   if (currentConfigHash() !== configHash) {
-    throw new Error(`golden: $name was recorded against a different registry — re-record with npm run test:record`)
+    throw new Error(`golden: $name was recorded against a different profile — re-record with npm run test:record`)
   }
   expect(sha256(canonical(solve(snapshot, defaultConfig)))).toBe(expectedHash)
 })
@@ -220,7 +220,7 @@ satisfied.
 
 ---
 
-## Registry tests
+## Profile tests
 
 Cheap, and they catch the failure mode where the Worker boots and solves
 wrongly:
