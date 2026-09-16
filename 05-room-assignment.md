@@ -7,7 +7,7 @@ policies, and pure evaluators.
 The core of the system. Everything else is plumbing around this file.
 
 ```ts
-solve(snapshot: Snapshot, config: SolverConfig): Plan
+solve(solverInput: SolverInput, config: SolverConfig): Plan
 ```
 
 Pure. No I/O, no clock, no randomness, no ambient state. Given identical inputs
@@ -25,7 +25,7 @@ Seven rules. Each has a way it actually gets broken.
 
 ### R1 — Every input array is sorted by an explicit total order
 
-Sorting happens once, in `snapshot.ts`. Everything downstream may assume it.
+Sorting happens once, in `solver-input.ts`. Everything downstream may assume it.
 
 ```ts
 const persons = [...raw].sort(by(
@@ -36,9 +36,9 @@ const persons = [...raw].sort(by(
 Object.freeze(persons);
 ```
 
-*How it breaks:* someone adds a new collection to the snapshot and forgets to
-sort it. Mitigation: `snapshot.ts` has one `freezeSorted()` helper and a test
-that walks every array property of the Snapshot asserting it is sorted and
+*How it breaks:* someone adds a new collection to the solver input and forgets to
+sort it. Mitigation: `solver-input.ts` has one `freezeSorted()` helper and a test
+that walks every array property of the SolverInput asserting it is sorted and
 frozen.
 
 `labels` is covered by R1 like every other array, sorted by
@@ -72,7 +72,7 @@ plan. Default is no randomness at all.
 The event date arrives in the config. Age is `ageAt(birthdate, config.eventDate)`.
 
 *How it breaks:* someone adds a "registered recently" tiebreak and reaches for
-the clock. The correct move is to use the `created_at` already in the snapshot,
+the clock. The correct move is to use the `created_at` already in the solver input,
 which came from the event log and is therefore part of the input.
 
 *Enforced by:* the same lint rule.
@@ -111,19 +111,19 @@ Sorting keys makes the hash depend on content only.
 
 In [testing](14-testing.md), but stated here because it is the point:
 
-**Shuffle invariance.** Take a snapshot, randomly permute every array in it,
-re-sort via `snapshot.ts`, solve, and assert the output hash is unchanged. Run it
+**Shuffle invariance.** Take a solver input, randomly permute every array in it,
+re-sort via `solver-input.ts`, solve, and assert the output hash is unchanged. Run it
 with fifty different permutations in CI. Any order dependence anywhere in the
 solver fails this within a handful of seeds. It is worth more than every other
 test combined.
 
 ---
 
-## 2. Snapshot
+## 2. SolverInput
 
 ```ts
-type Snapshot = Readonly<{
-  eventSeq: number
+type SolverInput = Readonly<{
+  inputSeq: number
   families:        readonly Family[]
   persons:         readonly Person[]
   rooms:           readonly Room[]
@@ -151,14 +151,14 @@ type SolverConfig = Readonly<{
 
 `eventDate` comes from `meta.date` in the event profile.
 
-Withdrawn people are excluded when the snapshot is built, not filtered later.
+Withdrawn people are excluded when the solver input is built, not filtered later.
 Blocked rooms likewise. The solver never sees data it must remember to ignore.
 
 ---
 
 ## 3. Preflight, then Phase A — Party formation
 
-**Preflight runs first**, before any placement, over the snapshot alone. C1–C9
+**Preflight runs first**, before any placement, over the solver input alone. C1–C9
 per [labels and constraints](04-labels-and-constraints.md) §6. Error severity does not block computing a plan —
 an admin needs to see the plan to understand the error — but it blocks
 publishing without an explicit acknowledgement.

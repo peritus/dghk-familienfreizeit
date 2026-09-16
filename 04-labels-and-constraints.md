@@ -279,8 +279,8 @@ it surprises people, so the party card in
 
 ## 6. Preflight
 
-A phase running **before** party formation, on the snapshot alone. Output is
-stored on the plan and rendered on the dashboard.
+A phase running **before** party formation, on the plan's solver input alone. Output
+is stored on the plan and rendered on the dashboard.
 
 Its value is timing. A resolver surfaces infeasibility as a post-hoc "38 rooms rejected
 on capacity" after a full solve. Preflight says it in week two, before a single
@@ -390,7 +390,7 @@ that the solver ignores. Without it, admins will reach for a constraint-kind tag
 to record a note, and the solver will act on it. Make `descriptive` easy and
 obvious in the admin UI.
 
-**Canonical ordering.** Labels are an array in the snapshot and must be sorted
+**Canonical ordering.** Labels are an array in the solver input and must be sorted
 like every other one: `entity_id`, `key`, `value`.
 [room assignment](05-room-assignment.md) §1 R1 applies unchanged, and the
-shuffle-invariance test covers it once the array is added to the snapshot.
+shuffle-invariance test covers it once the array is added to the solver input.
