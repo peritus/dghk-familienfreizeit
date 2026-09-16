@@ -21,7 +21,7 @@ The profile enables:
 - workshop audience and person-to-workshop leadership;
 - food preferences with one per-person diet value and optional allergy text;
 - materials contributed by families and linked to workshops;
-- admin board, family portal, notifications, and constraint health.
+- admin board, attendee view, notifications, and constraint health.
 
 Room adjacency is not selected for the first deployment. The generic extension
 point remains available.
@@ -240,7 +240,7 @@ assignments.
 ## 8. Profile metadata and copy
 
 The profile supplies the actual event name, date, preference deadline, locale,
-public description, family-facing labels, admin-facing labels, and email copy.
+public description, attendee-facing labels, admin-facing labels, and email copy.
 These values are event configuration and are included in the configuration hash.
 
 For this deployment, the event runs from `2027-04-30` through `2027-05-02`,

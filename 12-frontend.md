@@ -128,8 +128,8 @@ lifecycle. If a component needs data it takes a prop; the route fetches it.
 and should appear nowhere in this codebase. Family free text, admin notes and
 workshop titles are all user-supplied and all rendered as `{value}`.
 
-The family preferences page is a renderer over `familyFacing` event-profile entries
-rather than hand-written JSX ([family portal](10-family-portal.md) §1): each
+The attendee preferences page is a renderer over `attendeeFacing` event-profile entries
+rather than hand-written JSX ([attendee view](10-family-portal.md) §1): each
 `control` value maps one-to-one onto a component in `src/views/controls/`.
 
 ---
@@ -165,7 +165,7 @@ return fragment
 ```
 
 That two-line pattern is the whole progressive-enhancement story. It is worth the
-discipline because the family portal will be opened on devices nobody tested.
+discipline because the attendee view will be opened on devices nobody tested.
 
 **htmx is the first thing to cut** if the dependency count needs to come down.
 Plain forms with redirects work everywhere; the cost is a full page render per
@@ -249,7 +249,7 @@ Non-negotiable regardless of the style:
 - **`prefers-reduced-motion` respected.** The press-down button transform is the
   only motion in the application and it is an action response, which is the kind
   worth keeping — but it still respects the preference.
-- **Responsive to 360px.** The family portal will be used on phones. The admin
+- **Responsive to 360px.** The attendee view will be used on phones. The admin
   board will not, and does not need to be.
 
 ---

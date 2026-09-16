@@ -230,7 +230,7 @@ exported event log. Rationale in [event profiles](16-event-profiles.md) §4.
 preserve dense ordered lists without a special property table. Rationale in
 [labels and constraints](04-labels-and-constraints.md) §7.
 
-### D14 — `familyFacing` in the event profile drives the family portal
+### D14 — `attendeeFacing` in the event profile drives the attendee view
 
 *Chosen.* The preferences page becomes a renderer. Rationale in
 [event profiles](16-event-profiles.md) §6.

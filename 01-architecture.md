@@ -220,7 +220,7 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family | Label/constraint events on entities it owns, for family-facing controls |
+| Family | Label/constraint events on entities it owns, for attendee-facing controls |
 | Allowlisted admin | Everything, through the admin UI |
 
 An allowlisted admin may enter a constraint for any entity. The actor identifies

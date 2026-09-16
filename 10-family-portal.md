@@ -1,4 +1,4 @@
-# 09 — Family portal
+# 09 — Attendee view
 
 One email per family. One login. One page before publication, a different page
 after.
@@ -24,7 +24,7 @@ minds. Everything saves on change.
 
 Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
 zusammen?") are **generated from the active event profile**: every tag declaring
-`familyFacing` produces a control, in profile order, grouped by scope. The
+`attendeeFacing` produces a control, in profile order, grouped by scope. The
 mock-up below is explanatory only; no event-specific form is hard-coded here.
 
 `control` is a closed union, and this is the thing to think about up front —
@@ -160,7 +160,7 @@ visible is already answered by the latest publication, and needs no rule.
 | Bed labels within their own rooms | Yes |
 | Scores, parties, traces, admin constraints | No |
 | Admin notes about them | **No** — free text is theirs, admin notes are not |
-| Tags declaring `adminOnly` | **Never**, regardless of `familyFacing` |
+| Tags declaring `adminOnly` | **Never**, regardless of `attendeeFacing` |
 | `descriptive` tags | Never |
 
 **Reciprocity is visible; the request is not.** If the Müllers request the
@@ -183,7 +183,7 @@ they're flexible about the ensuite", that goes in an admin-only note field.
 Conflating them means either admins self-censor or families read something they
 should not have.
 
-`apart-from` declares no `familyFacing` *and* `adminOnly: true`, deliberately
+`apart-from` declares no `attendeeFacing` *and* `adminOnly: true`, deliberately
 doubled, because exposing keep-apart relations to families would be the worst
 privacy failure available to this application.
 

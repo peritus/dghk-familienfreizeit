@@ -55,7 +55,7 @@ preferred label, or no label:
 | Indifferent | no row |
 
 `indifferent` stops being a value and becomes an absence, which is what it always
-meant. The tri-state control in the family portal writes one of two strengths or
+meant. The tri-state control in the attendee view writes one of two strengths or
 clears the label.
 
 ---
@@ -169,11 +169,11 @@ report names them.
 A family may `LabelSet` / `LabelCleared` only:
 
 - on entities it owns (itself, or its own people);
-- for tags declaring `familyFacing`;
+- for tags declaring `attendeeFacing`;
 - at strengths that control permits.
 
 Everything else is admin-only. Admin-only labels are never rendered in the
-family portal.
+attendee view.
 
 ---
 

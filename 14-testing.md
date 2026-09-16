@@ -255,7 +255,7 @@ wrongly:
 - every `satisfiedBy` names a tag whose kind is `capability`;
 - every `param` names a valid entity type;
 - no alias collides with another tag or alias;
-- every `familyFacing.control` has a renderer in `src/views/controls/`;
+- every `attendeeFacing.control` has a renderer in `src/views/controls/`;
 - every tag depending on a phase is disabled when that phase is;
 - `defineEvent` throws on each of the above when deliberately broken.
 
