@@ -359,7 +359,7 @@ The week before, in order:
 
 1. **Freeze the schema.** No migrations after this point without a very good
    reason.
-2. **Export everything.** Event log, full database, and the published plan as a
+2. **Export everything.** Event log, full database, and the current published plan as a
    PDF.
 2a. **Run `npm run tune`** against the exported log and confirm the deployed
     weights are the ones you settled on.
@@ -369,8 +369,8 @@ The week before, in order:
    sheet. The hostel's wifi will be bad and someone will need paper.
 4. **Verify one magic link end to end** against a real address on the actual
    production domain.
-5. **Check the published plan is the one you think it is** — `plan.status =
-   'published'`, and its `output_hash` matches what the dashboard shows.
+5. **Check the published plan is the one you think it is** — the latest
+   `PlanPublished.output_hash` matches the plan shown by the dashboard.
 6. **Nominate a laptop.** One machine, known to be logged in as an admin, known
    to have the export. Do not rely on being able to log in from a phone in a
    building with thick walls.

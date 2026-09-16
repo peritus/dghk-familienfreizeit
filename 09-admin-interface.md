@@ -267,12 +267,12 @@ the same log. Attendees do not — that is what Publish is for.
 **Discard** drops them; because nothing was written, nothing is left behind — no
 cleared labels, no retired constraints, no sediment in the family's event history.
 
-The two verbs are the two horizons ([architecture](01-architecture.md)):
+The two verbs control who can see the same plan:
 
 | | Apply | Publish |
 |---|---|---|
 | Who starts seeing it | the other admins | attendees |
-| What it writes | the pending events | one marker |
+| What it writes | the pending events | a `PlanPublished` event |
 | Undo | a new constraint, or a correcting event | publish again |
 
 This is what makes the board safe to think in. An admin can try an arrangement,
