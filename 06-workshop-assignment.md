@@ -250,7 +250,7 @@ step 5 cannot rescue anyone — nobody is eligible for the free places. The
 `"no eligible workshop with capacity; 14 free places exist in ages 4–7 workshops"`.
 
 **Preferences submitted after a plan is published.** Standard staleness handling:
-the dashboard shows the count, the background solve shows whether it would change
+the dashboard shows the count, the background derivation shows whether it would change
 anything. A workshop change is much less disruptive than a room change, so
 consider a lower threshold for re-publishing workshops than for rooms — though
 publishing them together keeps the mental model simple, and simplicity is worth

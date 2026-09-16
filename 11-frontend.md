@@ -32,6 +32,11 @@ per-directory `tsconfig.json` and it will confuse a newcomer once — but it is 
 smaller wart than a client runtime on every page. Revisit at ~600 lines of
 `client/board.ts`.
 
+That threshold counts interaction code only. The board bundle also carries
+`src/derive/**` and `src/solver/**`, which are shared with the Worker and are not
+written to be read as browser code; growth there says nothing about whether the
+interaction layer needs a framework.
+
 ---
 
 ## 2. Build
@@ -274,36 +279,53 @@ renders correctly. That is worth having.
 
 ### Client responsibility
 
-Roughly 400 lines, four concerns:
+Roughly 400 lines of interaction, four concerns:
 
 ```
 draggable()   party chips become draggable
 dropTarget()  room cards accept drops, with a canDrop predicate
 monitor()     global drag state → dim infeasible rooms, show penalty ghosts
-              → selection, keyboard handling, optimistic move, reconcile
+              → selection, keyboard handling, pending list, re-derive
 ```
 
-The feasibility predicate runs client-side for immediate feedback and
-**server-side for truth**. The client version is a fast approximation — capacity
-and the hard attribute checks — and is allowed to be slightly wrong. The server
-re-solves and the board reconciles. Never let the client's opinion be
-authoritative; it does not have the constraints, exclusions, or party
-structure.
+Plus the shared derivation core, `src/derive/**` and `src/solver/**`, bundled
+unchanged from the Worker's copy.
+
+The feasibility predicate is the real one. `canDrop` asks `derive` what happens if
+this constraint is appended, so an infeasible room is dimmed because it is
+infeasible — with the constraints, exclusions, and party structure all present —
+rather than because a cheap approximation guessed so.
 
 ### Mutation cycle
 
 ```
-1. optimistic move in the DOM
-2. POST /admin/api/board/constraint  { personIds, targetRoomId, snapshotId }
-3. server: append ConstraintDefined + LabelSet → re-solve → snapshot draft plan
-4. server responds with { snapshotId, assignments, movedPartyKeys, stats }
-5. client reconciles the whole board from the response
-6. if movedPartyKeys has more than this party → flash them, show the toast
-7. on 409: revert, show "Anna changed the plan. Reload →"
+1. append the event to the pending list
+2. world = derive(committed ++ pending, config)
+3. render the board from world
+4. if more than this party moved → flash them, show the summary
 ```
 
-Step 5 is a full reconcile rather than a patch. At forty rooms this is cheap and
-it removes an entire class of divergence bug.
+No network, and no reconcile step, because there is nothing to reconcile: the world
+on screen was computed the same way the server would compute it.
+
+Applying is the only request the board makes after load:
+
+```
+POST /admin/api/sandbox/apply
+     { input_seq, events[], output_hash, config_hash, solver_version }
+
+  409 → the log moved; response carries the new events, board re-derives on them
+  200 → applied; response carries the server's output_hash
+```
+
+The server's plan is authoritative. `output_hash` travels so the server can check
+that the world the admin acted on is the world it derived; the determinism contract
+([room assignment](05-room-assignment.md) §1) says the two agree, so a mismatch is
+reported as a defect rather than smoothed over.
+
+A stale bundle must not derive at all. The page is served with the Worker's
+`config_hash`, and a bundle whose profile hashes differently refuses to open the
+board and asks for a reload.
 
 ---
 
@@ -340,8 +362,8 @@ Versions are indicative. Let npm resolve and commit the lockfile. This design ad
 runtime dependencies: the active profile is code in the repo and both handlers are
 code. `tsx` is added to devDependencies for the tune script.
 
-**The solver has zero dependencies.** `src/solver/**` imports only from itself
-and from TypeScript's standard library. That is deliberate: the most important
+**The derivation core has zero dependencies.** `src/derive/**` and `src/solver/**`
+import only from themselves and from TypeScript's standard library. That is deliberate: the most important
 code in the project should be readable without knowing any framework, and
 auditable by someone who does not know this stack. It imports `src/config/**`,
 which is also dependency-free —
@@ -355,7 +377,7 @@ both of which are dependency-free".
 | React, Vue, Svelte | Seven form controls and one island |
 | Base UI, Radix, shadcn | React-only; see §1 |
 | Vite, any bundler plugin | Wrangler and esbuild are enough |
-| A state manager | The server is the state |
+| A state manager | The state is a list of events and a pure function over it |
 | tRPC | Hono's RPC client exists if ever needed |
 | Prisma | Heavier than Drizzle on Workers, no gain on SQLite |
 | An auth library | See [authentication](10-authentication.md) |

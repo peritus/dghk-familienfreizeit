@@ -144,6 +144,11 @@ same request, rebuilds the projections it affects and returns the new state.
 The user sees their write immediately. The asynchrony that usually forces
 "your change may take a moment to appear" copy simply does not exist.
 
+The same arithmetic is why the board can derive at all. Two to four thousand
+events is a few hundred kilobytes of JSON, well under a hundred compressed, fetched
+once when the board loads. An admin tool on a laptop can hold the entire history of
+the event in memory and fold it on every drag without noticing.
+
 If the event count ever approaches five figures — it will not, but if — the
 change is to cache the folded projection in a KV namespace keyed by `max(seq)`.
 That is a ten-line change. Do not pre-build it.
@@ -293,7 +298,8 @@ src/
       parties.ts    board.ts     plans.ts
       constraints.ts workshops.ts
     api/
-      board.ts            JSON endpoints for the board island
+      log.ts              the committed event list, for deriving in the browser
+      apply.ts            append a pending list in one batch
   events/
     types.ts              discriminated union + zod schemas
     append.ts             the only place that INSERTs into event
