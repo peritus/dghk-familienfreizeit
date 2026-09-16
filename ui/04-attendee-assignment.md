@@ -39,3 +39,10 @@ Support published, no assignment yet, and temporary service failure states.
 Never show scores, parties, solver language, unpublished changes, admin notes,
 or another family's preferences. Read-only controls must look disabled only
 when necessary; prefer plain text and a clear “published” label.
+
+## Neobrutalist redesign and components
+
+Use a high-contrast announcement `Alert`, a primary room `Card` with an offset
+shadow, and `Badge` elements for publication and room capabilities. Workshop
+results are smaller `Card` rows. `Button` actions remain outlined and full-width
+on mobile; “Contact organisers” is secondary to the published result.
