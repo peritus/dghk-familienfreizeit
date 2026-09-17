@@ -79,8 +79,9 @@ separate: **E-Mail-Benachrichtigung: nicht ausgewählt** or the exact recipient 
 
 Changing selection or notification options refreshes the preview.
 Pending edits must be applied or discarded before final confirmation. If the server
-reports a changed head/deployment, retain the organiser's selection, show the refreshed
-diff and require confirmation again. A rejected action changes no family visibility.
+reports an unavailable reviewed sequence or deployment mismatch, retain the organiser's
+selection, explain the unavailable review and require a new preview. A concurrent append
+does not invalidate the review. A rejected action changes no family visibility.
 Success returns the communicated scopes and separately shows email delivery outcomes.
 
 ## History and recovery
