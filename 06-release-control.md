@@ -90,7 +90,7 @@ and time. It stores references and `build_revision`/`compatibility_revision`, ne
 
 ```ts
 type CommunicatedPayload = {
-  basis_seq: number
+  input_seq: number              // reviewed event-log cut for this communication
   scopes: readonly CommunicationScope[]
   build_revision: string
   compatibility_revision: number
@@ -99,21 +99,25 @@ type CommunicatedPayload = {
 }
 ```
 
-`basis_seq` is the committed head reviewed and must equal the head immediately
-before append (`Communicated.seq - 1`). Scopes are non-empty, unique, supported by
-selected modules, and sorted by kind then referenced id. Module references resolve
+`input_seq` is the event-log cut reviewed by the organiser. It may be older than the
+head immediately before append (`Communicated.seq - 1`); this permits communication
+of exactly the content the organiser reviewed despite concurrent events. Scopes are
+non-empty, unique, supported by selected modules, and sorted by kind then referenced
+id. Module references resolve
 through the configured resolver. `notify`
 requires `change-notifications` to be selected.
 
 Organisers apply pending events before confirming communication. Preview requests
-are read-only. The confirmation submits the reviewed basis, scopes,
+are read-only. The confirmation submits the reviewed `input_seq`, scopes,
 `build_revision`, `compatibility_revision` and notification choice. The server:
 
 1. authenticates and authorises the organiser;
-2. verifies the current head and deployed identities equal those reviewed;
-3. derives the current world, checks §5 and
+2. verifies that `input_seq` is a reachable event-log prefix and the deployed
+   identities equal those reviewed;
+3. derives the world at `input_seq`, checks §5 and
    all selected-scope findings, and verifies the affected-family/email preview;
-4. appends one `Communicated` using the head-guarded atomic append;
+4. appends one `Communicated` using the atomic append, recording the reviewed
+   `input_seq` even when the live head has advanced;
 5. returns the resulting authoritative views, then attempts optional notifications.
 
 A concurrent append, changed deployment or dependency conflict changes
@@ -126,7 +130,7 @@ consistency are hard gates. No release action can bypass a blocking finding.
 
 ### Review identity and semantic comparison
 
-The reviewed prefix, scope selection, `build_revision`, `compatibility_revision` and
+The reviewed `input_seq`, scope selection, `build_revision`, `compatibility_revision` and
 notification choice identify the action. The preview response returns those fields;
 the client invalidates confirmation whenever any selection/option changes and asks
 for a new preview. Confirmation repeats exactly that reviewed tuple. The server
@@ -150,7 +154,7 @@ work tests.
 `derive(events, config)` folds communication events into an in-memory index:
 `scope identity → latest Communicated reference`. It never queries event payloads
 outside the event source to reconstruct domain state. Selected content comes from
-ordinary historical derivations at `basis_seq`, using the same Plan type.
+ordinary derivation at the reviewed `input_seq`, using the same Plan type.
 
 Historical references strictly decrease in sequence. Derivation can process these
 prefixes in increasing order and reuse results within the request; there is no
@@ -271,7 +275,7 @@ communication as a staleness measure. Reports work on mobile and print under
 The review uses the same scope-content extraction and semantic comparison as §6 and
 contains:
 
-1. selected scopes and the exact committed basis;
+1. selected scopes and the exact reviewed `input_seq`;
 2. field-level before/after values, full initial content, and participant additions,
    removals and movements;
 3. affected families, grouped by family, with the exact family-visible result;
@@ -284,9 +288,10 @@ contains:
 **Diese Angaben sind anschließend in der Familienansicht sichtbar.** Separately:
 **E-Mail-Benachrichtigung: nicht ausgewählt** or the selected recipient count.
 
-A refused/stale confirmation refreshes the diff, explains what changed and requires
-confirmation again. The successful response must expose exactly the reviewed held
-content; unrelated future live edits are not frozen by that promise. The family
+A confirmation is refused only when the reviewed `input_seq` is unavailable, the
+deployed identities cannot reproduce it, or the selected scopes/findings no longer
+pass validation at that sequence. Newer concurrent events do not refresh the diff:
+the successful response must expose exactly the reviewed held content. The family
 preview applies the real privacy projection, not an organiser rendering with some
 columns hidden. Pending edits must be applied or discarded before final confirmation.
 
@@ -294,8 +299,8 @@ columns hidden. Pending edits must be applied or discarded before final confirma
 
 `notify` requests email after the communication append succeeds. Delivery cannot
 roll back visibility. Recipient selection compares family-visible compositions
-immediately before and after the proposed release, at the same current head for
-live facts; it does not compare two whole worlds with unrelated live changes.
+immediately before and after the proposed release at the reviewed `input_seq`; it
+does not compare two whole worlds with unrelated live changes.
 
 - First accommodation/slot allocation communication includes families represented
   by its results, including explicitly unassigned people.
@@ -315,7 +320,7 @@ for these recipients. It cannot widen scope visibility. Messages omit private re
 causes. No notification module means no email option; release control still works.
 
 Operational `email_log` records the communication event sequence, family, kind,
-delivery status and retry identity. Retries use the reviewed basis and scope selection,
+delivery status and retry identity. Retries use the reviewed `input_seq` and scope selection,
 not a newer programme or recipient set; no second domain snapshot is stored. Reconstruct
 recipients and bodies from the prefix ending at that communication. Claim delivery
 atomically and use a stable provider idempotency key where supported; without provider

@@ -278,7 +278,7 @@ Worth writing down, because the boundary blurs under pressure.
 The test is whether this records an authoritative domain fact or organiser decision,
 or merely a reproducible result. Family labels, material commitments and communication
 decisions are events even when they do not change solver output. Assignments and
-summaries are derived results. Communication records its reviewed basis, scopes and
+summaries are derived results. Communication records its reviewed `input_seq`, scopes and
 `build_revision` and `compatibility_revision` under [release control](06-release-control.md), never a plan
 payload or an additional content hash.
 
