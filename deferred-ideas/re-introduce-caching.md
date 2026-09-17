@@ -27,7 +27,7 @@ workshop admission also needs the effective communicated programme and head labe
 There is no single family cut, and a cache cannot hide a newly saved own answer.
 
 Organiser apply still verifies solver agreement. Communication confirmation uses the
-reviewed head, scope selection and code/config identities, with no extra content hash.
+reviewed head, scope selection, `build_revision`, and `compatibility_revision`, with no extra content hash.
 Any benchmark must exercise multi-basis family responses, live participation checks,
 release previews and ordinary apply. Do not assume saves are fold-only or that cold
 misses occur only once per communication. This proposal is outside the active
