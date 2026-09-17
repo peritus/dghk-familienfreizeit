@@ -412,8 +412,8 @@ Also covered:
 - **Release control**: implement every scenario in [release control](06-release-control.md)
   §9, including unchanged-head preview equality, selection changes, concurrent appends,
   per-scope history, dependencies, privacy and build/compatibility mismatch. Communication
-  carries no extra content hash. Selected-scope errors require their acknowledgements;
-  hard consistency gates cannot be acknowledged away.
+  carries no extra content hash. Selected-scope errors block communication until
+  resolved; hard consistency gates cannot be bypassed.
 - **Live coordination**: cover last-place races, over-capacity preservation, inactive
   rankings, sign-up fairness exclusion, interest privacy and immediate material saves
   under the module fixture contracts. These behaviours do not need a second Plan.

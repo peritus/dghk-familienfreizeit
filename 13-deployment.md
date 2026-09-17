@@ -387,8 +387,8 @@ The week before, in order:
    paper copies needed for the occasion from their browser print views.
 3. **Run `npm run tune`** against the exported log and confirm the deployed
    weights are the ones you settled on.
-4. **Confirm required scopes are ready**, including relevant solver acknowledgements
-   and the non-acknowledgeable release consistency gates.
+4. **Confirm required scopes are ready**, including the absence of blocking solver
+   findings and release consistency failures.
 5. **Print the required reports.** Use the report print styles for room lists per
    building, workshop lists per slot, the master sheet, and any confidential
    operational sheets. The hostel's wifi will be bad and someone will need paper.
