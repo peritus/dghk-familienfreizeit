@@ -47,7 +47,7 @@ worlds; family/shared reports combine live permitted facts with communicated sco
 
 Renderers aggregate, sort, group and redact. They do not query event payloads,
 perform another relationship lookup, or implement their own release cuts. The
-outstanding-change report and confirmation diff use the kernel contract in
+shared inline diff, outstanding-change overview and confirmation diff use the kernel contract in
 [release control](06-release-control.md) §6–7.
 
 Reports are shared with families when sharing supports coordination and does not
