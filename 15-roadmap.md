@@ -236,7 +236,7 @@ acceptance scenarios.
 
 - Implement accommodation, programme, and per-slot allocation scopes.
 - Implement semantic scope accessors, outstanding-change report, detailed preview,
-  basis/head/code/config guards, acknowledgements, and atomic `Communicated` append.
+  basis/head/build/compatibility guards, acknowledgements, and atomic `Communicated` append.
 - Implement historical scope composition, reproducibility mismatch handling,
   current privacy projection, and family/shared responses.
 - Add all release-control scenarios, concurrent confirmation, reverted-change,

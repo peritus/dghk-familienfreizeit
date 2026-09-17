@@ -275,7 +275,7 @@ allocations, so accommodation and slot allocations are coherent release units.
 
 *Rejected alternative:* persist communicated snapshots or a second plan type.
 They create competing domain state and bypass ordinary deterministic derivation.
-The reviewed sequence, selected scopes and code/config identities identify the
+The reviewed sequence, selected scopes, `build_revision`, and `compatibility_revision` identify the
 action. Release control needs no additional content hash; the head guard and
 deterministic derivation protect confirmation.
 

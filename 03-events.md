@@ -280,7 +280,7 @@ The test is whether this records an authoritative domain fact or organiser decis
 or merely a reproducible result. Family labels, material commitments and communication
 decisions are events even when they do not change solver output. Assignments and
 summaries are derived results. Communication records its reviewed basis, scopes and
-code/config identities under [release control](06-release-control.md), never a plan
+`build_revision` and `compatibility_revision` under [release control](06-release-control.md), never a plan
 payload or an additional content hash.
 
 Pending events are the interesting case, because they are events in every respect

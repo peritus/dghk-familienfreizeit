@@ -70,7 +70,7 @@ fields, removed/added participants, cancellation, and movements grouped by famil
 Family previews use the actual server privacy projection. Dependencies present an
 explicit selection action that refreshes the review; they are never silently added.
 Blocking issues disable confirmation with a reason. Acknowledgeable findings show
-named checkboxes. Show the reviewed basis and code/config identities in secondary
+named checkboxes. Show the reviewed basis, `build_revision`, and `compatibility_revision` in secondary
 review details, not in ordinary family flows. There is no communication-content hash.
 
 German final action: **Jetzt an Familien kommunizieren**. Consequence:
