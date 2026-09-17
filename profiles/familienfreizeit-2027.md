@@ -12,7 +12,6 @@ The profile selects these modules ([modules](../20-modules.md) §5):
 | Module | Used for |
 |---|---|
 | [`room-inventory`](../20.1-room-inventory.md) | buildings, rooms, beds, places, and capacity |
-| [`sleeping-parties`](../20.2-sleeping-parties.md) | party formation, co-rooming, and requirement inheritance |
 | [`room-assignment`](../20.3-room-assignment.md) | deterministic placement, keep-apart relations, and the board |
 | [`workshops`](../20.4-workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
 | [`workshop-rankings`](../20.5-workshop-rankings.md) | ordered per-person workshop rankings |
@@ -125,20 +124,19 @@ not a booking or billing rule.
 | Tag | Builder | Scope | Semantics |
 |---|---|---|---|
 | `role` | property | person | `adult`, `child`, or `infant`; stated in `PersonAdded`, not derived from birthdate |
-| `does-not-need-a-bed` | property | person | default `false`; when true the person has no bed demand but stays in the family's party; children and infants only |
+| `does-not-need-a-bed` | property | person | default `false`; when true the person has no bed demand but remains in the family's placement unit; children and infants only |
 | `needs-private-sanitary` | requirement | family | satisfied by `private-sanitary`; weight 6; family-facing "Eigenes Bad" |
 | `needs-accessible` | requirement | family, person | satisfied by `accessible`; weight 8; family-facing; placed first |
 | `needs-ground-floor` | requirement | family, person | satisfied by `ground-floor`; weight 4; organiser-only |
 | `needs-apartment` | requirement | family | satisfied by `multi-room-unit`; preferred only; weight 4; organiser-only |
-| `sole-occupancy` | requirement | family | structural check `no-other-parties`; penalty −12; family-facing, inverted as "Zimmer teilen" |
-| `room-with` | relation | family → family | `groups-with`, mutual-required; one-sided weight 6; family-facing family picker at `required` |
+| `sole-occupancy` | requirement | family | structural check `no-other-families`; penalty −12; family-facing, inverted as "Zimmer teilen" |
 | `apart-from` | relation | family, person | `separates-from`, implied-mutual; penalty −20; organiser-only and restricted |
 | `family-note` | property | family | free text the family writes and organisers read |
 | `organiser-note` | note | family, person, room, workshop | organiser-only, restricted; the solver never reads it |
 
-Mutual `required` `room-with` requests merge families into one party; everything else
-about `room-with` is a soft score. Keep-apart relations are never visible to
-families, which is why `apart-from` is both organiser-only and restricted.
+Keep-apart relations are never visible to families, which is why `apart-from` is
+both organiser-only and restricted. Cross-family co-rooming is deferred with the
+sleeping-parties module.
 
 ## 4. Food preferences
 
@@ -160,9 +158,6 @@ family assignments.
 
 | Module | Parameter | Value | Why |
 |---|---|---|---|
-| `sleeping-parties` | `co_room_tag` | `room-with` | |
-| | `no_bed_tag` | `does-not-need-a-bed` | infants sleep with their parents |
-| | `size_one_warning_threshold` | `5` | module default |
 | `room-assignment` | `weights` | exact fit 10, near fit 4, orphan bed −8 | module defaults; tune with `npm run tune` |
 | | `keep_apart_tag` | `apart-from` | |
 | | `priority_tag` | `needs-accessible` | accessible needs claim scarce places first |

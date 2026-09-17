@@ -177,8 +177,7 @@ migration ([deployment](13-deployment.md) §2).
 | Module | Owns | Requires | Enhances |
 |---|---|---|---|
 | [`room-inventory`](20.1-room-inventory.md) | Buildings, rooms, beds, places; designations; capacity | — | — |
-| [`sleeping-parties`](20.2-sleeping-parties.md) | Party formation from families and co-room relations | `room-inventory` | — |
-| [`room-assignment`](20.3-room-assignment.md) | Placing parties into rooms and places; the board | `sleeping-parties` | — |
+| [`room-assignment`](20.3-room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshops`](20.4-workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
 | [`workshop-rankings`](20.5-workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
 | [`workshop-assignment`](20.6-workshop-assignment.md) | Fair workshop assignment and co-assignment groups | `workshop-rankings` | — |
@@ -187,10 +186,15 @@ migration ([deployment](13-deployment.md) §2).
 | [`family-preferences`](20.9-family-preferences.md) | The profile-driven preferences page | — | — |
 | [`change-notifications`](20.10-change-notifications.md) | Publication and change emails | — | — |
 
-`requires` is transitive: `room-assignment` requires `sleeping-parties`, which
-requires `room-inventory`. A room-only occasion selects the first three rows; a
+`requires` is transitive. A room-only occasion selects `room-inventory` and
+`room-assignment`; it places whole families and has no parties or child rooms. A
 workshop-only occasion selects `workshops`, `workshop-rankings`, and
 `workshop-assignment` and has no room entities, parties, or board.
+
+Sleeping parties and child rooms are deferred ideas, not selectable modules in the
+current catalogue. They are specified under [`deferred-ideas/`](deferred-ideas/)
+and must be adopted together before a profile may split families or merge them into
+cross-family sleeping groups.
 
 ## 6. Source layout
 
