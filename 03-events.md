@@ -272,7 +272,6 @@ Worth writing down, because the boundary blurs under pressure.
 | Email sent, delivered, bounced | Operational telemetry | `email_log` |
 | Page views, login times | Telemetry | Workers analytics, or nowhere |
 | Entities, labels, and definitions as read models | Derivation, not decision | nowhere |
-| Workshop auto-cancelled for under-subscription | Derivation; re-derives next run | plan trace |
 | Family placement units | Derivation | room-assignment plan section |
 | A plan, whether communicated or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
 | Pending events on an organiser's board | Not yet decided; discarding one must leave no trace | that organiser's browser |
