@@ -171,8 +171,8 @@ const invariants = [
   ['no room exceeds its place count',
     (p, s) => /* group by room, compare */],
 
-  ['every party is wholly placed or wholly unplaced',
-    p => /* never a partial party */],
+  ['every family is wholly placed or wholly unplaced',
+    p => /* never a partial family */],
 
   ['every person appears exactly once across assignments + unplaced',
     (p, s) => /* conservation of people */],
@@ -196,8 +196,8 @@ const invariants = [
   ['a capability with a derive has no assignments',
     (p, s) => /* … */],
 
-  ["party requirements are the strictest-strength union of final members' family and person requirements",
-    (p, s) => /* … */],
+  ['every family placement unit contains all of its non-withdrawn people',
+    (p, s) => /* no child-room split in the active scope */],
 ]
 ```
 
@@ -266,8 +266,8 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
 - `fam_42 excludes=rm_14` prevents placement there in every solver phase, even
   when another label requests that room. Contradictory required inputs produce
   diagnostics. Place and workshop exclusions receive equivalent coverage.
-- Grouping and separation use stable entities and resolver scope. Splitting a
-  sleeping party recomputes contributors; a workshop group never merges rooms.
+- Separation uses stable entities and resolver scope. Sleeping grouping is deferred;
+  workshop groups never merge room placement units.
 - Workshop decisions preserve eligibility, capacity, and per-slot uniqueness
   through cancellation restart and fill. Cancelled required targets are reported.
 - Clear removes the selected label's effect from the current plan; replay before
@@ -404,10 +404,9 @@ Recorded so the gaps are deliberate.
 ## 8. Fixtures as documentation
 
 `test/fixtures/event-logs/minimal.kdl` should be readable and hand-checkable: six
-families, four rooms, one mutual co-room request, one
-preferred `sole-occupancy`. Small enough that a person can work out the right answer with a
-pencil and verify the solver agrees.
+families, four rooms, one keep-apart decision, and one preferred `sole-occupancy`.
+Small enough that a person can work out the right answer with a pencil and verify
+the solver agrees.
 
-When someone new asks how party formation works, that fixture plus its trace is a
-better answer than any prose — including this specification. Keep it small enough
-that it stays true.
+Sleeping-party and child-room fixtures belong to their deferred ideas and are not
+part of the active fixture contract.

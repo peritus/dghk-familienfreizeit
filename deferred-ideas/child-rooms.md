@@ -26,7 +26,7 @@ group. Adult supervision, if needed, is modelled separately with ordinary relati
 
 ## 2. Dependencies
 
-Requires: [`sleeping-parties`](../20.2-sleeping-parties.md), and through it
+Requires: [`sleeping-parties`](sleeping-parties.md), and through it
 [`room-inventory`](../20.1-room-inventory.md). Enhances: none.
 
 Adopting it would add a `child` designation to `room-inventory`.
@@ -190,7 +190,7 @@ child, attributed to the child's family.
 
 | Kind | Contribution |
 |---|---|
-| Screen | Child-group management on the inventory screen; the children's-room section of party review ([organiser view](../09-organiser-view.md) §4) |
+| Screen | Child-group management on the inventory screen; the children's-room section of the deferred party review |
 | Controls | none; the need tag declares its own control in the profile |
 | Reports | Accommodation overview gains child-group capability and occupants per child room |
 | Emails | none |

@@ -295,13 +295,13 @@ Worth writing down, because the boundary blurs under pressure.
 | Page views, login times | Telemetry | Workers analytics, or nowhere |
 | Entities, labels, and definitions as read models | Derivation, not decision | nowhere |
 | Workshop auto-cancelled for under-subscription | Derivation; re-derives next run | plan trace |
-| Party formation results | Derivation | plan trace |
+| Family placement units | Derivation | room-assignment plan section |
 | A plan, whether published or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
 | Pending events on an organiser's board | Not yet decided; discarding one must leave no trace | that organiser's browser |
 
 The test: **would replaying the log without this produce a different plan?** If
-no, it is not an event. Party formation is derived from labels and constraints,
-both of which *are* events; the formation itself is not. A plan fails the same test
+no, it is not an event. Family placement is derived from labels and constraints,
+both of which *are* events; the placement itself is not. A plan fails the same test
 for every input sequence, including the one published, which is why publication does
 not create a second plan type. What publication records is the decision and a hash of
 the plan the organiser saw when making it.

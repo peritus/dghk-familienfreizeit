@@ -124,8 +124,8 @@ JSON API on the Worker.
 
 *Rejected alternative:* server-rendered `hono/jsx` pages with htmx for partial
 updates and a vanilla TypeScript island for the board. It looks smaller on a
-dependency list and is larger in code: the pending list is needed on party review
-as well as the board, the board has to re-render a derived world without losing
+dependency list and is larger in code: the pending list is needed on the board,
+which has to re-render a derived world without losing
 selection or drag state, and comboboxes, dialogs, and toasts would all be written
 by hand. Every screen would also need its own route, form handlers, and
 full-page-or-fragment responses.

@@ -67,11 +67,11 @@ possible.
 
 An organiser working in the organiser application holds a list of **pending events**:
 ordinary events, in the existing vocabulary, that have not been appended to the
-log. Every organiser screen — the board, party review, the dashboard, plan diffs —
+log. Every organiser screen — the board, dashboard, plan diffs —
 renders `derive(committed ++ pending)`.
 
 Usually `pending` is empty and every screen shows the same world the server has.
-When an organiser drags a party or splits one, the action appends decision labels to
+When an organiser drags a family to a room, the action appends decision labels to
 `pending` and the application re-derives locally — no request, no approximation, the real solver over the real
 constraints. Applying flushes `pending` to the log in one append; discarding drops
 it. An empty pending list is not a special case, so there is no second code path
@@ -152,7 +152,7 @@ requirement that function bodies are hashed by source.
 The application is a fixed kernel plus selectable modules. The kernel — the event
 log, labels and the resolver, `derive` and `diff`, the solver pipeline, publication,
 authentication, and the application shells — is present in every deployment. Modules
-contribute the domain: room inventory, party formation, room and workshop assignment,
+contribute the domain: room inventory, whole-family room and workshop assignment,
 food preferences, materials, and the surfaces that go with them. The catalogue and
 the module contract are in [modules](20-modules.md).
 
@@ -169,7 +169,8 @@ are deterministic evaluators only.
 
 Room and workshop capabilities are independent. A room-only occasion needs no
 workshop entities or views; a workshop-only occasion needs no rooms, beds, places,
-or parties. The first deployed profile selects both.
+or sleeping parties. The first deployed profile selects both room inventory and
+whole-family room assignment; sleeping parties and child rooms remain deferred.
 
 ## Why CQRS is cheap at this size
 

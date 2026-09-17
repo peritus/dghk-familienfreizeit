@@ -99,7 +99,7 @@ const matches = world.labels
 ```
 
 The code illustrates the shape only; the constraint resolver owns scope checks,
-party formation, symmetry, and diagnostics.
+relation symmetry and diagnostics. Sleeping-party formation is deferred.
 
 ### What stays typed
 
@@ -238,21 +238,21 @@ applying a decision through an existing resolver:
 |---|---|---|
 | `needs-provides` | person needs / room provides | matching capability |
 | `excludes` | family excludes family | forbidden match |
-| `groups-with` | person groups-with person | same party or same workshop group |
+| `groups-with` | person groups-with person | same workshop group; sleeping co-rooming is deferred |
 | `separates-from` | family separates-from family | keep apart |
 
 Organisers cannot upload executable rules. New mechanisms belong in module code and
 the active profile; new facts and ordinary matching constraints do not.
 
-Dragging a party to a room adds ordinary decision labels to the pending list. A
+Dragging a family to a room adds ordinary decision labels to the pending list. A
 room choice may pair `needs` on the selected stable entities with `provides` on
 the target. It does not require creating vocabulary or additional decision
 metadata. A token offered by multiple rooms expresses a matching requirement,
 not a command to choose an arbitrary provider.
 
 Constraints reference stable people, families, workshops, rooms, and places. They
-never reference derived party keys. If party formation changes, the consuming module
-reports a spanning or unsatisfied constraint instead of applying it partially.
+never reference derived party keys. Sleeping-party constraints are rejected or
+reported as deferred until that module is selected.
 
 ### How modules consume constraints
 
@@ -266,8 +266,7 @@ resolved inputs; none re-implements matching:
 
 | Module | Consumes |
 |---|---|
-| [sleeping parties](20.2-sleeping-parties.md) | party requirements; `groups-with` and `separates-from` on people and families |
-| [room assignment](20.3-room-assignment.md) | requirements against room/place capabilities; structural checks; grouping/separation effects; exclusions; resolved placement decisions |
+| [room assignment](20.3-room-assignment.md) | requirements against room/place capabilities; keep-apart effects; exclusions; resolved placement decisions |
 | [workshop rankings](20.5-workshop-rankings.md) | the `ordered-choice` operator |
 | [workshop assignment](20.6-workshop-assignment.md) | needs/provides matching, exclusions, eligibility, co-assignment and separation, and decisions naming workshops within their slot |
 
@@ -277,8 +276,9 @@ Relation symmetry is declared on the tag and interpreted by the resolver:
 - `implied-mutual` — one label binds both directions;
 - `one-sided-soft` — never binds; always a preference.
 
-Direct organiser grouping/separation uses the fixed mechanism's scope and symmetry;
-it does not inherit the mutual-request requirement of a family-facing co-room tag.
+Direct organiser separation uses the fixed mechanism's scope and symmetry. Sleeping
+grouping does not become effective until the deferred sleeping-parties module is
+selected.
 Workshop relations retain their configured slot/target value shape. The resolver
 routes them to the relevant selected module, so a workshop decision does not also
 merge sleeping parties. If the consuming module is absent, the decision is rejected
@@ -329,7 +329,7 @@ assignments, or you get two answers to "does Room 14 have an ensuite". Enforced
 at append time and tested in [testing](14-testing.md).
 
 **Requirement inflation through merges.** See
-[sleeping parties](20.2-sleeping-parties.md) §7. The strictest-strength union is
+the deferred sleeping-parties idea. The strictest-strength union is
 correct and surprising.
 
 **Notes are not constraints.** Profile-defined `descriptive` facts and optional

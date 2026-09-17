@@ -130,8 +130,8 @@ visible is already answered by the latest publication, and needs no rule.
 | Data | Visible to the family? |
 |---|---|
 | Their own people and preferences | Yes |
-| Their own co-room requests | Yes |
-| **Whether a co-room request is reciprocated** | **Yes — see below** |
+| Their own co-room requests | No — deferred with sleeping parties |
+| **Whether a co-room request is reciprocated** | **No — deferred with sleeping parties** |
 | Other families' room preferences | No |
 | Other families' co-room requests, including ones naming them | **No** |
 | Names of families sharing their room | Yes |
@@ -151,9 +151,8 @@ pressure to reciprocate, which produces merges nobody wanted and is exactly the
 dynamic that makes people dread these forms. Showing only mutual matches means a
 request costs nothing socially and the data stays honest.
 
-The cost: two families who each want to room together but neither goes first will
-never match. Accepted. The organiser party review screen surfaces one-sided requests,
-and a human can make the phone call — which is the right tool for that problem.
+Cross-family co-room requests are deferred with sleeping parties. The initial family
+view exposes only preferences that constrain the family's own placement unit.
 
 **Organiser notes are separate from family free text.** The family's "Sonst noch
 etwas?" box is theirs and they can see it. If an organiser wants to write "phoned,

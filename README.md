@@ -22,7 +22,6 @@
 | 19 | [Reports](19-reports.md) | Report catalogue, audience scopes, responsive behavior, and print stylesheets |
 | 20 | [Modules](20-modules.md) | Module contract, composition, and catalogue |
 | 20.1 | [Room inventory](20.1-room-inventory.md) | Buildings, rooms, beds, places, designations, and capacity |
-| 20.2 | [Sleeping parties](20.2-sleeping-parties.md) | Party formation, merges, and party requirements |
 | 20.3 | [Room assignment](20.3-room-assignment.md) | Deterministic placement, room scoring, and the board |
 | 20.4 | [Workshops](20.4-workshops.md) | Slots, workshops, audience, leadership, and cancellation |
 | 20.5 | [Workshop rankings](20.5-workshop-rankings.md) | Ordered per-person workshop choices |
@@ -33,7 +32,9 @@
 | 20.10 | [Change notifications](20.10-change-notifications.md) | Publication and change emails |
 
 Ideas that are not part of the specification are kept in
-[deferred ideas](deferred-ideas/).
+
+[`deferred-ideas/`](deferred-ideas/), including sleeping parties, child rooms, and
+the party-review screen.
 
 ## What this is
 

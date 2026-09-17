@@ -16,7 +16,7 @@ be placed in the same room. It is derived on every run, never stored, and never
 referenced by a constraint. This module owns party formation: family
 parties, merges from co-room relations, organiser grouping and separation, the
 unplaceable-merge guard, and party requirements. It does not decide which room a
-party gets; that is [room assignment](20.3-room-assignment.md).
+party gets; that is [room assignment](../20.3-room-assignment.md).
 
 Party formation is a separate, reviewable phase (D5). Organisers review a short list
 of parties with provenance before looking at any room.
@@ -188,7 +188,7 @@ reported by room assignment and attributed to the events that caused them.
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/parties` — party review with provenance, requirement contributors, merge and split ([organiser view](09-organiser-view.md) §4, [UI-09](ui/09-party-review.md)) |
+| Screen | `/organiser/parties` — party review with provenance, requirement contributors, merge and split ([deferred party review](party-review.md)) |
 | Controls | none; the co-room tag's control is declared by the profile |
 | Reports | none of its own |
 | Emails | none |
@@ -219,7 +219,7 @@ Adopting this module requires updating:
 - [`20.3-room-assignment.md`](../20.3-room-assignment.md) to consume parties;
 - [`05-solver-contract.md`](../05-solver-contract.md) and [`03-events.md`](../03-events.md)
   for the plan section and derived-stage contract;
-- [`09-organiser-view.md`](../09-organiser-view.md), [`ui/09-party-review.md`](../ui/09-party-review.md),
+- [`09-organiser-view.md`](../09-organiser-view.md), [`party-review.md`](party-review.md),
   and [`ui/10-assignment-board.md`](../ui/10-assignment-board.md) for party review;
 - [`14-testing.md`](../14-testing.md), fixtures, reports, and the family-facing
   co-room controls.

@@ -109,7 +109,7 @@ type. Builders accept these further fields where they apply:
 | `per`, `choice` | `orderedChoice` | the scope entity kind and the choice entity kind |
 | `weight` | `requirement`, `relation` | integer score when a `preferred` label is satisfied |
 | `penalty` | `requirement`, `relation` | integer score, ≤ 0, when a `preferred` label is violated |
-| `one_sided_weight` | `relation` | co-room scoring ([room assignment](20.3-room-assignment.md) §8) |
+| `one_sided_weight` | `relation` | deferred sleeping-party co-room scoring |
 | `family_facing` | all except `note` | the family control ([family preferences](20.9-family-preferences.md) §6) |
 | `organiser_only` | all | never rendered to families; excludes `family_facing` |
 | `aliases` | all | further keys accepted on replay and mapped to this tag, so a rename costs nothing |

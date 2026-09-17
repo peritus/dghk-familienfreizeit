@@ -262,6 +262,6 @@ including the alternatives rejected. Every number in it traces to a named weight
 stored configuration, so an organiser who disagrees can point at the term rather than
 the outcome.
 
-Plan sections are specified by their modules: [sleeping parties](20.2-sleeping-parties.md) §10,
+Plan sections are specified by their selected modules: [room assignment](20.3-room-assignment.md) §10,
 [room assignment](20.3-room-assignment.md) §10,
 [workshop assignment](20.6-workshop-assignment.md) §10, and [materials](20.8-materials.md) §10.
