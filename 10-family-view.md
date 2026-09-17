@@ -31,33 +31,20 @@ One scrolling page, not a wizard. A wizard implies a one-time completion; this i
 a form people will return to three times over six weeks as they change their
 minds. Everything saves on change.
 
-Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
-zusammen?") are **generated from the active occasion profile**: every tag declaring
-`familyFacing` produces a control, in profile order, grouped by scope. The
+Sections 2 ("Zimmerwünsche") and 3 ("Mit wem möchtest Du zusammen?") are
+**generated from the active occasion profile**: every tag declaring
+`family_facing` produces a control, in the sections the profile configures. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
-`control` is a closed union, and this is the thing to think about up front —
-see [occasion profiles](16-occasion-profiles.md) §6:
-
-| `control` | Renders | Writes |
-|---|---|---|
-| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `LabelCleared` |
-| `toggle` | one checkbox | `LabelSet` with no strength, or `LabelCleared` |
-| `family-picker` | searchable family list, multi-select | one `LabelSet` per selection, `value` = family id |
-| `person-picker` | people within the same family | one `LabelSet` per selection, `value` = person id |
-
-Adding a tag that reuses an existing control is a **one-file change**; adding a
-*new kind* of control is two files.
-
-`invert: true` on `sole-occupancy` flips the labels so the family view reads
-"Zimmer teilen: gerne / lieber nicht / auf keinen Fall" while the stored tag
-stays positively named. Presentation only.
+The page, its sections, the closed `control` union, and the save-on-change contract
+are specified by the [family preferences](20.9-family-preferences.md) module. A tag
+that reuses an existing control needs no family view code.
 
 ```
 Willkommen, Familie Müller
 
-  Ihr Zimmer wird von den Organisatoren eingeteilt.
-  Ihre Angaben können Sie bis zum 20. September ändern.
+  Dein Zimmer wird vom Organisationsteam eingeteilt.
+  Deine Angaben kannst Du bis zum 20. September ändern.
 
   ─────────────────────────────────────────────────
   1  WER KOMMT MIT
@@ -80,27 +67,17 @@ Willkommen, Familie Müller
                       ( ) auf keinen Fall
 
   Sonst noch etwas?   [                                    ]
-                      Freitext — die Organisatoren lesen mit.
+                      Freitext — das Organisationsteam liest mit.
 
   ─────────────────────────────────────────────────
-  3  KINDERZIMMER
+  3  MIT WEM MÖCHTEST DU ZUSAMMEN?
   ─────────────────────────────────────────────────
-  Kinder können gemeinsam in einem Kinderzimmer schlafen,
-  ohne Erwachsene. Es gibt Zimmer für 8–14 Jahre.
-
-  Jonas (9)   [x] möchte ins Kinderzimmer
-  Emma (6)    [ ] möchte ins Kinderzimmer   — noch zu jung für die
-                  vorhandenen Kinderzimmer
-
-  ─────────────────────────────────────────────────
-  4  MIT WEM MÖCHTEN SIE ZUSAMMEN?
-  ─────────────────────────────────────────────────
-  Familie Schmidt     ✓ möchte auch mit Ihnen
+  Familie Schmidt     ✓ möchte auch mit Dir
   Familie Weber       — noch keine Antwort
   [ Familie suchen… ]
 
   ─────────────────────────────────────────────────
-  5  WORKSHOPS
+  4  WORKSHOPS
   ─────────────────────────────────────────────────
   Samstag Vormittag
     Anna    1. Töpfern   2. Kochen    3. —
@@ -115,7 +92,7 @@ Willkommen, Familie Müller
 The preferences collapse to a read-only summary; the assignment takes the top.
 
 ```
-  Ihre Zimmer
+  Deine Zimmer
 
   ┌──────────────────────────────────────────────┐
   │  Haus B · Raum 14 · 1. Stock                 │
@@ -123,31 +100,24 @@ The preferences collapse to a read-only summary; the assignment takes the top.
   │                                              │
   │  Anna Müller      Bett 14-A                  │
   │  Kai Müller       Bett 14-A                  │
+  │  Jonas Müller     Bett 14-B (oben)           │
   │  Emma Müller      Bett 14-C (unten)          │
   │  Mia Müller       bei den Eltern             │
   │                                              │
-  │  Sie teilen das Zimmer mit Familie Schmidt.  │
+  │  Du teilst das Zimmer mit Familie Schmidt.   │
   └──────────────────────────────────────────────┘
 
-  ┌──────────────────────────────────────────────┐
-  │  Kinderzimmer K3 · Haus B · Raum 22          │
-  │                                              │
-  │  Jonas Müller     Bett 22-D (oben)           │
-  │                                              │
-  │  Mit 4 weiteren Kindern.                     │
-  └──────────────────────────────────────────────┘
-
-  Ihre Workshops
+  Deine Workshops
   Samstag Vormittag   Anna: Töpfern · Kai: Klettern ·
                       Jonas: Klettern · Emma: Basteln
   Samstag Nachmittag  …
-
-  [ Als PDF speichern ]
 ```
 
 The print stylesheet matters more than it sounds. People will print this and put
 it on the fridge, and several will arrive at the hostel with it on paper because
-the signal there is bad.
+the signal there is bad. There is no print button and no PDF export (D21): families
+print with the browser, and the page's print stylesheet meets the same rules as a
+report's ([reports](19-reports.md) §5).
 
 ---
 
@@ -165,11 +135,10 @@ visible is already answered by the latest publication, and needs no rule.
 | Other families' room preferences | No |
 | Other families' co-room requests, including ones naming them | **No** |
 | Names of families sharing their room | Yes |
-| Names of children in their child's children's room | Yes |
 | Bed labels within their own rooms | Yes |
 | Scores, parties, traces, organiser constraints | No |
 | Organiser notes about them | **No** — free text is theirs, organiser notes are not |
-| Tags declaring `organiserOnly` | **Never**, regardless of `familyFacing` |
+| Tags declaring `organiser_only` | **Never**, regardless of `family_facing` |
 | `descriptive` tags | Never |
 
 **Reciprocity is visible; the request is not.** If the Müllers request the
@@ -192,7 +161,7 @@ they're flexible about the ensuite", that goes in an organiser-only note field.
 Conflating them means either organisers self-censor or families read something they
 should not have.
 
-`apart-from` declares no `familyFacing` *and* `organiserOnly: true`, deliberately
+`apart-from` declares no `family_facing` *and* `organiser_only: true`, deliberately
 doubled, because exposing keep-apart relations to families would be the worst
 privacy failure available to this application.
 
@@ -214,13 +183,13 @@ bundle small and test it on an old, slow phone — that is the device it will me
 
 **Age is computed and shown.** "Jonas (9)" uses the age at the occasion date, not
 today. If a child turns 9 the week before, they are shown as 9 throughout, which
-matches what the children's-room banding will do and avoids a confusing
-mismatch.
+matches what workshop age bounds will do and avoids a confusing mismatch.
 
-**Ineligibility is explained, not hidden.** Emma's children's-room checkbox is
-disabled with the reason next to it, not removed. A missing option makes people
+**Ineligibility is explained, not hidden.** A control that does not apply to a
+person, such as "Schläft bei den Eltern" for an adult, is disabled with the reason
+next to it, not removed. A missing option makes people
 think the site is broken; a disabled option with a reason answers the question
-before they ask. This is now driven by `validFor` — a control whose predicate
+before they ask. This is now driven by `valid_for` — a control whose predicate
 fails renders disabled with the reason.
 
 **Workshop ranking is drag-to-order on desktop and numbered selects on mobile.**
@@ -229,13 +198,16 @@ dropdowns are less elegant and more reliable, and this form will mostly be fille
 in on phones.
 
 **The deadline is stated everywhere and enforced softly.** After it, the page
-becomes read-only with *"Änderungen bitte an die Organisatoren."* plus the
+becomes read-only with *"Änderungen bitte an das Organisationsteam."* plus the
 contact address. Hard-blocking late changes just moves the work to email, which
 is where it was before this application existed.
 
 ---
 
 ## 4. Emails
+
+Invitation and reminder emails are kernel; publication and change emails are
+contributed by [change notifications](20.10-change-notifications.md).
 
 Four kinds. All plain, all short, all with the link.
 
@@ -252,12 +224,10 @@ People forward this to grandparents and read it on trains.
 
 **Change.** Only to affected families, only what changed:
 
-> Ihre Zimmereinteilung hat sich geändert.
+> Deine Einteilung hat sich geändert.
 >
 > Vorher:  Haus A · Raum 01
 > Jetzt:   Haus B · Raum 14 · mit eigenem Bad
->
-> Jonas bleibt im Kinderzimmer K3.
 >
 > [ Details ansehen ]
 
@@ -272,13 +242,12 @@ thing that trains people to ignore your emails.
 Different audience from the organiser UI. Families are non-technical, mildly anxious
 about where their children will sleep, and reading on a phone.
 
-**Say what will happen and when.** "Ihr Zimmer wird von den Organisatoren
+**Say what will happen and when.** "Dein Zimmer wird vom Organisationsteam
 eingeteilt" appears at the top of the preferences page, because the first
 question every person has is whether they are choosing or requesting.
 
 **Never expose the model's vocabulary.** No "party", no "place", no "assignment
-run". A family has a *Zimmer*; children go to a *Kinderzimmer*; they have
-*Wünsche*.
+run". A family has a *Zimmer* and *Wünsche*.
 
 **Preference strength in plain words.** "unbedingt / gerne / egal" rather than
 "required / preferred / indifferent". The three-way distinction is the most

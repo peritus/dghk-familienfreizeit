@@ -3,8 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers open this screen to answer “what needs attention today?” Route:
-`/organiser`. Governing specs: [organiser view](../09-organiser-view.md) §2 and
-[constraint health](../08-constraint-health.md).
+`/organiser`. Governing spec: [organiser view](../09-organiser-view.md) §2.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

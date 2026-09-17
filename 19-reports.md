@@ -10,12 +10,13 @@ Every report must:
 
 - work on a desktop screen;
 - work on a mobile screen;
-- be printable from the browser through the report's print stylesheet.
+- print correctly from the browser through the report's print stylesheet.
 
-Reports are browser views, not downloads. The application does not provide a
-download button, PDF export, CSV export, or report attachment. A user may still
-use the printing facilities provided by their browser or operating system; the
-application's responsibility ends at presenting a usable print layout.
+Reports are browser views, not downloads (D21). The application provides no
+download, PDF export, CSV export, report attachment, or print button. People print
+with the browser, for example with `Ctrl+P`, and save a PDF from the browser's print
+dialog if they want one. The print stylesheet is therefore a requirement: the
+printed page is the only paper output the application has.
 
 Responsive layout is part of the report, not a separate mobile feature. Tables
 must remain readable on narrow screens by wrapping, stacking, or switching to
@@ -70,8 +71,9 @@ occasion profile has declared safe for that audience.
 
 ## 3. Initial report catalogue
 
-The first release should provide these reports. A profile may disable a report
-whose module is not selected.
+The first release should provide these reports. Each report, or report part, is
+contributed by a module and named in that module's specification §11
+([modules](20-modules.md)); a report whose modules are not selected does not exist.
 
 ### 3.1 Shared family reports
 
@@ -111,7 +113,7 @@ inputs through the ordinary family controls.
 published assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
-capacity, child-group capability, accessibility, and parties spanning families.
+capacity, accessibility, and parties spanning families.
 It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
@@ -138,20 +140,20 @@ planning calculation, not an invoice or billing record.
 
 The occasion provides no childcare service. Parents and guardians remain responsible
 for supervising their children at all times. Reports must not suggest that a
-children's room, workshop, leader, or age grouping transfers that responsibility
+workshop, leader, room, or age grouping transfers that responsibility
 to the organisers or to another family.
 
 Detailed allergy, accessibility, contact, and child-related operational data is
-minimised and restricted to the report audience that needs it. Printing a
-confidential report should require an explicit confirmation and should label the
-printed document as confidential.
+minimised and restricted to the report audience that needs it. A confidential
+report shows its confidentiality label on screen and, through the print stylesheet,
+on every printed page.
 
 ## 5. UI and print behavior
 
 Reports appear as ordinary browser routes, with the same authenticated session
-rules as the corresponding family view or organiser view. They have no download or export
-action. The visible controls are limited to filtering, sorting, navigation, and
-`Print`.
+rules as the corresponding family view or organiser view. They have no download,
+export, or print action. The visible controls are limited to filtering, sorting, and
+navigation.
 
 The print stylesheet must:
 
@@ -163,6 +165,7 @@ The print stylesheet must:
   colour;
 - include the occasion, report title, data cut, publication identity, and printed
   page number;
+- carry the confidentiality label on every page of a confidential report;
 - remain usable on common A4 paper in portrait or landscape as appropriate.
 
 The mobile view must not depend on hover, wide-screen drag interactions, or a
@@ -176,7 +179,8 @@ A report is ready when:
 1. its audience and every sensitive field are specified;
 2. it renders from the correct derived world and publication cut;
 3. it is usable at desktop and mobile widths;
-4. its print stylesheet produces a legible paper document;
-5. it has no application download or export path;
+4. printing it from the browser with its print stylesheet produces a correct,
+   legible paper document, checked against the stylesheet rules in §5;
+5. it has no application download, export, or print path;
 6. it has fixtures covering empty, incomplete, full, and changed data;
 7. it does not create persisted domain state or bypass the configured resolver.

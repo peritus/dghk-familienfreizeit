@@ -135,7 +135,7 @@ chunk, so a family's phone never downloads the organiser screens or the solver.
 
 ```tsx
 function OrganiserApp() {
-  const { committed, configHash } = useLog()            // GET /api/organiser/log, once
+  const { committed, config_hash } = useLog()            // GET /api/organiser/log, once
   const [pending, dispatch] = useReducer(pendingReducer, [])
   const world = useMemo(() => derive([...committed, ...pending], config), [committed, pending])
   …
@@ -156,7 +156,7 @@ re-renders from the response.
 `dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, organiser
 notes, and workshop titles are all user-supplied and all rendered as `{value}`.
 
-The family preferences page is a renderer over `familyFacing` occasion-profile entries
+The family preferences page is a renderer over `family_facing` occasion-profile entries
 rather than hand-written JSX ([family view](10-family-view.md) §1): each
 `control` value maps one-to-one onto a component in `src/app/family-view/controls/`.
 
@@ -262,7 +262,7 @@ Applying is the only write the organiser application makes:
 
 ```
 POST /api/organiser/apply
-     { input_seq, events[], output_hash, config_hash, solver_version }
+     { input_seq, events[], output_hash, config_hash, code_revision }
 
   409 → the log moved; response carries the new events, the application re-derives on them
   200 → applied; response carries the server's output_hash
@@ -270,7 +270,7 @@ POST /api/organiser/apply
 
 The server's plan is authoritative. `output_hash` travels so the server can check
 that the world the organiser acted on is the world it derived; the determinism contract
-([room assignment](05-room-assignment.md) §1) says the two agree, so a mismatch is
+([solver contract](05-solver-contract.md) §1) says the two agree, so a mismatch is
 reported as a defect rather than smoothed over.
 
 A stale bundle must not derive at all. The log response carries the Worker's

@@ -8,7 +8,7 @@ Governing specs: [family view](../10-family-view.md), [labels and
 constraints](../04-labels-and-constraints.md), and [occasion profiles](../16-occasion-profiles.md).
 
 This is one scrolling page, not a wizard. Controls come from the active
-occasion profile's `familyFacing` entries.
+occasion profile's `family_facing` entries.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -82,7 +82,7 @@ Controls need visible labels, grouped radio semantics, touch targets of at least
 
 Make each numbered section a `Card` with a bold heading and small completion
 `Badge`. Use `RadioGroup` for tri-state preferences, `Combobox` for family
-search, `Checkbox` for child choices, `Select` for workshop ranks, and
+search, `Checkbox` for toggles, `Select` for workshop ranks, and
 `Textarea` for the note. Use `Sonner` for save feedback.
 
 On mobile, cards remain stacked and controls become full-width. A picker uses a

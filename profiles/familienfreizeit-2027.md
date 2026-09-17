@@ -1,30 +1,26 @@
 # Familienfreizeit 2027 occasion profile
 
-This is the first deployed occasion profile for DGHK Familienfreizeit. It selects and
-configures generic room, workshop, food-preferences, and materials modules; it
-does not define a separate application architecture.
+This is the first deployed occasion profile for DGHK Familienfreizeit. Its
+configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.ts); this document
+explains the choices behind it. It selects and configures generic modules; it does
+not define a separate application architecture.
 
 ## 1. Selected modules
 
-The profile enables:
+The profile selects these modules ([modules](../20-modules.md) §5):
 
-- event log, labels, constraints, plans, publication, authentication, and shared
-  UI modules;
-- room inventory with buildings, rooms, beds, places, and capacity;
-- sleeping-party formation and deterministic room assignment;
-- children’s rooms with explicit child-group capabilities and minimum occupancy,
-  and family fallback;
-- co-rooming and keep-apart relations;
-- workshop slots and workshops;
-- ordered per-person workshop rankings;
-- workshop age eligibility, capacity, cancellation, fairness, and co-assignment;
-- workshop audience and person-to-workshop leadership;
-- food preferences with one per-person diet value and optional allergy text;
-- materials contributed by families and linked to workshops;
-- organiser board, family view, notifications, and constraint health.
-
-Room adjacency is not selected for the first deployment. The generic extension
-point remains available.
+| Module | Used for |
+|---|---|
+| [`room-inventory`](../20.1-room-inventory.md) | buildings, rooms, beds, places, and capacity |
+| [`sleeping-parties`](../20.2-sleeping-parties.md) | party formation, co-rooming, and requirement inheritance |
+| [`room-assignment`](../20.3-room-assignment.md) | deterministic placement, keep-apart relations, and the board |
+| [`workshops`](../20.4-workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
+| [`workshop-rankings`](../20.5-workshop-rankings.md) | ordered per-person workshop rankings |
+| [`workshop-assignment`](../20.6-workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and co-assignment |
+| [`food-preferences`](../20.7-food-preferences.md) | one diet per person and optional allergy text |
+| [`materials`](../20.8-materials.md) | materials contributed by families and linked to workshops |
+| [`family-preferences`](../20.9-family-preferences.md) | the family preferences page |
+| [`change-notifications`](../20.10-change-notifications.md) | publication and change emails |
 
 ## 2. Room inventory
 
@@ -80,139 +76,126 @@ as supplied. The source descriptors are retained in the normalized record:
 `Gartenhaus`, `Blockhaus`, `Bungalow`, and `Schlaffass`. Apartment capacities
 are normalized from `2×4` and `2×2` sleeping rooms to 8 and 4 beds respectively.
 
-### Room tags
+### Inventory representation
 
-The inventory uses occasion-specific tags and derives reusable room capabilities
-from them:
+The inventory is event data entered through [room inventory](../20.1-room-inventory.md)
+events, not profile configuration. Each source location is a building
+(`Haupthaus`, `Gartenhaus`, `Blockhaus`, `Bungalow`, `Schlaffass`); room numbers
+become `RoomAdded.number`; each bed is a single bed. Rooms 35–37 are `apartment`
+rooms whose sleeping rooms are recorded as labels.
 
-| Tag | Values or derivation | Use |
-|---|---|---|
-| `room_type` | `standard`, `apartment`, `bungalow`, `schlaffass` | Occasion vocabulary for accommodation type |
-| `building` | `Haupthaus`, `Gartenhaus`, `Blockhaus`, or null | Location and grouping |
-| `floor` | `ground`, `1`, `2`, or null | Location; `ground` can derive `ground-floor` |
-| `sanitary` | `private`, `shared-floor`, `remote-shared` | Occasion vocabulary for sanitary arrangement |
-| `price_per_bed_eur` | `88.50` or `103.00` | Price information; not a solver preference by default |
-| `bed_capacity` | derived from beds and apartment layouts | Atomic room capacity |
-| `sleeping_rooms` | `2` for rooms 35–37, otherwise `1` where applicable | Apartment layout |
-| `beds_per_sleeping_room` | `4` for rooms 35 and 37; `2` for room 36 | Preserves the source `2×4` / `2×2` structure |
-| `has_common_room` | `true` for rooms 35–37 | Apartment layout |
-| `suitable_for_two_families` | `true` for rooms 35–37 | Descriptive occasion fact, not an automatic placement rule |
+Module-owned keys and parameters:
 
-Derived capabilities such as `private-sanitary`, `ground-floor`, and
-`multi-room-unit` are resolver projections, not additional authoritative room
-properties. The occasion profile decides which of them are exposed as preferences
-or hard requirements.
+| Key | Values in this profile |
+|---|---|
+| `room-type` | `standard`, `apartment`, `bungalow`, `schlaffass` |
+| `floor` | `ground`, `1`, `2`; none for bungalow and Schlaffass rooms |
+| `bed-type` | `single`, `double` |
+| `designation` | `general`, `staff`, `blocked` |
+
+Profile room tags:
+
+| Tag | Builder | Values | Use |
+|---|---|---|---|
+| `sanitary` | property | `private`, `shared-floor`, `remote-shared` | sanitary arrangement |
+| `is-accessible` | property | boolean, default `false` | accessibility fact |
+| `price-per-bed-eur` | property | `88.50` or `103.00` | cost overview; organiser-only; never scored |
+| `sleeping-rooms` | property | `2` for rooms 35–37, default `1` | apartment layout |
+| `beds-per-sleeping-room` | property | `4` for rooms 35 and 37; `2` for room 36 | preserves the source `2×4` / `2×2` layout |
+| `has-common-room` | property | `true` for rooms 35–37 | apartment layout |
+| `suitable-for-two-families` | property | `true` for rooms 35–37 | descriptive; not a placement rule |
+
+Room capacity is the module's place count, not a tag.
+
+Derived capabilities are resolver projections, never assigned:
+
+| Capability | Derived from |
+|---|---|
+| `private-sanitary` | `sanitary = private` |
+| `ground-floor` | `floor = ground` |
+| `accessible` | `is-accessible = true` |
+| `multi-room-unit` | `sleeping-rooms > 1` |
 
 At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
 103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
 not a booking or billing rule.
 
-## 3. Occasion vocabulary
+## 3. People and room vocabulary
 
-The profile defines concrete property and relationship tags, including:
+| Tag | Builder | Scope | Semantics |
+|---|---|---|---|
+| `role` | property | person | `adult`, `child`, or `infant`; stated in `PersonAdded`, not derived from birthdate |
+| `does-not-need-a-bed` | property | person | default `false`; when true the person has no bed demand but stays in the family's party; children and infants only |
+| `needs-private-sanitary` | requirement | family | satisfied by `private-sanitary`; weight 6; family-facing "Eigenes Bad" |
+| `needs-accessible` | requirement | family, person | satisfied by `accessible`; weight 8; family-facing; placed first |
+| `needs-ground-floor` | requirement | family, person | satisfied by `ground-floor`; weight 4; organiser-only |
+| `needs-apartment` | requirement | family | satisfied by `multi-room-unit`; preferred only; weight 4; organiser-only |
+| `sole-occupancy` | requirement | family | structural check `no-other-parties`; penalty −12; family-facing, inverted as "Zimmer teilen" |
+| `room-with` | relation | family → family | `groups-with`, mutual-required; one-sided weight 6; family-facing family picker at `required` |
+| `apart-from` | relation | family, person | `separates-from`, implied-mutual; penalty −20; organiser-only and restricted |
+| `family-note` | property | family | free text the family writes and organisers read |
+| `organiser-note` | note | family, person, room, workshop | organiser-only, restricted; the solver never reads it |
 
-| Tag | Purpose |
-|---|---|
-| `designation` | general, child, staff, or blocked room |
-| `is_accessible` | accessibility fact |
-| `role` | adult, child, or infant |
-| `does_not_need_a_bed` | explicit exception to the default bed demand |
-| `needs_accessible` | accessibility requirement fact |
-| `room_with` | co-room relation |
-| `apart_from` | keep-apart relation |
-| `provides_child_group` | room capability naming a child group |
-| `needs_child_group` | child requirement naming a child group |
-| `sole_occupancy` | do-not-share requirement |
-| `workshop_with` | workshop co-assignment relation |
-| `workshop_audience` | `children` or `adults` participation audience |
-| `leads_workshop` | person-to-workshop leadership relation; zero or more leaders |
-| `prefers_workshop` | ordered workshop choice |
-
-`room_type`, `building`, and `floor` are already defined by the room inventory's
-room-tag vocabulary above. This table lists only additional occasion vocabulary.
-The child-group labels use the generic `needs-provides` resolver operator:
-rooms provide a stable child-group entity and children need that same entity.
-There is no age-band or opt-in rule.
-
-### Tag semantics
-
-| Tag | Applies to | Semantics |
-|---|---|---|
-| `designation` | room | Declares whether a room is `general`, `child`, `staff`, or `blocked`; blocked rooms require a reason. |
-| `is_accessible` | room | States that the room provides the configured accessibility capability. |
-| `role` | person | States `adult`, `child`, or `infant`; it is supplied data, not derived from birthdate. |
-| `does_not_need_a_bed` | person | Defaults to false. When true, the person contributes no bed demand while remaining part of the family and other assignments. |
-| `needs_accessible` | person or family | Requires or prefers an accessible room, according to label strength. |
-| `room_with` | family or person | Requests co-rooming with another stable entity; required values form a group, preferred values remain soft. |
-| `apart_from` | family or person | Requires or prefers separation from another stable entity; it conflicts with a required `room_with`. |
-| `provides_child_group` | child room | Names the stable child-group capability that this room offers. |
-| `needs_child_group` | child | Names the stable child group whose room capability the child requires. |
-| `sole_occupancy` | family or person | Requires that the resulting room or sleeping unit contain no unrelated occupants. |
-| `workshop_with` | person | Requests co-assignment with another person for a workshop slot; required values form a group. |
-| `workshop_audience` | workshop | Restricts participation to the configured audience, here `children` or `adults`. |
-| `leads_workshop` | person | Records that a person leads a workshop; zero or more leaders are allowed, including children. |
-| `prefers_workshop` | person | Stores an ordered workshop ranking scoped to one slot. |
-
-`needs_accessible`, `room_with`, `apart_from`, `sole_occupancy`, and
-`workshop_with` use the generic required/preferred strength model. The two
-child-group tags are a `needs-provides` match: a child requires the group and a
-child room provides it. They are not an age rule, an opt-in flag, or a free-form
-note.
+Mutual `required` `room-with` requests merge families into one party; everything else
+about `room-with` is a soft score. Keep-apart relations are never visible to
+families, which is why `apart-from` is both organiser-only and restricted.
 
 ## 4. Food preferences
 
-The generic `foodPreferences` module is enabled for this occasion. Its authoritative
-data is attached to each person, not to the family: every person has exactly one
-configured `diet` value, and may have one `allergies_text` value.
+Food data is per person ([food preferences](../20.7-food-preferences.md)): every
+person has exactly one `diet` and may have one `allergies-text`.
 
-| Label | Scope | Values or format | Cardinality |
-|---|---|---|---|
-| `diet` | person | `vegetarian`, `vegan`, `carnivore`, or `pesco-vegetarian` | exactly one |
-| `allergies_text` | person | free text, retained as entered | zero or one |
+| Tag | Values or format | Cardinality |
+|---|---|---|
+| `diet` | `vegetarian`, `vegan`, `carnivore`, `pesco-vegetarian` | exactly one |
+| `allergies-text` | free text, retained as entered; restricted | zero or one |
 
-`pesco-vegetarian` is an explicit occasion-configured vocabulary value. Diet is
-mutually exclusive; a person cannot carry multiple diet values. Allergy text is
-independent of diet and preserves quantities and wording from the source data,
-for example `1 x Eier` or `2x Beifuß (sehr starke Allergie)`.
-
-Family-level food tables are derived projections: they count persons by diet
-and count persons with non-empty `allergies_text`. They are not an alternative
-authoritative family-level model. The supplied source rows do not include
-family names, so this profile records the model and vocabulary without
-inventing person or family assignments.
+`pesco-vegetarian` is an explicit occasion value. Allergy text preserves quantities
+and wording from the source data, for example `1 x Eier` or
+`2x Beifuß (sehr starke Allergie)`. The supplied source rows do not include family
+names, so this profile records the model and vocabulary without inventing person or
+family assignments.
 
 ## 5. Room policy
 
-The profile uses family residue parties, child-group placement before party
-formation, strictest-strength requirement inheritance, mutual-required co-room
-merging, one-sided soft co-room preferences, keep-apart constraints, and
-deterministic greedy placement with bounded repair.
+| Module | Parameter | Value | Why |
+|---|---|---|---|
+| `sleeping-parties` | `co_room_tag` | `room-with` | |
+| | `no_bed_tag` | `does-not-need-a-bed` | infants sleep with their parents |
+| | `size_one_warning_threshold` | `5` | module default |
+| `room-assignment` | `weights` | exact fit 10, near fit 4, orphan bed −8 | module defaults; tune with `npm run tune` |
+| | `keep_apart_tag` | `apart-from` | |
+| | `priority_tag` | `needs-accessible` | accessible needs claim scarce places first |
+| | `scarce_capabilities` | `accessible: −3` | use accessible rooms for others only when it helps |
+| | `max_repair_passes` | `5` | module default |
 
-Required and preferred room requirements use the generic strength model. Concrete
-weights, child-group assignments, minimum child-room occupancy, room
-designations, and capacity values are profile parameters.
+Tag weights and penalties (§3) and these parameters are starting values; changing
+them is a deployment, reviewed through the plan diff before publishing.
 
 ## 6. Workshop policy
 
-The profile uses one ordered ranking per person and slot. Workshop assignment
-uses the generic ordered-choice and fairness mechanisms with these occasion policies:
+| Module | Parameter | Value |
+|---|---|---|
+| `workshops` | `audience_tag` | `workshop-audience` (`children`, `adults`; organiser-only) |
+| | `leader_tag` | `leads-workshop` (zero or more workshops per person) |
+| | `leaders_consume_capacity` | `false` |
+| | `require_leader` | `false` |
+| `workshop-rankings` | `ranking_tag` | `prefers-workshop` |
+| | `max_rank` | `3` |
+| | `allow_no_preference` | `true` |
+| `workshop-assignment` | `objectives` | fewest people without a top-2 choice, then fewest without any choice, then most rank weight |
+| | `top_n`, `rank_weights` | `2`, `[3, 2, 1]` |
+| | `excluded_roles` | `infant` |
+| | `audience_rules` | `children` → `child`; `adults` → `adult` |
+| | `co_assignment_tag` | `workshop-with` (family-facing person picker, `required` only) |
+| | `cancel_under_subscribed`, `fill_unassigned` | `true`, `true` |
 
-- minimize people receiving none of their top two choices;
-- then minimize people receiving none of their choices;
-- then maximize total rank satisfaction;
-- enforce age eligibility and capacity;
-- cancel under-subscribed workshops according to configured minimum capacity;
-- support configured co-assignment groups;
-- classify workshops as `children` or `adults` for participation eligibility;
-- allow zero or more leaders for children’s workshops, including child leaders.
-
-Leadership does not consume participant capacity unless configured separately.
-The profile does not require every children’s workshop to have a leader.
+Children may lead workshops. Leadership does not consume participant capacity, and
+not every children's workshop needs a leader.
 
 ## 7. Materials
 
-The generic `materials` module is enabled for this occasion. Its configured
-categories and labels are:
+[Materials](../20.8-materials.md) categories:
 
 | Category | Meaning |
 |---|---|
@@ -220,31 +203,34 @@ categories and labels are:
 | `games` | games and play materials |
 | `material` | other equipment or workshop supplies |
 
-Families and workshops may request materials. Families and persons may commit
-to bringing them. Requests and commitments may be general occasion records or
-linked to a workshop; a workshop-linked request may additionally identify the
-child it concerns.
+Families, persons, and workshops may request materials; families and persons may
+commit to bringing them. Records may be linked to a workshop, and a workshop-linked
+request may identify the child it concerns (`workshop_links` and `person_links`).
+One commitment fulfils at most one request.
 
-The occasion uses free-text quantities and descriptions, preserving entries such as
-`2-3 Packs`, `5 Liter`, and `4x`. The generic `fulfills` relation explicitly
-connects commitments to requests; withdrawing a commitment leaves the request
-open for another contributor.
+Quantities stay free text, preserving entries such as `2-3 Packs`, `5 Liter`, and
+`4x`. The profile can represent snacks, apple juice, napkins, reusable or disposable
+tableware, an espresso machine with its safety inspection note and accessories, and
+workshop supplies such as paint or textile markers. The supplied examples do not
+contain a complete family or person mapping, so they define data shape rather than
+invented records.
 
-The occasion profile can represent examples such as snacks, apple juice, napkins,
-reusable or disposable tableware, an espresso machine with its safety inspection
-note and accessories, and workshop-specific supplies such as paint or textile
-markers. The supplied examples do not contain a complete normalized family or
-person mapping, so they define occasion data shape rather than creating invented
-assignments.
+## 8. Metadata, copy, and notifications
 
-## 8. Profile metadata and copy
+The occasion runs from `2027-04-30` through `2027-05-02`, inclusive; family-facing
+German dates are 30.04.2027 to 02.05.2027. Ages are computed at `2027-04-30`.
 
-The profile supplies the actual occasion name, date, preference deadline, locale,
-public description, family-facing labels, organisation-team-facing labels, and email copy.
-These values are occasion configuration and are included in the configuration hash.
+The preference deadline in the configuration, `2027-03-31T21:59:59Z` (the end of
+31.03.2027 in German summer time), is a placeholder until the organisation team
+confirms it. After the deadline, the preferences page is read-only.
 
-For this deployment, the occasion runs from `2027-04-30` through `2027-05-02`,
-inclusive. The user-facing German dates are 30.04.2027 to 02.05.2027.
+Family-facing copy is German with an English fallback and follows the
+[German translation guidelines](../18-german-translation-guidelines.md). The
+preferences page has five sections: who is coming, room wishes, sharing, workshops,
+and food.
+
+Change emails are sent for room, place, and workshop assignment changes and for
+workshop cancellations ([change notifications](../20.10-change-notifications.md)).
 
 ## 9. First-deployment boundary
 

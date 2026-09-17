@@ -45,7 +45,7 @@ diff(a: World, b: World): Change[]               // what moved, grouped by cause
 
 Neither performs I/O, reads a clock, or uses randomness. `derive` is the fold, the
 solver input builder, and the solver composed; it inherits the determinism contract in
-[room assignment](05-room-assignment.md) §1 whole, so identical event lists produce
+[solver contract](05-solver-contract.md) §1 whole, so identical event lists produce
 byte-identical worlds on any machine.
 
 Three consequences are worth stating, because most of this document rests on them.
@@ -124,7 +124,7 @@ publication; earlier events remain publication history.
 ```
 PlanPublished
   output_hash     sha256 of the plan the organiser reviewed
-  solver_version  semver of src/solver
+  code_revision   commit id of the deployed monorepo revision (D20)
   config_hash     sha256 of the canonicalised config object
   notify          whether change emails were queued
   note            optional organiser note
@@ -137,36 +137,39 @@ the record of what was actually sent, which is what makes code drift detectable
 rather than silent.
 
 **A plan's identity is the input sequence it was derived at.** That, `config_hash`, and
-`solver_version` name it completely, which is why there is no plan id. Those three
-also mean **every difference between two plans has exactly one attributable cause** —
-new events, retuned weights, or new code. You never have to wonder which.
+`code_revision` name it completely, which is why there is no plan id. Those three
+also mean **every difference between two plans has an attributable cause** — new
+events move `input_seq`; retuned weights move `config_hash` and `code_revision`, since
+the profile is code in the same repository; other new code moves `code_revision`
+alone. You never have to wonder which.
 
 `config_hash` is computed at runtime from the code config object. See
 [occasion profiles](16-occasion-profiles.md) §4 for what goes into it, including the
 requirement that function bodies are hashed by source.
 
-## Module profiles
+## Kernel and modules
 
-The application is assembled from typed modules. This resembles feature flags at
-the selection boundary, but module composition is a build-time property rather
-than a runtime rollout switch. It is part of the occasion profile and therefore part
-of the configuration hash used to identify a plan.
+The application is a fixed kernel plus selectable modules. The kernel — the event
+log, labels and the resolver, `derive` and `diff`, the solver pipeline, publication,
+authentication, and the application shells — is present in every deployment. Modules
+contribute the domain: room inventory, party formation, room and workshop assignment,
+food preferences, materials, and the surfaces that go with them. The catalogue and
+the module contract are in [modules](20-modules.md).
 
-An occasion profile explicitly selects its modules. A selected module may contribute
-event schemas, labels, validation, solver stages, traces, routes, views, and test
-contracts. Modules declare dependencies; a profile that omits a required
-dependency fails validation before deployment. A disabled module contributes no
-solver stage, trace section, route, view, or required fixture.
+This resembles feature flags at the selection boundary, but module composition is a
+build-time property rather than a runtime rollout switch. The occasion profile
+selects modules explicitly, and the selection is part of `config_hash`. A module
+that is not selected contributes no event type, solver stage, trace section, route,
+screen, report, or required fixture.
 
-The generic module implementation owns mechanisms. The profile owns vocabulary
-and policy: concrete tags and values, module parameters, pure derivations and
-checks, scoring weights, phases, and user-facing copy. Profile functions are
-deterministic evaluators only. They cannot perform I/O, read a clock, use
-randomness, dynamically evaluate code, or alter module control flow.
+Modules own mechanisms. The profile owns vocabulary and policy: concrete tags and
+values, module parameters, pure derivations and checks, scoring weights, and
+user-facing copy ([occasion profiles](16-occasion-profiles.md)). Profile functions
+are deterministic evaluators only.
 
-Room and workshop capabilities are independent. A room-only occasion does not need
-workshop entities or views; a workshop-only occasion does not need rooms, beds,
-places, or sleeping-party formation. The first deployed profile enables both.
+Room and workshop capabilities are independent. A room-only occasion needs no
+workshop entities or views; a workshop-only occasion needs no rooms, beds, places,
+or parties. The first deployed profile selects both.
 
 ## Why CQRS is cheap at this size
 
@@ -323,7 +326,7 @@ Events are one of three things that move a plan; the others are retuned weights 
 new code, and both arrive by deploy rather than by append. Deriving the published
 plan and comparing it to the recorded `output_hash` catches them:
 
-> ⚠ Publication #7 was made under solver 2.1.0. The deployed solver derives a
+> ⚠ Publication #7 was made with revision `3f9c2a1`. The deployed code derives a
 > different plan from the same events. **Review and re-publish →**
 
 This is the same loop as any other staleness — review the diff, publish, email the
@@ -346,7 +349,7 @@ Step 3 is a `for` loop over `diff(previous published plan, new plan)`. A
 family is affected if any of its people changed room, place, or workshop — which is
 what a `Change` records.
 
-## Module layout
+## Source layout
 
 ```
 src/
@@ -374,25 +377,20 @@ src/
     fold.ts               events → entities, labels, definitions — pure, no I/O
     diff.ts               diff(world, world) → Change[] — pure
   modules/
-    <module>/             generic contract and implementation; app/ screens and
-                          worker/ handlers where the module contributes them; tests
+    <module-id>/          one directory per module; layout in 20-modules §6
+      stages/ rules/      pure solver stages and rules
+      app/ worker/        screens and route handlers the module contributes
   config/
-    define.ts             profile builders and tag constructors
+    define.ts             defineOccasionProfile, defineModule, tag builders
     index.ts              re-exports the active occasion profile
   solver/
-    index.ts              solve(solverInput, config) — pure
+    index.ts              solve(solverInput, config) — pure; runs selected stages
     solver-input.ts       projections → frozen sorted SolverInput
-    preflight.ts          C1–C9
-    parties.ts            phase A
-    place.ts              phases 0-3
-    workshops.ts          the workshop solver
+    preflight.ts          kernel checks; runs module checks
+    pipeline.ts           stage ordering
     trace.ts              trace construction and rendering
     canonical.ts          canonical JSON + sha256
     rng.ts                seeded xorshift32 (unused by default)
-    rules/
-      hard/  capacity.ts ageBand.ts designation.ts tagRequirements.ts
-      soft/  exactFit.ts orphanBed.ts tagPreferences.ts
-      tagRelations.ts
   lib/
     dates.ts              ageAt() over ISO strings — pure
 profiles/
@@ -403,15 +401,17 @@ scripts/
 
 Four boundaries are load-bearing and should be enforced in review:
 
-- **`src/solver/**` imports nothing from `src/worker` or `src/app`.**
-  It is pure TypeScript over plain data. It may import selected module contracts
-  and the active profile, which are also pure data and pure functions with no
-  I/O. The ESLint determinism rules extend to profile code.
+- **`src/solver/**` and the pure parts of `src/modules/**` import nothing from
+  `src/worker`, `src/app`, or any module's `app/` and `worker/`.** They are pure
+  TypeScript over plain data. They may import module contracts and the active
+  profile, which are also pure data and pure functions with no I/O. The ESLint
+  determinism rules extend to profile code.
 - **`src/derive/**` is pure and holds the same restrictions.** It is imported by
   the Worker and by the organiser application, so a stray import of `src/worker/db`
   there would take the database with it into the client.
-- **`src/app/**` and `src/worker/**` never import each other.** They share only
-  event schemas, derivation, the solver, the profile, and module contracts.
+- **`src/app/**` and `src/worker/**` never import each other**, nor do a module's
+  `app/` and `worker/`. They share only event schemas, derivation, the solver, the
+  profile, and module contracts.
 - **Only `src/worker/append.ts` writes to `event`.**
 
 An ESLint `no-restricted-imports` rule covers the first three. The fourth is a

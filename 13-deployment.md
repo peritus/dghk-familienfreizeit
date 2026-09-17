@@ -88,8 +88,8 @@ navigation, deployment, or authentication, and text-file mode must be rejected
 by production configuration even if an environment variable is accidentally
 present.
 
-`EVENT_DATE`, `PREFERENCE_DEADLINE`, and the occasion-facing name belong in the
-occasion profile ([occasion profiles](16-occasion-profiles.md)) because they are solver
+The occasion dates, preference deadline, and occasion-facing name belong in the
+occasion profile's `meta` ([occasion profiles](16-occasion-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
@@ -107,11 +107,13 @@ Two rules keep that honest:
   or the organiser chunk exceeds its budget, and if the family view entry ever contains
   solver code. The budget exists so that growth is a decision rather than a drift;
   raise it deliberately when there is a reason.
-- **The profile hash travels with the log.** The organiser log response carries the
-  Worker's `config_hash`, and the organiser application refuses to derive if its own
-  bundled profile hashes differently. A deploy that updates the Worker while a browser holds yesterday's
-  bundle then produces a reload prompt rather than a plan computed against the
-  wrong vocabulary.
+- **The profile hash and revision travel with the log.** The organiser log response
+  carries the Worker's `config_hash` and `code_revision`, and the organiser
+  application refuses to derive if its own bundle differs in either. The Worker and
+  the bundle are built from one monorepo revision and deployed together (D19); the
+  build injects that revision's commit id as `code_revision` (D20). A deploy that
+  updates the Worker while a browser holds yesterday's bundle then produces a reload
+  prompt rather than a plan computed against the wrong vocabulary.
 
 ---
 
@@ -213,7 +215,7 @@ export async function sendEmail(env: Env, msg: Message): Promise<Sent> {
 
   if (!res.ok) return { sent: false, reason: `resend-${res.status}` }
   const { id } = await res.json<{ id: string }>()
-  return { sent: true, providerId: id }
+  return { sent: true, provider_id: id }
 }
 ```
 
