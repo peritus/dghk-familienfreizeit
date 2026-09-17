@@ -63,10 +63,25 @@ communicating twice does not shuffle people arbitrarily. Counterfactuals are che
 so a plan diff can attribute every move to its cause. Regression testing is a
 hash comparison. Reproducing a complaint is `solve(solverInputAt(input_seq))`.
 
-## D4 — Sorted greedy with bounded repair, not integer programming
+## D4 — Stable sorted greedy with bounded repair, not integer programming
 
-*Chosen.* A documented sort order, a scored greedy pass, then capped pairwise
-swaps.
+*Chosen.* A documented sort order, preservation of valid assignments from the
+previous derived plan, a scored greedy pass for unresolved claims, then capped
+pairwise swaps. The previous plan is transient comparison input, derived from
+the event-log prefix; it is not persisted domain state.
+
+The allocation priority is:
+
+1. satisfy hard constraints;
+2. maximise the number of assigned people;
+3. preserve as many valid previous assignments as possible;
+4. apply balanced opportunity priority to unresolved contests;
+5. prefer higher-ranked choices;
+6. terminate every tie with stable entity ids.
+
+Every displacement identifies the constraint, coverage need, or bounded repair
+that required it. If the previous assignment remains feasible and no coverage
+improvement is needed, it remains unchanged.
 
 *Rejected alternative:* an ILP or CP-SAT solver. It would produce better plans by
 a few percent and would be completely unreviewable. An organiser cannot look at a
