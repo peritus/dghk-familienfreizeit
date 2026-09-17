@@ -31,7 +31,8 @@ One scrolling page, not a wizard. A wizard implies a one-time completion; this i
 a form people will return to three times over six weeks as they change their
 minds. Everything saves on change.
 
-Sections 2 ("Zimmerwünsche") and 3 ("Mit wem möchten Sie zusammen?") are **generated from the active occasion profile**: every tag declaring
+Sections 2 ("Zimmerwünsche") and 3 ("Mit wem möchtest Du zusammen?") are
+**generated from the active occasion profile**: every tag declaring
 `family_facing` produces a control, in the sections the profile configures. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
@@ -42,8 +43,8 @@ that reuses an existing control needs no family view code.
 ```
 Willkommen, Familie Müller
 
-  Ihr Zimmer wird von den Organisatoren eingeteilt.
-  Ihre Angaben können Sie bis zum 20. September ändern.
+  Dein Zimmer wird vom Organisationsteam eingeteilt.
+  Deine Angaben kannst Du bis zum 20. September ändern.
 
   ─────────────────────────────────────────────────
   1  WER KOMMT MIT
@@ -66,12 +67,12 @@ Willkommen, Familie Müller
                       ( ) auf keinen Fall
 
   Sonst noch etwas?   [                                    ]
-                      Freitext — die Organisatoren lesen mit.
+                      Freitext — das Organisationsteam liest mit.
 
   ─────────────────────────────────────────────────
-  3  MIT WEM MÖCHTEN SIE ZUSAMMEN?
+  3  MIT WEM MÖCHTEST DU ZUSAMMEN?
   ─────────────────────────────────────────────────
-  Familie Schmidt     ✓ möchte auch mit Ihnen
+  Familie Schmidt     ✓ möchte auch mit Dir
   Familie Weber       — noch keine Antwort
   [ Familie suchen… ]
 
@@ -91,7 +92,7 @@ Willkommen, Familie Müller
 The preferences collapse to a read-only summary; the assignment takes the top.
 
 ```
-  Ihre Zimmer
+  Deine Zimmer
 
   ┌──────────────────────────────────────────────┐
   │  Haus B · Raum 14 · 1. Stock                 │
@@ -103,10 +104,10 @@ The preferences collapse to a read-only summary; the assignment takes the top.
   │  Emma Müller      Bett 14-C (unten)          │
   │  Mia Müller       bei den Eltern             │
   │                                              │
-  │  Sie teilen das Zimmer mit Familie Schmidt.  │
+  │  Du teilst das Zimmer mit Familie Schmidt.   │
   └──────────────────────────────────────────────┘
 
-  Ihre Workshops
+  Deine Workshops
   Samstag Vormittag   Anna: Töpfern · Kai: Klettern ·
                       Jonas: Klettern · Emma: Basteln
   Samstag Nachmittag  …
@@ -197,7 +198,7 @@ dropdowns are less elegant and more reliable, and this form will mostly be fille
 in on phones.
 
 **The deadline is stated everywhere and enforced softly.** After it, the page
-becomes read-only with *"Änderungen bitte an die Organisatoren."* plus the
+becomes read-only with *"Änderungen bitte an das Organisationsteam."* plus the
 contact address. Hard-blocking late changes just moves the work to email, which
 is where it was before this application existed.
 
@@ -223,7 +224,7 @@ People forward this to grandparents and read it on trains.
 
 **Change.** Only to affected families, only what changed:
 
-> Ihre Zimmereinteilung hat sich geändert.
+> Deine Einteilung hat sich geändert.
 >
 > Vorher:  Haus A · Raum 01
 > Jetzt:   Haus B · Raum 14 · mit eigenem Bad
@@ -241,7 +242,7 @@ thing that trains people to ignore your emails.
 Different audience from the organiser UI. Families are non-technical, mildly anxious
 about where their children will sleep, and reading on a phone.
 
-**Say what will happen and when.** "Ihr Zimmer wird von den Organisatoren
+**Say what will happen and when.** "Dein Zimmer wird vom Organisationsteam
 eingeteilt" appears at the top of the preferences page, because the first
 question every person has is whether they are choosing or requesting.
 
