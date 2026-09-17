@@ -161,7 +161,7 @@ None. Formation is not scored. Room assignment scores the soft co-room terms.
 | Id | Severity | Fires when |
 |---|---|---|
 | `sleeping-parties.merge-exceeds-capacity` | error | a mutual-required component's bed demand exceeds the largest general room |
-| `sleeping-parties.required-contradiction` | error | an entity requires co-rooming with an entity it is also kept apart from, or holds a required requirement using the structural check `no-other-parties` ([room assignment](../20.3-room-assignment.md) §8) together with a required co-room relation |
+| `sleeping-parties.required-contradiction` | error | an entity requires co-rooming with an entity it is also kept apart from, or holds a required requirement using a sole-occupancy structural check (the active scope's `no-other-families`, [room assignment](../20.3-room-assignment.md) §8, which this module would extend to parties) together with a required co-room relation |
 | `sleeping-parties.merge-cascade` | info | a transitive component contains two families with no direct relation |
 
 A merge cascade is correct — A↔B and B↔C must all share a room — but it surprises
