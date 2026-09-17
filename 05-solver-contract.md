@@ -175,8 +175,8 @@ not affect assignment, scoring, or the plan hash.
 
 Every selected stage consumes the resolver's applicable decisions: positive
 requirements, exclusions, grouping, separation, and workshop constraints. Required
-decisions constrain every placement path, including forced placement, repair, and
-cancellation restart. A decision that cannot be honoured is reported with its
+decisions constrain every placement path, including forced placement and repair.
+A decision that cannot be honoured is reported with its
 source labels; it is never silently bypassed. Preferred decisions retain the
 mechanism's configured soft behavior, and do not become forced placements.
 
