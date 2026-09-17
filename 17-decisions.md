@@ -59,7 +59,7 @@ Migrations are hand-written SQL and there is no ORM
 Identical inputs produce byte-identical output, forever.
 
 *Why:* it makes every other good property possible. Re-runs are stable, so
-publishing twice does not shuffle people arbitrarily. Counterfactuals are cheap,
+communicating twice does not shuffle people arbitrarily. Counterfactuals are cheap,
 so a plan diff can attribute every move to its cause. Regression testing is a
 hash comparison. Reproducing a complaint is `solve(solverInputAt(input_seq))`.
 
@@ -365,7 +365,7 @@ ships all of it together. The occasion profile selects which modules are active
 (D12, [modules](20-modules.md)); selection happens inside that one build, not by
 combining separately built parts.
 
-*Rejected alternative:* modules as separately built or published packages with
+*Rejected alternative:* modules as separately built or distributed packages with
 their own release cycles. It buys independent releases that nobody here needs and
 costs compatibility ranges, a matrix of module combinations to test, and a
 dependency resolver deciding what actually runs.
@@ -414,7 +414,7 @@ acceptance criteria, not a polish item ([reports](19-reports.md) §5–6).
 
 *Rejected alternative:* generated PDF exports. A second rendering path for the same
 data, a PDF library in the Worker or the bundle, and files that outlive the
-visibility rules and the published cut they were rendered from.
+visibility rules and the scope references they were rendered from.
 
 *Rejected alternative:* a print button calling `window.print()`. It adds a control to
 every printable page, tempts special cases such as confirmation dialogs or

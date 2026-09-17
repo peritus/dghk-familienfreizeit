@@ -28,7 +28,7 @@ Merge and split dialogs explain the resulting organiser decision and add it to t
 shared pending list. Refused merges name the capacity or constraint reason.
 
 The cards preserve provenance in reading order. Buttons have descriptive names;
-warnings are text plus glyph/border, and the pending count is announced after a
+warnings are text plus glyph/border, and the pending count is read out after a
 merge or split.
 
 ## Neobrutalist redesign and components

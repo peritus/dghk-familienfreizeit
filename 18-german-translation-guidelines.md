@@ -46,9 +46,11 @@ emails, notifications, and help text.
 | organiser decision note | **Zusätzliche Informationen** | Optional context; the token itself needs no second name |
 | label | **Angabe** | Do not expose the storage term *Label* in family copy |
 | plan | **Einteilung** | The generated room/workshop result |
-| publish | **Veröffentlichen** | For making an approved plan visible |
+| communicate | **An Familien kommunizieren** | Open the selected-scope review; final action: Jetzt an Familien kommunizieren |
+| communicated | **An Familien kommuniziert** | Visible in family views; email delivery is separate |
+| release control | **Freigabesteuerung** | Technical mechanism; organiser navigation uses Kommunikation |
 | pending | **Noch nicht angewendet** | Local changes awaiting Apply; other organisers cannot yet see them |
-| unpublished | **Noch nicht veröffentlicht** | Applied changes not yet made visible to families through Publish |
+| uncommunicated | **Noch nicht an Familien kommuniziert** | Applied changes not yet made visible to families through Communicate |
 | organiser | **organisierende Person** | One person acting on behalf of the organisation team |
 | organisation team | **Organisationsteam** | The collective group responsible for organising the occasion |
 | member of the organisation team | **Mitglied des Organisationsteams** | Use for one person when the team relationship matters |

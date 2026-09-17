@@ -419,6 +419,11 @@ export default defineOccasionProfile({
       leader_tag: 'leads-workshop',
       leaders_consume_capacity: false,
       require_leader: false,
+      excluded_roles: ['infant'],
+      audience_rules: {
+        'children': ['child'],
+        'adults': ['adult'],
+      },
     }),
 
     workshopRankings({
@@ -431,11 +436,6 @@ export default defineOccasionProfile({
       objectives: ['min-people-without-top-n', 'min-people-without-any-choice', 'max-rank-weight'],
       top_n: 2,
       rank_weights: [3, 2, 1],
-      excluded_roles: ['infant'],
-      audience_rules: {
-        'children': ['child'],
-        'adults': ['adult'],
-      },
       co_assignment_tag: 'workshop-with',
       cancel_under_subscribed: true,
       fill_unassigned: true,
@@ -490,6 +490,18 @@ export default defineOccasionProfile({
           tags: ['diet', 'allergies-text'],
         },
       ],
+      module_controls: [
+        {
+          key: 'workshop-sign-up', section: 'workshops',
+          label: { de: 'Workshop-Anmeldung', en: 'Workshop sign-up' },
+          help: { de: 'Du meldest Dich verbindlich an.', en: 'This reserves your place.' },
+        },
+        {
+          key: 'workshop-interest', section: 'workshops',
+          label: { de: 'Interesse', en: 'Interest' },
+          help: { de: 'Unverbindlich, ohne Platzreservierung.', en: 'Non-binding; no place reserved.' },
+        },
+      ],
       after_deadline: 'read-only',
       deadline_contact: {
         de: 'Änderungen bitte an das Organisationsteam.',
@@ -498,17 +510,10 @@ export default defineOccasionProfile({
     }),
 
     changeNotifications({
-      change_kinds: [
-        'room-changed',
-        'place-changed',
-        'workshop-assignment-changed',
-        'workshop-auto-cancelled',
-        'workshop-cancelled',
-      ],
-      include_assignment_in_body: true,
+      include_arrangements_in_body: true,
       copy: {
-        publication_subject: { de: 'Deine Zimmer und Workshops', en: 'Your rooms and workshops' },
-        change_subject: { de: 'Deine Einteilung hat sich geändert', en: 'Your assignment has changed' },
+        communication_subject: { de: 'Informationen zu Deinen Zimmern und Workshops', en: 'Room and workshop information' },
+        change_subject: { de: 'Änderungen zu Deinen Zimmern und Workshops', en: 'Changes to your rooms and workshops' },
       },
     }),
   ],

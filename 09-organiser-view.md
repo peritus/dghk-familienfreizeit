@@ -84,5 +84,5 @@ deferred until the sleeping-parties module is adopted. Optional notes stay attac
 to the label event; author and timestamp come from the event log.
 
 Reports show family-to-room assignments, unplaced families, capacity and constraint
-findings, workshop results, and publication status. They do not show party or
+findings, workshop results, and communication status. They do not show party or
 child-room sections in the active scope.

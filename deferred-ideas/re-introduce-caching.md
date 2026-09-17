@@ -19,25 +19,24 @@ You asked for caching that is **only** caching. Per AGENTS.md, touching D1/D2 is
 decision revision, so this plan is the review: what changed, the alternatives, and
 a recommendation. The spec gets edited only after you approve.
 
-## What the server actually derives (from the spec)
+## Derivation boundaries the proposal must preserve
 
-| Request | Needs | Cut | How often the cut changes |
-|---|---|---|---|
-| `currentPrincipal` → `familyByEmail(worldAtHead)` (11 §4) | fold only | head | every append |
-| Family save (VALIDATE step 2) | fold (+ profile validation) | head | every append |
-| `GET /api/family/view` (10) | fold + **solve** | before latest `PlanPublished` | only on publish |
-| `POST /api/organiser/apply`, publish (`output_hash` check) | fold + **solve** | new head | every organiser apply |
-| `GET /api/organiser/log` | no derive (raw events) | — | — |
-| Organiser screens | derived **in the browser** (D15) | — | — |
+[Release control](../06-release-control.md) is authoritative. Family responses need
+current permitted facts plus potentially several historical scope bases. Live
+workshop admission also needs the effective communicated programme and head labels.
+There is no single family cut, and a cache cannot hide a newly saved own answer.
 
-The key point: the expensive step (solve) is only needed at the **publication cut**
-and on organiser apply/publish. The per-append paths only need the fold, which the spec
-already calls sub-millisecond.
+Organiser apply still verifies solver agreement. Communication confirmation uses the
+reviewed head, scope selection and code/config identities, with no extra content hash.
+Any benchmark must exercise multi-basis family responses, live participation checks,
+release previews and ordinary apply. Do not assume saves are fold-only or that cold
+misses occur only once per communication. This proposal remains deferred; release
+control introduces no persisted cache.
 
 ## Why a cache here needs no invalidation
 
 `derive` is pure (D3), so a plan is fully identified by
-`(cut input_seq, config_hash, code_revision)` (01 "A plan's identity"). If the key
+`(cut input_seq, config_hash, code_revision)` ([solver contract](../05-solver-contract.md)). If the key
 is exactly that triple, a cached value can never be wrong. New events change the
 seq, a new deploy changes the hashes, and old entries just stop being looked up.
 Nothing is ever rebuilt, repaired, or kept in sync. This is the difference from the
@@ -73,8 +72,8 @@ removed projection tables.
      (a) fold at head, (b) cache-hit family view, (c) cold solve.
    - (a) and (b) within ~5 ms CPU → the free tier is viable for everything except a
      cold miss.
-   - A cold miss happens once per publish, and on organiser apply for the `output_hash`
-     check. If (c) > 10 ms, D1 stays Paid and the cache is kept only for latency. If
+   - Measure cold misses for head and every referenced historical basis, including
+     live saves and release previews. If (c) > 10 ms, D1 stays Paid and the cache is kept only for latency. If
      (c) fits, D1 becomes "Free tier + derive cache", with Paid as the documented
      fallback.
    - I'd write D1 as "Free + cache, pending the M2 benchmark; switch to Paid if the
@@ -95,7 +94,7 @@ removed projection tables.
     "Derive cache" section (key, rules, what's cached).
   - `src/db/cache.ts` in the tree, plus a fourth load-bearing boundary.
 - `02-data-model.md` §7: `derive_cache` DDL.
-- `13-deployment.md`: §10 cost row. Cron also deletes cache rows whose `input_seq` is below the latest publication and head, or older than N days. §1 unchanged (no new binding).
+- `13-deployment.md`: §10 cost row. Any proposed eviction policy must account for all active scope references and allow safe cold reconstruction; it cannot use a single latest communication cutoff. §1 unchanged (no new binding).
 - `14-testing.md`: the cache-hit ≡ fresh-derive test, plus a "table emptied mid-run" test.
 - `15-roadmap.md`: M0 "deployed on Workers Paid" becomes the free/Paid choice. Add the benchmark task to M2 (the solver milestone).
 

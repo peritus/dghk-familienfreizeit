@@ -22,14 +22,14 @@ experimentation.
 | UI-00 | [Design system and shell](00-design-system.md) | all screens |
 | UI-01 | [Request login link](01-login.md) | `/login` |
 | UI-02 | [Invalid or expired link](02-login-link-invalid.md) | `/login/invalid` |
-| UI-03 | [Family preferences](03-family-preferences.md) | `/family` before publication |
-| UI-04 | [Family assignment](04-family-assignment.md) | `/family` after publication |
+| UI-03 | [Family preferences](03-family-preferences.md) | `/family` current information |
+| UI-04 | [Family assignment](04-family-assignment.md) | `/family` communicated arrangements |
 | UI-05 | [Organiser dashboard](05-organiser-dashboard.md) | `/organiser` |
 | UI-06 | [Families and import](06-families.md) | `/organiser/families` |
 | UI-07 | [Family detail](07-family-detail.md) | `/organiser/families/:id` |
 | UI-08 | [Inventory](08-inventory.md) | `/organiser/inventory` |
 | UI-10 | [Assignment board](10-assignment-board.md) | `/organiser/board` |
-| UI-11 | [Plans and publishing](11-plans-and-publishing.md) | `/organiser/plans` |
+| UI-11 | [Release control](11-release-control.md) | `/organiser/releases` |
 | UI-12 | [Workshops](12-workshops.md) | `/organiser/workshops` |
 | UI-13 | [Organiser decisions](13-constraints.md) | `/organiser/constraints` |
 

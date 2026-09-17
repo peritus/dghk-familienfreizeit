@@ -26,7 +26,9 @@ minds. Everything saves on change.
 
 Section 2 ("Zimmerwünsche") and the later sections are **generated from the
 active occasion profile**: every tag declaring
-`family_facing` produces a control, in the sections the profile configures. The
+`family_facing` produces a control, in the sections the profile configures.
+Selected module-owned participation controls are placed through `module_controls`
+as defined by [family preferences](20.9-family-preferences.md). The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
 The page, its sections, the closed `control` union, and the save-on-change contract

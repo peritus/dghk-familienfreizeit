@@ -251,8 +251,11 @@ CREATE TABLE email_log (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   to_email      TEXT NOT NULL,
   kind          TEXT NOT NULL,
-  published_seq INTEGER,
-  sent_at       TEXT NOT NULL,
+  communication_seq INTEGER,
+  family_id     TEXT,             -- operational recipient identity, not a domain FK
+  delivery_key  TEXT UNIQUE,      -- communication seq + family + kind
+  status        TEXT NOT NULL,    -- pending | sending | sent | failed | unknown
+  sent_at       TEXT,
   provider_id   TEXT,
   error         TEXT
 );

@@ -189,7 +189,7 @@ const invariants = [
   ['no person is in two workshops in one slot',
     p => /* group by (person, slot) */],
 
-  ['no workshop exceeds capacity',
+  ['no solver-assigned workshop exceeds capacity',
     (p, s) => /* … */],
 
   ['every label key names a fixed resolver, profile tag, or declared custom definition, or is reported',
@@ -354,7 +354,7 @@ Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
 
 ```ts
-test('the full loop: import → constraints → solve → plan → publish', async () => {
+test('the full loop: import → constraints → solve → plan → communicate', async () => {
   const db = await freshDb()
 
   await importFamilies(db, csvFixture)           // 55 families
@@ -367,8 +367,10 @@ test('the full loop: import → constraints → solve → plan → publish', asy
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  await publish(db, plan2.output_hash)
-  expect(await publishedCount(db)).toBe(1)
+  const preview = await previewCommunication(db, [{ kind: 'accommodation' }])
+  await communicate(db, preview.confirmation)   // reviewed basis, scopes, identities and options
+  expect(await communicationCount(db)).toBe(1)
+  expect(await familyArrangements(db)).toEqual(preview.familyArrangements)
 })
 ```
 
@@ -383,13 +385,21 @@ Also covered:
 - **Auth**: magic link redeems exactly once; a second attempt fails; expiry
   works; rate limits bite; changing an email kills sessions.
 - **Fold**: a pure test, no database. Fold a fixture log, compare against a
-  hand-written expectation, then fold twice and assert identical. Persisting it is
-  a separate, smaller integration test.
+  hand-written expectation, then fold twice and assert identical. Appending and replaying its source events is
+  a separate integration test; the fold itself is never persisted.
 - **Constraint enforcement**: attempt to give two people the same place and assert
   solver-input validation fails.
-- **Publication concurrency**: publishing an `output_hash` the server no longer
-  derives is refused with the diff, and publishing an error-severity plan without
-  `acknowledged_findings` is refused.
+- **Release control**: implement every scenario in [release control](06-release-control.md)
+  §9, including unchanged-head preview equality, selection changes, concurrent appends,
+  per-scope history, dependencies, privacy and code/config mismatch. Communication
+  carries no extra content hash. Selected-scope errors require their acknowledgements;
+  hard consistency gates cannot be acknowledged away.
+- **Live coordination**: cover last-place races, over-capacity preservation, inactive
+  rankings, sign-up fairness exclusion, interest privacy and immediate material saves
+  under the module fixture contracts. These behaviours do not need a second Plan.
+- **Report contract**: check detailed initial/before/after content, unselected changes,
+  exact recipients and no writes from preview/report requests. A reverted edit clears
+  its outstanding difference; world-only changes do not create release backlog.
 
 ---
 

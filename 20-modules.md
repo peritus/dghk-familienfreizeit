@@ -195,7 +195,7 @@ migration ([deployment](13-deployment.md) §2).
 | [`food-preferences`](20.7-food-preferences.md) | Per-person diet and allergy text | — | — |
 | [`materials`](20.8-materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
 | [`family-preferences`](20.9-family-preferences.md) | The profile-driven preferences page | — | — |
-| [`change-notifications`](20.10-change-notifications.md) | Publication and change emails | — | — |
+| [`change-notifications`](20.10-change-notifications.md) | Communication and change emails | — | — |
 
 `requires` is transitive. A room-only occasion selects `room-inventory` and
 `room-assignment`; it places whole families and has no child rooms. A

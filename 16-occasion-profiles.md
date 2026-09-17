@@ -175,3 +175,13 @@ runtime multi-occasion tenancy.
 
 The profile is not an example configuration. It is the source of truth for the
 deployed occasion, while this document defines the reusable profile contract.
+
+## Module-owned family controls
+
+The profile places module-owned controls through `family-preferences.module_controls`
+([family preferences](20.9-family-preferences.md) §3), supplying section and copy. It
+must not redefine `signed-up-for` or `interested-in` as profile tags. The workshops
+module owns their schemas, resolver references and authorisation. These controls
+complement tag-driven controls and follow the ordinary deadline policy. Release
+control is fixed kernel behaviour, specified in [06-release-control](06-release-control.md);
+the profile supplies no executable release rules or stored communicated state.

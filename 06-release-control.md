@@ -120,7 +120,8 @@ code/config identities, findings and notification choice. The server:
 A concurrent append, changed deployment or dependency conflict changes
 nothing. Return a refreshed preview and require explicit confirmation again, even
 when the concurrent event was live-only. Acknowledgements apply only to acknowledgeable
-solver error findings relevant to the selected scope; unrelated scope errors do not
+solver error findings relevant to the selected scope; match findings by their check ids and resolved
+subjects (unscoped kernel errors apply to every dependent scope). Unrelated scope errors do not
 block a programme release. Privacy, reference validity, admission invariants and
 cross-scope consistency are hard gates and cannot be acknowledged away.
 
@@ -170,18 +171,24 @@ without the matching implementation/configuration there is no trustworthy histor
 before-image. Do not run current code and silently present its result as the old
 communicated truth. Affected family scopes show a temporary unavailable/contact
 message; independent matching scopes and permitted live information remain usable.
+Disable admissions and ranking changes that require an unavailable programme; own
+saved responses remain readable and participants may still clear their own labels.
+Current organiser planning can derive candidate content under the deployed code, but
+must label a historical replay under that code as an approximation, never a verified
+before-image. This permits recovery without inventing stored historical results.
 
 Organisers can restore the matching deployment or review a new communication. Recovery
 without the old implementation shows current content in full and states that a reliable
-before/after comparison is unavailable. The recipient preview conservatively includes
-the current and historically referenced affected families, derived from the event
-prefix; if that cannot be resolved safely, delivery waits for explicit organiser
-review. No hash can reconstruct an old result, and release control stores no content
+before/after comparison is unavailable. If the old affected-family set cannot be reproduced, the recovery preview explicitly
+uses all currently active families as the conservative recipient set, with each
+family's permitted current content. The organiser can leave email unselected;
+no old assignments are guessed or disclosed. No hash can reconstruct an old result, and release control stores no content
 hash or snapshot. Deploy guidance requires reviewing this impact before changing code.
 
 No general uncommunicate toggle exists. Communicate a correction or cancellation.
-Repeating an identical release may record a review after deployment,
-but creates no semantic change and sends no change email.
+Repeating reproducibly identical content creates no semantic change and sends no
+change email. Recovery after a revision mismatch is a full-content review; it must
+not claim an empty diff when the old content cannot be reproduced.
 
 ## 5. Programme, participation and dependencies
 
@@ -203,15 +210,18 @@ exposes both perspectives explicitly, never as per-screen relationship lookups.
 | Reinstatement | Preview restored participation and validate capacity/eligibility; never silently reinstate attendance through an unrelated scope |
 
 Build a prospective family composition by replacing only selected scopes. Validate
-it, not just the latest solver plan. An allocation target must be `assigned`, not
+it, not just the latest solver plan. An active allocation target must be `assigned`, not
 manually cancelled, in the same slot, and compatible with communicated eligibility,
 capacity and required decisions. Automatic cancellation is an allocation outcome:
-it does not mutate manual cancellation or another scope's programme.
+it does not mutate manual cancellation or another scope's programme. A communicated
+manual cancellation explicitly marks retained old assignments inactive/cancelled,
+so it can stand alone while replacements are prepared; those entries reserve no
+attendance capacity or slot and are not active targets for this check.
 
 A mode transition away from `assigned` requires communicating removal of its solver
 participants in the old slot. A transition to `assigned` can communicate the programme
-first and allocation later. Incompatible sign-up/interest labels must be explicitly
-cleared through ordinary authorised events before confirming the mode transition.
+first and allocation later. Incompatible retained sign-up/interest labels, including cancelled/inactive ones,
+must be explicitly cleared through ordinary authorised events before confirming the mode transition.
 They are never automatically cleared by `Communicated`. The mode-change preview names
 the affected people and required work. Old rankings remain recorded but are inactive
 when their workshop is no longer assigned in the relevant programme.
@@ -313,6 +323,11 @@ recipients and bodies from the prefix ending at that communication. Claim delive
 atomically and use a stable provider idempotency key where supported; without provider
 idempotency, an ambiguous send is marked unknown for explicit review rather than
 blindly retried. Failed/unknown delivery is distinct from successful communication.
+If code/config identities no longer match, pause reconstruction/retry until the
+matching deployment is restored or the organiser starts a new reviewed communication.
+Current authorisation still applies at send time: suppress recipients no longer
+entitled to the content and record the suppression; never redirect an old message
+to a newly associated address without review.
 
 ## 9. Acceptance scenarios
 

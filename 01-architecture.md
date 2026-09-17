@@ -55,9 +55,9 @@ Three consequences are worth stating, because most of this document rests on the
 What the plan would look like without one constraint is `derive(committed ∖ c)`.
 Counterfactual derivation is not a special capability; it is the ordinary use.
 
-**Every question about change is a call on `diff`.** Staleness, the plan diff
-between two publications, the change emails, and whether a constraint is still
-doing any work are one function over two worlds.
+**Changes are derived comparisons.** `diff` describes world and plan changes.
+Release control projects the scope content relevant to its outstanding-change report
+and communication review; ordinary live-world changes are not automatically held work.
 
 **Events need not be committed to be derived from.** `derive` takes a list, and it
 does not care where the list came from. That is what makes the next section
@@ -106,15 +106,16 @@ before responding. Reports use the same audience projection.
 `Communicated` records an organiser's reviewed release decision, not a stored plan.
 The kernel derives its scope references from events and uses ordinary historical
 worlds to reproduce content. There remains one Plan type, identified by `input_seq`,
-`config_hash` and `code_revision`. Release review uses its basis sequence, scope selection and code/config identities;
-programme details need not be solver output or acquire another content hash. See [release control](06-release-control.md) §3–4
+`config_hash` and `code_revision`. Release review uses its basis sequence, scope
+selection and code/config identities; programme details need not be solver output
+or acquire another content hash. See [release control](06-release-control.md) §3–4
 for identity, concurrency and verification; [occasion profiles](16-occasion-profiles.md)
 §4 defines configuration hashing.
 
 ## Kernel and modules
 
 The application is a fixed kernel plus selectable modules. The kernel — the event
-log, labels and the resolver, `derive` and `diff`, the solver pipeline, publication,
+log, labels and the resolver, `derive` and `diff`, the solver pipeline, communication,
 authentication, and the application shells — is present in every deployment. Modules
 contribute the domain: room inventory, whole-family room and workshop assignment,
 food preferences, materials, and the surfaces that go with them. The catalogue and
@@ -210,17 +211,19 @@ for another family.
 ## Read models
 
 None are stored. `World` is the read model: typed entities, labels, constraint
-definitions, the plan, and its diagnostics, built in memory by `derive`; audience responses select the permitted content. Stable URLs, authentication lookup, and every screen
-read it the same way.
+definitions, summaries, the plan, diagnostics and release references, built in memory
+by `derive`. Audience responses select permitted content. Stable URLs, authentication
+lookup and screens read this derived model.
 
 The database holds the event log and operational tables
 ([data model](02-data-model.md) §7), nothing else. If you find a table holding
 families, rooms, or labels, or a query that reads event payloads to answer a domain
 question, it is a bug.
 
-Plans are derived rather than maintained as authoritative state. Every planning screen derives
-the ordinary plan, and family screens use the release-control projection, and `derive` validates assignment
-uniqueness before returning a world, so there is no assignment table or plan table.
+Plans are derived rather than maintained as authoritative state. Planning screens
+read the ordinary plan; family screens use the release-control projection. `derive`
+validates assignment uniqueness before returning a world. There is no assignment
+or plan table.
 
 ## Event sources
 

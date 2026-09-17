@@ -294,7 +294,7 @@ wrangler d1 export dghk-familienfreizeit --remote --output=backup-$(date +%F).sq
 ```
 
 Put it somewhere that is not Cloudflare. Run it before every migration and before
-every publication.
+every communication.
 
 **The event log is the real backup.** Every read model, every plan, every
 assignment is derived from `event`. If everything else is lost but the event
@@ -366,27 +366,38 @@ never as a separate step someone might skip.
 
 ---
 
+## Release impact of deployment
+
+Changing code/config identities affects reproducibility of communicated scopes.
+Before deploying, review that impact under [release control](06-release-control.md)
+§4 and arrange organiser review of affected scopes. Do not present a replay under
+new code as a verified historical result. Restore the matching deployment or review
+and communicate current content explicitly. Ordinary solver hashes remain useful
+for regression; they cannot recover an old result.
+
 ## 10. Pre-event runbook
 
 The week before, in order:
 
 1. **Freeze the schema.** No migrations after this point without a very good
    reason.
-2. **Verify access to the reports.** Confirm that the current published plan and
+2. **Verify access to the reports.** Confirm that the communicated arrangements and
    the shared family reports are visible in the browser, and that the organiser
    reports show the expected data cut. Reports are not downloadable; print any
    paper copies needed for the occasion from their browser print views.
 3. **Run `npm run tune`** against the exported log and confirm the deployed
    weights are the ones you settled on.
-4. **Confirm preflight is clean**, or that the latest publication acknowledged
-   every error-severity finding in `acknowledged_findings`.
+4. **Confirm required scopes are ready**, including relevant solver acknowledgements
+   and the non-acknowledgeable release consistency gates.
 5. **Print the required reports.** Use the report print styles for room lists per
    building, workshop lists per slot, the master sheet, and any confidential
    operational sheets. The hostel's wifi will be bad and someone will need paper.
 6. **Verify one magic link end to end** against a real address on the actual
    production domain.
-7. **Check the published plan is the one you think it is** — the latest
-   `PlanPublished.output_hash` matches the plan shown by the dashboard.
+7. **Review release status** — every required scope is communicated at the intended
+   basis, and code/config identities match the deployment. Use the report and detailed
+   preview defined in [release control](06-release-control.md); communication events
+   do not carry a solver or content hash.
 8. **Nominate a laptop.** One machine, known to be logged in as an organiser, known
    to have the export. Do not rely on being able to log in from a phone in a
    building with thick walls.

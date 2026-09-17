@@ -36,7 +36,7 @@ width, at least 44px high, and the email remains visible when the keyboard opens
 
 Support idle, invalid email, submitting, generic sent, and rate-limited states.
 Label the input explicitly, associate the error with it, focus the error after
-submission, and announce the generic success message in a live region.
+submission, and read out the generic success message in a live region.
 
 ## Neobrutalist redesign and components
 

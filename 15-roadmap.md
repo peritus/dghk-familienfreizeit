@@ -22,7 +22,7 @@ Only these capabilities are in scope for the initial release:
 - Deterministic whole-family room assignment with a full human-readable explanation.
 - Deterministic workshop assignment with an explicit fairness objective.
 - Drag-and-drop organiser board that writes constraints, not assignments.
-- Deterministic plans identified by `input_seq`, and publication.
+- Deterministic plans identified by `input_seq`, and communication.
 - Organiser decision labels across fixed resolver mechanisms, with free-form
   matching values and one optional note, which organisers can add and clear.
 
@@ -98,7 +98,7 @@ translated into another data format.
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain-text rendering of it
 - `derive(events, config)` and `diff` as the only read path
-- `PlanPublished` identifying the plan's `input_seq`, with the reviewed `output_hash`
+- `Communicated` and scope references under [release control](06-release-control.md)
 - Shuffle-invariance test, golden fixtures, property tests
 
 **No UI beyond a page that shows the trace.** Resist building the board here.
@@ -150,20 +150,20 @@ Send the real invitations only after this deferred milestone is delivered.
 understand what happened each time, and can add and clear a human-readable
 decision label without defining new vocabulary or supplying a separate name.
 
-## M5 — Plans and publication
+## M5 — Release control
 
-*The plan becomes an answer. Two days.*
+*Arrangements become visible through a reviewed action.*
 
-- Plans identified by `input_seq`
-- Publish flow: the publication event, the hash compare-and-swap, and
-  acknowledgement of error findings
-- The published-plan view, derived from the plan selected by publication
+- Kernel release scopes and `Communicated`, following [release control](06-release-control.md)
+- Outstanding-change report and detailed before/after preview ([UI-11](ui/11-release-control.md))
+- Head/code/config guard, dependencies and selected-scope acknowledgements
+- Scope-specific history and reproducibility status
+- Family/shared response composition; the family shell arrives with its own milestone
 
-Families reach that view once the deferred family view of M3 is delivered; until
-then the published plan is read by organisers and printed from the reports.
-
-**Done when:** an organiser can publish a reviewed plan and reproduce
-the same deterministic result from the plan identified by its `input_seq`.
+**Done when:** an organiser can review and communicate accommodation, inspect exactly
+what became visible, and leave other arrangements held. No communication-content hash
+or stored snapshot is introduced. Workshop modules add their scopes in M6 using the
+same kernel mechanism. Release-control acceptance scenarios govern the full integration.
 
 ---
 
@@ -171,7 +171,9 @@ the same deterministic result from the plan identified by its `input_seq`.
 
 *Two to three days.*
 
-- Slots and workshops in inventory
+- Slots and workshops in inventory, explicit assigned/sign-up/interest modes
+- Programme scope contribution, live admission and per-slot allocation scope
+- Mode/slot transition and concurrency fixtures from the module contracts
 - The workshop solver with the fairness ledger
 - Workshop decision labels through all applicable fixed resolver mechanisms
 
@@ -227,7 +229,7 @@ transport, parking, payments, and mobile-first organisation.
 
 **Why derivation lands with the solver.** Every read already goes through the
 fold, so making `derive` the solver's entry point costs almost nothing now and is an
-awkward retrofit afterwards, and everything from M4 onward — the board's pending list, publication,
+awkward retrofit afterwards, and everything from M4 onward — the board's pending list, communication,
 and change emails — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
@@ -244,8 +246,8 @@ organiser surface, so the magic-link flow and code-level allowlist belong with t
 inventory rather than as a stopgap. Family-facing authentication and preference
 collection remain deferred to M3.
 
-**Why publication before workshops.** Room assignment is the thing people are
-anxious about. Getting it published and correct is worth more than having
+**Why communication before workshops.** Room assignment is the thing people are
+anxious about. Getting it communicated and correct is worth more than having
 workshops half-built alongside.
 
 ---
@@ -256,7 +258,7 @@ If time runs short, in the order they should go:
 
 1. **The bed-level view.** Room-level assignment is enough; bed placement within
    a room can be a piece of paper taped to the door.
-2. **The plan diff.** Publish without it and email everyone rather than only the
+2. **The plan diff.** Communicate without it and email everyone rather than only the
    affected families. Worse, not broken.
 3. **Multi-select on the board.** Drag one family at a time. Slower, still better
    than a spreadsheet.

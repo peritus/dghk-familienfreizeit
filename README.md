@@ -9,6 +9,7 @@
 | 03 | [Event model](03-events.md) | Generic event envelope, replay, and lifecycle |
 | 04 | [Labels and constraints](04-labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
 | 05 | [Solver contract](05-solver-contract.md) | Determinism contract, solver input, pipeline, rules, and trace |
+| 06 | [Release control](06-release-control.md) | Held arrangements, communication scopes, review and visibility |
 | 09 | [Organiser view](09-organiser-view.md) | Organisation-team surfaces and module-provided screens |
 | 10 | [Family view](10-family-view.md) | Family-facing controls, privacy, and family workflows |
 | 11 | [Authentication](11-authentication.md) | Magic links, sessions, and threat model |
@@ -29,12 +30,12 @@
 | 20.7 | [Food preferences](20.7-food-preferences.md) | Per-person diet and allergy text |
 | 20.8 | [Materials](20.8-materials.md) | Requests, commitments, and fulfilment |
 | 20.9 | [Family preferences](20.9-family-preferences.md) | The profile-driven preferences page and control union |
-| 20.10 | [Change notifications](20.10-change-notifications.md) | Publication and change emails |
+| 20.10 | [Change notifications](20.10-change-notifications.md) | Communication and change emails |
 
 Ideas that are not part of the specification are kept in
 
 [`deferred-ideas/`](deferred-ideas/), including sleeping parties, child rooms, the
-party-review screen, and a narrower publication scope.
+party-review screen, room adjacency, and caching proposals.
 
 ## What this is
 
@@ -42,9 +43,10 @@ A small web application composed from reusable occasion modules. A deployment
 selects one occasion profile, which may assign people to rooms, workshops, or both.
 The first deployed profile is `familienfreizeit-2027`.
 
-Families state preferences. They never assign anything. A deterministic
+Families state preferences and can join sign-up workshops. Solver allocations
+remain derived rather than directly assigned. A deterministic
 algorithm produces a complete proposal. Organisers review it, add decisions where
-their judgement should guide the result, and publish. Decisions are recorded with
+their judgement should guide the result, and communicate. Decisions are recorded with
 an optional note so other organisers can understand them.
 
 ## The shape of the problem
@@ -98,13 +100,15 @@ assignments, unplaced families, diagnostics, and a full decision trace. Plans ar
 deterministic values derived on demand. A plan's identity is its `input_seq`,
 `config_hash`, and `code_revision`.
 
-**Publication** — the decision that a specific plan is what families should see.
-`PlanPublished` records that decision and the plan's `output_hash`; it does not
-create a second kind of plan.
+**Release control** — the kernel capability governing when selected arrangements
+become visible to families. Its authoritative contract is [06-release-control](06-release-control.md).
 
-**World** — the complete derived state for one list of events: projections, plan,
-diagnostics, and trace. Produced by `derive(events, config)`. Never stored, always
-recomputed; the plan referenced by the latest publication is the one families see.
+**Communication** — an organiser's reviewed release action. `Communicated` records
+the basis sequence and selected scopes; email notification is optional and separate.
+
+**World** — the complete derived state for one event prefix: projections, summaries,
+plan, diagnostics and release references. Produced by `derive(events, config)` and
+never stored. Audience responses select permitted content under release control.
 
 **Pending events** — events an organiser has created in the organiser application and not
 yet applied. Held in their browser, never on the server. Every organiser screen derives
@@ -121,7 +125,7 @@ first-class deliverable that organisers read.
 another entity and optionally carrying a strength. Stored as a generic label.
 
 **Kernel** — the part of the application present in every deployment: event log,
-labels and resolver, derivation, solver pipeline, publication, authentication, and
+labels and resolver, derivation, solver pipeline, communication, authentication, and
 application shells.
 
 **Module** — a selectable unit of domain capability with a stable kebab-case id,

@@ -108,7 +108,7 @@ inputs through the ordinary family controls.
 ### 3.3 Organiser reports
 
 **Master participant overview** lists families, people, roles, contact details,
-published assignments, completion flags, and operational status.
+communicated assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
 capacity, accessibility, and the families sharing each room.
@@ -124,7 +124,7 @@ shared; individual allergy text may not.
 
 **Open issues and readiness** lists unplaced families, unsatisfied hard
 constraints, incomplete registrations, missing workshop choices, unresolved
-materials, and a stale or unpublished plan.
+materials, and outstanding or unavailable release scopes.
 
 **Uncommunicated arrangements** is the report specified in
 [release control](06-release-control.md) §6: outstanding scope differences,
@@ -165,7 +165,7 @@ The print stylesheet must:
   page break can be placed before it;
 - preserve text labels, borders, status glyphs, and warnings without relying on
   colour;
-- include the occasion, report title, data cut, publication identity, and printed
+- include the occasion, report title, data cut, communication identity, and printed
   page number;
 - carry the confidentiality label on every page of a confidential report;
 - remain usable on common A4 paper in portrait or landscape as appropriate.

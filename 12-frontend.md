@@ -182,9 +182,9 @@ The components in use, and that is the complete list:
 | Button, Card, Badge, Alert | everywhere |
 | Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
 | Combobox, Popover, Command | person picker, room picker, family search |
-| Dialog, Alert Dialog | import, organiser decisions, publish confirmation, discard pending |
+| Dialog, Alert Dialog | import, organiser decisions, communicate confirmation, discard pending |
 | Table, ScrollArea | families, CSV preview, plans, constraints, workshop fill |
-| Tabs | building filter on the board, before and after publication in the family view |
+| Tabs | building filter on the board, before and after communication in the family view |
 | Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
 | Sidebar, Sheet, Drawer, Breadcrumb | organiser navigation, mobile pickers |
 | Skeleton, Tooltip | loading states and hints |

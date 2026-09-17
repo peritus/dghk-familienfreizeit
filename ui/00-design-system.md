@@ -57,7 +57,7 @@ board may become a list view and the side rail may move above the rooms.
 - show a visible focus ring and preserve keyboard order;
 - every icon-only action has an accessible name;
 - every destructive or consequential action has text confirmation;
-- loading preserves the page skeleton and announces completion;
+- loading preserves the page skeleton and reads out completion;
 - errors identify the affected field or action and provide recovery;
 - empty states explain what the user can do next;
 - respect reduced-motion preferences;
@@ -69,7 +69,7 @@ The component contract follows the [neobrutalism Alert Dialog
 documentation](https://www.neobrutalism.dev/docs/alert-dialog): strong black
 outlines, offset shadows, direct labels, and deliberate primary actions.
 
-Use this composition for every action that applies, discards, publishes, sends,
+Use this composition for every action that applies, discards, communicates, sends,
 or clears something:
 
 ```text

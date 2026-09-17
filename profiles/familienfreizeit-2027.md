@@ -19,7 +19,7 @@ The profile selects these modules ([modules](../20-modules.md) §5):
 | [`food-preferences`](../20.7-food-preferences.md) | one diet per person and optional allergy text |
 | [`materials`](../20.8-materials.md) | materials contributed by families and linked to workshops |
 | [`family-preferences`](../20.9-family-preferences.md) | the family preferences page |
-| [`change-notifications`](../20.10-change-notifications.md) | publication and change emails |
+| [`change-notifications`](../20.10-change-notifications.md) | communication and change emails |
 
 ## 2. Room inventory
 
@@ -166,7 +166,7 @@ family assignments.
 | | `max_repair_passes` | `5` | module default |
 
 Tag weights and penalties (§3) and these parameters are starting values; changing
-them is a deployment, reviewed through the plan diff before publishing.
+them is a deployment, reviewed through the plan diff before communicating.
 
 ## 6. Workshop policy
 
@@ -176,18 +176,30 @@ them is a deployment, reviewed through the plan diff before publishing.
 | | `leader_tag` | `leads-workshop` (zero or more workshops per person) |
 | | `leaders_consume_capacity` | `false` |
 | | `require_leader` | `false` |
+| | `excluded_roles` | `infant` |
+| | `audience_rules` | `children` → `child`; `adults` → `adult` |
 | `workshop-rankings` | `ranking_tag` | `prefers-workshop` |
 | | `max_rank` | `3` |
 | | `allow_no_preference` | `true` |
 | `workshop-assignment` | `objectives` | fewest people without a top-2 choice, then fewest without any choice, then most rank weight |
 | | `top_n`, `rank_weights` | `2`, `[3, 2, 1]` |
-| | `excluded_roles` | `infant` |
-| | `audience_rules` | `children` → `child`; `adults` → `adult` |
 | | `co_assignment_tag` | `workshop-with` (family-facing person picker, `required` only) |
 | | `cancel_under_subscribed`, `fill_unassigned` | `true`, `true` |
 
 Children may lead workshops. Leadership does not consume participant capacity, and
 not every children's workshop needs a leader.
+
+Workshops explicitly choose `assigned`, `sign-up` or `interest` in their setup
+events. Module-owned `signed-up-for` and `interested-in` labels are placed in the
+workshops section through `module_controls`; the profile does not redefine them
+as tags. Shared age/audience policy applies to all participation modes. The ordinary
+preference deadline applies to these controls; organisers can act after it.
+
+The active kernel [release-control contract](../06-release-control.md) governs
+accommodation, per-workshop details and per-slot solver allocations. Family inputs
+and permitted materials/participation stay live. Draft programme details do not
+change family admission before communication. This profile enables all three scope
+kinds through its selected modules; release policy is not executable runtime config.
 
 ## 7. Materials
 
@@ -202,7 +214,8 @@ not every children's workshop needs a leader.
 Families, persons, and workshops may request materials; families and persons may
 commit to bringing them. Records may be linked to a workshop, and a workshop-linked
 request may identify the child it concerns (`workshop_links` and `person_links`).
-One commitment fulfils at most one request.
+One commitment fulfils at most one request. The current `MaterialsSummary` feeds
+coordination views and never contributes a solver plan section or release backlog.
 
 Quantities stay free text, preserving entries such as `2-3 Packs`, `5 Liter`, and
 `4x`. The profile can represent snacks, apple juice, napkins, reusable or disposable
@@ -226,8 +239,10 @@ preferences page has four sections: who is coming, room wishes, workshops, and
 food. Cross-family sharing wishes arrive with the deferred sleeping-parties
 module.
 
-Change emails are sent for room, place, and workshop assignment changes and for
-workshop cancellations ([change notifications](../20.10-change-notifications.md)).
+Optional communication emails use the release-control recipient preview, including
+programme-only changes. The notification profile configures subjects and includes
+arrangements in the body; it does not supply a list that can omit relevant scope
+changes ([change notifications](../20.10-change-notifications.md)).
 
 ## 9. First-deployment boundary
 

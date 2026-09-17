@@ -19,7 +19,7 @@ it produces byte-identical output, on any machine, at any time, forever (D3).
 
 This is not a coding-style preference. It is the property that makes re-runs
 safe, counterfactual diffs cheap, regression testing a hash comparison, and
-publishing twice a no-op for the forty families who did not move.
+communicating twice a no-op for the forty families who did not move.
 
 Seven rules. Each has a way it actually gets broken.
 
@@ -136,6 +136,12 @@ type SolverInput = Readonly<{
 
 `capabilities` and active constraints are materialised once by the resolver, from
 labels and profile derivations ([labels and constraints](04-labels-and-constraints.md) §3).
+Only labels/constraints consumed by selected solver stages and their applicable
+preflight checks enter solver input. Food, material and interest labels stay in the
+world; sign-up participation contributes only resolved person-slot availability.
+World-only reference/validity findings remain world diagnostics. The generic label
+array must not become a back door for material or programme-only data into Plan.
+
 Each selected module adds its own arrays with a declared sort key; for example
 [room inventory](20.1-room-inventory.md) §7 adds `buildings`, `rooms`, and `places`.
 
@@ -187,8 +193,9 @@ Preflight runs before any stage, over the solver input alone. Its value is timin
 says "19 beds required, 14 available" in week two, before a single placement runs.
 Finding severities behave as follows:
 
-- **error** — the plan still computes, but publishing requires the organiser to
-  name the check in `PlanPublished.acknowledged_findings` ([events](03-events.md)).
+- **error** — the plan still computes. When communicating an affected scope, the organiser
+  names the relevant check in `Communicated.acknowledged_findings`, under
+  [release control](06-release-control.md) §3.
   Never block computing: an organiser needs to see the plan to understand the
   error.
 - **warning** — shown on the dashboard, no gate.
