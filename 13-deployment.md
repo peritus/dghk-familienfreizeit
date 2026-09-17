@@ -368,7 +368,7 @@ never as a separate step someone might skip.
 
 ## Release impact of deployment
 
-Changing code/config identities affects reproducibility of communicated scopes.
+Changing `build_revision` or `compatibility_revision` affects reproducibility of communicated scopes.
 Before deploying, review that impact under [release control](06-release-control.md)
 §4 and arrange organiser review of affected scopes. Do not present a replay under
 new code as a verified historical result. Restore the matching deployment or review
@@ -395,7 +395,7 @@ The week before, in order:
 6. **Verify one magic link end to end** against a real address on the actual
    production domain.
 7. **Review release status** — every required scope is communicated at the intended
-   basis, and code/config identities match the deployment. Use the report and detailed
+   basis, `build_revision`, and `compatibility_revision` match the deployment. Use the report and detailed
    preview defined in [release control](06-release-control.md); communication events
    do not carry a solver or content hash.
 8. **Nominate a laptop.** One machine, known to be logged in as an organiser, known

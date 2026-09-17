@@ -273,8 +273,9 @@ POST /api/organiser/apply
   200 → applied; response carries the resulting derived world
 ```
 
-The server's plan is authoritative. The server checks the event head and code/config
-identities supplied with the request, then derives from trusted events. The
+The server's plan is authoritative. The server checks the event head,
+`build_revision`, and `compatibility_revision` supplied with the request, then derives
+from trusted events. The
 determinism contract ([solver contract](05-solver-contract.md) §1) makes the client
 prediction reproducible; any disagreement is reported as a defect rather than
 smoothed over.

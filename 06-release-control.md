@@ -86,7 +86,7 @@ places; other-family identities remain subject to current privacy rules.
 ## 3. Communication event and append
 
 `Communicated` is organiser-only. Its normal event envelope supplies `seq`, actor
-and time. It stores references and code/config identities, never arrangement payloads.
+and time. It stores references and `build_revision`/`compatibility_revision`, never arrangement payloads.
 
 ```ts
 type CommunicatedPayload = {
@@ -108,7 +108,7 @@ requires `change-notifications` to be selected.
 
 Organisers apply pending events before confirming communication. Preview requests
 are read-only. The confirmation submits the reviewed basis, scopes,
-code/config identities, findings and notification choice. The server:
+`build_revision`, `compatibility_revision`, findings and notification choice. The server:
 
 1. authenticates and authorises the organiser;
 2. verifies the current head and deployed identities equal those reviewed;
@@ -127,7 +127,7 @@ cross-scope consistency are hard gates and cannot be acknowledged away.
 
 ### Review identity and semantic comparison
 
-The reviewed prefix, scope selection, code/config identities, acknowledgements and
+The reviewed prefix, scope selection, `build_revision`, `compatibility_revision`, acknowledgements and
 notification choice identify the action. The preview response returns those fields;
 the client invalidates confirmation whenever any selection/option changes and asks
 for a new preview. Confirmation repeats exactly that reviewed tuple. The server
@@ -165,7 +165,7 @@ views explicitly distinguish content communicated by that event from current liv
 facts. They must not claim that today's live participation was part of an old release.
 
 A historical scope is reproducible by the current deployment only when its recorded
-code/config identities match. A different identity flags it for organiser review;
+`build_revision` and `compatibility_revision` match. A different identity flags it for organiser review;
 without the matching implementation/configuration there is no trustworthy historical
 before-image. Do not run current code and silently present its result as the old
 communicated truth. Affected family scopes show a temporary unavailable/contact
@@ -322,7 +322,7 @@ recipients and bodies from the prefix ending at that communication. Claim delive
 atomically and use a stable provider idempotency key where supported; without provider
 idempotency, an ambiguous send is marked unknown for explicit review rather than
 blindly retried. Failed/unknown delivery is distinct from successful communication.
-If code/config identities no longer match, pause reconstruction/retry until the
+If `build_revision` or `compatibility_revision` no longer matches, pause reconstruction/retry until the
 matching deployment is restored or the organiser starts a new reviewed communication.
 Current authorisation still applies at send time: suppress recipients no longer
 entitled to the content and record the suppression; never redirect an old message
@@ -354,5 +354,5 @@ to a newly associated address without review.
     Failure does not undo communication; retries do not duplicate known deliveries.
 14. Missing notification/assignment modules remove their contributions without
     disabling independent programme communication or live coordination.
-15. Code/config drift is attributed; mismatched scopes are unavailable rather than
+15. Build or compatibility drift is attributed; mismatched scopes are unavailable rather than
     silently recomputed as if communicated. Matching independent scopes remain usable.
