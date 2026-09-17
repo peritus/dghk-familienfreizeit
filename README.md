@@ -1,10 +1,28 @@
 # DGHK Familienfreizeit — modular event planning
 
-German attendee-facing terminology and translation rules live in the
-[German translation guidelines](18-german-translation-guidelines.md).
+## Reading order
 
-The report catalogue, audience scopes, responsive behavior, and browser print
-contract live in [reports](19-reports.md).
+| # | Document | What it settles |
+|---|---|---|
+| 01 | [Architecture](01-architecture.md) | Module composition, request lifecycle, and boundaries |
+| 02 | [Data model](02-data-model.md) | Generic identity, labels, relationships, and projections |
+| 03 | [Event model](03-events.md) | Generic event envelope, replay, and lifecycle |
+| 04 | [Labels and constraints](04-labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
+| 05 | [Room assignment](05-room-assignment.md) | Generic room modules and deterministic placement |
+| 06 | [Workshop assignment](06-workshop-assignment.md) | Generic ranking and workshop modules |
+| 07 | [Materials coordination](07-materials.md) | Generic requests, commitments, and fulfillment |
+| 08 | [Constraint health](08-constraint-health.md) | Preflight, diagnostics, and regression corpus |
+| 09 | [Admin interface](09-admin-interface.md) | Generic admin surfaces and module-provided screens |
+| 10 | [Attendee view](10-family-portal.md) | Family-facing controls, privacy, and attendee workflows |
+| 11 | [Authentication](11-authentication.md) | Magic links, sessions, and threat model |
+| 12 | [Frontend](12-frontend.md) | Rendering, enhancement, styling, and board island |
+| 13 | [Deployment](13-deployment.md) | One profile per deployment, migrations, secrets, and email |
+| 14 | [Testing](14-testing.md) | Generic module contracts and event fixtures |
+| 15 | [Roadmap](15-roadmap.md) | Delivery milestones and cut lines |
+| 16 | [Event profiles](16-event-profiles.md) | Profile contract and configuration rules |
+| 17 | [Decisions](17-decisions.md) | Architectural decisions and their accepted alternatives |
+| 18 | [German translation guidelines](18-german-translation-guidelines.md) | Attendee-facing terminology and translation rules |
+| 19 | [Reports](19-reports.md) | Report catalogue, audience scopes, responsive behavior, and browser printing |
 
 ## What this is
 
@@ -39,10 +57,6 @@ re-run shuffles forty families who had no reason to move, the plan is useless an
 the admins will go back to a spreadsheet. Stability across runs is a feature, and
 it is the reason the solver is a pure deterministic function and admin decisions
 are stored as constraints rather than as edits.
-
-See [15-roadmap.md](15-roadmap.md) for the release scope, implementation order,
-cut lines, and deferred work, and [17-decisions.md](17-decisions.md) for the
-architectural decisions and the alternatives they rejected.
 
 ## Glossary
 
