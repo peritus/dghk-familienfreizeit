@@ -33,8 +33,8 @@
 
 Ideas that are not part of the specification are kept in
 
-[`deferred-ideas/`](deferred-ideas/), including sleeping parties, child rooms, and
-the party-review screen.
+[`deferred-ideas/`](deferred-ideas/), including sleeping parties, child rooms, the
+party-review screen, and a narrower publication scope.
 
 ## What this is
 

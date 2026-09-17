@@ -6,9 +6,10 @@
 - The event log is the only persisted domain state. Every read model is derived
   in memory by `derive(events, config)`. Do not add tables that store folded
   domain state, and do not reconstruct domain state by querying event payloads.
-- Keep typed identity for durable entity boundaries: family, person, building,
-  room, bed, place, slot, and workshop are valid entity kinds. Identity is
-  carried by event payloads and exposed as typed entities in the derived world.
+- Keep typed identity for durable entity boundaries. The kernel owns family and
+  person; a selected module contributes its own kinds, currently building, room,
+  bed, place, slot, workshop, material-request, and material-commitment. Identity
+  is carried by event payloads and exposed as typed entities in the derived world.
 - Keep domain properties as generic labels. This includes names, dates,
   booleans, enums, quantities, capabilities, preferences, and references to
   other entities.
