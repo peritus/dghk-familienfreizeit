@@ -120,10 +120,10 @@ are read-only. The confirmation submits the reviewed `input_seq`, scopes,
    `input_seq` even when the live head has advanced;
 5. returns the resulting authoritative views, then attempts optional notifications.
 
-A concurrent append, changed deployment or dependency conflict changes
-nothing. Return a refreshed preview and require explicit confirmation again, even
-when the concurrent event was live-only. Blocking solver findings relevant to a
-selected scope, including unscoped kernel errors on which it depends, prevent
+A changed deployment or dependency conflict prevents confirmation because the
+reviewed content cannot be reproduced or validated. A concurrent append does not
+invalidate confirmation: publish the reviewed `input_seq` content. Blocking solver
+findings relevant to a selected scope, including unscoped kernel errors on which it depends, prevent
 communication until resolved. Unrelated scope findings do not block a programme
 release. Privacy, reference validity, admission invariants and cross-scope
 consistency are hard gates. No release action can bypass a blocking finding.
@@ -339,13 +339,15 @@ to a newly associated address without review.
 2. Communicating one workshop's details reveals neither another workshop nor any
    solver allocation. Rankings can then be collected before allocation communication.
 3. A combined release is atomic; accommodation and each slot retain uniqueness.
-4. Different scopes retain their own bases. A shared slot/room edit cannot leak
+4. Different scopes retain their own reviewed input sequences. A shared slot/room edit cannot leak
    through a join to current descriptors.
 5. A reverted edit has no outstanding change. Live materials do not create backlog.
 6. First communication shows full content; repeated identical content sends no email.
 7. Preview and resulting family-visible held content agree byte-for-byte after the
    same canonicalisation/privacy projection. Viewing previews writes no event.
-8. A concurrent append or deployment invalidates confirmation without partial release.
+8. A concurrent append does not invalidate confirmation: the reviewed `input_seq`
+   is communicated. An unreproducible sequence or deployment mismatch prevents
+   partial release.
 9. Missing programme dependencies require explicit selection; invalid mode, slot,
    capacity or cancellation combinations block communication until resolved.
 10. Sign-up admission, last-place races, capacity reductions and fairness follow the

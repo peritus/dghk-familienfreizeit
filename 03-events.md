@@ -253,7 +253,7 @@ remain local to the organiser's browser until applied.
 ## Communication
 
 `Communicated` is the kernel event for an organiser's release decision. Its payload,
-head guard, review identity, scope dependencies and authorisation are defined in
+review identity, scope dependencies and authorisation are defined in
 [release control](06-release-control.md) §3. Its envelope supplies actor, time and
 sequence; it stores no plan or arrangement snapshot. Previewing creates no event.
 

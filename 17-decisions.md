@@ -275,9 +275,10 @@ allocations, so accommodation and slot allocations are coherent release units.
 
 *Rejected alternative:* persist communicated snapshots or a second plan type.
 They create competing domain state and bypass ordinary deterministic derivation.
-The reviewed sequence, selected scopes, `build_revision`, and `compatibility_revision` identify the
-action. Release control needs no additional content hash; the head guard and
-deterministic derivation protect confirmation.
+The reviewed `input_seq`, selected scopes, `build_revision`, and
+`compatibility_revision` identify the action. Release control needs no additional
+content hash; the reviewed prefix and deterministic derivation protect exact
+confirmation content even when the live head advances.
 
 *Consequence:* family reads combine live information with scope-specific historical
 content and apply current authorisation/privacy. Organisers need an outstanding-change
