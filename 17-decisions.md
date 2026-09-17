@@ -73,16 +73,16 @@ a few percent and would be completely unreviewable. An organiser cannot look at 
 simplex result and say "yes, that is fair". The explicit requirement here is
 human reviewability, and that requirement beats optimality at this scale.
 
-## D5 — Sleeping parties and child rooms are deferred
+## D5 — Sleeping parties and child rooms are outside the active placement model
 
-*Chosen.* The initial room-assignment scope places each family as one indivisible
+*Chosen.* The active room-assignment scope places each family as one indivisible
 unit. Sleeping-party formation, cross-family co-rooming, and child-room placement
-are deferred together as a future module boundary.
+belong together behind a separate module boundary.
 
 *Why:* implementing only one of these mechanisms would make the placement unit
 ambiguous. A child-room placement can split a family, while a required co-room
 relation can merge families; both require the derived sleeping-party model. The
-initial release stays reviewable by keeping one family as one placement unit and
+the active scope stays reviewable by keeping one family as one placement unit and
 retains only constraints that do not change that unit, such as keep-apart.
 
 ## D6 — Organiser decisions guide the derived assignment
@@ -97,7 +97,7 @@ The solver remains the only producer of assignments. Organisers do not write an
 assignment directly; they add facts that guide the next derivation. The supported
 resolver mechanisms include `needs`, `provides`, `excludes`, separation, workshop
 eligibility, and workshop co-assignment. Grouping for sleeping placement belongs to
-the deferred sleeping-parties module.
+the separate sleeping-parties module.
 
 *Rejected alternative:* the board writes assignments directly. Then every re-run
 either destroys organiser work or requires merge logic, and the solver stops being
@@ -165,8 +165,8 @@ rendering and routing conventions this application does not use.
 
 *Cost:* the plugin writes the deployable Worker configuration into the build output,
 which is one more place to look when deployment misbehaves, and the plugin and
-`@cloudflare/vitest-pool-workers` must be on compatible versions. M0 proves that
-pairing before anything else is built on it ([roadmap](15-roadmap.md)).
+`@cloudflare/vitest-pool-workers` must be on compatible versions; the repository
+must verify that pairing.
 
 ## D10 — Hand-rolled magic link, no auth library
 

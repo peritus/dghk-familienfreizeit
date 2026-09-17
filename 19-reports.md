@@ -69,9 +69,7 @@ occasion profile has declared safe for that audience.
 
 These are the reports the selected modules provide. Each report, or report part, is
 contributed by a module and named in that module's specification §11
-([modules](20-modules.md)); a report whose modules are not selected does not exist,
-and a report arrives with the milestone that delivers its module
-([roadmap](15-roadmap.md)).
+([modules](20-modules.md)); a report whose modules are not selected does not exist.
 
 ### 3.1 Shared family reports
 

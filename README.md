@@ -16,7 +16,7 @@
 | 12 | [Frontend](12-frontend.md) | Rendering, enhancement, styling, and board island |
 | 13 | [Deployment](13-deployment.md) | One profile per deployment, migrations, secrets, and email |
 | 14 | [Testing](14-testing.md) | Determinism tests, module contracts, and event fixtures |
-| 15 | [Roadmap](15-roadmap.md) | Delivery milestones and cut lines |
+| 15 | [Roadmap](15-roadmap.md) | Specification coverage, dependencies, and scope boundaries |
 | 16 | [Occasion profiles](16-occasion-profiles.md) | Profile contract and configuration rules |
 | 17 | [Decisions](17-decisions.md) | Architectural decisions and their accepted alternatives |
 | 18 | [German translation guidelines](18-german-translation-guidelines.md) | Family-facing terminology and translation rules |
@@ -41,7 +41,7 @@ party-review screen, room adjacency, and caching proposals.
 
 A small web application composed from reusable occasion modules. A deployment
 selects one occasion profile, which may assign people to rooms, workshops, or both.
-The first deployed profile is `familienfreizeit-2027`.
+The active profile is `familienfreizeit-2027`.
 
 Families state preferences and can join sign-up workshops. Solver allocations
 remain derived rather than directly assigned. A deterministic
@@ -57,7 +57,7 @@ Three things make this harder than a seating chart:
 apartment, while grandparents travelling with a family may want a room of their
 own. The initial scope keeps one family as one indivisible placement unit, which
 keeps the result reviewable. Splitting and merging families is a separate problem
-and is deferred to the sleeping-parties and child-rooms ideas (D5).
+and belongs to the separate sleeping-parties and child-rooms module boundary (D5).
 
 **Preferences conflict and the conflicts are not symmetrical.** Two families both
 asking to room together is a merge. One family asking to room with another is a

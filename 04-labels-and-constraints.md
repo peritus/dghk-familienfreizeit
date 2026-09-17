@@ -103,7 +103,8 @@ const matches = world.labels
 ```
 
 The code illustrates the shape only; the constraint resolver owns scope checks,
-relation symmetry and diagnostics. Sleeping-party formation is deferred.
+relation symmetry and diagnostics. Sleeping-party formation is outside the active
+placement model.
 
 ### What stays typed
 
@@ -243,7 +244,7 @@ applying a decision through an existing resolver:
 |---|---|---|
 | `needs-provides` | person needs / room provides | matching capability |
 | `excludes` | family excludes family | forbidden match |
-| `groups-with` | person groups-with person | same workshop group; sleeping co-rooming is deferred |
+| `groups-with` | person groups-with person | same workshop group; sleeping co-rooming is outside the active placement model |
 | `separates-from` | family separates-from family | keep apart |
 
 Organisers cannot upload executable rules. New mechanisms belong in module code and
@@ -257,7 +258,7 @@ not a command to choose an arbitrary provider.
 
 Constraints reference stable people, families, workshops, rooms, beds, and places.
 They never reference a derived placement unit. Sleeping-party constraints are
-rejected or reported as deferred until that module is selected.
+rejected or reported as outside the active placement model.
 
 ### How modules consume constraints
 
@@ -283,8 +284,7 @@ Relation symmetry is declared on the tag and interpreted by the resolver:
 - `one-sided-soft` — never binds; always a preference.
 
 Direct organiser separation uses the fixed mechanism's scope and symmetry. Sleeping
-grouping does not become effective until the deferred sleeping-parties module is
-selected.
+grouping is not effective in the active module set.
 Workshop relations retain their configured slot/target value shape. The resolver
 routes them to the relevant selected module, so a workshop decision does not also
 merge sleeping parties. If the consuming module is absent, the decision is rejected
@@ -339,7 +339,7 @@ at append time and tested in [testing](14-testing.md).
 **Requirement inflation through unions.** A placement unit's requirements are the
 strictest-strength union of the family's and its members' tags, which is correct
 and still surprises people. Merging units across families would sharpen this, and
-is deferred with the sleeping-parties idea.
+belongs to the sleeping-parties design.
 
 **Notes are not constraints.** Profile-defined `descriptive` facts and optional
 decision notes are ignored by the solver. An organiser must not need to invent a

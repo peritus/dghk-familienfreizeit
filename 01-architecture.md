@@ -134,8 +134,9 @@ are deterministic evaluators only.
 
 Room and workshop capabilities are independent. A room-only occasion needs no
 workshop entities or views; a workshop-only occasion needs no rooms, beds, places,
-or sleeping parties. The first deployed profile selects both room inventory and
-whole-family room assignment; sleeping parties and child rooms remain deferred.
+or sleeping parties. The active profile selects both room inventory and
+whole-family room assignment; sleeping parties and child rooms are outside the
+active module set.
 
 ## Why CQRS is cheap at this size
 
@@ -315,7 +316,7 @@ src/
   lib/
     dates.ts              ageAt() over ISO strings — pure
 profiles/
-  familienfreizeit-2027.ts  the first deployed occasion profile
+  familienfreizeit-2027.ts  the active occasion profile
 scripts/
   tune.ts                 offline weight sweep, Node not Worker
 ```

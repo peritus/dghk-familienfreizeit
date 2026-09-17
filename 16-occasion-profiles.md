@@ -3,7 +3,7 @@
 An occasion profile composes modules for one deployment. It is the authoritative
 source for that deployment's module selection and parameters, vocabulary, policy,
 copy, and pure evaluators. The module contract is in [modules](20-modules.md); the
-first deployed profile is [familienfreizeit-2027](profiles/familienfreizeit-2027.md),
+active profile is [familienfreizeit-2027](profiles/familienfreizeit-2027.md),
 configured in [`profiles/familienfreizeit-2027.ts`](profiles/familienfreizeit-2027.ts).
 
 ## 1. Profile shape

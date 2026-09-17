@@ -123,7 +123,8 @@ domain rule. Domain rules belong to occasion config and the resolver.
 The kernel defines `family` and `person`. Every other kind is contributed by a
 selected module ([modules](20-modules.md) §3.1) without changing the core model: a
 room-only occasion has buildings, rooms, beds, and places; a workshop-only occasion
-has slots and workshops. A future module might add `venue` or `vendor`.
+has slots and workshops. Additional modules may add kinds such as `venue` or
+`vendor` without changing the core model.
 
 ## 4. Labels
 
