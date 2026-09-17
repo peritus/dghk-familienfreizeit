@@ -73,7 +73,7 @@ surprises in it, and they should surface now rather than in M2.
 
 ### Development event-log sandbox
 
-Throughout M1–M8, development may select `TextFileEventSource` instead of
+Throughout M1–M7, development may select `TextFileEventSource` instead of
 `D1EventSource` with an explicit development-only configuration. The source reads
 the KDL event-log fixtures and the organiser application can inspect the resulting
 derived world without requiring a populated D1 database. The same KDL loader is
@@ -91,7 +91,7 @@ translated into another data format.
 - The module contract, `defineOccasionProfile`, and the room modules
   ([modules](20-modules.md)); the two generic tag rules, `hard.tag-requirements` and
   `soft.tag-preferences`, keep the implementation small
-- Party formation: children's rooms first, residue, merges, the unplaceable-merge
+- Party formation: families, merges, the unplaceable-merge
   guard
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
@@ -106,7 +106,7 @@ translated into another data format.
 (with preferences entered by hand as events) and read the trace top to
 bottom without confusion, and you can say whether the ensuite requests are
 satisfiable — requirement arithmetic
-([room assignment](20.5-room-assignment.md) §9).
+([room assignment](20.3-room-assignment.md) §9).
 
 **This is the checkpoint.** If party formation does not express the real
 situation — if the families' actual arrangements do not fit the party model —
@@ -179,25 +179,7 @@ post-initial enhancements.
 
 ---
 
-## M7 — Deferred constraint health
-
-*Post-initial-release work. One to two days.*
-
-- Retirement loop with the redundant / near / load-bearing buckets
-- The dashboard panel, batch retirement
-- Constraint health screen with missing-provider and contradiction findings
-- Constraint fixture export and the CI corpus
-- Constraint usage and redundancy metrics
-
-**Done when:** an organiser can inspect constraint health and regression-test the
-custom constraint corpus without a second override model.
-
-This is the milestone that pays off over the following weeks rather than
-immediately, which is exactly why it gets cut under pressure. Do it before M8.
-
----
-
-## M8 — Hardening
+## M7 — Hardening
 
 *Continuous, through the run-up.*
 
@@ -213,7 +195,7 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 The following work remains in the detailed milestones as planning context, but
 is not part of the initial release: family import and self-service preference
 collection, food preferences and allergy notes, family-contributed materials,
-workshop-linked supplies, change emails, the constraint-health dashboard,
+workshop-linked supplies, change emails,
 multi-occasion tenancy, collaborative editing, arrival and departure logistics,
 transport, parking, payments, and mobile-first organisation.
 
@@ -224,7 +206,7 @@ transport, parking, payments, and mobile-first organisation.
 **Why derivation lands with the solver.** Every read already goes through the
 fold, so making `derive` the solver's entry point costs almost nothing now and is an
 awkward retrofit afterwards, and everything from M4 onward — the board's pending list, publication,
-and constraint health — is a call on it.
+and change emails — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
 wrong in a way that invalidates other work. A board built on a party model that
@@ -257,8 +239,6 @@ If time runs short, in the order they should go:
    affected families. Worse, not broken.
 3. **Multi-select on the board.** Drag one party at a time. Slower, still better
    than a spreadsheet.
-4. **Constraint-health dashboard.** Keep the underlying custom constraint
-   lifecycle and explanations; defer the reporting surface.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint
 definitions, the workshop solver and fairness objective, or the profile. Each

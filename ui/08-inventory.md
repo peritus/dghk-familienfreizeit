@@ -8,11 +8,11 @@ capabilities. Route: `/organiser/inventory`. Governing spec: [organiser view](..
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Inventory                                      [Add building] [Add room]   │
-│ [All buildings] [General] [Child] [Staff] [Blocked]                     │
+│ [All buildings] [General] [Staff] [Blocked]                             │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ MAIN HOUSE                                                               │
 │ Room 12 · first floor · 4 places · 2 beds free · private bathroom [Edit] │
-│ Room 14 · first floor · 6 places · 6 beds free · child room       [Edit] │
+│ Room 14 · first floor · 6 places · 6 beds free · staff            [Edit] │
 │                                                                          │
 │ GARDEN HOUSE                                                             │
 │ Room 35 · ground floor · 8 places · 8 beds free · two-family       [Edit]│

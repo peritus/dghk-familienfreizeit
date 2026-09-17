@@ -112,7 +112,7 @@ inputs through the ordinary family controls.
 published assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
-capacity, child-group capability, accessibility, and parties spanning families.
+capacity, accessibility, and parties spanning families.
 It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
@@ -139,7 +139,7 @@ planning calculation, not an invoice or billing record.
 
 The occasion provides no childcare service. Parents and guardians remain responsible
 for supervising their children at all times. Reports must not suggest that a
-children's room, workshop, leader, or age grouping transfers that responsibility
+workshop, leader, room, or age grouping transfers that responsibility
 to the organisers or to another family.
 
 Detailed allergy, accessibility, contact, and child-related operational data is

@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers inspect slot capacity, rankings, assignments, and fairness signals.
-Route: `/organiser/workshops`. Governing specs: [workshops](../20.6-workshops.md), [workshop rankings](../20.7-workshop-rankings.md), and [workshop assignment](../20.8-workshop-assignment.md).
+Route: `/organiser/workshops`. Governing specs: [workshops](../20.4-workshops.md), [workshop rankings](../20.5-workshop-rankings.md), and [workshop assignment](../20.6-workshop-assignment.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

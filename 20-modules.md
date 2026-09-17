@@ -95,7 +95,7 @@ is evaluated once, at profile build.
 | `preflight_checks` | Checks run before any stage, with an id, severity, and message template. |
 | `change_kinds` | What `diff` reports for this module's plan section, and how a change is attributed to a family. |
 | `routes`, `screens` | Worker handlers and organiser or family screens. A route or screen of an unselected module does not exist in the build. |
-| `family_controls` | Additional `control` kinds for the preferences renderer ([family preferences](20.12-family-preferences.md)). |
+| `family_controls` | Additional `control` kinds for the preferences renderer ([family preferences](20.9-family-preferences.md)). |
 | `reports` | Report definitions with audience and sensitivity ([reports](19-reports.md)). |
 | `emails` | Email kinds with their trigger and the plan data they may include. |
 | `fixtures` | The KDL fixture and golden-plan contracts a profile that selects the module must supply ([testing](14-testing.md)). |
@@ -142,7 +142,7 @@ Solver stages declare their order explicitly:
 
 ```ts
 export interface SolverStage<Output = unknown> {
-  id: string                               // '<module-id>.<stage>', e.g. 'child-rooms.place'
+  id: string                               // '<module-id>.<stage>', e.g. 'room-assignment.place'
   after: readonly string[]                 // stage ids that must run first, when selected
   before: readonly string[]                // stage ids that must run later, when selected
   reads: readonly string[]                 // stage ids whose output this stage consumes
@@ -177,21 +177,18 @@ migration ([deployment](13-deployment.md) §2).
 | Module | Owns | Requires | Enhances |
 |---|---|---|---|
 | [`room-inventory`](20.1-room-inventory.md) | Buildings, rooms, beds, places; designations; capacity | — | — |
-| [`room-adjacency`](20.2-room-adjacency.md) | Distance between rooms; adjacency preferences | `room-inventory` | — |
-| [`sleeping-parties`](20.3-sleeping-parties.md) | Party formation from families and co-room relations | `room-inventory` | `child-rooms` |
-| [`child-rooms`](20.4-child-rooms.md) | Child groups and children's rooms placed before parties form | `sleeping-parties` | — |
-| [`room-assignment`](20.5-room-assignment.md) | Placing parties into rooms and places; the board | `sleeping-parties` | `child-rooms`, `room-adjacency` |
-| [`workshops`](20.6-workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
-| [`workshop-rankings`](20.7-workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
-| [`workshop-assignment`](20.8-workshop-assignment.md) | Fair workshop assignment and co-assignment groups | `workshop-rankings` | — |
-| [`food-preferences`](20.9-food-preferences.md) | Per-person diet and allergy text | — | — |
-| [`materials`](20.10-materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
-| [`constraint-health`](20.11-constraint-health.md) | Counterfactual constraint buckets and the regression corpus | — | — |
-| [`family-preferences`](20.12-family-preferences.md) | The profile-driven preferences page | — | — |
-| [`change-notifications`](20.13-change-notifications.md) | Publication and change emails | — | — |
+| [`sleeping-parties`](20.2-sleeping-parties.md) | Party formation from families and co-room relations | `room-inventory` | — |
+| [`room-assignment`](20.3-room-assignment.md) | Placing parties into rooms and places; the board | `sleeping-parties` | — |
+| [`workshops`](20.4-workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
+| [`workshop-rankings`](20.5-workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
+| [`workshop-assignment`](20.6-workshop-assignment.md) | Fair workshop assignment and co-assignment groups | `workshop-rankings` | — |
+| [`food-preferences`](20.7-food-preferences.md) | Per-person diet and allergy text | — | — |
+| [`materials`](20.8-materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
+| [`family-preferences`](20.9-family-preferences.md) | The profile-driven preferences page | — | — |
+| [`change-notifications`](20.10-change-notifications.md) | Publication and change emails | — | — |
 
-`requires` is transitive: `child-rooms` requires `sleeping-parties`, which requires
-`room-inventory`. A room-only occasion selects the first five rows it needs; a
+`requires` is transitive: `room-assignment` requires `sleeping-parties`, which
+requires `room-inventory`. A room-only occasion selects the first three rows; a
 workshop-only occasion selects `workshops`, `workshop-rankings`, and
 `workshop-assignment` and has no room entities, parties, or board.
 
@@ -211,7 +208,7 @@ src/modules/<module-id>/
 ```
 
 Everything outside `app/` and `worker/` is bound by the determinism lint rules
-([testing](14-testing.md) §6). A module imports the kernel and the modules it
+([testing](14-testing.md) §5). A module imports the kernel and the modules it
 `requires` or `enhances`; it never imports an unrelated module.
 
 ## 7. Module specification format

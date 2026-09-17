@@ -161,10 +161,8 @@ authorisation are specified in the module documents.
 | Module | Event types |
 |---|---|
 | [room inventory](20.1-room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `RoomAdded`, `RoomUpdated`, `RoomDesignationChanged`, `BedAdded`, `BedUpdated`, `BedRemoved` |
-| [room adjacency](20.2-room-adjacency.md) §5 | `RoomAdjacencySet`, `RoomAdjacencyCleared` |
-| [child rooms](20.4-child-rooms.md) §5 | `ChildGroupAdded`, `ChildGroupUpdated`, `ChildGroupRetired` |
-| [workshops](20.6-workshops.md) §5 | `SlotAdded`, `SlotUpdated`, `WorkshopAdded`, `WorkshopUpdated`, `WorkshopCancelled`, `WorkshopReinstated` |
-| [materials](20.10-materials.md) §5 | `MaterialRequested`, `MaterialRequestUpdated`, `MaterialRequestCancelled`, `MaterialCommitted`, `MaterialCommitmentUpdated`, `MaterialCommitmentWithdrawn`, `MaterialFulfilmentAdded`, `MaterialFulfilmentRemoved` |
+| [workshops](20.4-workshops.md) §5 | `SlotAdded`, `SlotUpdated`, `WorkshopAdded`, `WorkshopUpdated`, `WorkshopCancelled`, `WorkshopReinstated` |
+| [materials](20.8-materials.md) §5 | `MaterialRequested`, `MaterialRequestUpdated`, `MaterialRequestCancelled`, `MaterialCommitted`, `MaterialCommitmentUpdated`, `MaterialCommitmentWithdrawn`, `MaterialFulfilmentAdded`, `MaterialFulfilmentRemoved` |
 
 Workshop rankings, food preferences, and organiser decisions add no event types;
 they are `LabelSet` and `LabelCleared` events.
@@ -221,7 +219,7 @@ resolver implements the operators. Definitions and assignments remain ordinary
 event-log data.
 
 Workshop rankings are `LabelSet` and `LabelCleared` events with structured values
-(D13); see [workshop rankings](20.7-workshop-rankings.md).
+(D13); see [workshop rankings](20.5-workshop-rankings.md).
 
 ---
 

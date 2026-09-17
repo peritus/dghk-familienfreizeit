@@ -4,7 +4,7 @@
 
 Organisers review derived sleeping parties before touching the board. Route:
 `/organiser/parties`. Governing specs: [organiser view](../09-organiser-view.md) §4,
-[sleeping parties](../20.3-sleeping-parties.md), [child rooms](../20.4-child-rooms.md), and decision [D5](../17-decisions.md#d5-party-formation-is-a-separate-reviewable-phase).
+[sleeping parties](../20.2-sleeping-parties.md), and decision [D5](../17-decisions.md#d5-party-formation-is-a-separate-reviewable-phase).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -23,7 +23,6 @@ Organisers review derived sleeping parties before touching the board. Route:
 
 Merge and split dialogs explain the resulting constraint and add it to the
 shared pending list. Refused merges name the capacity or constraint reason.
-Children's room assignment appears as a separate section before parties.
 
 The cards preserve provenance in reading order. Buttons have descriptive names;
 warnings are text plus glyph/border, and the pending count is announced after a

@@ -21,8 +21,6 @@ import {
   text,
 } from '../src/config/define'
 import { changeNotifications } from '../src/modules/change-notifications'
-import { childRooms } from '../src/modules/child-rooms'
-import { constraintHealth } from '../src/modules/constraint-health'
 import { familyPreferences } from '../src/modules/family-preferences'
 import { foodPreferences } from '../src/modules/food-preferences'
 import { materials } from '../src/modules/materials'
@@ -32,8 +30,6 @@ import { sleepingParties } from '../src/modules/sleeping-parties'
 import { workshopAssignment } from '../src/modules/workshop-assignment'
 import { workshopRankings } from '../src/modules/workshop-rankings'
 import { workshops } from '../src/modules/workshops'
-
-const childrenOnly = { de: 'Nur für Kinder', en: 'Children only' }
 
 export default defineOccasionProfile({
   meta: {
@@ -171,15 +167,6 @@ export default defineOccasionProfile({
       derive: (room) => (room.label('sleeping-rooms') ?? 1) > 1,
     }),
 
-    'provides-child-group': capability({
-      label: { de: 'Kinderzimmer für Gruppe', en: 'Children’s room for group' },
-      scopes: ['room'],
-      value: ref('child-group'),
-      cardinality: 'zero-or-one',
-      valid_for: (room) =>
-        room.label('designation') === 'child' || { de: 'Nur für Kinderzimmer', en: 'Children’s rooms only' },
-    }),
-
     // ── Room requirements ─────────────────────────────────────────────────────
 
     'needs-private-sanitary': requirement({
@@ -245,27 +232,6 @@ export default defineOccasionProfile({
         scope: 'family',
         strengths: ['required', 'preferred'],
         invert: true,
-      },
-    }),
-
-    'needs-child-group': requirement({
-      label: { de: 'Kinderzimmer', en: 'Children’s room' },
-      scopes: ['person'],
-      value: ref('child-group'),
-      satisfied_by: 'provides-child-group',
-      strengths: ['required', 'preferred'],
-      cardinality: 'zero-or-one',
-      valid_for: (person) => person.label('role') === 'child' || childrenOnly,
-      family_facing: {
-        control: 'choice',
-        label: { de: 'Möchte ins Kinderzimmer', en: 'Would like a children’s room' },
-        help: {
-          de: 'Kinder können gemeinsam in einem Kinderzimmer schlafen, ohne Erwachsene.',
-          en: 'Children can sleep together in a children’s room, without adults.',
-        },
-        scope: 'person',
-        strengths: ['required'],
-        invert: false,
       },
     }),
 
@@ -437,7 +403,7 @@ export default defineOccasionProfile({
       floors: ['ground', '1', '2'],
       room_types: ['standard', 'apartment', 'bungalow', 'schlaffass'],
       bed_types: ['single', 'double'],
-      designations: ['general', 'child', 'staff', 'blocked'],
+      designations: ['general', 'staff', 'blocked'],
       copy: {
         floors: {
           'ground': { de: 'Erdgeschoss', en: 'Ground floor' },
@@ -456,7 +422,6 @@ export default defineOccasionProfile({
         },
         designations: {
           'general': { de: 'Familienzimmer', en: 'General' },
-          'child': { de: 'Kinderzimmer', en: 'Children’s room' },
           'staff': { de: 'Organisationsteam', en: 'Staff' },
           'blocked': { de: 'Gesperrt', en: 'Blocked' },
         },
@@ -467,14 +432,6 @@ export default defineOccasionProfile({
       co_room_tag: 'room-with',
       no_bed_tag: 'does-not-need-a-bed',
       size_one_warning_threshold: 5,
-    }),
-
-    childRooms({
-      needs_group_tag: 'needs-child-group',
-      provides_group_tag: 'provides-child-group',
-      child_role: 'child',
-      priority_tag: 'needs-accessible',
-      min_occupants: 3,
     }),
 
     roomAssignment({
@@ -534,8 +491,6 @@ export default defineOccasionProfile({
       },
     }),
 
-    constraintHealth({}),
-
     familyPreferences({
       sections: [
         {
@@ -549,12 +504,6 @@ export default defineOccasionProfile({
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
           tags: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
-        },
-        {
-          key: 'child-rooms',
-          title: { de: 'Kinderzimmer', en: 'Children’s rooms' },
-          intro: null,
-          tags: ['needs-child-group'],
         },
         {
           key: 'room-with',

@@ -28,7 +28,7 @@ provides=ensuite                  a room has its own bathroom
 needs=needs-ensuite (required)     a family cannot accept a room without one
 needs=room-with-garden-view        a person needs a matching room capability
 provides=room-with-garden-view     a room offers that capability
-needs=child-group-a                this child needs a room providing child-group-a
+needs=ground-floor                 this person needs a ground-floor room
 separates-from=family_27           this family must not share with family 27
 ```
 
@@ -152,8 +152,7 @@ appended ([03-events](03-events.md)). The checks are:
 3. **Value type matches** the definition and entity references resolve.
 4. **Strength is legal** for the constraint.
 5. **Cardinality and validity pass**, including the tag's `valid_for` evaluator —
-   for example child-group requirements only on children
-   ([child rooms](20.4-child-rooms.md) §6).
+   for example "sleeps with the parents" only on children and infants.
 6. **The key is not module-owned.** Keys a module sets only through its own events,
    such as `located-in`, are rejected ([modules](20-modules.md) §3.1).
 
@@ -221,11 +220,10 @@ constraints once per derivation. Modules consume them; none re-implements matchi
 
 | Module | Consumes |
 |---|---|
-| [sleeping parties](20.3-sleeping-parties.md) | party requirements; `groups-with` and `separates-from` on people and families |
-| [child rooms](20.4-child-rooms.md) | the child-group `needs-provides` pair |
-| [room assignment](20.5-room-assignment.md) | requirements against room capabilities; structural checks; keep-apart relations; `needs-provides` constraints naming rooms and places |
-| [workshop rankings](20.7-workshop-rankings.md) | the `ordered-choice` operator |
-| [workshop assignment](20.8-workshop-assignment.md) | co-assignment `groups-with`; constraints naming workshops |
+| [sleeping parties](20.2-sleeping-parties.md) | party requirements; `groups-with` and `separates-from` on people and families |
+| [room assignment](20.3-room-assignment.md) | requirements against room capabilities; structural checks; keep-apart relations; `needs-provides` constraints naming rooms and places |
+| [workshop rankings](20.5-workshop-rankings.md) | the `ordered-choice` operator |
+| [workshop assignment](20.6-workshop-assignment.md) | co-assignment `groups-with`; constraints naming workshops |
 
 Relation symmetry is declared on the tag and interpreted by the resolver:
 
@@ -258,7 +256,7 @@ mechanism, listed in its specification §9.
 carrying a scope entity, a choice, and a rank. It validates unique, dense ranks per
 holder and scope entity. Rank is not strength: strength is how binding a preference
 is, rank is a position in a list. The workshop ranking that uses it, including the
-"no preference" value, is specified in [workshop rankings](20.7-workshop-rankings.md).
+"no preference" value, is specified in [workshop rankings](20.5-workshop-rankings.md).
 
 ---
 
@@ -278,7 +276,7 @@ assignments, or you get two answers to "does Room 14 have an ensuite". Enforced
 at append time and tested in [testing](14-testing.md).
 
 **Requirement inflation through merges.** See
-[sleeping parties](20.3-sleeping-parties.md) §7. The strictest-strength union is
+[sleeping parties](20.2-sleeping-parties.md) §7. The strictest-strength union is
 correct and surprising.
 
 **Labels as a dumping ground.** `descriptive` is the pressure valve — annotations

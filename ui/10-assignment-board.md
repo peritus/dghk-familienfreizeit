@@ -4,7 +4,7 @@
 
 Organisers experiment with room placement and review consequences. Route:
 `/organiser/board`. Governing specs: [organiser view](../09-organiser-view.md) §5,
-[room assignment](../20.5-room-assignment.md), and decisions [D6/D15](../17-decisions.md).
+[room assignment](../20.3-room-assignment.md), and decisions [D6/D15](../17-decisions.md).
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -13,7 +13,7 @@ Organisers experiment with room placement and review consequences. Route:
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                                │
 │ ┌─────────────┐ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
 │ │ Braun ×5    │ │ │ Room 12  ●●○○│ │ Room 14 ●●●●●○│ │ Room 16  ●●●│          │
-│ │ ensuite     │ │ │ ensuite     │ │ │ child room │ │ │             │          │
+│ │ ensuite     │ │ │ ensuite     │ │ │            │ │ │             │          │
 │ │ ⚠ no fit    │ │ │ Morgan ×2 ✓ │ │ │ open       │ │ │ Rivera ×3 ✓ │          │
 │ └─────────────┘ │ └─────────────┘ └─────────────┘ └─────────────┘          │
 ├─────────────────┴──────────────────────────────────────────────────────────┤

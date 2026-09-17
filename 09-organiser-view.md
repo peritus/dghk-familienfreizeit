@@ -16,7 +16,7 @@ English ASCII wireframes, state behavior, accessibility, and responsive notes.
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/organiser` | Dashboard | Status, staleness, constraint health, what needs attention |
+| `/organiser` | Dashboard | Status, staleness, preflight findings, what needs attention |
 | `/organiser/families` | Families | Table, import, invite, chase list |
 | `/organiser/families/:id` | Family detail | People, preferences, full event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
@@ -66,7 +66,7 @@ unplaceable parties, refused merges, workshops below minimum. Each links
 directly to the thing.
 
 Preflight findings come first. Requirement arithmetic
-([room assignment](20.5-room-assignment.md) §9) in particular is the earliest possible
+([room assignment](20.3-room-assignment.md) §9) in particular is the earliest possible
 warning and should be the most prominent thing on the screen when it fires:
 
 > ⚠ **needs-private-sanitary: 19 beds required, 14 available.** Five people cannot be
@@ -74,9 +74,6 @@ warning and should be the most prominent thing on the screen when it fires:
 
 > ⚠ **2 constraint conflicts** — constrained people are no longer in one party.
 > ⚠ **1 party cannot be placed** — Braun ×5 requires ensuite; none free.
-
-**Constraint health.** Active constraints with no provider, contradictions, and
-constraints currently doing no work.
 
 **Chase list.** Families who have not logged in, or who have logged in but
 submitted nothing. With a "send reminder" action that emails the lot.
@@ -127,7 +124,7 @@ the built-in or custom constraint definition:
 > to preferred, Drinnen schlafen to required.
 > 12 Sep 14:23 · *Organiser Anna* · "Wrote in saying the youngest is scared of
 > the dark, would like a room with a window onto the courtyard."
-> 14 Sep 09:01 · *This family* · set Möchte ins Kinderzimmer for Jonas (9).
+> 14 Sep 09:01 · *This family* · set Ernährung to vegetarisch for Jonas (9).
 
 The event actor identifies the authenticated principal while the subject
 identifies the affected family or person. No separate on-behalf-of role is needed.
@@ -154,14 +151,13 @@ Each party renders as a card:
 │ Requires: ensuite (Schmidt)                                    │
 │                                                                │
 │ Merged from a mutual room-with request (12 Sep, 13 Sep).       │
-│ Müller's two children are in children's room K3.               │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 Provenance is the content. An organiser reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
 Each requirement names which member family contributed it
-([sleeping parties](20.3-sleeping-parties.md) §7) — a merged party's `required` tag binding
+([sleeping parties](20.2-sleeping-parties.md) §7) — a merged party's `required` tag binding
 everyone is correct but surprising, and the card is where that surfaces.
 
 **Warnings inline, at the top:**
@@ -178,16 +174,6 @@ party override event and no reason code: the constraint's own description says w
 and party formation re-derives from it like any other constraint. Since party
 formation is the judgement call and the one most worth trying twice, this screen
 benefits from the pending list as much as the board does.
-
-**Children's room assignment** gets its own section on this page, since it
-happens before party formation and determines everything after:
-
-> **K3** · Haus B, Raum 22 · 6 places · ages 8–14
-> Jonas Müller (9), Lena Schmidt (11), Ada Weber (10), Nils Weber (13), Mia Braun (8)
-> 1 place free.
->
-> **Not placed:** Tim Braun — no matching child-group room was available.
-> Returned to the Braun family party.
 
 ---
 
@@ -227,7 +213,7 @@ drop without opening anything:
 - **Number and place count**, with filled and free places as discrete marks
   (`●●●○○`). Discrete marks rather than a bar, because the question is always
   "how many more fit", and counting five dots is faster than reading "3/5".
-- **Attribute chips**: sanitary arrangement, accessible, and child-group capability.
+- **Attribute chips**: sanitary arrangement and accessible.
 - **Occupants**, one line per party with size.
 - **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
   `⚲` constrained by an organiser rule.
@@ -291,7 +277,7 @@ The two verbs control who can see the same plan:
 | Undo | a new constraint, or a correcting event | publish again |
 
 This is what makes the board safe to think in. An organiser can try an arrangement,
-look at the constraint health and the diff it would produce, and walk away from it
+look at the preflight findings and the diff it would produce, and walk away from it
 without having said anything.
 
 ### Multi-select
@@ -303,8 +289,8 @@ Shift-click or ctrl-click parties in the left rail or on room cards to build a
 selection; drag any member and the whole selection moves. The drag preview shows
 the combined headcount so an organiser can see at a glance whether it will fit.
 
-This is what "five children from five families should share a room" looks like as
-an interaction: select five, drag once.
+This is what "these three small families should share the apartment" looks like
+as an interaction: select three, drag once.
 
 ### Keyboard
 
@@ -426,7 +412,7 @@ preference heatmap — people down one axis, workshops across, cells shaded by
 rank. It makes oversubscription and dead workshops obvious at a glance, which is
 the information needed to adjust capacities before running the solver.
 
-Warnings: below minimum capacity, no eligible participants, child-group mappings that
+Warnings: below minimum capacity, no eligible participants, and age bounds that
 partition the population and strand people.
 
 ---

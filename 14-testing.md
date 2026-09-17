@@ -85,7 +85,7 @@ profile described in [the event model](03-events.md). There is one shared
 replay invariants, and returns the same `Event[]` used by production derivation.
 
 Every event-driven test uses this loader, including fold and solver tests,
-constraint-health fixtures, API tests, D1 integration tests, and the
+API tests, D1 integration tests, and the
 browser/Worker agreement test. D1 tests seed their database from the parsed KDL
 events; they do not maintain a second JSON fixture for the same log.
 
@@ -97,7 +97,7 @@ test/fixtures/event-logs/
   full-event.kdl         55 families, 40 rooms — realistic
   tight.kdl              capacity == demand exactly
   oversubscribed.kdl     demand > capacity; things must be unplaced
-  fragmented.kdl         many children opted in; many size-1 parties
+  fragmented.kdl         many size-1 parties
   conflicted.kdl         constraints that span parties after a change
   constraint-heavy.kdl   many relations, several merge cascades
   infeasible.kdl         trips room-assignment.requirement-arithmetic
@@ -186,9 +186,6 @@ const invariants = [
   ['no workshop exceeds capacity',
     (p, s) => /* … */],
 
-  ['every child-room assignment satisfies the child-group requirement',
-    (p, s) => /* … */],
-
   ['every label names a built-in or custom definition or is reported',
     (p, s) => /* … */],
 
@@ -222,48 +219,8 @@ test('invariants hold on generated solver inputs', () => {
 ```
 
 The generator should produce hostile inputs as readily as reasonable ones: zero
-rooms, one enormous family, everyone requiring an ensuite, every child opted in,
+rooms, one enormous family, everyone requiring an ensuite,
 capacity exactly equal to demand, capacity one short.
-
----
-
-## 5. The constraint regression corpus
-
-From [constraint health](20.11-constraint-health.md) §12. Every active or
-cleared custom constraint can be a test case authored by a domain expert. It is the
-same counterfactual the dashboard computes, pinned to a fixed log position.
-
-```ts
-describe('constraint corpus', () => {
-  const constraints = loadConstraintFixtures()
-
-  describe('cleared constraints must remain represented by resolver rules', () => {
-    test.each(constraints.filter(c => c.cleared_at))('$description', (c) => {
-  const log = loadEventLog(c.seq)
-      const { plan } = derive(without(log, c), defaultConfig)
-      expect(satisfies(plan, c)).toBe(true)
-    })
-  })
-
-  describe('active constraints — informational health checks', () => {
-    test.each(constraints.filter(c => !c.cleared_at))('$description', (c) => {
-  const log = loadEventLog(c.seq)
-      const { plan } = derive(without(log, c), defaultConfig)
-      if (satisfies(plan, c)) {
-        console.log(`✨ now satisfied without custom constraint: ${c.description}`)
-      }
-      // not asserted — this bucket is the backlog, not a gate
-    })
-  })
-})
-```
-
-Cleared constraints represented by built-in rules are a hard gate: absorbing a
-rule and then losing it again is a regression and must break the build.
-
-Active constraints are informational. When one starts passing, CI prints it, and
-the build output can report that three load-bearing constraints are now
-satisfied.
 
 ---
 
@@ -295,7 +252,7 @@ an organiser acts on.
 
 ---
 
-## 6. Lint rules as tests
+## 5. Lint rules as tests
 
 Some parts of the determinism contract are better enforced statically.
 
@@ -346,7 +303,7 @@ the most likely way the contract degrades over six weeks of changes.
 
 ---
 
-## 7. Integration tests
+## 6. Integration tests
 
 Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
@@ -390,7 +347,7 @@ Also covered:
 
 ---
 
-## 8. What is not tested
+## 7. What is not tested
 
 Recorded so the gaps are deliberate.
 
@@ -407,10 +364,10 @@ Recorded so the gaps are deliberate.
 
 ---
 
-## 9. Fixtures as documentation
+## 8. Fixtures as documentation
 
 `test/fixtures/event-logs/minimal.kdl` should be readable and hand-checkable: six
-families, four rooms, one children's room, one mutual co-room request, one
+families, four rooms, one mutual co-room request, one
 preferred `sole-occupancy`. Small enough that a person can work out the right answer with a
 pencil and verify the solver agrees.
 

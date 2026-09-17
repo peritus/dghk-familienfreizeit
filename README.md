@@ -22,18 +22,18 @@
 | 19 | [Reports](19-reports.md) | Report catalogue, audience scopes, responsive behavior, and browser printing |
 | 20 | [Modules](20-modules.md) | Module contract, composition, and catalogue |
 | 20.1 | [Room inventory](20.1-room-inventory.md) | Buildings, rooms, beds, places, designations, and capacity |
-| 20.2 | [Room adjacency](20.2-room-adjacency.md) | Distances between rooms |
-| 20.3 | [Sleeping parties](20.3-sleeping-parties.md) | Party formation, merges, and party requirements |
-| 20.4 | [Child rooms](20.4-child-rooms.md) | Child groups and children's rooms placed before parties |
-| 20.5 | [Room assignment](20.5-room-assignment.md) | Deterministic placement, room scoring, and the board |
-| 20.6 | [Workshops](20.6-workshops.md) | Slots, workshops, audience, leadership, and cancellation |
-| 20.7 | [Workshop rankings](20.7-workshop-rankings.md) | Ordered per-person workshop choices |
-| 20.8 | [Workshop assignment](20.8-workshop-assignment.md) | Fair workshop assignment and co-assignment groups |
-| 20.9 | [Food preferences](20.9-food-preferences.md) | Per-person diet and allergy text |
-| 20.10 | [Materials](20.10-materials.md) | Requests, commitments, and fulfilment |
-| 20.11 | [Constraint health](20.11-constraint-health.md) | Counterfactual constraint buckets and regression corpus |
-| 20.12 | [Family preferences](20.12-family-preferences.md) | The profile-driven preferences page and control union |
-| 20.13 | [Change notifications](20.13-change-notifications.md) | Publication and change emails |
+| 20.2 | [Sleeping parties](20.2-sleeping-parties.md) | Party formation, merges, and party requirements |
+| 20.3 | [Room assignment](20.3-room-assignment.md) | Deterministic placement, room scoring, and the board |
+| 20.4 | [Workshops](20.4-workshops.md) | Slots, workshops, audience, leadership, and cancellation |
+| 20.5 | [Workshop rankings](20.5-workshop-rankings.md) | Ordered per-person workshop choices |
+| 20.6 | [Workshop assignment](20.6-workshop-assignment.md) | Fair workshop assignment and co-assignment groups |
+| 20.7 | [Food preferences](20.7-food-preferences.md) | Per-person diet and allergy text |
+| 20.8 | [Materials](20.8-materials.md) | Requests, commitments, and fulfilment |
+| 20.9 | [Family preferences](20.9-family-preferences.md) | The profile-driven preferences page and control union |
+| 20.10 | [Change notifications](20.10-change-notifications.md) | Publication and change emails |
+
+Ideas that are not part of the specification are kept in
+[deferred ideas](deferred-ideas/).
 
 ## What this is
 
@@ -50,10 +50,10 @@ reason so the algorithm can be taught to stop needing them.
 
 Three things make this harder than a seating chart:
 
-**The assignable unit is not the family.** A family of five might sleep as a
-party of two adults in one room while its three children sleep in a children's
-room with children from four other families. The unit that must stay together is
-derived from stated preferences, not from the family structure. We call it a
+**The assignable unit is not the family.** Two friendly families may share an
+apartment, while grandparents travelling with a family want a room of their own.
+The unit that must stay together is derived from stated preferences and organiser
+decisions, not from the family structure. We call it a
 *party*, and forming parties correctly is a separate problem from placing them.
 
 **Preferences conflict and the conflicts are not symmetrical.** Two families both
@@ -63,7 +63,7 @@ is worth six points. The distinction has to live in the data model, not in
 someone's head.
 
 **The plan changes until the day before.** People register late, drop out, change
-their minds about the children's room. Each change means a re-run. If the
+their minds about who they share with. Each change means a re-run. If the
 re-run shuffles forty families who had no reason to move, the plan is useless and
 the organisers will go back to a spreadsheet. Stability across runs is a feature, and
 it is the reason the solver is a pure deterministic function and organiser decisions

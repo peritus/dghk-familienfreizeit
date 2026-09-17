@@ -60,7 +60,7 @@ Identical inputs produce byte-identical output, forever.
 
 *Why:* it makes every other good property possible. Re-runs are stable, so
 publishing twice does not shuffle people arbitrarily. Counterfactuals are cheap,
-so constraint health can be computed rather than guessed. Regression testing is a
+so a plan diff can attribute every move to its cause. Regression testing is a
 hash comparison. Reproducing a complaint is `solve(solverInputAt(input_seq))`.
 
 ## D4 — Sorted greedy with bounded repair, not integer programming
@@ -101,8 +101,8 @@ being the single writer of assignments.
 supplies author and timing, so no separate taxonomy of organiser pins is needed.
 
 *Why:* the value of recording intent is being able to explain and review the
-constraint. The resolver reports active, missing, contradictory, and redundant
-constraints directly.
+constraint. The resolver reports active, missing, and contradictory constraints
+directly.
 
 Organiser judgement is represented directly by custom matching constraints rather
 than a separate override mechanism.
@@ -194,7 +194,7 @@ weight tuning). `config_hash` makes every change visible in plan metadata
 *Chosen.* A person's ranking for a slot is a set of `prefers-workshop` labels whose
 structured values carry the slot, the workshop, and the rank, validated by the
 `ordered-choice` resolver operator. There is no dedicated ranking event and no
-property table. Rationale in [workshop rankings](20.7-workshop-rankings.md).
+property table. Rationale in [workshop rankings](20.5-workshop-rankings.md).
 
 ## D14 — `family_facing` in the occasion profile drives the family view
 
@@ -217,13 +217,11 @@ allowed to disagree with the real one, and a round trip per experiment.
 
 *Why:* D3 makes the solver pure and dependency-free, and the fold is pure for the
 same reason, so both run in a browser unchanged. Naming the primitive also means
-staleness, plan diffs, change emails, constraint redundancy, and the regression
-corpus need no machinery of their own — they are all the same two calls.
+staleness, plan diffs, and change emails need no machinery of their own — they are all the same two calls.
 
 *Consequence:* experiments stay out of the log. An organiser who tries four
 arrangements appends the events for the one they chose, so constraints in the log
-are decisions rather than sediment, and [constraint health](20.11-constraint-health.md)
-reasons only about constraints someone meant.
+are decisions rather than sediment.
 
 *Cost:* the organiser chunk carries the derivation core, and two runtimes execute one
 algorithm. The first is dependency-free TypeScript and is budgeted in
@@ -285,11 +283,11 @@ TypeScript, KDL, and these documents:
 
 | Kind of name | Case | Examples |
 |---|---|---|
-| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, `Party`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `min_occupants` |
+| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, `Party`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `max_repair_passes` |
 | Code identifiers: variables, parameters, functions, methods, module factories | `camelCase` | `ageAt`, `buildSolverInput`, `roomInventory()` |
 | Types, interfaces, classes, React components | `PascalCase` | `SolverInput`, `RoomInventoryParams`, `FamilyView` |
 | Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
-| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `room-with`, `needs-child-group`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
+| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `room-with`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
 | Entity ids | kind prefix, `_`, then a free suffix | `fam_27`, `per_peter`, `slot_sat-morning` |
 | Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `PUBLIC_URL`, `DB` |
 | Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `tag-requirements.ts` |
@@ -310,7 +308,7 @@ In KDL a kebab-case identifier is a valid bare value, so vocabulary needs no quo
 in event logs:
 
 ```kdl
-LabelSet entity_id=per_jonas key=needs-child-group value=child-group-a strength=#null
+LabelSet entity_id=fam_mueller key=needs-private-sanitary value=private-sanitary strength=preferred
 ```
 
 In TypeScript a kebab-case key is quoted where it is an object key
@@ -330,7 +328,7 @@ and blur the line between a field and the value it holds; kebab-case keeps
 vocabulary visibly distinct.
 
 *Consequence:* `typescript-eslint`'s `naming-convention` rule enforces the code and
-data rules ([testing](14-testing.md) §6); the profile builder rejects vocabulary
+data rules ([testing](14-testing.md) §5); the profile builder rejects vocabulary
 identifiers that are not kebab-case.
 
 ## D19 — One monolith in one repository, deployed as a whole

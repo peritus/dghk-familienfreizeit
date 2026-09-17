@@ -12,20 +12,15 @@ The profile selects these modules ([modules](../20-modules.md) §5):
 | Module | Used for |
 |---|---|
 | [`room-inventory`](../20.1-room-inventory.md) | buildings, rooms, beds, places, and capacity |
-| [`sleeping-parties`](../20.3-sleeping-parties.md) | party formation, co-rooming, and requirement inheritance |
-| [`child-rooms`](../20.4-child-rooms.md) | children's rooms with explicit child groups, minimum occupancy, and family fallback |
-| [`room-assignment`](../20.5-room-assignment.md) | deterministic placement, keep-apart relations, and the board |
-| [`workshops`](../20.6-workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
-| [`workshop-rankings`](../20.7-workshop-rankings.md) | ordered per-person workshop rankings |
-| [`workshop-assignment`](../20.8-workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and co-assignment |
-| [`food-preferences`](../20.9-food-preferences.md) | one diet per person and optional allergy text |
-| [`materials`](../20.10-materials.md) | materials contributed by families and linked to workshops |
-| [`constraint-health`](../20.11-constraint-health.md) | constraint health on the dashboard |
-| [`family-preferences`](../20.12-family-preferences.md) | the family preferences page |
-| [`change-notifications`](../20.13-change-notifications.md) | publication and change emails |
-
-[`room-adjacency`](../20.2-room-adjacency.md) is not selected for the first
-deployment.
+| [`sleeping-parties`](../20.2-sleeping-parties.md) | party formation, co-rooming, and requirement inheritance |
+| [`room-assignment`](../20.3-room-assignment.md) | deterministic placement, keep-apart relations, and the board |
+| [`workshops`](../20.4-workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
+| [`workshop-rankings`](../20.5-workshop-rankings.md) | ordered per-person workshop rankings |
+| [`workshop-assignment`](../20.6-workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and co-assignment |
+| [`food-preferences`](../20.7-food-preferences.md) | one diet per person and optional allergy text |
+| [`materials`](../20.8-materials.md) | materials contributed by families and linked to workshops |
+| [`family-preferences`](../20.9-family-preferences.md) | the family preferences page |
+| [`change-notifications`](../20.10-change-notifications.md) | publication and change emails |
 
 ## 2. Room inventory
 
@@ -96,7 +91,7 @@ Module-owned keys and parameters:
 | `room-type` | `standard`, `apartment`, `bungalow`, `schlaffass` |
 | `floor` | `ground`, `1`, `2`; none for bungalow and Schlaffass rooms |
 | `bed-type` | `single`, `double` |
-| `designation` | `general`, `child`, `staff`, `blocked` |
+| `designation` | `general`, `staff`, `blocked` |
 
 Profile room tags:
 
@@ -121,9 +116,6 @@ Derived capabilities are resolver projections, never assigned:
 | `accessible` | `is-accessible = true` |
 | `multi-room-unit` | `sleeping-rooms > 1` |
 
-`provides-child-group` is the one assigned room capability; it names a child group
-and is valid only on rooms designated `child`.
-
 At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
 103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
 not a booking or billing rule.
@@ -139,7 +131,6 @@ not a booking or billing rule.
 | `needs-ground-floor` | requirement | family, person | satisfied by `ground-floor`; weight 4; organiser-only |
 | `needs-apartment` | requirement | family | satisfied by `multi-room-unit`; preferred only; weight 4; organiser-only |
 | `sole-occupancy` | requirement | family | structural check `no-other-parties`; penalty −12; family-facing, inverted as "Zimmer teilen" |
-| `needs-child-group` | requirement | person | names a child group; children only; family-facing choice |
 | `room-with` | relation | family → family | `groups-with`, mutual-required; one-sided weight 6; family-facing family picker at `required` |
 | `apart-from` | relation | family, person | `separates-from`, implied-mutual; penalty −20; organiser-only and restricted |
 | `family-note` | property | family | free text the family writes and organisers read |
@@ -149,13 +140,9 @@ Mutual `required` `room-with` requests merge families into one party; everything
 about `room-with` is a soft score. Keep-apart relations are never visible to
 families, which is why `apart-from` is both organiser-only and restricted.
 
-Child groups are entities created by `ChildGroupAdded`; a child needs a group, a
-child room provides it. There is no age band or opt-in rule
-([child rooms](../20.4-child-rooms.md)).
-
 ## 4. Food preferences
 
-Food data is per person ([food preferences](../20.9-food-preferences.md)): every
+Food data is per person ([food preferences](../20.7-food-preferences.md)): every
 person has exactly one `diet` and may have one `allergies-text`.
 
 | Tag | Values or format | Cardinality |
@@ -176,11 +163,9 @@ family assignments.
 | `sleeping-parties` | `co_room_tag` | `room-with` | |
 | | `no_bed_tag` | `does-not-need-a-bed` | infants sleep with their parents |
 | | `size_one_warning_threshold` | `5` | module default |
-| `child-rooms` | `min_occupants` | `3` | starting value; a room with two children is rarely worth a bed each |
-| | `priority_tag` | `needs-accessible` | accessible needs claim scarce places first |
 | `room-assignment` | `weights` | exact fit 10, near fit 4, orphan bed −8 | module defaults; tune with `npm run tune` |
 | | `keep_apart_tag` | `apart-from` | |
-| | `priority_tag` | `needs-accessible` | |
+| | `priority_tag` | `needs-accessible` | accessible needs claim scarce places first |
 | | `scarce_capabilities` | `accessible: −3` | use accessible rooms for others only when it helps |
 | | `max_repair_passes` | `5` | module default |
 
@@ -210,7 +195,7 @@ not every children's workshop needs a leader.
 
 ## 7. Materials
 
-[Materials](../20.10-materials.md) categories:
+[Materials](../20.8-materials.md) categories:
 
 | Category | Meaning |
 |---|---|
@@ -241,12 +226,11 @@ confirms it. After the deadline, the preferences page is read-only.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../18-german-translation-guidelines.md). The
-preferences page has six sections: who is coming, room wishes, children's rooms,
-sharing, workshops, and food.
+preferences page has five sections: who is coming, room wishes, sharing, workshops,
+and food.
 
 Change emails are sent for room, place, and workshop assignment changes and for
-workshop cancellations ([change notifications](../20.13-change-notifications.md)).
-Constraint health is selected with its defaults.
+workshop cancellations ([change notifications](../20.10-change-notifications.md)).
 
 ## 9. First-deployment boundary
 

@@ -52,7 +52,7 @@ has no meaning; stage order comes from the modules ([modules](20-modules.md) §4
 | `id` | kebab-case profile id; matches the file name |
 | `name`, `description` | occasion-facing copy |
 | `starts_on`, `ends_on` | inclusive occasion dates; every age is computed at `starts_on` |
-| `preference_deadline` | after it, family controls follow [family preferences](20.12-family-preferences.md) |
+| `preference_deadline` | after it, family controls follow [family preferences](20.9-family-preferences.md) |
 | `locale`, `fallback_locale` | family-facing copy language and fallback |
 
 `PUBLIC_URL`, `EMAIL_FROM`, and secrets are deployment facts, not profile metadata,
@@ -109,8 +109,8 @@ type. Builders accept these further fields where they apply:
 | `per`, `choice` | `orderedChoice` | the scope entity kind and the choice entity kind |
 | `weight` | `requirement`, `relation` | integer score when a `preferred` label is satisfied |
 | `penalty` | `requirement`, `relation` | integer score, ≤ 0, when a `preferred` label is violated |
-| `one_sided_weight`, `adjacent_weight` | `relation` | co-room scoring ([room assignment](20.5-room-assignment.md) §8) |
-| `family_facing` | all except `note` | the family control ([family preferences](20.12-family-preferences.md) §6) |
+| `one_sided_weight` | `relation` | co-room scoring ([room assignment](20.3-room-assignment.md) §8) |
+| `family_facing` | all except `note` | the family control ([family preferences](20.9-family-preferences.md) §6) |
 | `organiser_only` | all | never rendered to families; excludes `family_facing` |
 | `aliases` | all | further keys accepted on replay and mapped to this tag, so a rename costs nothing |
 | `sensitivity` | all | `normal` or `restricted`; restricted values never appear in shared or other-family views |
@@ -123,7 +123,7 @@ policy scores that no single tag owns live in module parameters.
 `derive`, `valid_for`, and any function a module specification names as an
 evaluator slot are pure. They may not perform I/O, read a clock, use randomness,
 dynamically evaluate code, or change module control flow. They are bound by the
-determinism lint rules ([testing](14-testing.md) §6) and hashed by source.
+determinism lint rules ([testing](14-testing.md) §5) and hashed by source.
 
 ## 4. Module parameters
 

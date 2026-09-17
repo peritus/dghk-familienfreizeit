@@ -1,15 +1,15 @@
-# UI-13 — Constraints and health
+# UI-13 — Constraints
 
 ## Audience, purpose, and route
 
 Organisers inspect available constraint vocabulary, active labels, and preflight
-findings. Route: `/organiser/constraints`. Governing specs: [labels and constraints](../04-labels-and-constraints.md),
-[constraint health](../20.11-constraint-health.md), and [organiser view](../09-organiser-view.md) §8.
+findings. Route: `/organiser/constraints`. Governing specs: [labels and constraints](../04-labels-and-constraints.md)
+and [organiser view](../09-organiser-view.md) §7.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Constraints                                  [Create custom constraint]    │
-│ 11 active · 2 findings · [All] [Errors] [Warnings] [Unused]               │
+│ 11 active · 2 findings · [All] [Errors] [Warnings]                        │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ ⚠ needs-ensuite · 19 beds required, 14 available        [Affected →]      │
 │ ⚠ room-with conflict · Morgan and Rivera split            [Inspect →]      │

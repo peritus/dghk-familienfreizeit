@@ -31,13 +31,12 @@ One scrolling page, not a wizard. A wizard implies a one-time completion; this i
 a form people will return to three times over six weeks as they change their
 minds. Everything saves on change.
 
-Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
-zusammen?") are **generated from the active occasion profile**: every tag declaring
+Sections 2 ("Zimmerwünsche") and 3 ("Mit wem möchten Sie zusammen?") are **generated from the active occasion profile**: every tag declaring
 `family_facing` produces a control, in the sections the profile configures. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
 The page, its sections, the closed `control` union, and the save-on-change contract
-are specified by the [family preferences](20.12-family-preferences.md) module. A tag
+are specified by the [family preferences](20.9-family-preferences.md) module. A tag
 that reuses an existing control needs no family view code.
 
 ```
@@ -70,24 +69,14 @@ Willkommen, Familie Müller
                       Freitext — die Organisatoren lesen mit.
 
   ─────────────────────────────────────────────────
-  3  KINDERZIMMER
-  ─────────────────────────────────────────────────
-  Kinder können gemeinsam in einem Kinderzimmer schlafen,
-  ohne Erwachsene. Es gibt Zimmer für 8–14 Jahre.
-
-  Jonas (9)   [x] möchte ins Kinderzimmer
-  Emma (6)    [ ] möchte ins Kinderzimmer   — noch zu jung für die
-                  vorhandenen Kinderzimmer
-
-  ─────────────────────────────────────────────────
-  4  MIT WEM MÖCHTEN SIE ZUSAMMEN?
+  3  MIT WEM MÖCHTEN SIE ZUSAMMEN?
   ─────────────────────────────────────────────────
   Familie Schmidt     ✓ möchte auch mit Ihnen
   Familie Weber       — noch keine Antwort
   [ Familie suchen… ]
 
   ─────────────────────────────────────────────────
-  5  WORKSHOPS
+  4  WORKSHOPS
   ─────────────────────────────────────────────────
   Samstag Vormittag
     Anna    1. Töpfern   2. Kochen    3. —
@@ -110,18 +99,11 @@ The preferences collapse to a read-only summary; the assignment takes the top.
   │                                              │
   │  Anna Müller      Bett 14-A                  │
   │  Kai Müller       Bett 14-A                  │
+  │  Jonas Müller     Bett 14-B (oben)           │
   │  Emma Müller      Bett 14-C (unten)          │
   │  Mia Müller       bei den Eltern             │
   │                                              │
   │  Sie teilen das Zimmer mit Familie Schmidt.  │
-  └──────────────────────────────────────────────┘
-
-  ┌──────────────────────────────────────────────┐
-  │  Kinderzimmer K3 · Haus B · Raum 22          │
-  │                                              │
-  │  Jonas Müller     Bett 22-D (oben)           │
-  │                                              │
-  │  Mit 4 weiteren Kindern.                     │
   └──────────────────────────────────────────────┘
 
   Ihre Workshops
@@ -152,7 +134,6 @@ visible is already answered by the latest publication, and needs no rule.
 | Other families' room preferences | No |
 | Other families' co-room requests, including ones naming them | **No** |
 | Names of families sharing their room | Yes |
-| Names of children in their child's children's room | Yes |
 | Bed labels within their own rooms | Yes |
 | Scores, parties, traces, organiser constraints | No |
 | Organiser notes about them | **No** — free text is theirs, organiser notes are not |
@@ -201,11 +182,11 @@ bundle small and test it on an old, slow phone — that is the device it will me
 
 **Age is computed and shown.** "Jonas (9)" uses the age at the occasion date, not
 today. If a child turns 9 the week before, they are shown as 9 throughout, which
-matches what the children's-room banding will do and avoids a confusing
-mismatch.
+matches what workshop age bounds will do and avoids a confusing mismatch.
 
-**Ineligibility is explained, not hidden.** Emma's children's-room checkbox is
-disabled with the reason next to it, not removed. A missing option makes people
+**Ineligibility is explained, not hidden.** A control that does not apply to a
+person, such as "Schläft bei den Eltern" for an adult, is disabled with the reason
+next to it, not removed. A missing option makes people
 think the site is broken; a disabled option with a reason answers the question
 before they ask. This is now driven by `valid_for` — a control whose predicate
 fails renders disabled with the reason.
@@ -225,7 +206,7 @@ is where it was before this application existed.
 ## 4. Emails
 
 Invitation and reminder emails are kernel; publication and change emails are
-contributed by [change notifications](20.13-change-notifications.md).
+contributed by [change notifications](20.10-change-notifications.md).
 
 Four kinds. All plain, all short, all with the link.
 
@@ -247,8 +228,6 @@ People forward this to grandparents and read it on trains.
 > Vorher:  Haus A · Raum 01
 > Jetzt:   Haus B · Raum 14 · mit eigenem Bad
 >
-> Jonas bleibt im Kinderzimmer K3.
->
 > [ Details ansehen ]
 
 Computed from the plan diff. A family whose assignment did not change receives
@@ -267,8 +246,7 @@ eingeteilt" appears at the top of the preferences page, because the first
 question every person has is whether they are choosing or requesting.
 
 **Never expose the model's vocabulary.** No "party", no "place", no "assignment
-run". A family has a *Zimmer*; children go to a *Kinderzimmer*; they have
-*Wünsche*.
+run". A family has a *Zimmer* and *Wünsche*.
 
 **Preference strength in plain words.** "unbedingt / gerne / egal" rather than
 "required / preferred / indifferent". The three-way distinction is the most

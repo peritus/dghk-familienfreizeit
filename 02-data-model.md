@@ -208,7 +208,7 @@ Capacity is represented by entities and labels, not special property columns: a
 place is the atomic sleeping position, located in a bed, located in a room
 ([room inventory](20.1-room-inventory.md) §4). Ordered preferences are structured
 label values validated by the `ordered-choice` operator
-([workshop rankings](20.7-workshop-rankings.md) §6), which keeps the core model
+([workshop rankings](20.5-workshop-rankings.md) §6), which keeps the core model
 generic while preserving that an ordered preference is not an unordered set.
 
 ## 7. Operational tables

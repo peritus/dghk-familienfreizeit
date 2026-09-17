@@ -1,6 +1,11 @@
-# 20.4 — Child rooms
+# Deferred idea: child rooms
 
-Module id `child-rooms` · factory `childRooms`
+*Status:* deferred. Not part of the specification and not selected by any profile.
+This sketch records how the idea would work as a module if it is ever picked up;
+adopting it means adding it back to the module catalogue and to every document
+listed under "Integration points".
+
+Proposed module id `child-rooms` · factory `childRooms`
 
 ## 1. Purpose and boundary
 
@@ -19,16 +24,12 @@ Matching is explicit. There is no age band and no opt-in rule: a child carries a
 requirement naming a child group, and a room carries the capability naming the same
 group. Adult supervision, if needed, is modelled separately with ordinary relations.
 
-This document is the authoritative description of child groups, child-room
-eligibility, and children's-room placement.
-
 ## 2. Dependencies
 
-Requires: [`sleeping-parties`](20.3-sleeping-parties.md), and through it
-[`room-inventory`](20.1-room-inventory.md). Enhances: none.
+Requires: [`sleeping-parties`](../20.2-sleeping-parties.md), and through it
+[`room-inventory`](../20.1-room-inventory.md). Enhances: none.
 
-Selecting this module is what makes the `child` designation valid in
-`room-inventory`.
+Adopting it would add a `child` designation to `room-inventory`.
 
 ## 3. Parameters
 
@@ -189,7 +190,7 @@ child, attributed to the child's family.
 
 | Kind | Contribution |
 |---|---|
-| Screen | Child-group management on the inventory screen; the children's-room section of party review ([organiser view](09-organiser-view.md) §4) |
+| Screen | Child-group management on the inventory screen; the children's-room section of party review ([organiser view](../09-organiser-view.md) §4) |
 | Controls | none; the need tag declares its own control in the profile |
 | Reports | Accommodation overview gains child-group capability and occupants per child room |
 | Emails | none |
@@ -209,3 +210,25 @@ child, attributed to the child's family.
 
 No child groups exist; the `child` designation is invalid; the child-group tags
 cannot be defined; party formation starts from whole families.
+
+## Integration points
+
+Adopting the idea would require, beyond this module:
+
+- **Room inventory:** a `child` designation, available only to children's-room
+  placement and rejected by `hard.designation` for ordinary parties.
+- **Sleeping parties:** an `enhances: ['child-rooms']` hook so formation starts
+  from the people `child-rooms.place` did not place, and an ordering constraint
+  `after: ['child-rooms.place']`.
+- **Room assignment:** reading `child-rooms.place`, pre-occupying child-room places,
+  and `party_key: null` for child-room assignments. The known sharp edge that
+  children in children's rooms fragment families into parties of one would apply.
+- **Organiser view:** a children's-room section on party review, child-group
+  management on inventory, and a child-group chip on board room cards.
+- **Family view:** a "Kinderzimmer" section on the preferences page and a
+  children's-room card on the assignment page.
+- **Reports:** child-group capability and occupants in the accommodation overview.
+- **Profile:** `needs-child-group` and `provides-child-group` tags, a
+  `child-rooms` section in `family-preferences`, and `min_occupants`.
+- **Tests:** a property test that every child-room assignment satisfies the
+  child-group requirement, and a fixture with children released for capacity.
