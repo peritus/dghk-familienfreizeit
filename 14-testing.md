@@ -389,7 +389,7 @@ test('the full loop: import → constraints → solve → plan → communicate',
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
   const preview = await previewCommunication(db, [{ kind: 'accommodation' }])
-  await communicate(db, preview.confirmation)   // reviewed basis, scopes, identities and options
+  await communicate(db, preview.confirmation)   // reviewed input_seq, scopes, identities and options
   expect(await communicationCount(db)).toBe(1)
   expect(await familyArrangements(db)).toEqual(preview.familyArrangements)
 })

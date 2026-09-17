@@ -274,7 +274,7 @@ notification sections of [release control](06-release-control.md) §8, [authenti
   separate from domain visibility.
 - Add recipient/body agreement, unchanged-content, failure, retry, and privacy tests.
 
-Acceptance: recipient previews equal sends for the reviewed basis and scopes;
+Acceptance: recipient previews equal sends for the reviewed `input_seq` and scopes;
 delivery failure never rolls back communication or widens visibility.
 
 ## M15 — Deployment, security, and launch hardening
