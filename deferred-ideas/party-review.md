@@ -1,10 +1,13 @@
-# UI-09 — Party review
+# Deferred idea: party review
+
+*Status:* deferred with the sleeping-parties and child-rooms modules. This screen
+is not part of the active UI catalogue.
 
 ## Audience, purpose, and route
 
-Organisers review derived sleeping parties before touching the board. Route:
-`/organiser/parties`. Governing specs: [organiser view](../09-organiser-view.md) §4,
-[sleeping parties](../20.2-sleeping-parties.md), and decision [D5](../17-decisions.md#d5-party-formation-is-a-separate-reviewable-phase).
+Organisers would review derived sleeping parties before touching the board. Proposed
+route: `/organiser/parties`. Governing specs: [organiser view](../09-organiser-view.md),
+[sleeping parties](sleeping-parties.md), and decision [D5](../17-decisions.md#d5-sleeping-parties-and-child-rooms-are-deferred).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

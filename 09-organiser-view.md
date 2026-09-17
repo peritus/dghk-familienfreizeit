@@ -20,7 +20,6 @@ English ASCII wireframes, state behavior, accessibility, and responsive notes.
 | `/organiser/families` | Families | Table, import, invite, chase list |
 | `/organiser/families/:id` | Family detail | People, preferences, full event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
-| `/organiser/parties` | Party review | Derived parties with provenance; merge and split |
 | `/organiser/board` | The board | Room assignment by drag and drop |
 | `/organiser/plans` | Plans | List, diff, publish |
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
@@ -62,7 +61,7 @@ accurate count of consequences. If the derivation produces the same hash:
 > 14 events since, none affecting assignments. **Up to date.**
 
 **Blocking items**, only when present. Preflight findings, constraint conflicts,
-unplaceable parties, refused merges, workshops below minimum. Each links
+unplaceable families, workshops below minimum. Each links
 directly to the thing.
 
 Preflight findings come first. Requirement arithmetic
@@ -72,8 +71,8 @@ warning and should be the most prominent thing on the screen when it fires:
 > ⚠ **needs-private-sanitary: 19 beds required, 14 available.** Five people cannot be
 > placed however the rooms are arranged. *See affected families →*
 
-> ⚠ **2 constraint conflicts** — constrained people are no longer in one party.
-> ⚠ **1 party cannot be placed** — Braun ×5 requires ensuite; none free.
+> ⚠ **2 constraint conflicts** — organiser decisions cannot be satisfied.
+> ⚠ **1 family cannot be placed** — Braun ×5 requires ensuite; none free.
 
 **Chase list.** Families who have not logged in, or who have logged in but
 submitted nothing. With a "send reminder" action that emails the lot.
@@ -131,7 +130,11 @@ identifies the affected family or person. No separate on-behalf-of role is neede
 
 ---
 
-## 4. Party review
+## Deferred party review
+
+This screen is deferred with the sleeping-parties and child-rooms modules. Its
+design sketch is retained in [`deferred-ideas/party-review.md`](deferred-ideas/party-review.md)
+and is not part of the active route catalogue.
 
 The screen that should exist before the board, and the one most likely to be
 skipped. Put it in the navigation before the board so it is read first.
@@ -202,7 +205,7 @@ assignment puzzle legible at a glance and adjustable without thought.
 └──────────────┴───────────────────────────────────────────────────────────┘
 ```
 
-Left rail: unplaced parties, always visible, with the blocking reason. Main area:
+Left rail: unplaced families, always visible, with the blocking reason. Main area:
 rooms as cards, grouped by building and floor, in `sort_key` order.
 
 ### Room cards
@@ -214,7 +217,7 @@ drop without opening anything:
   (`●●●○○`). Discrete marks rather than a bar, because the question is always
   "how many more fit", and counting five dots is faster than reading "3/5".
 - **Attribute chips**: sanitary arrangement and accessible.
-- **Occupants**, one line per party with size.
+- **Occupants**, one line per family with size.
 - **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
   `⚲` constrained by an organiser rule.
 
@@ -299,11 +302,11 @@ optional.
 
 | Key | Action |
 |---|---|
-| `/` | Focus the party search |
+| `/` | Focus the family search |
 | `↑ ↓` | Move through the party list |
 | `Space` | Add to selection |
 | `Enter` | Open the room picker for the selection |
-| `r` then digits | Add a room decision for the selected party |
+| `r` then digits | Add a room decision for the selected family |
 | `u` | Drop the selected party's pending constraint |
 | `z` | Undo the last action |
 | `Esc` | Clear selection |

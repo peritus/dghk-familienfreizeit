@@ -28,11 +28,13 @@ experimentation.
 | UI-06 | [Families and import](06-families.md) | `/organiser/families` |
 | UI-07 | [Family detail](07-family-detail.md) | `/organiser/families/:id` |
 | UI-08 | [Inventory](08-inventory.md) | `/organiser/inventory` |
-| UI-09 | [Party review](09-party-review.md) | `/organiser/parties` |
 | UI-10 | [Assignment board](10-assignment-board.md) | `/organiser/board` |
 | UI-11 | [Plans and publishing](11-plans-and-publishing.md) | `/organiser/plans` |
 | UI-12 | [Workshops](12-workshops.md) | `/organiser/workshops` |
 | UI-13 | [Organiser decisions](13-constraints.md) | `/organiser/constraints` |
+
+The party-review screen is deferred with the sleeping modules. Its design sketch
+is kept in [`deferred-ideas/party-review.md`](../deferred-ideas/party-review.md).
 
 ## Screen-spec format
 

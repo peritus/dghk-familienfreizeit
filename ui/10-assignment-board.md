@@ -8,7 +8,7 @@ Organisers make room-placement decisions and review consequences. Route:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ [Search parties…]  Main House  Garden House  [Unplaced only]  Plan #8      │
+│ [Search families…] Main House  Garden House  [Unplaced only]  Plan #8      │
 ├─────────────────┬──────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                                │
 │ ┌─────────────┐ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
@@ -21,7 +21,7 @@ Organisers make room-placement decisions and review consequences. Route:
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a party to a room appends one or more organiser decision label events, re-derives locally, and shows
+Dragging a family to a room appends one or more organiser decision label events, re-derives locally, and shows
 any cascade. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
 picker and consequence summary. Apply confirms the pending batch; Discard
@@ -30,14 +30,14 @@ together. An optional note belongs to the label, not to a separate decision reco
 
 ## Narrow fallback
 
-The board becomes a searchable unplaced list followed by a room list. Each party
+The board becomes a searchable unplaced list followed by a room list. Each family
 has an “Add room decision” action; do not require drag-and-drop on touch devices. The
 pending bar remains sticky at the bottom without covering the final control.
 
 ## Neobrutalist redesign and components
 
-Use `Sidebar`, `Input` or `Combobox` for party search, `Tabs` for buildings,
-`Card` for rooms and parties, and `Badge` for capacity and constraint status.
+Use `Sidebar`, `Input` or `Combobox` for family search, `Tabs` for buildings,
+`Card` for rooms and families, and `Badge` for capacity and constraint status.
 Room cards keep the thick outline and offset shadow; infeasible cards use an
 `Alert`-style border and explanatory text. Apply and Discard each use
 `AlertDialog` with the complete `AlertDialogTrigger`, `AlertDialogContent`,

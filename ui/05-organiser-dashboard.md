@@ -18,13 +18,13 @@ Organisers open this screen to answer “what needs attention today?” Route:
 │ NEEDS ATTENTION                                                          │
 │ ⚠ 19 ensuite beds required, 14 available                 [See families] │
 │ ⚠ 2 constraint conflicts                                  [Inspect]      │
-│ ⚠ 1 party cannot be placed                                [Open board]   │
+│ ⚠ 1 family cannot be placed                                [Open board]   │
 │                                                                          │
 │ CHASE LIST                                                               │
 │ 8 families have not opened their invitation              [Send reminders]│
 │ 5 families have not stated room preferences                             │
 │                                                                          │
-│ 3 orphan beds · 19/24 co-room wishes · 11 active constraints              │
+│ 11 active constraints                                                       │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 

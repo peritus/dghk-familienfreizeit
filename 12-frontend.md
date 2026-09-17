@@ -11,9 +11,9 @@ components, talking to a small JSON API.
 
 The derived world is the read side of the application
 ([architecture](01-architecture.md)), and it already runs in the browser. The organiser
-screens are views over it: the dashboard, families, party review, the board, plan
+screens are views over it: the dashboard, families, the board, plan
 diffs, workshops, and constraints all render `derive(committed ++ pending)`. The
-pending list is shared by every one of them — party review merges and splits into it
+pending list is shared by every one of them — the board adds placement decisions to it
 just as the board drags into it. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
 
@@ -181,7 +181,7 @@ The components in use, and that is the complete list:
 |---|---|
 | Button, Card, Badge | everywhere |
 | Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
-| Combobox | family picker, person picker, room picker, party search |
+| Combobox | family picker, person picker, room picker, family search |
 | Dialog, Alert Dialog | merge and split, publish confirmation, discard pending |
 | Table | families, CSV preview, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after publication in the family view |
@@ -231,12 +231,12 @@ Non-negotiable regardless of the style:
 
 A screen of the organiser application like any other, with the most interaction.
 Drag and drop is `@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB
-core, attached to room cards and party chips from effects.
+core, attached to room cards and family cards from effects.
 
 ### Responsibilities
 
 ```
-draggable()   party chips become draggable
+draggable()   family cards become draggable
 dropTarget()  room cards accept drops, with a canDrop predicate
 monitor()     global drag state → dim infeasible rooms, show penalty ghosts
 reducer       selection, keyboard handling, pending list
@@ -245,7 +245,7 @@ world         derive(committed ++ pending), memoised
 
 The feasibility predicate is the real one. `canDrop` asks `derive` what happens if
 this constraint is appended, so an infeasible room is dimmed because it is
-infeasible — with the constraints, exclusions, and party structure all present —
+infeasible — with the constraints and exclusions all present —
 rather than because a cheap approximation guessed so.
 
 ### Mutation cycle
@@ -254,7 +254,7 @@ rather than because a cheap approximation guessed so.
 1. dispatch the event onto the pending list
 2. world = derive(committed ++ pending, config)
 3. React renders the board from world
-4. if more than this party moved → flash them, show the summary
+4. if more than this family moved → flash them, show the summary
 ```
 
 No network, and no reconcile step, because there is nothing to reconcile: the world
