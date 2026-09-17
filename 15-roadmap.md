@@ -198,15 +198,17 @@ contract](05-solver-contract.md), and workshop tests in [testing](14-testing.md)
 - Implement structured ordered-choice rankings, no-preference values, rank
   validation, and communicated-programme rules.
 - Implement eligibility, reservations, co-assignment groups, fixed resolver
-  decisions, fairness ledger, ranked allocation, cancellation restart, fill, and
-  workshop plan output.
+  decisions, previous-plan retention, balanced-opportunity ledger, ranked
+  allocation, cancellation restart, fill, and workshop plan output.
 - Implement the preference heatmap, ranking controls, workshop findings, rosters,
   and allocation diffs.
 - Add fairness, capacity, group, separation, age, cancellation, and deterministic
   workshop fixtures.
 
-Acceptance: each person receives at most one assigned workshop per slot, fairness
-objectives are applied lexicographically, and every allocation decision is traced.
+Acceptance: each person receives at most one assigned workshop per slot; valid
+previous assignments are retained when possible; unavoidable movement is bounded
+and explained; balanced-opportunity objectives are applied lexicographically to
+unresolved contests; and every allocation decision is traced.
 
 ## M11 — Food and materials coordination
 
