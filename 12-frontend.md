@@ -135,7 +135,7 @@ chunk, so a family's phone never downloads the organiser screens or the solver.
 
 ```tsx
 function OrganiserApp() {
-  const { committed, config_hash } = useLog()            // GET /api/organiser/log, once
+  const { committed, build_revision, compatibility_revision } = useLog() // GET /api/organiser/log, once
   const [pending, dispatch] = useReducer(pendingReducer, [])
   const world = useMemo(() => derive([...committed, ...pending], config), [committed, pending])
   …
@@ -267,19 +267,20 @@ Applying is the only write the organiser application makes:
 
 ```
 POST /api/organiser/apply
-     { input_seq, events[], output_hash, config_hash, code_revision }
+     { input_seq, events[], build_revision, compatibility_revision }
 
   409 → the log moved; response carries the new events, the application re-derives on them
-  200 → applied; response carries the server's output_hash
+  200 → applied; response carries the resulting derived world
 ```
 
-The server's plan is authoritative. `output_hash` travels so the server can check
-that the world the organiser acted on is the world it derived; the determinism contract
-([solver contract](05-solver-contract.md) §1) says the two agree, so a mismatch is
-reported as a defect rather than smoothed over.
+The server's plan is authoritative. The server checks the event head and code/config
+identities supplied with the request, then derives from trusted events. The
+determinism contract ([solver contract](05-solver-contract.md) §1) makes the client
+prediction reproducible; any disagreement is reported as a defect rather than
+smoothed over.
 
 A stale bundle must not derive at all. The log response carries the Worker's
-`config_hash` and `code_revision`, and a bundle differing in either refuses to open
+`build_revision` and `compatibility_revision`, and a bundle differing in either refuses to open
 the organiser application and asks for a reload ([deployment](13-deployment.md) §1).
 
 ---

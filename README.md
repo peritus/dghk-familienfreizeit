@@ -98,7 +98,7 @@ reference stable entities, never derived placement units.
 **Plan** — the complete solver result for the event log through an `input_seq`:
 assignments, unplaced families, diagnostics, and a full decision trace. Plans are
 deterministic values derived on demand. A plan's identity is its `input_seq`,
-`config_hash`, and `code_revision`.
+`build_revision`, and `compatibility_revision`.
 
 **Release control** — the kernel capability governing when selected arrangements
 become visible to families. Its authoritative contract is [06-release-control](06-release-control.md).

@@ -58,7 +58,8 @@ Specification coverage: [occasion profiles](16-occasion-profiles.md), [modules](
   validation, evaluator restrictions, and defaulted module parameters.
 - Implement module registration, dependency and enhancement validation, duplicate
   contribution checks, and selected-module composition.
-- Implement canonical configuration serialization and `config_hash`.
+- Inject the exact commit `build_revision` and hardcoded `compatibility_revision` into
+  the Worker and browser bundle.
 - Add profile-builder tests for tag shapes, vocabulary naming, module roles,
   dependencies, and evaluator determinism.
 - Load the active Familienfreizeit profile as the first profile fixture.

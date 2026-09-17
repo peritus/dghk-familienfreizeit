@@ -92,8 +92,8 @@ and time. It stores references and code/config identities, never arrangement pay
 type CommunicatedPayload = {
   basis_seq: number
   scopes: readonly CommunicationScope[]
-  code_revision: string
-  config_hash: string
+  build_revision: string
+  compatibility_revision: number
   acknowledged_findings: readonly string[]
   notify: boolean
   note: string | null                 // organiser-only
@@ -141,10 +141,9 @@ allocation results and cancellation status. Exclude plan metadata such as `input
 traces, internal explanations, current answers, materials, live participation,
 actor/time, notes and delivery state. Privacy filtering follows selection.
 
-`Plan.output_hash` remains available for solver regression and client/server agreement.
-The solver and its seven determinism rules are unchanged. A plan's sequence/hash can
-change without release content changing. Do not use plan hash inequality or event
-counts as outstanding-work tests.
+Solver output hashes remain an internal regression-test technique, not release
+identity or outstanding-work state. The solver and its seven determinism rules are
+unchanged. Do not use plan hash inequality or event counts as outstanding-work tests.
 
 ## 4. Derivation and history
 
