@@ -2,7 +2,7 @@
 
 ## Audience, purpose, and route
 
-Organisers experiment with room placement and review consequences. Route:
+Organisers make room-placement decisions and review consequences. Route:
 `/organiser/board`. Governing specs: [organiser view](../09-organiser-view.md) §5,
 [room assignment](../05-room-assignment.md), and decisions [D6/D15](../17-decisions.md).
 
@@ -17,11 +17,11 @@ Organisers experiment with room placement and review consequences. Route:
 │ │ ⚠ no fit    │ │ │ Morgan ×2 ✓ │ │ │ open       │ │ │ Rivera ×3 ✓ │          │
 │ └─────────────┘ │ └─────────────┘ └─────────────┘ └─────────────┘          │
 ├─────────────────┴──────────────────────────────────────────────────────────┤
-│ 3 pending changes · Braun → Room 14 · [Undo] [Discard] [Apply]              │
+│ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]           │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a party to a room appends a constraint, re-derives locally, and shows
+Dragging a party to a room appends an organiser decision label, re-derives locally, and shows
 any cascade. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
 picker and consequence summary. Apply confirms the pending batch; Discard
@@ -30,7 +30,7 @@ requires confirmation.
 ## Narrow fallback
 
 The board becomes a searchable unplaced list followed by a room list. Each party
-has a “Move to room” action; do not require drag-and-drop on touch devices. The
+has an “Add room decision” action; do not require drag-and-drop on touch devices. The
 pending bar remains sticky at the bottom without covering the final control.
 
 ## Neobrutalist redesign and components

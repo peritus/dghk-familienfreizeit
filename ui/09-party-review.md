@@ -21,7 +21,7 @@ Organisers review derived sleeping parties before touching the board. Route:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Merge and split dialogs explain the resulting constraint and add it to the
+Merge and split dialogs explain the resulting organiser decision and add it to the
 shared pending list. Refused merges name the capacity or constraint reason.
 Children's room assignment appears as a separate section before parties.
 
