@@ -15,7 +15,7 @@ The profile selects these modules ([modules](../20-modules.md) §5):
 | [`room-assignment`](../20.3-room-assignment.md) | deterministic placement, keep-apart relations, and the board |
 | [`workshops`](../20.4-workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
 | [`workshop-rankings`](../20.5-workshop-rankings.md) | ordered per-person workshop rankings |
-| [`workshop-assignment`](../20.6-workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and co-assignment |
+| [`workshop-assignment`](../20.6-workshop-assignment.md) | eligibility, capacity, cancellation, and fairness |
 | [`food-preferences`](../20.7-food-preferences.md) | one diet per person and optional allergy text |
 | [`materials`](../20.8-materials.md) | materials contributed by families and linked to workshops |
 | [`family-preferences`](../20.9-family-preferences.md) | the family preferences page |
@@ -183,8 +183,7 @@ them is a deployment, reviewed through the plan diff before communicating.
 | | `allow_no_preference` | `true` |
 | `workshop-assignment` | `objectives` | fewest people without a top-2 choice, then fewest without any choice, then most rank weight |
 | | `top_n`, `rank_weights` | `2`, `[3, 2, 1]` |
-| | `co_assignment_tag` | `workshop-with` (family-facing person picker, `required` only) |
-| | `cancel_under_subscribed`, `fill_unassigned` | `true`, `true` |
+| | `fill_unassigned` | `true` |
 
 Children may lead workshops. Leadership does not consume participant capacity, and
 not every children's workshop needs a leader.
