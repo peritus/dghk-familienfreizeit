@@ -199,7 +199,7 @@ contract](05-solver-contract.md), and workshop tests in [testing](14-testing.md)
   validation, and communicated-programme rules.
 - Implement eligibility, reservations, co-assignment groups, fixed resolver
   decisions, previous-plan retention, balanced-opportunity ledger, ranked
-  allocation, cancellation restart, fill, and workshop plan output.
+  allocation, manual cancellation, fill, and workshop plan output.
 - Implement the preference heatmap, ranking controls, workshop findings, rosters,
   and allocation diffs.
 - Add fairness, capacity, group, separation, age, cancellation, and deterministic

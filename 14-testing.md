@@ -291,7 +291,7 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
   the active fixture contract;
   workshop groups never merge room placement units.
 - Workshop decisions preserve eligibility, capacity, and per-slot uniqueness
-  through cancellation restart and fill. Cancelled required targets are reported.
+  through manual cancellation and fill. Cancelled required targets are reported.
 - Clear removes the selected label's effect from the current plan; replay before
   the clear reproduces its prior effect. Pending undo removes a whole action's
   events, including both halves of a needs/provides pair.
