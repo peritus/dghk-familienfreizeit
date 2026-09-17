@@ -83,8 +83,9 @@ compile error.
 | `orderedChoice({ … })` | `ordered-choice` | a ranked list of choices per scope entity |
 | `note({ … })` | `descriptive` | an annotation the solver never reads |
 
-Value types: `enumOf([...])`, `text()`, `integer()`, `decimal()`, `bool()`,
-`date()`, and `ref('<entity-kind>')`.
+Value types: `enumOf([...])`, `text({ max_length })`, `integer({ min, max })`,
+`decimal({ scale })`, `bool()`, `date()`, and `ref('<entity-kind>')`. Options are
+optional.
 
 ### Tag fields
 
@@ -96,6 +97,9 @@ type. Builders accept these further fields where they apply:
 | `help` | all | organiser help text |
 | `cardinality` | `property`, `capability`, `requirement`, `relation` | `'zero-or-one'`, `'exactly-one'`, or `'zero-or-more'` |
 | `strengths` | `requirement`, `relation` | allowed strengths |
+| `default` | `property` | value assumed when the entity has no label; never stored |
+| `copy` | `property` with `enumOf` | `LocalizedText` per enum value |
+| `operator` | `relation` | `groups-with` or `separates-from` |
 | `satisfied_by` | `requirement` | capability tag key |
 | `structural` | `requirement` | named structural check provided by a module, e.g. `no-other-parties` |
 | `derive` | `capability` | pure evaluator over the entity's labels; makes the capability derived |
