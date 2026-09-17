@@ -70,8 +70,9 @@ occasion profile has declared safe for that audience.
 
 ## 3. Initial report catalogue
 
-The first release should provide these reports. A profile may disable a report
-whose module is not selected.
+The first release should provide these reports. Each report, or report part, is
+contributed by a module and named in that module's specification §11
+([modules](20-modules.md)); a report whose modules are not selected does not exist.
 
 ### 3.1 Shared family reports
 

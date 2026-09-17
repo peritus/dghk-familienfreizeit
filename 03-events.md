@@ -4,10 +4,14 @@ This document defines the generic event envelope and lifecycle. Occasion profile
 may contribute event types through selected modules, but the append, replay,
 validation, and fold rules are shared by every deployment.
 
-The complete write vocabulary. Adding an event type means adding to this file, to
-`src/events/types.ts`, and to the fold. Nothing else.
+This file lists the kernel write vocabulary. Modules contribute further event types,
+each specified in its module document and registered by `defineModule`
+([modules](20-modules.md) §3.1). Adding a kernel event type means adding to this file,
+to `src/events/types.ts`, and to the fold; adding a module event type means adding to
+the module specification and the module's `events.ts`. Nothing else.
 
-Semantic setup events (`FamilyInvited`, `PersonAdded`, `RoomAdded`, and so on)
+Semantic setup events (`FamilyInvited`, `PersonAdded`, module events such as
+`RoomAdded`)
 are convenient command vocabulary. Their complete payloads are folded into
 one typed entity identity and generic labels. Constraints and intrinsic facts
 then use the same
@@ -37,7 +41,7 @@ properties are the payload fields.
 
 ```kdl
 FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
-PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role="adult" does_not_need_a_bed=#false needs_accessible=#false
+PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role=adult
 ```
 
 The project accepts a restricted KDL profile: one event node per line, no
@@ -84,9 +88,9 @@ discover the problem in the solver.
 Setup event payloads are complete command inputs, not a second data model. The
 fold creates the typed entity identity and emits the payload's mutable
 values as labels, under the kebab-case form of the field name (D18). For example,
-`PersonAdded.role`, `birthdate`, and `does_not_need_a_bed` become the labels `role`,
-`birthdate`, and `does-not-need-a-bed` on the new person; `RoomAdded.kind`, `floor`, and
-capacity-related values do the same for the room. Occasion-specific config defines
+`PersonAdded.given_name` and `birthdate` become the labels `given-name` and
+`birthdate` on the new person, and `RoomAdded.room_type` becomes `room-type` on the
+room. Occasion-specific config defines
 which labels are legal and how the resolver uses them.
 
 ---
@@ -124,16 +128,17 @@ so its sessions lose access without a cleanup step
   person_id: string, family_id: string,
   given_name: string, family_name: string,
   birthdate: string | null,
-  role: 'adult' | 'child' | 'infant',
-  does_not_need_a_bed: boolean,
-  needs_accessible: boolean
+  role: string                  // values are validated by the active profile
 }
 ```
-Emitted by the family or by an allowlisted organiser.
+Emitted by the family or by an allowlisted organiser. Folds to `member-of`,
+`given-name`, `family-name`, `birthdate`, and `role`. Everything else about a person —
+bed demand, accessibility, diet — is an ordinary label set by the module or profile
+tag that owns it.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
-registered as an adult by their family and that is their call. The solver uses
-`role` for role-based rules; it does not turn role into a bed exception.
+registered as an adult by their family and that is their call. Modules use `role`
+for role-based rules; no module turns role into a bed exception.
 
 ### `PersonUpdated`
 ```ts
@@ -148,58 +153,21 @@ Excludes the person from newly derived plans. Historical plans keep them.
 
 ---
 
-## Inventory
+## Module events
 
-### `BuildingAdded` / `BuildingUpdated`
-```ts
-{ building_id: string, name: string, sort_key: number }
-```
+Selected modules contribute these event types. Their payloads, invariants, and
+authorisation are specified in the module documents.
 
-### `RoomAdded`
-```ts
-{
-  room_id: string, building_id: string, number: string,
-  floor: number | null,
-  kind: string,                 // values are validated by the active profile
-  is_accessible: boolean,
-  sort_key: number
-}
-```
+| Module | Event types |
+|---|---|
+| [room inventory](20.1-room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `RoomAdded`, `RoomUpdated`, `RoomDesignationChanged`, `BedAdded`, `BedUpdated`, `BedRemoved` |
+| [room adjacency](20.2-room-adjacency.md) §5 | `RoomAdjacencySet`, `RoomAdjacencyCleared` |
+| [child rooms](20.4-child-rooms.md) §5 | `ChildGroupAdded`, `ChildGroupUpdated`, `ChildGroupRetired` |
+| [workshops](20.6-workshops.md) §5 | `SlotAdded`, `SlotUpdated`, `WorkshopAdded`, `WorkshopUpdated`, `WorkshopCancelled`, `WorkshopReinstated` |
+| [materials](20.10-materials.md) §5 | `MaterialRequested`, `MaterialRequestUpdated`, `MaterialRequestCancelled`, `MaterialCommitted`, `MaterialCommitmentUpdated`, `MaterialCommitmentWithdrawn`, `MaterialFulfilmentAdded`, `MaterialFulfilmentRemoved` |
 
-### `RoomUpdated`
-Full restatement of the above.
-
-### `RoomDesignationChanged`
-```ts
-{
-  room_id: string,
-  designation: 'general' | 'child' | 'staff' | 'blocked',
-  reason: string | null
-}
-```
-`reason` is required when the designation is `blocked`. This is the event that
-records a blocked-space fact. Any compensating constraints remain visible in the
-event history and may be cleared explicitly.
-
-*Invariant:* `designation = 'blocked'` requires a reason. A child room's eligible
-children are determined by explicit child-group labels, not an age band.
-
-### `BedAdded` / `BedUpdated` / `BedRemoved`
-```ts
-{ bed_id: string, room_id: string, label: string,
-  kind: string,                // values are validated by the active profile
-  sleeps: 1 | 2, sort_key: number }
-```
-Places are *generated* by the fold from `sleeps`, never by an event. Place
-ids are deterministic: `plc_${bed_id_suffix}_${idx}`. This matters because
-constraints may target a Place, and a Place id must survive re-derivation.
-
-### `RoomAdjacencySet`
-```ts
-{ room_a: string, room_b: string, distance: 1 | 2 | 3 }
-```
-Organiser override of the derived adjacency. Both directions are derived by the
-fold from one event.
+Workshop rankings, food preferences, and organiser decisions add no event types;
+they are `LabelSet` and `LabelCleared` events.
 
 ---
 
@@ -252,36 +220,8 @@ Defines a custom matching vocabulary. It contains no executable code; the fixed
 resolver implements the operators. Definitions and assignments remain ordinary
 event-log data.
 
-Workshop rankings are `LabelSet` and `LabelCleared` events on `prefers-workshop`
-with structured values (D13); see [labels and constraints](04-labels-and-constraints.md) §7.
-
----
-
-## Workshops
-
-### `SlotAdded` / `SlotUpdated`
-```ts
-{ slot_id: string, label: string, starts_at: string, ends_at: string, sort_key: number }
-```
-
-### `WorkshopAdded` / `WorkshopUpdated`
-```ts
-{
-  workshop_id: string, slot_id: string, title: string, description: string | null,
-  capacity: number, min_capacity: number,
-  min_age: number | null, max_age: number | null,
-  room_id: string | null, sort_key: number
-}
-```
-
-### `WorkshopCancelled`
-```ts
-{ workshop_id: string, reason: string }
-```
-Manual cancellation by an organiser. Distinct from automatic under-subscription
-cancellation, which the solver performs internally and reports in the trace —
-that is not an event, because it is a *derivation* and would re-derive itself on
-the next run anyway.
+Workshop rankings are `LabelSet` and `LabelCleared` events with structured values
+(D13); see [workshop rankings](20.7-workshop-rankings.md).
 
 ---
 

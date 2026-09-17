@@ -4,7 +4,7 @@
 
 Organisers review derived sleeping parties before touching the board. Route:
 `/organiser/parties`. Governing specs: [organiser view](../09-organiser-view.md) §4,
-[room assignment](../05-room-assignment.md), and decision [D5](../17-decisions.md#d5-party-formation-is-a-separate-reviewable-phase).
+[sleeping parties](../20.3-sleeping-parties.md), [child rooms](../20.4-child-rooms.md), and decision [D5](../17-decisions.md#d5-party-formation-is-a-separate-reviewable-phase).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

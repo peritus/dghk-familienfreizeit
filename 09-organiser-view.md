@@ -65,10 +65,11 @@ accurate count of consequences. If the derivation produces the same hash:
 unplaceable parties, refused merges, workshops below minimum. Each links
 directly to the thing.
 
-Preflight findings come first. C8 in particular is the earliest possible
+Preflight findings come first. Requirement arithmetic
+([room assignment](20.5-room-assignment.md) §9) in particular is the earliest possible
 warning and should be the most prominent thing on the screen when it fires:
 
-> ⚠ **needs-ensuite: 19 beds required, 14 available.** Five people cannot be
+> ⚠ **needs-private-sanitary: 19 beds required, 14 available.** Five people cannot be
 > placed however the rooms are arranged. *See affected families →*
 
 > ⚠ **2 constraint conflicts** — constrained people are no longer in one party.
@@ -160,7 +161,7 @@ Each party renders as a card:
 Provenance is the content. An organiser reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
 Each requirement names which member family contributed it
-([labels and constraints](04-labels-and-constraints.md) §5.3) — a merged party's `required` tag binding
+([sleeping parties](20.3-sleeping-parties.md) §7) — a merged party's `required` tag binding
 everyone is correct but surprising, and the card is where that surfaces.
 
 **Warnings inline, at the top:**
@@ -168,7 +169,7 @@ everyone is correct but surprising, and the card is where that surfaces.
 > ⚠ 7 parties of one person. Consider merging or contacting these families.
 > ⚠ Merge refused: Müller + Schmidt + Weber, combined demand 10 exceeds
 > the largest room (6 places). Treated as a preference instead.
-> ⚠ Preflight C4: merged party Müller + Schmidt + Weber needs a six-place
+> ⚠ Merged party Müller + Schmidt + Weber needs a six-place
 > ensuite room (Schmidt's requirement); no such room exists.
 
 **Merge and split** open a small dialog and append `groups-with` or
@@ -357,7 +358,7 @@ since, the server returns 409 with the events it has gained, and the board says:
 Re-deriving is honest work rather than merge logic: the pending events are folded
 onto the newer log and the board shows the resulting plan. Payloads are complete
 restatements ([03-events](03-events.md)) and constraints name stable entities
-([08-constraint-health](08-constraint-health.md) §3), so the result is well defined.
+([labels and constraints](04-labels-and-constraints.md) §5), so the result is well defined.
 A pending event that names something Anna withdrew surfaces as an ordinary
 constraint diagnostic, not as a conflict the organiser has to resolve by hand.
 

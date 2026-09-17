@@ -194,7 +194,7 @@ weight tuning). `config_hash` makes every change visible in plan metadata
 *Chosen.* A person's ranking for a slot is a set of `prefers-workshop` labels whose
 structured values carry the slot, the workshop, and the rank, validated by the
 `ordered-choice` resolver operator. There is no dedicated ranking event and no
-property table. Rationale in [labels and constraints](04-labels-and-constraints.md) §7.
+property table. Rationale in [workshop rankings](20.7-workshop-rankings.md).
 
 ## D14 — `family_facing` in the occasion profile drives the family view
 
@@ -222,7 +222,7 @@ corpus need no machinery of their own — they are all the same two calls.
 
 *Consequence:* experiments stay out of the log. An organiser who tries four
 arrangements appends the events for the one they chose, so constraints in the log
-are decisions rather than sediment, and [constraint health](08-constraint-health.md)
+are decisions rather than sediment, and [constraint health](20.11-constraint-health.md)
 reasons only about constraints someone meant.
 
 *Cost:* the organiser chunk carries the derivation core, and two runtimes execute one

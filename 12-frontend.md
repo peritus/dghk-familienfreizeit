@@ -270,7 +270,7 @@ POST /api/organiser/apply
 
 The server's plan is authoritative. `output_hash` travels so the server can check
 that the world the organiser acted on is the world it derived; the determinism contract
-([room assignment](05-room-assignment.md) §1) says the two agree, so a mismatch is
+([solver contract](05-solver-contract.md) §1) says the two agree, so a mismatch is
 reported as a defect rather than smoothed over.
 
 A stale bundle must not derive at all. The log response carries the Worker's

@@ -11,8 +11,9 @@ A single mechanism for intrinsic facts, preferences, capabilities, relations,
 and organiser decisions. It covers both occasion-specific properties and matching
 constraints without adding entity-specific property columns.
 
-Built-in vocabulary lives in code; custom matching keys are defined by events
-and use only the fixed resolver operators in this document. This document
+Built-in vocabulary lives in code — module-owned keys and profile tags; custom
+matching keys are defined by events and use only the fixed resolver operators in
+this document. This document
 covers labels, constraints, and how the solver consumes them.
 
 ---
@@ -112,7 +113,7 @@ before it returns a world. They are not authoritative inputs.
 ## 3. Capabilities come from labels
 
 A room's capability set is read from its `provides` labels. Properties such as
-`sanitary=private`, `floor=0`, and `is-accessible=true` are labels too. A
+`sanitary=private`, `floor=ground`, and `is-accessible=true` are labels too. A
 configured resolver may derive a capability from those labels, but the derived
 value is never stored as a competing column or manually assigned fact:
 
@@ -150,16 +151,19 @@ appended ([03-events](03-events.md)). The checks are:
 2. **Scope matches** the entity kind and operator.
 3. **Value type matches** the definition and entity references resolve.
 4. **Strength is legal** for the constraint.
-5. **Cardinality and validity pass**, including child-group requirements only on
-   children and child-group capabilities only on child rooms.
+5. **Cardinality and validity pass**, including the tag's `valid_for` evaluator —
+   for example child-group requirements only on children
+   ([child rooms](20.4-child-rooms.md) §6).
+6. **The key is not module-owned.** Keys a module sets only through its own events,
+   such as `located-in`, are rejected ([modules](20-modules.md) §3.1).
 
 Failures are field-level errors on the form, never silent. Because `type Tag =
 keyof typeof profile.tags`, a bad tag in *code* is a compile error, and a zod
 enum derived from the same object makes a bad tag from a *request* a validation
 error. There is no path by which an unknown tag enters the log.
 
-Tags removed from the profile mid-run are the one remaining case, handled as
-preflight C7 (§6): the fold retains them, the solver ignores them, the
+Tags removed from the profile mid-run are the one remaining case, handled by
+`kernel.unknown-tag` (§6): the fold retains them, the solver ignores them, the
 report names them.
 
 ### Authorisation
@@ -175,206 +179,86 @@ family view.
 
 ---
 
-## 5. Two generic handlers
+## 5. Constraint definitions and the organiser
 
-The generic handlers keep constraint evaluation in one auditable place.
-
-### 5.1 `rules/hard/tag-requirements.ts`
+Organiser-created matching vocabulary is stored as `ConstraintDefined` events
+([events](03-events.md)). It is data only:
 
 ```ts
-export const tagRequirements: Rule = {
-  id: 'hard.tag-requirements',
-  since: '2.0.0',
-
-  evaluate(party, room, ctx) {
-    const have = ctx.capabilities(room)
-    const missing: Tag[] = []
-
-    for (const req of party.requirements) {
-      const def = profile.tags[req.tag]
-      const ok = def.satisfied_by
-        ? have.has(def.satisfied_by)
-        : def.check!(party, room, ctx)       // structural, e.g. sole-occupancy
-      if (!ok && req.strength === 'required') missing.push(req.tag)
-    }
-
-    return missing.length ? infeasible(missing) : 0
-  },
-
-  describe(party, room, ctx) {
-    const missing = /* as above */
-    return missing.length
-      ? `${roomLabel(room)} fehlt: ${missing.map(t => profile.tags[t].label).join(', ')}`
-      : null
-  },
+{
+  key: 'room-with-garden-view',
+  label: 'Zimmer mit Gartenblick',
+  description: 'Requested by the organiser for this family.',
+  operator: 'needs-provides',
+  needs_scopes: ['person', 'family'],
+  provides_scopes: ['room'],
+  strength: 'required'
 }
 ```
 
-Its soft counterpart, `rules/soft/tag-preferences.ts`, is the same loop over
-`strength === 'preferred'`, returning `+weight` on satisfaction and `+penalty`
-on violation (see [occasion profiles](16-occasion-profiles.md) §4 for the two-field
-convention).
-
-Two requirement shapes are supported, and the distinction matters:
-
-- **`satisfied_by: 'ensuite'`** — a room capability. A set lookup.
-- **`check: (party, room, ctx) => boolean`** — structural, depending on the
-  placement rather than the room. `sole-occupancy` asks whether every current
-  occupant belongs to this party, which no capability can express.
-
-### 5.2 `tagRelations`
-
-One handler, split across two phases because relations act at different points.
-
-**In party formation** (`parties.ts`), for `kind: 'same-room'`:
-
-```
-edges = mutual pairs at strength 'required'
-union-find over edges → components
-each component merges its members' residue parties
-```
-
-Non-mutual, or mutual at `preferred`, becomes a soft term worth
-`one_sided_weight`.
-
-**In placement** (`rules/`), for the rest:
-
-| `kind` | Acts as | Where |
+| Operator | Example | Effect |
 |---|---|---|
-| `same-room` | merge (mutual required) or soft bonus | parties / soft |
-| `not-same-room` | hard rule pruning rooms | hard |
-| `adjacent` | soft, scaled by `room_adjacency.distance` | soft |
-| `same-workshop` | co-assignment group | workshop solver |
+| `needs-provides` | person needs / room provides | matching capability |
+| `excludes` | family excludes family | forbidden match |
+| `groups-with` | person groups-with person | same party or same workshop group |
+| `separates-from` | family separates-from family | keep apart |
 
-`symmetry` has three values:
+Organisers cannot upload executable rules. New mechanisms belong in module code and
+the active profile; new facts and ordinary matching constraints do not.
 
-- `mutual-required` — both directions must exist at `required` to bind.
-- `implied-mutual` — one row binds both directions. Used by `apart-from`; it is
-  what a pair-normalizing relational table would express.
+Dragging a party to a room creates a custom definition when necessary and applies it
+with `LabelSet`. Clearing it emits `LabelCleared`. There is no separate undo stack,
+override table, reason taxonomy, or retirement event.
+
+Constraints reference stable people, families, workshops, rooms, and places. They
+never reference derived party keys. If party formation changes, the consuming module
+reports a spanning or unsatisfied constraint instead of applying it partially.
+
+### How modules consume constraints
+
+The resolver materialises labels and definitions into capabilities and active
+constraints once per derivation. Modules consume them; none re-implements matching:
+
+| Module | Consumes |
+|---|---|
+| [sleeping parties](20.3-sleeping-parties.md) | party requirements; `groups-with` and `separates-from` on people and families |
+| [child rooms](20.4-child-rooms.md) | the child-group `needs-provides` pair |
+| [room assignment](20.5-room-assignment.md) | requirements against room capabilities; structural checks; keep-apart relations; `needs-provides` constraints naming rooms and places |
+| [workshop rankings](20.7-workshop-rankings.md) | the `ordered-choice` operator |
+| [workshop assignment](20.8-workshop-assignment.md) | co-assignment `groups-with`; constraints naming workshops |
+
+Relation symmetry is declared on the tag and interpreted by the resolver:
+
+- `mutual-required` — both directions must exist at `required` to bind;
+- `implied-mutual` — one label binds both directions;
 - `one-sided-soft` — never binds; always a preference.
-
-**The unplaceable-merge guard is generalized.** If a
-merged component's `bed_demand` exceeds the largest room's place count, the merge
-is refused, downgraded to a preference, and reported as an error-severity
-preflight finding. Without it the solver builds a party no room can hold and then
-reports it unplaced with no explanation.
-
-### 5.3 Party tags
-
-Party requirements are **derived**, never stored: the union of its member
-families' requirement tags, with the strictest strength winning
-(`required` > `preferred`).
-
-**Consequence worth knowing:** in a merged party, one family's `required` binds
-everyone. Two families merge, one requires an ensuite, and the merged party of
-six now needs a six-place ensuite room that may not exist. The unplaceable-merge
-guard catches the capacity case; this one surfaces as preflight C4 with the
-requirement named. It is the correct semantics — they *are* sharing a room — but
-it surprises people, so the party card in
-[organiser view](09-organiser-view.md) §4 shows which member contributed each requirement.
 
 ---
 
 ## 6. Preflight
 
-A phase running **before** party formation, on the plan's solver input alone. Output
-is stored on the plan and rendered on the dashboard.
+Preflight runs before any solver stage over the solver input alone
+([solver contract](05-solver-contract.md) §3). The kernel contributes the checks that
+concern labels and definitions themselves; each module contributes checks about its
+mechanism, listed in its specification §9.
 
-Its value is timing. A resolver surfaces infeasibility as a post-hoc "38 rooms rejected
-on capacity" after a full solve. Preflight says it in week two, before a single
-placement runs.
-
-| | Check | Severity |
+| Check | Severity | Fires when |
 |---|---|---|
-| C1 | A requirement is required by ≥1 entity and no room holds the paired capability | error |
-| C2 | A relation's `value` names a withdrawn or absent entity | error |
-| C3 | Contradictory tags on one entity (`sole-occupancy: required` with any `room-with: required`) | error |
-| C4 | A mutual-required component's bed demand exceeds the largest feasible room | error |
-| C5 | Scope violation — a person-scoped tag on a family | error |
-| C6 | `valid_for` failure — a child-group requirement on a non-child person or a child-group capability on a non-child room | warning |
-| C7 | An assignment names a tag no longer in the profile | warning |
-| C8 | **Requirement arithmetic** — demand for a capability exceeds supply | error |
-| C9 | A transitive merge cascade produced a party nobody asked for | info |
-
-### C8 is the one to build first
-
-```
-for each requirement tag R:
-    demand = Σ bed_demand of parties requiring R at 'required'
-    supply = Σ places in rooms holding satisfied_by(R)
-    if demand > supply: error
-```
-
-> **C8 · needs-ensuite** — 19 beds required, 14 available.
-> Five people cannot be placed regardless of how the rooms are arranged.
-> Families affected: Braun (5), Weber (4), Koch (2), Lang (3), Ott (5).
-
-That is a phone call, not a re-solve, and the earlier it appears the cheaper it
-is. Run it per requirement tag, plus once for the intersection of any two
-requirements that co-occur on the same party.
-
-### Severity behaviour
-
-- **error** — the plan computes and stores, but publishing requires an explicit
-  acknowledgement. Never block computing: an organiser needs to see the plan to
-  understand the error.
-- **warning** — shown on the dashboard, no gate.
-- **info** — shown on the relevant screen only.
+| `kernel.dangling-reference` | error | a label or constraint names a withdrawn, retired, or absent entity |
+| `kernel.contradiction` | error | one entity holds `groups-with` and `separates-from` towards the same entity at `required` |
+| `kernel.scope-violation` | error | a label is held by an entity kind outside its tag's scopes |
+| `kernel.valid-for` | warning | a label's `valid_for` evaluator no longer holds for its entity |
+| `kernel.unknown-tag` | warning | a live label names a tag no longer in the profile; the fold retains it, the solver ignores it |
 
 ---
 
 ## 7. Ordered values
 
-A ranking is person → slot → *ordered list*. Rank is not strength: strength is
-how binding a preference is, rank is position in a list. They are independent
-dimensions represented in the structured label value and its constraint
-definition.
-
-The resolver validates the ordering constraint:
-
-The structured label value contains the slot, workshop, and rank. The resolver
-checks that no two ranks collide for one person and slot, and that ranks for a slot
-are dense from 1.
-
-```text
-person:123  prefers-workshop={"slot":"slot_sat-morning","workshop":"ws_4","rank":1}
-person:123  prefers-workshop={"slot":"slot_sat-morning","workshop":"ws_2","rank":2}
-person:123  prefers-workshop={"slot":"slot_sat-afternoon","workshop":null,"rank":null}
-```
-
-A `workshop: null` value states "no preference" for that slot. It is meaningfully
-different from having no `prefers-workshop` label for the slot at all — the latter
-shows up in the organiser's chase list — and `ordered-choice` rejects it alongside
-ranked values for the same slot. Re-ranking a slot clears its labels and sets the
-new ones in one append.
-
-Workshop rankings remain ordered values, represented by the `ordered-choice`
-constraint operator.
-
-All workshop properties are labels:
-
-| Fact about a workshop | Mechanism |
-|---|---|
-| Who ranked it, and in what order | `prefers-workshop` structured labels |
-| Age bounds, capacity | `min-age`, `max-age`, and `capacity` labels |
-| "Lena must be with her brother" | `workshop-with=per_x`, a relation tag |
-
-### Co-assignment groups
-
-`workshop-with` at `mutual-required` forms a group that the workshop solver
-treats as one claimant.
-
-The group's preference ordering is the **sum of its members' ranks** per
-workshop, lowest first; an unranked workshop counts as `n + 1`. Ties break on the
-lowest member `person_id`. This is explainable in the trace, which is why it beats
-using one member's list:
-
-> **Klettern** — group (Lena Schmidt, Tom Schmidt) assigned, combined rank 4.
-> Lena ranked it 1st, Tom 3rd. Tom's own 1st choice was Töpfern.
-
-If a group's size exceeds the remaining capacity of every workshop it could
-otherwise claim, the group is split and reported rather than cascaded — the same
-shape as the unplaceable-merge guard.
+`ordered-choice` is the operator for ranked preferences: a structured label value
+carrying a scope entity, a choice, and a rank. It validates unique, dense ranks per
+holder and scope entity. Rank is not strength: strength is how binding a preference
+is, rank is a position in a list. The workshop ranking that uses it, including the
+"no preference" value, is specified in [workshop rankings](20.7-workshop-rankings.md).
 
 ---
 
@@ -385,7 +269,7 @@ shape as the unplaceable-merge guard.
 **Typos become silence.** `room-with=fam_72` for `fam_27` — a relational foreign
 key would catch that; a label does not. The merge simply never happens and
 nothing errors.
-This is why append-time check 3 (§4) and preflight C2 both exist. Neither is
+This is why append-time check 3 (§4) and `kernel.dangling-reference` (§6) both exist. Neither is
 optional; together they restore the property that a constraint either applies or
 is visibly reported.
 
@@ -393,8 +277,9 @@ is visibly reported.
 assignments, or you get two answers to "does Room 14 have an ensuite". Enforced
 at append time and tested in [testing](14-testing.md).
 
-**Requirement inflation through merges.** See §5.3. The strictest-strength union
-is correct and surprising.
+**Requirement inflation through merges.** See
+[sleeping parties](20.3-sleeping-parties.md) §7. The strictest-strength union is
+correct and surprising.
 
 **Labels as a dumping ground.** `descriptive` is the pressure valve — annotations
 that the solver ignores. Without it, organisers will reach for a constraint-kind tag
@@ -403,5 +288,5 @@ obvious in the organiser UI.
 
 **Canonical ordering.** Labels are an array in the solver input and must be sorted
 like every other one: `entity_id`, `key`, `value`.
-[room assignment](05-room-assignment.md) §1 R1 applies unchanged, and the
+[solver contract](05-solver-contract.md) §1 R1 applies unchanged, and the
 shuffle-invariance test covers it once the array is added to the solver input.

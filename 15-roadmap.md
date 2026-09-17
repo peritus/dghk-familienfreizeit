@@ -87,9 +87,10 @@ translated into another data format.
 *The riskiest milestone. Do it third, not last. Three to four days.*
 
 - `solver-input.ts` with the freeze-and-sort discipline
-- Preflight, C1–C9
-- The two generic handlers, `tagRequirements` and `tagPreferences`, replacing
-  eight rule files — the generic handlers keep the implementation small
+- Preflight: kernel checks and the room modules' checks
+- The module contract, `defineOccasionProfile`, and the room modules
+  ([modules](20-modules.md)); the two generic tag rules, `hard.tag-requirements` and
+  `soft.tag-preferences`, keep the implementation small
 - Party formation: children's rooms first, residue, merges, the unplaceable-merge
   guard
 - Placement phases 0–4
@@ -104,7 +105,8 @@ translated into another data format.
 **Done when:** you can derive a plan from the real inventory and real families
 (with preferences entered by hand as events) and read the trace top to
 bottom without confusion, and you can say whether the ensuite requests are
-satisfiable — preflight C8.
+satisfiable — requirement arithmetic
+([room assignment](20.5-room-assignment.md) §9).
 
 **This is the checkpoint.** If party formation does not express the real
 situation — if the families' actual arrangements do not fit the party model —
@@ -265,7 +267,7 @@ something else. A solver without a trace is a black box
 nobody will trust; unexplained constraints are permanent sediment. The profile
 is **not cuttable** — it consolidates the matching model and occasion vocabulary, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
-to C8 alone, which carries most of the value.
+to requirement arithmetic alone, which carries most of the value.
 
 ---
 
@@ -280,7 +282,7 @@ to C8 alone, which carries most of the value.
 | Capacity is genuinely insufficient | Low | The unplaced report names the binding constraint early |
 | Solver is chaotic — small input changes move many people | Low | The `movedCount` integration test catches it |
 | Scope creep into catering, transport, payments | **High** | The scope section in this roadmap; say no |
-| Profile vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; C7 makes removals visible; a rename costs nothing |
+| Profile vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; `kernel.unknown-tag` makes removals visible; a rename costs nothing |
 
 The two highest-likelihood risks are both about data rather than software.
 Families may not fill in a future preference form, and the room inventory will be

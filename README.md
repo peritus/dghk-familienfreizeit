@@ -4,25 +4,36 @@
 
 | # | Document | What it settles |
 |---|---|---|
-| 01 | [Architecture](01-architecture.md) | Module composition, request lifecycle, and boundaries |
+| 01 | [Architecture](01-architecture.md) | Kernel and modules, request lifecycle, and boundaries |
 | 02 | [Data model](02-data-model.md) | Generic identity, labels, relationships, and projections |
 | 03 | [Event model](03-events.md) | Generic event envelope, replay, and lifecycle |
 | 04 | [Labels and constraints](04-labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
-| 05 | [Room assignment](05-room-assignment.md) | Generic room modules and deterministic placement |
-| 06 | [Workshop assignment](06-workshop-assignment.md) | Generic ranking and workshop modules |
-| 07 | [Materials coordination](07-materials.md) | Generic requests, commitments, and fulfillment |
-| 08 | [Constraint health](08-constraint-health.md) | Preflight, diagnostics, and regression corpus |
+| 05 | [Solver contract](05-solver-contract.md) | Determinism contract, solver input, pipeline, rules, and trace |
 | 09 | [Organiser view](09-organiser-view.md) | Organisation-team surfaces and module-provided screens |
 | 10 | [Family view](10-family-view.md) | Family-facing controls, privacy, and family workflows |
 | 11 | [Authentication](11-authentication.md) | Magic links, sessions, and threat model |
 | 12 | [Frontend](12-frontend.md) | Rendering, enhancement, styling, and board island |
 | 13 | [Deployment](13-deployment.md) | One profile per deployment, migrations, secrets, and email |
-| 14 | [Testing](14-testing.md) | Generic module contracts and event fixtures |
+| 14 | [Testing](14-testing.md) | Determinism tests, module contracts, and event fixtures |
 | 15 | [Roadmap](15-roadmap.md) | Delivery milestones and cut lines |
 | 16 | [Occasion profiles](16-occasion-profiles.md) | Profile contract and configuration rules |
 | 17 | [Decisions](17-decisions.md) | Architectural decisions and their accepted alternatives |
 | 18 | [German translation guidelines](18-german-translation-guidelines.md) | Family-facing terminology and translation rules |
 | 19 | [Reports](19-reports.md) | Report catalogue, audience scopes, responsive behavior, and browser printing |
+| 20 | [Modules](20-modules.md) | Module contract, composition, and catalogue |
+| 20.1 | [Room inventory](20.1-room-inventory.md) | Buildings, rooms, beds, places, designations, and capacity |
+| 20.2 | [Room adjacency](20.2-room-adjacency.md) | Distances between rooms |
+| 20.3 | [Sleeping parties](20.3-sleeping-parties.md) | Party formation, merges, and party requirements |
+| 20.4 | [Child rooms](20.4-child-rooms.md) | Child groups and children's rooms placed before parties |
+| 20.5 | [Room assignment](20.5-room-assignment.md) | Deterministic placement, room scoring, and the board |
+| 20.6 | [Workshops](20.6-workshops.md) | Slots, workshops, audience, leadership, and cancellation |
+| 20.7 | [Workshop rankings](20.7-workshop-rankings.md) | Ordered per-person workshop choices |
+| 20.8 | [Workshop assignment](20.8-workshop-assignment.md) | Fair workshop assignment and co-assignment groups |
+| 20.9 | [Food preferences](20.9-food-preferences.md) | Per-person diet and allergy text |
+| 20.10 | [Materials](20.10-materials.md) | Requests, commitments, and fulfilment |
+| 20.11 | [Constraint health](20.11-constraint-health.md) | Counterfactual constraint buckets and regression corpus |
+| 20.12 | [Family preferences](20.12-family-preferences.md) | The profile-driven preferences page and control union |
+| 20.13 | [Change notifications](20.13-change-notifications.md) | Publication and change emails |
 
 ## What this is
 
@@ -108,6 +119,13 @@ first-class deliverable that organisers read.
 
 **Tag** — a named fact in an occasion profile's vocabulary, optionally pointing at
 another entity and optionally carrying a strength. Stored as a generic label.
+
+**Kernel** — the part of the application present in every deployment: event log,
+labels and resolver, derivation, solver pipeline, publication, authentication, and
+application shells.
+
+**Module** — a selectable unit of domain capability with a stable kebab-case id,
+typed parameters, and its own specification in `20.N-<module-id>.md`.
 
 **Occasion profile** — the typed composition of modules and the occasion-specific
 vocabulary, policy, parameters, and copy for one deployment. The first profile

@@ -4,7 +4,7 @@
 
 Organisers open this screen to answer “what needs attention today?” Route:
 `/organiser`. Governing specs: [organiser view](../09-organiser-view.md) §2 and
-[constraint health](../08-constraint-health.md).
+[constraint health](../20.11-constraint-health.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

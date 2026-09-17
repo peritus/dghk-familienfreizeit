@@ -6,25 +6,25 @@ does not define a separate application architecture.
 
 ## 1. Selected modules
 
-The profile enables:
+The profile selects these modules ([modules](../20-modules.md) §5):
 
-- event log, labels, constraints, plans, publication, authentication, and shared
-  UI modules;
-- room inventory with buildings, rooms, beds, places, and capacity;
-- sleeping-party formation and deterministic room assignment;
-- children’s rooms with explicit child-group capabilities and minimum occupancy,
-  and family fallback;
-- co-rooming and keep-apart relations;
-- workshop slots and workshops;
-- ordered per-person workshop rankings;
-- workshop age eligibility, capacity, cancellation, fairness, and co-assignment;
-- workshop audience and person-to-workshop leadership;
-- food preferences with one per-person diet value and optional allergy text;
-- materials contributed by families and linked to workshops;
-- organiser board, family view, notifications, and constraint health.
+| Module | Used for |
+|---|---|
+| [`room-inventory`](../20.1-room-inventory.md) | buildings, rooms, beds, places, and capacity |
+| [`sleeping-parties`](../20.3-sleeping-parties.md) | party formation, co-rooming, and requirement inheritance |
+| [`child-rooms`](../20.4-child-rooms.md) | children's rooms with explicit child groups, minimum occupancy, and family fallback |
+| [`room-assignment`](../20.5-room-assignment.md) | deterministic placement, keep-apart relations, and the board |
+| [`workshops`](../20.6-workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
+| [`workshop-rankings`](../20.7-workshop-rankings.md) | ordered per-person workshop rankings |
+| [`workshop-assignment`](../20.8-workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and co-assignment |
+| [`food-preferences`](../20.9-food-preferences.md) | one diet per person and optional allergy text |
+| [`materials`](../20.10-materials.md) | materials contributed by families and linked to workshops |
+| [`constraint-health`](../20.11-constraint-health.md) | constraint health on the dashboard |
+| [`family-preferences`](../20.12-family-preferences.md) | the family preferences page |
+| [`change-notifications`](../20.13-change-notifications.md) | publication and change emails |
 
-Room adjacency is not selected for the first deployment. The generic extension
-point remains available.
+[`room-adjacency`](../20.2-room-adjacency.md) is not selected for the first
+deployment.
 
 ## 2. Room inventory
 

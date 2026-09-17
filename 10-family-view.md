@@ -33,25 +33,12 @@ minds. Everything saves on change.
 
 Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
 zusammen?") are **generated from the active occasion profile**: every tag declaring
-`family_facing` produces a control, in profile order, grouped by scope. The
+`family_facing` produces a control, in the sections the profile configures. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
-`control` is a closed union, and this is the thing to think about up front —
-see [occasion profiles](16-occasion-profiles.md) §6:
-
-| `control` | Renders | Writes |
-|---|---|---|
-| `tri-state` | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `LabelCleared` |
-| `toggle` | one checkbox | `LabelSet` with no strength, or `LabelCleared` |
-| `family-picker` | searchable family list, multi-select | one `LabelSet` per selection, `value` = family id |
-| `person-picker` | people within the same family | one `LabelSet` per selection, `value` = person id |
-
-Adding a tag that reuses an existing control is a **one-file change**; adding a
-*new kind* of control is two files.
-
-`invert: true` on `sole-occupancy` flips the labels so the family view reads
-"Zimmer teilen: gerne / lieber nicht / auf keinen Fall" while the stored tag
-stays positively named. Presentation only.
+The page, its sections, the closed `control` union, and the save-on-change contract
+are specified by the [family preferences](20.12-family-preferences.md) module. A tag
+that reuses an existing control needs no family view code.
 
 ```
 Willkommen, Familie Müller
@@ -236,6 +223,9 @@ is where it was before this application existed.
 ---
 
 ## 4. Emails
+
+Invitation and reminder emails are kernel; publication and change emails are
+contributed by [change notifications](20.13-change-notifications.md).
 
 Four kinds. All plain, all short, all with the link.
 

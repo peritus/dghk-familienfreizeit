@@ -1,0 +1,246 @@
+# 20 — Modules
+
+The application is a fixed platform kernel plus a set of selectable modules. An
+occasion profile ([occasion profiles](16-occasion-profiles.md)) selects modules and
+configures them; this document defines what a module is, how modules compose, and
+which modules exist. Each module has its own specification, `20.N-<module-id>.md`.
+
+## 1. Kernel and modules
+
+The **kernel** is present in every deployment and is never listed in a profile:
+
+| Kernel part | Specified in |
+|---|---|
+| Event envelope, append, replay, KDL event source | [events](03-events.md), [data model](02-data-model.md) |
+| Family and person identity, invitation, and person events | [events](03-events.md) |
+| Labels, constraint definitions, fixed resolver operators, append validation | [labels and constraints](04-labels-and-constraints.md) |
+| `derive`, `diff`, the solver pipeline, determinism contract, preflight framework, trace | [architecture](01-architecture.md), [solver contract](05-solver-contract.md) |
+| Plans and publication | [architecture](01-architecture.md), [events](03-events.md) |
+| Authentication, sessions, organiser allowlist | [authentication](11-authentication.md) |
+| Organiser application shell, board-independent screens, family view shell, reports framework, email transport | [organiser view](09-organiser-view.md), [family view](10-family-view.md), [reports](19-reports.md), [deployment](13-deployment.md) |
+
+A **module** is a selectable unit of domain capability. It owns a mechanism — entity
+kinds, events, the label keys it interprets, solver stages, diagnostics, screens,
+reports, and test contracts — and exposes a typed parameter object through which a
+profile supplies policy. A module never owns occasion vocabulary; it names the
+*roles* a profile tag must fill and checks the tag's shape.
+
+Nothing about the kernel is optional, so listing it in a profile would add noise
+without adding a choice. Everything a profile can choose is a module.
+
+## 2. Authority
+
+A module specification is the single authoritative description of its mechanism:
+its events and payloads, built-in label keys, parameters, stage behaviour,
+diagnostics, and outputs. Other documents link to it rather than restate it.
+
+Screen interaction design stays in the [UI screen catalog](ui/README.md) and the
+[organiser](09-organiser-view.md) and [family](10-family-view.md) views. A module
+specification lists which screens and reports it contributes and what data they
+show; the linked screen specification decides how they look and behave.
+
+Concrete vocabulary, values, weights, and copy belong to the profile. The first
+deployed profile is [familienfreizeit-2027](profiles/familienfreizeit-2027.md), with
+its configuration in [`profiles/familienfreizeit-2027.ts`](profiles/familienfreizeit-2027.ts).
+
+## 3. Module contract
+
+Every module is defined once, in `src/modules/<module-id>/index.ts`, with
+`defineModule`. The module factory a profile calls — `roomInventory({ … })` — returns
+the definition bound to validated parameters.
+
+```ts
+export interface ModuleDefinition<Id extends ModuleId, Params> {
+  id: Id                                   // kebab-case; stable forever
+  version: string                          // semver; included in config_hash
+  requires: readonly ModuleDependency[]    // missing or incompatible → profile build fails
+  enhances: readonly ModuleDependency[]    // used when selected, ignored otherwise
+  params: z.ZodType<Params>                // parsed at profile build; defaults live here
+  contribute(params: Params, profile: ProfileView): ModuleContributions
+}
+
+export interface ModuleDependency {
+  id: ModuleId
+  range: string                            // semver range, e.g. '^1.0.0'
+}
+
+export interface ModuleContributions {
+  entity_kinds: readonly EntityKindDefinition[]
+  events: readonly EventDefinition[]
+  label_keys: readonly BuiltInLabelKey[]
+  tag_roles: readonly TagRole[]
+  solver_input: readonly SolverInputContribution[]
+  stages: readonly SolverStage[]
+  rules: readonly Rule[]
+  preflight_checks: readonly PreflightCheck[]
+  change_kinds: readonly ChangeKind[]
+  routes: readonly RouteDefinition[]       // Worker handlers under src/modules/<id>/worker/
+  screens: readonly ScreenDefinition[]     // React screens under src/modules/<id>/app/
+  family_controls: readonly ControlDefinition[]
+  reports: readonly ReportDefinition[]
+  emails: readonly EmailDefinition[]
+  fixtures: readonly FixtureContract[]
+}
+```
+
+Empty contributions are empty arrays. `contribute` is a pure function of the
+parameters and a read-only view of the rest of the profile; it performs no I/O and
+is evaluated once, at profile build.
+
+### 3.1 Contribution kinds
+
+| Contribution | Contract |
+|---|---|
+| `entity_kinds` | Kind name (kebab-case), id prefix, and whether ids are caller-generated or derived by the fold. The fold rejects an id reused under another kind. |
+| `events` | Event type, zod payload schema, fold function, append invariants, and the authorisation rule. The fold function may create entity identity and emit labels; it may not emit derived results. |
+| `label_keys` | Label keys the module owns outright, such as `located-in` for inventory, with value type, scopes, and cardinality. A profile may not define a tag with the same key. |
+| `tag_roles` | A slot a profile tag must fill, such as the co-room relation for party formation: the parameter that names the tag, and the operator, scopes, value type, and strengths the tag must have. |
+| `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](05-solver-contract.md) §1, R1). |
+| `stages` | Pure solver stages with explicit ordering and a typed output section of the plan (§4). |
+| `rules` | Hard and soft rules, each with `describe` ([solver contract](05-solver-contract.md) §4). |
+| `preflight_checks` | Checks run before any stage, with an id, severity, and message template. |
+| `change_kinds` | What `diff` reports for this module's plan section, and how a change is attributed to a family. |
+| `routes`, `screens` | Worker handlers and organiser or family screens. A route or screen of an unselected module does not exist in the build. |
+| `family_controls` | Additional `control` kinds for the preferences renderer ([family preferences](20.12-family-preferences.md)). |
+| `reports` | Report definitions with audience and sensitivity ([reports](19-reports.md)). |
+| `emails` | Email kinds with their trigger and the plan data they may include. |
+| `fixtures` | The KDL fixture and golden-plan contracts a profile that selects the module must supply ([testing](14-testing.md)). |
+
+### 3.2 Parameters
+
+Parameters are data. They follow the naming decision (D18): snake_case fields,
+kebab-case vocabulary values, integer weights. A parameter that names a profile tag
+ends in `_tag` and holds the tag key. Functions are allowed only where a module
+specification names a pure evaluator slot, and they are hashed by source like every
+other profile function.
+
+Defaults live in the module's zod schema, so a profile states only what it changes.
+The canonicalised, defaulted parameter object is what enters `config_hash`, so a
+default that changes in a new module version is visible as a configuration change.
+
+### 3.3 Versions
+
+A module's `version` follows semver over its observable behaviour:
+
+- **patch** — no change to any plan, trace text, event schema, or parameter;
+- **minor** — new optional parameters, event types, rules, reports, or screens;
+  existing plans derive unchanged under default parameters;
+- **major** — anything that can change a derived plan or reject previously valid
+  events or parameters.
+
+A rule is never edited to mean something different; a new rule id replaces it
+([solver contract](05-solver-contract.md) §4). The solver version recorded on a
+plan is the kernel version plus every selected module's id and version.
+
+## 4. Composition
+
+The profile builder, `defineOccasionProfile`, composes selected modules at build
+time and fails the build when:
+
+- a module is selected twice;
+- a `requires` dependency is missing or out of range;
+- two modules contribute the same entity kind, event type, label key, route, or
+  report id;
+- a profile tag collides with a module-owned label key;
+- a tag role parameter names no tag, or names a tag of the wrong shape;
+- a parameter fails its schema;
+- a vocabulary identifier is not kebab-case.
+
+### 4.1 Stage order
+
+Solver stages declare their order explicitly:
+
+```ts
+export interface SolverStage<Output = unknown> {
+  id: string                               // '<module-id>.<stage>', e.g. 'child-rooms.place'
+  after: readonly string[]                 // stage ids that must run first, when selected
+  before: readonly string[]                // stage ids that must run later, when selected
+  reads: readonly string[]                 // stage ids whose output this stage consumes
+  run(input: SolverInput, upstream: StageOutputs, config: SolverConfig): StageResult<Output>
+}
+```
+
+The kernel orders the selected stages topologically; ties break on stage `id`. An
+`after`, `before`, or `reads` entry naming a stage of an unselected module is
+ignored, which is how an enhancing module plugs in without the base module
+knowing whether it is present. A cycle fails the profile build.
+
+`run` follows the determinism contract. It returns its output section, trace
+entries, and diagnostics; it never mutates `input` or another stage's output.
+Downstream stages read upstream output only through `upstream`, and only for the
+stages they list in `reads`.
+
+The plan holds one section per stage-owning module, keyed by module id
+([solver contract](05-solver-contract.md) §5). Modules export typed accessors, such as `roomAssignmentSection(plan)`, so
+application code never reads `sections` with a bare string.
+
+### 4.2 When a module is not selected
+
+An unselected module contributes nothing: no entity kind, event type, label key,
+solver input, stage, rule, preflight check, plan section, route, screen, control,
+report, email, or fixture requirement. An event of a type no selected module
+defines fails replay validation, which is the signal that a profile change needs a
+migration ([deployment](13-deployment.md) §2).
+
+## 5. Catalogue
+
+| Module | Owns | Requires | Enhances |
+|---|---|---|---|
+| [`room-inventory`](20.1-room-inventory.md) | Buildings, rooms, beds, places; designations; capacity | — | — |
+| [`room-adjacency`](20.2-room-adjacency.md) | Distance between rooms; adjacency preferences | `room-inventory` | — |
+| [`sleeping-parties`](20.3-sleeping-parties.md) | Party formation from families and co-room relations | `room-inventory` | `child-rooms` |
+| [`child-rooms`](20.4-child-rooms.md) | Child groups and children's rooms placed before parties form | `sleeping-parties` | — |
+| [`room-assignment`](20.5-room-assignment.md) | Placing parties into rooms and places; the board | `sleeping-parties` | `child-rooms`, `room-adjacency` |
+| [`workshops`](20.6-workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
+| [`workshop-rankings`](20.7-workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
+| [`workshop-assignment`](20.8-workshop-assignment.md) | Fair workshop assignment and co-assignment groups | `workshop-rankings` | — |
+| [`food-preferences`](20.9-food-preferences.md) | Per-person diet and allergy text | — | — |
+| [`materials`](20.10-materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
+| [`constraint-health`](20.11-constraint-health.md) | Counterfactual constraint buckets and the regression corpus | — | — |
+| [`family-preferences`](20.12-family-preferences.md) | The profile-driven preferences page | — | — |
+| [`change-notifications`](20.13-change-notifications.md) | Publication and change emails | — | — |
+
+`requires` is transitive: `child-rooms` requires `sleeping-parties`, which requires
+`room-inventory`. A room-only occasion selects the first five rows it needs; a
+workshop-only occasion selects `workshops`, `workshop-rankings`, and
+`workshop-assignment` and has no room entities, parties, or board.
+
+## 6. Source layout
+
+```
+src/modules/<module-id>/
+  index.ts          defineModule, the factory, parameter schema, typed accessors
+  events.ts         event schemas and fold functions
+  stages/           solver stages, pure
+  rules/            hard/ and soft/ rules, pure
+  preflight.ts      preflight checks, pure
+  app/              React screens and controls; never imported by worker/
+  worker/           route handlers; never imported by app/
+  reports/          report renderers
+  test/             module contract tests and fixture contracts
+```
+
+Everything outside `app/` and `worker/` is bound by the determinism lint rules
+([testing](14-testing.md) §6). A module imports the kernel and the modules it
+`requires` or `enhances`; it never imports an unrelated module.
+
+## 7. Module specification format
+
+Each `20.N-<module-id>.md` uses these sections, omitting none; an empty one says
+"None":
+
+1. Purpose and boundary
+2. Dependencies
+3. Parameters
+4. Entity kinds
+5. Events
+6. Labels and tag roles
+7. Solver input and stages
+8. Rules and scoring
+9. Preflight checks
+10. Output and diff
+11. Screens, controls, reports, and emails
+12. Tests
+13. When not selected
+
+A specification may end with further sections, such as known sharp edges.

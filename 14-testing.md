@@ -37,7 +37,7 @@ them, and the output hash must be identical. `labels` is one of the arrays the
 shuffler permutes — this proves the generic label input is order-independent.
 
 This single test catches almost every violation of the determinism contract in
-[room assignment](05-room-assignment.md) §1:
+[solver contract](05-solver-contract.md) §1:
 
 - an unsorted collection someone added and forgot to sort — **caught**
 - a tiebreak that falls through to input order — **caught**
@@ -100,7 +100,7 @@ test/fixtures/event-logs/
   fragmented.kdl         many children opted in; many size-1 parties
   conflicted.kdl         constraints that span parties after a change
   constraint-heavy.kdl   many relations, several merge cascades
-  infeasible.kdl         trips preflight C8
+  infeasible.kdl         trips room-assignment.requirement-arithmetic
 ```
 
 The parser reports file and line locations, rejects duplicate properties, and
@@ -160,13 +160,13 @@ assertions that catch bugs the golden fixtures happen not to exercise.
 ```ts
 const invariants = [
   ['no person is assigned twice',
-    p => unique(p.assignments.map(a => a.person_id))],
+    p => unique(roomAssignmentSection(p).assignments.map(a => a.person_id))],
 
   ['no place holds two people',
-    p => unique(p.assignments.map(a => a.place_id))],
+    p => unique(roomAssignmentSection(p).assignments.map(a => a.place_id))],
 
   ['every assigned place exists in the solver input',
-    (p, s) => p.assignments.every(a => s.places.some(pl => pl.id === a.place_id))],
+    (p, s) => roomAssignmentSection(p).assignments.every(a => s.places.some(pl => pl.id === a.place_id))],
 
   ['no room exceeds its place count',
     (p, s) => /* group by room, compare */],
@@ -229,7 +229,7 @@ capacity exactly equal to demand, capacity one short.
 
 ## 5. The constraint regression corpus
 
-From [constraint health](08-constraint-health.md) §5. Every active or
+From [constraint health](20.11-constraint-health.md) §12. Every active or
 cleared custom constraint can be a test case authored by a domain expert. It is the
 same counterfactual the dashboard computes, pinned to a fixed log position.
 
@@ -272,21 +272,26 @@ satisfied.
 Cheap, and they catch the failure mode where the Worker boots and solves
 wrongly:
 
-- every entry has a non-empty `doc`;
-- every `satisfied_by` names a tag whose kind is `capability`;
-- every `param` names a valid entity type;
-- no alias collides with another tag or alias;
-- every `family_facing.control` has a renderer in `src/app/family-view/controls/`;
-- every tag depending on a phase is disabled when that phase is;
-- `defineEvent` throws on each of the above when deliberately broken.
+- every tag has a non-empty `label`;
+- every `satisfied_by` names a tag built with `capability`;
+- every `ref` names an entity kind of the kernel or a selected module;
+- no alias collides with another tag or alias, or with a module-owned key;
+- every `family_facing.control` has a renderer contributed by a selected module;
+- every `_tag` parameter names a tag of the shape its module role requires;
+- every selected module's `requires` is satisfied and stage order has no cycle;
+- `defineOccasionProfile` throws on each of the above when deliberately broken.
+
+Each module additionally ships contract tests and names the fixtures a profile
+selecting it must supply (module specification §12).
 
 ---
 
 ## Preflight tests
 
-One fixture per check C1–C9, asserting the finding fires with the right
-severity and names the right entities. C8's message should be asserted
-verbatim, since it is the one an organiser acts on.
+One fixture per preflight check — the kernel's and each selected module's —
+asserting the finding fires with the right severity and names the right entities.
+The requirement arithmetic message should be asserted verbatim, since it is the one
+an organiser acts on.
 
 ---
 

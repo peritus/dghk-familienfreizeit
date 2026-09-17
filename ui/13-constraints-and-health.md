@@ -4,7 +4,7 @@
 
 Organisers inspect available constraint vocabulary, active labels, and preflight
 findings. Route: `/organiser/constraints`. Governing specs: [labels and constraints](../04-labels-and-constraints.md),
-[constraint health](../08-constraint-health.md), and [organiser view](../09-organiser-view.md) §8.
+[constraint health](../20.11-constraint-health.md), and [organiser view](../09-organiser-view.md) §8.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
