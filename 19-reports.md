@@ -30,9 +30,9 @@ Every report identifies:
 |---|---|
 | Report title | Human-readable name from the active occasion profile |
 | Audience | `shared`, `family`, or `organiser` |
-| Data cut | The derived event sequence and whether it is the current or published world |
+| Data cut | Current-data sequence plus the communication references for included scopes |
 | Generated at | Display-only browser generation time |
-| Publication | The current publication number/hash when the report uses a published plan |
+| Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
 The timestamp is not domain state and does not affect derivation or report
@@ -40,19 +40,15 @@ identity. Reports are generated on demand from the world visible to the reader.
 
 ## 2. Derivation and visibility
 
-Reports never have a table, event type, cache entry, or stored snapshot. They are
-renderers over `World`, using the same visibility cuts as every other screen:
+Reports never have a table, event type, cache entry or stored snapshot. They render
+ordinary derived worlds and the audience projection defined in
+[release control](06-release-control.md) §2. Organisers may inspect current or pending
+worlds; family/shared reports combine live permitted facts with communicated scopes.
 
-```ts
-derive(log ++ pending)                         // working organiser
-derive(log)                                    // other organisers
-derive(log before latest PlanPublished)        // families
-```
-
-The report renderer may aggregate, sort, group, and redact the derived world. It
-must not query event payloads directly, perform a second relationship lookup, or
-invent a stored report model. A report that compares two plans uses
-`diff(previousPublishedWorld, currentWorld)`.
+Renderers aggregate, sort, group and redact. They do not query event payloads,
+perform another relationship lookup, or implement their own release cuts. The
+outstanding-change report and confirmation diff use the kernel contract in
+[release control](06-release-control.md) §6–7.
 
 Reports are shared with families when sharing supports coordination and does not
 expose personal or safety-sensitive information. Restrict fields, not whole
@@ -65,8 +61,8 @@ useful coordination report unavailable.
 | `family` | The family represented by the session | Its people, room, workshops, food entries, materials, and instructions |
 | `organiser` | Allowlisted organisers | Full contacts, detailed allergies, operational notes, unresolved issues, and audit detail |
 
-A family report uses the published cut. It must not reveal unpublished room,
-workshop, or constraint decisions. A shared report must show only fields that the
+A family report uses the release-control projection. It must not reveal held
+arrangements or private constraint decisions. A shared report must show only fields that the
 occasion profile has declared safe for that audience.
 
 ## 3. Report catalogue
@@ -85,7 +81,8 @@ family or person where that identity is useful for coordination. It is the
 canonical shared coordination report for materials; it is not organiser-only.
 
 **Workshop programme** shows dates, times, workshops, rooms, leaders, audience,
-and cancellations. It is the occasion schedule, not a private participant list.
+and cancellations. Its workshop rows use communicated programme content for family readers. Live
+participation is a separate view; interest never exposes shared names.
 
 **Shared workshop roster**, when the profile permits it, shows the minimum names
 needed for families to coordinate workshop participation. It does not expose
@@ -95,15 +92,14 @@ email addresses, allergy text, private notes, or preference rankings.
 practical instructions, and other profile-provided information intended for all
 families.
 
-**Change notice** shows changes that affect families since the last
-published plan. It is derived from the publication diff and contains only the
-affected family-visible result, not internal constraint explanations.
+**Change notice** shows the selected communication's family-visible differences
+from the previous scope references. It contains no internal constraint explanations.
 
 ### 3.2 Family reports
 
-**Family information sheet** shows the signed-in family's people, published room
-and sleeping places, published workshops, submitted food information, submitted
-materials, and instructions relevant to that family.
+**Family information sheet** shows current own people, food information, materials
+and participation alongside communicated accommodation, workshop programme and
+allocation results. It includes the data/reference labels from §1.
 
 The family sheet is both a review surface and a print surface. It must make it
 easy for a family to see what the system currently knows and correct its own
@@ -130,9 +126,13 @@ shared; individual allergy text may not.
 constraints, incomplete registrations, missing workshop choices, unresolved
 materials, and a stale or unpublished plan.
 
-**Plan change report** compares the current world with the previous published
-world and explains room, place, workshop, cancellation, and affected-family
-changes for organiser review.
+**Uncommunicated arrangements** is the report specified in
+[release control](06-release-control.md) §6: outstanding scope differences,
+affected families and dependencies, with links to the detailed preview (§7).
+
+**Plan comparison** compares arbitrary derived plans for organiser investigation.
+It is distinct from the scope-selected communication preview and does not decide
+what families can see.
 
 **Capacity and accommodation cost overview** shows room and bed use, free
 capacity, workshop fill, and the configured accommodation cost estimate. It is a
@@ -179,7 +179,7 @@ wrap rather than truncate.
 A report is ready when:
 
 1. its audience and every sensitive field are specified;
-2. it renders from the correct derived world and publication cut;
+2. it uses the correct audience projection and communication references;
 3. it is usable at desktop and mobile widths;
 4. printing it from the browser with its print stylesheet produces a correct,
    legible paper document, checked against the stylesheet rules in §5;

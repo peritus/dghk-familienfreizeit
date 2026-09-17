@@ -15,7 +15,7 @@ The **kernel** is present in every deployment and is never listed in a profile:
 | Family and person identity, invitation, and person events | [events](03-events.md) |
 | Labels, constraint definitions, fixed resolver operators, append validation | [labels and constraints](04-labels-and-constraints.md) |
 | `derive`, `diff`, the solver pipeline, determinism contract, preflight framework, trace | [architecture](01-architecture.md), [solver contract](05-solver-contract.md) |
-| Plans and publication | [architecture](01-architecture.md), [events](03-events.md) |
+| Plans and release control | [solver contract](05-solver-contract.md), [release control](06-release-control.md) |
 | Authentication, sessions, organiser allowlist | [authentication](11-authentication.md) |
 | Organiser application shell, board-independent screens, family view shell, reports framework, email transport | [organiser view](09-organiser-view.md), [family view](10-family-view.md), [reports](19-reports.md), [deployment](13-deployment.md) |
 
@@ -67,6 +67,9 @@ export interface ModuleContributions {
   stages: readonly SolverStage[]
   rules: readonly Rule[]
   preflight_checks: readonly PreflightCheck[]
+  world_summaries: readonly WorldSummaryDefinition[]
+  world_checks: readonly WorldCheck[]
+  release_scopes: readonly ReleaseScopeContribution[]
   change_kinds: readonly ChangeKind[]
   routes: readonly RouteDefinition[]       // Worker handlers under src/modules/<id>/worker/
   screens: readonly ScreenDefinition[]     // React screens under src/modules/<id>/app/
@@ -76,6 +79,11 @@ export interface ModuleContributions {
   fixtures: readonly FixtureContract[]
 }
 ```
+
+`derive` folds facts, resolves relationships, computes world summaries/checks, builds
+solver input, solves, and exposes release references/content accessors. Summary/check
+functions consume resolved world data, never query event payloads or access other
+modules' tables. The kernel handles historical prefixes as specified by release control.
 
 Empty contributions are empty arrays. `contribute` is a pure function of the
 parameters and a read-only view of the rest of the profile; it performs no I/O and
@@ -87,15 +95,18 @@ is evaluated once, at profile build.
 |---|---|
 | `entity_kinds` | Kind name (kebab-case), id prefix, and whether ids are caller-generated or derived by the fold. The fold rejects an id reused under another kind. |
 | `events` | Event type, zod payload schema, fold function, append invariants, and the authorisation rule. The fold function may create entity identity and emit labels; it may not emit derived results. |
-| `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, and cardinality. Ownership is per (key, entity kind): a profile may not define a tag using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
+| `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, cardinality, and setup-only or label-writable policy. Label-writable keys may supply family-control metadata with explicit authorisation. Ownership is per (key, entity kind): a profile may not define a tag using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
 | `tag_roles` | A slot a profile tag must fill, such as the keep-apart relation for room assignment: the parameter that names the tag, and the operator, scopes, value type, and strengths the tag must have. |
 | `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](05-solver-contract.md) §1, R1). |
 | `stages` | Pure solver stages with explicit ordering and a typed output section of the plan (§4). |
 | `rules` | Hard and soft rules, each with `describe` ([solver contract](05-solver-contract.md) §4). |
 | `preflight_checks` | Checks run before any stage, with an id, severity, and message template. |
-| `change_kinds` | What `diff` reports for this module's plan section, and how a change is attributed to a family. |
+| `world_summaries` | Pure typed summaries built by `derive` from resolved labels, such as food, materials and live workshop participation; never persisted or inserted into Plan. |
+| `world_checks` | Diagnostics over resolved non-solver facts, with subjects, severity and check id; kept outside solver preflight. |
+| `release_scopes` | Canonical content accessors and subject attribution for kernel scope kinds defined in [release control](06-release-control.md); no module-specific release mechanism. |
+| `change_kinds` | What `diff` reports for world facts or plan output, with subject/family attribution. Release control selects scope content differences; arbitrary world changes do not imply held work. |
 | `routes`, `screens` | Worker handlers and organiser or family screens. A route or screen of an unselected module does not exist in the build. |
-| `family_controls` | Additional `control` kinds for the preferences renderer ([family preferences](20.9-family-preferences.md)). |
+| `family_controls` | Additional `control` kinds and module-owned control definitions for the preferences renderer ([family preferences](20.9-family-preferences.md)). |
 | `reports` | Report definitions with audience and sensitivity ([reports](19-reports.md)). |
 | `emails` | Email kinds with their trigger and the plan data they may include. |
 | `fixtures` | The KDL fixture and golden-plan contracts a profile that selects the module must supply ([testing](14-testing.md)). |
@@ -167,7 +178,7 @@ application code never reads `sections` with a bare string.
 ### 4.2 When a module is not selected
 
 An unselected module contributes nothing: no entity kind, event type, label key,
-solver input, stage, rule, preflight check, plan section, route, screen, control,
+solver input, stage, rule, preflight check, world summary/check, release scope, plan section, route, screen, control,
 report, email, or fixture requirement. An event of a type no selected module
 defines fails replay validation, which is the signal that a profile change needs a
 migration ([deployment](13-deployment.md) §2).
@@ -228,7 +239,7 @@ Each `20.N-<module-id>.md` uses these sections, omitting none; an empty one says
 6. Labels and tag roles
 7. Solver input and stages
 8. Rules and scoring
-9. Preflight checks
+9. Preflight checks (also identify any separate world diagnostics)
 10. Output and diff
 11. Screens, controls, reports, and emails
 12. Tests

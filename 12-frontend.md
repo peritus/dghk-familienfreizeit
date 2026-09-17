@@ -150,8 +150,8 @@ data-fetching library: the organiser application makes three kinds of request โ€
 the log, apply pending events, and trigger emails.
 
 **Family view state** is the family's view from `GET /api/family/view`, which the server
-derives from the events before the latest publication and filters to that family
-([family view](10-family-view.md)). A control change posts the label event and
+composes according to [release control](06-release-control.md) ยง2 and filters to
+that family ([family view](10-family-view.md)). A control change posts the label event and
 re-renders from the response.
 
 **Escaping.** React escapes interpolated values by default.

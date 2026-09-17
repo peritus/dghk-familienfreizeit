@@ -264,4 +264,5 @@ stored configuration, so an organiser who disagrees can point at the term rather
 the outcome.
 
 Plan sections are specified by their selected modules: [room assignment](20.3-room-assignment.md) §10,
-[workshop assignment](20.6-workshop-assignment.md) §10, and [materials](20.8-materials.md) §10.
+[workshop assignment](20.6-workshop-assignment.md) §10. Food and materials contribute
+world summaries, not solver sections.

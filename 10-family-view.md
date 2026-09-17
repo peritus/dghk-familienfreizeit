@@ -4,28 +4,21 @@ The screen plans are [family preferences](ui/03-family-preferences.md) and
 [family assignment](ui/04-family-assignment.md). They are
 English planning examples; family copy follows [the translation guidelines](18-german-translation-guidelines.md).
 
-One email per family. One login. One page before publication, a different page
-after.
+One email per family. One login. A family can review its current information and
+communicated arrangements on the same page. The design constraint is that families
+state preferences and never see machinery: no scores, solver language, organiser
+notes or other families' preferences.
 
-The design constraint that shapes everything: **families state preferences and
-never see machinery.** No scores, no parties, no solver, no other families'
-preferences. The word "algorithm" does not appear anywhere in this interface.
-
-The family view derives the plan selected by the latest publication ([architecture](01-architecture.md)),
-which settles the largest privacy question structurally: a family's view is
-computed from the events before the latest publication, so unpublished work is not
-hidden from them, it is simply not in the list they derive from.
-
-The Worker performs that derivation and returns only the signed-in family's view
-(`GET /api/family/view`), filtered by the boundaries in §2. The event log never
-reaches a family's browser, and the family view bundle contains neither the solver nor
-the organiser screens.
+The Worker returns the signed-in family's response from `GET /api/family/view`.
+Its composition is defined in [release control](06-release-control.md) §2; the event
+log, solver and organiser screens never reach a family's browser. Current inputs
+remain visible whether or not any arrangements have been communicated.
 
 ---
 
-## 1. Two states
+## 1. Information and arrangements
 
-### Before publication — the preferences page
+### Current information and controls
 
 One scrolling page, not a wizard. A wizard implies a one-time completion; this is
 a form people will return to three times over six weeks as they change their
@@ -80,9 +73,18 @@ Willkommen, Familie Müller
   …
 ```
 
-### After publication — the assignment page
+### Communicated arrangements
 
-The preferences collapse to a read-only summary; the assignment takes the top.
+Communicated accommodation and workshop results take the top as they become
+available. Current preferences remain accessible and editable under the deadline
+policy; communication itself does not lock controls. Each arrangement shows its
+communication status. There is no single before/after switch for the whole page.
+
+Workshop controls use the communicated programme: assigned workshops offer rankings,
+sign-up workshops offer join/leave controls and current places remaining, and interest
+workshops offer a non-binding toggle. Own responses appear immediately. A pending
+conflict between a sign-up and a communicated assignment is explained in plain words.
+Uncommunicated programme details are not offered as choices.
 
 ```
   Deine Zimmer
@@ -117,8 +119,8 @@ report's ([reports](19-reports.md) §5).
 ## 2. Privacy boundaries
 
 Decided explicitly, because the defaults are wrong in both directions. The rows
-below are the ones that need deciding; anything about *when* something becomes
-visible is already answered by the latest publication, and needs no rule.
+below specify disclosure; timing is governed separately by
+[release control](06-release-control.md).
 
 | Data | Visible to the family? |
 |---|---|
@@ -129,7 +131,8 @@ visible is already answered by the latest publication, and needs no rule.
 | Scores, traces, organiser decisions | No |
 | Organiser notes about them | **No** — free text is theirs, organiser notes are not |
 | Tags declaring `organiser_only` | **Never**, regardless of `family_facing` |
-| `descriptive` tags | Never |
+| Restricted values | Own-family values only where authorised; never shared or other-family |
+| `descriptive` tags | Only explicitly family-facing own inputs; internal descriptive facts remain hidden |
 
 Cross-family co-room requests are deferred with sleeping parties, so the family
 view exposes only preferences that constrain the family's own placement unit. When
@@ -188,34 +191,18 @@ is where it was before this application existed.
 
 ## 4. Emails
 
-Invitation and reminder emails are kernel; publication and change emails are
-contributed by [change notifications](20.10-change-notifications.md).
+Invitation and reminder emails are kernel. Communication and change messages are
+rendered by [change notifications](20.10-change-notifications.md). The recipient
+selection and preview contract belongs to [release control](06-release-control.md)
+§8; email does not determine whether arrangements are visible.
 
-Four kinds. All plain, all short, all with the link.
+**Invitation:** a short explanation of the occasion and what to do, with a magic
+link. **Reminder:** names missing answers, such as a person's workshop wishes.
+**Communication:** includes the arrangements/details in the body. **Change:** gives
+only relevant before/after details and a link, without internal explanations.
 
-**Invitation.** One paragraph on what the weekend is, one on what they need to
-do, one button. The magic link is the invitation — there is no separate account
-creation.
-
-**Reminder.** Sent by an organiser from the chase list. Names what is missing
-specifically: *"Für Emma fehlen noch die Workshop-Wünsche."* A generic reminder
-gets ignored; a specific one gets acted on.
-
-**Publication.** The assignment in the body of the email, not only behind a link.
-People forward this to grandparents and read it on trains.
-
-**Change.** Only to affected families, only what changed:
-
-> Deine Einteilung hat sich geändert.
->
-> Vorher:  Haus A · Raum 01
-> Jetzt:   Haus B · Raum 14 · mit eigenem Bad
->
-> [ Details ansehen ]
-
-Computed from the plan diff. A family whose assignment did not change receives
-nothing — which is what makes re-publication socially acceptable rather than a
-thing that trains people to ignore your emails.
+Messages are plain and short. Families whose relevant visible content did not
+change do not receive a change message.
 
 ---
 
