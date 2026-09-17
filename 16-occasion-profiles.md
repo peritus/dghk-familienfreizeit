@@ -101,7 +101,7 @@ type. Builders accept these further fields where they apply:
 | `copy` | `property` with `enumOf` | `LocalizedText` per enum value |
 | `operator` | `relation` | `groups-with` or `separates-from` |
 | `satisfied_by` | `requirement` | capability tag key |
-| `structural` | `requirement` | named structural check provided by a module, e.g. `no-other-parties` |
+| `structural` | `requirement` | named structural check provided by a module, e.g. `no-other-families` |
 | `derive` | `capability` | pure evaluator over the entity's labels; makes the capability derived |
 | `valid_for` | all | pure evaluator deciding whether the tag applies to an entity, returning `true` or a reason |
 | `target` | `relation` | entity kinds the value may reference |
@@ -109,7 +109,6 @@ type. Builders accept these further fields where they apply:
 | `per`, `choice` | `orderedChoice` | the scope entity kind and the choice entity kind |
 | `weight` | `requirement`, `relation` | integer score when a `preferred` label is satisfied |
 | `penalty` | `requirement`, `relation` | integer score, ≤ 0, when a `preferred` label is violated |
-| `one_sided_weight` | `relation` | deferred sleeping-party co-room scoring |
 | `family_facing` | all except `note` | the family control ([family preferences](20.9-family-preferences.md) §6) |
 | `organiser_only` | all | never rendered to families; excludes `family_facing` |
 | `aliases` | all | further keys accepted on replay and mapped to this tag, so a rename costs nothing |

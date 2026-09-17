@@ -15,11 +15,11 @@ event history for one family. Route: `/organiser/families/:id`. Governing spec:
 │ Alex Morgan · adult · 38       Jamie Morgan · child · 9     [Edit people]│
 │                                                                          │
 │ CURRENT PREFERENCES                                                       │
-│ Private bathroom · preferred     Indoor sleeping · required              │
-│ Wants to share with Taylor family                                        │
+│ Private bathroom · preferred     Accessible room · no preference          │
+│ Diet: 1 vegetarian, 1 with meat                                          │
 │                                                                          │
 │ EVENT HISTORY                                                             │
-│ 14 Sep 09:01 · This family · chose Indoor sleeping as required            │
+│ 14 Sep 09:01 · This family · chose Private bathroom as preferred          │
 │ 12 Sep 14:22 · Organiser Anna · added note about a courtyard window       │
 └──────────────────────────────────────────────────────────────────────────┘
 ```

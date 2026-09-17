@@ -27,8 +27,8 @@ What that buys, concretely:
 - **No hand-written rendering engine for the board.** Re-deriving on every drag,
   keeping selection, focus, and drag state across renders, flashing moved cards —
   this is component state and reconciliation, not DOM bookkeeping.
-- **Accessible primitives instead of hand-written ones.** The family picker, the room
-  picker, merge and split dialogs, toasts, radio groups, and selects come from
+- **Accessible primitives instead of hand-written ones.** The person picker, the room
+  picker, confirmation dialogs, toasts, radio groups, and selects come from
   maintained components with keyboard and ARIA behaviour already correct.
 - **Almost no per-screen server code.** Organiser screens need no routes of their own;
   they read the log once and write through apply.
@@ -123,7 +123,7 @@ src/app/
   family-view/               login, preferences page, assignment page
   organiser/
     OrganiserApp.tsx        loads the log, owns the pending reducer, derives the world
-    screens/            dashboard, families, parties, board, plans, workshops, constraints
+    screens/            dashboard, families, inventory, board, plans, workshops, constraints, reports
   components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
@@ -182,7 +182,7 @@ The components in use, and that is the complete list:
 | Button, Card, Badge | everywhere |
 | Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
 | Combobox | family picker, person picker, room picker, family search |
-| Dialog, Alert Dialog | merge and split, publish confirmation, discard pending |
+| Dialog, Alert Dialog | import, organiser decisions, publish confirmation, discard pending |
 | Table | families, CSV preview, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after publication in the family view |
 | Toast | "Gespeichert um 14:22", "Applied", apply conflicts |

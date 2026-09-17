@@ -26,7 +26,6 @@ import { foodPreferences } from '../src/modules/food-preferences'
 import { materials } from '../src/modules/materials'
 import { roomAssignment } from '../src/modules/room-assignment'
 import { roomInventory } from '../src/modules/room-inventory'
-import { sleepingParties } from '../src/modules/sleeping-parties'
 import { workshopAssignment } from '../src/modules/workshop-assignment'
 import { workshopRankings } from '../src/modules/workshop-rankings'
 import { workshops } from '../src/modules/workshops'
@@ -222,7 +221,7 @@ export default defineOccasionProfile({
     'sole-occupancy': requirement({
       label: { de: 'Zimmer nicht teilen', en: 'Do not share the room' },
       scopes: ['family'],
-      structural: 'no-other-parties',
+      structural: 'no-other-families',
       strengths: ['required', 'preferred'],
       penalty: -12,
       family_facing: {
@@ -236,28 +235,6 @@ export default defineOccasionProfile({
     }),
 
     // ── Room relations ────────────────────────────────────────────────────────
-
-    'room-with': relation({
-      label: { de: 'Zusammen mit', en: 'Room with' },
-      scopes: ['family'],
-      target: ['family'],
-      operator: 'groups-with',
-      symmetry: 'mutual-required',
-      strengths: ['required', 'preferred'],
-      cardinality: 'zero-or-more',
-      one_sided_weight: 6,
-      family_facing: {
-        control: 'family-picker',
-        label: { de: 'Mit wem möchtest Du zusammen?', en: 'Who would you like to share with?' },
-        help: {
-          de: 'Du siehst nur, ob eine Familie Dich ebenfalls gewählt hat.',
-          en: 'You only see whether a family has chosen you too.',
-        },
-        scope: 'family',
-        strengths: ['required'],
-        invert: false,
-      },
-    }),
 
     'apart-from': relation({
       label: { de: 'Getrennt von', en: 'Keep apart from' },
@@ -428,15 +405,10 @@ export default defineOccasionProfile({
       },
     }),
 
-    sleepingParties({
-      co_room_tag: 'room-with',
-      no_bed_tag: 'does-not-need-a-bed',
-      size_one_warning_threshold: 5,
-    }),
-
     roomAssignment({
       weights: { exact_fit: 10, near_fit: 4, orphan_bed: -8 },
       keep_apart_tag: 'apart-from',
+      no_bed_tag: 'does-not-need-a-bed',
       priority_tag: 'needs-accessible',
       scarce_capabilities: { 'accessible': -3 },
       max_repair_passes: 5,
@@ -504,12 +476,6 @@ export default defineOccasionProfile({
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
           tags: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
-        },
-        {
-          key: 'room-with',
-          title: { de: 'Mit wem möchtest Du zusammen?', en: 'Who would you like to share with?' },
-          intro: null,
-          tags: ['room-with'],
         },
         {
           key: 'workshops',

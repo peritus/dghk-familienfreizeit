@@ -88,7 +88,7 @@ is evaluated once, at profile build.
 | `entity_kinds` | Kind name (kebab-case), id prefix, and whether ids are caller-generated or derived by the fold. The fold rejects an id reused under another kind. |
 | `events` | Event type, zod payload schema, fold function, append invariants, and the authorisation rule. The fold function may create entity identity and emit labels; it may not emit derived results. |
 | `label_keys` | Label keys the module owns outright, such as `located-in` for inventory, with value type, scopes, and cardinality. A profile may not define a tag with the same key. |
-| `tag_roles` | A slot a profile tag must fill, such as the co-room relation for party formation: the parameter that names the tag, and the operator, scopes, value type, and strengths the tag must have. |
+| `tag_roles` | A slot a profile tag must fill, such as the keep-apart relation for room assignment: the parameter that names the tag, and the operator, scopes, value type, and strengths the tag must have. |
 | `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](05-solver-contract.md) §1, R1). |
 | `stages` | Pure solver stages with explicit ordering and a typed output section of the plan (§4). |
 | `rules` | Hard and soft rules, each with `describe` ([solver contract](05-solver-contract.md) §4). |
@@ -187,9 +187,9 @@ migration ([deployment](13-deployment.md) §2).
 | [`change-notifications`](20.10-change-notifications.md) | Publication and change emails | — | — |
 
 `requires` is transitive. A room-only occasion selects `room-inventory` and
-`room-assignment`; it places whole families and has no parties or child rooms. A
+`room-assignment`; it places whole families and has no child rooms. A
 workshop-only occasion selects `workshops`, `workshop-rankings`, and
-`workshop-assignment` and has no room entities, parties, or board.
+`workshop-assignment` and has no room entities or board.
 
 Sleeping parties and child rooms are deferred ideas, not selectable modules in the
 current catalogue. They are specified under [`deferred-ideas/`](deferred-ideas/)

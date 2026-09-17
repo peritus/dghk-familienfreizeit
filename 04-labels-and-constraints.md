@@ -25,12 +25,12 @@ A typed key/value fact about an entity, optionally pointing at another entity an
 optionally carrying a strength.
 
 ```
-provides=ensuite                  a room has its own bathroom
-needs=needs-ensuite (required)     a family cannot accept a room without one
+provides=private-sanitary          a room has its own bathroom
+needs=private-sanitary (required)  a family cannot accept a room without one
 needs=room-with-garden-view        a person needs a matching room capability
 provides=room-with-garden-view     a room offers that capability
 needs=ground-floor                 this person needs a ground-floor room
-separates-from=family_27           this family must not share with family 27
+separates-from=fam_27              this family must not share with family fam_27
 ```
 
 Built-in definitions and custom definitions declare the resolver operator:
@@ -53,8 +53,8 @@ preferred label, or no label:
 
 | Preference | Stored form |
 |---|---|
-| Required | `needs=ensuite`, strength `required` |
-| Preferred | `needs=ensuite`, strength `preferred` |
+| Required | `needs=private-sanitary`, strength `required` |
+| Preferred | `needs=private-sanitary`, strength `preferred` |
 | Indifferent | no row |
 
 `indifferent` stops being a value and becomes an absence, which is what it always
@@ -76,7 +76,7 @@ Three details of that shape are not arbitrary.
 use canonical JSON. Nullability and cardinality belong to the configured schema;
 free-form matching tokens must be non-empty strings.
 
-**The reference lives in the value, not in the key.** `needs=family_27` is
+**The reference lives in the value, not in the key.** `needs=fam_27` is
 the mental model and the label an organiser sees. The resolver indexes the key and
 value without requiring a foreign key.
 
@@ -157,7 +157,7 @@ appended ([03-events](03-events.md)). The checks are:
    where required; organiser matching tokens may otherwise be free-form.
 4. **Strength is legal** for the constraint.
 5. **Cardinality and validity pass**, including the tag's `valid_for` evaluator —
-   for example "sleeps with the parents" only on children and infants.
+   for example "does not need a bed" only on children and infants.
 6. **The key is writable through labels.** Keys the kernel or a module sets only
    through setup events, such as `member-of` and `located-in`, are rejected
    ([modules](20-modules.md) §3.1).
@@ -186,7 +186,7 @@ family view.
 
 Organisers may set free-form values for every fixed resolver mechanism. Examples
 include `needs=naehe_zum_eingang` paired with `provides=naehe_zum_eingang`,
-`excludes=room_14`, `groups-with=person_23`, and `separates-from=family_27`.
+`excludes=rm_14`, `groups-with=per_23`, and `separates-from=fam_27`.
 Workshop resolver inputs use their existing structured value shapes. An optional
 label note records context for organisers; it is not read by the solver.
 
@@ -250,9 +250,9 @@ the target. It does not require creating vocabulary or additional decision
 metadata. A token offered by multiple rooms expresses a matching requirement,
 not a command to choose an arbitrary provider.
 
-Constraints reference stable people, families, workshops, rooms, and places. They
-never reference derived party keys. Sleeping-party constraints are rejected or
-reported as deferred until that module is selected.
+Constraints reference stable people, families, workshops, rooms, beds, and places.
+They never reference a derived placement unit. Sleeping-party constraints are
+rejected or reported as deferred until that module is selected.
 
 ### How modules consume constraints
 
@@ -315,7 +315,7 @@ is, rank is a position in a list. The workshop ranking that uses it, including t
 
 ## 8. Sharp edges
 
-**Typos become silence.** `room-with=fam_72` for `fam_27` — a relational foreign
+**Typos become silence.** `separates-from=fam_72` for `fam_27` — a relational foreign
 key would catch that; a label does not. The merge simply never happens and
 nothing errors.
 This is why append-time check 3 (§4) and `kernel.dangling-reference` (§6) both exist. Neither is
@@ -326,9 +326,10 @@ is visibly reported.
 assignments, or you get two answers to "does Room 14 have an ensuite". Enforced
 at append time and tested in [testing](14-testing.md).
 
-**Requirement inflation through merges.** See
-the deferred sleeping-parties idea. The strictest-strength union is
-correct and surprising.
+**Requirement inflation through unions.** A placement unit's requirements are the
+strictest-strength union of the family's and its members' tags, which is correct
+and still surprises people. Merging units across families would sharpen this, and
+is deferred with the sleeping-parties idea.
 
 **Notes are not constraints.** Profile-defined `descriptive` facts and optional
 decision notes are ignored by the solver. An organiser must not need to invent a

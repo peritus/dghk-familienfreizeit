@@ -51,11 +51,11 @@ an optional note so other organisers can understand them.
 
 Three things make this harder than a seating chart:
 
-**The assignable unit is not the family.** Two friendly families may share an
-apartment, while grandparents travelling with a family want a room of their own.
-The unit that must stay together is derived from stated preferences and organiser
-decisions, not from the family structure. We call it a
-*party*, and forming parties correctly is a separate problem from placing them.
+**The assignable unit needs deciding.** Two friendly families may want to share an
+apartment, while grandparents travelling with a family may want a room of their
+own. The initial scope keeps one family as one indivisible placement unit, which
+keeps the result reviewable. Splitting and merging families is a separate problem
+and is deferred to the sleeping-parties and child-rooms ideas (D5).
 
 **Preferences conflict and the conflicts are not symmetrical.** Two families both
 asking to room together is a merge. One family asking to room with another is a
@@ -81,21 +81,20 @@ authentication. Its email, display name, and membership labels are event-backed.
 **Person** — a typed entity representing one human. Birthdate, role, bed demand,
 and family membership are labels interpreted by occasion configuration.
 
-**Party** — a set of People who must be placed in the same room. *Derived*, not
-stored as ground truth. One Family can yield several Parties; one Party can span
-several Families. Party membership is recomputed on every solver run. A
-Party's requirements are derived as the union of its member Families' tags,
-strictest strength winning.
+**Placement unit** — the set of People placed in one room together. In the active
+scope it is exactly one Family's non-withdrawn People, derived on every solver
+run and never stored. Its requirements are the union of the Family's and its
+members' tags, strictest strength winning.
 
 **Place** — one sleeping position. A single bed is one Place. A double bed is two
 Places. This is the atomic unit of capacity. Rooms have Beds; Beds have Places.
 
 **Constraint** — an event-backed, human-readable matching fact such as a person
-needing a room capability or two people needing to stay together. Constraints
-reference stable entities, never derived Parties.
+needing a room capability or two families needing to stay apart. Constraints
+reference stable entities, never derived placement units.
 
 **Plan** — the complete solver result for the event log through an `input_seq`:
-assignments, unplaced parties, diagnostics, and a full decision trace. Plans are
+assignments, unplaced families, diagnostics, and a full decision trace. Plans are
 deterministic values derived on demand. A plan's identity is its `input_seq`,
 `config_hash`, and `code_revision`.
 

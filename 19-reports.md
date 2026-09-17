@@ -113,7 +113,7 @@ inputs through the ordinary family controls.
 published assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
-capacity, accessibility, and parties spanning families.
+capacity, accessibility, and the families sharing each room.
 It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
@@ -124,7 +124,7 @@ separate restricted **allergy and safety sheet** lists person, family, room, and
 the allergy/accessibility text needed by organisers. Aggregate diet counts may be
 shared; individual allergy text may not.
 
-**Open issues and readiness** lists unplaced people or parties, unsatisfied hard
+**Open issues and readiness** lists unplaced families, unsatisfied hard
 constraints, incomplete registrations, missing workshop choices, unresolved
 materials, and a stale or unpublished plan.
 

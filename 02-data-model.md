@@ -205,7 +205,7 @@ type ConstraintDefinition = {
 strength rules, and UI metadata. It never contains executable code.
 
 The resolver is the only component allowed to turn labels and definitions into
-relationships, capabilities, parties, assignments, or diagnostics. The indexes
+relationships, capabilities, placement units, assignments, or diagnostics. The indexes
 the fold builds support lookup; they do not define semantics.
 
 ## 6. Capacity and ordered choices

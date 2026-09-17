@@ -97,9 +97,9 @@ test/fixtures/event-logs/
   full-event.kdl         55 families, 40 rooms — realistic
   tight.kdl              capacity == demand exactly
   oversubscribed.kdl     demand > capacity; things must be unplaced
-  fragmented.kdl         many size-1 parties
-  conflicted.kdl         constraints that span parties after a change
-  constraint-heavy.kdl   many relations, several merge cascades
+  fragmented.kdl         many one-person families
+  conflicted.kdl         constraints that contradict after a change
+  constraint-heavy.kdl   many relations and organiser decisions
   infeasible.kdl         trips room-assignment.requirement-arithmetic
 ```
 
@@ -197,14 +197,14 @@ const invariants = [
     (p, s) => /* … */],
 
   ['every family placement unit contains all of its non-withdrawn people',
-    (p, s) => /* no child-room split in the active scope */],
+    (p, s) => /* no family is split in the active scope */],
 ]
 ```
 
 "Conservation of people" is the most valuable and the least obvious: every person
-in the solver input appears exactly once in `assignments` or once in a party listed
+in the solver input appears exactly once in `assignments` or once in a family listed
 under `unplaced`. A person who silently vanishes — dropped by a filter, lost in a
-merge — is the failure mode that is hardest to notice by eye and worst to
+rewrite — is the failure mode that is hardest to notice by eye and worst to
 discover at the hostel.
 
 Run every invariant against every golden fixture, and against generated
@@ -365,7 +365,7 @@ test('the full loop: import → constraints → solve → plan → publish', asy
 ```
 
 That `movedCount` assertion is worth more than it looks. It encodes the property
-that makes the whole design worthwhile: **a constraint moves the constrained party and very
+that makes the whole design worthwhile: **a constraint moves the constrained family and very
 little else.** If a future change makes the solver chaotic — where a small input
 change produces a large output change — this test catches it, and nothing else
 would.

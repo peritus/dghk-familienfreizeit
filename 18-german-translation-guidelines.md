@@ -34,7 +34,6 @@ emails, notifications, and help text.
 | people | **Personen** | A group of individual people |
 | family | **Familie** | The authenticated account and domain grouping |
 | family member | **Familienmitglied** | Use when the relationship to the family matters |
-| party | **Gruppe** | A solver grouping; never expose *Partei* |
 | room | **Zimmer** | |
 | bed | **Bett** | |
 | place | **Schlafplatz** | A generated place in a bed or room |

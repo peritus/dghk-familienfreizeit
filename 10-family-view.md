@@ -31,8 +31,8 @@ One scrolling page, not a wizard. A wizard implies a one-time completion; this i
 a form people will return to three times over six weeks as they change their
 minds. Everything saves on change.
 
-Sections 2 ("Zimmerwünsche") and 3 ("Mit wem möchtest Du zusammen?") are
-**generated from the active occasion profile**: every tag declaring
+Section 2 ("Zimmerwünsche") and the later sections are **generated from the
+active occasion profile**: every tag declaring
 `family_facing` produces a control, in the sections the profile configures. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
@@ -61,8 +61,8 @@ Willkommen, Familie Müller
   2  ZIMMERWÜNSCHE
   ─────────────────────────────────────────────────
   Eigenes Bad         ( ) unbedingt  (•) gerne  ( ) egal
-  Drinnen schlafen    (•) unbedingt  ( ) gerne  ( ) egal
-  Zimmer teilen       (•) gerne mit einer anderen Familie
+  Barrierefreies Zimmer ( ) unbedingt ( ) gerne (•) egal
+  Zimmer teilen       ( ) gerne mit einer anderen Familie
                       ( ) lieber nicht
                       ( ) auf keinen Fall
 
@@ -70,14 +70,7 @@ Willkommen, Familie Müller
                       Freitext — das Organisationsteam liest mit.
 
   ─────────────────────────────────────────────────
-  3  MIT WEM MÖCHTEST DU ZUSAMMEN?
-  ─────────────────────────────────────────────────
-  Familie Schmidt     ✓ möchte auch mit Dir
-  Familie Weber       — noch keine Antwort
-  [ Familie suchen… ]
-
-  ─────────────────────────────────────────────────
-  4  WORKSHOPS
+  3  WORKSHOPS
   ─────────────────────────────────────────────────
   Samstag Vormittag
     Anna    1. Töpfern   2. Kochen    3. —
@@ -101,7 +94,7 @@ The preferences collapse to a read-only summary; the assignment takes the top.
   │  Anna Müller      Bett 14-A                  │
   │  Kai Müller       Bett 14-A                  │
   │  Jonas Müller     Bett 14-B (oben)           │
-  │  Emma Müller      Bett 14-C (unten)          │
+  │  Emma Müller      Bett 14-B (unten)          │
   │  Mia Müller       bei den Eltern             │
   │                                              │
   │  Du teilst das Zimmer mit Familie Schmidt.   │
@@ -130,29 +123,19 @@ visible is already answered by the latest publication, and needs no rule.
 | Data | Visible to the family? |
 |---|---|
 | Their own people and preferences | Yes |
-| Their own co-room requests | No — deferred with sleeping parties |
-| **Whether a co-room request is reciprocated** | **No — deferred with sleeping parties** |
 | Other families' room preferences | No |
-| Other families' co-room requests, including ones naming them | **No** |
 | Names of families sharing their room | Yes |
 | Bed labels within their own rooms | Yes |
-| Scores, parties, traces, organiser constraints | No |
+| Scores, traces, organiser decisions | No |
 | Organiser notes about them | **No** — free text is theirs, organiser notes are not |
 | Tags declaring `organiser_only` | **Never**, regardless of `family_facing` |
 | `descriptive` tags | Never |
 
-**Reciprocity is visible; the request is not.** If the Müllers request the
-Schmidts, the Müllers see "noch keine Antwort" until the Schmidts request them
-back, at which point both see "✓". The Schmidts are *not* notified that the
-Müllers asked.
-
-This asymmetry is deliberate. Showing the incoming request creates social
-pressure to reciprocate, which produces merges nobody wanted and is exactly the
-dynamic that makes people dread these forms. Showing only mutual matches means a
-request costs nothing socially and the data stays honest.
-
-Cross-family co-room requests are deferred with sleeping parties. The initial family
-view exposes only preferences that constrain the family's own placement unit.
+Cross-family co-room requests are deferred with sleeping parties, so the family
+view exposes only preferences that constrain the family's own placement unit. When
+that idea is adopted, the rule to keep is that only a mutual match is shown: a
+one-sided request stays invisible to the family it names, because showing it
+creates social pressure to reciprocate and produces merges nobody wanted.
 
 **Organiser notes are separate from family free text.** The family's "Sonst noch
 etwas?" box is theirs and they can see it. If an organiser wants to write "phoned,
@@ -188,7 +171,7 @@ matches what workshop age bounds will do and avoids a confusing mismatch.
 person, such as "Schläft bei den Eltern" for an adult, is disabled with the reason
 next to it, not removed. A missing option makes people
 think the site is broken; a disabled option with a reason answers the question
-before they ask. This is now driven by `valid_for` — a control whose predicate
+before they ask. The tag's `valid_for` evaluator decides: a control whose predicate
 fails renders disabled with the reason.
 
 **Workshop ranking is drag-to-order on desktop and numbered selects on mobile.**
@@ -253,10 +236,9 @@ run". A family has a *Zimmer* and *Wünsche*.
 important thing the form collects and the labels have to make the difference
 obvious without explanation.
 
-**Anxiety-reducing defaults.** "Zimmer teilen: gerne mit einer anderen Familie"
-is pre-selected because most families are fine with it and the ones who are not
-will change it. Defaulting to "auf keinen Fall" would make the plan infeasible
-through inertia.
+**Anxiety-reducing defaults.** "Zimmer teilen" starts with no answer rather than
+"auf keinen Fall". An absent label means indifferent, which is what most families
+are; making refusal the default would make the plan infeasible through inertia.
 
 **No progress bars, no gamification, no "You're 60% done!"** This is a form about
 where your family sleeps, not an onboarding funnel.

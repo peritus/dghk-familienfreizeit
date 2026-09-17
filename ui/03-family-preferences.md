@@ -2,8 +2,8 @@
 
 ## Audience, purpose, and route
 
-An invited family records and revises its own people, room preferences, shared
-family requests, and workshop rankings. Route: `/family` before publication.
+An invited family records and revises its own people, room preferences, food
+information, and workshop rankings. Route: `/family` before publication.
 Governing specs: [family view](../10-family-view.md), [labels and
 constraints](../04-labels-and-constraints.md), and [occasion profiles](../16-occasion-profiles.md).
 
@@ -21,19 +21,17 @@ occasion profile's `family_facing` entries.
 │                                                                          │
 │ 2  ROOM PREFERENCES                                                        │
 │ Private bathroom       ( ) Required  (•) Preferred  ( ) No preference      │
-│ Indoor sleeping        (•) Required  ( ) Preferred  ( ) No preference      │
+│ Accessible room        ( ) Required  ( ) Preferred  (•) No preference      │
+│ Anything else?  [                                                     ]    │
+│ The organisation team can read this note.                                  │
 │                                                                          │
-│ 3  SHARING                                                                  │
-│ [ Search families… ]                                                       │
-│ ✓ Taylor family · mutual request     Rivera family · awaiting response    │
-│                                                                          │
-│ 4  WORKSHOPS                                                               │
+│ 3  WORKSHOPS                                                               │
 │ Saturday morning · Alex   1. Pottery   2. Hiking   3. —                   │
 │ Saturday morning · Jamie  1. Hiking    2. Archery  3. Pottery             │
 │                                                                          │
-│ 5  ANYTHING ELSE?                                                          │
-│ [                                                                      ]   │
-│ The organisation team can read this note.                                  │
+│ 4  FOOD                                                                    │
+│ Alex   Diet [ vegetarian ▼ ]   Allergies [                           ]     │
+│ Jamie  Diet [ with meat   ▼ ]  Allergies [                           ]     │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -53,18 +51,16 @@ occasion profile's `family_facing` entries.
 │ Private bathroom              │
 │ [ Required ] [ Preferred ]    │
 │ [ No preference ]             │
-│                              │
-│ SHARING                       │
-│ [ Search families… ]          │
-│ ✓ Taylor family               │
+│ Anything else?                │
+│ [                          ]  │
 │                              │
 │ WORKSHOPS                     │
 │ Alex · Saturday morning       │
 │ [1 Pottery                 ]  │
 │ [2 Hiking                  ]  │
 │                              │
-│ ANYTHING ELSE?                │
-│ [                          ]  │
+│ FOOD                          │
+│ Alex  [ vegetarian       ▼ ]  │
 └──────────────────────────────┘
 ```
 
@@ -81,9 +77,9 @@ Controls need visible labels, grouped radio semantics, touch targets of at least
 ## Neobrutalist redesign and components
 
 Make each numbered section a `Card` with a bold heading and small completion
-`Badge`. Use `RadioGroup` for tri-state preferences, `Combobox` for family
-search, `Checkbox` for toggles, `Select` for workshop ranks, and
-`Textarea` for the note. Use `Sonner` for save feedback.
+`Badge`. Use `RadioGroup` for tri-state preferences, `Combobox` for the person
+picker, `Checkbox` for toggles, `Select` for workshop ranks and diet, and
+`Textarea` for free text. Use `Sonner` for save feedback.
 
 On mobile, cards remain stacked and controls become full-width. A picker uses a
 `Drawer` or `Sheet`; the selected result stays visible as a bordered `Badge`

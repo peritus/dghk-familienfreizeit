@@ -64,7 +64,7 @@ building on it.
 - KDL event-log fixtures are the canonical authored inputs for development and
   tests; the same parsed events seed D1 integration tests and local experiments
 - Generic labels in the fold and a minimal built-in tag vocabulary (capabilities plus
-  `needs-ensuite`) so that M2 has something to solve against
+  `needs-private-sanitary`) so that M2 has something to solve against
 - Organiser inventory screens — plain tables
 - Magic-link authentication, sessions, rate limits, and the code-level organiser allowlist
 

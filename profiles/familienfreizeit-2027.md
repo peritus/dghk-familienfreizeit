@@ -80,7 +80,8 @@ are normalized from `2×4` and `2×2` sleeping rooms to 8 and 4 beds respectivel
 The inventory is event data entered through [room inventory](../20.1-room-inventory.md)
 events, not profile configuration. Each source location is a building
 (`Haupthaus`, `Gartenhaus`, `Blockhaus`, `Bungalow`, `Schlaffass`); room numbers
-become `RoomAdded.number`; each bed is a single bed. Rooms 35–37 are `apartment`
+become `RoomAdded.number`; each bed carries the `sleeps` count the hostel lists,
+so a double bed provides two places. Rooms 35–37 are `apartment`
 rooms whose sleeping rooms are recorded as labels.
 
 Module-owned keys and parameters:
@@ -221,8 +222,9 @@ confirms it. After the deadline, the preferences page is read-only.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../18-german-translation-guidelines.md). The
-preferences page has five sections: who is coming, room wishes, sharing, workshops,
-and food.
+preferences page has four sections: who is coming, room wishes, workshops, and
+food. Cross-family sharing wishes arrive with the deferred sleeping-parties
+module.
 
 Change emails are sent for room, place, and workshop assignment changes and for
 workshop cancellations ([change notifications](../20.10-change-notifications.md)).

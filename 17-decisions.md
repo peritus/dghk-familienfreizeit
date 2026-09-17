@@ -293,11 +293,11 @@ TypeScript, KDL, and these documents:
 
 | Kind of name | Case | Examples |
 |---|---|---|
-| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, `Party`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `max_repair_passes` |
+| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `max_repair_passes` |
 | Code identifiers: variables, parameters, functions, methods, module factories | `camelCase` | `ageAt`, `buildSolverInput`, `roomInventory()` |
 | Types, interfaces, classes, React components | `PascalCase` | `SolverInput`, `RoomInventoryParams`, `FamilyView` |
 | Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
-| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `room-with`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
+| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `apart-from`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
 | Entity ids | kind prefix, `_`, then a free suffix | `fam_27`, `per_peter`, `slot_sat-morning` |
 | Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `PUBLIC_URL`, `DB` |
 | Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `tag-requirements.ts` |
@@ -314,7 +314,7 @@ read the same. Code identifiers follow the TypeScript ecosystem so that our name
 not clash with React, Hono, zod, and the DOM, which are all camelCase.
 
 Vocabulary identifiers are values, not fields. They appear inside data
-(`LabelSet key=room-with`) and name things a person refers to in review, the trace,
+(`LabelSet key=apart-from`) and name things a person refers to in review, the trace,
 and the constraint screen. Setup-event payload fields that the fold turns into labels
 change only their separator: the payload field `does_not_need_a_bed` becomes the
 label key `does-not-need-a-bed`.
@@ -327,7 +327,7 @@ LabelSet entity_id=fam_mueller key=needs-private-sanitary value=private-sanitary
 ```
 
 In TypeScript a kebab-case key is quoted where it is an object key
-(`'room-with': relation({ … })`), and a profile's tag type is derived from those
+(`'apart-from': relation({ … })`), and a profile's tag type is derived from those
 keys, so a misspelt tag is still a compile error.
 
 *Rejected alternative:* snake_case for every identifier, Python-style. Every file

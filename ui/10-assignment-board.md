@@ -21,8 +21,8 @@ Organisers make room-placement decisions and review consequences. Route:
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a family to a room appends one or more organiser decision label events, re-derives locally, and shows
-any cascade. Infeasible rooms lose drop affordance and explain why; soft
+Dragging a family to a room appends one or more organiser decision label events,
+re-derives locally, and shows every other family the change moved. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
 picker and consequence summary. Apply confirms the pending batch; Discard
 requires confirmation. Undo removes all pending events belonging to the last action

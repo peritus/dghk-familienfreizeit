@@ -11,8 +11,8 @@ and [organiser view](../09-organiser-view.md) §5.
 │ Organiser decisions                         [Add organiser decision]    │
 │ 11 active · 2 findings · [All] [Errors] [Warnings]                        │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ ⚠ needs-ensuite · 19 beds required, 14 available        [Affected →]      │
-│ ⚠ room-with conflict · Morgan and Rivera split            [Inspect →]      │
+│ ⚠ needs-private-sanitary · 19 places required, 14 available [Affected →]  │
+│ ⚠ apart-from conflict · Morgan and Rivera both need Room 12 [Inspect →]   │
 │                                                                          │
 │ ACTIVE DECISIONS                                                        │
 │ Müller family · needs=naehe_zum_eingang · required                       │

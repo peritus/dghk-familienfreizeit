@@ -247,7 +247,7 @@ type PreflightFinding = {
 type TraceEntry = {
   stage: string                 // stage id, e.g. 'room-assignment.place'
   step: string                  // module-defined, e.g. 'greedy'
-  subject: string               // party key, person id, workshop id, or constraint key
+  subject: string               // family id, person id, workshop id, or constraint key
   text: string                  // the human-readable line
   detail?: {
     chosen?: { target: string, score: number, terms: Array<[string, number]> }
