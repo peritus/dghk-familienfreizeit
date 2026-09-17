@@ -221,7 +221,7 @@ export async function sendEmail(env: Env, msg: Message): Promise<Sent> {
 
 **The graceful no-op is the important part.** With no API key, the magic link is
 logged to the console and local development works without ever sending mail.
-Copy the link out of `wrangler dev` output and paste it. This is the difference
+Copy the link out of the `vite` dev server output and paste it. This is the difference
 between a pleasant local loop and one where every login costs a real email.
 
 Every send writes to `email_log`. When someone says they never received their

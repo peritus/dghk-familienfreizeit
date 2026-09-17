@@ -18,9 +18,11 @@ families. Route: `/organiser/families`. Governing spec: [organiser view](../09-o
 ```
 
 Import opens a dialog with file upload or paste, expected columns, validation,
-and a preview. The preview reports “52 ready, 2 problems” and keeps Apply
-disabled until every row is valid. Duplicate addresses and malformed dates are
-named by row. The empty table offers import and manual invite actions.
+and a preview. The preview reports “52 ready, 2 problems” and names duplicate
+addresses and malformed dates by row. Problem rows are excluded from the import;
+the valid rows are appended in one batch, so a bad row costs that row, not the
+import ([events](../03-events.md), `FamilyInvited`). The empty table offers import
+and manual invite actions.
 
 ## Accessibility and responsive behavior
 
@@ -33,5 +35,5 @@ the import preview may scroll horizontally inside its own region.
 Use `Sidebar`, `Input`, `Badge`, `Button`, and `Table` for the main view. Import
 is a `Dialog` containing `Tabs` for upload/paste, `Textarea` for pasted CSV,
 and a preview `Table`. The final import action uses `AlertDialog` with
-`AlertDialogTitle` naming the number of families and `AlertDialogDescription`
-stating that the operation is all-or-nothing.
+`AlertDialogTitle` naming the number of families to be invited and
+`AlertDialogDescription` naming the rows that will be skipped.

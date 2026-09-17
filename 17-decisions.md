@@ -11,7 +11,7 @@ every document that depends on it together.
 ## D1 — Cloudflare Workers Paid + D1
 
 *Chosen.* The whole application is one Worker with one SQLite-backed database, on
-the Workers Paid plan. At 150 families the event log is perhaps 3,000 rows. The
+the Workers Paid plan. At 55 families the event log is perhaps 3,000 rows. The
 interesting engineering is in the solver, not in scale.
 
 *Why Paid:* every request that shows domain state derives it (D2), and the family

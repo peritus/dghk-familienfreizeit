@@ -64,7 +64,8 @@ registration closed.
 │     RETURNING email                                         │
 │   if no row → 302 to the "link expired or used" screen      │
 │   session = base64url(32 random bytes)                      │
-│   INSERT session (sha256(session), email, now+30d)          │
+│   INSERT session (sha256(session), email,                   │
+│                   organiser ? now+7d : now+30d)             │
 │   Set-Cookie; 302 to /                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -223,15 +224,15 @@ payment data, no addresses, no phone numbers, no documents. The consequence of
 compromise is low, which is what justifies the simplicity everywhere else.
 
 **Organisers are the higher-value target**, which is why organiser sessions are shorter
-and why Cloudflare Access in front of `/organiser` is recommended during the build
-(§6). Compromising an organiser means access to the full family list.
+and why Cloudflare Access in front of the organiser routes is recommended during the
+build (§6). Compromising an organiser means access to the full family list.
 
 ---
 
 ## 6. Cloudflare Access as defence in depth
 
 During development and the early run-up, put Cloudflare Access in front of
-`/organiser/*` in addition to the application's own check. Free for small teams, adds
+`/organiser/*` and `/api/organiser/*` in addition to the application's own check. Free for small teams, adds
 a second independent factor, and costs no application code.
 
 Remove it before handing the tool to a non-technical organiser if the extra login

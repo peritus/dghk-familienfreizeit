@@ -89,7 +89,7 @@ The loader maps node properties to an existing event payload, applies the same
 schema and invariant checks as D1 replay, and then constructs the complete event
 envelope. Unless explicitly supplied for a historical fixture, `seq` is the
 one-based file position, `actor` is `fixture`, `at` is a fixed deterministic
-timestamp, and `subject` is null or the event's natural subject. No domain
+timestamp, and `subject` is null ([events](03-events.md)). No domain
 meaning is assigned by the text format itself.
 
 KDL files are authored inputs, not a second domain model. `Event[]` remains the
@@ -199,10 +199,12 @@ type ConstraintDefinition = {
 }
 ```
 
-`operator` is selected from the fixed resolver vocabulary, such as
-`needs-provides`, `excludes`, `groups-with`, `separates-from`, `capacity`, and
-`ordered-choice`. `config` contains scopes, value types, cardinality,
-strength rules, and UI metadata. It never contains executable code.
+`operator` is one of the four operators a definition may declare:
+`needs-provides`, `excludes`, `groups-with`, and `separates-from`
+([events](03-events.md), `ConstraintDefined`). `config` holds the declared scopes
+and strength from that event. The resolver's other fixed mechanisms — `capacity`,
+`ordered-choice`, and `descriptive` — belong to module and profile vocabulary and
+need no definition event. `config` never contains executable code.
 
 The resolver is the only component allowed to turn labels and definitions into
 relationships, capabilities, placement units, assignments, or diagnostics. The indexes

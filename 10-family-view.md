@@ -44,7 +44,7 @@ that reuses an existing control needs no family view code.
 Willkommen, Familie Müller
 
   Dein Zimmer wird vom Organisationsteam eingeteilt.
-  Deine Angaben kannst Du bis zum 20. September ändern.
+  Deine Angaben kannst Du bis zum 31. März ändern.
 
   ─────────────────────────────────────────────────
   1  WER KOMMT MIT

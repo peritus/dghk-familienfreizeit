@@ -69,11 +69,13 @@ A family report uses the published cut. It must not reveal unpublished room,
 workshop, or constraint decisions. A shared report must show only fields that the
 occasion profile has declared safe for that audience.
 
-## 3. Initial report catalogue
+## 3. Report catalogue
 
-The first release should provide these reports. Each report, or report part, is
+These are the reports the selected modules provide. Each report, or report part, is
 contributed by a module and named in that module's specification §11
-([modules](20-modules.md)); a report whose modules are not selected does not exist.
+([modules](20-modules.md)); a report whose modules are not selected does not exist,
+and a report arrives with the milestone that delivers its module
+([roadmap](15-roadmap.md)).
 
 ### 3.1 Shared family reports
 

@@ -182,7 +182,7 @@ it is too big.
 
 None of that applies here. Concretely:
 
-- 150 families, ~55 families, ~40 rooms, ~120 places, ~24 workshops.
+- ~55 families, ~150 people, ~40 rooms, ~160 places, ~24 workshops.
 - Every family edits preferences a handful of times. Organisers add a few dozen
   times. Inventory is entered once and corrected occasionally.
 - Realistic total: **2,000 to 4,000 events** for the entire life of the occasion.
@@ -236,7 +236,7 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family | Label/constraint events on entities it owns, for family-facing controls |
+| Family | Person events for its own people, and label/constraint events on entities it owns, for family-facing controls |
 | Allowlisted organiser | Everything, through the organiser UI |
 
 An allowlisted organiser may enter a constraint for any entity. The actor identifies

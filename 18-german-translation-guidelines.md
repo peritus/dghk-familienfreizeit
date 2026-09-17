@@ -7,8 +7,8 @@ literal when a more natural German phrase is clearer.
 
 ## 1. Voice and tone
 
-- Address families with **Du**, **dir**, and **dein**, never **Sie**, **Ihnen**,
-  or **Ihr**.
+- Address families with **Du**, **Dir**, and **Dein**, never **Sie**, **Ihnen**,
+  or **Ihr**. Capitalise the polite-informal forms consistently in family copy.
 - Use a warm, calm, practical tone. Sound like a helpful organiser, not a
   government form or a marketing campaign.
 - Prefer short sentences and familiar words. Explain a necessary technical
@@ -74,7 +74,7 @@ family copy unless a support or debugging screen explicitly requires them.
 ## 4. Grammar and formatting
 
 - Capitalise nouns according to German rules: **Deine Angaben**, **Ein Zimmer**.
-- Use the informal possessives consistently: **dein**, **deine**, **deinem**.
+- Use the informal possessives consistently: **Dein**, **Deine**, **Deinem**.
 - Use German quotation marks only where quotation is necessary: „…“.
 - Use a non-breaking space before `%`, but no space before `!` or `?`.
 - Format dates as `30.04.2027` in family copy. Include the weekday when it

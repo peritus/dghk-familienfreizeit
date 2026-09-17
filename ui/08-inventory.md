@@ -11,11 +11,11 @@ capabilities. Route: `/organiser/inventory`. Governing spec: [organiser view](..
 │ [All buildings] [General] [Staff] [Blocked]                             │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ MAIN HOUSE                                                               │
-│ Room 12 · first floor · 4 places · 2 beds free · private bathroom [Edit] │
-│ Room 14 · first floor · 6 places · 6 beds free · staff            [Edit] │
+│ Room 12 · first floor · 4 places · 2 free · private bathroom      [Edit] │
+│ Room 14 · first floor · 6 places · 6 free · general                [Edit]│
 │                                                                          │
 │ GARDEN HOUSE                                                             │
-│ Room 35 · ground floor · 8 places · 8 beds free · two-family       [Edit]│
+│ Room 35 · first floor · 8 places · 8 free · two-family             [Edit]│
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 

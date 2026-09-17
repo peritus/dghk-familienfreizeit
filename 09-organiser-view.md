@@ -18,6 +18,7 @@ child-room assignment are deferred; their design sketches live under
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
 | `/organiser/workshops` | Workshops | Slots, capacity, fill, rankings |
 | `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
+| `/organiser/materials` | Materials | Requests, commitments, and fulfilment |
 | `/organiser/reports` | Reports | Printable operational reports |
 
 Every screen renders the organiser application's derived world. The browser holds
@@ -52,8 +53,8 @@ searchable unplaced-family rail and room cards grouped by building and floor.
 │ [Search families…] Main House  Garden House  [Unplaced only]  seq 1482   │
 ├─────────────────┬────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                              │
-│ Braun ×5 ⚠      │ Room 12 · 6 places · Morgan ×2 ✓                      │
-│ Lang ×1         │ Room 14 · 5 places · open                             │
+│ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
+│ Lang ×1         │ Room 14 · 6 places · open                             │
 ├─────────────────┴────────────────────────────────────────────────────────┤
 │ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]         │
 └──────────────────────────────────────────────────────────────────────────┘

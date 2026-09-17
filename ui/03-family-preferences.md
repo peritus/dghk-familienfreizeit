@@ -14,7 +14,7 @@ occasion profile's `family_facing` entries.
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Family view                                      Saved just now  Sign out│
 │ Welcome, Morgan family                                                     │
-│ Your organisation team will assign rooms. You can change these answers until 20 Sep│
+│ Your organisation team will assign rooms. Answers can change until 31 Mar     │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ 1  PEOPLE                                                                  │
 │ Morgan Alex · adult · 38       Morgan Jamie · child · 9       [Edit people]│
@@ -66,8 +66,9 @@ occasion profile's `family_facing` entries.
 
 ## Behavior and states
 
-Save each change on input, show “Saving”, “Saved”, or a recoverable error, and
-retain unsent input if the network fails. Empty workshop rankings and incomplete
+Save each change on input and show “Saving”, “Saved”, or a recoverable error. A
+failed save returns the control to its stored state and says so; nothing is queued
+in the browser ([family view](../10-family-view.md) §3). Empty workshop rankings and incomplete
 people data are warnings, not invented validation rules. Before publication,
 show an editable state; after publication this route becomes UI-04.
 

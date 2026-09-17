@@ -21,7 +21,8 @@ immediately.
 
 ```ts
 test('solver output is invariant under input permutation', () => {
-  const base = loadEventLog('test/fixtures/event-logs/full-event.kdl')
+  const log = loadEventLog('test/fixtures/event-logs/full-event.kdl')
+  const base = buildSolverInput(log, defaultConfig)
   const expected = sha256(canonical(solve(base, defaultConfig)))
 
   for (let seed = 0; seed < 50; seed++) {
@@ -122,11 +123,12 @@ profile change legitimately changes output. Store `config_hash` alongside
 than reporting an opaque mismatch:
 
 ```ts
-test.each(goldenCases)('golden: $name', ({ solverInput, expected_hash, config_hash }) => {
+test.each(goldenCases)('golden: $name', ({ log_path, expected_hash, config_hash }) => {
   if (currentConfigHash() !== config_hash) {
     throw new Error(`golden: $name was recorded against a different profile — re-record with npm run test:record`)
   }
-  expect(sha256(canonical(solve(solverInput, defaultConfig)))).toBe(expected_hash)
+  const world = derive(loadEventLog(log_path), defaultConfig)
+  expect(sha256(canonical(world.plan))).toBe(expected_hash)
 })
 ```
 
@@ -137,9 +139,9 @@ the diff readable, not just report a mismatch:
 golden: full-event — output changed
   47 assignments identical
    3 assignments differ:
-     P07  rm_0014 → rm_0009
-     P12  rm_0009 → rm_0014
-     P22  rm_0031 → rm_0031  (place changed within room)
+     fam_0007  rm_0014 → rm_0009
+     fam_0012  rm_0009 → rm_0014
+     fam_0022  rm_0031 → rm_0031  (place changed within room)
   total_score 412 → 419
   Re-record with: npm run test:record
 ```
@@ -365,7 +367,7 @@ test('the full loop: import → constraints → solve → plan → publish', asy
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  await publish(db, plan2.input_seq)
+  await publish(db, plan2.output_hash)
   expect(await publishedCount(db)).toBe(1)
 })
 ```
@@ -385,8 +387,9 @@ Also covered:
   a separate, smaller integration test.
 - **Constraint enforcement**: attempt to give two people the same place and assert
   solver-input validation fails.
-- **Publication concurrency**: publishing while another plan is published fails
-  the event-sequence compare-and-swap.
+- **Publication concurrency**: publishing an `output_hash` the server no longer
+  derives is refused with the diff, and publishing an error-severity plan without
+  `acknowledged_findings` is refused.
 
 ---
 

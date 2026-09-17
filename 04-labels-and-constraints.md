@@ -35,14 +35,18 @@ separates-from=fam_27              this family must not share with family fam_27
 
 Built-in definitions and custom definitions declare the resolver operator:
 
-| Kind | Scope | Strength | Meaning |
+| Mechanism | Scope | Strength | Meaning |
 |---|---|---|---|
 | `needs-provides` | family, person → room/place/workshop | required / preferred | The holder needs a matching capability |
 | `excludes` | entity → entity/value | required / preferred | The holder rejects a match |
 | `groups-with` / `separates-from` | family, person | required / preferred | A relation between entities |
+| `ordered-choice` | person → slot, choice | — | A ranked list per scope entity (§7) |
+| `capacity` | the entities a module counts | — | Counting, owned by the module |
 | `descriptive` | any | — | Recorded for humans; the solver ignores it |
 
-`descriptive` exists for profile-defined facts that the solver ignores. An organiser
+The first four are the operators a `ConstraintDefined` event may declare
+([events](03-events.md)); `capacity` and `descriptive` come from module and profile
+vocabulary. `descriptive` exists for profile-defined facts that the solver ignores. An organiser
 decision may also carry one optional free-text note; the note is visible to
 organisers but is not solver input.
 

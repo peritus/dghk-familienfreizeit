@@ -150,6 +150,48 @@ Send the real invitations only after this deferred milestone is delivered.
 understand what happened each time, and can add and clear a human-readable
 decision label without defining new vocabulary or supplying a separate name.
 
+## M5 — Plans and publication
+
+*The plan becomes an answer. Two days.*
+
+- Plans identified by `input_seq`
+- Publish flow: the publication event, the hash compare-and-swap, and
+  acknowledgement of error findings
+- The published-plan view, derived from the plan selected by publication
+
+Families reach that view once the deferred family view of M3 is delivered; until
+then the published plan is read by organisers and printed from the reports.
+
+**Done when:** an organiser can publish a reviewed plan and reproduce
+the same deterministic result from the plan identified by its `input_seq`.
+
+---
+
+## M6 — Workshops
+
+*Two to three days.*
+
+- Slots and workshops in inventory
+- The workshop solver with the fairness ledger
+- Workshop decision labels through all applicable fixed resolver mechanisms
+
+The solver, its fairness objective, co-assignment groups, and under-subscription
+cancellation are initial-release work: they are module behaviour the plan depends
+on ([workshop assignment](20.6-workshop-assignment.md)). The family-facing ranking
+UI and the organiser preference heatmap are post-initial enhancements.
+
+---
+
+## M7 — Hardening
+
+*Continuous, through the run-up.*
+
+- `scripts/tune.ts` and a weight-tuning pass against the real exported log
+- Copy review, German throughout the family surface
+- Accessibility pass: keyboard, contrast, focus, reduced motion
+- Deliverability testing against GMX, web.de, Gmail, Outlook
+- The pre-occasion runbook from [deployment](13-deployment.md) §10
+
 ## M8 — Deferred sleeping modules
 
 *Future work. Reintroduces family splitting and cross-family sleeping groups as a
@@ -168,42 +210,7 @@ or merge. Their deferred specifications live under [`deferred-ideas/`](deferred-
 
 ---
 
-## M5 — Plans and publication
-
-*Families get answers. Two days.*
-
-- Plans identified by `input_seq`
-- Publish flow: the publication event and the hash compare-and-swap
-- The published-plan view, derived from the plan selected by publication
-
-**Done when:** an organiser can publish a reviewed plan and reproduce
-the same deterministic result from the plan identified by its `input_seq`.
-
 ---
-
-## M6 — Workshops
-
-*Two to three days.*
-
-- Slots and workshops in inventory
-- The workshop solver with the fairness ledger
-- Workshop decision labels through all applicable fixed resolver mechanisms
-
-The solver and its fairness objective are initial-release work. Family ranking
-UI, co-assignment groups, cancellation handling, and the preference heatmap are
-post-initial enhancements.
-
----
-
-## M7 — Hardening
-
-*Continuous, through the run-up.*
-
-- `scripts/tune.ts` and a weight-tuning pass against the real exported log
-- Copy review, German throughout the family surface
-- Accessibility pass: keyboard, contrast, focus, reduced motion
-- Deliverability testing against GMX, web.de, Gmail, Outlook
-- The pre-occasion runbook from [deployment](13-deployment.md) §10
 
 ## Post-initial-release work
 
