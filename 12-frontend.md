@@ -1,4 +1,4 @@
-# 11 — Frontend
+# 12 — Frontend
 
 The planned surfaces are indexed in the [UI screen catalog](ui/README.md).
 
@@ -13,8 +13,8 @@ The derived world is the read side of the application
 ([architecture](01-architecture.md)), and it already runs in the browser. The organiser
 screens are views over it: the dashboard, families, the board, plan
 diffs, workshops, and constraints all render `derive(committed ++ pending)`. The
-pending list is shared by every one of them — the board adds placement decisions to it
-just as the board drags into it. That is a client application with one piece of
+pending list is shared by every one of them: the constraints screen adds decision
+labels to it just as the board drags into it. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
 
 So: render everything in React, organiser and family view alike, and keep the server

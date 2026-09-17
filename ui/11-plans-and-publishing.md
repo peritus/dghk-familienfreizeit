@@ -4,7 +4,7 @@
 
 Organisers compare derived plans, inspect moves, and publish the reviewed plan.
 Route: `/organiser/plans`; diff route: `/organiser/plans/:a/diff/:b`. Governing specs:
-[organiser view](../09-organiser-view.md) §7 and [publication](../01-architecture.md).
+[organiser view](../09-organiser-view.md) §1 and [publication](../01-architecture.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -25,8 +25,8 @@ the draft untouched. An already-published plan is read-only.
 ## Accessibility and mobile
 
 Use a real table with row actions and a text summary above the diff. On narrow
-screens, each plan becomes a card and diff groups stack vertically. Publishing
-Publishing confirmation is a full-width dialog with focus returned to Publish on cancel.
+screens, each plan becomes a card and diff groups stack vertically. The publish
+confirmation is a full-width dialog with focus returned to Publish on cancel.
 
 ## Neobrutalist redesign and components
 

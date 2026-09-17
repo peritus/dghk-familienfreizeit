@@ -1,4 +1,4 @@
-# 12 — Deployment
+# 13 — Deployment
 
 One Worker, one D1 database, one custom domain. No queues, no KV, no R2, no
 Durable Objects.
@@ -63,7 +63,7 @@ The Cloudflare Vite plugin reads this file, builds the Worker and the applicatio
 together, and writes the deployable configuration into the build output, so
 `wrangler deploy` runs after `vite build`.
 
-## Development-only text event source
+### Development-only text event source
 
 The normal source is D1. Local development and tests may explicitly select a
 filesystem-backed source in the Vite development host:
@@ -136,7 +136,7 @@ npx wrangler d1 migrations apply dghk-familienfreizeit --remote
 
 **Migrations are forward-only.** No down migrations. Rolling back a schema change
 on a live event database is not a thing anyone will do correctly under pressure;
-the recovery path is a restore, covered in §6.
+the recovery path is a restore, covered in §7.
 
 **Never edit a migration after applying it anywhere.** Add a new one.
 
@@ -147,10 +147,10 @@ corrective events through the ordinary append. Never edit event rows.
 
 ---
 
-## Weight tuning
+## 3. Weight tuning
 
-There is no weight-editing screen, and this is deliberate. The offline
-workflow, from [occasion profiles](16-occasion-profiles.md) §4:
+There is no weight-editing screen, and this is deliberate. Weights are occasion
+profile code (D12), so tuning happens offline:
 
 ```bash
 wrangler d1 execute dghk-familienfreizeit --remote --json \
@@ -163,7 +163,7 @@ active occasion profile, and deploy.
 
 ---
 
-## 3. Secrets
+## 4. Secrets
 
 ```bash
 wrangler secret put RESEND_API_KEY
@@ -186,7 +186,7 @@ SESSION_PEPPER=local-only-not-secret
 
 ---
 
-## 4. Email
+## 5. Email
 
 Resend over `fetch`. No SDK — Workers have `fetch`, and the API is one endpoint.
 
@@ -251,7 +251,7 @@ one-file change.
 
 ---
 
-## 5. Scheduled worker
+## 6. Scheduled worker
 
 One cron, daily at 03:00, doing exactly one thing:
 
@@ -276,7 +276,7 @@ changes in a week and stop reading.
 
 ---
 
-## 6. Backups and recovery
+## 7. Backups and recovery
 
 Three layers, in increasing order of how much you will regret needing them.
 
@@ -309,7 +309,7 @@ That file is small, human-readable, and outlives the application.
 
 ---
 
-## 7. CI
+## 8. CI
 
 ```yaml
 name: ci
@@ -349,7 +349,7 @@ harmless for the few seconds it takes.
 
 ---
 
-## 8. Environments
+## 9. Environments
 
 | | Local | Preview | Production |
 |---|---|---|---|
@@ -366,7 +366,7 @@ never as a separate step someone might skip.
 
 ---
 
-## 9. Pre-event runbook
+## 10. Pre-event runbook
 
 The week before, in order:
 
@@ -376,18 +376,18 @@ The week before, in order:
    the shared family reports are visible in the browser, and that the organiser
    reports show the expected data cut. Reports are not downloadable; print any
    paper copies needed for the occasion from their browser print views.
-2a. **Run `npm run tune`** against the exported log and confirm the deployed
-    weights are the ones you settled on.
-2b. **Confirm preflight is clean**, or that every error-severity finding has
-    been acknowledged.
-3. **Print the required reports.** Use the report print styles for room lists per
+3. **Run `npm run tune`** against the exported log and confirm the deployed
+   weights are the ones you settled on.
+4. **Confirm preflight is clean**, or that every error-severity finding has
+   been acknowledged.
+5. **Print the required reports.** Use the report print styles for room lists per
    building, workshop lists per slot, the master sheet, and any confidential
    operational sheets. The hostel's wifi will be bad and someone will need paper.
-4. **Verify one magic link end to end** against a real address on the actual
+6. **Verify one magic link end to end** against a real address on the actual
    production domain.
-5. **Check the published plan is the one you think it is** — the latest
+7. **Check the published plan is the one you think it is** — the latest
    `PlanPublished.output_hash` matches the plan shown by the dashboard.
-6. **Nominate a laptop.** One machine, known to be logged in as an organiser, known
+8. **Nominate a laptop.** One machine, known to be logged in as an organiser, known
    to have the export. Do not rely on being able to log in from a phone in a
    building with thick walls.
 
@@ -397,7 +397,7 @@ plan to have printed the right thing.
 
 ---
 
-## 10. Cost
+## 11. Cost
 
 | | |
 |---|---|

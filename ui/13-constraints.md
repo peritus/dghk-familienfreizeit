@@ -4,7 +4,7 @@
 
 Organisers add, inspect, and clear decision labels, and inspect current resolver
 findings. Route: `/organiser/constraints`. Governing specs: [labels and constraints](../04-labels-and-constraints.md)
-and [organiser view](../09-organiser-view.md) §7.
+and [organiser view](../09-organiser-view.md) §5.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

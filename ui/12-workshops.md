@@ -34,7 +34,7 @@ the existing event author and timestamp. The derived assignment and findings
 update through the ordinary solver.
 
 The heatmap has a text table alternative and does not use color alone. On
-On narrow screens, show one workshop card at a time followed by the ranking list.
+narrow screens, show one workshop card at a time followed by the ranking list.
 
 ## Neobrutalist redesign and components
 

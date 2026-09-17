@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers make room-placement decisions and review consequences. Route:
-`/organiser/board`. Governing specs: [organiser view](../09-organiser-view.md) §5,
+`/organiser/board`. Governing specs: [organiser view](../09-organiser-view.md) §4,
 [room assignment](../20.3-room-assignment.md), and decisions [D6/D15](../17-decisions.md).
 
 ```text

@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers maintain buildings, rooms, beds, capacities, designations, and
-capabilities. Route: `/organiser/inventory`. Governing spec: [organiser view](../09-organiser-view.md) §5.
+capabilities. Route: `/organiser/inventory`. Governing spec: [organiser view](../09-organiser-view.md) §3.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

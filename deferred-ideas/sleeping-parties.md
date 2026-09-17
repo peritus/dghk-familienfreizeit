@@ -7,8 +7,6 @@ listed under “Integration points”.
 
 Proposed module id `sleeping-parties` · factory `sleepingParties`
 
-Module id `sleeping-parties` · factory `sleepingParties`
-
 ## 1. Purpose and boundary
 
 Sleeping parties decides who sleeps with whom. A *party* is a set of people who must
@@ -18,7 +16,7 @@ parties, merges from co-room relations, organiser grouping and separation, the
 unplaceable-merge guard, and party requirements. It does not decide which room a
 party gets; that is [room assignment](../20.3-room-assignment.md).
 
-Party formation is a separate, reviewable phase (D5). Organisers review a short list
+Party formation would be a separate, reviewable phase; D5 defers it. Organisers review a short list
 of parties with provenance before looking at any room.
 
 This document is the authoritative description of party formation, party
@@ -26,7 +24,7 @@ requirement inheritance, and relation handling during formation.
 
 ## 2. Dependencies
 
-Requires: [`room-inventory`](20.1-room-inventory.md). Enhances: none.
+Requires: [`room-inventory`](../20.1-room-inventory.md). Enhances: none.
 
 ## 3. Parameters
 
@@ -163,7 +161,7 @@ None. Formation is not scored. Room assignment scores the soft co-room terms.
 | Id | Severity | Fires when |
 |---|---|---|
 | `sleeping-parties.merge-exceeds-capacity` | error | a mutual-required component's bed demand exceeds the largest general room |
-| `sleeping-parties.required-contradiction` | error | an entity requires co-rooming with an entity it is also kept apart from, or holds a required requirement using the structural check `no-other-parties` ([room assignment](20.3-room-assignment.md) §8) together with a required co-room relation |
+| `sleeping-parties.required-contradiction` | error | an entity requires co-rooming with an entity it is also kept apart from, or holds a required requirement using the structural check `no-other-parties` ([room assignment](../20.3-room-assignment.md) §8) together with a required co-room relation |
 | `sleeping-parties.merge-cascade` | info | a transitive component contains two families with no direct relation |
 
 A merge cascade is correct — A↔B and B↔C must all share a room — but it surprises
@@ -211,7 +209,12 @@ clearing an applied label appends `LabelCleared`.
 - Fixture contract: `minimal.kdl` includes one mutual co-room request and one
   one-sided request.
 
-## 13. Integration points
+## 13. When not selected
+
+No parties are formed; whole families remain the placement unit, the party review
+screen is absent, and the co-room tag cannot be defined.
+
+## Integration points
 
 Adopting this module requires updating:
 

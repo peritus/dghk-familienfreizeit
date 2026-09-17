@@ -203,7 +203,7 @@ post-initial enhancements.
 - Copy review, German throughout the family surface
 - Accessibility pass: keyboard, contrast, focus, reduced motion
 - Deliverability testing against GMX, web.de, Gmail, Outlook
-- The pre-occasion runbook from [deployment](13-deployment.md) §9
+- The pre-occasion runbook from [deployment](13-deployment.md) §10
 
 ## Post-initial-release work
 

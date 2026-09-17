@@ -94,7 +94,7 @@ removed projection tables.
   - Replace the "memoise the fold … do not pre-build it" paragraph with a short
     "Derive cache" section (key, rules, what's cached).
   - `src/db/cache.ts` in the tree, plus a fourth load-bearing boundary.
-- `02-data-model.md` §6: `derive_cache` DDL.
+- `02-data-model.md` §7: `derive_cache` DDL.
 - `13-deployment.md`: §10 cost row. Cron also deletes cache rows whose `input_seq` is below the latest publication and head, or older than N days. §1 unchanged (no new binding).
 - `14-testing.md`: the cache-hit ≡ fresh-derive test, plus a "table emptied mid-run" test.
 - `15-roadmap.md`: M0 "deployed on Workers Paid" becomes the free/Paid choice. Add the benchmark task to M2 (the solver milestone).

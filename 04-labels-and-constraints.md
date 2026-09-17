@@ -315,8 +315,6 @@ is, rank is a position in a list. The workshop ranking that uses it, including t
 
 ## 8. Sharp edges
 
----
-
 **Typos become silence.** `room-with=fam_72` for `fam_27` — a relational foreign
 key would catch that; a label does not. The merge simply never happens and
 nothing errors.

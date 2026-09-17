@@ -16,10 +16,9 @@ parties or place them.
 
 ## 2. Dependencies
 
-Requires: [`room-inventory`](../20.1-room-inventory.md). Enhances: none.
-
-Enhances [`room-assignment`](../20.3-room-assignment.md), which reads the distance
-for the `adjacent_weight` term of co-room relations.
+Requires: [`room-inventory`](../20.1-room-inventory.md). Enhances:
+[`room-assignment`](../20.3-room-assignment.md), which would read the distance for
+the `adjacent_weight` term of co-room relations.
 
 ## 3. Parameters
 
