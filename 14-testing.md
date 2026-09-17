@@ -412,7 +412,8 @@ Also covered:
   solver-input validation fails.
 - **Release control**: implement every scenario in [release control](06-release-control.md)
 §9, including unchanged-head preview equality, selection changes, concurrent appends
-that occur after preview and still publish the reviewed `input_seq`,
+  that occur after preview and still publish the reviewed `input_seq`, shared badge
+  states, inline admin/family projections, and keyboard-accessible expansion of diffs,
   per-scope history, dependencies, privacy and build/compatibility mismatch. Communication
   carries no extra content hash. Selected-scope errors block communication until
   resolved; hard consistency gates cannot be bypassed.
