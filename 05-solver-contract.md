@@ -175,7 +175,7 @@ Notes and event author/timestamp remain available in the organiser world, but do
 not affect assignment, scoring, or the plan hash.
 
 Every selected stage consumes the resolver's applicable decisions: positive
-requirements, exclusions, grouping, separation, and workshop constraints. Required
+requirements, exclusions, separation, and workshop constraints. Required
 decisions constrain every placement path, including forced placement and repair.
 A decision that cannot be honoured is reported with its
 source labels; it is never silently bypassed. Preferred decisions retain the

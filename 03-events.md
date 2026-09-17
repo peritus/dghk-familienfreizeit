@@ -201,8 +201,7 @@ Omitting the optional note is equivalent to `note: null`, including when replayi
 events and loading fixtures. Family-facing controls cannot set organiser notes.
 
 Organiser decision labels may use every existing fixed resolver mechanism, including
-`needs`, `provides`, `excludes`, grouping, separation, workshop eligibility, and
-workshop co-assignment. The resolver interprets the value according to that
+`needs`, `provides`, `excludes`, separation, and workshop eligibility. The resolver interprets the value according to that
 mechanism; the note is context for organisers and never changes the derived plan.
 
 ### `LabelCleared`

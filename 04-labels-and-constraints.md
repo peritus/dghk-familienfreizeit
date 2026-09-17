@@ -244,7 +244,7 @@ applying a decision through an existing resolver:
 |---|---|---|
 | `needs-provides` | person needs / room provides | matching capability |
 | `excludes` | family excludes family | forbidden match |
-| `groups-with` | person groups-with person | same workshop group; sleeping co-rooming is outside the active placement model |
+| `groups-with` | person groups-with person | reserved for the deferred sleeping-parties module; no active module consumes it |
 | `separates-from` | family separates-from family | keep apart |
 
 Organisers cannot upload executable rules. New mechanisms belong in module code and
@@ -275,7 +275,7 @@ resolved inputs; none re-implements matching:
 | [room assignment](20.3-room-assignment.md) | requirements against room/place capabilities; keep-apart effects; exclusions; resolved placement decisions |
 | [workshops](20.4-workshops.md) | participation references, capacity admission and effective programme/slot resolution |
 | [workshop rankings](20.5-workshop-rankings.md) | the `ordered-choice` operator |
-| [workshop assignment](20.6-workshop-assignment.md) | needs/provides matching, exclusions, eligibility, co-assignment and separation, and decisions naming workshops within their slot |
+| [workshop assignment](20.6-workshop-assignment.md) | needs/provides matching, exclusions, eligibility, separation, and decisions naming workshops within their slot |
 
 Relation symmetry is declared on the tag and interpreted by the resolver:
 
@@ -285,10 +285,10 @@ Relation symmetry is declared on the tag and interpreted by the resolver:
 
 Direct organiser separation uses the fixed mechanism's scope and symmetry. Sleeping
 grouping is not effective in the active module set.
-Workshop relations retain their configured slot/target value shape. The resolver
-routes them to the relevant selected module, so a workshop decision does not also
-merge sleeping parties. If the consuming module is absent, the decision is rejected
-on append or reported during replay, never silently accepted as effective.
+Workshop decisions retain their configured slot/target value shape. The resolver
+routes them to the relevant selected module. If the consuming module is absent, the
+decision is rejected on append or reported during replay, never silently accepted
+as effective.
 
 ---
 

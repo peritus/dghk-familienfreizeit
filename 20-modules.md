@@ -191,7 +191,7 @@ migration ([deployment](13-deployment.md) §2).
 | [`room-assignment`](20.3-room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshops`](20.4-workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
 | [`workshop-rankings`](20.5-workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
-| [`workshop-assignment`](20.6-workshop-assignment.md) | Fair workshop assignment and co-assignment groups | `workshop-rankings` | — |
+| [`workshop-assignment`](20.6-workshop-assignment.md) | Fair workshop assignment | `workshop-rankings` | — |
 | [`food-preferences`](20.7-food-preferences.md) | Per-person diet and allergy text | — | — |
 | [`materials`](20.8-materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
 | [`family-preferences`](20.9-family-preferences.md) | The profile-driven preferences page | — | — |

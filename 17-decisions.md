@@ -110,8 +110,8 @@ decisions share one path.
 
 The solver remains the only producer of assignments. Organisers do not write an
 assignment directly; they add facts that guide the next derivation. The supported
-resolver mechanisms include `needs`, `provides`, `excludes`, separation, workshop
-eligibility, and workshop co-assignment. Grouping for sleeping placement belongs to
+resolver mechanisms include `needs`, `provides`, `excludes`, separation, and workshop
+eligibility. Grouping for sleeping placement belongs to
 the separate sleeping-parties module.
 
 *Rejected alternative:* the board writes assignments directly. Then every re-run
