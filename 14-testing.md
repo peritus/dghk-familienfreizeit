@@ -177,7 +177,8 @@ const invariants = [
     p => unique(roomAssignmentSection(p).assignments.map(a => a.person_id))],
 
   ['no place holds two people',
-    p => unique(roomAssignmentSection(p).assignments.map(a => a.place_id))],
+    p => unique(roomAssignmentSection(p).assignments
+      .map(a => a.place_id).filter(place_id => place_id !== null))],
 
   ['every assigned place exists in the solver input',
     (p, s) => roomAssignmentSection(p).assignments.every(a => s.places.some(pl => pl.id === a.place_id))],
@@ -190,6 +191,12 @@ const invariants = [
 
   ['every person appears exactly once across assignments + unplaced',
     (p, s) => /* conservation of people */],
+
+  ['no-bed people have a room and no place',
+    (p, s) => /* no_bed_tag => room_id exists and place_id is null */],
+
+  ['bed demand equals non-null place assignments',
+    (p, s) => /* no null place consumes bed capacity */],
 
   ['every required constraint is honoured or reported as a conflict',
     (p, s) => s.constraints.filter(c => c.strength === 'required')
