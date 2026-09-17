@@ -49,7 +49,7 @@ searchable unplaced-family rail and room cards grouped by building and floor.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ [Search families…] Main House  Garden House  [Unplaced only]  Plan #8    │
+│ [Search families…] Main House  Garden House  [Unplaced only]  seq 1482   │
 ├─────────────────┬────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                              │
 │ Braun ×5 ⚠      │ Room 12 · 6 places · Morgan ×2 ✓                      │

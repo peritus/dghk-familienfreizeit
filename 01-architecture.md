@@ -123,11 +123,12 @@ publication; earlier events remain publication history.
 
 ```
 PlanPublished
-  output_hash     sha256 of the plan the organiser reviewed
-  code_revision   commit id of the deployed monorepo revision (D20)
-  config_hash     sha256 of the canonicalised config object
-  notify          whether change emails were queued
-  note            optional organiser note
+  output_hash             sha256 of the plan the organiser reviewed
+  code_revision           commit id of the deployed monorepo revision (D20)
+  config_hash             sha256 of the canonicalised config object
+  acknowledged_findings   check ids of the error findings the organiser accepted
+  notify                  whether change emails were queued
+  note                    optional organiser note
 ```
 
 `output_hash` does two jobs. It is the concurrency guard — the publish request
@@ -327,8 +328,8 @@ Events are one of three things that move a plan; the others are retuned weights 
 new code, and both arrive by deploy rather than by append. Deriving the published
 plan and comparing it to the recorded `output_hash` catches them:
 
-> ⚠ Publication #7 was made with revision `3f9c2a1`. The deployed code derives a
-> different plan from the same events. **Review and re-publish →**
+> ⚠ The publication at seq 1482 was made with revision `3f9c2a1`. The deployed code
+> derives a different plan from the same events. **Review and re-publish →**
 
 This is the same loop as any other staleness — review the diff, publish, email the
 families who move — and it is the reason the hash is recorded rather than the plan.

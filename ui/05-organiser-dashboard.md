@@ -12,7 +12,7 @@ Organisers open this screen to answer “what needs attention today?” Route:
 │ Dashboard                                      Last derived 14:22          │
 │                                                                          │
 │ PUBLISHED PLAN                                                          │
-│ Plan #7 · published 3 days ago                                          │
+│ Plan at seq 1402 · published 3 days ago                                 │
 │ 14 events since publication · 6 people would move   [Review changes →]  │
 │                                                                          │
 │ NEEDS ATTENTION                                                          │

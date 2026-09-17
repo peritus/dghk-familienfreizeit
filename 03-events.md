@@ -257,6 +257,7 @@ remain local to the organiser's browser until applied.
 ```ts
 {
   code_revision: string, config_hash: string, output_hash: string,
+  acknowledged_findings: string[],
   notify: boolean, note: string | null
 }
 ```
@@ -272,6 +273,11 @@ the same way, on the position its pending events were composed against; publicat
 guards on the plan itself, because that is what the organiser actually read. Either way
 the guard is what makes a sequence number on the payload unnecessary — you publish
 the log as it stands, or you review it again.
+
+`acknowledged_findings` carries the check ids of the error-severity preflight
+findings the organiser accepted ([solver contract](05-solver-contract.md) §3). The
+append is refused when the derived plan has an error finding this list does not
+name, so publishing over an error is a recorded decision rather than a click.
 
 The latest `PlanPublished` is the active publication; an earlier one is superseded by
 a later one. If `notify`, the diff between the old published plan and the new plan is

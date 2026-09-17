@@ -8,7 +8,7 @@ Organisers make room-placement decisions and review consequences. Route:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ [Search families…] Main House  Garden House  [Unplaced only]  Plan #8      │
+│ [Search families…] Main House  Garden House  [Unplaced only]  seq 1482     │
 ├─────────────────┬──────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                                │
 │ ┌─────────────┐ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
