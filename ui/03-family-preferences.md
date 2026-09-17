@@ -3,7 +3,8 @@
 ## Audience, purpose, and route
 
 An invited family records and revises its own people, room preferences, food
-information, and workshop rankings. Route: `/family` before publication.
+information, workshop rankings and live participation. Route: `/family`, before
+and after arrangements are communicated.
 Governing specs: [family view](../10-family-view.md), [labels and
 constraints](../04-labels-and-constraints.md), and [occasion profiles](../16-occasion-profiles.md).
 
@@ -69,8 +70,17 @@ occasion profile's `family_facing` entries.
 Save each change on input and show “Saving”, “Saved”, or a recoverable error. A
 failed save returns the control to its stored state and says so; nothing is queued
 in the browser ([family view](../10-family-view.md) §3). Empty workshop rankings and incomplete
-people data are warnings, not invented validation rules. Before publication,
-show an editable state; after publication this route becomes UI-04.
+people data are warnings, not invented validation rules. Communication adds UI-04
+arrangement cards; it does not replace this page or make current answers disappear.
+Editing follows the profile deadline, independently of communication status.
+
+Workshop rows show the control for their communicated mode: rankings, a sign-up
+join/leave button with current availability, or a non-binding interest toggle.
+Interest names are never shared. A failed last-place sign-up returns the control to
+its saved state with a clear full-capacity message. Own rankings can remain visible
+as inactive choices after a programme change. Uncommunicated workshops are absent
+from selectable options. See [release control](../06-release-control.md) for the
+response projection; controls do not choose historical cuts themselves.
 
 Controls need visible labels, grouped radio semantics, touch targets of at least
 44px, keyboard navigation, and text equivalents for pending or mutual requests.

@@ -2,7 +2,8 @@
 
 ## Audience, purpose, and route
 
-Organisers inspect slot capacity, rankings, assignments, and fairness signals.
+Organisers edit workshop details and participation mode, inspect live sign-ups and
+interest counts, and review assigned-mode capacity, rankings and fairness.
 Route: `/organiser/workshops`. Governing specs: [workshops](../20.4-workshops.md), [workshop rankings](../20.5-workshop-rankings.md), and [workshop assignment](../20.6-workshop-assignment.md).
 
 ```text
@@ -35,6 +36,25 @@ update through the ordinary solver.
 
 The heatmap has a text table alternative and does not use color alone. On
 narrow screens, show one workshop card at a time followed by the ranking list.
+
+## Programme and participation modes
+
+Each workshop card has an explicit `assigned`, `sign-up` or `interest` mode and its
+communication status. Assigned mode offers rankings/fairness; sign-up mode shows a
+live list and optional capacity; interest mode shows organiser headcounts without
+shared names. Hide irrelevant ranking/solver columns for self-organised workshops.
+
+Setup changes use pending/Apply. Show draft versus effective communicated details
+when they differ, including capacity and slot. Family admission uses the effective
+programme, so a draft capacity edit must not suggest places have already changed.
+Over-capacity preserves existing names and blocks new admission; warnings link to
+the affected workshop. Mode changes show the ordinary label changes or allocation
+release dependencies needed before communication; they never silently clear lists.
+
+**An Familien kommunizieren** opens [UI-11](11-release-control.md) with this
+programme scope selected. A slot allocation action selects the complete slot,
+never an individual workshop roster. Dependencies and detailed family-visible diffs
+are reviewed there, under [release control](../06-release-control.md).
 
 ## Neobrutalist redesign and components
 

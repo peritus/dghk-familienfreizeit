@@ -14,7 +14,9 @@ child-room assignment are deferred; their design sketches live under
 | `/organiser/families/:id` | Family detail | People, preferences, event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
 | `/organiser/board` | The board | Whole-family room placement |
-| `/organiser/plans` | Plans | List, diff, publish |
+| `/organiser/plans` | Plans | Derived plan investigation and comparison |
+| `/organiser/releases` | Release control | Outstanding scopes, detailed preview, communicate |
+| `/organiser/releases/history` | Communication history | Scope references, actor, time and reproducible comparisons |
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
 | `/organiser/workshops` | Workshops | Slots, capacity, fill, rankings |
 | `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
@@ -25,9 +27,13 @@ Every screen renders the organiser application's derived world. The browser hold
 pending events; applying appends them in one validated batch, and discarding them
 leaves no trace.
 
+Release reporting and confirmation follow [release control](06-release-control.md)
+and [UI-11](ui/11-release-control.md). Live coordination findings remain separate
+from held arrangements.
+
 ## 2. Dashboard
 
-The dashboard shows publication freshness, events since publication, moved families,
+The dashboard shows outstanding release scopes, affected families,
 preflight findings, constraint conflicts, unplaced families, workshop warnings, and
 the chase list. Quality counters exclude deferred co-room and party metrics.
 
