@@ -19,7 +19,7 @@
 | 16 | [Occasion profiles](16-occasion-profiles.md) | Profile contract and configuration rules |
 | 17 | [Decisions](17-decisions.md) | Architectural decisions and their accepted alternatives |
 | 18 | [German translation guidelines](18-german-translation-guidelines.md) | Family-facing terminology and translation rules |
-| 19 | [Reports](19-reports.md) | Report catalogue, audience scopes, responsive behavior, and browser printing |
+| 19 | [Reports](19-reports.md) | Report catalogue, audience scopes, responsive behavior, and print stylesheets |
 | 20 | [Modules](20-modules.md) | Module contract, composition, and catalogue |
 | 20.1 | [Room inventory](20.1-room-inventory.md) | Buildings, rooms, beds, places, designations, and capacity |
 | 20.2 | [Sleeping parties](20.2-sleeping-parties.md) | Party formation, merges, and party requirements |

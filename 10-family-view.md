@@ -111,17 +111,13 @@ The preferences collapse to a read-only summary; the assignment takes the top.
   Samstag Vormittag   Anna: Töpfern · Kai: Klettern ·
                       Jonas: Klettern · Emma: Basteln
   Samstag Nachmittag  …
-
-  [ Drucken ]
 ```
-
-**Drucken** opens the browser's print dialog; it is the same `Print` control reports
-use, and there is no PDF export or download ([reports](19-reports.md) §1, §5). A
-family that wants a PDF chooses it in the browser's print dialog.
 
 The print stylesheet matters more than it sounds. People will print this and put
 it on the fridge, and several will arrive at the hostel with it on paper because
-the signal there is bad.
+the signal there is bad. There is no print button and no PDF export (D21): families
+print with the browser, and the page's print stylesheet meets the same rules as a
+report's ([reports](19-reports.md) §5).
 
 ---
 

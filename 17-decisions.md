@@ -377,3 +377,25 @@ what someone needs to reproduce a plan: check out that revision and derive at
 the lockfile. Change within the code is tracked by version control, and rule
 identity by rule id: a rule is never edited to mean something different; a new rule
 id replaces it ([solver contract](05-solver-contract.md) §4).
+
+## D21 — Print through the browser: no export, no print button, perfect print stylesheets
+
+*Chosen.* The application offers no PDF export, no download, no file attachment, and
+no print button. People print with the browser — `Ctrl+P` or the browser menu — and
+save a PDF from the browser's print dialog if they want one. In exchange, every
+report and every page families are expected to print ships a print stylesheet that
+produces a correct paper document, and that stylesheet is a requirement with
+acceptance criteria, not a polish item ([reports](19-reports.md) §5–6).
+
+*Rejected alternative:* generated PDF exports. A second rendering path for the same
+data, a PDF library in the Worker or the bundle, and files that outlive the
+visibility rules and the published cut they were rendered from.
+
+*Rejected alternative:* a print button calling `window.print()`. It adds a control to
+every printable page, tempts special cases such as confirmation dialogs or
+print-only modes, and does nothing the browser does not already do.
+
+*Consequence:* anything that must happen when a page is printed has to live in the
+print stylesheet itself. A confidential report therefore carries its confidentiality
+label on screen and on every printed page, rather than asking for confirmation
+before printing.
