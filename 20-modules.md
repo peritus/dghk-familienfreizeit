@@ -202,9 +202,9 @@ migration ([deployment](13-deployment.md) §2).
 workshop-only occasion selects `workshops`, `workshop-rankings`, and
 `workshop-assignment` and has no room entities or board.
 
-Sleeping parties and child rooms are deferred ideas, not selectable modules in the
-current catalogue. They are specified under [`deferred-ideas/`](deferred-ideas/)
-and must be adopted together before a profile may split families or merge them into
+Sleeping parties and child rooms are not selectable modules in the current
+catalogue. They are specified under [`deferred-ideas/`](deferred-ideas/) and must
+be adopted together before a profile may split families or merge them into
 cross-family sleeping groups.
 
 ## 6. Source layout

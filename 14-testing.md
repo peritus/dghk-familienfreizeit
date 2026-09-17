@@ -268,7 +268,8 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
 - `fam_42 excludes=rm_14` prevents placement there in every solver phase, even
   when another label requests that room. Contradictory required inputs produce
   diagnostics. Place and workshop exclusions receive equivalent coverage.
-- Separation uses stable entities and resolver scope. Sleeping grouping is deferred;
+- Separation uses stable entities and resolver scope. Sleeping grouping is outside
+  the active fixture contract;
   workshop groups never merge room placement units.
 - Workshop decisions preserve eligibility, capacity, and per-slot uniqueness
   through cancellation restart and fill. Cancelled required targets are reported.
@@ -427,5 +428,5 @@ families, four rooms, one keep-apart decision, and one preferred `sole-occupancy
 Small enough that a person can work out the right answer with a pencil and verify
 the solver agrees.
 
-Sleeping-party and child-room fixtures belong to their deferred ideas and are not
-part of the active fixture contract.
+Sleeping-party and child-room fixtures belong to their separate module contracts and
+are not part of the active fixture contract.
