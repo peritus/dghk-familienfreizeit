@@ -136,6 +136,7 @@ type Label = {
   value: Json               // canonical JSON scalar or object
   value_type: string
   strength: 'required' | 'preferred' | null
+  note: string | null       // optional organiser context; ignored by derivation
   set_seq: number
   cleared_seq: number | null
 }

@@ -12,7 +12,7 @@ are convenient command vocabulary. Their complete payloads are folded into
 one typed entity identity and generic labels. Constraints and intrinsic facts
 then use the same
 `LabelSet` stream; no event type exists solely for a particular preference or
-organiser override.
+organiser decision.
 
 ## Shape
 
@@ -197,8 +197,8 @@ constraints may target a Place, and a Place id must survive re-derivation.
 ```ts
 { room_a: string, room_b: string, distance: 1 | 2 | 3 }
 ```
-Organiser override of the derived adjacency. Both directions are derived by the
-fold from one event.
+Organiser-supplied adjacency decision. Both directions are derived by the fold
+from one event.
 
 ---
 
@@ -215,16 +215,23 @@ custom matching definitions before append.
   key: string
   value: string
   strength: 'required' | 'preferred' | null
+  note: string | null       // optional organiser context; ignored by the solver
 }
 ```
 
 This is the one event for intrinsic facts, preferences, capabilities, and organiser
-decisions. Values may be scalar facts or stable entity ids. For example:
+decisions. Values may be scalar facts, free-form matching tokens, or stable entity
+ids. For example:
 
 ```ts
-{ entity_id: 'per_42', key: 'needs', value: 'room-with-garden-view', strength: 'required' }
-{ entity_id: 'rm_07', key: 'provides', value: 'room-with-garden-view', strength: null }
+{ entity_id: 'fam_42', key: 'needs', value: 'naehe_zum_eingang', strength: 'required', note: 'Nähe zum barrierefreien Eingang.' }
+{ entity_id: 'rm_07', key: 'provides', value: 'naehe_zum_eingang', strength: null, note: null }
 ```
+
+Organiser decision labels may use every existing fixed resolver mechanism, including
+`needs`, `provides`, `excludes`, grouping, separation, workshop eligibility, and
+workshop co-assignment. The resolver interprets the value according to that
+mechanism; the note is context for organisers and never changes derivation.
 
 ### `LabelCleared`
 ```ts
@@ -247,9 +254,9 @@ remains in the log.
 }
 ```
 
-Defines a custom matching vocabulary. It contains no executable code; the fixed
-resolver implements the operators. Definitions and assignments remain ordinary
-event-log data.
+Defines a custom matching vocabulary where a profile needs a declared value shape.
+It contains no executable code; the fixed resolver implements the operators.
+Organiser decisions using the built-in mechanisms do not need a custom definition.
 
 Workshop rankings are `LabelSet` and `LabelCleared` events on `prefers-workshop`
 with structured values (D13); see [labels and constraints](04-labels-and-constraints.md) §7.
@@ -284,16 +291,18 @@ the next run anyway.
 
 ---
 
-## Organiser constraints
+## Organiser decisions
 
 Organiser judgement uses the same label mechanism as family preferences. A board
-drag creates a custom constraint; clearing its label is the undo operation.
+drag or other organiser action creates pending decision labels; clearing a label is
+the undo operation. Organiser decisions are ordinary event-log inputs and the solver
+derives the resulting assignment.
 
-### `LabelSet` for organiser decisions
+### Shared organiser context
 
-The organiser board emits `LabelSet` events using a `ConstraintDefined` operator.
-Exact room placement, co-assignment, separation, and other judgement all use the
-same stable entity references and remain visible in the event history.
+Applied decision labels, their optional notes, event authors, and timestamps are
+visible to every organiser in the event history and organiser views. Pending labels
+remain local to the organiser's browser until applied.
 
 ---
 

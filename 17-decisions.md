@@ -84,28 +84,35 @@ organisers review a short list of parties with provenance rather than auditing 4
 room placements. Merge and split add constraints to the pending list (D15), so a
 party arrangement can be tried and discarded like a board move.
 
-## D6 — Organiser decisions are constraints, not edits
+## D6 — Organiser decisions guide the derived assignment
 
-*Chosen.* Dragging a party on the board adds a matching constraint to the organiser's
-pending events. Every screen re-derives with that constraint as an ordinary input,
-and applying appends it to the log, so stated preferences and organiser decisions share
-one path.
+*Chosen.* Organiser decisions are event-backed inputs to the derived assignment.
+Dragging a party, choosing a room, or making another planning decision adds one or
+more labels to the organiser's pending events. Every screen re-derives with those
+labels as ordinary inputs, and applying appends them to the log, so stated
+preferences and organiser decisions share one path.
 
-*Rejected alternative:* the board writes assignments directly. Then every
-re-run either destroys organiser work or requires merge logic, and the solver stops
-being the single writer of assignments.
+The solver remains the only producer of assignments. Organisers do not write an
+assignment directly; they add facts that guide the next derivation. The supported
+resolver mechanisms include `needs`, `provides`, `excludes`, grouping, separation,
+workshop eligibility, and workshop co-assignment.
 
-## D7 — Constraints carry human-readable explanations
+*Rejected alternative:* the board writes assignments directly. Then every re-run
+either destroys organiser work or requires merge logic, and the solver stops being
+the single writer of assignments.
 
-*Chosen.* Organiser-created constraints carry a label and explanation. The event log
-supplies author and timing, so no separate taxonomy of organiser pins is needed.
+## D7 — Organiser decisions carry optional notes
 
-*Why:* the value of recording intent is being able to explain and review the
-constraint. The resolver reports active, missing, contradictory, and redundant
-constraints directly.
+*Chosen.* An organiser decision may carry one free-text note. The event log supplies
+author and timing. Applied decisions are visible to every organiser through the
+existing event history and derived organiser views.
 
-Organiser judgement is represented directly by custom matching constraints rather
-than a separate override mechanism.
+*Why:* the value of recording intent is being able to explain and review a human
+decision. The resolver reports active, missing, contradictory, and redundant
+constraints directly; no additional decision metadata or report is needed.
+
+Organiser judgement is represented directly by the existing resolver labels rather
+than a separate decision mechanism.
 
 ## D8 — React for every screen
 
@@ -175,11 +182,12 @@ user, account, and session tables — a second, stored record of who the familie
 *Non-negotiable rules* are in [authentication](11-authentication.md). Follow them
 exactly.
 
-## D11 — Built-in rules live in code; custom matching keys live in the event log
+## D11 — Resolver mechanisms live in code; organiser values live in the event log
 
-*Chosen.* Built-in solver mechanisms require a deploy. Organiser-created matching
-keys use only the fixed generic resolver and are event-backed, so they need no
-dynamic evaluation or code deployment.
+*Chosen.* Resolver mechanisms require a deploy. Organiser decisions may supply
+free-form values to the fixed generic resolver mechanisms, so a new practical fact
+such as `needs=naehe_zum_eingang` and `provides=naehe_zum_eingang` needs no code
+deployment. Organisers cannot add executable operators or solver rules.
 
 ## D12 — Weights live in code
 

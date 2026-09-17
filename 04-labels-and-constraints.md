@@ -1,7 +1,8 @@
 # 04 — Labels and constraints
 
 Labels are the generic storage mechanism. A profile supplies the concrete tag
-vocabulary, values, scopes, and UI metadata that generic modules interpret. The
+vocabulary, value shapes, scopes, and UI metadata that generic modules interpret.
+Organisers may add free-form values through the fixed resolver mechanisms. The
 examples in this document use placeholders; the concrete 2027 vocabulary is in
 [the Familienfreizeit profile](profiles/familienfreizeit-2027.md).
 Generic resolver operators remain fixed; occasion profiles cannot upload executable
@@ -11,9 +12,9 @@ A single mechanism for intrinsic facts, preferences, capabilities, relations,
 and organiser decisions. It covers both occasion-specific properties and matching
 constraints without adding entity-specific property columns.
 
-Built-in vocabulary lives in code; custom matching keys are defined by events
-and use only the fixed resolver operators in this document. This document
-covers labels, constraints, and how the solver consumes them.
+Built-in resolver mechanisms live in code. Profile vocabulary and organiser values
+use only the fixed resolver operators in this document. This document covers
+labels, constraints, organiser decisions, and how the solver consumes them.
 
 ---
 
@@ -40,8 +41,9 @@ Built-in definitions and custom definitions declare the resolver operator:
 | `groups-with` / `separates-from` | family, person | required / preferred | A relation between entities |
 | `descriptive` | any | — | Recorded for humans; the solver ignores it |
 
-`descriptive` exists so that organisers can annotate without inventing a constraint.
-A label the solver reads is a decision; one it ignores is a note.
+`descriptive` exists for profile-defined facts that the solver ignores. An organiser
+decision may also carry one optional free-text note; the note is visible to
+organisers but is not solver input.
 
 ### The three-value scale collapses
 
@@ -80,9 +82,9 @@ value without requiring a foreign key.
 The event that produced a label already carries `at` and `actor`, and sequence
 bounds are what let the same fold run to an earlier point in the log.
 
-**Keys carry no foreign key.** Built-in definitions are code and custom
-definitions are events. Validity is enforced on append and replay by the
-resolver schema.
+**Keys carry no foreign key.** Resolver mechanisms are fixed code. Values may be
+profile-defined or organiser-supplied free-form matching tokens, with entity
+references validated where the mechanism requires them.
 
 ### Matching is a resolver lookup
 
@@ -143,12 +145,13 @@ with a derivation rejects direct `provides` assignments at append time.
 
 ## 4. Validation on append
 
-`LabelSet` is validated against built-in or event-defined schemas before it is
+`LabelSet` is validated against fixed resolver and profile schemas before it is
 appended ([03-events](03-events.md)). The checks are:
 
-1. **Key exists** in built-in or custom definitions.
+1. **Key exists** in the fixed resolver vocabulary or active profile vocabulary.
 2. **Scope matches** the entity kind and operator.
-3. **Value type matches** the definition and entity references resolve.
+3. **Value shape matches** the resolver mechanism and entity references resolve
+   where required; organiser matching tokens may otherwise be free-form.
 4. **Strength is legal** for the constraint.
 5. **Cardinality and validity pass**, including child-group requirements only on
    children and child-group capabilities only on child rooms.
@@ -172,6 +175,12 @@ A family may `LabelSet` / `LabelCleared` only:
 
 Everything else is organiser-only. Organiser-only labels are never rendered in the
 family view.
+
+Organisers may set free-form values for every fixed resolver mechanism. Examples
+include `needs=naehe_zum_eingang` paired with `provides=naehe_zum_eingang`,
+`excludes=room_14`, `groups-with=person_23`, and `separates-from=family_27`.
+Workshop resolver inputs use their existing structured value shapes. An optional
+label note records context for organisers; it is not read by the solver.
 
 ---
 
