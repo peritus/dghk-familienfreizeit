@@ -8,7 +8,7 @@ Generic resolver operators remain fixed; occasion profiles cannot upload executa
 operators.
 
 A single mechanism for intrinsic facts, preferences, capabilities, relations,
-and admin decisions. It covers both occasion-specific properties and matching
+and organiser decisions. It covers both occasion-specific properties and matching
 constraints without adding entity-specific property columns.
 
 Built-in vocabulary lives in code; custom matching keys are defined by events
@@ -40,7 +40,7 @@ Built-in definitions and custom definitions declare the resolver operator:
 | `groups-with` / `separates-from` | family, person | required / preferred | A relation between entities |
 | `descriptive` | any | — | Recorded for humans; the solver ignores it |
 
-`descriptive` exists so that admins can annotate without inventing a constraint.
+`descriptive` exists so that organisers can annotate without inventing a constraint.
 A label the solver reads is a decision; one it ignores is a note.
 
 ### The three-value scale collapses
@@ -55,7 +55,7 @@ preferred label, or no label:
 | Indifferent | no row |
 
 `indifferent` stops being a value and becomes an absence, which is what it always
-meant. The tri-state control in the attendee view writes one of two strengths or
+meant. The tri-state control in the family view writes one of two strengths or
 clears the label.
 
 ---
@@ -73,7 +73,7 @@ Three details of that shape are not arbitrary.
 value, so a label has one unambiguous key.
 
 **The reference lives in the value, not in the key.** `needs=family_27` is
-the mental model and the label an admin sees. The resolver indexes the key and
+the mental model and the label an organiser sees. The resolver indexes the key and
 value without requiring a foreign key.
 
 **The lifetime is a pair of sequence numbers, not a timestamp and an actor.**
@@ -167,11 +167,11 @@ report names them.
 A family may `LabelSet` / `LabelCleared` only:
 
 - on entities it owns (itself, or its own people);
-- for tags declaring `attendeeFacing`;
+- for tags declaring `familyFacing`;
 - at strengths that control permits.
 
-Everything else is admin-only. Admin-only labels are never rendered in the
-attendee view.
+Everything else is organiser-only. Organiser-only labels are never rendered in the
+family view.
 
 ---
 
@@ -212,7 +212,7 @@ export const tagRequirements: Rule = {
 
 Its soft counterpart, `rules/soft/tagPreferences.ts`, is the same loop over
 `strength === 'preferred'`, returning `+weight` on satisfaction and `+penalty`
-on violation (see [occasion profiles](16-event-profiles.md) §4 for the two-field
+on violation (see [occasion profiles](16-occasion-profiles.md) §4 for the two-field
 convention).
 
 Two requirement shapes are supported, and the distinction matters:
@@ -271,7 +271,7 @@ six now needs a six-place ensuite room that may not exist. The unplaceable-merge
 guard catches the capacity case; this one surfaces as preflight C4 with the
 requirement named. It is the correct semantics — they *are* sharing a room — but
 it surprises people, so the party card in
-[admin interface](09-admin-interface.md) §4 shows which member contributed each requirement.
+[organiser view](09-organiser-view.md) §4 shows which member contributed each requirement.
 
 ---
 
@@ -316,7 +316,7 @@ requirements that co-occur on the same party.
 ### Severity behaviour
 
 - **error** — the plan computes and stores, but publishing requires an explicit
-  acknowledgement. Never block computing: an admin needs to see the plan to
+  acknowledgement. Never block computing: an organiser needs to see the plan to
   understand the error.
 - **warning** — shown on the dashboard, no gate.
 - **info** — shown on the relevant screen only.
@@ -344,7 +344,7 @@ person:123  prefers-workshop={"slot":"slot_sat-afternoon","workshop":null,"rank"
 
 A `workshop: null` value states "no preference" for that slot. It is meaningfully
 different from having no `prefers-workshop` label for the slot at all — the latter
-shows up in the admin's chase list — and `ordered-choice` rejects it alongside
+shows up in the organiser's chase list — and `ordered-choice` rejects it alongside
 ranked values for the same slot. Re-ranking a slot clears its labels and sets the
 new ones in one append.
 
@@ -397,9 +397,9 @@ at append time and tested in [testing](14-testing.md).
 is correct and surprising.
 
 **Labels as a dumping ground.** `descriptive` is the pressure valve — annotations
-that the solver ignores. Without it, admins will reach for a constraint-kind tag
+that the solver ignores. Without it, organisers will reach for a constraint-kind tag
 to record a note, and the solver will act on it. Make `descriptive` easy and
-obvious in the admin UI.
+obvious in the organiser UI.
 
 **Canonical ordering.** Labels are an array in the solver input and must be sorted
 like every other one: `entity_id`, `key`, `value`.

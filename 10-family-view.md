@@ -1,8 +1,8 @@
-# 09 — Attendee view
+# 09 — Family view
 
-The screen plans are [attendee preferences](ui/03-attendee-preferences.md) and
-[published attendee assignment](ui/04-attendee-assignment.md). They are
-English planning examples; attendee copy follows [the translation guidelines](18-german-translation-guidelines.md).
+The screen plans are [family preferences](ui/03-family-preferences.md) and
+[family assignment](ui/04-family-assignment.md). They are
+English planning examples; family copy follows [the translation guidelines](18-german-translation-guidelines.md).
 
 One email per family. One login. One page before publication, a different page
 after.
@@ -11,15 +11,15 @@ The design constraint that shapes everything: **families state preferences and
 never see machinery.** No scores, no parties, no solver, no other families'
 preferences. The word "algorithm" does not appear anywhere in this interface.
 
-The portal derives the plan selected by the latest publication ([architecture](01-architecture.md)),
-which settles the largest privacy question structurally: an attendee's view is
+The family view derives the plan selected by the latest publication ([architecture](01-architecture.md)),
+which settles the largest privacy question structurally: a family's view is
 computed from the events before the latest publication, so unpublished work is not
 hidden from them, it is simply not in the list they derive from.
 
 The Worker performs that derivation and returns only the signed-in family's view
 (`GET /api/family/view`), filtered by the boundaries in §2. The event log never
-reaches a family's browser, and the portal bundle contains neither the solver nor
-the admin screens.
+reaches a family's browser, and the family view bundle contains neither the solver nor
+the organiser screens.
 
 ---
 
@@ -33,11 +33,11 @@ minds. Everything saves on change.
 
 Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
 zusammen?") are **generated from the active occasion profile**: every tag declaring
-`attendeeFacing` produces a control, in profile order, grouped by scope. The
+`familyFacing` produces a control, in profile order, grouped by scope. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
 `control` is a closed union, and this is the thing to think about up front —
-see [occasion profiles](16-event-profiles.md) §6:
+see [occasion profiles](16-occasion-profiles.md) §6:
 
 | `control` | Renders | Writes |
 |---|---|---|
@@ -49,7 +49,7 @@ see [occasion profiles](16-event-profiles.md) §6:
 Adding a tag that reuses an existing control is a **one-file change**; adding a
 *new kind* of control is two files.
 
-`invert: true` on `sole-occupancy` flips the labels so the portal reads
+`invert: true` on `sole-occupancy` flips the labels so the family view reads
 "Zimmer teilen: gerne / lieber nicht / auf keinen Fall" while the stored tag
 stays positively named. Presentation only.
 
@@ -167,9 +167,9 @@ visible is already answered by the latest publication, and needs no rule.
 | Names of families sharing their room | Yes |
 | Names of children in their child's children's room | Yes |
 | Bed labels within their own rooms | Yes |
-| Scores, parties, traces, admin constraints | No |
-| Admin notes about them | **No** — free text is theirs, admin notes are not |
-| Tags declaring `adminOnly` | **Never**, regardless of `attendeeFacing` |
+| Scores, parties, traces, organiser constraints | No |
+| Organiser notes about them | **No** — free text is theirs, organiser notes are not |
+| Tags declaring `organiserOnly` | **Never**, regardless of `familyFacing` |
 | `descriptive` tags | Never |
 
 **Reciprocity is visible; the request is not.** If the Müllers request the
@@ -183,16 +183,16 @@ dynamic that makes people dread these forms. Showing only mutual matches means a
 request costs nothing socially and the data stays honest.
 
 The cost: two families who each want to room together but neither goes first will
-never match. Accepted. The admin party review screen surfaces one-sided requests,
+never match. Accepted. The organiser party review screen surfaces one-sided requests,
 and a human can make the phone call — which is the right tool for that problem.
 
-**Admin notes are separate from family free text.** The family's "Sonst noch
-etwas?" box is theirs and they can see it. If an admin wants to write "phoned,
-they're flexible about the ensuite", that goes in an admin-only note field.
-Conflating them means either admins self-censor or families read something they
+**Organiser notes are separate from family free text.** The family's "Sonst noch
+etwas?" box is theirs and they can see it. If an organiser wants to write "phoned,
+they're flexible about the ensuite", that goes in an organiser-only note field.
+Conflating them means either organisers self-censor or families read something they
 should not have.
 
-`apart-from` declares no `attendeeFacing` *and* `adminOnly: true`, deliberately
+`apart-from` declares no `familyFacing` *and* `organiserOnly: true`, deliberately
 doubled, because exposing keep-apart relations to families would be the worst
 privacy failure available to this application.
 
@@ -209,10 +209,10 @@ once means they will not come back.
 **One request per change, and the response is the truth.** Each control posts its
 label event as it changes and renders the confirmation from the response. A failed
 save returns the control to its stored state and says so in plain words; nothing is
-queued in the browser, so what a family sees is what was saved. Keep the portal
+queued in the browser, so what a family sees is what was saved. Keep the family view
 bundle small and test it on an old, slow phone — that is the device it will meet.
 
-**Age is computed and shown.** "Jonas (9)" uses the age at the event date, not
+**Age is computed and shown.** "Jonas (9)" uses the age at the occasion date, not
 today. If a child turns 9 the week before, they are shown as 9 throughout, which
 matches what the children's-room banding will do and avoids a confusing
 mismatch.
@@ -243,7 +243,7 @@ Four kinds. All plain, all short, all with the link.
 do, one button. The magic link is the invitation — there is no separate account
 creation.
 
-**Reminder.** Sent by an admin from the chase list. Names what is missing
+**Reminder.** Sent by an organiser from the chase list. Names what is missing
 specifically: *"Für Emma fehlen noch die Workshop-Wünsche."* A generic reminder
 gets ignored; a specific one gets acted on.
 
@@ -269,7 +269,7 @@ thing that trains people to ignore your emails.
 
 ## 5. Copy principles for this surface
 
-Different audience from the admin UI. Families are non-technical, mildly anxious
+Different audience from the organiser UI. Families are non-technical, mildly anxious
 about where their children will sleep, and reading on a phone.
 
 **Say what will happen and when.** "Ihr Zimmer wird von den Organisatoren

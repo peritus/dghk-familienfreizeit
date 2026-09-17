@@ -1,14 +1,14 @@
-# UI-05 — Admin dashboard
+# UI-05 — Organiser dashboard
 
 ## Audience, purpose, and route
 
 Organisers open this screen to answer “what needs attention today?” Route:
-`/admin`. Governing specs: [admin interface](../09-admin-interface.md) §2 and
+`/organiser`. Governing specs: [organiser view](../09-organiser-view.md) §2 and
 [constraint health](../08-constraint-health.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Admin · Familienfreizeit   Dashboard  Families  Board  Plans  [Sign out]  │
+│ Organiser · Familienfreizeit   Dashboard  Families  Board  Plans  [Sign out]  │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Dashboard                                      Last derived 14:22          │
 │                                                                          │
@@ -40,7 +40,7 @@ the heading for the attention region is announced when new findings appear.
 
 ## Neobrutalist redesign and components
 
-Use a `Sidebar` for admin navigation, `Card` for plan status and each urgent
+Use a `Sidebar` for organiser navigation, `Card` for plan status and each urgent
 group, `Badge` for plan freshness, and `Alert` for findings. Reminder sending
 uses the canonical `AlertDialog` composition: `AlertDialogTrigger` + `Button`,
 `AlertDialogContent`, `AlertDialogHeader`, `AlertDialogTitle`,

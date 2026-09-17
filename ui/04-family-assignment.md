@@ -1,16 +1,15 @@
-# UI-04 — Published attendee assignment
+# UI-04 — Family assignment
 
 ## Audience, purpose, and route
 
-A family sees only its published room and workshop results. Route: `/family`
-after publication. Governing spec: [attendee view](../10-family-portal.md)
-§2 and [decisions D14/D16](../17-decisions.md).
+A family sees its room and workshop results through `/family`. Governing spec:
+[family view](../10-family-view.md) §2 and [decisions D14/D16](../17-decisions.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Attendee view                                             Sign out    │
+│ Family view                                             Sign out    │
 │ Your arrangements                                                      │
-│ Published 20 September · Please bring your own towel                   │
+│ Please bring your own towel                                             │
 ├──────────────────────────────────────────────────────────────────────┤
 │ YOUR ROOM                                                              │
 │ ┌──────────────────────────────────────────────────────────────────┐   │
@@ -23,7 +22,7 @@ after publication. Governing spec: [attendee view](../10-family-portal.md)
 │ Saturday morning · Alex: Pottery                                       │
 │ Saturday morning · Jamie: Hiking                                       │
 │                                                                          │
-│ [Review my preferences]     Something wrong? [Contact organisers]       │
+│ [Review my preferences]     Something wrong? [Contact the organisation team]│
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -35,14 +34,14 @@ requires a table or horizontal scrolling.
 
 ## States and privacy
 
-Support published, no assignment yet, and temporary service failure states.
-Never show scores, parties, solver language, unpublished changes, admin notes,
+Support an available result, no assignment yet, and temporary service failure states.
+Never show scores, parties, solver language, unpublished changes, organisation-team notes,
 or another family's preferences. Read-only controls must look disabled only
-when necessary; prefer plain text and a clear “published” label.
+when necessary; prefer plain text and a clear result label.
 
 ## Neobrutalist redesign and components
 
 Use a high-contrast announcement `Alert`, a primary room `Card` with an offset
-shadow, and `Badge` elements for publication and room capabilities. Workshop
+shadow, and `Badge` elements for result status and room capabilities. Workshop
 results are smaller `Card` rows. `Button` actions remain outlined and full-width
-on mobile; “Contact organisers” is secondary to the published result.
+on mobile; “Contact the organisation team” is secondary to the family result.

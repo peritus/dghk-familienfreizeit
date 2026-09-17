@@ -2,8 +2,8 @@
 
 ## Audience and purpose
 
-The attendee view is for non-technical families on phones. The admin tool is
-for a small group of competent organisers on laptops. Both applications share
+The family view is for non-technical families on phones. The organiser tool is
+for a small organisation team on laptops. Both applications share
 visual primitives, but not navigation density.
 
 Governing decisions: [D8](../17-decisions.md#d8-react-for-every-screen),
@@ -21,7 +21,7 @@ Governing decisions: [D8](../17-decisions.md#d8-react-for-every-screen),
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-The attendee shell removes the admin navigation and uses a compact header:
+The family shell removes the organiser navigation and uses a compact header:
 
 ```text
 ┌──────────────────────────────┐
@@ -39,17 +39,17 @@ The attendee shell removes the admin navigation and uses a compact header:
 - thick black borders, offset shadows, slightly squared corners, and pressed
   button feedback;
 - typography must remain readable before decoration: body text is at least
-  16px on attendee screens and uses comfortable line height;
+  16px on family screens and uses comfortable line height;
 - status colors never stand alone: pair them with text, a glyph, or a border;
-- cards group information, while tables are reserved for dense admin data;
+- cards group information, while tables are reserved for dense organiser data;
 - use the existing neobrutalism component vocabulary from
   [frontend §4](../12-frontend.md#4-components).
 
 ## Responsive rules
 
-The attendee layout is designed at 360px first. Content becomes one column,
+The family layout is designed at 360px first. Content becomes one column,
 controls stack, dialogs become full-height sheets, and no table requires
-horizontal scrolling. The admin layout targets laptop widths; below 900px the
+horizontal scrolling. The organiser layout targets laptop widths; below 900px the
 board may become a list view and the side rail may move above the rooms.
 
 ## Shared states and accessibility

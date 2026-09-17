@@ -54,15 +54,15 @@ in §5 are for.
 
 ### Cross-runtime agreement
 
-Second in importance, and the one that holds the admin application honest. The same
-derivation runs in two places — the Worker and the admin chunk — so the test is
+Second in importance, and the one that holds the organiser application honest. The same
+derivation runs in two places — the Worker and the organiser chunk — so the test is
 that they cannot disagree.
 
 ```ts
 test('the browser bundle derives what the Worker derives', async () => {
   const log = loadEventLog('test/fixtures/event-logs/full-event.kdl')
   const here  = sha256(canonical(derive(log, defaultConfig).plan))
-  const there = await deriveInBundle(log)      // the built admin chunk, in a DOM env
+  const there = await deriveInBundle(log)      // the built organiser chunk, in a DOM env
   expect(there).toBe(here)
 })
 ```
@@ -71,8 +71,8 @@ test('the browser bundle derives what the Worker derives', async () => {
 also catches a bundler transform that changes behaviour — the one way two copies of
 identical source can diverge.
 
-This test is what permits the admin application to treat its locally derived plan as
-real. If it ever fails, the board is showing admins something the server will not
+This test is what permits the organiser application to treat its locally derived plan as
+real. If it ever fails, the board is showing organisers something the server will not
 agree to, and that is worse than the board being slow.
 
 ---
@@ -276,7 +276,7 @@ wrongly:
 - every `satisfiedBy` names a tag whose kind is `capability`;
 - every `param` names a valid entity type;
 - no alias collides with another tag or alias;
-- every `attendeeFacing.control` has a renderer in `src/app/portal/controls/`;
+- every `familyFacing.control` has a renderer in `src/app/family-view/controls/`;
 - every tag depending on a phase is disabled when that phase is;
 - `defineEvent` throws on each of the above when deliberately broken.
 
@@ -392,7 +392,7 @@ Recorded so the gaps are deliberate.
   be flaky. The *server* side of every board action is tested through the API.
 - **Email rendering.** Sent to a real address and looked at. Litmus-style
   cross-client testing is not worth it for four plain emails.
-- **Load.** 150 people, three admins. There is no load.
+- **Load.** 150 people, three organisers. There is no load.
 
 ---
 

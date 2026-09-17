@@ -1,6 +1,6 @@
 # 03 — Event model
 
-This document defines the generic event envelope and lifecycle. Event profiles
+This document defines the generic event envelope and lifecycle. Occasion profiles
 may contribute event types through selected modules, but the append, replay,
 validation, and fold rules are shared by every deployment.
 
@@ -12,7 +12,7 @@ are convenient command vocabulary. Their complete payloads are folded into
 one typed entity identity and generic labels. Constraints and intrinsic facts
 then use the same
 `LabelSet` stream; no event type exists solely for a particular preference or
-admin override.
+organiser override.
 
 ## Shape
 
@@ -85,7 +85,7 @@ Setup event payloads are complete command inputs, not a second data model. The
 fold creates the typed entity identity and emits the payload's mutable
 values as labels. For example, `PersonAdded.role`, `birthdate`, and
 `does_not_need_a_bed` become labels on the new person; `RoomAdded.kind`, `floor`, and
-capacity-related values do the same for the room. Event-specific config defines
+capacity-related values do the same for the room. Occasion-specific config defines
 which labels are legal and how the resolver uses them.
 
 ---
@@ -96,12 +96,12 @@ which labels are legal and how the resolver uses them.
 ```ts
 { family_id: string, email: string, display_name: string, locale: 'de' | 'en' }
 ```
-Emitted by an admin, once per family, during import or manual add. Creates the
+Emitted by an organiser, once per family, during import or manual add. Creates the
 family. Does not send the email — that is an operational side effect performed
 after the append succeeds.
 
 *Invariant:* email must be unique case-insensitively across all families and
-must not be an allowlisted admin address. Checked against the derived world
+must not be an allowlisted organiser address. Checked against the derived world
 before append; the `seq` guard makes the check and the append atomic. The import
 preview reports a duplicate as a row-level error rather than aborting the whole
 import.
@@ -110,7 +110,7 @@ import.
 ```ts
 { family_id: string, old_email: string, new_email: string }
 ```
-Admin only. Carries the old value so the history reads correctly without
+Organiser only. Carries the old value so the history reads correctly without
 replaying to that point.
 
 *Consequence:* the old address stops resolving to this family on the next request,
@@ -128,7 +128,7 @@ so its sessions lose access without a cleanup step
   needs_accessible: boolean
 }
 ```
-Emitted by the family or by an allowlisted admin.
+Emitted by the family or by an allowlisted organiser.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
 registered as an adult by their family and that is their call. The solver uses
@@ -197,7 +197,7 @@ constraints may target a Place, and a Place id must survive re-derivation.
 ```ts
 { room_a: string, room_b: string, distance: 1 | 2 | 3 }
 ```
-Admin override of the derived adjacency. Both directions are derived by the
+Organiser override of the derived adjacency. Both directions are derived by the
 fold from one event.
 
 ---
@@ -205,7 +205,7 @@ fold from one event.
 ## Labels and constraints
 
 Families may set labels only on themselves or their own people. An allowlisted
-admin may set any domain label. The resolver validates both built-in labels and
+organiser may set any domain label. The resolver validates both built-in labels and
 custom matching definitions before append.
 
 ### `LabelSet`
@@ -218,7 +218,7 @@ custom matching definitions before append.
 }
 ```
 
-This is the one event for intrinsic facts, preferences, capabilities, and admin
+This is the one event for intrinsic facts, preferences, capabilities, and organiser
 decisions. Values may be scalar facts or stable entity ids. For example:
 
 ```ts
@@ -277,21 +277,21 @@ with structured values (D13); see [labels and constraints](04-labels-and-constra
 ```ts
 { workshop_id: string, reason: string }
 ```
-Manual cancellation by an admin. Distinct from automatic under-subscription
+Manual cancellation by an organiser. Distinct from automatic under-subscription
 cancellation, which the solver performs internally and reports in the trace —
 that is not an event, because it is a *derivation* and would re-derive itself on
 the next run anyway.
 
 ---
 
-## Admin constraints
+## Organiser constraints
 
-Admin judgement uses the same label mechanism as attendee preferences. A board
+Organiser judgement uses the same label mechanism as family preferences. A board
 drag creates a custom constraint; clearing its label is the undo operation.
 
-### `LabelSet` for admin decisions
+### `LabelSet` for organiser decisions
 
-The admin board emits `LabelSet` events using a `ConstraintDefined` operator.
+The organiser board emits `LabelSet` events using a `ConstraintDefined` operator.
 Exact room placement, co-assignment, separation, and other judgement all use the
 same stable entity references and remain visible in the event history.
 
@@ -308,14 +308,14 @@ same stable entity references and remain visible in the event history.
 ```
 
 The one event about plans, and it records the decision that the plan derived from
-events before this event is what attendees are being told. Its own `seq` identifies
+events before this event is what families are being told. Its own `seq` identifies
 the preceding plan's `input_seq`.
 
-`output_hash` is the plan the admin reviewed. It is checked on append: the server
+`output_hash` is the plan the organiser reviewed. It is checked on append: the server
 derives at the position the event would occupy and refuses if the hashes differ,
-which means the log moved while the admin was reading. A board apply guards itself
+which means the log moved while the organiser was reading. A board apply guards itself
 the same way, on the position its pending events were composed against; publication
-guards on the plan itself, because that is what the admin actually read. Either way
+guards on the plan itself, because that is what the organiser actually read. Either way
 the guard is what makes a sequence number on the payload unnecessary — you publish
 the log as it stands, or you review it again.
 
@@ -323,7 +323,7 @@ The latest `PlanPublished` is the active publication; an earlier one is supersed
 a later one. If `notify`, the diff between the old published plan and the new plan is
 computed and change emails are queued.
 
-*Note:* the hash is computed by the server, but the actor is the admin who published.
+*Note:* the hash is computed by the server, but the actor is the organiser who published.
 Publishing is the decision; the hash is what they decided about.
 
 ---
@@ -343,14 +343,14 @@ Worth writing down, because the boundary blurs under pressure.
 | Workshop auto-cancelled for under-subscription | Derivation; re-derives next run | plan trace |
 | Party formation results | Derivation | plan trace |
 | A plan, whether published or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
-| Pending events on an admin's board | Not yet decided; discarding one must leave no trace | that admin's browser |
+| Pending events on an organiser's board | Not yet decided; discarding one must leave no trace | that organiser's browser |
 
 The test: **would replaying the log without this produce a different plan?** If
 no, it is not an event. Party formation is derived from labels and constraints,
 both of which *are* events; the formation itself is not. A plan fails the same test
 for every input sequence, including the one published, which is why publication does
 not create a second plan type. What publication records is the decision and a hash of
-the plan the admin saw when making it.
+the plan the organiser saw when making it.
 
 Pending events are the interesting case, because they are events in every respect
 except that nobody has committed to them. Applying them appends them here through

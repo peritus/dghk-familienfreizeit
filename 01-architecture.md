@@ -4,7 +4,7 @@
 
 ```
       committed events                 pending events
-      the log, append-only             held by one admin, not yet applied
+      the log, append-only             held by one organiser, not yet applied
               │                                │
               └────────────────┬───────────────┘
                                ▼
@@ -25,12 +25,12 @@
                                │
               diff(world, world) → what changed, and why
                                │
-          admins read ─────────┤
-          attendees read ──────┘  (published only)
+          organisers read ─────────┤
+          families read ──────┘  (published only)
 ```
 
-Everything flows in one direction. There is no path by which an attendee or an
-admin writes an assignment. `derive` is the only producer of assignments, and its
+Everything flows in one direction. There is no path by which a family or an
+organiser writes an assignment. `derive` is the only producer of assignments, and its
 only inputs are a list of events and a config.
 
 ## Derivation is the read side
@@ -64,34 +64,34 @@ possible.
 
 ## Pending events
 
-An admin working in the admin application holds a list of **pending events**:
+An organiser working in the organiser application holds a list of **pending events**:
 ordinary events, in the existing vocabulary, that have not been appended to the
-log. Every admin screen — the board, party review, the dashboard, plan diffs —
+log. Every organiser screen — the board, party review, the dashboard, plan diffs —
 renders `derive(committed ++ pending)`.
 
 Usually `pending` is empty and every screen shows the same world the server has.
-When an admin drags a party or splits one, the action appends a constraint to
+When an organiser drags a party or splits one, the action appends a constraint to
 `pending` and the application re-derives locally — no request, no approximation, the real solver over the real
 constraints. Applying flushes `pending` to the log in one append; discarding drops
 it. An empty pending list is not a special case, so there is no second code path
 and no mode to be in.
 
 This is the difference between recording a decision and recording the search for
-one. An admin who tries four arrangements before choosing appends the events for
+one. An organiser who tries four arrangements before choosing appends the events for
 the arrangement they chose, and the log stays a record of judgement rather than of
 experiment.
 
 **The trust boundary does not move.** A client never submits a world. It submits
 events, which the server validates, authorises, and appends exactly as it does for
-any other command, and then derives for itself. The world the admin saw locally is
+any other command, and then derives for itself. The world the organiser saw locally is
 a *prediction*; because `derive` is pure, the prediction is checkable, and the apply
 request carries the `output_hash` the client derived so the server can compare after
 appending. Agreement is what the determinism contract guarantees; disagreement is a
 bug to report, and the server's world is authoritative either way.
 
-Pending events live in the admin's browser for as long as that tab is open. They are
-never stored on the server, never shared between admins, and never visible to
-attendees.
+Pending events live in the organiser's browser for as long as that tab is open. They are
+never stored on the server, never shared between organisers, and never visible to
+families.
 
 ## Plan inputs
 
@@ -100,36 +100,36 @@ answer is which events count. Three answers, and they are the whole visibility
 model:
 
 ```
-the working admin    derive(log ++ their pending events)
-every other admin    derive(log)
-attendees            derive(log before the latest PlanPublished)
+the working organiser    derive(log ++ their pending events)
+every other organiser    derive(log)
+families            derive(log before the latest PlanPublished)
 ```
 
-Reports use these same cuts and are audience-scoped rather than admin-only by
+Reports use these same cuts and are audience-scoped rather than organiser-only by
 default. Shared coordination reports such as materials and the workshop
-programme are available to authenticated attendees when their fields are safe to
+programme are available to authenticated families when their fields are safe to
 share. The complete report contract and catalogue are in [reports](19-reports.md).
 
-One function, one list, cut at three points. The two admin cuts differ by whether a
-change has been appended yet, which is what **Apply** does. The attendee cut differs
+One function, one list, cut at three points. The two organiser cuts differ by whether a
+change has been appended yet, which is what **Apply** does. The family cut differs
 by whether it has been published, which is what **Publish** does.
 
 **Publication is a record about a plan.** `PlanPublished` says that the plan derived
-from the events before it is what attendees are being told. Its own position in the
+from the events before it is what families are being told. Its own position in the
 log identifies the preceding plan's `input_seq`. The latest such event is the active
 publication; earlier events remain publication history.
 
 ```
 PlanPublished
-  output_hash     sha256 of the plan the admin reviewed
+  output_hash     sha256 of the plan the organiser reviewed
   solver_version  semver of src/solver
   config_hash     sha256 of the canonicalised config object
   notify          whether change emails were queued
-  note            optional admin note
+  note            optional organiser note
 ```
 
 `output_hash` does two jobs. It is the concurrency guard — the publish request
-carries the hash the admin reviewed, and the server refuses with the diff if its own
+carries the hash the organiser reviewed, and the server refuses with the diff if its own
 derivation disagrees, which means the log moved while they were reading. And it is
 the record of what was actually sent, which is what makes code drift detectable
 rather than silent.
@@ -140,7 +140,7 @@ also mean **every difference between two plans has exactly one attributable caus
 new events, retuned weights, or new code. You never have to wonder which.
 
 `config_hash` is computed at runtime from the code config object. See
-[occasion profiles](16-event-profiles.md) §4 for what goes into it, including the
+[occasion profiles](16-occasion-profiles.md) §4 for what goes into it, including the
 requirement that function bodies are hashed by source.
 
 ## Module profiles
@@ -162,8 +162,8 @@ checks, scoring weights, phases, and user-facing copy. Profile functions are
 deterministic evaluators only. They cannot perform I/O, read a clock, use
 randomness, dynamically evaluate code, or alter module control flow.
 
-Room and workshop capabilities are independent. A room-only event does not need
-workshop entities or views; a workshop-only event does not need rooms, beds,
+Room and workshop capabilities are independent. A room-only occasion does not need
+workshop entities or views; a workshop-only occasion does not need rooms, beds,
 places, or sleeping-party formation. The first deployed profile enables both.
 
 ## Why CQRS is cheap at this size
@@ -175,10 +175,10 @@ it is too big.
 
 None of that applies here. Concretely:
 
-- 150 attendees, ~55 families, ~40 rooms, ~120 places, ~24 workshops.
-- Every family edits preferences a handful of times. Admins add a few dozen
+- 150 families, ~55 families, ~40 rooms, ~120 places, ~24 workshops.
+- Every family edits preferences a handful of times. Organisers add a few dozen
   times. Inventory is entered once and corrected occasionally.
-- Realistic total: **2,000 to 4,000 events** for the entire life of the event.
+- Realistic total: **2,000 to 4,000 events** for the entire life of the occasion.
 
 At that size, `SELECT * FROM event ORDER BY seq` and a fold in memory is a
 sub-millisecond operation. So:
@@ -195,10 +195,10 @@ response is derived from the log that includes them. The user sees their write
 immediately. The asynchrony that usually forces
 "your change may take a moment to appear" copy simply does not exist.
 
-The same arithmetic is why the admin application can derive at all. Two to four
+The same arithmetic is why the organiser application can derive at all. Two to four
 thousand events is a few hundred kilobytes of JSON, well under a hundred compressed,
-fetched once when the application loads. An admin tool on a laptop can hold the entire history of
-the event in memory and fold it on every drag without noticing.
+fetched once when the application loads. An organiser tool on a laptop can hold the entire history of
+the event log in memory and fold it on every drag without noticing.
 
 If the event count ever approaches five figures — it will not, but if — the
 change is to memoise the fold in the Worker isolate, keyed by `max(seq)`. That is
@@ -210,7 +210,7 @@ Every mutating request follows the same five steps. Deviating from this shape is
 how the architecture rots.
 
 ```
-1. AUTHENTICATE   session cookie → verified email → admin (allowlist) or family (derived), or reject
+1. AUTHENTICATE   session cookie → verified email → organiser (allowlist) or family (derived), or reject
 2. VALIDATE       zod-parse the body, then check invariants against derive(log at head)
 3. AUTHORISE      may this principal emit these events about these subjects?
 4. APPEND         one batch(), seq = head + 1, head + 2, …
@@ -229,12 +229,12 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family | Label/constraint events on entities it owns, for attendee-facing controls |
-| Allowlisted admin | Everything, through the admin UI |
+| Family | Label/constraint events on entities it owns, for family-facing controls |
+| Allowlisted organiser | Everything, through the organiser UI |
 
-An allowlisted admin may enter a constraint for any entity. The actor identifies
+An allowlisted organiser may enter a constraint for any entity. The actor identifies
 the authenticated principal and the subject identifies the affected entity. There
-is no separate semantic distinction between an admin acting for themselves and
+is no separate semantic distinction between an organiser acting for themselves and
 for another family.
 
 ## Read models
@@ -297,8 +297,8 @@ ORDER BY seq DESC
 LIMIT 1;
 ```
 
-`events_behind > 0` means attendees may be looking at a plan older than what the
-admins have. The dashboard shows it permanently. It is the single most important
+`events_behind > 0` means families may be looking at a plan older than what the
+organisers have. The dashboard shows it permanently. It is the single most important
 number on the screen, because it is the one that answers "do I need to do anything
 today".
 
@@ -331,11 +331,11 @@ disagree with it in silence.
 
 ## Publication and change notification
 
-Publishing records the current plan as the attendee plan and, optionally, runs the emails.
+Publishing records the current plan as the family plan and, optionally, runs the emails.
 
 ```
-1. Admin reviews the current plan and its diff against the previously published plan.
-2. Admin publishes → PlanPublished { output_hash, …, notify, note }
+1. Organiser reviews the current plan and its diff against the previously published plan.
+2. Organiser publishes → PlanPublished { output_hash, …, notify, note }
    — refused with the diff if the server derives a different output_hash
 3. If notify: diff the previously published plan against the new plan, email only affected families
 ```
@@ -353,16 +353,16 @@ src/
     routes/
       auth.ts             login, magic-link redemption, logout, session probe
       family.ts           the signed-in family's view; its label events
-      admin.ts            the committed log, apply, email actions
+      organiser.ts            the committed log, apply, email actions
     append.ts             the only place that INSERTs into event
     db/
       events.ts           read the log; the seq-guarded batch insert
       operational.ts      sessions, magic links, rate limits, email log
     email.ts
   app/                    the React application; never imported by src/worker
-    main.tsx              router, session probe, lazy admin chunk
-    portal/               login, preferences, assignment
-    admin/                AdminApp, the pending reducer, screens/
+    main.tsx              router, session probe, lazy organiser chunk
+    family-view/               login, preferences, assignment
+    organiser/                OrganiserApp, the pending reducer, screens/
     components/ui/        copied neobrutalism components
     csv.ts                papaparse import and preview validation
   events/
@@ -406,7 +406,7 @@ Four boundaries are load-bearing and should be enforced in review:
   and the active profile, which are also pure data and pure functions with no
   I/O. The ESLint determinism rules extend to profile code.
 - **`src/derive/**` is pure and holds the same restrictions.** It is imported by
-  the Worker and by the admin application, so a stray import of `src/worker/db`
+  the Worker and by the organiser application, so a stray import of `src/worker/db`
   there would take the database with it into the client.
 - **`src/app/**` and `src/worker/**` never import each other.** They share only
   event schemas, derivation, the solver, the profile, and module contracts.

@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers experiment with room placement and review consequences. Route:
-`/admin/board`. Governing specs: [admin interface](../09-admin-interface.md) §5,
+`/organiser/board`. Governing specs: [organiser view](../09-organiser-view.md) §5,
 [room assignment](../05-room-assignment.md), and decisions [D6/D15](../17-decisions.md).
 
 ```text

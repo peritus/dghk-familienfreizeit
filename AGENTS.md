@@ -16,7 +16,7 @@
   configured constraint resolver. Do not add relational foreign keys or
   per-screen lookups that let application code become a second relationship
   engine.
-- Event-specific configuration defines entity kinds, label schemas, fixed
+- Occasion-specific configuration defines entity kinds, label schemas, fixed
   resolver operators, validation, cardinality, and UI metadata. It must not
   contain executable rules supplied at runtime.
 - Operational tables (sessions, magic links, rate limits, delivery receipts) may

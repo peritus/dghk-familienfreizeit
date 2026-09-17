@@ -10,40 +10,40 @@ components, talking to a small JSON API.
 ## 1. The decision and its boundary
 
 The derived world is the read side of the application
-([architecture](01-architecture.md)), and it already runs in the browser. The admin
+([architecture](01-architecture.md)), and it already runs in the browser. The organiser
 screens are views over it: the dashboard, families, party review, the board, plan
 diffs, workshops, and constraints all render `derive(committed ++ pending)`. The
 pending list is shared by every one of them — party review merges and splits into it
 just as the board drags into it. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
 
-So: render everything in React, admin and attendee view alike, and keep the server
+So: render everything in React, organiser and family view alike, and keep the server
 to authentication, the event log, and side effects.
 
 What that buys, concretely:
 
 - **One pending list across screens.** It lives in one reducer at the root of the
-  admin application, so every screen sees the same unapplied work.
+  organiser application, so every screen sees the same unapplied work.
 - **No hand-written rendering engine for the board.** Re-deriving on every drag,
   keeping selection, focus, and drag state across renders, flashing moved cards —
   this is component state and reconciliation, not DOM bookkeeping.
 - **Accessible primitives instead of hand-written ones.** The family picker, the room
   picker, merge and split dialogs, toasts, radio groups, and selects come from
   maintained components with keyboard and ARIA behaviour already correct.
-- **Almost no per-screen server code.** Admin screens need no routes of their own;
+- **Almost no per-screen server code.** Organiser screens need no routes of their own;
   they read the log once and write through apply.
 - **One way to render.** Every screen is a component, and every request returns
   JSON.
 
-The attendee view requires JavaScript. It is a small bundle that never contains the
-admin screens or the solver, loads on any browser released in the last several
+The family view requires JavaScript. It is a small bundle that never contains the
+organiser screens or the solver, loads on any browser released in the last several
 years, and saves on change through ordinary requests.
 
 ### Development event-log debug view
 
 Development mode includes an explicitly non-production debug view for editing the
 KDL event log in a `Textarea`. It is an editor and inspection surface, not a new
-state model or a replacement for the admin application:
+state model or a replacement for the organiser application:
 
 ```text
 KDL Textarea → parse → validate → Event[] → derive(events, config)
@@ -119,23 +119,23 @@ off-by-one there produces a wrong plan rather than a crash.
 
 ```
 src/app/
-  main.tsx              router, session probe, lazy-loads the admin application
-  portal/               login, preferences page, assignment page
-  admin/
-    AdminApp.tsx        loads the log, owns the pending reducer, derives the world
+  main.tsx              router, session probe, lazy-loads the organiser application
+  family-view/               login, preferences page, assignment page
+  organiser/
+    OrganiserApp.tsx        loads the log, owns the pending reducer, derives the world
     screens/            dashboard, families, parties, board, plans, workshops, constraints
   components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
 **Routing** is `wouter`: path patterns with parameters for the dozen routes in the
-[admin interface](09-admin-interface.md) and the portal. `/admin/**` is a lazy
-chunk, so a family's phone never downloads the admin screens or the solver.
+[organiser view](09-organiser-view.md) and the family view. `/organiser/**` is a lazy
+chunk, so a family's phone never downloads the organiser screens or the solver.
 
-**Admin state** is one reducer:
+**Organiser state** is one reducer:
 
 ```tsx
-function AdminApp() {
-  const { committed, configHash } = useLog()            // GET /api/admin/log, once
+function OrganiserApp() {
+  const { committed, configHash } = useLog()            // GET /api/organiser/log, once
   const [pending, dispatch] = useReducer(pendingReducer, [])
   const world = useMemo(() => derive([...committed, ...pending], config), [committed, pending])
   …
@@ -144,21 +144,21 @@ function AdminApp() {
 
 Every screen receives `world` and `dispatch`. Actions append a pending event, pop
 one for undo, clear the list for discard, or apply. There is no state manager and no
-data-fetching library: the admin application makes three kinds of request — load
+data-fetching library: the organiser application makes three kinds of request — load
 the log, apply pending events, and trigger emails.
 
-**Portal state** is the family's view from `GET /api/family/view`, which the server
+**Family view state** is the family's view from `GET /api/family/view`, which the server
 derives from the events before the latest publication and filters to that family
-([attendee view](10-family-portal.md)). A control change posts the label event and
+([family view](10-family-view.md)). A control change posts the label event and
 re-renders from the response.
 
 **Escaping.** React escapes interpolated values by default.
-`dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, admin
+`dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, organiser
 notes, and workshop titles are all user-supplied and all rendered as `{value}`.
 
-The attendee preferences page is a renderer over `attendeeFacing` occasion-profile entries
-rather than hand-written JSX ([attendee view](10-family-portal.md) §1): each
-`control` value maps one-to-one onto a component in `src/app/portal/controls/`.
+The family preferences page is a renderer over `familyFacing` occasion-profile entries
+rather than hand-written JSX ([family view](10-family-view.md) §1): each
+`control` value maps one-to-one onto a component in `src/app/family-view/controls/`.
 
 ---
 
@@ -178,11 +178,11 @@ The components in use, and that is the complete list:
 | Component | Used for |
 |---|---|
 | Button, Card, Badge | everywhere |
-| Input, Textarea, Checkbox, Radio Group, Select | portal controls, admin forms, CSV paste |
+| Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
 | Combobox | family picker, person picker, room picker, party search |
 | Dialog, Alert Dialog | merge and split, publish confirmation, discard pending |
 | Table | families, CSV preview, plans, constraints, workshop fill |
-| Tabs | building filter on the board, before and after publication in the portal |
+| Tabs | building filter on the board, before and after publication in the family view |
 | Toast | "Gespeichert um 14:22", "Applied", apply conflicts |
 
 The families table sorts and filters 55 rows with `useMemo`; it does not need the
@@ -220,14 +220,14 @@ Non-negotiable regardless of the style:
 - **`prefers-reduced-motion` respected.** The press-down button transform is an
   action response, which is the kind of motion worth keeping — but it still respects
   the preference.
-- **Responsive to 360px.** The attendee view will be used on phones. The admin
+- **Responsive to 360px.** The family view will be used on phones. The organiser
   board will not, and does not need to be.
 
 ---
 
 ## 6. The board
 
-A screen of the admin application like any other, with the most interaction.
+A screen of the organiser application like any other, with the most interaction.
 Drag and drop is `@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB
 core, attached to room cards and party chips from effects.
 
@@ -258,10 +258,10 @@ rather than because a cheap approximation guessed so.
 No network, and no reconcile step, because there is nothing to reconcile: the world
 on screen was computed the same way the server would compute it.
 
-Applying is the only write the admin application makes:
+Applying is the only write the organiser application makes:
 
 ```
-POST /api/admin/apply
+POST /api/organiser/apply
      { input_seq, events[], output_hash, config_hash, solver_version }
 
   409 → the log moved; response carries the new events, the application re-derives on them
@@ -269,13 +269,13 @@ POST /api/admin/apply
 ```
 
 The server's plan is authoritative. `output_hash` travels so the server can check
-that the world the admin acted on is the world it derived; the determinism contract
+that the world the organiser acted on is the world it derived; the determinism contract
 ([room assignment](05-room-assignment.md) §1) says the two agree, so a mismatch is
 reported as a defect rather than smoothed over.
 
 A stale bundle must not derive at all. The log response carries the Worker's
 `config_hash`, and a bundle whose profile hashes differently refuses to open the
-admin application and asks for a reload.
+organiser application and asks for a reload.
 
 ---
 
@@ -329,7 +329,7 @@ auditable by someone who does not know this stack. React never reaches into it.
 | htmx or other partial-update libraries | React owns updates; requests return JSON |
 | A meta-framework (Next.js, Remix, TanStack Start) | No server rendering to organise; the Worker is an API |
 | A state manager | The state is a list of events and a pure function over it |
-| A data-fetching library | Three admin requests and two portal requests |
+| A data-fetching library | Three organiser requests and two family view requests |
 | A table library | 55 rows, sorted and filtered in `useMemo` |
 | tRPC | Shared zod schemas type both ends |
 | An ORM | Only the event log and operational tables are stored; see [data model](02-data-model.md) |

@@ -15,7 +15,7 @@ parties — but the fairness requirement makes the objective more interesting.
 
 ## 1. Workshop audience and leadership
 
-The generic workshop model supports an event-configured participation audience.
+The generic workshop model supports an occasion-configured participation audience.
 A workshop may be for children, adults, or another profile-defined audience.
 Audience eligibility controls participation; it does not by itself determine
 who leads the workshop.
@@ -138,7 +138,7 @@ Carry to the next slot.
 Bounded at one restart per slot, deliberately. A second cancellation caused by
 the first is possible in principle and vanishingly unlikely in practice with
 twenty-four workshops. Reporting it rather than looping keeps termination
-obvious and keeps the trace readable. If it ever fires, an admin adjusts
+obvious and keeps the trace readable. If it ever fires, an organiser adjusts
 `min_capacity` and re-runs.
 
 ### Co-assignment groups
@@ -175,7 +175,7 @@ double-booking unstorable.
 The solver assigns at most one workshop per person per slot by construction —
 step 1 through 5 each skip already-assigned people — so the index should never
 fire. It exists so that if a refactor breaks that invariant, the failure is a
-write error in an admin's face rather than a family discovering the clash on
+write error in an organiser's face rather than a family discovering the clash on
 Saturday morning.
 
 ---
@@ -234,7 +234,7 @@ And per slot, a summary:
 
 The same generic constraint resolver is used for workshop matching. A custom
 `needs-provides` or `groups-with` label is visible in the trace and can be
-cleared by an admin; there is no separate pin lifecycle.
+cleared by an organiser; there is no separate pin lifecycle.
 
 Common real cases and where they belong:
 

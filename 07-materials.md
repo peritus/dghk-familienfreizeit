@@ -1,7 +1,7 @@
 # 07 — Materials coordination
 
 Materials coordination is a small reusable module for events where families,
-people, or workshops need items brought from outside the event inventory. It
+people, or workshops need items brought from outside the occasion inventory. It
 coordinates requests and commitments; it does not manage purchasing, stock,
 menus, or physical delivery.
 
@@ -39,8 +39,8 @@ may additionally identify the person it concerns.
 
 The `fulfills` relation explicitly connects a commitment to a request. Matching
 is never inferred from similar names. Multiple commitments may fulfill one
-request, and one commitment may be allocated across requests only if the event
-profile explicitly permits that.
+request, and one commitment may be distributed across requests only if the
+occasion profile explicitly permits that.
 
 ## 3. Simple resolver
 
@@ -90,6 +90,6 @@ plan. The generic UI may show:
 - withdrawn commitments and the requests they leave open;
 - workshop-specific material coordination.
 
-Admin actions append request, commitment, withdrawal, cancellation, and
+Organiser actions append request, commitment, withdrawal, cancellation, and
 fulfillment events. The event log remains authoritative; the resolver output is
 derived.

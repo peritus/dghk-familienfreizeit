@@ -1,4 +1,4 @@
-# 08 — Admin interface
+# 08 — Organiser view
 
 Three people will use this, for about six weeks, on laptops. Design for
 competence and speed, not for onboarding. Assume they will use it daily and learn
@@ -16,35 +16,35 @@ English ASCII wireframes, state behavior, accessibility, and responsive notes.
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/admin` | Dashboard | Status, staleness, constraint health, what needs attention |
-| `/admin/families` | Families | Table, import, invite, chase list |
-| `/admin/families/:id` | Family detail | People, preferences, full event history |
-| `/admin/inventory` | Inventory | Buildings, rooms, beds, designations |
-| `/admin/parties` | Party review | Derived parties with provenance; merge and split |
-| `/admin/board` | The board | Room assignment by drag and drop |
-| `/admin/plans` | Plans | List, diff, publish |
-| `/admin/plans/:a/diff/:b` | Plan diff | What moved and why |
-| `/admin/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
-| `/admin/constraints` | Constraints | Create, inspect, clear, and explain matching constraints |
-| `/admin/reports` | Reports | Printable operational reports with audience and sensitivity scopes |
+| `/organiser` | Dashboard | Status, staleness, constraint health, what needs attention |
+| `/organiser/families` | Families | Table, import, invite, chase list |
+| `/organiser/families/:id` | Family detail | People, preferences, full event history |
+| `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
+| `/organiser/parties` | Party review | Derived parties with provenance; merge and split |
+| `/organiser/board` | The board | Room assignment by drag and drop |
+| `/organiser/plans` | Plans | List, diff, publish |
+| `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
+| `/organiser/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
+| `/organiser/constraints` | Constraints | Create, inspect, clear, and explain matching constraints |
+| `/organiser/reports` | Reports | Printable operational reports with audience and sensitivity scopes |
 
-Every screen is a view over the admin application's world
+Every screen is a view over the organiser application's world
 ([frontend](12-frontend.md) §3). None has a server route of its own: the application
 loads the committed log once, derives, and writes only through apply and the email
 actions. Reports follow the same rule and are defined in [reports](19-reports.md);
-shared attendee reports are rendered from the published world through the family
-portal rather than becoming admin-only exports.
+shared family reports are rendered from the published world through the family
+family view rather than becoming organiser-only exports.
 
-`/admin/constraints` renders built-in and custom definitions, shows which labels
+`/organiser/constraints` renders built-in and custom definitions, shows which labels
 are in use and by how many entities, and lists current
-preflight findings. It is where an admin looks to answer "what can I even ask
+preflight findings. It is where an organiser looks to answer "what can I even ask
 for".
 
 ---
 
 ## 2. Dashboard
 
-The one screen an admin opens every morning. It answers one question: *does
+The one screen an organiser opens every morning. It answers one question: *does
 anything need me today?*
 
 Layout, top to bottom, in descending order of urgency:
@@ -157,7 +157,7 @@ Each party renders as a card:
 └────────────────────────────────────────────────────────────────┘
 ```
 
-Provenance is the content. An admin reading this card should be able to tell
+Provenance is the content. An organiser reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
 Each requirement names which member family contributed it
 ([labels and constraints](04-labels-and-constraints.md) §5.3) — a merged party's `required` tag binding
@@ -178,7 +178,7 @@ and party formation re-derives from it like any other constraint. Since party
 formation is the judgement call and the one most worth trying twice, this screen
 benefits from the pending list as much as the board does.
 
-**Children's room allocation** gets its own section on this page, since it
+**Children's room assignment** gets its own section on this page, since it
 happens before party formation and determines everything after:
 
 > **K3** · Haus B, Raum 22 · 6 places · ages 8–14
@@ -229,7 +229,7 @@ drop without opening anything:
 - **Attribute chips**: sanitary arrangement, accessible, and child-group capability.
 - **Occupants**, one line per party with size.
 - **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
-  `⚲` constrained by an admin rule.
+  `⚲` constrained by an organiser rule.
 
 Colour alone never carries meaning. The neobrutalism palette is high-contrast and
 tempting to lean on, but a constrained room and a warned room must be
@@ -243,7 +243,7 @@ Built on `@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB core
 the same toolchain behind Trello and Jira.
 
 - **Drag target is the room card**, not an individual place. Which bed within a
-  room is a detail the solver handles and admins rarely care about. A separate
+  room is a detail the solver handles and organisers rarely care about. A separate
   bed-level view handles the exceptions (see below).
 - **On drag start**, rooms that cannot accept the party dim and lose their drop
   affordance. Rooms that can accept it but would incur a penalty show the penalty
@@ -263,7 +263,7 @@ the same toolchain behind Trello and Jira.
 Every board action appends an event to the **pending list**
 ([01-architecture](01-architecture.md)) rather than to the log. The board renders
 `derive(committed ++ pending)`, so the plan on screen is always the real plan for
-everything the admin has done so far.
+everything the organiser has done so far.
 
 A bar along the bottom carries the count and the two ways out:
 
@@ -275,8 +275,8 @@ board rather than a special one.
 
 **Apply** appends the events in order, in one request. The server validates and
 authorises each one exactly as it would a single action, appends them together, and
-derives. From that moment the other admins see the change, because they derive from
-the same log. Attendees do not — that is what Publish is for.
+derives. From that moment the other organisers see the change, because they derive from
+the same log. Families do not — that is what Publish is for.
 
 **Discard** drops them; because nothing was written, nothing is left behind — no
 cleared labels, no retired constraints, no sediment in the family's event history.
@@ -285,11 +285,11 @@ The two verbs control who can see the same plan:
 
 | | Apply | Publish |
 |---|---|---|
-| Who starts seeing it | the other admins | attendees |
+| Who starts seeing it | the other organisers | families |
 | What it writes | the pending events | a `PlanPublished` event |
 | Undo | a new constraint, or a correcting event | publish again |
 
-This is what makes the board safe to think in. An admin can try an arrangement,
+This is what makes the board safe to think in. An organiser can try an arrangement,
 look at the constraint health and the diff it would produce, and walk away from it
 without having said anything.
 
@@ -300,7 +300,7 @@ building.
 
 Shift-click or ctrl-click parties in the left rail or on room cards to build a
 selection; drag any member and the whole selection moves. The drag preview shows
-the combined headcount so an admin can see at a glance whether it will fit.
+the combined headcount so an organiser can see at a glance whether it will fit.
 
 This is what "five children from five families should share a room" looks like as
 an interaction: select five, drag once.
@@ -322,7 +322,7 @@ optional.
 | `Esc` | Clear selection |
 
 The room picker is a filtered list showing feasibility and score per room, which
-makes it strictly more informative than dragging — an admin who learns it will
+makes it strictly more informative than dragging — an organiser who learns it will
 prefer it.
 
 ### Bed-level view
@@ -346,7 +346,7 @@ instead.
 
 ### Concurrency
 
-Three admins, optimistic locking.
+Three organisers, optimistic locking.
 
 Apply carries the `input_seq` the pending list was built on. If the log has moved
 since, the server returns 409 with the events it has gained, and the board says:
@@ -359,14 +359,14 @@ onto the newer log and the board shows the resulting plan. Payloads are complete
 restatements ([03-events](03-events.md)) and constraints name stable entities
 ([08-constraint-health](08-constraint-health.md) §3), so the result is well defined.
 A pending event that names something Anna withdrew surfaces as an ordinary
-constraint diagnostic, not as a conflict the admin has to resolve by hand.
+constraint diagnostic, not as a conflict the organiser has to resolve by hand.
 
-No operational transform, no Durable Objects. At three admins the collision rate is
+No operational transform, no Durable Objects. At three organisers the collision rate is
 near zero.
 
 ### Empty state
 
-An empty board is the first thing a new admin sees, and it should be an
+An empty board is the first thing a new organiser sees, and it should be an
 instruction rather than a void:
 
 > Nothing to place yet. Add rooms and beds in **Inventory**, then import families.
@@ -385,7 +385,7 @@ publication #7 (12 Sep)  →  current
 BECAUSE OF NEW PREFERENCES (4 people)
   Weber ×4   Raum 01 → Raum 07   Weber stated ensuite required (14 Sep)
 
-BECAUSE OF ADMIN CONSTRAINTS (5 people)
+BECAUSE OF ORGANISER CONSTRAINTS (5 people)
   Braun ×5   Raum 12 → Raum 03   Zimmer mit Gartenblick, added by Anna, 15 Sep
 
 KNOCK-ON (2 people)
@@ -395,7 +395,7 @@ UNCHANGED  46 people
 ```
 
 Grouping by cause is what makes the diff readable. A flat list of eleven moves
-tells an admin nothing; moves attributed to a preference or custom constraint,
+tells an organiser nothing; moves attributed to a preference or custom constraint,
 with the remainder marked knock-on, tell them whether to publish.
 
 Attribution is computed, not guessed. For each event between the two positions,
@@ -412,7 +412,7 @@ Publishing from this screen shows exactly who will be emailed.
 ## 7. Constraints
 
 Each constraint row shows its label, explanation, needs, providers, strength,
-and current resolver status. Admins can create a custom matching definition,
+and current resolver status. Organisers can create a custom matching definition,
 apply it to entities, or clear an application. Missing providers and
 contradictions are visible immediately.
 
@@ -438,8 +438,8 @@ The interface's voice, applied consistently.
 "Plan published"; "Apply" produces "Applied". Never "Submit".
 
 **There is no compute step, so there is no button for one.** The plan on screen is
-always current, because every screen derives it. An admin's verbs are **Apply** —
-other admins see this — and **Publish** — attendees see this.
+always current, because every screen derives it. An organiser's verbs are **Apply** —
+other organisers see this — and **Publish** — families see this.
 
 **Errors state what happened and what to do.** Not "Invalid input" but "Row 31:
 birthdate `31.02.2015` is not a date. Use `DD.MM.YYYY`."
@@ -450,13 +450,13 @@ Add one when the plan needs a human rule."
 **Numbers get units and comparison.** Not "11" but "11 active constraints (was 19)".
 
 **No apologies, no exclamation marks, no "Oops".** These are organisers doing
-administrative work; the interface should be a competent colleague.
+organisational work; the interface should be a competent colleague.
 
-**German or English.** The audience is a German Jugendherberge. Attendee-facing
-copy should be German with an English fallback (`family.locale`). Admin-facing
+**German or English.** The audience is a German Jugendherberge. Family-facing
+copy should be German with an English fallback (`family.locale`). Organisation-team-facing
 copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
 
-Admin-facing labels come from the built-in or custom definition and attendee-facing text
-from `attendeeFacing.label`, so the two audiences can be worded differently for
+Organisation-team-facing labels come from the built-in or custom definition and family-facing text
+from `familyFacing.label`, so the two audiences can be worded differently for
 the same tag.

@@ -54,7 +54,7 @@ Durable Objects.
 
 `run_worker_first` matters. The single-page-application fallback answers
 navigation requests with `index.html` *before* the Worker runs, which is what the
-React router needs for `/admin/board` and every other client route. It would also
+React router needs for `/organiser/board` and every other client route. It would also
 swallow the magic-link redemption — a top-level navigation to `/auth/:token` — and
 any API call made by navigation. Listing `/api/*` and `/auth/*` sends those to the
 Worker first; everything else is the application.
@@ -88,27 +88,27 @@ navigation, deployment, or authentication, and text-file mode must be rejected
 by production configuration even if an environment variable is accidentally
 present.
 
-`EVENT_DATE`, `PREFERENCE_DEADLINE`, and the event-facing name belong in the
-occasion profile ([occasion profiles](16-event-profiles.md)) because they are solver
+`EVENT_DATE`, `PREFERENCE_DEADLINE`, and the occasion-facing name belong in the
+occasion profile ([occasion profiles](16-occasion-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `config_hash`.
 
 ### The application bundles
 
-The build produces an entry chunk for login and the attendee view, and a lazy admin
-chunk. The admin chunk carries `src/derive/**`, `src/solver/**`, and the active
-profile alongside the admin screens, because the admin application derives locally
+The build produces an entry chunk for login and the family view, and a lazy organiser
+chunk. The organiser chunk carries `src/derive/**`, `src/solver/**`, and the active
+profile alongside the organiser screens, because the organiser application derives locally
 ([frontend](12-frontend.md) §3). The derivation core is dependency-free TypeScript
 and minifies accordingly.
 
 Two rules keep that honest:
 
-- **A size budget per chunk, checked in CI.** The build fails if the portal entry
-  or the admin chunk exceeds its budget, and if the portal entry ever contains
+- **A size budget per chunk, checked in CI.** The build fails if the family view entry
+  or the organiser chunk exceeds its budget, and if the family view entry ever contains
   solver code. The budget exists so that growth is a decision rather than a drift;
   raise it deliberately when there is a reason.
-- **The profile hash travels with the log.** The admin log response carries the
-  Worker's `config_hash`, and the admin application refuses to derive if its own
+- **The profile hash travels with the log.** The organiser log response carries the
+  Worker's `config_hash`, and the organiser application refuses to derive if its own
   bundled profile hashes differently. A deploy that updates the Worker while a browser holds yesterday's
   bundle then produces a reload prompt rather than a plan computed against the
   wrong vocabulary.
@@ -148,7 +148,7 @@ corrective events through the ordinary append. Never edit event rows.
 ## Weight tuning
 
 There is no weight-editing screen, and this is deliberate. The offline
-workflow, from [occasion profiles](16-event-profiles.md) §4:
+workflow, from [occasion profiles](16-occasion-profiles.md) §4:
 
 ```bash
 wrangler d1 execute dghk-familienfreizeit --remote --json \
@@ -267,8 +267,8 @@ export default {
 }
 ```
 
-No scheduled solving, no scheduled emails. Every solve is triggered by an admin
-who is about to look at the result, and every email is triggered by an admin who
+No scheduled solving, no scheduled emails. Every solve is triggered by an organiser
+who is about to look at the result, and every email is triggered by an organiser who
 decided to send it. Automatic background sends are how people receive four room
 changes in a week and stop reading.
 
@@ -353,7 +353,7 @@ harmless for the few seconds it takes.
 |---|---|---|---|
 | Database | Miniflare SQLite | `dghk-familienfreizeit-preview` | `dghk-familienfreizeit` |
 | Email | console log | Resend test domain | Resend, real domain |
-| Auth | magic link in console | real, seeded admins | real |
+| Auth | magic link in console | real, seeded organisers | real |
 | Data | generated fixtures | anonymised copy | real |
 
 **Never copy production data into preview un-anonymised.** Real names and email
@@ -371,9 +371,9 @@ The week before, in order:
 1. **Freeze the schema.** No migrations after this point without a very good
    reason.
 2. **Verify access to the reports.** Confirm that the current published plan and
-   the shared attendee reports are visible in the browser, and that the admin
+   the shared family reports are visible in the browser, and that the organiser
    reports show the expected data cut. Reports are not downloadable; print any
-   paper copies needed for the event from their browser print views.
+   paper copies needed for the occasion from their browser print views.
 2a. **Run `npm run tune`** against the exported log and confirm the deployed
     weights are the ones you settled on.
 2b. **Confirm preflight is clean**, or that every error-severity finding has
@@ -385,11 +385,11 @@ The week before, in order:
    production domain.
 5. **Check the published plan is the one you think it is** — the latest
    `PlanPublished.output_hash` matches the plan shown by the dashboard.
-6. **Nominate a laptop.** One machine, known to be logged in as an admin, known
+6. **Nominate a laptop.** One machine, known to be logged in as an organiser, known
    to have the export. Do not rely on being able to log in from a phone in a
    building with thick walls.
 
-During the event, the application is read-only in practice. Changes happen on
+During the occasion, the application is read-only in practice. Changes happen on
 paper and get entered afterwards, if at all. Do not plan to re-solve on site;
 plan to have printed the right thing.
 
@@ -405,6 +405,6 @@ plan to have printed the right thing.
 | Domain | Whatever you already pay |
 
 About five dollars a month. The Paid plan is chosen for CPU time, not traffic: every
-portal and dashboard request derives the plan ([decisions](17-decisions.md) D1). It
+family view and dashboard request derives the plan ([decisions](17-decisions.md) D1). It
 also makes Cloudflare Email Sending to arbitrary recipients available, should that
 replace Resend.

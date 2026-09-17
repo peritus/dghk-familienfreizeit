@@ -1,7 +1,7 @@
 # 19 — Reports
 
-Reports are named, human-readable views over the current event world. They help
-organisers and attendees coordinate from the same derived information without
+Reports are named, human-readable views over the current occasion world. They help
+organisers and families coordinate from the same derived information without
 introducing another kind of domain state.
 
 ## 1. Contract
@@ -28,7 +28,7 @@ Every report identifies:
 | Field | Meaning |
 |---|---|
 | Report title | Human-readable name from the active occasion profile |
-| Audience | `shared`, `family`, or `admin` |
+| Audience | `shared`, `family`, or `organiser` |
 | Data cut | The derived event sequence and whether it is the current or published world |
 | Generated at | Display-only browser generation time |
 | Publication | The current publication number/hash when the report uses a published plan |
@@ -43,9 +43,9 @@ Reports never have a table, event type, cache entry, or stored snapshot. They ar
 renderers over `World`, using the same visibility cuts as every other screen:
 
 ```ts
-derive(log ++ pending)                         // working admin
-derive(log)                                    // other admins
-derive(log before latest PlanPublished)        // attendees
+derive(log ++ pending)                         // working organiser
+derive(log)                                    // other organisers
+derive(log before latest PlanPublished)        // families
 ```
 
 The report renderer may aggregate, sort, group, and redact the derived world. It
@@ -53,18 +53,18 @@ must not query event payloads directly, perform a second relationship lookup, or
 invent a stored report model. A report that compares two plans uses
 `diff(previousPublishedWorld, currentWorld)`.
 
-Reports are shared with attendees when sharing supports coordination and does not
+Reports are shared with families when sharing supports coordination and does not
 expose personal or safety-sensitive information. Restrict fields, not whole
-reports, where possible. The absence of an admin login must not by itself make a
+reports, where possible. The absence of an organiser login must not by itself make a
 useful coordination report unavailable.
 
 | Audience | Reader | Typical contents |
 |---|---|---|
-| `shared` | Any authenticated attendee | Materials coordination, workshop programme, practical event information |
+| `shared` | Any authenticated family | Materials coordination, workshop programme, practical occasion information |
 | `family` | The family represented by the session | Its people, room, workshops, food entries, materials, and instructions |
-| `admin` | Allowlisted admins | Full contacts, detailed allergies, operational notes, unresolved issues, and audit detail |
+| `organiser` | Allowlisted organisers | Full contacts, detailed allergies, operational notes, unresolved issues, and audit detail |
 
-An attendee report uses the published cut. It must not reveal unpublished room,
+A family report uses the published cut. It must not reveal unpublished room,
 workshop, or constraint decisions. A shared report must show only fields that the
 occasion profile has declared safe for that audience.
 
@@ -73,27 +73,27 @@ occasion profile has declared safe for that audience.
 The first release should provide these reports. A profile may disable a report
 whose module is not selected.
 
-### 3.1 Shared attendee reports
+### 3.1 Shared family reports
 
 **Materials overview** groups requests and commitments by category and workshop.
 It shows descriptions, quantities, open/fulfilled status, and the contributing
 family or person where that identity is useful for coordination. It is the
-canonical shared coordination report for materials; it is not admin-only.
+canonical shared coordination report for materials; it is not organiser-only.
 
 **Workshop programme** shows dates, times, workshops, rooms, leaders, audience,
-and cancellations. It is the event schedule, not a private participant list.
+and cancellations. It is the occasion schedule, not a private participant list.
 
 **Shared workshop roster**, when the profile permits it, shows the minimum names
-needed for attendees to coordinate workshop participation. It does not expose
+needed for families to coordinate workshop participation. It does not expose
 email addresses, allergy text, private notes, or preference rankings.
 
-**Shared event overview** shows the event dates, buildings, workshop locations,
+**Shared occasion overview** shows the occasion dates, buildings, workshop locations,
 practical instructions, and other profile-provided information intended for all
-attendees.
+families.
 
-**Published change notice** shows changes that affect attendees since the last
+**Change notice** shows changes that affect families since the last
 published plan. It is derived from the publication diff and contains only the
-affected public result, not internal constraint explanations.
+affected family-visible result, not internal constraint explanations.
 
 ### 3.2 Family reports
 
@@ -103,21 +103,21 @@ materials, and instructions relevant to that family.
 
 The family sheet is both a review surface and a print surface. It must make it
 easy for a family to see what the system currently knows and correct its own
-inputs through the ordinary attendee controls.
+inputs through the ordinary family controls.
 
-### 3.3 Admin reports
+### 3.3 Organiser reports
 
 **Master participant overview** lists families, people, roles, contact details,
 published assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
 capacity, child-group capability, accessibility, and parties spanning families.
-It may include operational room notes that are not attendee-facing.
+It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
 including leaders, capacity, assigned people, cancellations, and fill status.
 
-**Food service overview** aggregates counts by configured diet and event day. A
+**Food service overview** aggregates counts by configured diet and occasion day. A
 separate restricted **allergy and safety sheet** lists person, family, room, and
 the allergy/accessibility text needed by organisers. Aggregate diet counts may be
 shared; individual allergy text may not.
@@ -136,10 +136,10 @@ planning calculation, not an invoice or billing record.
 
 ## 4. Safety and responsibility
 
-The event provides no childcare service. Parents and guardians remain responsible
+The occasion provides no childcare service. Parents and guardians remain responsible
 for supervising their children at all times. Reports must not suggest that a
 children's room, workshop, leader, or age grouping transfers that responsibility
-to the organisers or to another attendee.
+to the organisers or to another family.
 
 Detailed allergy, accessibility, contact, and child-related operational data is
 minimised and restricted to the report audience that needs it. Printing a
@@ -149,7 +149,7 @@ printed document as confidential.
 ## 5. UI and print behavior
 
 Reports appear as ordinary browser routes, with the same authenticated session
-rules as the corresponding portal or admin view. They have no download or export
+rules as the corresponding family view or organiser view. They have no download or export
 action. The visible controls are limited to filtering, sorting, navigation, and
 `Print`.
 
@@ -161,7 +161,7 @@ The print stylesheet must:
   page break can be placed before it;
 - preserve text labels, borders, status glyphs, and warnings without relying on
   colour;
-- include the event, report title, data cut, publication identity, and printed
+- include the occasion, report title, data cut, publication identity, and printed
   page number;
 - remain usable on common A4 paper in portrait or landscape as appropriate.
 

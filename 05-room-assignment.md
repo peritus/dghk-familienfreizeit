@@ -19,7 +19,7 @@ it produces byte-identical output, on any machine, at any time, forever.
 
 This is not a coding-style preference. It is the property that makes re-runs
 safe, constraint health computable, regression testing a hash comparison, and
-publishing twice a non-event for the forty families who did not move.
+publishing twice a no-op for the forty families who did not move.
 
 Seven rules. Each has a way it actually gets broken.
 
@@ -69,7 +69,7 @@ plan. Default is no randomness at all.
 
 ### R4 — No `Date.now()`, no `new Date()` without an argument
 
-The event date arrives in the config. Age is `ageAt(birthdate, config.eventDate)`.
+The occasion date arrives in the config. Age is `ageAt(birthdate, config.eventDate)`.
 
 *How it breaks:* someone adds a "registered recently" tiebreak and reaches for
 the clock. The correct move is to use the `created_at` already in the solver input,
@@ -160,7 +160,7 @@ Blocked rooms likewise. The solver never sees data it must remember to ignore.
 
 **Preflight runs first**, before any placement, over the solver input alone. C1–C9
 per [labels and constraints](04-labels-and-constraints.md) §6. Error severity does not block computing a plan —
-an admin needs to see the plan to understand the error — but it blocks
+an organiser needs to see the plan to understand the error — but it blocks
 publishing without an explicit acknowledgement.
 
 Phase A is the judgement-heavy phase. Runs before any placement.
@@ -190,7 +190,7 @@ Nothing may persist a party key as a reference. Constraints reference people. Th
 exists only to correlate a party across the phases of a single run and to label
 rows in the trace.
 
-### A.1 Child groups, allocated first
+### A.1 Child groups, placed first
 
 This ordering is the single most important sequencing decision in the solver.
 
@@ -198,7 +198,7 @@ A child whose requested child group does not get a place must fall back to their
 family. If family parties are formed first, that fallback mutates a party's size
 after placement reasoning has begun, and determinism dies in the patching.
 
-So: **allocate children's-room places, then form family parties from the
+So: **place children's groups first, then form family parties from the
 residue.**
 
 ```
@@ -244,7 +244,7 @@ modeled separately through the generic person/room relationships.
 > Müller Jonas needs `childgroupA`; `K3` and `K7` were full. Returned to family
 > party. Müller party size 2 → 3.
 
-That second line is exactly what an admin needs when the family emails asking why
+That second line is exactly what an organiser needs when the family emails asking why
 Jonas is not with his friends.
 
 ### A.2 Family residue parties
@@ -278,15 +278,15 @@ the request to a soft preference, and warn loudly in the trace:
 
 > Refused merge of Müller (3) + Schmidt (3) + Weber (4): combined demand 10
 > exceeds largest room capacity 6. Treated as a preference; the solver will try
-> to place them adjacently. **Needs admin attention.**
+> to place them adjacently. **Needs organiser attention.**
 
 Without this guard the solver produces a party that no room can hold, reports it
-unplaced, and gives an admin no idea why.
+unplaced, and gives an organiser no idea why.
 
 Non-mutual relation tags, and mutual `preferred` ones, do not merge. They
 become the `room-with.oneSidedWeight` / `room-with.adjacentWeight` soft terms.
 
-### A.4 Admin constraints, applied last in event order
+### A.4 Organiser constraints, applied last in event order
 
 Custom `groups-with` and `separates-from` labels are applied in `event.seq` order
 after preference-derived formation. Later label clears and definitions determine
@@ -297,34 +297,34 @@ the active constraint set. Each emits provenance:
 > Bed demand 4 (1 infant does not occupy a bed).
 
 > `P12` size 2 — Weber (2 adults).
-> Separated by admin constraint (`e1340`): "Grandparents need ground floor."
+> Separated by organiser constraint (`e1340`): "Grandparents need ground floor."
 
 ### A.5 Output
 
 A sorted `Party[]`. Sort order: `bedDemand` desc, then first member's
-`family_id`, then `key`. Admins review this list on the party screen before
+`family_id`, then `key`. Organisers review this list on the party screen before
 looking at any room.
 
 Party requirements are derived as a strictest-strength union of member
 families' requirement tags ([labels and constraints](04-labels-and-constraints.md) §5.3), and party provenance
 names which member contributed each requirement — a merged party's `required`
-tag came from one specific family, and admins reviewing the party screen need
+tag came from one specific family, and organisers reviewing the party screen need
 to know which one.
 
 ---
 
 ## 4. Phases 0–4 — Placement
 
-### Phase 0 — Admin constraints as hard constraints
+### Phase 0 — Organiser constraints as hard constraints
 
-For each active required admin constraint, in event sequence then constraint-key
+For each active required organiser constraint, in event sequence then constraint-key
 order:
 
 1. Resolve the constraint's people to parties.
 2. **If the constraint's people span more than one party** → conflict. Skip it,
    record it in `plan.conflicts`, trace it. Do not attempt a partial placement.
    This happens when a constraint was created and then party formation changed
-   under it, and the admin needs to know rather than have it silently half-applied.
+   under it, and the organiser needs to know rather than have it silently half-applied.
 3. If the matching room has insufficient free places → conflict, skip, trace.
 4. Otherwise place the party, decrement the room's free places, mark the party
    placed.
@@ -353,7 +353,7 @@ The iteration cap guarantees termination. Placing one party can force another
 passes is a generous bound since each pass places at least one party or stops.
 
 Forced placements carry no score and need no justification. That is the point of
-separating them: they shorten the list of decisions an admin must actually read.
+separating them: they shorten the list of decisions an organiser must actually read.
 
 ### Phase 2 — Sorted greedy
 
@@ -417,7 +417,7 @@ For each still-unplaced party, evaluate every room and report:
 > Closest: Room 31 (5 places free, no ensuite). Relaxing the ensuite requirement
 > would place this party.
 
-That last sentence is the product. An admin reads it and either calls the family
+That last sentence is the product. An organiser reads it and either calls the family
 or adds a matching constraint for Room 31.
 
 ---
@@ -427,7 +427,7 @@ or adds a matching constraint for Room 31.
 A short table of named integer terms, living in config, stored with every plan.
 
 Geometry terms live on `Weights`. Every tag-specific term lives as a field on
-its own tag instead ([occasion profiles](16-event-profiles.md) §4):
+its own tag instead ([occasion profiles](16-occasion-profiles.md) §4):
 
 | Geometry term | Configured as |
 |---|---|
@@ -454,8 +454,8 @@ remaining places regardless of which tags are involved.
 
 Defaults shown. They are a starting point, not a truth; expect to tune them in
 the first week with `scripts/tune.ts` against an exported event log
-([occasion profiles](16-event-profiles.md) §4), and to record each change as a
-deployment of the occasion profile rather than an event.
+([occasion profiles](16-occasion-profiles.md) §4), and to record each change as a
+deployment of the occasion profile rather than a log event.
 
 Three notes explain why these particular terms carry the scale they do:
 
@@ -472,7 +472,7 @@ it rather than leave someone unplaced".
 **`sole-occupancy.penalty` is large and negative but not a hard rule.** That is
 the whole point of the three-value preference scale: `required` prunes,
 `preferred` costs 12 points. If the plan is tight, the solver will do it, and
-the trace will say so, and an admin can make a phone call.
+the trace will say so, and an organiser can make a phone call.
 
 Hard rules are *not* in this table. A requirement tag at `required` is not
 worth points; it prunes the room from consideration entirely. Anything in
@@ -575,7 +575,7 @@ A rendered greedy entry:
 > Runner-up: Room 09, score 11 (no ensuite, leaves 1 orphan bed).
 > Rejected: Room 22 — capacity (4 places, needs 5).
 
-Every number in that block traces to a named weight in a stored config. An admin
+Every number in that block traces to a named weight in a stored config. An organiser
 who disagrees can point at the term rather than at the outcome, which is a much
 more productive conversation and usually ends in a weight change rather than a
 constraint.
@@ -590,13 +590,13 @@ rediscovered.
 **Fragmentation from children's rooms.** A family of two whose only child opts
 into a children's room leaves a party of one. Several of these and the plan fills
 with single-person parties that waste beds. The `orphanBed` penalty helps, but
-the real fix is the party review screen: admins see the size-1 parties listed
+the real fix is the party review screen: organisers see the size-1 parties listed
 first and can merge them or talk to the families. Consider a dashboard warning at
 more than five size-1 parties.
 
 **Constraint conflicts after party changes.** A constraint created when Jonas was
 in his family's party may span parties once he moves to a children's room. Phase
-0 reports the conflict; it does not guess. Admins clear or revise the labels.
+0 reports the conflict; it does not guess. Organisers clear or revise the labels.
 
 **Merge cascades.** Mutual `must` requests are transitive through union-find:
 A↔B and B↔C produces one party of all three, even though A and C never asked for

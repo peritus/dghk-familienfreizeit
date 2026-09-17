@@ -21,15 +21,15 @@ The profile enables:
 - workshop audience and person-to-workshop leadership;
 - food preferences with one per-person diet value and optional allergy text;
 - materials contributed by families and linked to workshops;
-- admin board, attendee view, notifications, and constraint health.
+- organiser board, family view, notifications, and constraint health.
 
 Room adjacency is not selected for the first deployment. The generic extension
 point remains available.
 
 ## 2. Room inventory
 
-The event inventory contains 38 rooms and 162 beds. Prices below are per bed for
-both event days. `private` means sanitary facilities in the room or apartment;
+The occasion inventory contains 38 rooms and 162 beds. Prices below are per bed for
+both occasion days. `private` means sanitary facilities in the room or apartment;
 `shared-floor` means shared facilities on the floor; `remote-shared` means shared
 facilities in a neighbouring building.
 
@@ -87,16 +87,16 @@ from them:
 
 | Tag | Values or derivation | Use |
 |---|---|---|
-| `room_type` | `standard`, `apartment`, `bungalow`, `schlaffass` | Event vocabulary for accommodation type |
+| `room_type` | `standard`, `apartment`, `bungalow`, `schlaffass` | Occasion vocabulary for accommodation type |
 | `building` | `Haupthaus`, `Gartenhaus`, `Blockhaus`, or null | Location and grouping |
 | `floor` | `ground`, `1`, `2`, or null | Location; `ground` can derive `ground-floor` |
-| `sanitary` | `private`, `shared-floor`, `remote-shared` | Event vocabulary for sanitary arrangement |
+| `sanitary` | `private`, `shared-floor`, `remote-shared` | Occasion vocabulary for sanitary arrangement |
 | `price_per_bed_eur` | `88.50` or `103.00` | Price information; not a solver preference by default |
 | `bed_capacity` | derived from beds and apartment layouts | Atomic room capacity |
 | `sleeping_rooms` | `2` for rooms 35–37, otherwise `1` where applicable | Apartment layout |
 | `beds_per_sleeping_room` | `4` for rooms 35 and 37; `2` for room 36 | Preserves the source `2×4` / `2×2` structure |
 | `has_common_room` | `true` for rooms 35–37 | Apartment layout |
-| `suitable_for_two_families` | `true` for rooms 35–37 | Descriptive event fact, not an automatic placement rule |
+| `suitable_for_two_families` | `true` for rooms 35–37 | Descriptive occasion fact, not an automatic placement rule |
 
 Derived capabilities such as `private-sanitary`, `ground-floor`, and
 `multi-room-unit` are resolver projections, not additional authoritative room
@@ -107,7 +107,7 @@ At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
 103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
 not a booking or billing rule.
 
-## 3. Event vocabulary
+## 3. Occasion vocabulary
 
 The profile defines concrete property and relationship tags, including:
 
@@ -161,7 +161,7 @@ note.
 
 ## 4. Food preferences
 
-The generic `foodPreferences` module is enabled for this event. Its authoritative
+The generic `foodPreferences` module is enabled for this occasion. Its authoritative
 data is attached to each person, not to the family: every person has exactly one
 configured `diet` value, and may have one `allergies_text` value.
 
@@ -170,7 +170,7 @@ configured `diet` value, and may have one `allergies_text` value.
 | `diet` | person | `vegetarian`, `vegan`, `carnivore`, or `pesco-vegetarian` | exactly one |
 | `allergies_text` | person | free text, retained as entered | zero or one |
 
-`pesco-vegetarian` is an explicit event-configured vocabulary value. Diet is
+`pesco-vegetarian` is an explicit occasion-configured vocabulary value. Diet is
 mutually exclusive; a person cannot carry multiple diet values. Allergy text is
 independent of diet and preserves quantities and wording from the source data,
 for example `1 x Eier` or `2x Beifuß (sehr starke Allergie)`.
@@ -183,7 +183,7 @@ inventing person or family assignments.
 
 ## 5. Room policy
 
-The profile uses family residue parties, child-group allocation before party
+The profile uses family residue parties, child-group placement before party
 formation, strictest-strength requirement inheritance, mutual-required co-room
 merging, one-sided soft co-room preferences, keep-apart constraints, and
 deterministic greedy placement with bounded repair.
@@ -211,7 +211,7 @@ The profile does not require every children’s workshop to have a leader.
 
 ## 7. Materials
 
-The generic `materials` module is enabled for this event. Its configured
+The generic `materials` module is enabled for this occasion. Its configured
 categories and labels are:
 
 | Category | Meaning |
@@ -221,11 +221,11 @@ categories and labels are:
 | `material` | other equipment or workshop supplies |
 
 Families and workshops may request materials. Families and persons may commit
-to bringing them. Requests and commitments may be general event records or
+to bringing them. Requests and commitments may be general occasion records or
 linked to a workshop; a workshop-linked request may additionally identify the
 child it concerns.
 
-The event uses free-text quantities and descriptions, preserving entries such as
+The occasion uses free-text quantities and descriptions, preserving entries such as
 `2-3 Packs`, `5 Liter`, and `4x`. The generic `fulfills` relation explicitly
 connects commitments to requests; withdrawing a commitment leaves the request
 open for another contributor.
@@ -234,16 +234,16 @@ The occasion profile can represent examples such as snacks, apple juice, napkins
 reusable or disposable tableware, an espresso machine with its safety inspection
 note and accessories, and workshop-specific supplies such as paint or textile
 markers. The supplied examples do not contain a complete normalized family or
-person mapping, so they define event data shape rather than creating invented
+person mapping, so they define occasion data shape rather than creating invented
 assignments.
 
 ## 8. Profile metadata and copy
 
-The profile supplies the actual event name, date, preference deadline, locale,
-public description, attendee-facing labels, admin-facing labels, and email copy.
+The profile supplies the actual occasion name, date, preference deadline, locale,
+public description, family-facing labels, organisation-team-facing labels, and email copy.
 These values are occasion configuration and are included in the configuration hash.
 
-For this deployment, the event runs from `2027-04-30` through `2027-05-02`,
+For this deployment, the occasion runs from `2027-04-30` through `2027-05-02`,
 inclusive. The user-facing German dates are 30.04.2027 to 02.05.2027.
 
 ## 9. First-deployment boundary

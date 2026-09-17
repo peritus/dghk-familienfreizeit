@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers inspect invitation progress, filter missing information, and import
-families. Route: `/admin/families`. Governing spec: [admin interface](../09-admin-interface.md) §3.
+families. Route: `/organiser/families`. Governing spec: [organiser view](../09-organiser-view.md) §3.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

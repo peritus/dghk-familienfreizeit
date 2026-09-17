@@ -17,13 +17,13 @@ inadequate.
 
 Only these capabilities are in scope for the initial release:
 
-- Admin-managed inventory: buildings, rooms, beds, and room designations.
-- Magic-link authentication with a code-level admin allowlist.
+- Organiser-managed inventory: buildings, rooms, beds, and room designations.
+- Magic-link authentication with a code-level organiser allowlist.
 - Deterministic room assignment with a full human-readable explanation.
 - Deterministic workshop assignment with an explicit fairness objective.
-- Drag-and-drop admin board that writes constraints, not assignments.
+- Drag-and-drop organiser board that writes constraints, not assignments.
 - Deterministic plans identified by `input_seq`, and publication.
-- Custom, human-readable matching constraints that admins can add and clear.
+- Custom, human-readable matching constraints that organisers can add and clear.
 
 The milestones below are the unified implementation order. Work that supports
 the initial release is included in that release; work explicitly identified as
@@ -51,23 +51,23 @@ building on it.
 
 ---
 
-## M1 — Inventory and administrator access
+## M1 — Inventory and organiser access
 
-*Usable by an admin to enter data. Two days.*
+*Usable by an organiser to enter data. Two days.*
 
 - Event table, the `seq`-guarded append, fold skeleton
 - `BuildingAdded`, `RoomAdded`, `BedAdded`, `RoomDesignationChanged`
 - Place generation from `bed.sleeps`
-- `FamilyInvited`, `PersonAdded` fixtures for solver development; attendee-facing
+- `FamilyInvited`, `PersonAdded` fixtures for solver development; family-facing
   onboarding is deferred
 - KDL event-log fixtures are the canonical authored inputs for development and
   tests; the same parsed events seed D1 integration tests and local experiments
 - Generic labels in the fold and a minimal built-in tag vocabulary (capabilities plus
   `needs-ensuite`) so that M2 has something to solve against
-- Admin inventory screens — plain tables
-- Magic-link authentication, sessions, rate limits, and the code-level admin allowlist
+- Organiser inventory screens — plain tables
+- Magic-link authentication, sessions, rate limits, and the code-level organiser allowlist
 
-**Done when:** the real hostel's rooms and beds are entered and an administrator
+**Done when:** the real hostel's rooms and beds are entered and an organiser
 can sign in. Do this with real inventory data as early as possible; it will have
 surprises in it, and they should surface now rather than in M2.
 
@@ -75,7 +75,7 @@ surprises in it, and they should surface now rather than in M2.
 
 Throughout M1–M8, development may select `TextFileEventSource` instead of
 `D1EventSource` with an explicit development-only configuration. The source reads
-the KDL event-log fixtures and the admin application can inspect the resulting
+the KDL event-log fixtures and the organiser application can inspect the resulting
 derived world without requiring a populated D1 database. The same KDL loader is
 used by tests, so a scenario can move from a fixture to the UI without being
 translated into another data format.
@@ -113,18 +113,18 @@ day for that possibility.
 
 ---
 
-## M3 — Deferred attendee preferences and view
+## M3 — Deferred family preferences and view
 
 *Post-initial-release work. Two to three days.*
 
-- The attendee view: a renderer over `attendeeFacing` profile tags, not
+- The family view: a renderer over `familyFacing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
-  couples the portal to the profile by design
+  couples the family view to the profile by design
 - Save-on-change with a per-control confirmation and a visible failure state
 - Invitation and reminder emails
-- Admin chase list
+- Organiser chase list
 
-**Done when:** a family can use the portal to state preferences and see them in
+**Done when:** a family can use the family view to state preferences and see them in
 the event log.
 
 Send the real invitations only after this deferred milestone is delivered.
@@ -133,7 +133,7 @@ Send the real invitations only after this deferred milestone is delivered.
 
 ## M4 — Party review and the board
 
-*The admin tool becomes real. Three to four days.*
+*The organiser tool becomes real. Three to four days.*
 
 - Party review screen with provenance, merge and split
 - Board: room cards, room grouping, status glyphs
@@ -152,13 +152,13 @@ matching constraint.
 
 ## M5 — Plans and publication
 
-*Attendees get answers. Two days.*
+*Families get answers. Two days.*
 
 - Plans identified by `input_seq`
 - Publish flow: the publication event and the hash compare-and-swap
 - The published-plan view, derived from the plan selected by publication
 
-**Done when:** an administrator can publish a reviewed plan and reproduce
+**Done when:** an organiser can publish a reviewed plan and reproduce
 the same deterministic result from the plan identified by its `input_seq`.
 
 ---
@@ -187,7 +187,7 @@ post-initial enhancements.
 - Constraint fixture export and the CI corpus
 - Constraint usage and redundancy metrics
 
-**Done when:** an admin can inspect constraint health and regression-test the
+**Done when:** an organiser can inspect constraint health and regression-test the
 custom constraint corpus without a second override model.
 
 This is the milestone that pays off over the following weeks rather than
@@ -204,7 +204,7 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 - Copy review, German throughout the family surface
 - Accessibility pass: keyboard, contrast, focus, reduced motion
 - Deliverability testing against GMX, web.de, Gmail, Outlook
-- The pre-event runbook from [deployment](13-deployment.md) §9
+- The pre-occasion runbook from [deployment](13-deployment.md) §9
 
 ## Post-initial-release work
 
@@ -212,8 +212,8 @@ The following work remains in the detailed milestones as planning context, but
 is not part of the initial release: family import and self-service preference
 collection, food preferences and allergy notes, family-contributed materials,
 workshop-linked supplies, change emails, the constraint-health dashboard,
-multi-event tenancy, collaborative editing, arrival and departure logistics,
-transport, parking, payments, and mobile-first administration.
+multi-occasion tenancy, collaborative editing, arrival and departure logistics,
+transport, parking, payments, and mobile-first organisation.
 
 ---
 
@@ -234,9 +234,9 @@ no fixture will: rooms that are really two rooms, a bungalow with an outdoor
 bathroom, a tent that sleeps four but only comfortably three. The model should
 meet reality before it meets the solver.
 
-**Why administrator access lands in M1.** Every initial-release surface is an
-admin surface, so the magic-link flow and code-level allowlist belong with the
-inventory rather than as a stopgap. Attendee-facing authentication and preference
+**Why organiser access lands in M1.** Every initial-release surface is an
+organiser surface, so the magic-link flow and code-level allowlist belong with the
+inventory rather than as a stopgap. Family-facing authentication and preference
 collection remain deferred to M3.
 
 **Why publication before workshops.** Room assignment is the thing people are
@@ -249,7 +249,7 @@ workshops half-built alongside.
 
 If time runs short, in the order they should go:
 
-1. **The bed-level view.** Room-level assignment is enough; bed allocation within
+1. **The bed-level view.** Room-level assignment is enough; bed placement within
    a room can be a piece of paper taped to the door.
 2. **The plan diff.** Publish without it and email everyone rather than only the
    affected families. Worse, not broken.
@@ -276,7 +276,7 @@ to C8 alone, which carries most of the value.
 | The party model does not fit the real families | Medium | M2 is the checkpoint; budget a day to revise |
 | Families do not submit preferences | **High** | Chase list from M3; expect to phone people |
 | Inventory data is wrong (bed counts, ensuites) | **High** | Walk the building, or have someone who has |
-| The board is slower than a spreadsheet for the admin who knows the families | Medium | Keyboard path; multi-select; measure honestly |
+| The board is slower than a spreadsheet for the organiser who knows the families | Medium | Keyboard path; multi-select; measure honestly |
 | Capacity is genuinely insufficient | Low | The unplaced report names the binding constraint early |
 | Solver is chaotic — small input changes move many people | Low | The `movedCount` integration test catches it |
 | Scope creep into catering, transport, payments | **High** | The scope section in this roadmap; say no |
@@ -284,5 +284,5 @@ to C8 alone, which carries most of the value.
 
 The two highest-likelihood risks are both about data rather than software.
 Families may not fill in a future preference form, and the room inventory will be
-wrong. Plan admin time for the walk-through now; preference chasing belongs to
-the deferred family-portal work.
+wrong. Plan organiser time for the walk-through now; preference chasing belongs to
+the deferred family-view work.

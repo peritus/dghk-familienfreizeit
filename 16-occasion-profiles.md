@@ -1,4 +1,4 @@
-# 16 — Event profiles
+# 16 — Occasion profiles
 
 An occasion profile composes generic modules for one deployment. It is the
 authoritative source for that deployment's module selection, vocabulary, policy,
@@ -63,7 +63,7 @@ those labels. A profile may define:
 - references such as `member_of=fam_27`;
 - capabilities derived from properties, such as `indoor` or `ensuite`;
 - requirements, relations, descriptive notes, scopes, cardinality, aliases,
-  strengths, and attendee-facing controls.
+  strengths, and family-facing controls.
 
 The resolver operators remain generic and fixed. A profile maps its tags to those
 operators but cannot add executable runtime operators.
@@ -95,7 +95,7 @@ and locale-specific copy. A disabled module has no corresponding UI surface.
 
 One occasion profile and one database belong to one deployment. Supporting another
 occasion means composing another profile and deploying it separately; this design
-does not introduce runtime multi-event tenancy.
+does not introduce runtime multi-occasion tenancy.
 
 The profile is not an example configuration. It is the source of truth for the
 first deployed occasion, while this document defines the reusable profile contract.

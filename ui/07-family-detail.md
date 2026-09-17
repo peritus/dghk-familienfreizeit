@@ -2,9 +2,9 @@
 
 ## Audience, purpose, and route
 
-An organiser checks people, current attendee preferences, notes, and the full
-event history for one family. Route: `/admin/families/:id`. Governing spec:
-[admin interface](../09-admin-interface.md) §3 and [data model](../02-data-model.md).
+An organiser checks people, current family preferences, notes, and the full
+event history for one family. Route: `/organiser/families/:id`. Governing spec:
+[organiser view](../09-organiser-view.md) §3 and [data model](../02-data-model.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -24,7 +24,7 @@ event history for one family. Route: `/admin/families/:id`. Governing spec:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Separate attendee free text from admin-only notes. Loading, missing-family,
+Separate family free text from organiser-only notes. Loading, missing-family,
 and stale-log states explain what happened and offer retry. History is prose,
 not raw JSON, and is keyboard-readable in chronological order.
 

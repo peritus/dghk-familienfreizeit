@@ -11,11 +11,11 @@ every document that depends on it together.
 ## D1 — Cloudflare Workers Paid + D1
 
 *Chosen.* The whole application is one Worker with one SQLite-backed database, on
-the Workers Paid plan. At 150 attendees the event log is perhaps 3,000 rows. The
+the Workers Paid plan. At 150 families the event log is perhaps 3,000 rows. The
 interesting engineering is in the solver, not in scale.
 
-*Why Paid:* every request that shows domain state derives it (D2), and the attendee
-view and the admin dashboard run the solver to do so. The free tier allows 10 ms
+*Why Paid:* every request that shows domain state derives it (D2), and the family
+view and the organiser dashboard run the solver to do so. The free tier allows 10 ms
 of CPU per request, which a fold, a solve, and a trace will not reliably fit. The
 Paid plan's per-request allowance removes the question for about five dollars a
 month.
@@ -69,7 +69,7 @@ hash comparison. Reproducing a complaint is `solve(solverInputAt(input_seq))`.
 swaps.
 
 *Rejected alternative:* an ILP or CP-SAT solver. It would produce better plans by
-a few percent and would be completely unreviewable. An admin cannot look at a
+a few percent and would be completely unreviewable. An organiser cannot look at a
 simplex result and say "yes, that is fair". The explicit requirement here is
 human reviewability, and that requirement beats optimality at this scale.
 
@@ -78,38 +78,38 @@ human reviewability, and that requirement beats optimality at this scale.
 *Chosen.* Deciding who sleeps with whom happens before, and separately from,
 deciding which room they sleep in.
 
-*Why:* who-with-whom is the judgement call, and it is where admins need to
+*Why:* who-with-whom is the judgement call, and it is where organisers need to
 intervene. Fitting boxes onto shelves is mechanical. Splitting the phases means
-admins review a short list of parties with provenance rather than auditing 40
+organisers review a short list of parties with provenance rather than auditing 40
 room placements. Merge and split add constraints to the pending list (D15), so a
 party arrangement can be tried and discarded like a board move.
 
-## D6 — Admin decisions are constraints, not edits
+## D6 — Organiser decisions are constraints, not edits
 
-*Chosen.* Dragging a party on the board adds a matching constraint to the admin's
+*Chosen.* Dragging a party on the board adds a matching constraint to the organiser's
 pending events. Every screen re-derives with that constraint as an ordinary input,
-and applying appends it to the log, so stated preferences and admin decisions share
+and applying appends it to the log, so stated preferences and organiser decisions share
 one path.
 
 *Rejected alternative:* the board writes assignments directly. Then every
-re-run either destroys admin work or requires merge logic, and the solver stops
+re-run either destroys organiser work or requires merge logic, and the solver stops
 being the single writer of assignments.
 
 ## D7 — Constraints carry human-readable explanations
 
-*Chosen.* Admin-created constraints carry a label and explanation. The event log
-supplies author and timing, so no separate taxonomy of admin pins is needed.
+*Chosen.* Organiser-created constraints carry a label and explanation. The event log
+supplies author and timing, so no separate taxonomy of organiser pins is needed.
 
 *Why:* the value of recording intent is being able to explain and review the
 constraint. The resolver reports active, missing, contradictory, and redundant
 constraints directly.
 
-Admin judgement is represented directly by custom matching constraints rather
+Organiser judgement is represented directly by custom matching constraints rather
 than a separate override mechanism.
 
 ## D8 — React for every screen
 
-*Chosen.* One React application for the admin tool and the attendee view, built
+*Chosen.* One React application for the organiser tool and the family view, built
 from neobrutalism.dev components copied in through the shadcn CLI, over a small
 JSON API on the Worker.
 
@@ -134,8 +134,8 @@ route.
 components target React, and a compatibility layer is a second thing to debug in
 exactly the components chosen so that nobody has to debug them.
 
-*Consequence:* the attendee view requires JavaScript. The portal bundle excludes the
-admin screens and the solver, and saves on change with ordinary requests. See
+*Consequence:* the family view requires JavaScript. The family view bundle excludes the
+organiser screens and the solver, and saves on change with ordinary requests. See
 [frontend](12-frontend.md).
 
 ## D9 — Vite with the Cloudflare plugin
@@ -162,7 +162,7 @@ pairing before anything else is built on it ([roadmap](15-roadmap.md)).
 ## D10 — Hand-rolled magic link, no auth library
 
 *Chosen.* Roughly 120 lines using Web Crypto. Sessions and magic links store the
-verified email address, and every request resolves it — against the admin
+verified email address, and every request resolves it — against the organiser
 allowlist, or to a family in the derived world — so there is no user table beside
 the event log (D2).
 
@@ -177,7 +177,7 @@ exactly.
 
 ## D11 — Built-in rules live in code; custom matching keys live in the event log
 
-*Chosen.* Built-in solver mechanisms require a deploy. Admin-created matching
+*Chosen.* Built-in solver mechanisms require a deploy. Organiser-created matching
 keys use only the fixed generic resolver and are event-backed, so they need no
 dynamic evaluation or code deployment.
 
@@ -187,7 +187,7 @@ dynamic evaluation or code deployment.
 them is a deployment, not an event. Tuning happens offline: export the log, run
 `npm run tune`, and deploy the weights chosen ([deployment](13-deployment.md),
 weight tuning). `config_hash` makes every change visible in plan metadata
-([occasion profiles](16-event-profiles.md) §4–5).
+([occasion profiles](16-occasion-profiles.md) §4–5).
 
 ## D13 — Workshop rankings are structured labels
 
@@ -196,19 +196,19 @@ structured values carry the slot, the workshop, and the rank, validated by the
 `ordered-choice` resolver operator. There is no dedicated ranking event and no
 property table. Rationale in [labels and constraints](04-labels-and-constraints.md) §7.
 
-## D14 — `attendeeFacing` in the occasion profile drives the attendee view
+## D14 — `familyFacing` in the occasion profile drives the family view
 
 *Chosen.* The preferences page is a renderer: every tag that declares
-`attendeeFacing` in the active profile produces a control, in profile order. Adding a
-tag that reuses an existing control needs no portal code. See
-[attendee view](10-family-portal.md) §1.
+`familyFacing` in the active profile produces a control, in profile order. Adding a
+tag that reuses an existing control needs no family view code. See
+[family view](10-family-view.md) §1.
 
 ## D15 — Derivation is a named primitive, and the client may call it
 
 *Chosen.* `derive(events, config) → World` and `diff(World, World)` are the read
-side of the application. The admin application holds a list of pending events and
+side of the application. The organiser application holds a list of pending events and
 renders every screen from `derive(committed ++ pending)`, deriving locally as the
-admin works and appending only when they apply.
+organiser works and appending only when they apply.
 
 *Rejected alternative:* a sandbox mode on the board, where each drag
 posts a constraint, the server re-solves, and the board reconciles from the
@@ -220,12 +220,12 @@ same reason, so both run in a browser unchanged. Naming the primitive also means
 staleness, plan diffs, change emails, constraint redundancy, and the regression
 corpus need no machinery of their own — they are all the same two calls.
 
-*Consequence:* experiments stay out of the log. An admin who tries four
+*Consequence:* experiments stay out of the log. An organiser who tries four
 arrangements appends the events for the one they chose, so constraints in the log
 are decisions rather than sediment, and [constraint health](08-constraint-health.md)
 reasons only about constraints someone meant.
 
-*Cost:* the admin chunk carries the derivation core, and two runtimes execute one
+*Cost:* the organiser chunk carries the derivation core, and two runtimes execute one
 algorithm. The first is dependency-free TypeScript and is budgeted in
 [deployment](13-deployment.md) §1; the second is held by the cross-runtime agreement
 test in [testing](14-testing.md) §1.
@@ -233,9 +233,9 @@ test in [testing](14-testing.md) §1.
 ## D16 — Publication identifies a plan; it does not create another plan
 
 *Chosen.* `PlanPublished` identifies the plan derived from the events before the
-publication event. It carries the hash of what the admin reviewed. Every audience
+publication event. It carries the hash of what the organiser reviewed. Every audience
 derives the same kind of plan from the events visible to that audience: the working
-admin may include pending events, other admins use the log head, and attendees use
+organiser may include pending events, other organisers use the log head, and families use
 the events before the latest publication.
 
 *Rejected alternative:* store a second published-plan type alongside the ordinary
@@ -245,11 +245,11 @@ plan, so publication would have a separate result shape.
 `solver_version`, `config_hash`, and `output_hash` identify and verify the plan
 without introducing another vocabulary layer.
 
-*Consequence:* keeping unpublished work from attendees is a data path, not a rule.
-There is no filter to forget, because the Worker derives an attendee's view from the
+*Consequence:* keeping unpublished work from families is a data path, not a rule.
+There is no filter to forget, because the Worker derives a family's view from the
 events before the latest publication and cannot reach past them. What a family may
 see of *other* families within that plan is a filter, applied by the Worker before
-the view leaves it ([attendee view](10-family-portal.md) §2).
+the view leaves it ([family view](10-family-view.md) §2).
 
 ## D17 — KDL is the canonical development and test event-log format
 

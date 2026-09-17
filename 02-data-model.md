@@ -61,7 +61,7 @@ another request appended first, the batch collides, D1 rolls it back, and nothin
 is written. Every invariant checked against the derived world before the append
 holds after it.
 
-`actor` identifies the authenticated principal. Admin authorization comes from
+`actor` identifies the authenticated principal. Organiser authorization comes from
 the verified login identity and a code-level allowlist, not from a domain label.
 
 Operational data—sessions, magic links, rate limits, delivery receipts, and page
@@ -176,7 +176,7 @@ checks entity kinds, cardinality, ownership, and validity when it resolves them.
 
 ## 5. Constraint definitions
 
-Event-specific matching vocabulary is data in the event log and has a generic
+Occasion-specific matching vocabulary is data in the event log and has a generic
 derived shape:
 
 ```ts
@@ -257,7 +257,7 @@ CREATE TABLE email_log (
 );
 ```
 
-Every request resolves the session's address afresh: to an admin through the
+Every request resolves the session's address afresh: to an organiser through the
 allowlist, or to a family through the derived world. An address that no longer
 belongs to a family resolves to nothing, so there is no mapping table to keep in
 step with the log ([authentication](11-authentication.md) §3).

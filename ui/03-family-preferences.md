@@ -1,20 +1,20 @@
-# UI-03 — Attendee preferences
+# UI-03 — Family preferences
 
 ## Audience, purpose, and route
 
 An invited family records and revises its own people, room preferences, shared
 family requests, and workshop rankings. Route: `/family` before publication.
-Governing specs: [attendee view](../10-family-portal.md), [labels and
-constraints](../04-labels-and-constraints.md), and [event profiles](../16-event-profiles.md).
+Governing specs: [family view](../10-family-view.md), [labels and
+constraints](../04-labels-and-constraints.md), and [occasion profiles](../16-occasion-profiles.md).
 
 This is one scrolling page, not a wizard. Controls come from the active
-occasion profile's `attendeeFacing` entries.
+occasion profile's `familyFacing` entries.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Attendee view                                      Saved just now  Sign out│
+│ Family view                                      Saved just now  Sign out│
 │ Welcome, Morgan family                                                     │
-│ Your organisers will assign rooms. You can change these answers until 20 Sep│
+│ Your organisation team will assign rooms. You can change these answers until 20 Sep│
 ├──────────────────────────────────────────────────────────────────────────┤
 │ 1  PEOPLE                                                                  │
 │ Morgan Alex · adult · 38       Morgan Jamie · child · 9       [Edit people]│
@@ -33,7 +33,7 @@ occasion profile's `attendeeFacing` entries.
 │                                                                          │
 │ 5  ANYTHING ELSE?                                                          │
 │ [                                                                      ]   │
-│ Organisers can read this note.                                             │
+│ The organisation team can read this note.                                  │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -41,7 +41,7 @@ occasion profile's `attendeeFacing` entries.
 
 ```text
 ┌──────────────────────────────┐
-│ Attendee view       Saved ✓  │
+│ Family view       Saved ✓  │
 │ Welcome, Morgan family       │
 │                              │
 │ PEOPLE                         │

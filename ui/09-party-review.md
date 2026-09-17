@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers review derived sleeping parties before touching the board. Route:
-`/admin/parties`. Governing specs: [admin interface](../09-admin-interface.md) §4,
+`/organiser/parties`. Governing specs: [organiser view](../09-organiser-view.md) §4,
 [room assignment](../05-room-assignment.md), and decision [D5](../17-decisions.md#d5-party-formation-is-a-separate-reviewable-phase).
 
 ```text
@@ -23,7 +23,7 @@ Organisers review derived sleeping parties before touching the board. Route:
 
 Merge and split dialogs explain the resulting constraint and add it to the
 shared pending list. Refused merges name the capacity or constraint reason.
-Children's room allocation appears as a separate section before parties.
+Children's room assignment appears as a separate section before parties.
 
 The cards preserve provenance in reading order. Buttons have descriptive names;
 warnings are text plus glyph/border, and the pending count is announced after a

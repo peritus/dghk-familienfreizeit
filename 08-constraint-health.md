@@ -4,8 +4,8 @@ Constraint health is a generic diagnostic module. Its checks consume the active
 profile and selected modules; occasion-specific tags and policies determine which
 findings can occur.
 
-Admin judgement is expressed through the same event-backed constraint system as
-attendee preferences. There is no temporary override model separate from the
+Organiser judgement is expressed through the same event-backed constraint system as
+family preferences. There is no temporary override model separate from the
 matching vocabulary.
 
 ## 1. The premise
@@ -25,7 +25,7 @@ why through its definition and description.
 ## 2. Generic constraint definitions
 
 Generic constraint operators are implemented by the constraint module. An event
-profile binds its concrete tags to those operators. Admin-created definitions
+profile binds its concrete tags to those operators. Organiser-created definitions
 are stored as `ConstraintDefined` events. They are data only:
 
 ```ts
@@ -49,7 +49,7 @@ The fixed resolver supports:
 | `groups-with` | person groups-with person | party or workshop group |
 | `separates-from` | family separates-from family | keep apart |
 
-Admins cannot upload executable rules. New mechanisms belong in solver code and
+Organisers cannot upload executable rules. New mechanisms belong in solver code and
 the active profile; new facts and ordinary matching constraints do not.
 
 ## 3. Board and constraint lifecycle
@@ -64,7 +64,7 @@ spanning or unsatisfied constraint instead of applying it partially.
 
 ## 4. Constraint health
 
-The admin dashboard computes health from the current event-log state:
+The organiser dashboard computes health from the current event-log state:
 
 - required constraints with no provider;
 - contradictory constraints;

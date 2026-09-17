@@ -5,8 +5,8 @@
 ## Context
 
 `kkrzzvqs` ("plan Workers Paid") made D1 require Workers Paid. The reason: every
-server request that shows domain state runs `derive`, the attendee view and the
-admin apply run the solver, and fold + solve + trace won't reliably fit in 10 ms
+server request that shows domain state runs `derive`, the family view and the
+organiser apply run the solver, and fold + solve + trace won't reliably fit in 10 ms
 of CPU. The only alternative it considered was an in-isolate memo, and it turned
 that down because a cold isolate still has to solve from scratch.
 
@@ -26,12 +26,12 @@ a recommendation. The spec gets edited only after you approve.
 | `currentPrincipal` → `familyByEmail(worldAtHead)` (11 §4) | fold only | head | every append |
 | Family save (VALIDATE step 2) | fold (+ profile validation) | head | every append |
 | `GET /api/family/view` (10) | fold + **solve** | before latest `PlanPublished` | only on publish |
-| `POST /api/admin/apply`, publish (`output_hash` check) | fold + **solve** | new head | every admin apply |
-| `GET /api/admin/log` | no derive (raw events) | — | — |
-| Admin screens | derived **in the browser** (D15) | — | — |
+| `POST /api/organiser/apply`, publish (`output_hash` check) | fold + **solve** | new head | every organiser apply |
+| `GET /api/organiser/log` | no derive (raw events) | — | — |
+| Organiser screens | derived **in the browser** (D15) | — | — |
 
 The key point: the expensive step (solve) is only needed at the **publication cut**
-and on admin apply/publish. The per-append paths only need the fold, which the spec
+and on organiser apply/publish. The per-append paths only need the fold, which the spec
 already calls sub-millisecond.
 
 ## Why a cache here needs no invalidation
@@ -70,10 +70,10 @@ removed projection tables.
 3. **D1 revision is conditional on a measurement**, not an assumption:
    - Add an M0/M2 task: benchmark in `workerd` against
      `test/fixtures/event-logs/full-event.kdl`:
-     (a) fold at head, (b) cache-hit attendee view, (c) cold solve.
+     (a) fold at head, (b) cache-hit family view, (c) cold solve.
    - (a) and (b) within ~5 ms CPU → the free tier is viable for everything except a
      cold miss.
-   - A cold miss happens once per publish, and on admin apply for the `output_hash`
+   - A cold miss happens once per publish, and on organiser apply for the `output_hash`
      check. If (c) > 10 ms, D1 stays Paid and the cache is kept only for latency. If
      (c) fits, D1 becomes "Free tier + derive cache", with Paid as the documented
      fallback.

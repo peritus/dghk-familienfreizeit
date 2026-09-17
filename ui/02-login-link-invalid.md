@@ -2,7 +2,7 @@
 
 ## Audience, purpose, and route
 
-An attendee who followed an unusable link needs a calm recovery path. Route:
+A family who followed an unusable link needs a calm recovery path. Route:
 `/login/invalid`. Governing spec: [authentication](../11-authentication.md).
 
 ```text
@@ -15,7 +15,7 @@ An attendee who followed an unusable link needs a calm recovery path. Route:
 │                                     │
 │ [ Request a new login link ]        │
 │                                     │
-│ Need help? Contact the organisers.  │
+│ Need help? Contact the organisation team. │
 └─────────────────────────────────────┘
 ```
 

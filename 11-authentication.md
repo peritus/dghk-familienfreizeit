@@ -3,9 +3,9 @@
 The UI plans are [request login link](ui/01-login.md) and [invalid or expired
 link](ui/02-login-link-invalid.md).
 
-Magic link, no passwords, invite-only. One login per family. Admin access is a
+Magic link, no passwords, invite-only. One login per family. Organiser access is a
 code-level allowlist of verified email addresses, exposed through a separate
-admin URL and UI.
+organiser URL and UI.
 
 Roughly 120 lines of Web Crypto. That is a deliberate choice over a library, and
 it is only defensible if the rules in §3 are followed exactly.
@@ -23,7 +23,7 @@ exists inside the request handler.
 What remains after removing everything unused is one flow: prove control of an
 email address, get a session. That flow is well understood, is about 120 lines,
 and — importantly — is fully readable in one sitting by whoever maintains this
-after the event.
+after the occasion.
 
 **There is also a security argument.** Better Auth versions below 1.6.22 carry a
 pre-account-hijacking vulnerability on magic-link sign-in: an attacker registers
@@ -48,7 +48,7 @@ registration closed.
 ┌── request ──────────────────────────────────────────────────┐
 │ POST /api/login { email }                                   │
 │   rate-limit check                                          │
-│   resolve email: admin allowlist, or family in derive(log)  │
+│   resolve email: organiser allowlist, or family in derive(log)  │
 │   if found:                                                 │
 │     token = base64url(crypto.getRandomValues(32 bytes))     │
 │     INSERT magic_link (sha256(token), email, now+15min)     │
@@ -99,8 +99,8 @@ column: the lookup *is* the verification.
 
 ## 3. Non-negotiable rules
 
-Admin authorization is checked against the verified login email and allowlist on
-every admin request. The special URL is routing, not a credential; knowing it
+Organiser authorization is checked against the verified login email and allowlist on
+every organiser request. The special URL is routing, not a credential; knowing it
 never grants access.
 
 Follow all of these. Each has a failure mode that is
@@ -120,7 +120,7 @@ simple.
 
 **4 — `POST /api/login` responds identically whether or not the address exists.**
 Same status, same body, same timing envelope. This is an invite-only application
-for a private event; whether an address is on the guest list is not public
+for a private occasion; whether an address is on the guest list is not public
 information.
 
 **5 — Rate-limit by address and by IP.**
@@ -144,7 +144,7 @@ granting access on the next request. There is no session cleanup to forget.
 No tokens, no hashes, no session ids, not even `LoginSucceeded`. The event log is
 domain decisions; these are operational secrets with a deletion policy.
 
-**10 — Admin status is checked per request from the allowlist.**
+**10 — Organiser status is checked per request from the allowlist.**
 Not from the cookie, a JWT claim, or a family label. Changing the allowlist
 requires a deploy for now, and the lookup uses the verified session identity.
 
@@ -162,7 +162,7 @@ async function currentPrincipal(c: Context): Promise<Principal | null> {
   ).bind(await sha256(raw), nowIso()).first<{ email: string }>()
   if (!row) return null
 
-  if (isAllowlistedAdmin(row.email)) return { kind: 'admin', email: row.email }
+  if (isAllowlistedOrganiser(row.email)) return { kind: 'organiser', email: row.email }
   const family = familyByEmail(await worldAtHead(c.env.DB), row.email)
   return family ? { kind: 'family', email: row.email, family } : null
 }
@@ -172,19 +172,19 @@ Two middlewares, used as API route guards:
 
 ```ts
 const requireFamily = async (c, next) => { … }   // 401; the application shows the login screen
-const requireAdmin  = async (c, next) => { … }   // 404, not 403
+const requireOrganiser  = async (c, next) => { … }   // 404, not 403
 ```
 
-**Admin API routes return 404, not 403.** A logged-in non-admin family probing
-`/api/admin` should not learn that the routes exist. There is no legitimate reason a
+**Organiser API routes return 404, not 403.** A logged-in non-organiser family probing
+`/api/organiser` should not learn that the routes exist. There is no legitimate reason a
 family would land there, so there is no usability cost to the lie.
 
-The admin application's code is a static asset, like any frontend bundle, and
+The organiser application's code is a static asset, like any frontend bundle, and
 anyone can download it. It contains no data. Everything it shows arrives through
-`/api/admin/*`, which checks the allowlist on every request.
+`/api/organiser/*`, which checks the allowlist on every request.
 
 Sessions last 30 days for families — long enough to cover a six-week run-up with
-one login — and 7 days for admins, refreshed on use. Admins log in weekly anyway;
+one login — and 7 days for organisers, refreshed on use. Organisers log in weekly anyway;
 families should not have to log in twice.
 
 ---
@@ -204,7 +204,7 @@ Honest about what this defends against and what it does not.
 | Address enumeration | Uniform response on `/api/login` |
 | Login-endpoint abuse as a spam relay | Rate limits on address and IP |
 | Timing attacks on token comparison | No comparison exists; lookup is by hash |
-| Admin privilege escalation | Allowlist checked against the verified address per request |
+| Organiser privilege escalation | Allowlist checked against the verified address per request |
 | **Shared mailbox access** | **Not handled — see below** |
 | **Forwarded magic link within 15 minutes** | **Not handled — see below** |
 
@@ -222,20 +222,20 @@ that family's preferences, and see the names of people sharing their room. No
 payment data, no addresses, no phone numbers, no documents. The consequence of
 compromise is low, which is what justifies the simplicity everywhere else.
 
-**Admins are the higher-value target**, which is why admin sessions are shorter
-and why Cloudflare Access in front of `/admin` is recommended during the build
-(§6). Compromising an admin means access to the full attendee list.
+**Organisers are the higher-value target**, which is why organiser sessions are shorter
+and why Cloudflare Access in front of `/organiser` is recommended during the build
+(§6). Compromising an organiser means access to the full family list.
 
 ---
 
 ## 6. Cloudflare Access as defence in depth
 
 During development and the early run-up, put Cloudflare Access in front of
-`/admin/*` in addition to the application's own check. Free for small teams, adds
+`/organiser/*` in addition to the application's own check. Free for small teams, adds
 a second independent factor, and costs no application code.
 
 Remove it before handing the tool to a non-technical organiser if the extra login
-becomes friction — but only then, and only once the application's own admin path
+becomes friction — but only then, and only once the application's own organiser path
 has been exercised properly.
 
 The application check must work correctly with or without Access present. Access
