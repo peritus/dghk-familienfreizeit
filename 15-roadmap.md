@@ -11,7 +11,7 @@ and summarized in the final hardening milestone.
 
 ## M0 — Repository and runtime foundation
 
-Specification coverage: [D1](17-decisions.md#d1-cloudflare-workers-paid--d1),
+Specification coverage: [D1](17-decisions.md#d1--cloudflare-workers-paid--d1),
 [D8](17-decisions.md#d8-react-for-every-screen),
 [D9](17-decisions.md#d9-vite-with-the-cloudflare-plugin),
 [deployment](13-deployment.md) §§1, 8–9, and [frontend](12-frontend.md) §§1–3.
@@ -297,7 +297,7 @@ the repository test and operational gates.
 
 Specification coverage: [sleeping parties](deferred-ideas/sleeping-parties.md),
 [child rooms](deferred-ideas/child-rooms.md), [party review](deferred-ideas/party-review.md),
-and [D5](17-decisions.md#d5-sleeping-parties-and-child-rooms-are-deferred).
+and [D5](17-decisions.md#d5-sleeping-parties-and-child-rooms-are-outside-the-active-placement-model).
 
 - Add the sleeping-party and child-room modules together.
 - Add party residue, co-room merges, child groups, provenance, merge guards,

@@ -32,7 +32,7 @@
 | 20.9 | [Family preferences](20.9-family-preferences.md) | The profile-driven preferences page and control union |
 | 20.10 | [Change notifications](20.10-change-notifications.md) | Communication and change emails |
 
-Ideas that are not part of the specification are kept in
+Optional designs that are not part of the active specification are kept in
 
 [`deferred-ideas/`](deferred-ideas/), including sleeping parties, child rooms, the
 party-review screen, room adjacency, and caching proposals.
