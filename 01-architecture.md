@@ -31,7 +31,8 @@
 
 Everything flows in one direction. There is no path by which a family or an
 organiser writes an assignment. `derive` is the only producer of assignments, and its
-only inputs are a list of events and a config.
+only inputs are a list of events and a config. Organisers can add decisions as
+event-backed labels that guide derivation.
 
 ## Derivation is the read side
 
@@ -70,7 +71,7 @@ log. Every organiser screen — the board, party review, the dashboard, plan dif
 renders `derive(committed ++ pending)`.
 
 Usually `pending` is empty and every screen shows the same world the server has.
-When an organiser drags a party or splits one, the action appends a constraint to
+When an organiser drags a party or splits one, the action appends decision labels to
 `pending` and the application re-derives locally — no request, no approximation, the real solver over the real
 constraints. Applying flushes `pending` to the log in one append; discarding drops
 it. An empty pending list is not a special case, so there is no second code path
@@ -79,7 +80,8 @@ and no mode to be in.
 This is the difference between recording a decision and recording the search for
 one. An organiser who tries four arrangements before choosing appends the events for
 the arrangement they chose, and the log stays a record of judgement rather than of
-experiment.
+experiment. Applied organiser decisions, their optional notes, authors, and
+timestamps are visible to every organiser through the existing event history.
 
 **The trust boundary does not move.** A client never submits a world. It submits
 events, which the server validates, authorises, and appends exactly as it does for

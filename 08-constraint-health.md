@@ -4,39 +4,38 @@ Constraint health is a generic diagnostic module. Its checks consume the active
 profile and selected modules; occasion-specific tags and policies determine which
 findings can occur.
 
-Organiser judgement is expressed through the same event-backed constraint system as
-family preferences. There is no temporary override model separate from the
-matching vocabulary.
+Organiser decisions use the same event-backed label system as family preferences.
+There is no separate decision model. Decisions may use any fixed resolver
+mechanism, including needs/provides matching, exclusions, grouping, separation,
+and workshop constraints.
 
 ## 1. The premise
 
-When an organiser knows something the solver does not, they add a human-readable
-matching constraint. For example:
+When an organiser knows something the solver does not, they add a decision label
+with an optional note. For example:
 
 ```text
-per_42 needs    room-with-garden-view
-rm_07  provides room-with-garden-view
+fam_42 needs    naehe_zum_eingang
+rm_07  provides naehe_zum_eingang
 ```
 
 The resolver joins the labels and the solver treats the result as a normal
 required or preferred constraint. The event log records who added it, when, and
-why through its definition and description.
+the optional note.
 
 ## 2. Generic constraint definitions
 
-Generic constraint operators are implemented by the constraint module. An event
-profile binds its concrete tags to those operators. Organiser-created definitions
-are stored as `ConstraintDefined` events. They are data only:
+Generic constraint operators are implemented by the constraint module. An occasion
+profile binds its concrete tags to those operators. Organiser decisions use
+`LabelSet` events and are data only:
 
 ```ts
 {
-  key: 'room-with-garden-view',
-  label: 'Zimmer mit Gartenblick',
-  description: 'Requested by the organiser for this family.',
-  operator: 'needs-provides',
-  needsScopes: ['person', 'family'],
-  providesScopes: ['space'],
-  strength: 'required'
+  entity_id: 'fam_42',
+  key: 'needs',
+  value: 'naehe_zum_eingang',
+  strength: 'required',
+  note: 'Nähe zum barrierefreien Eingang.'
 }
 ```
 
@@ -54,13 +53,14 @@ the active profile; new facts and ordinary matching constraints do not.
 
 ## 3. Board and constraint lifecycle
 
-Dragging a party to a room creates a custom definition when necessary and applies
-it with `LabelSet`. Clearing it emits `LabelCleared`. There is no separate undo
-stack, override table, reason taxonomy, or retirement event.
+Dragging a party to a room, excluding a room, grouping people, or guiding workshop
+participation creates one or more `LabelSet` events. Clearing them emits
+`LabelCleared`. There is no separate undo stack, decision table, decision metadata
+model, or retirement event.
 
-Constraints reference stable people, families, workshops, and spaces. They never
-reference derived party keys. If party formation changes, the resolver reports a
-spanning or unsatisfied constraint instead of applying it partially.
+Decision labels reference stable people, families, workshops, and spaces. They
+never reference derived party keys. If party formation changes, the resolver
+reports a spanning or unsatisfied decision instead of applying it partially.
 
 ## 4. Constraint health
 
@@ -94,11 +94,9 @@ Fixtures for constraints that have been cleared remain useful regression cases:
 - active constraints are informational and expose the current backlog;
 - a changed constraint or solver result produces a readable plan diff.
 
-This retains the useful learning loop without requiring a second domain model.
-
 ## 6. What this costs
 
 The resolver needs typed definitions, scope validation, cardinality checks, and
 good diagnostics. In exchange, the system removes a pin table, five event
-shapes, party override events, a reason-code workflow, retirement machinery, and
-the promotion path from pin to tag.
+shapes, a reason-code workflow, retirement machinery, and a second assignment
+model.

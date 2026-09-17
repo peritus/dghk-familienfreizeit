@@ -232,9 +232,12 @@ And per slot, a summary:
 
 ## 6. Workshop constraints
 
-The same generic constraint resolver is used for workshop matching. A custom
-`needs-provides` or `groups-with` label is visible in the trace and can be
-cleared by an organiser; there is no separate pin lifecycle.
+The same generic constraint resolver is used for workshop matching. Organiser
+decisions may use `needs`, `provides`, `excludes`, `groups-with`,
+`separates-from`, and other fixed workshop resolver mechanisms. The labels and
+their optional notes are visible to every organiser in the event history and
+trace, and can be cleared by an organiser; there is no separate decision
+lifecycle.
 
 Common real cases and where they belong:
 

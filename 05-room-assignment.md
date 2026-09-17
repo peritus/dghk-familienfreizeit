@@ -286,11 +286,12 @@ unplaced, and gives an organiser no idea why.
 Non-mutual relation tags, and mutual `preferred` ones, do not merge. They
 become the `room-with.oneSidedWeight` / `room-with.adjacentWeight` soft terms.
 
-### A.4 Organiser constraints, applied last in event order
+### A.4 Organiser decisions, applied last in event order
 
-Custom `groups-with` and `separates-from` labels are applied in `event.seq` order
-after preference-derived formation. Later label clears and definitions determine
-the active constraint set. Each emits provenance:
+Organiser decision labels, including `groups-with`, `separates-from`, `needs`,
+`provides`, and `excludes`, are applied in `event.seq` order after
+preference-derived formation. Later label clears determine the active constraint
+set. Each emits provenance:
 
 > `P07` size 5 — Müller (2 adults) + Schmidt (2 adults, 1 infant).
 > Merged: mutual co-room request `e1183` / `e1201`.
@@ -315,10 +316,9 @@ to know which one.
 
 ## 4. Phases 0–4 — Placement
 
-### Phase 0 — Organiser constraints as hard constraints
+### Phase 0 — Required organiser decisions as hard constraints
 
-For each active required organiser constraint, in event sequence then constraint-key
-order:
+For each active required organiser decision, in event sequence then label-key order:
 
 1. Resolve the constraint's people to parties.
 2. **If the constraint's people span more than one party** → conflict. Skip it,
@@ -594,7 +594,7 @@ the real fix is the party review screen: organisers see the size-1 parties liste
 first and can merge them or talk to the families. Consider a dashboard warning at
 more than five size-1 parties.
 
-**Constraint conflicts after party changes.** A constraint created when Jonas was
+**Constraint conflicts after party changes.** An organiser decision created when Jonas was
 in his family's party may span parties once he moves to a children's room. Phase
 0 reports the conflict; it does not guess. Organisers clear or revise the labels.
 
