@@ -142,8 +142,10 @@ function OrganiserApp() {
 }
 ```
 
-Every screen receives `world` and `dispatch`. Actions append a pending event, pop
-one for undo, clear the list for discard, or apply. There is no state manager and no
+Every screen receives `world` and `dispatch`. Actions append one or more pending
+events, remove the last action's events together for undo, clear the list for
+discard, or apply. Action boundaries are local UI bookkeeping; only the ordinary
+event list is sent to `derive` and append. There is no state manager and no
 data-fetching library: the organiser application makes three kinds of request — load
 the log, apply pending events, and trigger emails.
 

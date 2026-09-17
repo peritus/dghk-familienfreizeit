@@ -32,7 +32,7 @@ experimentation.
 | UI-10 | [Assignment board](10-assignment-board.md) | `/organiser/board` |
 | UI-11 | [Plans and publishing](11-plans-and-publishing.md) | `/organiser/plans` |
 | UI-12 | [Workshops](12-workshops.md) | `/organiser/workshops` |
-| UI-13 | [Constraints](13-constraints.md) | `/organiser/constraints` |
+| UI-13 | [Organiser decisions](13-constraints.md) | `/organiser/constraints` |
 
 ## Screen-spec format
 

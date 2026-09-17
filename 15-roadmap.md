@@ -23,7 +23,8 @@ Only these capabilities are in scope for the initial release:
 - Deterministic workshop assignment with an explicit fairness objective.
 - Drag-and-drop organiser board that writes constraints, not assignments.
 - Deterministic plans identified by `input_seq`, and publication.
-- Custom, human-readable matching constraints that organisers can add and clear.
+- Organiser decision labels across fixed resolver mechanisms, with free-form
+  matching values and one optional note, which organisers can add and clear.
 
 The milestones below are the unified implementation order. Work that supports
 the initial release is included in that release; work explicitly identified as
@@ -73,7 +74,7 @@ surprises in it, and they should surface now rather than in M2.
 
 ### Development event-log sandbox
 
-Throughout M1–M8, development may select `TextFileEventSource` instead of
+Throughout M1–M7, development may select `TextFileEventSource` instead of
 `D1EventSource` with an explicit development-only configuration. The source reads
 the KDL event-log fixtures and the organiser application can inspect the resulting
 derived world without requiring a populated D1 database. The same KDL loader is
@@ -87,10 +88,11 @@ translated into another data format.
 *The riskiest milestone. Do it third, not last. Three to four days.*
 
 - `solver-input.ts` with the freeze-and-sort discipline
-- Preflight, C1–C9
-- The two generic handlers, `tagRequirements` and `tagPreferences`, replacing
-  eight rule files — the generic handlers keep the implementation small
-- Party formation: children's rooms first, residue, merges, the unplaceable-merge
+- Preflight: kernel checks and the room modules' checks
+- The module contract, `defineOccasionProfile`, and the room modules
+  ([modules](20-modules.md)); the two generic tag rules, `hard.tag-requirements` and
+  `soft.tag-preferences`, keep the implementation small
+- Party formation: families, merges, the unplaceable-merge
   guard
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
@@ -104,7 +106,8 @@ translated into another data format.
 **Done when:** you can derive a plan from the real inventory and real families
 (with preferences entered by hand as events) and read the trace top to
 bottom without confusion, and you can say whether the ensuite requests are
-satisfiable — preflight C8.
+satisfiable — requirement arithmetic
+([room assignment](20.3-room-assignment.md) §9).
 
 **This is the checkpoint.** If party formation does not express the real
 situation — if the families' actual arrangements do not fit the party model —
@@ -117,7 +120,7 @@ day for that possibility.
 
 *Post-initial-release work. Two to three days.*
 
-- The family view: a renderer over `familyFacing` profile tags, not
+- The family view: a renderer over `family_facing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
   couples the family view to the profile by design
 - Save-on-change with a per-control confirmation and a visible failure state
@@ -139,14 +142,15 @@ Send the real invitations only after this deferred milestone is delivered.
 - Board: room cards, room grouping, status glyphs
 - Board interaction: pragmatic-drag-and-drop, multi-select, keyboard
 - The pending list, deriving locally on every action; apply and discard
-- Organiser decision labels and `needs/provides` label application
-- Undo by popping a pending event
+- Organiser decisions through needs/provides, exclusions, grouping, and separation;
+  show optional notes with the existing event author and timestamp
+- Undo by removing the last action's pending events together
 - Apply-time compare-and-swap with 409 re-derivation
 - The cross-runtime agreement test, before the board is trusted
 
 **Done when:** an organiser who has not seen the code can rearrange a plan and
 understand what happened each time, and can add and clear a human-readable
-matching constraint.
+decision label without defining new vocabulary or supplying a separate name.
 
 ---
 
@@ -169,7 +173,7 @@ the same deterministic result from the plan identified by its `input_seq`.
 
 - Slots and workshops in inventory
 - The workshop solver with the fairness ledger
-- Workshop constraints
+- Workshop decision labels through all applicable fixed resolver mechanisms
 
 The solver and its fairness objective are initial-release work. Family ranking
 UI, co-assignment groups, cancellation handling, and the preference heatmap are
@@ -177,25 +181,7 @@ post-initial enhancements.
 
 ---
 
-## M7 — Deferred constraint health
-
-*Post-initial-release work. One to two days.*
-
-- Retirement loop with the redundant / near / load-bearing buckets
-- The dashboard panel, batch retirement
-- Constraint health screen with missing-provider and contradiction findings
-- Constraint fixture export and the CI corpus
-- Constraint usage and redundancy metrics
-
-**Done when:** an organiser can inspect constraint health and regression-test the
-organiser decision label corpus without a second assignment model.
-
-This is the milestone that pays off over the following weeks rather than
-immediately, which is exactly why it gets cut under pressure. Do it before M8.
-
----
-
-## M8 — Hardening
+## M7 — Hardening
 
 *Continuous, through the run-up.*
 
@@ -210,7 +196,7 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 The following work remains in the detailed milestones as planning context, but
 is not part of the initial release: family import and self-service preference
 collection, food preferences and allergy notes, family-contributed materials,
-workshop-linked supplies, change emails, the constraint-health dashboard,
+workshop-linked supplies, change emails,
 multi-occasion tenancy, collaborative editing, arrival and departure logistics,
 transport, parking, payments, and mobile-first organisation.
 
@@ -221,7 +207,7 @@ transport, parking, payments, and mobile-first organisation.
 **Why derivation lands with the solver.** Every read already goes through the
 fold, so making `derive` the solver's entry point costs almost nothing now and is an
 awkward retrofit afterwards, and everything from M4 onward — the board's pending list, publication,
-and constraint health — is a call on it.
+and change emails — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
 wrong in a way that invalidates other work. A board built on a party model that
@@ -254,8 +240,6 @@ If time runs short, in the order they should go:
    affected families. Worse, not broken.
 3. **Multi-select on the board.** Drag one party at a time. Slower, still better
    than a spreadsheet.
-4. **Constraint-health dashboard.** Keep the underlying organiser decision
-   lifecycle and explanations; defer the reporting surface.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint
 definitions, the workshop solver and fairness objective, or the profile. Each
@@ -264,7 +248,7 @@ something else. A solver without a trace is a black box
 nobody will trust; unexplained constraints are permanent sediment. The profile
 is **not cuttable** — it consolidates the matching model and occasion vocabulary, so
 removing it is a larger change than keeping it. Preflight **is** cuttable down
-to C8 alone, which carries most of the value.
+to requirement arithmetic alone, which carries most of the value.
 
 ---
 
@@ -279,7 +263,7 @@ to C8 alone, which carries most of the value.
 | Capacity is genuinely insufficient | Low | The unplaced report names the binding constraint early |
 | Solver is chaotic — small input changes move many people | Low | The `movedCount` integration test catches it |
 | Scope creep into catering, transport, payments | **High** | The scope section in this roadmap; say no |
-| Profile vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; C7 makes removals visible; a rename costs nothing |
+| Profile vocabulary settles badly and needs churn mid-run-up | Medium | `aliases` from day one; `kernel.unknown-tag` makes removals visible; a rename costs nothing |
 
 The two highest-likelihood risks are both about data rather than software.
 Families may not fill in a future preference form, and the room inventory will be

@@ -21,11 +21,12 @@ Organisers make room-placement decisions and review consequences. Route:
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a party to a room appends an organiser decision label, re-derives locally, and shows
+Dragging a party to a room appends one or more organiser decision label events, re-derives locally, and shows
 any cascade. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
 picker and consequence summary. Apply confirms the pending batch; Discard
-requires confirmation.
+requires confirmation. Undo removes all pending events belonging to the last action
+together. An optional note belongs to the label, not to a separate decision record.
 
 ## Narrow fallback
 

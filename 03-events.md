@@ -4,10 +4,14 @@ This document defines the generic event envelope and lifecycle. Occasion profile
 may contribute event types through selected modules, but the append, replay,
 validation, and fold rules are shared by every deployment.
 
-The complete write vocabulary. Adding an event type means adding to this file, to
-`src/events/types.ts`, and to the fold. Nothing else.
+This file lists the kernel write vocabulary. Modules contribute further event types,
+each specified in its module document and registered by `defineModule`
+([modules](20-modules.md) §3.1). Adding a kernel event type means adding to this file,
+to `src/events/types.ts`, and to the fold; adding a module event type means adding to
+the module specification and the module's `events.ts`. Nothing else.
 
-Semantic setup events (`FamilyInvited`, `PersonAdded`, `RoomAdded`, and so on)
+Semantic setup events (`FamilyInvited`, `PersonAdded`, module events such as
+`RoomAdded`)
 are convenient command vocabulary. Their complete payloads are folded into
 one typed entity identity and generic labels. Constraints and intrinsic facts
 then use the same
@@ -37,7 +41,7 @@ properties are the payload fields.
 
 ```kdl
 FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
-PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role="adult" does_not_need_a_bed=#false needs_accessible=#false
+PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role=adult
 ```
 
 The project accepts a restricted KDL profile: one event node per line, no
@@ -83,9 +87,10 @@ discover the problem in the solver.
 
 Setup event payloads are complete command inputs, not a second data model. The
 fold creates the typed entity identity and emits the payload's mutable
-values as labels. For example, `PersonAdded.role`, `birthdate`, and
-`does_not_need_a_bed` become labels on the new person; `RoomAdded.kind`, `floor`, and
-capacity-related values do the same for the room. Occasion-specific config defines
+values as labels, under the kebab-case form of the field name (D18). For example,
+`PersonAdded.given_name` and `birthdate` become the labels `given-name` and
+`birthdate` on the new person, and `RoomAdded.room_type` becomes `room-type` on the
+room. Occasion-specific config defines
 which labels are legal and how the resolver uses them.
 
 ---
@@ -123,16 +128,17 @@ so its sessions lose access without a cleanup step
   person_id: string, family_id: string,
   given_name: string, family_name: string,
   birthdate: string | null,
-  role: 'adult' | 'child' | 'infant',
-  does_not_need_a_bed: boolean,
-  needs_accessible: boolean
+  role: string                  // values are validated by the active profile
 }
 ```
-Emitted by the family or by an allowlisted organiser.
+Emitted by the family or by an allowlisted organiser. Folds to `member-of`,
+`given-name`, `family-name`, `birthdate`, and `role`. Everything else about a person —
+bed demand, accessibility, diet — is an ordinary label set by the module or profile
+tag that owns it.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
-registered as an adult by their family and that is their call. The solver uses
-`role` for role-based rules; it does not turn role into a bed exception.
+registered as an adult by their family and that is their call. Modules use `role`
+for role-based rules; no module turns role into a bed exception.
 
 ### `PersonUpdated`
 ```ts
@@ -147,99 +153,65 @@ Excludes the person from newly derived plans. Historical plans keep them.
 
 ---
 
-## Inventory
+## Module events
 
-### `BuildingAdded` / `BuildingUpdated`
-```ts
-{ building_id: string, name: string, sort_key: number }
-```
+Selected modules contribute these event types. Their payloads, invariants, and
+authorisation are specified in the module documents.
 
-### `RoomAdded`
-```ts
-{
-  room_id: string, building_id: string, number: string,
-  floor: number | null,
-  kind: string,                 // values are validated by the active profile
-  is_accessible: boolean,
-  sort_key: number
-}
-```
+| Module | Event types |
+|---|---|
+| [room inventory](20.1-room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `RoomAdded`, `RoomUpdated`, `RoomDesignationChanged`, `BedAdded`, `BedUpdated`, `BedRemoved` |
+| [workshops](20.4-workshops.md) §5 | `SlotAdded`, `SlotUpdated`, `WorkshopAdded`, `WorkshopUpdated`, `WorkshopCancelled`, `WorkshopReinstated` |
+| [materials](20.8-materials.md) §5 | `MaterialRequested`, `MaterialRequestUpdated`, `MaterialRequestCancelled`, `MaterialCommitted`, `MaterialCommitmentUpdated`, `MaterialCommitmentWithdrawn`, `MaterialFulfilmentAdded`, `MaterialFulfilmentRemoved` |
 
-### `RoomUpdated`
-Full restatement of the above.
-
-### `RoomDesignationChanged`
-```ts
-{
-  room_id: string,
-  designation: 'general' | 'child' | 'staff' | 'blocked',
-  reason: string | null
-}
-```
-`reason` is required when the designation is `blocked`. This is the event that
-records a blocked-space fact. Any compensating constraints remain visible in the
-event history and may be cleared explicitly.
-
-*Invariant:* `designation = 'blocked'` requires a reason. A child room's eligible
-children are determined by explicit child-group labels, not an age band.
-
-### `BedAdded` / `BedUpdated` / `BedRemoved`
-```ts
-{ bed_id: string, room_id: string, label: string,
-  kind: string,                // values are validated by the active profile
-  sleeps: 1 | 2, sort_key: number }
-```
-Places are *generated* by the fold from `sleeps`, never by an event. Place
-ids are deterministic: `plc_${bed_id_suffix}_${idx}`. This matters because
-constraints may target a Place, and a Place id must survive re-derivation.
-
-### `RoomAdjacencySet`
-```ts
-{ room_a: string, room_b: string, distance: 1 | 2 | 3 }
-```
-Organiser-supplied adjacency decision. Both directions are derived by the fold
-from one event.
+Workshop rankings, food preferences, and organiser decisions add no event types;
+they are `LabelSet` and `LabelCleared` events.
 
 ---
 
 ## Labels and constraints
 
-Families may set labels only on themselves or their own people. An allowlisted
-organiser may set any domain label. The resolver validates both built-in labels and
-custom matching definitions before append.
+Families may set labels only on themselves or their own people, through permitted
+family-facing controls. Organisers may set labels through fixed resolver mechanisms,
+profile tags, and declared custom vocabulary. Kernel and module keys reserved for
+setup events remain protected. The resolver validates scopes, values, strengths,
+and references before append ([labels and constraints](04-labels-and-constraints.md) §4).
 
 ### `LabelSet`
 ```ts
 {
   entity_id: string
   key: string
-  value: string
+  value: Json               // canonical scalar or structured resolver value
   strength: 'required' | 'preferred' | null
   note: string | null       // optional organiser context; ignored by the solver
 }
 ```
 
 This is the one event for intrinsic facts, preferences, capabilities, and organiser
-decisions. Values may be scalar facts, free-form matching tokens, or stable entity
-ids. For example:
+decisions. Values may be scalar facts, free-form matching tokens, stable entity
+ids, or structured values such as workshop rankings. For example:
 
 ```ts
 { entity_id: 'fam_42', key: 'needs', value: 'naehe_zum_eingang', strength: 'required', note: 'Nähe zum barrierefreien Eingang.' }
 { entity_id: 'rm_07', key: 'provides', value: 'naehe_zum_eingang', strength: null, note: null }
 ```
 
+Omitting the optional note is equivalent to `note: null`, including when replaying
+events and loading fixtures. Family-facing controls cannot set organiser notes.
+
 Organiser decision labels may use every existing fixed resolver mechanism, including
 `needs`, `provides`, `excludes`, grouping, separation, workshop eligibility, and
 workshop co-assignment. The resolver interprets the value according to that
-mechanism; the note is context for organisers and never changes derivation.
+mechanism; the note is context for organisers and never changes the derived plan.
 
 ### `LabelCleared`
 ```ts
-{ entity_id: string, key: string, value: string | null }
+{ entity_id: string, key: string, value: Json | null }
 ```
 
-`value: null` clears every current value for the key. The original label event
-remains in the log.
+`value: null` clears every current value for the key; otherwise the canonical value
+identifies the application to clear. The original label event remains in the log.
 
 ### `ConstraintDefined`
 ```ts
@@ -258,45 +230,18 @@ Defines a custom matching vocabulary where a profile needs a declared value shap
 It contains no executable code; the fixed resolver implements the operators.
 Organiser decisions using the built-in mechanisms do not need a custom definition.
 
-Workshop rankings are `LabelSet` and `LabelCleared` events on `prefers-workshop`
-with structured values (D13); see [labels and constraints](04-labels-and-constraints.md) §7.
-
----
-
-## Workshops
-
-### `SlotAdded` / `SlotUpdated`
-```ts
-{ slot_id: string, label: string, starts_at: string, ends_at: string, sort_key: number }
-```
-
-### `WorkshopAdded` / `WorkshopUpdated`
-```ts
-{
-  workshop_id: string, slot_id: string, title: string, description: string | null,
-  capacity: number, min_capacity: number,
-  min_age: number | null, max_age: number | null,
-  room_id: string | null, sort_key: number
-}
-```
-
-### `WorkshopCancelled`
-```ts
-{ workshop_id: string, reason: string }
-```
-Manual cancellation by an organiser. Distinct from automatic under-subscription
-cancellation, which the solver performs internally and reports in the trace —
-that is not an event, because it is a *derivation* and would re-derive itself on
-the next run anyway.
+Workshop rankings are `LabelSet` and `LabelCleared` events with structured values
+(D13); see [workshop rankings](20.5-workshop-rankings.md).
 
 ---
 
 ## Organiser decisions
 
 Organiser judgement uses the same label mechanism as family preferences. A board
-drag or other organiser action creates pending decision labels; clearing a label is
-the undo operation. Organiser decisions are ordinary event-log inputs and the solver
-derives the resulting assignment.
+drag or other organiser action creates one or more pending label events. Undo
+removes that action's events from the local pending list; after application,
+clearing a label appends `LabelCleared`. Organiser decisions are ordinary event-log
+inputs and the solver derives the resulting assignment.
 
 ### Shared organiser context
 
@@ -311,7 +256,7 @@ remain local to the organiser's browser until applied.
 ### `PlanPublished`
 ```ts
 {
-  solver_version: string, config_hash: string, output_hash: string,
+  code_revision: string, config_hash: string, output_hash: string,
   notify: boolean, note: string | null
 }
 ```

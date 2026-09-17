@@ -128,9 +128,9 @@ type SolverInput = Readonly<{
   input_seq: number
   families: readonly SolverFamily[]      // sort: sort_key, id
   persons: readonly SolverPerson[]       // sort: family_id, sort_key, id
-  labels: readonly Label[]               // sort: entity_id, key, value
+  labels: readonly SolverLabel[]         // Label without note; sort: entity_id, key, canonical value
   capabilities: ReadonlyMap<EntityId, ReadonlySet<string>>
-  constraints: readonly Constraint[]     // sort: defined_seq, key
+  constraints: readonly Constraint[]     // sort: source event seq, entity_id, key, canonical value
 }> & ModuleSolverInputs                  // arrays contributed by selected modules
 ```
 
@@ -138,6 +138,20 @@ type SolverInput = Readonly<{
 labels and profile derivations ([labels and constraints](04-labels-and-constraints.md) §3).
 Each selected module adds its own arrays with a declared sort key; for example
 [room inventory](20.1-room-inventory.md) §7 adds `buildings`, `rooms`, and `places`.
+
+`SolverLabel` omits the display-only note from the derived `Label` shape. Free-form
+organiser values resolve through the same fixed mechanisms as profile vocabulary;
+they do not require a custom definition or a `defined_seq`. Source label references
+and event sequences provide deterministic ordering and diagnostic attribution.
+Notes and event author/timestamp remain available in the organiser world, but do
+not affect assignment, scoring, or the plan hash.
+
+Every selected stage consumes the resolver's applicable decisions: positive
+requirements, exclusions, grouping, separation, and workshop constraints. Required
+decisions constrain every placement path, including forced placement, repair, and
+cancellation restart. A decision that cannot be honoured is reported with its
+source labels; it is never silently bypassed. Preferred decisions retain the
+mechanism's configured soft behavior, and do not become forced placements.
 
 Withdrawn people are excluded when the solver input is built, not filtered later, and
 each module excludes what its specification says it excludes, such as blocked rooms.

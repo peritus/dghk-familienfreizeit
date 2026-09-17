@@ -138,7 +138,7 @@ type Label = {
   value: Json               // canonical JSON scalar or object
   value_type: string
   strength: 'required' | 'preferred' | null
-  note: string | null       // optional organiser context; ignored by derivation
+  note: string | null       // optional organiser context; excluded from solver input
   set_seq: number
   cleared_seq: number | null
 }
@@ -147,6 +147,11 @@ type Label = {
 The world exposes the latest uncleared value for each configured label, indexed
 by entity and by key and value. Keeping `set_seq` and `cleared_seq` makes replay
 and temporal derivation explicit; the event log remains canonical.
+
+Notes remain in the derived organiser world for display. The label's `set_seq`
+links to its event's existing author and timestamp; no decision entity or metadata
+table is created. Neither notes nor display-only attribution affect assignment,
+scoring, or the plan hash.
 
 Examples:
 

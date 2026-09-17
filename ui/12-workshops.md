@@ -26,6 +26,13 @@ Slot selection changes the view only. Capacity warnings link to affected
 people; the screen does not let an organiser assign directly. Empty and
 unranked states distinguish “no response” from “no workshop available”.
 
+An Add organiser decision action opens the shared [decision form](13-constraints.md)
+with the selected workshop and slot context. It can add matching, exclusion,
+grouping, separation, or eligibility labels through the fixed resolver. It uses
+the existing pending/apply flow and offers one optional note; applied labels show
+the existing event author and timestamp. The derived assignment and findings
+update through the ordinary solver.
+
 The heatmap has a text table alternative and does not use color alone. On
 On narrow screens, show one workshop card at a time followed by the ranking list.
 

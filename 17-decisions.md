@@ -60,7 +60,7 @@ Identical inputs produce byte-identical output, forever.
 
 *Why:* it makes every other good property possible. Re-runs are stable, so
 publishing twice does not shuffle people arbitrarily. Counterfactuals are cheap,
-so constraint health can be computed rather than guessed. Regression testing is a
+so a plan diff can attribute every move to its cause. Regression testing is a
 hash comparison. Reproducing a complaint is `solve(solverInputAt(input_seq))`.
 
 ## D4 — Sorted greedy with bounded repair, not integer programming
@@ -108,8 +108,8 @@ author and timing. Applied decisions are visible to every organiser through the
 existing event history and derived organiser views.
 
 *Why:* the value of recording intent is being able to explain and review a human
-decision. The resolver reports active, missing, contradictory, and redundant
-constraints directly; no additional decision metadata or report is needed.
+decision. The resolver reports active constraints, missing providers, and
+contradictions directly; no additional decision metadata or report is needed.
 
 Organiser judgement is represented directly by the existing resolver labels rather
 than a separate decision mechanism.
@@ -202,12 +202,12 @@ weight tuning). `config_hash` makes every change visible in plan metadata
 *Chosen.* A person's ranking for a slot is a set of `prefers-workshop` labels whose
 structured values carry the slot, the workshop, and the rank, validated by the
 `ordered-choice` resolver operator. There is no dedicated ranking event and no
-property table. Rationale in [labels and constraints](04-labels-and-constraints.md) §7.
+property table. Rationale in [workshop rankings](20.5-workshop-rankings.md).
 
-## D14 — `familyFacing` in the occasion profile drives the family view
+## D14 — `family_facing` in the occasion profile drives the family view
 
 *Chosen.* The preferences page is a renderer: every tag that declares
-`familyFacing` in the active profile produces a control, in profile order. Adding a
+`family_facing` in the active profile produces a control, in profile order. Adding a
 tag that reuses an existing control needs no family view code. See
 [family view](10-family-view.md) §1.
 
@@ -225,13 +225,11 @@ allowed to disagree with the real one, and a round trip per experiment.
 
 *Why:* D3 makes the solver pure and dependency-free, and the fold is pure for the
 same reason, so both run in a browser unchanged. Naming the primitive also means
-staleness, plan diffs, change emails, constraint redundancy, and the regression
-corpus need no machinery of their own — they are all the same two calls.
+staleness, plan diffs, and change emails need no machinery of their own — they are all the same two calls.
 
 *Consequence:* experiments stay out of the log. An organiser who tries four
 arrangements appends the events for the one they chose, so constraints in the log
-are decisions rather than sediment, and [constraint health](08-constraint-health.md)
-reasons only about constraints someone meant.
+are decisions rather than sediment.
 
 *Cost:* the organiser chunk carries the derivation core, and two runtimes execute one
 algorithm. The first is dependency-free TypeScript and is budgeted in
@@ -250,7 +248,7 @@ the events before the latest publication.
 plan, so publication would have a separate result shape.
 
 *Why it loses:* publication is a state of a plan, not a second domain object.
-`solver_version`, `config_hash`, and `output_hash` identify and verify the plan
+`code_revision`, `config_hash`, and `output_hash` identify and verify the plan
 without introducing another vocabulary layer.
 
 *Consequence:* keeping unpublished work from families is a data path, not a rule.
@@ -285,3 +283,132 @@ development, fixtures, and tests. JSON remains valid for API messages, serialize
 D1 rows, canonical hashes, and derived output. D1 remains the only production
 domain store; filesystem access and the textarea route are rejected from
 production builds and configuration.
+
+## D18 — Naming: snake_case data, camelCase code, kebab-case vocabulary
+
+*Chosen.* One naming rule per kind of name, applied across the database, the wire,
+TypeScript, KDL, and these documents:
+
+| Kind of name | Case | Examples |
+|---|---|---|
+| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, `Party`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `max_repair_passes` |
+| Code identifiers: variables, parameters, functions, methods, module factories | `camelCase` | `ageAt`, `buildSolverInput`, `roomInventory()` |
+| Types, interfaces, classes, React components | `PascalCase` | `SolverInput`, `RoomInventoryParams`, `FamilyView` |
+| Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
+| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `room-with`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
+| Entity ids | kind prefix, `_`, then a free suffix | `fam_27`, `per_peter`, `slot_sat-morning` |
+| Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `PUBLIC_URL`, `DB` |
+| Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `tag-requirements.ts` |
+| Human-readable copy | free text from the profile | `Eigenes Bad` |
+
+Organiser-supplied free-form matching tokens are data values, not declared
+vocabulary identifiers. They retain their entered spelling, such as
+`naehe_zum_eingang` in D11. The kebab-case rule does not reject or rename them;
+the fixed resolver validates their shape and matches their value exactly.
+
+The data rule is a boundary rule: a value keeps one spelling from the D1 row through
+`derive` to the browser, so hashes, fixtures, API responses, and the documents all
+read the same. Code identifiers follow the TypeScript ecosystem so that our names do
+not clash with React, Hono, zod, and the DOM, which are all camelCase.
+
+Vocabulary identifiers are values, not fields. They appear inside data
+(`LabelSet key=room-with`) and name things a person refers to in review, the trace,
+and the constraint screen. Setup-event payload fields that the fold turns into labels
+change only their separator: the payload field `does_not_need_a_bed` becomes the
+label key `does-not-need-a-bed`.
+
+In KDL a kebab-case identifier is a valid bare value, so vocabulary needs no quoting
+in event logs:
+
+```kdl
+LabelSet entity_id=fam_mueller key=needs-private-sanitary value=private-sanitary strength=preferred
+```
+
+In TypeScript a kebab-case key is quoted where it is an object key
+(`'room-with': relation({ … })`), and a profile's tag type is derived from those
+keys, so a misspelt tag is still a compile error.
+
+*Rejected alternative:* snake_case for every identifier, Python-style. Every file
+would mix our names with library camelCase, and React hooks and component props
+cannot follow the rule at all.
+
+*Rejected alternative:* camelCase for every TypeScript field, with snake_case only
+in SQL and KDL. Every boundary would need a renaming step, and a field would have
+two spellings depending on which document or layer is being read.
+
+*Rejected alternative:* snake_case vocabulary identifiers. They read as field names
+and blur the line between a field and the value it holds; kebab-case keeps
+vocabulary visibly distinct.
+
+*Consequence:* `typescript-eslint`'s `naming-convention` rule enforces the code and
+data rules ([testing](14-testing.md) §5); the profile builder rejects vocabulary
+identifiers that are not kebab-case.
+
+## D19 — One monolith in one repository, deployed as a whole
+
+*Chosen.* The application is a single monolith in a single monorepo: the kernel,
+every module, every occasion profile, the Worker, and the browser application. One
+build from one revision produces everything a deployment runs, and a deployment
+ships all of it together. The occasion profile selects which modules are active
+(D12, [modules](20-modules.md)); selection happens inside that one build, not by
+combining separately built parts.
+
+*Rejected alternative:* modules as separately built or published packages with
+their own release cycles. It buys independent releases that nobody here needs and
+costs compatibility ranges, a matrix of module combinations to test, and a
+dependency resolver deciding what actually runs.
+
+*Rejected alternative:* separately deployed services per module. Derivation is one
+pure function over one event list (D2, D15); splitting it across deployments would
+turn a function call into a distributed consistency problem.
+
+*Consequence:* modules depend on each other by id only, never on a compatible
+range. A change that spans the kernel and several modules is one change, reviewed
+and deployed together. The Worker and the browser bundle always come from the same
+revision, and the organiser application refuses to derive when they do not
+([deployment](13-deployment.md) §1).
+
+## D20 — Code is identified by its revision, not by a version number
+
+*Chosen.* Nothing in this project carries a semantic or any other multi-part version
+number: not the application, the kernel, a module, a rule, or a profile. Deployed code
+is identified by `code_revision`, the commit id of the monorepo revision the
+deployment was built from, injected at build time. Configuration is identified by
+`config_hash` (D12). A plan is identified by `input_seq`, `config_hash`, and
+`code_revision`.
+
+*Rejected alternative:* semver for the application or per module. Version numbers
+communicate compatibility to independent consumers; a monolith deployed as a whole
+(D19) has none. Numbers would be bumped by hand, drift from what actually changed,
+and still not name the exact code that produced a plan.
+
+*Why:* a commit id names the exact code that ran, costs nothing to maintain, and is
+what someone needs to reproduce a plan: check out that revision and derive at
+`input_seq`.
+
+*Consequence:* third-party dependency versions are unaffected; they are pinned by
+the lockfile. Change within the code is tracked by version control, and rule
+identity by rule id: a rule is never edited to mean something different; a new rule
+id replaces it ([solver contract](05-solver-contract.md) §4).
+
+## D21 — Print through the browser: no export, no print button, perfect print stylesheets
+
+*Chosen.* The application offers no PDF export, no download, no file attachment, and
+no print button. People print with the browser — `Ctrl+P` or the browser menu — and
+save a PDF from the browser's print dialog if they want one. In exchange, every
+report and every page families are expected to print ships a print stylesheet that
+produces a correct paper document, and that stylesheet is a requirement with
+acceptance criteria, not a polish item ([reports](19-reports.md) §5–6).
+
+*Rejected alternative:* generated PDF exports. A second rendering path for the same
+data, a PDF library in the Worker or the bundle, and files that outlive the
+visibility rules and the published cut they were rendered from.
+
+*Rejected alternative:* a print button calling `window.print()`. It adds a control to
+every printable page, tempts special cases such as confirmation dialogs or
+print-only modes, and does nothing the browser does not already do.
+
+*Consequence:* anything that must happen when a page is printed has to live in the
+print stylesheet itself. A confidential report therefore carries its confidentiality
+label on screen and on every printed page, rather than asking for confirmation
+before printing.

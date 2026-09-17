@@ -118,6 +118,20 @@ type. Builders accept these further fields where they apply:
 A tag-specific score lives on its tag, next to the vocabulary it scores. Geometry and
 policy scores that no single tag owns live in module parameters.
 
+### Organiser-supplied values
+
+Fixed resolver mechanisms accept organiser decisions independently of the profile's
+tag catalogue ([labels and constraints](04-labels-and-constraints.md) §5). A new
+`needs`/`provides` token such as `naehe_zum_eingang` is a value, not a new profile tag:
+it needs neither `label` copy nor `family_facing` metadata. The configured schemas
+still validate entity kinds, references, strengths, and slot-scoped shapes.
+
+Vocabulary naming rules apply to declared keys and enum values. Free-form matching
+tokens retain the spelling supplied by the organiser, including underscores, and
+are matched exactly. They are not converted to kebab-case. Preferred decisions use
+the consuming mechanism's configured weights (D12); labels cannot supply weights.
+Optional decision notes and internal tokens are never family-facing copy.
+
 ### Evaluators
 
 `derive`, `valid_for`, and any function a module specification names as an

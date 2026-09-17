@@ -16,7 +16,7 @@ English ASCII wireframes, state behavior, accessibility, and responsive notes.
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/organiser` | Dashboard | Status, staleness, constraint health, what needs attention |
+| `/organiser` | Dashboard | Status, staleness, preflight findings, what needs attention |
 | `/organiser/families` | Families | Table, import, invite, chase list |
 | `/organiser/families/:id` | Family detail | People, preferences, full event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
@@ -25,7 +25,7 @@ English ASCII wireframes, state behavior, accessibility, and responsive notes.
 | `/organiser/plans` | Plans | List, diff, publish |
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
 | `/organiser/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
-| `/organiser/constraints` | Constraints | Create, inspect, clear, and explain matching constraints |
+| `/organiser/constraints` | Organiser decisions | Add, inspect, and clear decision labels; inspect resolver findings |
 | `/organiser/reports` | Reports | Printable operational reports with audience and sensitivity scopes |
 
 Every screen is a view over the organiser application's world
@@ -65,17 +65,15 @@ accurate count of consequences. If the derivation produces the same hash:
 unplaceable parties, refused merges, workshops below minimum. Each links
 directly to the thing.
 
-Preflight findings come first. C8 in particular is the earliest possible
+Preflight findings come first. Requirement arithmetic
+([room assignment](20.3-room-assignment.md) §9) in particular is the earliest possible
 warning and should be the most prominent thing on the screen when it fires:
 
-> ⚠ **needs-ensuite: 19 beds required, 14 available.** Five people cannot be
+> ⚠ **needs-private-sanitary: 19 beds required, 14 available.** Five people cannot be
 > placed however the rooms are arranged. *See affected families →*
 
 > ⚠ **2 constraint conflicts** — constrained people are no longer in one party.
 > ⚠ **1 party cannot be placed** — Braun ×5 requires ensuite; none free.
-
-**Constraint health.** Active constraints with no provider, contradictions, and
-constraints currently doing no work.
 
 **Chase list.** Families who have not logged in, or who have logged in but
 submitted nothing. With a "send reminder" action that emails the lot.
@@ -126,7 +124,7 @@ the resolver mechanism, token, and optional organiser note:
 > to preferred, Drinnen schlafen to required.
 > 12 Sep 14:23 · *Organiser Anna* · "Wrote in saying the youngest is scared of
 > the dark, would like a room with a window onto the courtyard."
-> 14 Sep 09:01 · *This family* · set Möchte ins Kinderzimmer for Jonas (9).
+> 14 Sep 09:01 · *This family* · set Ernährung to vegetarisch for Jonas (9).
 
 The event actor identifies the authenticated principal while the subject
 identifies the affected family or person. No separate on-behalf-of role is needed.
@@ -153,14 +151,13 @@ Each party renders as a card:
 │ Requires: ensuite (Schmidt)                                    │
 │                                                                │
 │ Merged from a mutual room-with request (12 Sep, 13 Sep).       │
-│ Müller's two children are in children's room K3.               │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 Provenance is the content. An organiser reading this card should be able to tell
 exactly why these five people are one unit without opening anything else.
 Each requirement names which member family contributed it
-([labels and constraints](04-labels-and-constraints.md) §5.3) — a merged party's `required` tag binding
+([sleeping parties](20.2-sleeping-parties.md) §7) — a merged party's `required` tag binding
 everyone is correct but surprising, and the card is where that surfaces.
 
 **Warnings inline, at the top:**
@@ -168,7 +165,7 @@ everyone is correct but surprising, and the card is where that surfaces.
 > ⚠ 7 parties of one person. Consider merging or contacting these families.
 > ⚠ Merge refused: Müller + Schmidt + Weber, combined demand 10 exceeds
 > the largest room (6 places). Treated as a preference instead.
-> ⚠ Preflight C4: merged party Müller + Schmidt + Weber needs a six-place
+> ⚠ Merged party Müller + Schmidt + Weber needs a six-place
 > ensuite room (Schmidt's requirement); no such room exists.
 
 **Merge and split** open a small dialog and append `groups-with` or
@@ -177,16 +174,6 @@ party decision event and no separate reason code: the label's optional note says
 and party formation re-derives from it like any other constraint. Since party
 formation is the judgement call and the one most worth trying twice, this screen
 benefits from the pending list as much as the board does.
-
-**Children's room assignment** gets its own section on this page, since it
-happens before party formation and determines everything after:
-
-> **K3** · Haus B, Raum 22 · 6 places · ages 8–14
-> Jonas Müller (9), Lena Schmidt (11), Ada Weber (10), Nils Weber (13), Mia Braun (8)
-> 1 place free.
->
-> **Not placed:** Tim Braun — no matching child-group room was available.
-> Returned to the Braun family party.
 
 ---
 
@@ -226,7 +213,7 @@ drop without opening anything:
 - **Number and place count**, with filled and free places as discrete marks
   (`●●●○○`). Discrete marks rather than a bar, because the question is always
   "how many more fit", and counting five dots is faster than reading "3/5".
-- **Attribute chips**: sanitary arrangement, accessible, and child-group capability.
+- **Attribute chips**: sanitary arrangement and accessible.
 - **Occupants**, one line per party with size.
 - **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
   `⚲` constrained by an organiser rule.
@@ -249,18 +236,18 @@ the same toolchain behind Trello and Jira.
   affordance. Rooms that can accept it but would incur a penalty show the penalty
   as a ghost chip, its text read from the constraint definition rather than
   hard-coded: `−12 Zimmer teilen`.
-- **On drop**, the constraint is appended to the pending list and the board
+- **On drop**, the decision's label events are appended to the pending list and the board
   re-derives locally. There is no request and no optimistic guess to reconcile:
   what appears is the real plan for those events.
 - **If the re-derivation moves anything else**, those cards flash once and a
-  summary appears: *"Constraint added for Braun ×5 → Room 03. 2 other parties
+  summary appears: *"Decision added for Braun ×5 → Room 03. 2 other parties
   moved. See what changed →"*. Cascading moves are the main way a board like this
   surprises people; showing them immediately is the difference between trust and
   suspicion.
 
 ### Pending changes
 
-Every board action appends an event to the **pending list**
+Every board action appends one or more label events to the **pending list**
 ([01-architecture](01-architecture.md)) rather than to the log. The board renders
 `derive(committed ++ pending)`, so the plan on screen is always the real plan for
 everything the organiser has done so far.
@@ -287,10 +274,10 @@ The two verbs control who can see the same plan:
 |---|---|---|
 | Who starts seeing it | the other organisers | families |
 | What it writes | the pending events | a `PlanPublished` event |
-| Undo | a new constraint, or a correcting event | publish again |
+| Undo | clear or correct the applied labels with new events | publish again |
 
 This is what makes the board safe to think in. An organiser can try an arrangement,
-look at the constraint health and the diff it would produce, and walk away from it
+look at the preflight findings and the diff it would produce, and walk away from it
 without having said anything.
 
 ### Multi-select
@@ -302,8 +289,8 @@ Shift-click or ctrl-click parties in the left rail or on room cards to build a
 selection; drag any member and the whole selection moves. The drag preview shows
 the combined headcount so an organiser can see at a glance whether it will fit.
 
-This is what "five children from five families should share a room" looks like as
-an interaction: select five, drag once.
+This is what "these three small families should share the apartment" looks like
+as an interaction: select three, drag once.
 
 ### Keyboard
 
@@ -336,13 +323,14 @@ when the actual question is almost always "which room".
 
 ### Undo
 
-`z`, and a button. It pops the last pending event and re-derives. Undo is exact
+`z`, and a button. It removes the last action's pending events together and re-derives,
+so undoing a needs/provides pair cannot leave half of the decision behind. Undo is exact
 rather than compensating: there is no cleared label and no second event recording
 that the first was a mistake, because the first was never committed.
 
-Undoing past the start of the pending list is not undo — the change is published
-history by then, and the way back is a new constraint that says what should happen
-instead.
+Past the start of the pending list, changes are applied history, whether or not
+they have been published. Clearing or revising them appends ordinary label events;
+the original events remain visible to organisers.
 
 ### Concurrency
 
@@ -357,7 +345,7 @@ since, the server returns 409 with the events it has gained, and the board says:
 Re-deriving is honest work rather than merge logic: the pending events are folded
 onto the newer log and the board shows the resulting plan. Payloads are complete
 restatements ([03-events](03-events.md)) and constraints name stable entities
-([08-constraint-health](08-constraint-health.md) §3), so the result is well defined.
+([labels and constraints](04-labels-and-constraints.md) §5), so the result is well defined.
 A pending event that names something Anna withdrew surfaces as an ordinary
 constraint diagnostic, not as a conflict the organiser has to resolve by hand.
 
@@ -385,8 +373,8 @@ publication #7 (12 Sep)  →  current
 BECAUSE OF NEW PREFERENCES (4 people)
   Weber ×4   Raum 01 → Raum 07   Weber stated ensuite required (14 Sep)
 
-BECAUSE OF ORGANISER CONSTRAINTS (5 people)
-  Braun ×5   Raum 12 → Raum 03   Zimmer mit Gartenblick, added by Anna, 15 Sep
+BECAUSE OF ORGANISER DECISIONS (5 people)
+  Braun ×5   Raum 12 → Raum 03   naehe_zum_eingang, added by Anna, 15 Sep
 
 KNOCK-ON (2 people)
   Koch ×2    Raum 03 → Raum 02   displaced by the above
@@ -409,12 +397,22 @@ Publishing from this screen shows exactly who will be emailed.
 
 ---
 
-## 7. Constraints
+## 7. Organiser decisions
 
-Each constraint row shows its label, explanation, needs, providers, strength,
-and current resolver status. Organisers can create a custom matching definition,
-apply it to entities, or clear an application. Missing providers and
-contradictions are visible immediately.
+The existing `/organiser/constraints` screen shows the decision label/value and
+optional note, with author and timestamp from the event that set it. A token such
+as `naehe_zum_eingang` is shown as entered; there is no second name or required
+explanation field. Applied labels are visible to every organiser. Pending labels
+remain local to the working organiser until Apply.
+
+Add and clear use the same fixed resolver forms as the board and party review:
+needs/provides, exclusions, grouping, separation, and workshop mechanisms with
+their established value shapes. Built-in mechanisms are inspectable, not editable.
+Missing providers and contradictions appear as current preflight or solver
+findings. The detailed interaction is in [UI-13](ui/13-constraints.md).
+
+German wording: **Entscheidungen des Organisationsteams**, **Entscheidung
+hinzufügen**, and **Zusätzliche Informationen** for the optional note.
 
 ---
 
@@ -425,8 +423,14 @@ preference heatmap — people down one axis, workshops across, cells shaded by
 rank. It makes oversubscription and dead workshops obvious at a glance, which is
 the information needed to adjust capacities before running the solver.
 
-Warnings: below minimum capacity, no eligible participants, child-group mappings that
+Warnings: below minimum capacity, no eligible participants, and age bounds that
 partition the population and strand people.
+
+An organiser can open the same decision form with the workshop and slot context.
+It writes ordinary pending labels for matching, exclusion, grouping, separation,
+or eligibility; workshop assignment derives the result. The form never writes an
+assignment directly. Existing history shows the token, optional note, author, and
+timestamp after application.
 
 ---
 
@@ -457,6 +461,7 @@ copy should be German with an English fallback (`family.locale`). Organisation-t
 copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
 
-Organisation-team-facing labels come from the built-in resolver mechanism and family-facing text
-from `familyFacing.label`, so the two audiences can be worded differently for
+Organisation-team-facing wording comes from the resolver mechanism and profile or
+custom definition; organiser-supplied tokens are shown as entered. Family-facing
+text comes from `family_facing.label`, so the audiences can be worded differently for
 the same tag.

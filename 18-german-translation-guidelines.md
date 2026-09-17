@@ -44,10 +44,12 @@ emails, notifications, and help text.
 | preference | **Wunsch** | Use **Angabe** when it is not a preference or choice |
 | constraint | **Vorgabe** | Use **Regel** only when explaining behaviour informally |
 | organiser decision | **Entscheidung des Organisationsteams** | A human planning decision that guides the calculated result |
+| organiser decision note | **Zusätzliche Informationen** | Optional context; the token itself needs no second name |
 | label | **Angabe** | Do not expose the storage term *Label* in family copy |
 | plan | **Einteilung** | The generated room/workshop result |
 | publish | **Veröffentlichen** | For making an approved plan visible |
-| pending | **Noch nicht veröffentlicht** | Prefer this phrase over a literal technical translation |
+| pending | **Noch nicht angewendet** | Local changes awaiting Apply; other organisers cannot yet see them |
+| unpublished | **Noch nicht veröffentlicht** | Applied changes not yet made visible to families through Publish |
 | organiser | **organisierende Person** | One person acting on behalf of the organisation team |
 | organisation team | **Organisationsteam** | The collective group responsible for organising the occasion |
 | member of the organisation team | **Mitglied des Organisationsteams** | Use for one person when the team relationship matters |

@@ -37,7 +37,7 @@ them, and the output hash must be identical. `labels` is one of the arrays the
 shuffler permutes — this proves the generic label input is order-independent.
 
 This single test catches almost every violation of the determinism contract in
-[room assignment](05-room-assignment.md) §1:
+[solver contract](05-solver-contract.md) §1:
 
 - an unsorted collection someone added and forgot to sort — **caught**
 - a tiebreak that falls through to input order — **caught**
@@ -85,7 +85,7 @@ profile described in [the event model](03-events.md). There is one shared
 replay invariants, and returns the same `Event[]` used by production derivation.
 
 Every event-driven test uses this loader, including fold and solver tests,
-constraint-health fixtures, API tests, D1 integration tests, and the
+API tests, D1 integration tests, and the
 browser/Worker agreement test. D1 tests seed their database from the parsed KDL
 events; they do not maintain a second JSON fixture for the same log.
 
@@ -97,10 +97,10 @@ test/fixtures/event-logs/
   full-event.kdl         55 families, 40 rooms — realistic
   tight.kdl              capacity == demand exactly
   oversubscribed.kdl     demand > capacity; things must be unplaced
-  fragmented.kdl         many children opted in; many size-1 parties
+  fragmented.kdl         many size-1 parties
   conflicted.kdl         constraints that span parties after a change
   constraint-heavy.kdl   many relations, several merge cascades
-  infeasible.kdl         trips preflight C8
+  infeasible.kdl         trips room-assignment.requirement-arithmetic
 ```
 
 The parser reports file and line locations, rejects duplicate properties, and
@@ -118,15 +118,15 @@ solver input builder, and the solver together rather than the solver alone.
 
 Golden fixtures must record the profile they were recorded against, since a
 profile change legitimately changes output. Store `config_hash` alongside
-`expectedHash` and fail with a clear message when the profile moved, rather
+`expected_hash` and fail with a clear message when the profile moved, rather
 than reporting an opaque mismatch:
 
 ```ts
-test.each(goldenCases)('golden: $name', ({ solverInput, expectedHash, configHash }) => {
-  if (currentConfigHash() !== configHash) {
+test.each(goldenCases)('golden: $name', ({ solverInput, expected_hash, config_hash }) => {
+  if (currentConfigHash() !== config_hash) {
     throw new Error(`golden: $name was recorded against a different profile — re-record with npm run test:record`)
   }
-  expect(sha256(canonical(solve(solverInput, defaultConfig)))).toBe(expectedHash)
+  expect(sha256(canonical(solve(solverInput, defaultConfig)))).toBe(expected_hash)
 })
 ```
 
@@ -140,7 +140,7 @@ golden: full-event — output changed
      P07  rm_0014 → rm_0009
      P12  rm_0009 → rm_0014
      P22  rm_0031 → rm_0031  (place changed within room)
-  totalScore 412 → 419
+  total_score 412 → 419
   Re-record with: npm run test:record
 ```
 
@@ -160,13 +160,13 @@ assertions that catch bugs the golden fixtures happen not to exercise.
 ```ts
 const invariants = [
   ['no person is assigned twice',
-    p => unique(p.assignments.map(a => a.personId))],
+    p => unique(roomAssignmentSection(p).assignments.map(a => a.person_id))],
 
   ['no place holds two people',
-    p => unique(p.assignments.map(a => a.placeId))],
+    p => unique(roomAssignmentSection(p).assignments.map(a => a.place_id))],
 
   ['every assigned place exists in the solver input',
-    (p, s) => p.assignments.every(a => s.places.some(pl => pl.id === a.placeId))],
+    (p, s) => roomAssignmentSection(p).assignments.every(a => s.places.some(pl => pl.id === a.place_id))],
 
   ['no room exceeds its place count',
     (p, s) => /* group by room, compare */],
@@ -177,8 +177,12 @@ const invariants = [
   ['every person appears exactly once across assignments + unplaced',
     (p, s) => /* conservation of people */],
 
-  ['every active constraint is either honoured or reported as a conflict',
-    (p, s) => s.constraints.every(c => honoured(p, c) || conflicted(p, c))],
+  ['every required constraint is honoured or reported as a conflict',
+    (p, s) => s.constraints.filter(c => c.strength === 'required')
+      .every(c => honoured(p, c) || conflicted(p, c))],
+
+  ['preferred constraints affect configured soft terms and remain traceable',
+    (p, s) => /* no preferred decision becomes a forced placement */],
 
   ['no person is in two workshops in one slot',
     p => /* group by (person, slot) */],
@@ -186,16 +190,13 @@ const invariants = [
   ['no workshop exceeds capacity',
     (p, s) => /* … */],
 
-  ['every child-room assignment satisfies the child-group requirement',
-    (p, s) => /* … */],
-
-  ['every label names a fixed resolver or profile vocabulary entry or is reported',
+  ['every label key names a fixed resolver, profile tag, or declared custom definition, or is reported',
     (p, s) => /* … */],
 
   ['a capability with a derive has no assignments',
     (p, s) => /* … */],
 
-  ["party requirements are exactly the strictest-strength union of member families' requirement tags",
+  ["party requirements are the strictest-strength union of final members' family and person requirements",
     (p, s) => /* … */],
 ]
 ```
@@ -222,48 +223,8 @@ test('invariants hold on generated solver inputs', () => {
 ```
 
 The generator should produce hostile inputs as readily as reasonable ones: zero
-rooms, one enormous family, everyone requiring an ensuite, every child opted in,
+rooms, one enormous family, everyone requiring an ensuite,
 capacity exactly equal to demand, capacity one short.
-
----
-
-## 5. The constraint regression corpus
-
-From [constraint health](08-constraint-health.md) §5. Every active or
-cleared custom constraint can be a test case authored by a domain expert. It is the
-same counterfactual the dashboard computes, pinned to a fixed log position.
-
-```ts
-describe('constraint corpus', () => {
-  const constraints = loadConstraintFixtures()
-
-  describe('cleared constraints must remain represented by resolver rules', () => {
-    test.each(constraints.filter(c => c.clearedAt))('$description', (c) => {
-  const log = loadEventLog(c.seq)
-      const { plan } = derive(without(log, c), defaultConfig)
-      expect(satisfies(plan, c)).toBe(true)
-    })
-  })
-
-  describe('active constraints — informational health checks', () => {
-    test.each(constraints.filter(c => !c.clearedAt))('$description', (c) => {
-  const log = loadEventLog(c.seq)
-      const { plan } = derive(without(log, c), defaultConfig)
-      if (satisfies(plan, c)) {
-        console.log(`✨ now satisfied without custom constraint: ${c.description}`)
-      }
-      // not asserted — this bucket is the backlog, not a gate
-    })
-  })
-})
-```
-
-Cleared constraints represented by built-in rules are a hard gate: absorbing a
-rule and then losing it again is a regression and must break the build.
-
-Active constraints are informational. When one starts passing, CI prints it, and
-the build output can report that three load-bearing constraints are now
-satisfied.
 
 ---
 
@@ -272,25 +233,63 @@ satisfied.
 Cheap, and they catch the failure mode where the Worker boots and solves
 wrongly:
 
-- every entry has a non-empty `doc`;
-- every `satisfiedBy` names a tag whose kind is `capability`;
-- every `param` names a valid entity type;
-- no alias collides with another tag or alias;
-- every `familyFacing.control` has a renderer in `src/app/family-view/controls/`;
-- every tag depending on a phase is disabled when that phase is;
-- `defineEvent` throws on each of the above when deliberately broken.
+- every tag has a non-empty `label`;
+- every `satisfied_by` names a tag built with `capability`;
+- every `ref` names an entity kind of the kernel or a selected module;
+- no alias collides with another tag or alias, or with a module-owned key;
+- every `family_facing.control` has a renderer contributed by a selected module;
+- every `_tag` parameter names a tag of the shape its module role requires;
+- every selected module's `requires` is satisfied and stage order has no cycle;
+- `defineOccasionProfile` throws on each of the above when deliberately broken.
+
+Each module additionally ships contract tests and names the fixtures a profile
+selecting it must supply (module specification §12).
 
 ---
 
 ## Preflight tests
 
-One fixture per check C1–C9, asserting the finding fires with the right
-severity and names the right entities. C8's message should be asserted
-verbatim, since it is the one an organiser acts on.
+One fixture per preflight check — the kernel's and each selected module's —
+asserting the finding fires with the right severity and names the right entities.
+The requirement arithmetic message should be asserted verbatim, since it is the one
+an organiser acts on.
+
+## Organiser decision cases
+
+Use the ordinary KDL fixtures and module/integration tests for these cases:
+
+- `fam_42 needs=naehe_zum_eingang` and `rm_07 provides=naehe_zum_eingang`
+  work without a profile tag or `ConstraintDefined`. Underscores are retained;
+  an empty matching token fails append validation.
+- Required and preferred needs have distinct hard/soft behavior. Multiple
+  providers leave a candidate set; the first provider is not silently pinned.
+- `fam_42 excludes=rm_14` prevents placement there in every solver phase, even
+  when another label requests that room. Contradictory required inputs produce
+  diagnostics. Place and workshop exclusions receive equivalent coverage.
+- Grouping and separation use stable entities and resolver scope. Splitting a
+  sleeping party recomputes contributors; a workshop group never merges rooms.
+- Workshop decisions preserve eligibility, capacity, and per-slot uniqueness
+  through cancellation restart and fill. Cancelled required targets are reported.
+- Clear removes the selected label's effect from the current plan; replay before
+  the clear reproduces its prior effect. Pending undo removes a whole action's
+  events, including both halves of a needs/provides pair.
+- Omitting a note equals `null`. Varying only note text with the event envelope
+  and other inputs held fixed changes organiser display but not solver input,
+  assignment, scores, or plan hash. Appending any event still advances `input_seq`.
+- Applied tokens, optional notes, authors, and timestamps are visible to a second
+  organiser in existing views/history; pending events are local. Family payloads
+  never expose internal tokens or organiser notes, and family attempts to write
+  unrestricted decision labels fail authorisation.
+- Kernel/module setup-only keys remain protected, and a decision requiring an
+  unselected module is rejected or diagnosed on replay.
+- The same cases pass shuffle invariance and browser/Worker agreement.
+
+These are ordinary feature regression cases, with no separate decision-analysis
+corpus, reporting module, or retrospective UI.
 
 ---
 
-## 6. Lint rules as tests
+## 5. Lint rules as tests
 
 Some parts of the determinism contract are better enforced statically.
 
@@ -300,7 +299,7 @@ Some parts of the determinism contract are better enforced statically.
     "files": ["src/solver/**/*.ts", "src/derive/**/*.ts", "src/config/**/*.ts"],
     "rules": {
       "no-restricted-globals": ["error",
-        { "name": "Date",   "message": "Pass eventDate in via config." },
+        { "name": "Date",   "message": "Pass event_date in via config." },
         { "name": "Math",   "message": "No Math.random in the solver. Use rng.ts." }
       ],
       "no-restricted-imports": ["error", {
@@ -312,8 +311,14 @@ Some parts of the determinism contract are better enforced statically.
 }
 ```
 
+A repository-wide `@typescript-eslint/naming-convention` rule enforces the
+naming decision (D18): camelCase variables, parameters, and functions; PascalCase
+types; snake_case properties in type declarations and object literals; and quoted
+kebab-case keys only where a key is vocabulary. Library-defined names such as React
+props are exempt through the rule's `filter` option.
+
 These overrides extend to `src/derive/**` and `src/config/**`. Profile evaluators
-(`derive`, `check`, `validFor`) run inside the solver and are bound by the same
+(`derive`, `check`, `valid_for`) run inside the solver and are bound by the same
 contract, and the fold is bound by it because the same code runs in a browser,
 where a stray `src/worker` import would be a bundling failure rather than a subtle one.
 
@@ -335,7 +340,7 @@ the most likely way the contract degrades over six weeks of changes.
 
 ---
 
-## 7. Integration tests
+## 6. Integration tests
 
 Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
@@ -354,7 +359,7 @@ test('the full loop: import → constraints → solve → plan → publish', asy
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  await publish(db, plan2.inputSeq)
+  await publish(db, plan2.input_seq)
   expect(await publishedCount(db)).toBe(1)
 })
 ```
@@ -379,7 +384,7 @@ Also covered:
 
 ---
 
-## 8. What is not tested
+## 7. What is not tested
 
 Recorded so the gaps are deliberate.
 
@@ -396,11 +401,11 @@ Recorded so the gaps are deliberate.
 
 ---
 
-## 9. Fixtures as documentation
+## 8. Fixtures as documentation
 
 `test/fixtures/event-logs/minimal.kdl` should be readable and hand-checkable: six
-families, four rooms, one children's room, one mutual co-room request, one
-`prefer_not`. Small enough that a person can work out the right answer with a
+families, four rooms, one mutual co-room request, one
+preferred `sole-occupancy`. Small enough that a person can work out the right answer with a
 pencil and verify the solver agrees.
 
 When someone new asks how party formation works, that fixture plus its trace is a
