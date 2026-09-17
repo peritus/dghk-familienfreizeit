@@ -19,7 +19,7 @@ Only these capabilities are in scope for the initial release:
 
 - Organiser-managed inventory: buildings, rooms, beds, and room designations.
 - Magic-link authentication with a code-level organiser allowlist.
-- Deterministic room assignment with a full human-readable explanation.
+- Deterministic whole-family room assignment with a full human-readable explanation.
 - Deterministic workshop assignment with an explicit fairness objective.
 - Drag-and-drop organiser board that writes constraints, not assignments.
 - Deterministic plans identified by `input_seq`, and publication.
@@ -92,8 +92,8 @@ translated into another data format.
 - The module contract, `defineOccasionProfile`, and the room modules
   ([modules](20-modules.md)); the two generic tag rules, `hard.tag-requirements` and
   `soft.tag-preferences`, keep the implementation small
-- Party formation: families, merges, the unplaceable-merge
-  guard
+- Family-unit construction: one placement unit per family, with family-level
+  requirements and bed demand
 - Placement phases 0–4
 - The scoring table and the `Rule` interface, with `describe` mandatory
 - Trace construction and a plain-text rendering of it
@@ -104,15 +104,14 @@ translated into another data format.
 **No UI beyond a page that shows the trace.** Resist building the board here.
 
 **Done when:** you can derive a plan from the real inventory and real families
-(with preferences entered by hand as events) and read the trace top to
+(with requirements entered by hand as events) and read the trace top to
 bottom without confusion, and you can say whether the ensuite requests are
 satisfiable — requirement arithmetic
 ([room assignment](20.3-room-assignment.md) §9).
 
-**This is the checkpoint.** If party formation does not express the real
-situation — if the families' actual arrangements do not fit the party model —
-this is where you find out, and there is still time to change the model. Budget a
-day for that possibility.
+**This is the checkpoint.** If whole-family placement does not express the real
+situation, record the missing arrangement as a deferred sleeping-parties or
+child-rooms requirement rather than introducing a partial placement model.
 
 ---
 
@@ -134,15 +133,14 @@ Send the real invitations only after this deferred milestone is delivered.
 
 ---
 
-## M4 — Party review and the board
+## M4 — The whole-family board
 
 *The organiser tool becomes real. Three to four days.*
 
-- Party review screen with provenance, merge and split
 - Board: room cards, room grouping, status glyphs
 - Board interaction: pragmatic-drag-and-drop, multi-select, keyboard
 - The pending list, deriving locally on every action; apply and discard
-- Organiser decisions through needs/provides, exclusions, grouping, and separation;
+- Organiser decisions through needs/provides, exclusions, and separation;
   show optional notes with the existing event author and timestamp
 - Undo by removing the last action's pending events together
 - Apply-time compare-and-swap with 409 re-derivation
@@ -151,6 +149,22 @@ Send the real invitations only after this deferred milestone is delivered.
 **Done when:** an organiser who has not seen the code can rearrange a plan and
 understand what happened each time, and can add and clear a human-readable
 decision label without defining new vocabulary or supplying a separate name.
+
+## M8 — Deferred sleeping modules
+
+*Future work. Reintroduces family splitting and cross-family sleeping groups as a
+coherent capability.*
+
+- Sleeping-party module: derived family residue, co-room merges, party requirements,
+  provenance, merge guards, and party-level diagnostics
+- Child-rooms module: child-group entities, child-room placement before family
+  residue, fallback, and minimum occupancy
+- Party review screen with merge and split
+- Cross-family co-room controls and the corresponding family-facing preferences
+- Migration of whole-family fixtures and reports to cover split and merged plans
+
+The modules must be selected together for a profile that permits families to split
+or merge. Their deferred specifications live under [`deferred-ideas/`](deferred-ideas/).
 
 ---
 
@@ -210,9 +224,8 @@ awkward retrofit afterwards, and everything from M4 onward — the board's pendi
 and change emails — is a call on it.
 
 **Why the solver before the UI.** It is the only part where the design might be
-wrong in a way that invalidates other work. A board built on a party model that
-turns out not to fit is wasted; a solver built without a board is merely
-unpolished.
+wrong in a way that invalidates other work. A board built on the wrong placement
+unit is wasted; a solver built without a board is merely unpolished.
 
 **Why real data in M1.** Entering 40 rooms from a hostel's website reveals things
 no fixture will: rooms that are really two rooms, a bungalow with an outdoor
@@ -238,7 +251,7 @@ If time runs short, in the order they should go:
    a room can be a piece of paper taped to the door.
 2. **The plan diff.** Publish without it and email everyone rather than only the
    affected families. Worse, not broken.
-3. **Multi-select on the board.** Drag one party at a time. Slower, still better
+3. **Multi-select on the board.** Drag one family at a time. Slower, still better
    than a spreadsheet.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint
@@ -256,7 +269,7 @@ to requirement arithmetic alone, which carries most of the value.
 
 | Risk | Likelihood | What to do |
 |---|---|---|
-| The party model does not fit the real families | Medium | M2 is the checkpoint; budget a day to revise |
+| Whole-family placement does not fit the real families | Medium | Record the missing split or merge in the deferred sleeping modules and keep the initial scope coherent |
 | Families do not submit preferences | **High** | Chase list from M3; expect to phone people |
 | Inventory data is wrong (bed counts, ensuites) | **High** | Walk the building, or have someone who has |
 | The board is slower than a spreadsheet for the organiser who knows the families | Medium | Keyboard path; multi-select; measure honestly |

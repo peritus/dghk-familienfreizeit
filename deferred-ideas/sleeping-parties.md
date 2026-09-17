@@ -1,4 +1,11 @@
-# 20.2 — Sleeping parties
+# Deferred idea: sleeping parties
+
+*Status:* deferred. Not part of the specification and not selected by any profile.
+This sketch records how the idea would work as a module if it is ever picked up;
+adopting it means adding it back to the module catalogue and to every document
+listed under “Integration points”.
+
+Proposed module id `sleeping-parties` · factory `sleepingParties`
 
 Module id `sleeping-parties` · factory `sleepingParties`
 
@@ -204,7 +211,18 @@ clearing an applied label appends `LabelCleared`.
 - Fixture contract: `minimal.kdl` includes one mutual co-room request and one
   one-sided request.
 
-## 13. When not selected
+## 13. Integration points
 
-No parties exist. [`room-assignment`](20.3-room-assignment.md) cannot be selected,
-and the party review screen is absent.
+Adopting this module requires updating:
+
+- [`20-modules.md`](../20-modules.md) and the active occasion profile;
+- [`20.3-room-assignment.md`](../20.3-room-assignment.md) to consume parties;
+- [`05-solver-contract.md`](../05-solver-contract.md) and [`03-events.md`](../03-events.md)
+  for the plan section and derived-stage contract;
+- [`09-organiser-view.md`](../09-organiser-view.md), [`ui/09-party-review.md`](../ui/09-party-review.md),
+  and [`ui/10-assignment-board.md`](../ui/10-assignment-board.md) for party review;
+- [`14-testing.md`](../14-testing.md), fixtures, reports, and the family-facing
+  co-room controls.
+
+Until then, whole-family [`room-assignment`](../20.3-room-assignment.md) remains
+the active placement model and the party review screen is absent.

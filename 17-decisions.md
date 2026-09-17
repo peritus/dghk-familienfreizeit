@@ -73,29 +73,31 @@ a few percent and would be completely unreviewable. An organiser cannot look at 
 simplex result and say "yes, that is fair". The explicit requirement here is
 human reviewability, and that requirement beats optimality at this scale.
 
-## D5 — Party formation is a separate, reviewable phase
+## D5 — Sleeping parties and child rooms are deferred
 
-*Chosen.* Deciding who sleeps with whom happens before, and separately from,
-deciding which room they sleep in.
+*Chosen.* The initial room-assignment scope places each family as one indivisible
+unit. Sleeping-party formation, cross-family co-rooming, and child-room placement
+are deferred together as a future module boundary.
 
-*Why:* who-with-whom is the judgement call, and it is where organisers need to
-intervene. Fitting boxes onto shelves is mechanical. Splitting the phases means
-organisers review a short list of parties with provenance rather than auditing 40
-room placements. Merge and split add constraints to the pending list (D15), so a
-party arrangement can be tried and discarded like a board move.
+*Why:* implementing only one of these mechanisms would make the placement unit
+ambiguous. A child-room placement can split a family, while a required co-room
+relation can merge families; both require the derived sleeping-party model. The
+initial release stays reviewable by keeping one family as one placement unit and
+retains only constraints that do not change that unit, such as keep-apart.
 
 ## D6 — Organiser decisions guide the derived assignment
 
 *Chosen.* Organiser decisions are event-backed inputs to the derived assignment.
-Dragging a party, choosing a room, or making another planning decision adds one or
-more labels to the organiser's pending events. Every screen re-derives with those
-labels as ordinary inputs, and applying appends them to the log, so stated
-preferences and organiser decisions share one path.
+Choosing a room or making another planning decision adds one or more labels to the
+organiser's pending events. Every screen re-derives with those labels as ordinary
+inputs, and applying appends them to the log, so stated preferences and organiser
+decisions share one path.
 
 The solver remains the only producer of assignments. Organisers do not write an
 assignment directly; they add facts that guide the next derivation. The supported
-resolver mechanisms include `needs`, `provides`, `excludes`, grouping, separation,
-workshop eligibility, and workshop co-assignment.
+resolver mechanisms include `needs`, `provides`, `excludes`, separation, workshop
+eligibility, and workshop co-assignment. Grouping for sleeping placement belongs to
+the deferred sleeping-parties module.
 
 *Rejected alternative:* the board writes assignments directly. Then every re-run
 either destroys organiser work or requires merge logic, and the solver stops being
