@@ -109,7 +109,9 @@ inputs through the ordinary family controls.
 communicated assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
-capacity, accessibility, and the families sharing each room.
+bed capacity, room accessibility, and the families sharing each room. It lists
+no-bed people as room occupants without assigning them a bed or counting them
+against bed occupancy; bed occupancy is the count of non-null place assignments.
 It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
