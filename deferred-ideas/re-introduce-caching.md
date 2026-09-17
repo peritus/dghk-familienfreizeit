@@ -36,9 +36,9 @@ architecture; release control introduces no persisted cache.
 ## Why a cache here needs no invalidation
 
 `derive` is pure (D3), so a plan is fully identified by
-`(cut input_seq, config_hash, code_revision)` ([solver contract](../05-solver-contract.md)). If the key
+`(cut input_seq, build_revision, compatibility_revision)` ([solver contract](../05-solver-contract.md)). If the key
 is exactly that triple, a cached value can never be wrong. New events change the
-seq, a new deploy changes the hashes, and old entries just stop being looked up.
+seq, a new deploy changes the build revision, and old entries just stop being looked up.
 Nothing is ever rebuilt, repaired, or kept in sync. This is the difference from the
 removed projection tables.
 
@@ -56,7 +56,7 @@ removed projection tables.
 
 1. **Cache only the solve output**, not the whole world:
    `derive_cache(key TEXT PRIMARY KEY, value TEXT NOT NULL, created_at TEXT NOT NULL)`.
-   `key = "plan:" || input_seq || ":" || config_hash || ":" || code_revision`,
+   `key = "plan:" || input_seq || ":" || build_revision || ":" || compatibility_revision`,
    `value` = canonical JSON of plan + trace. Always refold (it's cheap), which keeps
    parse cost small and keeps entities and labels out of storage.
 2. **Rules** (added to 01 and AGENTS.md):
@@ -65,7 +65,7 @@ removed projection tables.
    - Keys contain only the plan identity triple. Nothing else, and never a key that can be overwritten with a different value.
    - Writes are `INSERT OR IGNORE`.
    - Only one module (`src/db/cache.ts`) reads or writes it.
-   - A test asserts that a cache hit's `output_hash` equals a fresh derive's.
+   - A test asserts that a cache hit's canonical plan equals a fresh derive's.
 3. **D1 revision is conditional on a measurement**, not an assumption:
    - Benchmark in `workerd` against
      `test/fixtures/event-logs/full-event.kdl`:

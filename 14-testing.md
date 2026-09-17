@@ -129,15 +129,15 @@ Fixture event logs with their expected output hashes, checked on every change.
 Each case is `derive(log, config)`, so a golden test exercises the fold, the
 solver input builder, and the solver together rather than the solver alone.
 
-Golden fixtures must record the profile they were recorded against, since a
-profile change legitimately changes output. Store `config_hash` alongside
-`expected_hash` and fail with a clear message when the profile moved, rather
-than reporting an opaque mismatch:
+Golden fixtures must record the compatibility revision they were recorded against,
+since an incompatible profile or contract change requires deliberate fixture review.
+Store `compatibility_revision` alongside `expected_hash` and fail with a clear message
+when the contract revision moved, rather than reporting an opaque mismatch:
 
 ```ts
-test.each(goldenCases)('golden: $name', ({ log_path, expected_hash, config_hash }) => {
-  if (currentConfigHash() !== config_hash) {
-    throw new Error(`golden: $name was recorded against a different profile — re-record with npm run test:record`)
+test.each(goldenCases)('golden: $name', ({ log_path, expected_hash, compatibility_revision }) => {
+  if (currentCompatibilityRevision() !== compatibility_revision) {
+    throw new Error(`golden: $name was recorded against a different contract revision — review with npm run test:record`)
   }
   const world = derive(loadEventLog(log_path), defaultConfig)
   expect(sha256(canonical(world.plan))).toBe(expected_hash)
