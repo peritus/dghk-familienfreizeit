@@ -120,15 +120,15 @@ specification names a pure evaluator slot, and they are hashed by source like ev
 other profile function.
 
 Defaults live in the module's zod schema, so a profile states only what it changes.
-The canonicalised, defaulted parameter object is what enters `config_hash`, so a
-changed default is visible as a configuration change.
+The canonicalised, defaulted parameter object is part of the built profile and is
+therefore identified by `build_revision`.
 
 ### 3.3 Identity and change
 
-Modules have no version numbers (D20). The kernel and every module live in one
+Modules have no independent version numbers (D20). The kernel and every module live in one
 monorepo and are built and deployed together (D19), so a module depends on another
 by id alone and there is never a compatibility range to resolve. A plan records the
-`code_revision` it was derived with, which names the exact code of every module.
+`build_revision` it was derived with, which names the exact code of every module.
 
 A rule is never edited to mean something different; a new rule id replaces it
 ([solver contract](05-solver-contract.md) §4).

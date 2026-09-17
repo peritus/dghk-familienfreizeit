@@ -86,10 +86,10 @@ timestamps are visible to every organiser through the existing event history.
 **The trust boundary does not move.** A client never submits a world. It submits
 events, which the server validates, authorises, and appends exactly as it does for
 any other command, and then derives for itself. The world the organiser saw locally is
-a *prediction*; because `derive` is pure, the prediction is checkable, and the apply
-request carries the `output_hash` the client derived so the server can compare after
-appending. Agreement is what the determinism contract guarantees; disagreement is a
-bug to report, and the server's world is authoritative either way.
+a *prediction*; because `derive` is pure, the prediction is reproducible from the
+same event head and configuration. Agreement is what the determinism contract
+guarantees; disagreement is a bug to report, and the server's world is authoritative
+either way.
 
 Pending events live in the organiser's browser for as long as that tab is open. They are
 never stored on the server, never shared between organisers, and never visible to
@@ -106,11 +106,10 @@ before responding. Reports use the same audience projection.
 `Communicated` records an organiser's reviewed release decision, not a stored plan.
 The kernel derives its scope references from events and uses ordinary historical
 worlds to reproduce content. There remains one Plan type, identified by `input_seq`,
-`config_hash` and `code_revision`. Release review uses its basis sequence, scope
-selection and code/config identities; programme details need not be solver output
-or acquire another content hash. See [release control](06-release-control.md) §3–4
-for identity, concurrency and verification; [occasion profiles](16-occasion-profiles.md)
-§4 defines configuration hashing.
+`build_revision`, and `compatibility_revision`. Release review uses its basis
+sequence, scope selection, and these implementation identities; programme details
+need not be solver output or acquire another content hash. See [release control](06-release-control.md)
+§3–4 and [deployment](13-deployment.md) §1 for identity, concurrency, and verification.
 
 ## Kernel and modules
 
@@ -123,7 +122,8 @@ the module contract are in [modules](20-modules.md).
 
 This resembles feature flags at the selection boundary, but module composition is a
 build-time property rather than a runtime rollout switch. The occasion profile
-selects modules explicitly, and the selection is part of `config_hash`. A module
+selects modules explicitly, and the selection is part of the built profile identified
+by `build_revision`. A module
 that is not selected contributes no event type, solver stage, trace section, route,
 screen, report, or required fixture.
 

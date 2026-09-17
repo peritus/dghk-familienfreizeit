@@ -56,7 +56,7 @@ has no meaning; stage order comes from the modules ([modules](20-modules.md) §4
 | `locale`, `fallback_locale` | family-facing copy language and fallback |
 
 `PUBLIC_URL`, `EMAIL_FROM`, and secrets are deployment facts, not profile metadata,
-and never enter `config_hash` ([deployment](13-deployment.md)).
+and are not part of the built profile identity ([deployment](13-deployment.md)).
 
 ## 2. Kernel labels
 
@@ -145,16 +145,13 @@ A parameter naming a tag ends in `_tag` and must name a tag of the shape the mod
 role requires. Weights are integers. Changes to parameters, tags, and weights are
 deployments, not events (D12).
 
-## 5. Hashing and history
+## 5. Build identity and history
 
-`config_hash` is the SHA-256 of the canonical JSON of: `meta`; each tag with its
-fields, with evaluators replaced by their source text; and each selected module's id
-and defaulted parameters. It makes every configuration change visible in
-plan metadata.
-
-Historical plan metadata remains authoritative. The deployed profile is used for new
-derivations; the recorded `code_revision` and `config_hash` identify what produced an
-earlier plan.
+The active profile, its selected modules, defaulted parameters, and evaluator source
+are compiled into the monolith. The exact `build_revision` identifies that complete
+profile and implementation. Historical plan metadata remains authoritative: the
+recorded `build_revision` and `compatibility_revision` identify the build and contract
+boundary used to produce an earlier plan.
 
 ## 6. UI and copy
 

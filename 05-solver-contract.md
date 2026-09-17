@@ -123,7 +123,7 @@ is a bug waiting in a tiebreak, and an integer score reads better in a trace.
 
 ```ts
 function canonical(v: unknown): string   // recursively sorts object keys
-const outputHash = sha256(canonical(plan))
+const planHash = sha256(canonical(plan))
 ```
 
 Key order in `JSON.stringify` follows insertion order, which is deterministic if
@@ -135,7 +135,8 @@ Sorting keys makes the hash depend on content only.
 In [testing](14-testing.md), but stated here because it is the point:
 
 **Shuffle invariance.** Take a solver input, randomly permute every array in it,
-re-sort via `solver-input.ts`, solve, and assert the output hash is unchanged. Run it
+re-sort via `solver-input.ts`, solve, and assert the externally computed plan hash is
+unchanged. Run it
 with fifty different permutations in CI. Any order dependence anywhere in the
 solver fails this within a handful of seeds. It is worth more than every other
 test combined.
@@ -186,8 +187,8 @@ No stage sees data it must remember to ignore.
 
 ```ts
 type SolverConfig = Readonly<{
-  code_revision: string                  // commit id of the deployed monorepo revision (D20)
-  config_hash: string
+  build_revision: string                 // exact commit id of the deployed monorepo revision (D20)
+  compatibility_revision: number         // manually bumped incompatible-contract revision
   event_date: string                     // meta.starts_on; every age is computed against it
   profile: OccasionProfile               // the built profile, parameters defaulted
   seed: number | null                    // default null
@@ -241,7 +242,7 @@ rules take their wording from the profile's tag copy. Explanation lives next to 
 logic, in the same file and the same diff, so it cannot rot separately.
 
 **Integer scores only** (R6). Every weight lives in the profile, on the module
-parameter or on the tag it belongs to, and is recorded in `config_hash`.
+parameter or on the tag it belongs to, and is fixed by the `build_revision`.
 
 **Hard rules are binary.** A `required` requirement is not worth points; it prunes.
 
@@ -257,8 +258,8 @@ through the profile, never through code (D12).
 type Plan = {
   meta: {
     input_seq: number
-    code_revision: string
-    config_hash: string
+    build_revision: string
+    compatibility_revision: number
     event_date: string
   }
   preflight: PreflightFinding[]

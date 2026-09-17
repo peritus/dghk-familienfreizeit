@@ -211,8 +211,7 @@ deployment. Organisers cannot add executable operators or solver rules.
 *Chosen.* Scoring weights and module parameters are occasion-profile code, and changing
 them is a deployment, not an event. Tuning happens offline: export the log, run
 `npm run tune`, and deploy the weights chosen ([deployment](13-deployment.md),
-weight tuning). `config_hash` makes every change visible in plan metadata
-([occasion profiles](16-occasion-profiles.md) §4–5).
+weight tuning). The exact build revision identifies the profile and parameters used.
 
 ## D13 — Workshop rankings are structured labels
 
@@ -395,19 +394,24 @@ and deployed together. The Worker and the browser bundle always come from the sa
 revision, and the organiser application refuses to derive when they do not
 ([deployment](13-deployment.md) §1).
 
-## D20 — Code is identified by its revision, not by a version number
+## D20 — Builds and compatibility have separate identities
 
-*Chosen.* Nothing in this project carries a semantic or any other multi-part version
-number: not the application, the kernel, a module, a rule, or a profile. Deployed code
-is identified by `code_revision`, the commit id of the monorepo revision the
-deployment was built from, injected at build time. Configuration is identified by
-`config_hash` (D12). A plan is identified by `input_seq`, `config_hash`, and
-`code_revision`.
+*Chosen.* The deployed build is identified by `build_revision`, the exact commit id
+of the monorepo revision it was built from, injected at build time. The client and
+Worker compare this value to detect stale artifacts. The project also carries a
+manually maintained `compatibility_revision`, initially `1`, which increments only
+when an incompatible API, event, derived-shape, or cross-runtime contract change is
+made. It is not a semantic version and does not identify a build.
+
+Configuration is repository code and is identified by `build_revision`; there is no
+separate `config_hash`. A plan is identified by `input_seq`, `build_revision`, and
+`compatibility_revision`.
 
 *Rejected alternative:* semver for the application or per module. Version numbers
 communicate compatibility to independent consumers; a monolith deployed as a whole
-(D19) has none. Numbers would be bumped by hand, drift from what actually changed,
-and still not name the exact code that produced a plan.
+(D19) has no independent module consumers. The compatibility revision is retained
+only for the explicit contract boundary; it is separate from the exact build
+identity so stale-build detection does not depend on a manual bump.
 
 *Why:* a commit id names the exact code that ran, costs nothing to maintain, and is
 what someone needs to reproduce a plan: check out that revision and derive at
