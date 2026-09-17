@@ -119,11 +119,11 @@ is a bug waiting in a tiebreak, and an integer score reads better in a trace.
 "Score 22 = exact fit +10, ensuite +6" is a sentence. "Score
 21.9999" is not.
 
-### R7 — Canonical JSON for hashing
+### R7 — Canonical JSON for regression-test hashing
 
 ```ts
 function canonical(v: unknown): string   // recursively sorts object keys
-const planHash = sha256(canonical(plan))
+const solverOutputHash = sha256(canonical(plan))
 ```
 
 Key order in `JSON.stringify` follows insertion order, which is deterministic if
@@ -135,8 +135,8 @@ Sorting keys makes the hash depend on content only.
 In [testing](14-testing.md), but stated here because it is the point:
 
 **Shuffle invariance.** Take a solver input, randomly permute every array in it,
-re-sort via `solver-input.ts`, solve, and assert the externally computed plan hash is
-unchanged. Run it
+re-sort via `solver-input.ts`, solve, and assert the externally computed solver-output
+hash is unchanged. Run it
 with fifty different permutations in CI. Any order dependence anywhere in the
 solver fails this within a handful of seeds. It is worth more than every other
 test combined.
@@ -172,7 +172,8 @@ organiser values resolve through the same fixed mechanisms as profile vocabulary
 they do not require a custom definition or a `defined_seq`. Source label references
 and event sequences provide deterministic ordering and diagnostic attribution.
 Notes and event author/timestamp remain available in the organiser world, but do
-not affect assignment, scoring, or the plan hash.
+not affect assignment, scoring, or the canonical solver-output hash used by
+regression tests.
 
 Every selected stage consumes the resolver's applicable decisions: positive
 requirements, exclusions, separation, and workshop constraints. Required

@@ -306,7 +306,7 @@ can restrict its broader document features without reimplementing lexical parsin
 
 *Consequence:* KDL is the canonical authored event-log representation across
 development, fixtures, and tests. JSON remains valid for API messages, serialized
-D1 rows, canonical hashes, and derived output. D1 remains the only production
+D1 rows, canonical regression-test hashes, and derived output. D1 remains the only production
 domain store; filesystem access and the textarea route are rejected from
 production builds and configuration.
 

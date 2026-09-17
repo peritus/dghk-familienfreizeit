@@ -95,7 +95,7 @@ meaning is assigned by the text format itself.
 KDL files are authored inputs, not a second domain model. `Event[]` remains the
 boundary passed to `derive`, and authored KDL fixtures are the canonical event
 inputs for development and tests. JSON remains appropriate for API payloads,
-canonical hashes, and derived output.
+canonical regression-test hashes, and derived output.
 
 ## 3. Typed entity identity
 
@@ -152,7 +152,7 @@ and temporal derivation explicit; the event log remains canonical.
 Notes remain in the derived organiser world for display. The label's `set_seq`
 links to its event's existing author and timestamp; no decision entity or metadata
 table is created. Neither notes nor display-only attribution affect assignment,
-scoring, or the plan hash.
+scoring, or the canonical solver-output hash used by regression tests.
 
 Examples:
 
