@@ -40,7 +40,9 @@ narrow screens, show one workshop card at a time followed by the ranking list.
 ## Programme and participation modes
 
 Each workshop card has an explicit `assigned`, `sign-up` or `interest` mode and its
-communication status. Assigned mode offers rankings/fairness; sign-up mode shows a
+shared communication badge. Expanding the badge shows the privacy-appropriate inline
+before/after diff; admins see organiser details and the communication action. Assigned
+mode offers rankings/fairness; sign-up mode shows a
 live list and optional capacity; interest mode shows organiser headcounts without
 shared names. Hide irrelevant ranking/solver columns for self-organised workshops.
 

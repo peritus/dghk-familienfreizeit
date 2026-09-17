@@ -31,7 +31,7 @@ Organisers open this screen to answer “what needs attention today?” Route:
 Warnings use text and glyphs as well as color. The empty state says “Nothing
 needs attention” and still shows outstanding release status and quality numbers.
 
-The release-control card links to the authoritative outstanding-change report in
+The release-control card uses the shared communication badges and links to the authoritative outstanding-change overview in
 [UI-11](11-release-control.md). Show initial scopes, changed scopes and revision
 mismatches distinctly. Programme-only changes count even when nobody moves. Live
 material requests and over-capacity sign-ups appear in the attention region, not
@@ -46,7 +46,7 @@ the heading for the attention region is read by assistive technology when new fi
 ## Neobrutalist redesign and components
 
 Use a `Sidebar` for organiser navigation, `Card` for plan status and each urgent
-group, `Badge` for outstanding release status, and `Alert` for findings. Reminder sending
+group, the shared `Badge`/inline-diff component for release status, and `Alert` for findings. Reminder sending
 uses the canonical `AlertDialog` composition: `AlertDialogTrigger` + `Button`,
 `AlertDialogContent`, `AlertDialogHeader`, `AlertDialogTitle`,
 `AlertDialogDescription`, `AlertDialogFooter`, `AlertDialogCancel`, and

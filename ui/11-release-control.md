@@ -2,8 +2,9 @@
 
 ## Audience, purpose, and routes
 
-Organisers inspect held arrangements and review exactly what families will see.
-Routes: `/organiser/releases` for outstanding changes and review, and
+Organisers and families inspect the same privacy-projected online diffs in context.
+Organisers can also use `/organiser/releases` for an outstanding-change overview and
+review, and
 `/organiser/releases/history` for communication history. Plan investigation remains
 at `/organiser/plans` and `/organiser/plans/:a/diff/:b`, with input sequences as
 parameters. It does not substitute for a release preview.
@@ -12,7 +13,29 @@ The authoritative report, review, dependency and confirmation contracts are in
 [release control](../06-release-control.md) §6–8. This document owns their layout
 and interaction, not another definition of communication semantics.
 
-## Outstanding changes
+## Shared inline status and diff
+
+Every releasable scope renders the same status badge wherever it appears:
+
+| Badge | Meaning |
+|---|---|
+| `✓` | Communicated by the organisers |
+| `?` | Changed since communication; confirmation is needed |
+| `—` | Never communicated |
+
+Badges have text labels and tooltips; colour is supplementary. The tooltip includes
+the last communication time and reviewed `input_seq` when one exists. Expanding a
+badge opens the canonical before/after diff in place, without navigating to a
+separate release view. The diff shows added, removed and changed fields, allocation
+movements, and cancellation status appropriate to the viewer.
+
+The component receives one semantic scope diff and a privacy projection. Admins get
+affected families, findings, organiser explanations, and the communication action;
+families get only their own family-visible result and remain read-only. Both use the
+same reviewed `input_seq` when a diff is opened. A newer event shows a non-blocking
+“newer changes exist” indicator and never silently replaces the open diff.
+
+## Outstanding changes overview
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -29,7 +52,7 @@ and interaction, not another definition of communication semantics.
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-Rows expand into concrete differences and affected-family lists. Distinguish initial
+Rows expand into the same inline component's concrete differences and affected-family lists. Distinguish initial
 content, changed content, no changes, and revision mismatch with text and glyphs.
 Programme changes do not imply participant movement; report both counts accurately.
 An applied-then-reverted value disappears from outstanding differences.
@@ -86,7 +109,7 @@ Success returns the communicated scopes and separately shows email delivery outc
 
 ## History and recovery
 
-History rows show actor, time, selected scopes and basis, with per-scope before/after
+History rows show actor, time, selected scopes and `input_seq`, with per-scope before/after
 views where reproducible. A revision mismatch shows full current proposed content and
 the explicit absence of a reliable before-image. It must not show a fabricated diff.
 Recovery uses the same review rather than an uncommunicate toggle.

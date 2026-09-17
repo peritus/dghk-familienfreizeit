@@ -17,6 +17,8 @@ event history for one family. Route: `/organiser/families/:id`. Governing spec:
 │ CURRENT PREFERENCES                                                       │
 │ Private bathroom · preferred     Accessible room · no preference          │
 │ Diet: 1 vegetarian, 1 with meat                                          │
+│ ACCOMMODATION RELEASE  ✓ Communicated                                    │
+│ [Show before/after diff]                                                  │
 │                                                                          │
 │ EVENT HISTORY                                                             │
 │ 14 Sep 09:01 · This family · chose Private bathroom as preferred          │
@@ -24,7 +26,10 @@ event history for one family. Route: `/organiser/families/:id`. Governing spec:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Separate family free text from organiser-only notes. Loading, missing-family,
+Show the shared communication badge and expandable privacy-projected diff for each
+releasable scope affecting this family. Admins may see affected-family context and
+communication actions; the family-facing projection remains read-only. Separate
+family free text from organiser-only notes. Loading, missing-family,
 and stale-log states explain what happened and offer retry. History is prose,
 not raw JSON, and is keyboard-readable in chronological order.
 
