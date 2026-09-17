@@ -1,8 +1,8 @@
 # 09 — Organiser view
 
-Three organisers use this on laptops for about six weeks. The active room
-workflow treats each family as one placement unit. Sleeping-party review and
-child-room assignment are deferred; their design sketches live under
+The active room workflow treats each family as one placement unit. Sleeping-party
+review and child-room assignment are outside the active module set; their design
+sketches live under
 [`deferred-ideas/`](deferred-ideas/).
 
 ## 1. Screen inventory
@@ -35,7 +35,8 @@ from held arrangements.
 
 The dashboard shows outstanding release scopes, affected families,
 preflight findings, constraint conflicts, unplaced families, workshop warnings, and
-the chase list. Quality counters exclude deferred co-room and party metrics.
+the chase list. Quality counters exclude co-room and party metrics that are outside
+the active module set.
 
 Example findings:
 
@@ -80,7 +81,7 @@ Touch users get the same room picker through a drawer instead of drag-and-drop.
 
 The constraints screen exposes fixed resolver mechanisms: needs/provides, exclusions,
 and separation. Sleeping `groups-with` decisions are rejected or reported as
-deferred until the sleeping-parties module is adopted. Optional notes stay attached
+outside the active module set. Optional notes stay attached
 to the label event; author and timestamp come from the event log.
 
 Reports show family-to-room assignments, unplaced families, capacity and constraint

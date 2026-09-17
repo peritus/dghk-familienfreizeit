@@ -345,7 +345,7 @@ test('every solver input array is sorted and frozen', () => {
 ```
 
 This is the test that catches "someone added a collection and forgot", which is
-the most likely way the contract degrades over six weeks of changes.
+the most likely way the contract degrades as the code changes.
 
 ---
 

@@ -21,8 +21,7 @@ remain visible whether or not any arrangements have been communicated.
 ### Current information and controls
 
 One scrolling page, not a wizard. A wizard implies a one-time completion; this is
-a form people will return to three times over six weeks as they change their
-minds. Everything saves on change.
+a form people return to as they change their minds. Everything saves on change.
 
 Section 2 ("Zimmerwünsche") and the later sections are **generated from the
 active occasion profile**: every tag declaring
@@ -136,7 +135,7 @@ below specify disclosure; timing is governed separately by
 | Restricted values | Own-family values only where authorised; never shared or other-family |
 | `descriptive` tags | Only explicitly family-facing own inputs; internal descriptive facts remain hidden |
 
-Cross-family co-room requests are deferred with sleeping parties, so the family
+Cross-family co-room requests are outside the active sleeping model, so the family
 view exposes only preferences that constrain the family's own placement unit. When
 that idea is adopted, the rule to keep is that only a mutual match is shown: a
 one-sided request stays invisible to the family it names, because showing it

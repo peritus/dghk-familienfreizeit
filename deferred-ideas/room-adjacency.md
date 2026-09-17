@@ -1,9 +1,9 @@
-# Deferred idea: room adjacency
+# Optional design: room adjacency
 
-*Status:* deferred. Not part of the specification and not selected by any profile.
-This sketch records how the idea would work as a module if it is ever picked up;
-adopting it means adding it back to the module catalogue and to every document
-listed under "Integration points".
+*Status:* Not part of the active specification and not selected by any profile.
+This sketch records how the capability would work as a module; adopting it means
+adding it to the module catalogue and to every document listed under
+"Integration points".
 
 Proposed module id `room-adjacency` · factory `roomAdjacency`
 

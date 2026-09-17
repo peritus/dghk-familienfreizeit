@@ -1,13 +1,13 @@
-# Deferred idea: party review
+# Optional design: party review
 
-*Status:* deferred with the sleeping-parties and child-rooms modules. This screen
-is not part of the active UI catalogue.
+*Status:* Not part of the active UI catalogue. This screen belongs to the
+sleeping-parties and child-rooms module boundary.
 
 ## Audience, purpose, and route
 
 Organisers would review derived sleeping parties before touching the board. Proposed
 route: `/organiser/parties`. Governing specs: [organiser view](../09-organiser-view.md),
-[sleeping parties](sleeping-parties.md), and decision [D5](../17-decisions.md#d5-sleeping-parties-and-child-rooms-are-deferred).
+[sleeping parties](sleeping-parties.md), and decision [D5](../17-decisions.md#d5-sleeping-parties-and-child-rooms-are-outside-the-active-placement-model).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

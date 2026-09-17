@@ -30,8 +30,8 @@ Organiser apply still verifies solver agreement. Communication confirmation uses
 reviewed head, scope selection and code/config identities, with no extra content hash.
 Any benchmark must exercise multi-basis family responses, live participation checks,
 release previews and ordinary apply. Do not assume saves are fold-only or that cold
-misses occur only once per communication. This proposal remains deferred; release
-control introduces no persisted cache.
+misses occur only once per communication. This proposal is outside the active
+architecture; release control introduces no persisted cache.
 
 ## Why a cache here needs no invalidation
 
@@ -67,7 +67,7 @@ removed projection tables.
    - Only one module (`src/db/cache.ts`) reads or writes it.
    - A test asserts that a cache hit's `output_hash` equals a fresh derive's.
 3. **D1 revision is conditional on a measurement**, not an assumption:
-   - Add an M0/M2 task: benchmark in `workerd` against
+   - Benchmark in `workerd` against
      `test/fixtures/event-logs/full-event.kdl`:
      (a) fold at head, (b) cache-hit family view, (c) cold solve.
    - (a) and (b) within ~5 ms CPU → the free tier is viable for everything except a
@@ -76,30 +76,9 @@ removed projection tables.
      live saves and release previews. If (c) > 10 ms, D1 stays Paid and the cache is kept only for latency. If
      (c) fits, D1 becomes "Free tier + derive cache", with Paid as the documented
      fallback.
-   - I'd write D1 as "Free + cache, pending the M2 benchmark; switch to Paid if the
+   - I'd write D1 as "Free + cache, pending the benchmark; switch to Paid if the
      cold solve exceeds the limit." That's honest about the one path a cache can't
      remove.
-
-## Spec edits after approval (docs only, one commit)
-
-- `17-decisions.md`:
-  - D1: rewrite *Why Paid* as above. Replace the rejected-memo alternative with the
-    table of alternatives. Add the measurement gate.
-  - D2: add *Consequence:* the derive cache is allowed because it's keyed by plan
-    identity; distinguish it from the rejected persisted projections.
-- `AGENTS.md`: add to the operational-tables bullet: "a content-keyed derive cache
-  that is safe to empty".
-- `01-architecture.md`:
-  - Replace the "memoise the fold … do not pre-build it" paragraph with a short
-    "Derive cache" section (key, rules, what's cached).
-  - `src/db/cache.ts` in the tree, plus a fourth load-bearing boundary.
-- `02-data-model.md` §7: `derive_cache` DDL.
-- `13-deployment.md`: §10 cost row. Any proposed eviction policy must account for all active scope references and allow safe cold reconstruction; it cannot use a single latest communication cutoff. §1 unchanged (no new binding).
-- `14-testing.md`: the cache-hit ≡ fresh-derive test, plus a "table emptied mid-run" test.
-- `15-roadmap.md`: M0 "deployed on Workers Paid" becomes the free/Paid choice. Add the benchmark task to M2 (the solver milestone).
-
-Commit: `docs: cache derived plans by plan identity instead of requiring Workers Paid`.
-Bookmark: `re-introduce-caching` (this plan); implement on top of it.
 
 ## Verification
 

@@ -170,9 +170,9 @@ wrangler secret put RESEND_API_KEY
 wrangler secret put SESSION_PEPPER      # optional, see below
 ```
 
-That is the complete list. `SESSION_PEPPER` is optional: mixing a server-side
-secret into the session and magic-link hashes means a database-only leak yields
-nothing usable even offline. It costs one string concatenation. Take it.
+That is the complete list. `SESSION_PEPPER` is optional, but mixing a server-side
+secret into the session and magic-link hashes means a database-only leak does not
+provide usable session or magic-link hashes offline.
 
 Rotating it invalidates every session and every outstanding magic link, which is
 also a useful emergency lever.

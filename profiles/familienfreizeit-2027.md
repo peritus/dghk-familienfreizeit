@@ -1,6 +1,6 @@
 # Familienfreizeit 2027 occasion profile
 
-This is the first deployed occasion profile for DGHK Familienfreizeit. Its
+This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.ts); this document
 explains the choices behind it. It selects and configures generic modules; it does
 not define a separate application architecture.
@@ -136,8 +136,8 @@ not a booking or billing rule.
 | `organiser-note` | note | family, person, room, workshop | organiser-only, restricted; the solver never reads it |
 
 Keep-apart relations are never visible to families, which is why `apart-from` is
-both organiser-only and restricted. Cross-family co-rooming is deferred with the
-sleeping-parties module.
+both organiser-only and restricted. Cross-family co-rooming belongs to the
+separate sleeping-parties module.
 
 ## 4. Food preferences
 
@@ -236,8 +236,7 @@ confirms it. After the deadline, the preferences page is read-only.
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../18-german-translation-guidelines.md). The
 preferences page has four sections: who is coming, room wishes, workshops, and
-food. Cross-family sharing wishes arrive with the deferred sleeping-parties
-module.
+food. Cross-family sharing wishes belong to the separate sleeping-parties module.
 
 Optional communication emails use the release-control recipient preview, including
 programme-only changes. The notification profile configures subjects and includes

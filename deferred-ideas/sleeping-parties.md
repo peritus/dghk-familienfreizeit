@@ -1,9 +1,9 @@
-# Deferred idea: sleeping parties
+# Optional design: sleeping parties
 
-*Status:* deferred. Not part of the specification and not selected by any profile.
-This sketch records how the idea would work as a module if it is ever picked up;
-adopting it means adding it back to the module catalogue and to every document
-listed under “Integration points”.
+*Status:* Not part of the active specification and not selected by any profile.
+This sketch records how the capability would work as a module; adopting it means
+adding it to the module catalogue and to every document listed under “Integration
+points”.
 
 Proposed module id `sleeping-parties` · factory `sleepingParties`
 
@@ -186,7 +186,7 @@ reported by room assignment and attributed to the events that caused them.
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/parties` — party review with provenance, requirement contributors, merge and split ([deferred party review](party-review.md)) |
+| Screen | `/organiser/parties` — party review with provenance, requirement contributors, merge and split ([party review](party-review.md)) |
 | Controls | none; the co-room tag's control is declared by the profile |
 | Reports | none of its own |
 | Emails | none |

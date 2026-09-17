@@ -241,8 +241,8 @@ ordinary visible domain action, not a hidden side effect of releasing details.
 
 Uncommunicated workshop references in saved own rankings use the last safe descriptor
 or a neutral unavailable-choice label, never draft titles. Existing disclosure rules
-for requests still apply; release control does not activate deferred sleeping-party
-functionality.
+for requests still apply; release control does not activate sleeping-party
+functionality outside the active module set.
 
 ## 6. Outstanding changes report
 

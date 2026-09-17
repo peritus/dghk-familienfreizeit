@@ -6,8 +6,7 @@ English; the family-facing German copy follows [the translation
 guidelines](../18-german-translation-guidelines.md).
 
 The wireframes are ASCII plans, not pixel-perfect artwork. They establish
-information hierarchy, actions, states, and responsive behavior before React
-implementation begins.
+information hierarchy, actions, and responsive behavior for the React application.
 
 Development also provides a non-production KDL event-log debug view. It is not
 an organisation-team or family surface and is intentionally absent from the route catalog
@@ -33,7 +32,7 @@ experimentation.
 | UI-12 | [Workshops](12-workshops.md) | `/organiser/workshops` |
 | UI-13 | [Organiser decisions](13-constraints.md) | `/organiser/constraints` |
 
-The party-review screen is deferred with the sleeping modules. Its design sketch
+The party-review screen belongs to the separate sleeping modules. Its design sketch
 is kept in [`deferred-ideas/party-review.md`](../deferred-ideas/party-review.md).
 
 Two organiser routes in [organiser view](../09-organiser-view.md) §1 have no screen

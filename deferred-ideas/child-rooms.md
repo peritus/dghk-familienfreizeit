@@ -1,9 +1,9 @@
-# Deferred idea: child rooms
+# Optional design: child rooms
 
-*Status:* deferred. Not part of the specification and not selected by any profile.
-This sketch records how the idea would work as a module if it is ever picked up;
-adopting it means adding it back to the module catalogue and to every document
-listed under "Integration points".
+*Status:* Not part of the active specification and not selected by any profile.
+This sketch records how the capability would work as a module; adopting it means
+adding it to the module catalogue and to every document listed under
+"Integration points".
 
 Proposed module id `child-rooms` · factory `childRooms`
 
@@ -190,7 +190,7 @@ child, attributed to the child's family.
 
 | Kind | Contribution |
 |---|---|
-| Screen | Child-group management on the inventory screen; the children's-room section of the deferred party review |
+| Screen | Child-group management on the inventory screen; the children's-room section of the party review |
 | Controls | none; the need tag declares its own control in the profile |
 | Reports | Accommodation overview gains child-group capability and occupants per child room |
 | Emails | none |
