@@ -198,12 +198,12 @@ contract](05-solver-contract.md), and workshop tests in [testing](14-testing.md)
 
 - Implement structured ordered-choice rankings, no-preference values, rank
   validation, and communicated-programme rules.
-- Implement eligibility, reservations, co-assignment groups, fixed resolver
+- Implement eligibility, reservations, fixed resolver
   decisions, previous-plan retention, balanced-opportunity ledger, ranked
   allocation, manual cancellation, fill, and workshop plan output.
 - Implement the preference heatmap, ranking controls, workshop findings, rosters,
   and allocation diffs.
-- Add fairness, capacity, group, separation, age, cancellation, and deterministic
+- Add fairness, capacity, separation, age, cancellation, and deterministic
   workshop fixtures.
 
 Acceptance: each person receives at most one assigned workshop per slot; valid

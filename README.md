@@ -26,7 +26,7 @@
 | 20.3 | [Room assignment](20.3-room-assignment.md) | Deterministic placement, room scoring, and the board |
 | 20.4 | [Workshops](20.4-workshops.md) | Slots, workshops, audience, leadership, and cancellation |
 | 20.5 | [Workshop rankings](20.5-workshop-rankings.md) | Ordered per-person workshop choices |
-| 20.6 | [Workshop assignment](20.6-workshop-assignment.md) | Fair workshop assignment and co-assignment groups |
+| 20.6 | [Workshop assignment](20.6-workshop-assignment.md) | Fair workshop assignment |
 | 20.7 | [Food preferences](20.7-food-preferences.md) | Per-person diet and allergy text |
 | 20.8 | [Materials](20.8-materials.md) | Requests, commitments, and fulfilment |
 | 20.9 | [Family preferences](20.9-family-preferences.md) | The profile-driven preferences page and control union |

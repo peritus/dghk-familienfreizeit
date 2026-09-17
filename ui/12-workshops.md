@@ -29,7 +29,7 @@ unranked states distinguish “no response” from “no workshop available”.
 
 An Add organiser decision action opens the shared [decision form](13-constraints.md)
 with the selected workshop and slot context. It can add matching, exclusion,
-grouping, separation, or eligibility labels through the fixed resolver. It uses
+separation, or eligibility labels through the fixed resolver. It uses
 the existing pending/apply flow and offers one optional note; applied labels show
 the existing event author and timestamp. The derived assignment and findings
 update through the ordinary solver.
