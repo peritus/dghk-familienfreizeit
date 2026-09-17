@@ -96,7 +96,7 @@ reference stable entities, never derived Parties.
 **Plan** — the complete solver result for the event log through an `input_seq`:
 assignments, unplaced parties, diagnostics, and a full decision trace. Plans are
 deterministic values derived on demand. A plan's identity is its `input_seq`,
-`config_hash`, and `solver_version`.
+`config_hash`, and `code_revision`.
 
 **Publication** — the decision that a specific plan is what families should see.
 `PlanPublished` records that decision and the plan's `output_hash`; it does not

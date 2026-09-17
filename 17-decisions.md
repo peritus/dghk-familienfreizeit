@@ -242,7 +242,7 @@ the events before the latest publication.
 plan, so publication would have a separate result shape.
 
 *Why it loses:* publication is a state of a plan, not a second domain object.
-`solver_version`, `config_hash`, and `output_hash` identify and verify the plan
+`code_revision`, `config_hash`, and `output_hash` identify and verify the plan
 without introducing another vocabulary layer.
 
 *Consequence:* keeping unpublished work from families is a data path, not a rule.
@@ -332,3 +332,50 @@ vocabulary visibly distinct.
 *Consequence:* `typescript-eslint`'s `naming-convention` rule enforces the code and
 data rules ([testing](14-testing.md) §6); the profile builder rejects vocabulary
 identifiers that are not kebab-case.
+
+## D19 — One monolith in one repository, deployed as a whole
+
+*Chosen.* The application is a single monolith in a single monorepo: the kernel,
+every module, every occasion profile, the Worker, and the browser application. One
+build from one revision produces everything a deployment runs, and a deployment
+ships all of it together. The occasion profile selects which modules are active
+(D12, [modules](20-modules.md)); selection happens inside that one build, not by
+combining separately built parts.
+
+*Rejected alternative:* modules as separately built or published packages with
+their own release cycles. It buys independent releases that nobody here needs and
+costs compatibility ranges, a matrix of module combinations to test, and a
+dependency resolver deciding what actually runs.
+
+*Rejected alternative:* separately deployed services per module. Derivation is one
+pure function over one event list (D2, D15); splitting it across deployments would
+turn a function call into a distributed consistency problem.
+
+*Consequence:* modules depend on each other by id only, never on a compatible
+range. A change that spans the kernel and several modules is one change, reviewed
+and deployed together. The Worker and the browser bundle always come from the same
+revision, and the organiser application refuses to derive when they do not
+([deployment](13-deployment.md) §1).
+
+## D20 — Code is identified by its revision, not by a version number
+
+*Chosen.* Nothing in this project carries a semantic or any other multi-part version
+number: not the application, the kernel, a module, a rule, or a profile. Deployed code
+is identified by `code_revision`, the commit id of the monorepo revision the
+deployment was built from, injected at build time. Configuration is identified by
+`config_hash` (D12). A plan is identified by `input_seq`, `config_hash`, and
+`code_revision`.
+
+*Rejected alternative:* semver for the application or per module. Version numbers
+communicate compatibility to independent consumers; a monolith deployed as a whole
+(D19) has none. Numbers would be bumped by hand, drift from what actually changed,
+and still not name the exact code that produced a plan.
+
+*Why:* a commit id names the exact code that ran, costs nothing to maintain, and is
+what someone needs to reproduce a plan: check out that revision and derive at
+`input_seq`.
+
+*Consequence:* third-party dependency versions are unaffected; they are pinned by
+the lockfile. Change within the code is tracked by version control, and rule
+identity by rule id: a rule is never edited to mean something different; a new rule
+id replaces it ([solver contract](05-solver-contract.md) §4).

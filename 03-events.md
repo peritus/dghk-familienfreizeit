@@ -243,7 +243,7 @@ same stable entity references and remain visible in the event history.
 ### `PlanPublished`
 ```ts
 {
-  solver_version: string, config_hash: string, output_hash: string,
+  code_revision: string, config_hash: string, output_hash: string,
   notify: boolean, note: string | null
 }
 ```

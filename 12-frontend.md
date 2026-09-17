@@ -262,7 +262,7 @@ Applying is the only write the organiser application makes:
 
 ```
 POST /api/organiser/apply
-     { input_seq, events[], output_hash, config_hash, solver_version }
+     { input_seq, events[], output_hash, config_hash, code_revision }
 
   409 → the log moved; response carries the new events, the application re-derives on them
   200 → applied; response carries the server's output_hash

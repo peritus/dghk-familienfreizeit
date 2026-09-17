@@ -135,13 +135,13 @@ deployments, not events (D12).
 ## 5. Hashing and history
 
 `config_hash` is the SHA-256 of the canonical JSON of: `meta`; each tag with its
-fields, with evaluators replaced by their source text; and each selected module's id,
-version, and defaulted parameters. It makes every configuration change visible in
+fields, with evaluators replaced by their source text; and each selected module's id
+and defaulted parameters. It makes every configuration change visible in
 plan metadata.
 
 Historical plan metadata remains authoritative. The deployed profile is used for new
-derivations; the recorded solver version and configuration hash identify what
-produced an earlier plan.
+derivations; the recorded `code_revision` and `config_hash` identify what produced an
+earlier plan.
 
 ## 6. UI and copy
 

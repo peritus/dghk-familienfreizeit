@@ -145,7 +145,7 @@ No stage sees data it must remember to ignore.
 
 ```ts
 type SolverConfig = Readonly<{
-  solver_version: string                 // kernel version + selected module ids and versions
+  code_revision: string                  // commit id of the deployed monorepo revision (D20)
   config_hash: string
   event_date: string                     // meta.starts_on; every age is computed against it
   profile: OccasionProfile               // the built profile, parameters defaulted
@@ -188,7 +188,6 @@ Every scored or pruning rule, hard or soft, in any module, implements one shape:
 ```ts
 interface Rule<Candidate = unknown, Target = unknown, Ctx = unknown> {
   id: string                    // 'hard.<name>' or 'soft.<name>', kebab-case
-  since: string                 // module version that introduced it
   evaluate(candidate: Candidate, target: Target, ctx: Ctx): number | Infeasible
   describe(candidate: Candidate, target: Target, ctx: Ctx): string | null
 }
@@ -203,8 +202,8 @@ parameter or on the tag it belongs to, and is recorded in `config_hash`.
 
 **Hard rules are binary.** A `required` requirement is not worth points; it prunes.
 
-Adding a rule is a new file plus a module version bump. Never edit an existing rule to
-mean something different; add a new rule id and retire the old one. Weight changes go
+Adding a rule is a new file with a new rule id. Never edit an existing rule to mean
+something different; add a new rule id and retire the old one. Weight changes go
 through the profile, never through code (D12).
 
 ---
@@ -215,7 +214,7 @@ through the profile, never through code (D12).
 type Plan = {
   meta: {
     input_seq: number
-    solver_version: string
+    code_revision: string
     config_hash: string
     event_date: string
   }

@@ -52,16 +52,10 @@ the definition bound to validated parameters.
 ```ts
 export interface ModuleDefinition<Id extends ModuleId, Params> {
   id: Id                                   // kebab-case; stable forever
-  version: string                          // semver; included in config_hash
-  requires: readonly ModuleDependency[]    // missing or incompatible → profile build fails
-  enhances: readonly ModuleDependency[]    // used when selected, ignored otherwise
+  requires: readonly ModuleId[]            // missing → profile build fails
+  enhances: readonly ModuleId[]            // used when selected, ignored otherwise
   params: z.ZodType<Params>                // parsed at profile build; defaults live here
   contribute(params: Params, profile: ProfileView): ModuleContributions
-}
-
-export interface ModuleDependency {
-  id: ModuleId
-  range: string                            // semver range, e.g. '^1.0.0'
 }
 
 export interface ModuleContributions {
@@ -116,21 +110,17 @@ other profile function.
 
 Defaults live in the module's zod schema, so a profile states only what it changes.
 The canonicalised, defaulted parameter object is what enters `config_hash`, so a
-default that changes in a new module version is visible as a configuration change.
+changed default is visible as a configuration change.
 
-### 3.3 Versions
+### 3.3 Identity and change
 
-A module's `version` follows semver over its observable behaviour:
-
-- **patch** — no change to any plan, trace text, event schema, or parameter;
-- **minor** — new optional parameters, event types, rules, reports, or screens;
-  existing plans derive unchanged under default parameters;
-- **major** — anything that can change a derived plan or reject previously valid
-  events or parameters.
+Modules have no version numbers (D20). The kernel and every module live in one
+monorepo and are built and deployed together (D19), so a module depends on another
+by id alone and there is never a compatibility range to resolve. A plan records the
+`code_revision` it was derived with, which names the exact code of every module.
 
 A rule is never edited to mean something different; a new rule id replaces it
-([solver contract](05-solver-contract.md) §4). The solver version recorded on a
-plan is the kernel version plus every selected module's id and version.
+([solver contract](05-solver-contract.md) §4).
 
 ## 4. Composition
 
@@ -138,7 +128,7 @@ The profile builder, `defineOccasionProfile`, composes selected modules at build
 time and fails the build when:
 
 - a module is selected twice;
-- a `requires` dependency is missing or out of range;
+- a `requires` dependency is not selected;
 - two modules contribute the same entity kind, event type, label key, route, or
   report id;
 - a profile tag collides with a module-owned label key;
