@@ -112,8 +112,12 @@ The preferences collapse to a read-only summary; the assignment takes the top.
                       Jonas: Klettern · Emma: Basteln
   Samstag Nachmittag  …
 
-  [ Als PDF speichern ]
+  [ Drucken ]
 ```
+
+**Drucken** opens the browser's print dialog; it is the same `Print` control reports
+use, and there is no PDF export or download ([reports](19-reports.md) §1, §5). A
+family that wants a PDF chooses it in the browser's print dialog.
 
 The print stylesheet matters more than it sounds. People will print this and put
 it on the fridge, and several will arrive at the hostel with it on paper because
