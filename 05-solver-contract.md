@@ -215,11 +215,9 @@ Preflight runs before any stage, over the solver input alone. Its value is timin
 says "19 beds required, 14 available" in week two, before a single placement runs.
 Finding severities behave as follows:
 
-- **error** — the plan still computes. When communicating an affected scope, the organiser
-  names the relevant check in `Communicated.acknowledged_findings`, under
-  [release control](06-release-control.md) §3.
-  Never block computing: an organiser needs to see the plan to understand the
-  error.
+- **error** — the plan still computes so the organiser can inspect and fix the
+  problem, but communication of an affected scope is blocked until the finding
+  is resolved.
 - **warning** — shown on the dashboard, no gate.
 - **info** — shown on the relevant screen only.
 

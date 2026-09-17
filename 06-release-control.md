@@ -94,7 +94,6 @@ type CommunicatedPayload = {
   scopes: readonly CommunicationScope[]
   build_revision: string
   compatibility_revision: number
-  acknowledged_findings: readonly string[]
   notify: boolean
   note: string | null                 // organiser-only
 }
@@ -103,12 +102,12 @@ type CommunicatedPayload = {
 `basis_seq` is the committed head reviewed and must equal the head immediately
 before append (`Communicated.seq - 1`). Scopes are non-empty, unique, supported by
 selected modules, and sorted by kind then referenced id. Module references resolve
-through the configured resolver. Findings are unique sorted check ids. `notify`
+through the configured resolver. `notify`
 requires `change-notifications` to be selected.
 
 Organisers apply pending events before confirming communication. Preview requests
 are read-only. The confirmation submits the reviewed basis, scopes,
-`build_revision`, `compatibility_revision`, findings and notification choice. The server:
+`build_revision`, `compatibility_revision` and notification choice. The server:
 
 1. authenticates and authorises the organiser;
 2. verifies the current head and deployed identities equal those reviewed;
@@ -119,15 +118,15 @@ are read-only. The confirmation submits the reviewed basis, scopes,
 
 A concurrent append, changed deployment or dependency conflict changes
 nothing. Return a refreshed preview and require explicit confirmation again, even
-when the concurrent event was live-only. Acknowledgements apply only to acknowledgeable
-solver error findings relevant to the selected scope; match findings by their check ids and resolved
-subjects (unscoped kernel errors apply to every dependent scope). Unrelated scope errors do not
-block a programme release. Privacy, reference validity, admission invariants and
-cross-scope consistency are hard gates and cannot be acknowledged away.
+when the concurrent event was live-only. Blocking solver findings relevant to a
+selected scope, including unscoped kernel errors on which it depends, prevent
+communication until resolved. Unrelated scope findings do not block a programme
+release. Privacy, reference validity, admission invariants and cross-scope
+consistency are hard gates. No release action can bypass a blocking finding.
 
 ### Review identity and semantic comparison
 
-The reviewed prefix, scope selection, `build_revision`, `compatibility_revision`, acknowledgements and
+The reviewed prefix, scope selection, `build_revision`, `compatibility_revision` and
 notification choice identify the action. The preview response returns those fields;
 the client invalidates confirmation whenever any selection/option changes and asks
 for a new preview. Confirmation repeats exactly that reviewed tuple. The server
@@ -251,7 +250,7 @@ content with its last reproducible communicated content. It lists:
 - never communicated, changed, matching, or revision-mismatch state;
 - scope name and last communication reference;
 - exact semantic differences and affected families;
-- dependencies, blocking conflicts and acknowledgeable findings;
+- dependencies and blocking conflicts;
 - selection for communication.
 
 Never-communicated scopes show full initial content. A changed-then-restored value
@@ -276,8 +275,8 @@ contains:
 2. field-level before/after values, full initial content, and participant additions,
    removals and movements;
 3. affected families, grouped by family, with the exact family-visible result;
-4. dependencies requiring explicit selection, blocking conflicts and check ids that
-   can be acknowledged; no scope is added silently;
+4. dependencies requiring explicit selection and blocking conflicts; no scope is
+   added silently;
 5. everything left uncommunicated;
 6. optional email choice, exact recipients and message previews (§8).
 
@@ -343,7 +342,7 @@ to a newly associated address without review.
    same canonicalisation/privacy projection. Viewing previews writes no event.
 8. A concurrent append or deployment invalidates confirmation without partial release.
 9. Missing programme dependencies require explicit selection; invalid mode, slot,
-   capacity or cancellation combinations cannot be acknowledged away.
+   capacity or cancellation combinations block communication until resolved.
 10. Sign-up admission, last-place races, capacity reductions and fairness follow the
     workshop module; historical allocation overlap is explained and resolved on release.
 11. Mode transitions never convert, silently delete or revive participation. Moving
