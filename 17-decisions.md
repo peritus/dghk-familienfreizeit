@@ -238,26 +238,36 @@ algorithm. The first is dependency-free TypeScript and is budgeted in
 [deployment](13-deployment.md) §1; the second is held by the cross-runtime agreement
 test in [testing](14-testing.md) §1.
 
-## D16 — Publication identifies a plan; it does not create another plan
+## D16 — Release control determines which arrangements families see
 
-*Chosen.* `PlanPublished` identifies the plan derived from the events before the
-publication event. It carries the hash of what the organiser reviewed. Every audience
-derives the same kind of plan from the events visible to that audience: the working
-organiser may include pending events, other organisers use the log head, and families use
-the events before the latest publication.
+*Chosen.* Release control holds back accommodation allocations as a whole, workshop
+programme details per workshop, and solver workshop allocations per slot. Organisers
+review an exact diff and choose **An Familien kommunizieren**. A `Communicated`
+event identifies the reviewed log prefix and selected scopes; each scope retains
+its last communicated content while organisers prepare changes. Own information,
+materials and permitted live participation remain current. Privacy is independent.
+Email notification is optional and does not determine visibility.
 
-*Rejected alternative:* store a second published-plan type alongside the ordinary
-plan, so publication would have a separate result shape.
+The authoritative mechanism, event contract, dependencies, reports and acceptance
+scenarios are in [release control](06-release-control.md). All content is derived
+from the event log; the family response composes ordinary worlds without creating
+another Plan type or storing a snapshot.
 
-*Why it loses:* publication is a state of a plan, not a second domain object.
-`code_revision`, `config_hash`, and `output_hash` identify and verify the plan
-without introducing another vocabulary layer.
+*Rejected alternatives:* freezing the whole family world hides successfully saved
+answers; exposing the entire current world reveals unfinished arrangements; a single
+global boundary prevents communicating individual workshops. Releasing individual
+families' beds or individual workshops' solver participants can produce contradictory
+allocations, so accommodation and slot allocations are coherent release units.
 
-*Consequence:* keeping unpublished work from families is a data path, not a rule.
-There is no filter to forget, because the Worker derives a family's view from the
-events before the latest publication and cannot reach past them. What a family may
-see of *other* families within that plan is a filter, applied by the Worker before
-the view leaves it ([family view](10-family-view.md) §2).
+*Rejected alternative:* persist communicated snapshots or a second plan type.
+They create competing domain state and bypass ordinary deterministic derivation.
+The reviewed sequence, selected scopes and code/config identities identify the
+action. Release control needs no additional content hash; the head guard and
+deterministic derivation protect confirmation.
+
+*Consequence:* family reads combine live information with scope-specific historical
+content and apply current authorisation/privacy. Organisers need an outstanding-change
+report and a detailed confirmation preview, not a whole-log age indicator.
 
 ## D17 — KDL is the canonical development and test event-log format
 

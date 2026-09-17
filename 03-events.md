@@ -251,40 +251,12 @@ remain local to the organiser's browser until applied.
 
 ---
 
-## Publication
+## Communication
 
-### `PlanPublished`
-```ts
-{
-  code_revision: string, config_hash: string, output_hash: string,
-  acknowledged_findings: string[],
-  notify: boolean, note: string | null
-}
-```
-
-The one event about plans, and it records the decision that the plan derived from
-events before this event is what families are being told. Its own `seq` identifies
-the preceding plan's `input_seq`.
-
-`output_hash` is the plan the organiser reviewed. It is checked on append: the server
-derives at the position the event would occupy and refuses if the hashes differ,
-which means the log moved while the organiser was reading. A board apply guards itself
-the same way, on the position its pending events were composed against; publication
-guards on the plan itself, because that is what the organiser actually read. Either way
-the guard is what makes a sequence number on the payload unnecessary — you publish
-the log as it stands, or you review it again.
-
-`acknowledged_findings` carries the check ids of the error-severity preflight
-findings the organiser accepted ([solver contract](05-solver-contract.md) §3). The
-append is refused when the derived plan has an error finding this list does not
-name, so publishing over an error is a recorded decision rather than a click.
-
-The latest `PlanPublished` is the active publication; an earlier one is superseded by
-a later one. If `notify`, the diff between the old published plan and the new plan is
-computed and change emails are queued.
-
-*Note:* the hash is computed by the server, but the actor is the organiser who published.
-Publishing is the decision; the hash is what they decided about.
+`Communicated` is the kernel event for an organiser's release decision. Its payload,
+head guard, review identity, scope dependencies and authorisation are defined in
+[release control](06-release-control.md) §3. Its envelope supplies actor, time and
+sequence; it stores no plan or arrangement snapshot. Previewing creates no event.
 
 ---
 

@@ -26,7 +26,7 @@
               diff(world, world) → what changed, and why
                                │
           organisers read ─────────┤
-          families read ──────┘  (published only)
+          families read ──────┘  (live + communicated scopes)
 ```
 
 Everything flows in one direction. There is no path by which a family or an
@@ -95,58 +95,21 @@ Pending events live in the organiser's browser for as long as that tab is open. 
 never stored on the server, never shared between organisers, and never visible to
 families.
 
-## Plan inputs
+## Planning and family reads
 
-`derive` takes a list of events, so the only question any screen or report has to
-answer is which events count. Three answers, and they are the whole visibility
-model:
+The working organiser renders `derive(log ++ pending)`; other organisers render
+`derive(log)`. The family response combines permitted live information with the
+last communicated content of each release scope, under the authoritative
+[release-control contract](06-release-control.md) §1–5. The Worker applies privacy
+before responding. Reports use the same audience projection.
 
-```
-the working organiser    derive(log ++ their pending events)
-every other organiser    derive(log)
-families            derive(log before the latest PlanPublished)
-```
-
-Reports use these same cuts and are audience-scoped rather than organiser-only by
-default. Shared coordination reports such as materials and the workshop
-programme are available to authenticated families when their fields are safe to
-share. The complete report contract and catalogue are in [reports](19-reports.md).
-
-One function, one list, cut at three points. The two organiser cuts differ by whether a
-change has been appended yet, which is what **Apply** does. The family cut differs
-by whether it has been published, which is what **Publish** does.
-
-**Publication is a record about a plan.** `PlanPublished` says that the plan derived
-from the events before it is what families are being told. Its own position in the
-log identifies the preceding plan's `input_seq`. The latest such event is the active
-publication; earlier events remain publication history.
-
-```
-PlanPublished
-  output_hash             sha256 of the plan the organiser reviewed
-  code_revision           commit id of the deployed monorepo revision (D20)
-  config_hash             sha256 of the canonicalised config object
-  acknowledged_findings   check ids of the error findings the organiser accepted
-  notify                  whether change emails were queued
-  note                    optional organiser note
-```
-
-`output_hash` does two jobs. It is the concurrency guard — the publish request
-carries the hash the organiser reviewed, and the server refuses with the diff if its own
-derivation disagrees, which means the log moved while they were reading. And it is
-the record of what was actually sent, which is what makes code drift detectable
-rather than silent.
-
-**A plan's identity is the input sequence it was derived at.** That, `config_hash`, and
-`code_revision` name it completely, which is why there is no plan id. Those three
-also mean **every difference between two plans has an attributable cause** — new
-events move `input_seq`; retuned weights move `config_hash` and `code_revision`, since
-the profile is code in the same repository; other new code moves `code_revision`
-alone. You never have to wonder which.
-
-`config_hash` is computed at runtime from the code config object. See
-[occasion profiles](16-occasion-profiles.md) §4 for what goes into it, including the
-requirement that function bodies are hashed by source.
+`Communicated` records an organiser's reviewed release decision, not a stored plan.
+The kernel derives its scope references from events and uses ordinary historical
+worlds to reproduce content. There remains one Plan type, identified by `input_seq`,
+`config_hash` and `code_revision`. Release review uses its basis sequence, scope selection and code/config identities;
+programme details need not be solver output or acquire another content hash. See [release control](06-release-control.md) §3–4
+for identity, concurrency and verification; [occasion profiles](16-occasion-profiles.md)
+§4 defines configuration hashing.
 
 ## Kernel and modules
 
@@ -247,8 +210,7 @@ for another family.
 ## Read models
 
 None are stored. `World` is the read model: typed entities, labels, constraint
-definitions, the plan, and its diagnostics, built in memory by `derive` for the
-events the reader may see. Stable URLs, authentication lookup, and every screen
+definitions, the plan, and its diagnostics, built in memory by `derive`; audience responses select the permitted content. Stable URLs, authentication lookup, and every screen
 read it the same way.
 
 The database holds the event log and operational tables
@@ -256,8 +218,8 @@ The database holds the event log and operational tables
 families, rooms, or labels, or a query that reads event payloads to answer a domain
 question, it is a bug.
 
-Plans are derived rather than maintained as authoritative state. Every screen derives
-the plan from the events it is allowed to see, and `derive` validates assignment
+Plans are derived rather than maintained as authoritative state. Every planning screen derives
+the ordinary plan, and family screens use the release-control projection, and `derive` validates assignment
 uniqueness before returning a world, so there is no assignment table or plan table.
 
 ## Event sources
@@ -292,64 +254,18 @@ does not bypass authentication or authorization, and must be rejected by
 production configuration. The D1 event table remains the production domain
 store and the only persisted domain state.
 
-## Staleness
+## Release control and notifications
 
-The distance between the latest published plan's input sequence and the log head:
+The dashboard reads the outstanding-change report defined in
+[release control](06-release-control.md) §6. Its detailed review (§7) determines
+exactly what selected scopes will make visible. Apply saves domain edits;
+**An Familien kommunizieren** releases reviewed arrangements. Live inputs do not
+wait for that action.
 
-```sql
-SELECT (SELECT MAX(seq) FROM event) - seq AS events_behind
-FROM event
-WHERE type = 'PlanPublished'
-ORDER BY seq DESC
-LIMIT 1;
-```
-
-`events_behind > 0` means families may be looking at a plan older than what the
-organisers have. The dashboard shows it permanently. It is the single most important
-number on the screen, because it is the one that answers "do I need to do anything
-today".
-
-Not every event should make a plan stale — a family correcting the spelling of a
-name does not change any assignment. Rather than filtering event types (fragile, and
-it will be wrong the first time someone adds an event type), compute staleness
-properly, by deriving the published plan and the current plan:
-
-```
-diff(derive(log before latest PlanPublished), derive(log))
-```
-
-Empty → "up to date despite N new events". Non-empty → "N changes would move M
-people. Review →". That is one extra derivation per dashboard load, in the low
-milliseconds, and it turns a scary number into an accurate one.
-
-### Code drift
-
-Events are one of three things that move a plan; the others are retuned weights and
-new code, and both arrive by deploy rather than by append. Deriving the published
-plan and comparing it to the recorded `output_hash` catches them:
-
-> ⚠ The publication at seq 1482 was made with revision `3f9c2a1`. The deployed code
-> derives a different plan from the same events. **Review and re-publish →**
-
-This is the same loop as any other staleness — review the diff, publish, email the
-families who move — and it is the reason the hash is recorded rather than the plan.
-A stored plan would render happily from its own payload and let the deployed code
-disagree with it in silence.
-
-## Publication and change notification
-
-Publishing records the current plan as the family plan and, optionally, runs the emails.
-
-```
-1. Organiser reviews the current plan and its diff against the previously published plan.
-2. Organiser publishes → PlanPublished { output_hash, …, notify, note }
-   — refused with the diff if the server derives a different output_hash
-3. If notify: diff the previously published plan against the new plan, email only affected families
-```
-
-Step 3 is a `for` loop over `diff(previous published plan, new plan)`. A
-family is affected if any of its people changed room, place, or workshop — which is
-what a `Change` records.
+Release control owns semantic scope comparison, history verification and recipient
+selection (§8). [Change notifications](20.10-change-notifications.md) owns message
+construction and operational delivery after the event succeeds. The request still
+uses the ordinary authenticate/validate/authorise/append/respond lifecycle.
 
 ## Source layout
 
