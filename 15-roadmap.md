@@ -139,7 +139,7 @@ Send the real invitations only after this deferred milestone is delivered.
 - Board: room cards, room grouping, status glyphs
 - Board interaction: pragmatic-drag-and-drop, multi-select, keyboard
 - The pending list, deriving locally on every action; apply and discard
-- Custom constraint definitions and `needs/provides` label application
+- Organiser decision labels and `needs/provides` label application
 - Undo by popping a pending event
 - Apply-time compare-and-swap with 409 re-derivation
 - The cross-runtime agreement test, before the board is trusted
@@ -188,7 +188,7 @@ post-initial enhancements.
 - Constraint usage and redundancy metrics
 
 **Done when:** an organiser can inspect constraint health and regression-test the
-custom constraint corpus without a second override model.
+organiser decision label corpus without a second assignment model.
 
 This is the milestone that pays off over the following weeks rather than
 immediately, which is exactly why it gets cut under pressure. Do it before M8.
@@ -200,7 +200,6 @@ immediately, which is exactly why it gets cut under pressure. Do it before M8.
 *Continuous, through the run-up.*
 
 - `scripts/tune.ts` and a weight-tuning pass against the real exported log
-- New built-in profile tags from recurring custom constraints
 - Copy review, German throughout the family surface
 - Accessibility pass: keyboard, contrast, focus, reduced motion
 - Deliverability testing against GMX, web.de, Gmail, Outlook
@@ -255,7 +254,7 @@ If time runs short, in the order they should go:
    affected families. Worse, not broken.
 3. **Multi-select on the board.** Drag one party at a time. Slower, still better
    than a spreadsheet.
-4. **Constraint-health dashboard.** Keep the underlying custom constraint
+4. **Constraint-health dashboard.** Keep the underlying organiser decision
    lifecycle and explanations; defer the reporting surface.
 
 **Never cut:** the determinism contract, the trace, human-readable constraint

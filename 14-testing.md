@@ -189,7 +189,7 @@ const invariants = [
   ['every child-room assignment satisfies the child-group requirement',
     (p, s) => /* … */],
 
-  ['every label names a built-in or custom definition or is reported',
+  ['every label names a fixed resolver or profile vocabulary entry or is reported',
     (p, s) => /* … */],
 
   ['a capability with a derive has no assignments',

@@ -43,6 +43,7 @@ emails, notifications, and help text.
 | slot | **Zeitslot** | Use **Zeitfenster** in prose when *Zeitslot* feels too technical |
 | preference | **Wunsch** | Use **Angabe** when it is not a preference or choice |
 | constraint | **Vorgabe** | Use **Regel** only when explaining behaviour informally |
+| organiser decision | **Entscheidung des Organisationsteams** | A human planning decision that guides the calculated result |
 | label | **Angabe** | Do not expose the storage term *Label* in family copy |
 | plan | **Einteilung** | The generated room/workshop result |
 | publish | **Veröffentlichen** | For making an approved plan visible |

@@ -31,9 +31,9 @@ selects one occasion profile, which may assign people to rooms, workshops, or bo
 The first deployed profile is `familienfreizeit-2027`.
 
 Families state preferences. They never assign anything. A deterministic
-algorithm produces a complete proposal. Organisers review it, override where their
-judgement beats the algorithm's, and publish. Overrides are recorded with a
-reason so the algorithm can be taught to stop needing them.
+algorithm produces a complete proposal. Organisers review it, add decisions where
+their judgement should guide the result, and publish. Decisions are recorded with
+an optional note so other organisers can understand them.
 
 ## The shape of the problem
 
