@@ -13,6 +13,27 @@ solve(solverInput: SolverInput, config: SolverConfig): Plan
 Pure. No I/O, no clock, no randomness, no ambient state. Given identical inputs
 it produces byte-identical output, on any machine, at any time, forever (D3).
 
+For a proposed change, the caller may derive a transition without persisting a
+second copy of domain state:
+
+```ts
+deriveTransition(
+  baseEvents: readonly Event[],
+  prospectiveEvents: readonly Event[],
+  config: SolverConfig,
+): {
+  before: Plan
+  after: Plan
+  diff: PlanDiff
+}
+```
+
+`before` is derived from the committed event-log prefix and `after` from the
+prospective event log. Modules may use `before` as transient comparison input
+when their contract calls for stable reallocation. The event log remains the
+only persisted domain state. A first allocation, or a transition without a
+compatible prior assignment, uses the module's normal initial-allocation path.
+
 ---
 
 ## 1. The determinism contract
@@ -262,6 +283,16 @@ type TraceEntry = {
     runners_up?: Array<{ target: string, score: number, terms: Array<[string, number]> }>
     rejected?: Array<{ target: string, rule: string }>
   }
+}
+
+type PlanDiff = {
+  changes: readonly {
+    kind: string
+    subject: string
+    before?: string
+    after?: string
+    reason: string
+  }[]
 }
 ```
 
