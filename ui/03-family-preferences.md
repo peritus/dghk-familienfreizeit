@@ -8,7 +8,7 @@ Governing specs: [family view](../10-family-view.md), [labels and
 constraints](../04-labels-and-constraints.md), and [occasion profiles](../16-occasion-profiles.md).
 
 This is one scrolling page, not a wizard. Controls come from the active
-occasion profile's `familyFacing` entries.
+occasion profile's `family_facing` entries.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐

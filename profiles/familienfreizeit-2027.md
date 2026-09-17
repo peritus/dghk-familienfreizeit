@@ -87,16 +87,16 @@ from them:
 
 | Tag | Values or derivation | Use |
 |---|---|---|
-| `room_type` | `standard`, `apartment`, `bungalow`, `schlaffass` | Occasion vocabulary for accommodation type |
+| `room-type` | `standard`, `apartment`, `bungalow`, `schlaffass` | Occasion vocabulary for accommodation type |
 | `building` | `Haupthaus`, `Gartenhaus`, `Blockhaus`, or null | Location and grouping |
 | `floor` | `ground`, `1`, `2`, or null | Location; `ground` can derive `ground-floor` |
 | `sanitary` | `private`, `shared-floor`, `remote-shared` | Occasion vocabulary for sanitary arrangement |
-| `price_per_bed_eur` | `88.50` or `103.00` | Price information; not a solver preference by default |
-| `bed_capacity` | derived from beds and apartment layouts | Atomic room capacity |
-| `sleeping_rooms` | `2` for rooms 35–37, otherwise `1` where applicable | Apartment layout |
-| `beds_per_sleeping_room` | `4` for rooms 35 and 37; `2` for room 36 | Preserves the source `2×4` / `2×2` structure |
-| `has_common_room` | `true` for rooms 35–37 | Apartment layout |
-| `suitable_for_two_families` | `true` for rooms 35–37 | Descriptive occasion fact, not an automatic placement rule |
+| `price-per-bed-eur` | `88.50` or `103.00` | Price information; not a solver preference by default |
+| `bed-capacity` | derived from beds and apartment layouts | Atomic room capacity |
+| `sleeping-rooms` | `2` for rooms 35–37, otherwise `1` where applicable | Apartment layout |
+| `beds-per-sleeping-room` | `4` for rooms 35 and 37; `2` for room 36 | Preserves the source `2×4` / `2×2` structure |
+| `has-common-room` | `true` for rooms 35–37 | Apartment layout |
+| `suitable-for-two-families` | `true` for rooms 35–37 | Descriptive occasion fact, not an automatic placement rule |
 
 Derived capabilities such as `private-sanitary`, `ground-floor`, and
 `multi-room-unit` are resolver projections, not additional authoritative room
@@ -114,21 +114,21 @@ The profile defines concrete property and relationship tags, including:
 | Tag | Purpose |
 |---|---|
 | `designation` | general, child, staff, or blocked room |
-| `is_accessible` | accessibility fact |
+| `is-accessible` | accessibility fact |
 | `role` | adult, child, or infant |
-| `does_not_need_a_bed` | explicit exception to the default bed demand |
-| `needs_accessible` | accessibility requirement fact |
-| `room_with` | co-room relation |
-| `apart_from` | keep-apart relation |
-| `provides_child_group` | room capability naming a child group |
-| `needs_child_group` | child requirement naming a child group |
-| `sole_occupancy` | do-not-share requirement |
-| `workshop_with` | workshop co-assignment relation |
-| `workshop_audience` | `children` or `adults` participation audience |
-| `leads_workshop` | person-to-workshop leadership relation; zero or more leaders |
-| `prefers_workshop` | ordered workshop choice |
+| `does-not-need-a-bed` | explicit exception to the default bed demand |
+| `needs-accessible` | accessibility requirement fact |
+| `room-with` | co-room relation |
+| `apart-from` | keep-apart relation |
+| `provides-child-group` | room capability naming a child group |
+| `needs-child-group` | child requirement naming a child group |
+| `sole-occupancy` | do-not-share requirement |
+| `workshop-with` | workshop co-assignment relation |
+| `workshop-audience` | `children` or `adults` participation audience |
+| `leads-workshop` | person-to-workshop leadership relation; zero or more leaders |
+| `prefers-workshop` | ordered workshop choice |
 
-`room_type`, `building`, and `floor` are already defined by the room inventory's
+`room-type`, `building`, and `floor` are already defined by the room inventory's
 room-tag vocabulary above. This table lists only additional occasion vocabulary.
 The child-group labels use the generic `needs-provides` resolver operator:
 rooms provide a stable child-group entity and children need that same entity.
@@ -139,22 +139,22 @@ There is no age-band or opt-in rule.
 | Tag | Applies to | Semantics |
 |---|---|---|
 | `designation` | room | Declares whether a room is `general`, `child`, `staff`, or `blocked`; blocked rooms require a reason. |
-| `is_accessible` | room | States that the room provides the configured accessibility capability. |
+| `is-accessible` | room | States that the room provides the configured accessibility capability. |
 | `role` | person | States `adult`, `child`, or `infant`; it is supplied data, not derived from birthdate. |
-| `does_not_need_a_bed` | person | Defaults to false. When true, the person contributes no bed demand while remaining part of the family and other assignments. |
-| `needs_accessible` | person or family | Requires or prefers an accessible room, according to label strength. |
-| `room_with` | family or person | Requests co-rooming with another stable entity; required values form a group, preferred values remain soft. |
-| `apart_from` | family or person | Requires or prefers separation from another stable entity; it conflicts with a required `room_with`. |
-| `provides_child_group` | child room | Names the stable child-group capability that this room offers. |
-| `needs_child_group` | child | Names the stable child group whose room capability the child requires. |
-| `sole_occupancy` | family or person | Requires that the resulting room or sleeping unit contain no unrelated occupants. |
-| `workshop_with` | person | Requests co-assignment with another person for a workshop slot; required values form a group. |
-| `workshop_audience` | workshop | Restricts participation to the configured audience, here `children` or `adults`. |
-| `leads_workshop` | person | Records that a person leads a workshop; zero or more leaders are allowed, including children. |
-| `prefers_workshop` | person | Stores an ordered workshop ranking scoped to one slot. |
+| `does-not-need-a-bed` | person | Defaults to false. When true, the person contributes no bed demand while remaining part of the family and other assignments. |
+| `needs-accessible` | person or family | Requires or prefers an accessible room, according to label strength. |
+| `room-with` | family or person | Requests co-rooming with another stable entity; required values form a group, preferred values remain soft. |
+| `apart-from` | family or person | Requires or prefers separation from another stable entity; it conflicts with a required `room-with`. |
+| `provides-child-group` | child room | Names the stable child-group capability that this room offers. |
+| `needs-child-group` | child | Names the stable child group whose room capability the child requires. |
+| `sole-occupancy` | family or person | Requires that the resulting room or sleeping unit contain no unrelated occupants. |
+| `workshop-with` | person | Requests co-assignment with another person for a workshop slot; required values form a group. |
+| `workshop-audience` | workshop | Restricts participation to the configured audience, here `children` or `adults`. |
+| `leads-workshop` | person | Records that a person leads a workshop; zero or more leaders are allowed, including children. |
+| `prefers-workshop` | person | Stores an ordered workshop ranking scoped to one slot. |
 
-`needs_accessible`, `room_with`, `apart_from`, `sole_occupancy`, and
-`workshop_with` use the generic required/preferred strength model. The two
+`needs-accessible`, `room-with`, `apart-from`, `sole-occupancy`, and
+`workshop-with` use the generic required/preferred strength model. The two
 child-group tags are a `needs-provides` match: a child requires the group and a
 child room provides it. They are not an age rule, an opt-in flag, or a free-form
 note.
@@ -163,12 +163,12 @@ note.
 
 The generic `foodPreferences` module is enabled for this occasion. Its authoritative
 data is attached to each person, not to the family: every person has exactly one
-configured `diet` value, and may have one `allergies_text` value.
+configured `diet` value, and may have one `allergies-text` value.
 
 | Label | Scope | Values or format | Cardinality |
 |---|---|---|---|
 | `diet` | person | `vegetarian`, `vegan`, `carnivore`, or `pesco-vegetarian` | exactly one |
-| `allergies_text` | person | free text, retained as entered | zero or one |
+| `allergies-text` | person | free text, retained as entered | zero or one |
 
 `pesco-vegetarian` is an explicit occasion-configured vocabulary value. Diet is
 mutually exclusive; a person cannot carry multiple diet values. Allergy text is
@@ -176,7 +176,7 @@ independent of diet and preserves quantities and wording from the source data,
 for example `1 x Eier` or `2x Beifuß (sehr starke Allergie)`.
 
 Family-level food tables are derived projections: they count persons by diet
-and count persons with non-empty `allergies_text`. They are not an alternative
+and count persons with non-empty `allergies-text`. They are not an alternative
 authoritative family-level model. The supplied source rows do not include
 family names, so this profile records the model and vocabulary without
 inventing person or family assignments.

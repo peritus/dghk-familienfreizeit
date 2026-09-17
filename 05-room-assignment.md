@@ -69,7 +69,7 @@ plan. Default is no randomness at all.
 
 ### R4 — No `Date.now()`, no `new Date()` without an argument
 
-The occasion date arrives in the config. Age is `ageAt(birthdate, config.eventDate)`.
+The occasion date arrives in the config. Age is `ageAt(birthdate, config.event_date)`.
 
 *How it breaks:* someone adds a "registered recently" tiebreak and reaches for
 the clock. The correct move is to use the `created_at` already in the solver input,
@@ -123,7 +123,7 @@ test combined.
 
 ```ts
 type SolverInput = Readonly<{
-  inputSeq: number
+  input_seq: number
   families:        readonly Family[]
   persons:         readonly Person[]
   rooms:           readonly Room[]
@@ -140,16 +140,16 @@ from typed labels and built-in derivations ([labels and constraints](04-labels-a
 
 ```ts
 type SolverConfig = Readonly<{
-  solverVersion: string
-  eventDate: string            // ISO date; all ages computed against this
-  weights: GeometryWeights     // exactFit, nearFit, orphanBed — see §5
+  solver_version: string
+  event_date: string           // ISO date; all ages computed against this
+  weights: GeometryWeights     // exact_fit, near_fit, orphan_bed — see §5
   profile: OccasionProfile     // from profiles/<occasion>.ts
   phases: Phases
   seed: number | null          // default null
 }>
 ```
 
-`eventDate` comes from `meta.date` in the occasion profile.
+`event_date` comes from `meta.date` in the occasion profile.
 
 Withdrawn people are excluded when the solver input is built, not filtered later.
 Blocked rooms likewise. The solver never sees data it must remember to ignore.
@@ -170,9 +170,9 @@ Phase A is the judgement-heavy phase. Runs before any placement.
 ```ts
 type Party = {
   key: string                  // sha256(sorted person ids).slice(0,12)
-  personIds: readonly string[] // sorted
+  person_ids: readonly string[] // sorted
   size: number                 // headcount
-  bedDemand: number            // count of persons with does_not_need_a_bed = false
+  bed_demand: number           // count of persons with does-not-need-a-bed = false
   requirements: readonly { tag: Tag, strength: 'required' | 'preferred' }[]
   provenance: readonly string[]   // human-readable lines, per requirement
 }
@@ -180,10 +180,10 @@ type Party = {
 
 `requirements` is the strictest-strength union of member families'
 requirement tags ([labels and constraints](04-labels-and-constraints.md) §5.3), consumed by
-`rules/hard/tagRequirements.ts` and `rules/soft/tagPreferences.ts`.
+`rules/hard/tag-requirements.ts` and `rules/soft/tag-preferences.ts`.
 
-`size` and `bedDemand` differ whenever an infant is present. Capacity checks use
-`bedDemand`. Everything a human reads shows `size`.
+`size` and `bed_demand` differ whenever an infant is present. Capacity checks use
+`bed_demand`. Everything a human reads shows `size`.
 
 `key` is derived and therefore **unstable** — it changes when membership changes.
 Nothing may persist a party key as a reference. Constraints reference people. The key
@@ -204,11 +204,11 @@ residue.**
 ```
 eligible = persons where
     role = 'child'
-  and has a 'needs_child_group' label
+  and has a 'needs-child-group' label
   and not constrained to a non-child room
 
 sort eligible by:
-  1. needs_accessible desc
+  1. needs-accessible desc
   2. age asc
   3. family_id asc
   4. person_id asc
@@ -216,32 +216,32 @@ sort eligible by:
 childRooms = rooms where designation = 'child', sorted by (sort_key, id)
 
 for each childRoom in order:
-    candidates = eligible not yet placed, whose 'needs_child_group' value is
+    candidates = eligible not yet placed, whose 'needs-child-group' value is
                  provided by this room
-    take up to childRoom.placeCount, in eligible order
-    if taken count < phases.childRooms.minOccupants: release them back to the pool
+    take up to childRoom.place_count, in eligible order
+    if taken count < phases.child_rooms.min_occupants: release them back to the pool
     else: place them, emit trace
 ```
 
 **The lone-child rule.** A children's room with fewer occupants than
-`phases.childRooms.minOccupants` is worse than no children's room: an isolated
+`phases.child_rooms.min_occupants` is worse than no children's room: an isolated
 child, and a wasted bed. Refuse it. The released children return to their
 family parties.
 
-Child-group matching is explicit: a child carries `needs_child_group=childgroupA`
-and a compatible child room carries `provides_child_group=childgroupA`. There is
+Child-group matching is explicit: a child carries `needs-child-group=child-group-a`
+and a compatible child room carries `provides-child-group=child-group-a`. There is
 no implicit age-band or opt-in rule. If a group needs adult supervision, that is
 modeled separately through the generic person/room relationships.
 
 **Trace output for this step, per child room:**
 
-> `K3` (Haus B, Raum 22, 6 places, childgroupA) ← 5 children: Müller Jonas,
+> `K3` (Haus B, Raum 22, 6 places, child-group-a) ← 5 children: Müller Jonas,
 > Schmidt Lena, Weber Ada, Weber Nils, Braun Mia.
 > 1 place left empty. Braun Tim has no matching child-group requirement.
 
 **Trace output for a released child:**
 
-> Müller Jonas needs `childgroupA`; `K3` and `K7` were full. Returned to family
+> Müller Jonas needs `child-group-a`; `K3` and `K7` were full. Returned to family
 > party. Müller party size 2 → 3.
 
 That second line is exactly what an organiser needs when the family emails asking why
@@ -253,7 +253,7 @@ For each family, the persons not placed in a children's room form one party.
 
 A family with zero residue (all members in children's rooms) produces no party.
 A family reduced to one person produces a party of one, and those fragment the
-plan badly — see the `orphanBed` penalty in §5 and the warning in §7.
+plan badly — see the `orphan_bed` penalty in §5 and the warning in §7.
 
 Requirements are lifted from the family's requirement-tag assignments
 directly: each `needs` label at strength `required` or `preferred` becomes
@@ -269,10 +269,10 @@ parties into one.
 
 ```
 merged.requirements = strictest-strength union of members' requirements
-merged.bedDemand = sum
+merged.bed_demand = sum
 ```
 
-**Guard against unplaceable merges.** If a merged party's `bedDemand` exceeds the
+**Guard against unplaceable merges.** If a merged party's `bed_demand` exceeds the
 largest room's place count, the merge cannot be honoured. Refuse it, downgrade
 the request to a soft preference, and warn loudly in the trace:
 
@@ -284,7 +284,7 @@ Without this guard the solver produces a party that no room can hold, reports it
 unplaced, and gives an organiser no idea why.
 
 Non-mutual relation tags, and mutual `preferred` ones, do not merge. They
-become the `room-with.oneSidedWeight` / `room-with.adjacentWeight` soft terms.
+become the `room-with.one_sided_weight` / `room-with.adjacent_weight` soft terms.
 
 ### A.4 Organiser constraints, applied last in event order
 
@@ -301,7 +301,7 @@ the active constraint set. Each emits provenance:
 
 ### A.5 Output
 
-A sorted `Party[]`. Sort order: `bedDemand` desc, then first member's
+A sorted `Party[]`. Sort order: `bed_demand` desc, then first member's
 `family_id`, then `key`. Organisers review this list on the party screen before
 looking at any room.
 
@@ -340,7 +340,7 @@ repeat:
   changed = false
   for each unplaced party, in party sort order:
     feasible = rooms where allHardRules(party, room) pass
-                          and freePlaces(room) >= party.bedDemand
+                          and freePlaces(room) >= party.bed_demand
     if feasible.length == 0: continue        // handled in phase 4
     if feasible.length == 1:
       place it; changed = true
@@ -361,7 +361,7 @@ Sort remaining parties by:
 
 1. `requires.accessible` desc — the hardest constraint, placed while options remain
 2. `feasibleRoomCount` asc — most constrained first
-3. `bedDemand` desc — big parties before small; small ones fit in gaps, big ones do not
+3. `bed_demand` desc — big parties before small; small ones fit in gaps, big ones do not
 4. first member's `family_id` asc
 5. `key` asc
 
@@ -372,7 +372,7 @@ candidates = feasible rooms
 scored     = candidates.map(room => ({ room, score: score(party, room, ctx) }))
 best       = argmax(scored, tiebreak: room.sort_key asc, then room.id asc)
 place(party, best.room)
-trace(party, best, runnersUp = next two by score)
+trace(party, best, runners_up = next two by score)
 ```
 
 Scoring is recomputed each time because the context changes as rooms fill — an
@@ -383,7 +383,7 @@ exact fit is only an exact fit against *current* free places.
 Pairwise swap hill-climbing.
 
 ```
-for pass in 1..config.maxRepairPasses:
+for pass in 1..config.max_repair_passes:
     improved = false
     for i in 0..n-2:                 // party array, fixed sort order
       for j in i+1..n-1:
@@ -431,24 +431,24 @@ its own tag instead ([occasion profiles](16-occasion-profiles.md) §4):
 
 | Geometry term | Configured as |
 |---|---|
-| `ensuitePreferred` | `needs-ensuite.weight` |
-| `indoorPreferred` | `needs-indoor.weight` |
-| `coRoomSameRoom` | `room-with.oneSidedWeight` |
-| `coRoomAdjacent` | `room-with.adjacentWeight` |
-| `coRoomSameFloor` | folded into `adjacentWeight`, scaled by distance |
-| `crossFamilyWhenPreferNot` | `sole-occupancy.penalty` |
-| `accessibleRoomWasted` | `accessible.wasteWhenUnneeded` |
-| `outsideWhenIndoorPreferred` | `needs-indoor.penalty` |
+| `ensuite_preferred` | `needs-ensuite.weight` |
+| `indoor_preferred` | `needs-indoor.weight` |
+| `co_room_same_room` | `room-with.one_sided_weight` |
+| `co_room_adjacent` | `room-with.adjacent_weight` |
+| `co_room_same_floor` | folded into `adjacent_weight`, scaled by distance |
+| `cross_family_when_prefer_not` | `sole-occupancy.penalty` |
+| `accessible_room_wasted` | `accessible.waste_when_unneeded` |
+| `outside_when_indoor_preferred` | `needs-indoor.penalty` |
 
 ```ts
 type GeometryWeights = {
-  exactFit: number                    //  +10  bedDemand == free places
-  nearFit: number                     //   +4  leaves exactly 2+ free places
-  orphanBed: number                   //   -8  leaves exactly 1 free place
+  exact_fit: number                   //  +10  bed_demand == free places
+  near_fit: number                    //   +4  leaves exactly 2+ free places
+  orphan_bed: number                  //   -8  leaves exactly 1 free place
 }
 ```
 
-`exactFit`, `nearFit` and `orphanBed` **stay** in `GeometryWeights` — they are
+`exact_fit`, `near_fit` and `orphan_bed` **stay** in `GeometryWeights` — they are
 geometry, not tag matching, and describe how well a party fits a room's
 remaining places regardless of which tags are involved.
 
@@ -459,12 +459,12 @@ deployment of the occasion profile rather than a log event.
 
 Three notes explain why these particular terms carry the scale they do:
 
-**`orphanBed` is a penalty, not a missing bonus.** A room left with exactly one
+**`orphan_bed` is a penalty, not a missing bonus.** A room left with exactly one
 free place is nearly always wasted — a single leftover place fits almost nobody,
 since most remaining parties are families of two or more. Penalising it heavily
 pushes the packer toward clean fits. This is the term most worth tuning first.
 
-**`accessible.wasteWhenUnneeded` is small and negative.** Accessible rooms are
+**`accessible.waste_when_unneeded` is small and negative.** Accessible rooms are
 scarce. Using one for a party that does not need it is not wrong, it is just a
 waste when alternatives exist. A small penalty expresses "prefer not to, but do
 it rather than leave someone unplaced".
@@ -484,7 +484,7 @@ Every rule, hard or soft, implements the same shape:
 
 ```ts
 interface Rule {
-  id: string                    // 'soft.exactFit'
+  id: string                    // 'soft.exact-fit'
   since: string                 // solver version that introduced it
   evaluate(party: Party, room: RoomState, ctx: Ctx): number | Infeasible
   describe(party: Party, room: RoomState, ctx: Ctx): string | null
@@ -511,46 +511,46 @@ through config and never through code.
 ```ts
 type Plan = {
   meta: {
-    inputSeq: number
-    solverVersion: string
-    configHash: string
-    eventDate: string
+    input_seq: number
+    solver_version: string
+    config_hash: string
+    event_date: string
   }
   parties: Party[]                       // with provenance
   assignments: Array<{
-    partyKey: string
-    personId: string
-    placeId: string
-    roomId: string
+    party_key: string
+    person_id: string
+    place_id: string
+    room_id: string
   }>
   unplaced: Array<{
-    partyKey: string
+    party_key: string
     reason: string
-    nearMiss: { roomId: string, failedRules: string[] } | null
+    near_miss: { room_id: string, failed_rules: string[] } | null
   }>
   conflicts: Array<{                     // constraints that could not be applied
-    constraintKey: string
+    constraint_key: string
     reason: string
   }>
   preflight: PreflightFinding[]
   trace: TraceEntry[]
   stats: {
-    partiesPlaced: number
-    placesUsed: number
-    placesFree: number
-    orphanBeds: number
-    repairPasses: number
-    repairCapHit: boolean
-    totalScore: number
-    coRoomWishesSatisfied: number
-    coRoomWishesTotal: number
-    unsatisfiedRequirements: number
+    parties_placed: number
+    places_used: number
+    places_free: number
+    orphan_beds: number
+    repair_passes: number
+    repair_cap_hit: boolean
+    total_score: number
+    co_room_wishes_satisfied: number
+    co_room_wishes_total: number
+    unsatisfied_requirements: number
   }
 }
 ```
 
-`stats` is what the dashboard graphs over time. `orphanBeds` and
-`coRoomWishesSatisfied / Total` are the two numbers that best express plan
+`stats` is what the dashboard graphs over time. `orphan_beds` and
+`co_room_wishes_satisfied / co_room_wishes_total` are the two numbers that best express plan
 quality to a non-technical organiser.
 
 ### Trace entries
@@ -561,9 +561,9 @@ type TraceEntry = {
   subject: string           // party key or constraint key
   text: string              // the human-readable line
   detail?: {
-    chosen?: { roomId: string, score: number, terms: Array<[string, number]> }
-    runnersUp?: Array<{ roomId: string, score: number, terms: Array<[string, number]> }>
-    rejected?: Array<{ roomId: string, rule: string }>
+    chosen?: { room_id: string, score: number, terms: Array<[string, number]> }
+    runners_up?: Array<{ room_id: string, score: number, terms: Array<[string, number]> }>
+    rejected?: Array<{ room_id: string, rule: string }>
   }
 }
 ```
@@ -589,7 +589,7 @@ rediscovered.
 
 **Fragmentation from children's rooms.** A family of two whose only child opts
 into a children's room leaves a party of one. Several of these and the plan fills
-with single-person parties that waste beds. The `orphanBed` penalty helps, but
+with single-person parties that waste beds. The `orphan_bed` penalty helps, but
 the real fix is the party review screen: organisers see the size-1 parties listed
 first and can merge them or talk to the families. Consider a dashboard warning at
 more than five size-1 parties.
@@ -613,7 +613,7 @@ confirmation.
 **Capacity exactly equal to headcount.** If total places equals total bed demand,
 almost every soft term becomes irrelevant and the solver degenerates into "find
 any feasible packing", which may take the full repair budget without improving.
-Expected and fine; the trace will show `repairCapHit: true` with a near-zero
+Expected and fine; the trace will show `repair_cap_hit: true` with a near-zero
 improvement, and that is the honest report.
 
 **Typos become silence.** `room-with=fam_72` for `fam_27` — nothing errors, the

@@ -9,8 +9,8 @@ menus, or physical delivery.
 
 The module contributes two durable entity kinds:
 
-- `material_request`: an item someone says is needed;
-- `material_commitment`: an item someone pledges to bring.
+- `material-request`: an item someone says is needed;
+- `material-commitment`: an item someone pledges to bring.
 
 Requests and commitments are separate records. A commitment can be withdrawn
 without changing the request it was intended to satisfy. A request therefore
@@ -29,7 +29,7 @@ Both record types may carry:
 |---|---|
 | `category` | Profile-defined material category |
 | `name` | Item name |
-| `quantity_text` | Quantity preserved as entered |
+| `quantity-text` | Quantity preserved as entered |
 | `description` | Additional instructions or notes |
 
 A request has a requester label that may identify a family, person, or

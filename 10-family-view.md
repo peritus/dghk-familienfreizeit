@@ -33,7 +33,7 @@ minds. Everything saves on change.
 
 Sections 2 ("Zimmerwünsche"), 3 ("Kinderzimmer") and 4 ("Mit wem möchten Sie
 zusammen?") are **generated from the active occasion profile**: every tag declaring
-`familyFacing` produces a control, in profile order, grouped by scope. The
+`family_facing` produces a control, in profile order, grouped by scope. The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
 `control` is a closed union, and this is the thing to think about up front —
@@ -169,7 +169,7 @@ visible is already answered by the latest publication, and needs no rule.
 | Bed labels within their own rooms | Yes |
 | Scores, parties, traces, organiser constraints | No |
 | Organiser notes about them | **No** — free text is theirs, organiser notes are not |
-| Tags declaring `organiserOnly` | **Never**, regardless of `familyFacing` |
+| Tags declaring `organiser_only` | **Never**, regardless of `family_facing` |
 | `descriptive` tags | Never |
 
 **Reciprocity is visible; the request is not.** If the Müllers request the
@@ -192,7 +192,7 @@ they're flexible about the ensuite", that goes in an organiser-only note field.
 Conflating them means either organisers self-censor or families read something they
 should not have.
 
-`apart-from` declares no `familyFacing` *and* `organiserOnly: true`, deliberately
+`apart-from` declares no `family_facing` *and* `organiser_only: true`, deliberately
 doubled, because exposing keep-apart relations to families would be the worst
 privacy failure available to this application.
 
@@ -220,7 +220,7 @@ mismatch.
 **Ineligibility is explained, not hidden.** Emma's children's-room checkbox is
 disabled with the reason next to it, not removed. A missing option makes people
 think the site is broken; a disabled option with a reason answers the question
-before they ask. This is now driven by `validFor` — a control whose predicate
+before they ask. This is now driven by `valid_for` — a control whose predicate
 fails renders disabled with the reason.
 
 **Workshop ranking is drag-to-order on desktop and numbered selects on mobile.**

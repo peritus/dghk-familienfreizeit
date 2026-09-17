@@ -27,7 +27,7 @@ provides=ensuite                  a room has its own bathroom
 needs=needs-ensuite (required)     a family cannot accept a room without one
 needs=room-with-garden-view        a person needs a matching room capability
 provides=room-with-garden-view     a room offers that capability
-needs=childgroupA                  this child needs a room providing childgroupA
+needs=child-group-a                this child needs a room providing child-group-a
 separates-from=family_27           this family must not share with family 27
 ```
 
@@ -167,7 +167,7 @@ report names them.
 A family may `LabelSet` / `LabelCleared` only:
 
 - on entities it owns (itself, or its own people);
-- for tags declaring `familyFacing`;
+- for tags declaring `family_facing`;
 - at strengths that control permits.
 
 Everything else is organiser-only. Organiser-only labels are never rendered in the
@@ -179,11 +179,11 @@ family view.
 
 The generic handlers keep constraint evaluation in one auditable place.
 
-### 5.1 `rules/hard/tagRequirements.ts`
+### 5.1 `rules/hard/tag-requirements.ts`
 
 ```ts
 export const tagRequirements: Rule = {
-  id: 'hard.tagRequirements',
+  id: 'hard.tag-requirements',
   since: '2.0.0',
 
   evaluate(party, room, ctx) {
@@ -192,8 +192,8 @@ export const tagRequirements: Rule = {
 
     for (const req of party.requirements) {
       const def = profile.tags[req.tag]
-      const ok = def.satisfiedBy
-        ? have.has(def.satisfiedBy)
+      const ok = def.satisfied_by
+        ? have.has(def.satisfied_by)
         : def.check!(party, room, ctx)       // structural, e.g. sole-occupancy
       if (!ok && req.strength === 'required') missing.push(req.tag)
     }
@@ -210,14 +210,14 @@ export const tagRequirements: Rule = {
 }
 ```
 
-Its soft counterpart, `rules/soft/tagPreferences.ts`, is the same loop over
+Its soft counterpart, `rules/soft/tag-preferences.ts`, is the same loop over
 `strength === 'preferred'`, returning `+weight` on satisfaction and `+penalty`
 on violation (see [occasion profiles](16-occasion-profiles.md) §4 for the two-field
 convention).
 
 Two requirement shapes are supported, and the distinction matters:
 
-- **`satisfiedBy: 'ensuite'`** — a room capability. A set lookup.
+- **`satisfied_by: 'ensuite'`** — a room capability. A set lookup.
 - **`check: (party, room, ctx) => boolean`** — structural, depending on the
   placement rather than the room. `sole-occupancy` asks whether every current
   occupant belongs to this party, which no capability can express.
@@ -235,7 +235,7 @@ each component merges its members' residue parties
 ```
 
 Non-mutual, or mutual at `preferred`, becomes a soft term worth
-`oneSidedWeight`.
+`one_sided_weight`.
 
 **In placement** (`rules/`), for the rest:
 
@@ -254,7 +254,7 @@ Non-mutual, or mutual at `preferred`, becomes a soft term worth
 - `one-sided-soft` — never binds; always a preference.
 
 **The unplaceable-merge guard is generalized.** If a
-merged component's `bedDemand` exceeds the largest room's place count, the merge
+merged component's `bed_demand` exceeds the largest room's place count, the merge
 is refused, downgraded to a preference, and reported as an error-severity
 preflight finding. Without it the solver builds a party no room can hold and then
 reports it unplaced with no explanation.
@@ -291,7 +291,7 @@ placement runs.
 | C3 | Contradictory tags on one entity (`sole-occupancy: required` with any `room-with: required`) | error |
 | C4 | A mutual-required component's bed demand exceeds the largest feasible room | error |
 | C5 | Scope violation — a person-scoped tag on a family | error |
-| C6 | `validFor` failure — a child-group requirement on a non-child person or a child-group capability on a non-child room | warning |
+| C6 | `valid_for` failure — a child-group requirement on a non-child person or a child-group capability on a non-child room | warning |
 | C7 | An assignment names a tag no longer in the profile | warning |
 | C8 | **Requirement arithmetic** — demand for a capability exceeds supply | error |
 | C9 | A transitive merge cascade produced a party nobody asked for | info |
@@ -300,8 +300,8 @@ placement runs.
 
 ```
 for each requirement tag R:
-    demand = Σ bedDemand of parties requiring R at 'required'
-    supply = Σ places in rooms holding satisfiedBy(R)
+    demand = Σ bed_demand of parties requiring R at 'required'
+    supply = Σ places in rooms holding satisfied_by(R)
     if demand > supply: error
 ```
 

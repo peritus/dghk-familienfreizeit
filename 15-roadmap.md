@@ -117,7 +117,7 @@ day for that possibility.
 
 *Post-initial-release work. Two to three days.*
 
-- The family view: a renderer over `familyFacing` profile tags, not
+- The family view: a renderer over `family_facing` profile tags, not
   hand-written sections — this keeps the milestone compact, and
   couples the family view to the profile by design
 - Save-on-change with a per-control confirmation and a visible failure state

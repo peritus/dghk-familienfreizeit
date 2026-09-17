@@ -34,8 +34,8 @@ are stored as `ConstraintDefined` events. They are data only:
   label: 'Zimmer mit Gartenblick',
   description: 'Requested by the organiser for this family.',
   operator: 'needs-provides',
-  needsScopes: ['person', 'family'],
-  providesScopes: ['space'],
+  needs_scopes: ['person', 'family'],
+  provides_scopes: ['space'],
   strength: 'required'
 }
 ```

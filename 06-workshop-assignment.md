@@ -20,7 +20,7 @@ A workshop may be for children, adults, or another profile-defined audience.
 Audience eligibility controls participation; it does not by itself determine
 who leads the workshop.
 
-`leads_workshop` is a many-to-many person-to-workshop relation. A workshop may
+`leads-workshop` is a many-to-many person-to-workshop relation. A workshop may
 have zero, one, or many leaders, and a person may lead many workshops. The
 generic model permits both adults and children to lead. An occasion profile may
 constrain leader roles or require a leader, but those assumptions do not belong
@@ -57,9 +57,9 @@ The mechanism that makes it work across slots rather than within them:
 
 ```ts
 type Ledger = Map<PersonId, {
-  satisfiedTop2: number     // slots where they got choice 1 or 2
-  satisfiedAny: number
-  slotsSeen: number
+  satisfied_top2: number    // slots where they got choice 1 or 2
+  satisfied_any: number
+  slots_seen: number
 }>
 ```
 
@@ -99,8 +99,8 @@ For each workshop w in slot, in (sort_key, id) order:
       assign all
   else:
       sort claimants by:
-        1. ledger.satisfiedTop2 asc      ← the fairness lever
-        2. ledger.satisfiedAny  asc
+        1. ledger.satisfied_top2 asc      ← the fairness lever
+        2. ledger.satisfied_any asc
         3. alternativeCount     asc      ← fewest other eligible workshops
         4. person_id            asc      ← total order
       assign the first `remaining capacity`
@@ -157,12 +157,12 @@ same shape as the room solver's unplaceable-merge guard. Trace format in
 ### On people with no preferences
 
 Someone who never submitted rankings has an empty preference list and goes
-straight to step 5. They are counted in the ledger as `satisfiedTop2: 0`, which
+straight to step 5. They are counted in the ledger as `satisfied_top2: 0`, which
 means they get priority in later slots — which is arguably wrong, since they
 expressed no wish to satisfy.
 
 Decision: **people with no preferences for a slot do not accrue ledger deficit
-for that slot.** `slotsSeen` increments only when they ranked something.
+for that slot.** `slots_seen` increments only when they ranked something.
 Otherwise non-participation would be rewarded with priority.
 
 ---
@@ -184,31 +184,31 @@ Saturday morning.
 
 ```ts
 type WorkshopPlan = {
-  assignments: Array<{ personId: string, workshopId: string, slotId: string }>
-  cancelled: Array<{ workshopId: string, intake: number, minCapacity: number }>
-  unassigned: Array<{ personId: string, slotId: string, reason: string }>
-  conflicts: Array<{ constraintKey: string, reason: string }>
+  assignments: Array<{ person_id: string, workshop_id: string, slot_id: string }>
+  cancelled: Array<{ workshop_id: string, intake: number, min_capacity: number }>
+  unassigned: Array<{ person_id: string, slot_id: string, reason: string }>
+  conflicts: Array<{ constraint_key: string, reason: string }>
   trace: TraceEntry[]
   stats: {
-    perSlot: Array<{
-      slotId: string
+    per_slot: Array<{
+      slot_id: string
       assigned: number
-      firstChoice: number
+      first_choice: number
       top2: number
-      noPreferenceSatisfied: number
+      no_preference_satisfied: number
       unassigned: number
     }>
     overall: {
-      peopleWithNoTop2AnySlot: number      // ← the primary objective
-      peopleWithNothingAnySlot: number     // ← the secondary
-      totalRankWeight: number
+      people_with_no_top2_any_slot: number     // ← the primary objective
+      people_with_nothing_any_slot: number     // ← the secondary
+      total_rank_weight: number
     }
-    fillRate: Array<{ workshopId: string, assigned: number, capacity: number }>
+    fill_rate: Array<{ workshop_id: string, assigned: number, capacity: number }>
   }
 }
 ```
 
-`peopleWithNoTop2AnySlot` is the headline number. It is the objective, it goes on
+`people_with_no_top2_any_slot` is the headline number. It is the objective, it goes on
 the dashboard, and it is what an organiser quotes when someone complains.
 
 ### Trace shape

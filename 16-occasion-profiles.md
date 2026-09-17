@@ -16,7 +16,7 @@ export default defineEvent({
   meta: {
     name: '...',
     date: 'YYYY-MM-DD',
-    preferenceDeadline: 'YYYY-MM-DDTHH:mm:ssZ',
+    preference_deadline: 'YYYY-MM-DDTHH:mm:ssZ',
     locale: 'de',
     description: '...',
   },
@@ -59,8 +59,8 @@ clock, use randomness, dynamically evaluate code, or change module control flow.
 Labels are the generic stored fact. Tags are the profile's typed vocabulary over
 those labels. A profile may define:
 
-- property tags such as `room_type=tent`;
-- references such as `member_of=fam_27`;
+- property tags such as `room-type=tent`;
+- references such as `member-of=fam_27`;
 - capabilities derived from properties, such as `indoor` or `ensuite`;
 - requirements, relations, descriptive notes, scopes, cardinality, aliases,
   strengths, and family-facing controls.

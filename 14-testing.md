@@ -118,15 +118,15 @@ solver input builder, and the solver together rather than the solver alone.
 
 Golden fixtures must record the profile they were recorded against, since a
 profile change legitimately changes output. Store `config_hash` alongside
-`expectedHash` and fail with a clear message when the profile moved, rather
+`expected_hash` and fail with a clear message when the profile moved, rather
 than reporting an opaque mismatch:
 
 ```ts
-test.each(goldenCases)('golden: $name', ({ solverInput, expectedHash, configHash }) => {
-  if (currentConfigHash() !== configHash) {
+test.each(goldenCases)('golden: $name', ({ solverInput, expected_hash, config_hash }) => {
+  if (currentConfigHash() !== config_hash) {
     throw new Error(`golden: $name was recorded against a different profile — re-record with npm run test:record`)
   }
-  expect(sha256(canonical(solve(solverInput, defaultConfig)))).toBe(expectedHash)
+  expect(sha256(canonical(solve(solverInput, defaultConfig)))).toBe(expected_hash)
 })
 ```
 
@@ -140,7 +140,7 @@ golden: full-event — output changed
      P07  rm_0014 → rm_0009
      P12  rm_0009 → rm_0014
      P22  rm_0031 → rm_0031  (place changed within room)
-  totalScore 412 → 419
+  total_score 412 → 419
   Re-record with: npm run test:record
 ```
 
@@ -160,13 +160,13 @@ assertions that catch bugs the golden fixtures happen not to exercise.
 ```ts
 const invariants = [
   ['no person is assigned twice',
-    p => unique(p.assignments.map(a => a.personId))],
+    p => unique(p.assignments.map(a => a.person_id))],
 
   ['no place holds two people',
-    p => unique(p.assignments.map(a => a.placeId))],
+    p => unique(p.assignments.map(a => a.place_id))],
 
   ['every assigned place exists in the solver input',
-    (p, s) => p.assignments.every(a => s.places.some(pl => pl.id === a.placeId))],
+    (p, s) => p.assignments.every(a => s.places.some(pl => pl.id === a.place_id))],
 
   ['no room exceeds its place count',
     (p, s) => /* group by room, compare */],
@@ -238,7 +238,7 @@ describe('constraint corpus', () => {
   const constraints = loadConstraintFixtures()
 
   describe('cleared constraints must remain represented by resolver rules', () => {
-    test.each(constraints.filter(c => c.clearedAt))('$description', (c) => {
+    test.each(constraints.filter(c => c.cleared_at))('$description', (c) => {
   const log = loadEventLog(c.seq)
       const { plan } = derive(without(log, c), defaultConfig)
       expect(satisfies(plan, c)).toBe(true)
@@ -246,7 +246,7 @@ describe('constraint corpus', () => {
   })
 
   describe('active constraints — informational health checks', () => {
-    test.each(constraints.filter(c => !c.clearedAt))('$description', (c) => {
+    test.each(constraints.filter(c => !c.cleared_at))('$description', (c) => {
   const log = loadEventLog(c.seq)
       const { plan } = derive(without(log, c), defaultConfig)
       if (satisfies(plan, c)) {
@@ -273,10 +273,10 @@ Cheap, and they catch the failure mode where the Worker boots and solves
 wrongly:
 
 - every entry has a non-empty `doc`;
-- every `satisfiedBy` names a tag whose kind is `capability`;
+- every `satisfied_by` names a tag whose kind is `capability`;
 - every `param` names a valid entity type;
 - no alias collides with another tag or alias;
-- every `familyFacing.control` has a renderer in `src/app/family-view/controls/`;
+- every `family_facing.control` has a renderer in `src/app/family-view/controls/`;
 - every tag depending on a phase is disabled when that phase is;
 - `defineEvent` throws on each of the above when deliberately broken.
 
@@ -300,7 +300,7 @@ Some parts of the determinism contract are better enforced statically.
     "files": ["src/solver/**/*.ts", "src/derive/**/*.ts", "src/config/**/*.ts"],
     "rules": {
       "no-restricted-globals": ["error",
-        { "name": "Date",   "message": "Pass eventDate in via config." },
+        { "name": "Date",   "message": "Pass event_date in via config." },
         { "name": "Math",   "message": "No Math.random in the solver. Use rng.ts." }
       ],
       "no-restricted-imports": ["error", {
@@ -312,8 +312,14 @@ Some parts of the determinism contract are better enforced statically.
 }
 ```
 
+A repository-wide `@typescript-eslint/naming-convention` rule enforces the
+naming decision (D18): camelCase variables, parameters, and functions; PascalCase
+types; snake_case properties in type declarations and object literals; and quoted
+kebab-case keys only where a key is vocabulary. Library-defined names such as React
+props are exempt through the rule's `filter` option.
+
 These overrides extend to `src/derive/**` and `src/config/**`. Profile evaluators
-(`derive`, `check`, `validFor`) run inside the solver and are bound by the same
+(`derive`, `check`, `valid_for`) run inside the solver and are bound by the same
 contract, and the fold is bound by it because the same code runs in a browser,
 where a stray `src/worker` import would be a bundling failure rather than a subtle one.
 
@@ -354,7 +360,7 @@ test('the full loop: import → constraints → solve → plan → publish', asy
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  await publish(db, plan2.inputSeq)
+  await publish(db, plan2.input_seq)
   expect(await publishedCount(db)).toBe(1)
 })
 ```
@@ -400,7 +406,7 @@ Recorded so the gaps are deliberate.
 
 `test/fixtures/event-logs/minimal.kdl` should be readable and hand-checkable: six
 families, four rooms, one children's room, one mutual co-room request, one
-`prefer_not`. Small enough that a person can work out the right answer with a
+preferred `sole-occupancy`. Small enough that a person can work out the right answer with a
 pencil and verify the solver agrees.
 
 When someone new asks how party formation works, that fixture plus its trace is a

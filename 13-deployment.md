@@ -213,7 +213,7 @@ export async function sendEmail(env: Env, msg: Message): Promise<Sent> {
 
   if (!res.ok) return { sent: false, reason: `resend-${res.status}` }
   const { id } = await res.json<{ id: string }>()
-  return { sent: true, providerId: id }
+  return { sent: true, provider_id: id }
 }
 ```
 

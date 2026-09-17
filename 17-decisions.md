@@ -196,10 +196,10 @@ structured values carry the slot, the workshop, and the rank, validated by the
 `ordered-choice` resolver operator. There is no dedicated ranking event and no
 property table. Rationale in [labels and constraints](04-labels-and-constraints.md) §7.
 
-## D14 — `familyFacing` in the occasion profile drives the family view
+## D14 — `family_facing` in the occasion profile drives the family view
 
 *Chosen.* The preferences page is a renderer: every tag that declares
-`familyFacing` in the active profile produces a control, in profile order. Adding a
+`family_facing` in the active profile produces a control, in profile order. Adding a
 tag that reuses an existing control needs no family view code. See
 [family view](10-family-view.md) §1.
 
@@ -277,3 +277,58 @@ development, fixtures, and tests. JSON remains valid for API messages, serialize
 D1 rows, canonical hashes, and derived output. D1 remains the only production
 domain store; filesystem access and the textarea route are rejected from
 production builds and configuration.
+
+## D18 — Naming: snake_case data, camelCase code, kebab-case vocabulary
+
+*Chosen.* One naming rule per kind of name, applied across the database, the wire,
+TypeScript, KDL, and these documents:
+
+| Kind of name | Case | Examples |
+|---|---|---|
+| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, `Party`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `min_occupants` |
+| Code identifiers: variables, parameters, functions, methods, module factories | `camelCase` | `ageAt`, `buildSolverInput`, `roomInventory()` |
+| Types, interfaces, classes, React components | `PascalCase` | `SolverInput`, `RoomInventoryParams`, `FamilyView` |
+| Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
+| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `room-with`, `needs-child-group`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
+| Entity ids | kind prefix, `_`, then a free suffix | `fam_27`, `per_peter`, `slot_sat-morning` |
+| Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `PUBLIC_URL`, `DB` |
+| Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `tag-requirements.ts` |
+| Human-readable copy | free text from the profile | `Eigenes Bad` |
+
+The data rule is a boundary rule: a value keeps one spelling from the D1 row through
+`derive` to the browser, so hashes, fixtures, API responses, and the documents all
+read the same. Code identifiers follow the TypeScript ecosystem so that our names do
+not clash with React, Hono, zod, and the DOM, which are all camelCase.
+
+Vocabulary identifiers are values, not fields. They appear inside data
+(`LabelSet key=room-with`) and name things a person refers to in review, the trace,
+and the constraint screen. Setup-event payload fields that the fold turns into labels
+change only their separator: the payload field `does_not_need_a_bed` becomes the
+label key `does-not-need-a-bed`.
+
+In KDL a kebab-case identifier is a valid bare value, so vocabulary needs no quoting
+in event logs:
+
+```kdl
+LabelSet entity_id=per_jonas key=needs-child-group value=child-group-a strength=#null
+```
+
+In TypeScript a kebab-case key is quoted where it is an object key
+(`'room-with': relation({ … })`), and a profile's tag type is derived from those
+keys, so a misspelt tag is still a compile error.
+
+*Rejected alternative:* snake_case for every identifier, Python-style. Every file
+would mix our names with library camelCase, and React hooks and component props
+cannot follow the rule at all.
+
+*Rejected alternative:* camelCase for every TypeScript field, with snake_case only
+in SQL and KDL. Every boundary would need a renaming step, and a field would have
+two spellings depending on which document or layer is being read.
+
+*Rejected alternative:* snake_case vocabulary identifiers. They read as field names
+and blur the line between a field and the value it holds; kebab-case keeps
+vocabulary visibly distinct.
+
+*Consequence:* `typescript-eslint`'s `naming-convention` rule enforces the code and
+data rules ([testing](14-testing.md) §6); the profile builder rejects vocabulary
+identifiers that are not kebab-case.

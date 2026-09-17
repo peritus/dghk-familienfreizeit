@@ -458,5 +458,5 @@ copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
 
 Organisation-team-facing labels come from the built-in or custom definition and family-facing text
-from `familyFacing.label`, so the two audiences can be worded differently for
+from `family_facing.label`, so the two audiences can be worded differently for
 the same tag.

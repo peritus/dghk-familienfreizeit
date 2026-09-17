@@ -83,8 +83,9 @@ discover the problem in the solver.
 
 Setup event payloads are complete command inputs, not a second data model. The
 fold creates the typed entity identity and emits the payload's mutable
-values as labels. For example, `PersonAdded.role`, `birthdate`, and
-`does_not_need_a_bed` become labels on the new person; `RoomAdded.kind`, `floor`, and
+values as labels, under the kebab-case form of the field name (D18). For example,
+`PersonAdded.role`, `birthdate`, and `does_not_need_a_bed` become the labels `role`,
+`birthdate`, and `does-not-need-a-bed` on the new person; `RoomAdded.kind`, `floor`, and
 capacity-related values do the same for the room. Occasion-specific config defines
 which labels are legal and how the resolver uses them.
 

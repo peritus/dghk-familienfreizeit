@@ -388,9 +388,9 @@ src/
     canonical.ts          canonical JSON + sha256
     rng.ts                seeded xorshift32 (unused by default)
     rules/
-      hard/  capacity.ts ageBand.ts designation.ts tagRequirements.ts
-      soft/  exactFit.ts orphanBed.ts tagPreferences.ts
-      tagRelations.ts
+      hard/  capacity.ts age-band.ts designation.ts tag-requirements.ts
+      soft/  exact-fit.ts orphan-bed.ts tag-preferences.ts
+      tag-relations.ts
   lib/
     dates.ts              ageAt() over ISO strings — pure
 profiles/

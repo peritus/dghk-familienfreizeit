@@ -135,7 +135,7 @@ chunk, so a family's phone never downloads the organiser screens or the solver.
 
 ```tsx
 function OrganiserApp() {
-  const { committed, configHash } = useLog()            // GET /api/organiser/log, once
+  const { committed, config_hash } = useLog()            // GET /api/organiser/log, once
   const [pending, dispatch] = useReducer(pendingReducer, [])
   const world = useMemo(() => derive([...committed, ...pending], config), [committed, pending])
   …
@@ -156,7 +156,7 @@ re-renders from the response.
 `dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, organiser
 notes, and workshop titles are all user-supplied and all rendered as `{value}`.
 
-The family preferences page is a renderer over `familyFacing` occasion-profile entries
+The family preferences page is a renderer over `family_facing` occasion-profile entries
 rather than hand-written JSX ([family view](10-family-view.md) §1): each
 `control` value maps one-to-one onto a component in `src/app/family-view/controls/`.
 
