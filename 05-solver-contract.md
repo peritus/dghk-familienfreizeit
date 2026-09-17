@@ -95,7 +95,7 @@ All weights are integers. All score terms are integers. Totals are integers.
 This is not about floating-point non-determinism — IEEE-754 is deterministic for
 a fixed operation order. It is about *comparison*: `12.7000000000000001 > 12.7`
 is a bug waiting in a tiebreak, and an integer score reads better in a trace.
-"Score 22 = exact fit +10, ensuite +6, co-room wish +6" is a sentence. "Score
+"Score 22 = exact fit +10, ensuite +6" is a sentence. "Score
 21.9999" is not.
 
 ### R7 — Canonical JSON for hashing

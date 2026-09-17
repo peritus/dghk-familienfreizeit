@@ -135,5 +135,5 @@ is `profiles/familienfreizeit-2027.ts`.
 **Strength** — `required` (prunes rooms) or `preferred` (scored). An absent tag
 assignment means indifferent.
 
-**Preflight** — checks run on a plan's solver input before party formation, catching
+**Preflight** — checks run on a plan's solver input before placement, catching
 infeasibility and contradictions before any placement runs.

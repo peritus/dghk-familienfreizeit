@@ -1,469 +1,81 @@
-# 08 — Organiser view
+# 09 — Organiser view
 
-Three people will use this, for about six weeks, on laptops. Design for
-competence and speed, not for onboarding. Assume they will use it daily and learn
-it.
-
-The board is the only screen that needs real interaction design. Everything else
-is tables and forms, and should be boring on purpose.
-
----
+Three organisers use this on laptops for about six weeks. The active room
+workflow treats each family as one placement unit. Sleeping-party review and
+child-room assignment are deferred; their design sketches live under
+[`deferred-ideas/`](deferred-ideas/).
 
 ## 1. Screen inventory
 
-Detailed UI plans live in the [UI screen catalog](ui/README.md), including
-English ASCII wireframes, state behavior, accessibility, and responsive notes.
-
 | Route | Screen | Purpose |
 |---|---|---|
-| `/organiser` | Dashboard | Status, staleness, preflight findings, what needs attention |
+| `/organiser` | Dashboard | Status, staleness, preflight findings, attention |
 | `/organiser/families` | Families | Table, import, invite, chase list |
-| `/organiser/families/:id` | Family detail | People, preferences, full event history |
+| `/organiser/families/:id` | Family detail | People, preferences, event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
-| `/organiser/board` | The board | Room assignment by drag and drop |
+| `/organiser/board` | The board | Whole-family room placement |
 | `/organiser/plans` | Plans | List, diff, publish |
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
-| `/organiser/workshops` | Workshops | Slots, capacity, fill, preference heatmap |
-| `/organiser/constraints` | Organiser decisions | Add, inspect, and clear decision labels; inspect resolver findings |
-| `/organiser/reports` | Reports | Printable operational reports with audience and sensitivity scopes |
+| `/organiser/workshops` | Workshops | Slots, capacity, fill, rankings |
+| `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
+| `/organiser/reports` | Reports | Printable operational reports |
 
-Every screen is a view over the organiser application's world
-([frontend](12-frontend.md) §3). None has a server route of its own: the application
-loads the committed log once, derives, and writes only through apply and the email
-actions. Reports follow the same rule and are defined in [reports](19-reports.md);
-shared family reports are rendered from the published world through the family
-family view rather than becoming organiser-only exports.
-
-`/organiser/constraints` renders fixed resolver mechanisms and organiser decision labels, shows which labels
-are in use and by how many entities, and lists current
-preflight findings. It is where an organiser looks to answer "what can I even ask
-for".
-
----
+Every screen renders the organiser application's derived world. The browser holds
+pending events; applying appends them in one validated batch, and discarding them
+leaves no trace.
 
 ## 2. Dashboard
 
-The one screen an organiser opens every morning. It answers one question: *does
-anything need me today?*
+The dashboard shows publication freshness, events since publication, moved families,
+preflight findings, constraint conflicts, unplaced families, workshop warnings, and
+the chase list. Quality counters exclude deferred co-room and party metrics.
 
-Layout, top to bottom, in descending order of urgency:
+Example findings:
 
-**Plan status.** One block, large.
+> ⚠ `needs-private-sanitary`: 19 beds required, 14 available.
+>
+> ⚠ 1 family cannot be placed — Braun ×5 requires ensuite; none free.
 
-> Published 3 days ago · plan #7
-> **14 events since.** Re-running would move **6 people**. *Review changes →*
+## 3. Families and inventory
 
-The "would move 6 people" is `diff(derive(published), derive(all))`, described in
-[01-architecture](01-architecture.md). It turns a scary count of events into an
-accurate count of consequences. If the derivation produces the same hash:
+Families is a sortable, filterable table with import and invitation state. Family
+detail shows people, current profile preferences, and the event history. Inventory
+shows buildings, rooms, beds, designations, capacity, and room capabilities.
 
-> Published 3 days ago · plan #7
-> 14 events since, none affecting assignments. **Up to date.**
+## 4. Whole-family assignment board
 
-**Blocking items**, only when present. Preflight findings, constraint conflicts,
-unplaceable families, workshops below minimum. Each links
-directly to the thing.
+The board is the only active screen with substantial interaction design. It has a
+searchable unplaced-family rail and room cards grouped by building and floor.
 
-Preflight findings come first. Requirement arithmetic
-([room assignment](20.3-room-assignment.md) §9) in particular is the earliest possible
-warning and should be the most prominent thing on the screen when it fires:
-
-> ⚠ **needs-private-sanitary: 19 beds required, 14 available.** Five people cannot be
-> placed however the rooms are arranged. *See affected families →*
-
-> ⚠ **2 constraint conflicts** — organiser decisions cannot be satisfied.
-> ⚠ **1 family cannot be placed** — Braun ×5 requires ensuite; none free.
-
-**Chase list.** Families who have not logged in, or who have logged in but
-submitted nothing. With a "send reminder" action that emails the lot.
-
-> 8 families have not opened their invitation.
-> 5 have logged in but stated no room preference.
-> 12 people have no workshop rankings for Samstag Vormittag.
-
-**Quality numbers.** Small, at the bottom, trending.
-
-> 11 active constraints · 4 people with no top-two choice
-
----
-
-## 3. Families
-
-A table. Sortable, filterable, 55 rows.
-
-Columns: family, email, people, preferences stated, workshops ranked, last seen,
-constraints. Filter chips include *no login*, *no room preference*, *incomplete
-workshops*, and *has constraints*.
-
-**Import.** Paste a CSV or upload one. The browser parses it with papaparse and
-validates every row against the derived world — duplicate addresses included — in a
-preview table before anything is written:
-
-> 54 rows parsed. 52 ready, 2 problems.
-> Row 14 — `mueller@example.com` duplicates row 9 (`Mueller@example.com`).
-> Row 31 — birthdate `31.02.2015` is not a date.
-
-Import is all-or-nothing after the preview is accepted. Each family becomes one
-`FamilyInvited` plus one `PersonAdded` per person, sent through apply in one batch.
-The server validates the batch again; if the log moved or a row no longer passes,
-nothing is written and the preview shows why.
-
-Expected columns, documented on the page itself: `email`, `family_name`,
-`given_names` (semicolon-separated), `birthdates` (semicolon-separated, matching
-order), `roles`. Be generous about header naming and show what was matched.
-
-**Family detail** shows people, current preferences, and — the useful part — the
-complete event history for that family, rendered as prose. The preferences
-block renders tag assignments with their strengths and labels from the
-profile. The event history renders `LabelSet` / `LabelCleared` in prose using
-the resolver mechanism, token, and optional organiser note:
-
-> 12 Sep 14:22 · *Organiser Anna, on behalf of this family* · set Eigenes Bad
-> to preferred, Drinnen schlafen to required.
-> 12 Sep 14:23 · *Organiser Anna* · "Wrote in saying the youngest is scared of
-> the dark, would like a room with a window onto the courtyard."
-> 14 Sep 09:01 · *This family* · set Ernährung to vegetarisch for Jonas (9).
-
-The event actor identifies the authenticated principal while the subject
-identifies the affected family or person. No separate on-behalf-of role is needed.
-
----
-
-## Deferred party review
-
-This screen is deferred with the sleeping-parties and child-rooms modules. Its
-design sketch is retained in [`deferred-ideas/party-review.md`](deferred-ideas/party-review.md)
-and is not part of the active route catalogue.
-
-The screen that should exist before the board, and the one most likely to be
-skipped. Put it in the navigation before the board so it is read first.
-
-A list of derived parties, sorted by bed demand descending — so the hard ones are
-at the top and the fragments are visible at the bottom.
-
-Each party renders as a card:
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│ P07 · 5 people · 4 beds                    [ split ] [ merge ] │
-│                                                                │
-│ Müller — Anna (38), Kai (41)                                   │
-│ Schmidt — Jana (36), Tom (39), Mia (0, no bed)                 │
-│                                                                │
-│ Requires: ensuite (Schmidt)                                    │
-│                                                                │
-│ Merged from a mutual room-with request (12 Sep, 13 Sep).       │
-└────────────────────────────────────────────────────────────────┘
-```
-
-Provenance is the content. An organiser reading this card should be able to tell
-exactly why these five people are one unit without opening anything else.
-Each requirement names which member family contributed it
-([deferred sleeping parties](deferred-ideas/sleeping-parties.md) §7) — a merged party's `required` tag binding
-everyone is correct but surprising, and the card is where that surfaces.
-
-**Warnings inline, at the top:**
-
-> ⚠ 7 parties of one person. Consider merging or contacting these families.
-> ⚠ Merge refused: Müller + Schmidt + Weber, combined demand 10 exceeds
-> the largest room (6 places). Treated as a preference instead.
-> ⚠ Merged party Müller + Schmidt + Weber needs a six-place
-> ensuite room (Schmidt's requirement); no such room exists.
-
-**Merge and split** open a small dialog and append `groups-with` or
-`separates-from` labels on the people concerned to the pending list. There is no
-party decision event and no separate reason code: the label's optional note says why,
-and party formation re-derives from it like any other constraint. Since party
-formation is the judgement call and the one most worth trying twice, this screen
-benefits from the pending list as much as the board does.
-
----
-
-## 5. The board
-
-The only genuinely designed screen. Everything here serves one goal: make the
-assignment puzzle legible at a glance and adjustable without thought.
-
-### Layout
-
-```
+```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ [search parties…]   Haus A  Haus B  Zelte   ○ unplaced only   plan #8 ⟳  │
-├──────────────┬───────────────────────────────────────────────────────────┤
-│ UNPLACED (3) │  HAUS A · Erdgeschoss                                     │
-│              │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐       │
-│ ┌──────────┐ │  │ 01 · 4 ●●●●  │ │ 02 · 2 ●●    │ │ 03 · 5 ●●●○○ │       │
-│ │ Braun ×5 │ │  │ ensuite      │ │              │ │ ensuite      │       │
-│ │ ensuite  │ │  │ ─────────────│ │ ─────────────│ │ ─────────────│       │
-│ │ ⚠ no fit │ │  │ Weber ×4     │ │ Koch ×2      │ │ Braun ×3     │       │
-│ └──────────┘ │  │        ✓ ⚲   │ │        ✓     │ │        ✓ ⚲   │       │
-│              │  └──────────────┘ └──────────────┘ └──────────────┘       │
-│ ┌──────────┐ │                                                           │
-│ │ Lang ×1  │ │  HAUS A · 1. Stock                                        │
-│ └──────────┘ │  …                                                        │
-└──────────────┴───────────────────────────────────────────────────────────┘
+│ [Search families…] Main House  Garden House  [Unplaced only]  Plan #8    │
+├─────────────────┬────────────────────────────────────────────────────────┤
+│ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                              │
+│ Braun ×5 ⚠      │ Room 12 · 6 places · Morgan ×2 ✓                      │
+│ Lang ×1         │ Room 14 · 5 places · open                             │
+├─────────────────┴────────────────────────────────────────────────────────┤
+│ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]         │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Left rail: unplaced families, always visible, with the blocking reason. Main area:
-rooms as cards, grouped by building and floor, in `sort_key` order.
-
-### Room cards
-
-The card is the information display, so it carries everything needed to judge a
-drop without opening anything:
-
-- **Number and place count**, with filled and free places as discrete marks
-  (`●●●○○`). Discrete marks rather than a bar, because the question is always
-  "how many more fit", and counting five dots is faster than reading "3/5".
-- **Attribute chips**: sanitary arrangement and accessible.
-- **Occupants**, one line per family with size.
-- **Status glyphs**: `✓` all constraints satisfied, `⚠` a soft penalty applied,
-  `⚲` constrained by an organiser rule.
-
-Colour alone never carries meaning. The neobrutalism palette is high-contrast and
-tempting to lean on, but a constrained room and a warned room must be
-distinguishable in greyscale and by anyone with a colour vision deficiency. Use
-the glyph plus a border treatment: constrained rooms get a doubled border, warned
-rooms get a hatched top edge.
-
-### Drag interaction
-
-Built on `@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB core,
-the same toolchain behind Trello and Jira.
-
-- **Drag target is the room card**, not an individual place. Which bed within a
-  room is a detail the solver handles and organisers rarely care about. A separate
-  bed-level view handles the exceptions (see below).
-- **On drag start**, rooms that cannot accept the party dim and lose their drop
-  affordance. Rooms that can accept it but would incur a penalty show the penalty
-  as a ghost chip, its text read from the constraint definition rather than
-  hard-coded: `−12 Zimmer teilen`.
-- **On drop**, the decision's label events are appended to the pending list and the board
-  re-derives locally. There is no request and no optimistic guess to reconcile:
-  what appears is the real plan for those events.
-- **If the re-derivation moves anything else**, those cards flash once and a
-  summary appears: *"Decision added for Braun ×5 → Room 03. 2 other parties
-  moved. See what changed →"*. Cascading moves are the main way a board like this
-  surprises people; showing them immediately is the difference between trust and
-  suspicion.
-
-### Pending changes
-
-Every board action appends one or more label events to the **pending list**
-([01-architecture](01-architecture.md)) rather than to the log. The board renders
-`derive(committed ++ pending)`, so the plan on screen is always the real plan for
-everything the organiser has done so far.
-
-A bar along the bottom carries the count and the two ways out:
-
-> **3 pending changes** · Braun ×5 → Raum 03 · Koch ×2 → Raum 02 · Weber split
-> [ Apply ] [ Discard ]
-
-Usually the list is empty and the bar is absent, which is the ordinary state of the
-board rather than a special one.
-
-**Apply** appends the events in order, in one request. The server validates and
-authorises each one exactly as it would a single action, appends them together, and
-derives. From that moment the other organisers see the change, because they derive from
-the same log. Families do not — that is what Publish is for.
-
-**Discard** drops them; because nothing was written, nothing is left behind — no
-cleared labels, no retired constraints, no sediment in the family's event history.
-
-The two verbs control who can see the same plan:
-
-| | Apply | Publish |
-|---|---|---|
-| Who starts seeing it | the other organisers | families |
-| What it writes | the pending events | a `PlanPublished` event |
-| Undo | clear or correct the applied labels with new events | publish again |
-
-This is what makes the board safe to think in. An organiser can try an arrangement,
-look at the preflight findings and the diff it would produce, and walk away from it
-without having said anything.
-
-### Multi-select
-
-The feature a spreadsheet cannot have, and the reason the board is worth
-building.
-
-Shift-click or ctrl-click parties in the left rail or on room cards to build a
-selection; drag any member and the whole selection moves. The drag preview shows
-the combined headcount so an organiser can see at a glance whether it will fit.
-
-This is what "these three small families should share the apartment" looks like
-as an interaction: select three, drag once.
-
-### Keyboard
-
-Faster than dragging once learned, and it is also the accessibility story. Not
-optional.
-
-| Key | Action |
-|---|---|
-| `/` | Focus the family search |
-| `↑ ↓` | Move through the party list |
-| `Space` | Add to selection |
-| `Enter` | Open the room picker for the selection |
-| `r` then digits | Add a room decision for the selected family |
-| `u` | Drop the selected party's pending constraint |
-| `z` | Undo the last action |
-| `Esc` | Clear selection |
-
-The room picker is a filtered list showing feasibility and score per room, which
-makes it strictly more informative than dragging — an organiser who learns it will
-prefer it.
-
-### Bed-level view
-
-Click into a room to see individual places. Needed for the real cases: who gets
-the bottom bunk, which family takes the double, who is next to the window. Drag
-people between places within the room; emits a place-targeted constraint.
-
-Kept out of the main board deliberately. Surfacing 120 places at once is noise
-when the actual question is almost always "which room".
-
-### Undo
-
-`z`, and a button. It removes the last action's pending events together and re-derives,
-so undoing a needs/provides pair cannot leave half of the decision behind. Undo is exact
-rather than compensating: there is no cleared label and no second event recording
-that the first was a mistake, because the first was never committed.
-
-Past the start of the pending list, changes are applied history, whether or not
-they have been published. Clearing or revising them appends ordinary label events;
-the original events remain visible to organisers.
-
-### Concurrency
-
-Three organisers, optimistic locking.
-
-Apply carries the `input_seq` the pending list was built on. If the log has moved
-since, the server returns 409 with the events it has gained, and the board says:
-
-> Anna appended 2 events while you were working. Your 3 pending changes still
-> apply. **[ Re-derive on her changes ]**
-
-Re-deriving is honest work rather than merge logic: the pending events are folded
-onto the newer log and the board shows the resulting plan. Payloads are complete
-restatements ([03-events](03-events.md)) and constraints name stable entities
-([labels and constraints](04-labels-and-constraints.md) §5), so the result is well defined.
-A pending event that names something Anna withdrew surfaces as an ordinary
-constraint diagnostic, not as a conflict the organiser has to resolve by hand.
-
-No operational transform, no Durable Objects. At three organisers the collision rate is
-near zero.
-
-### Empty state
-
-An empty board is the first thing a new organiser sees, and it should be an
-instruction rather than a void:
-
-> Nothing to place yet. Add rooms and beds in **Inventory**, then import families.
-> A plan appears here as soon as there is something to put in a room.
-
----
-
-## 6. Plan diff
-
-Where publication confidence comes from. Two plans side by side, only the
-differences shown, grouped by cause.
-
-```
-publication #7 (12 Sep)  →  current
-
-BECAUSE OF NEW PREFERENCES (4 people)
-  Weber ×4   Raum 01 → Raum 07   Weber stated ensuite required (14 Sep)
-
-BECAUSE OF ORGANISER DECISIONS (5 people)
-  Braun ×5   Raum 12 → Raum 03   naehe_zum_eingang, added by Anna, 15 Sep
-
-KNOCK-ON (2 people)
-  Koch ×2    Raum 03 → Raum 02   displaced by the above
-
-UNCHANGED  46 people
-```
-
-Grouping by cause is what makes the diff readable. A flat list of eleven moves
-tells an organiser nothing; moves attributed to a preference or organiser decision,
-with the remainder marked knock-on, tell them whether to publish.
-
-Attribution is computed, not guessed. For each event between the two positions,
-derive again without it and see whether the move survives; the move is attributed
-to the events whose absence removes it, and to knock-on if none of them does. For
-the ordinary case — a dozen or two events since publication — that is a dozen or two
-derivations of a few milliseconds each, and the answer is exact rather than a rule
-of thumb that is wrong precisely when the plan is most tangled.
-
-Publishing from this screen shows exactly who will be emailed.
-
----
-
-## 7. Organiser decisions
-
-The existing `/organiser/constraints` screen shows the decision label/value and
-optional note, with author and timestamp from the event that set it. A token such
-as `naehe_zum_eingang` is shown as entered; there is no second name or required
-explanation field. Applied labels are visible to every organiser. Pending labels
-remain local to the working organiser until Apply.
-
-Add and clear use the same fixed resolver forms as the board and party review:
-needs/provides, exclusions, grouping, separation, and workshop mechanisms with
-their established value shapes. Built-in mechanisms are inspectable, not editable.
-Missing providers and contradictions appear as current preflight or solver
-findings. The detailed interaction is in [UI-13](ui/13-constraints.md).
-
-German wording: **Entscheidungen des Organisationsteams**, **Entscheidung
-hinzufügen**, and **Zusätzliche Informationen** for the optional note.
-
----
-
-## 8. Workshops
-
-Per slot: workshops with capacity, current intake, and a fill bar. Below, a
-preference heatmap — people down one axis, workshops across, cells shaded by
-rank. It makes oversubscription and dead workshops obvious at a glance, which is
-the information needed to adjust capacities before running the solver.
-
-Warnings: below minimum capacity, no eligible participants, and age bounds that
-partition the population and strand people.
-
-An organiser can open the same decision form with the workshop and slot context.
-It writes ordinary pending labels for matching, exclusion, grouping, separation,
-or eligibility; workshop assignment derives the result. The form never writes an
-assignment directly. Existing history shows the token, optional note, author, and
-timestamp after application.
-
----
-
-## 9. Copy
-
-The interface's voice, applied consistently.
-
-**Buttons say what happens, and the result echoes them.** "Publish plan" produces
-"Plan published"; "Apply" produces "Applied". Never "Submit".
-
-**There is no compute step, so there is no button for one.** The plan on screen is
-always current, because every screen derives it. An organiser's verbs are **Apply** —
-other organisers see this — and **Publish** — families see this.
-
-**Errors state what happened and what to do.** Not "Invalid input" but "Row 31:
-birthdate `31.02.2015` is not a date. Use `DD.MM.YYYY`."
-
-**Empty states are invitations.** Not "No constraints" but "No constraints yet.
-Add one when the plan needs a human rule."
-
-**Numbers get units and comparison.** Not "11" but "11 active constraints (was 19)".
-
-**No apologies, no exclamation marks, no "Oops".** These are organisers doing
-organisational work; the interface should be a competent colleague.
-
-**German or English.** The audience is a German Jugendherberge. Family-facing
-copy should be German with an English fallback (`family.locale`). Organisation-team-facing
-copy can be either — pick one and be consistent. Room names, buildings and
-workshop titles come from the data and are whatever the organisers typed.
-
-Organisation-team-facing wording comes from the resolver mechanism and profile or
-custom definition; organiser-supplied tokens are shown as entered. Family-facing
-text comes from `family_facing.label`, so the audiences can be worded differently for
-the same tag.
+Dragging a family to a room appends organiser decision labels, re-derives locally,
+and explains infeasible drops. The solver remains the only producer of assignments.
+Room cards show capacity, sanitary arrangement, accessibility, occupants by family,
+hard-constraint status, and soft penalties. A drop never splits a family or merges
+two families.
+
+Keyboard users can search families, move through the unplaced list, open a room
+picker, add a room decision, undo the last pending action, and clear selection.
+Touch users get the same room picker through a drawer instead of drag-and-drop.
+
+## 5. Organiser decisions and reports
+
+The constraints screen exposes fixed resolver mechanisms: needs/provides, exclusions,
+and separation. Sleeping `groups-with` decisions are rejected or reported as
+deferred until the sleeping-parties module is adopted. Optional notes stay attached
+to the label event; author and timestamp come from the event log.
+
+Reports show family-to-room assignments, unplaced families, capacity and constraint
+findings, workshop results, and publication status. They do not show party or
+child-room sections in the active scope.
