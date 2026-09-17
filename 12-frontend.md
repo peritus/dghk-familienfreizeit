@@ -179,14 +179,17 @@ The components in use, and that is the complete list:
 
 | Component | Used for |
 |---|---|
-| Button, Card, Badge | everywhere |
-| Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
-| Combobox | family picker, person picker, room picker, family search |
+| Button, Card, Badge, Alert | everywhere |
+| Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
+| Combobox, Popover, Command | person picker, room picker, family search |
 | Dialog, Alert Dialog | import, organiser decisions, publish confirmation, discard pending |
-| Table | families, CSV preview, plans, constraints, workshop fill |
+| Table, ScrollArea | families, CSV preview, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after publication in the family view |
-| Toast | "Gespeichert um 14:22", "Applied", apply conflicts |
+| Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
+| Sidebar, Sheet, Drawer, Breadcrumb | organiser navigation, mobile pickers |
+| Skeleton, Tooltip | loading states and hints |
 
+This list and the inventory in [UI-00](ui/00-design-system.md) are the same list.
 The families table sorts and filters 55 rows with `useMemo`; it does not need the
 registry's data-table wrapper or a table library. Adding a component to this list is
 a deliberate decision, the same as adding a dependency.
@@ -276,8 +279,8 @@ that the world the organiser acted on is the world it derived; the determinism c
 reported as a defect rather than smoothed over.
 
 A stale bundle must not derive at all. The log response carries the Worker's
-`config_hash`, and a bundle whose profile hashes differently refuses to open the
-organiser application and asks for a reload.
+`config_hash` and `code_revision`, and a bundle differing in either refuses to open
+the organiser application and asks for a reload ([deployment](13-deployment.md) §1).
 
 ---
 
@@ -318,8 +321,9 @@ shadcn CLI adds for copied components — Base UI and its small styling helpers 
 reviewed when a component is added, like any other dependency.
 
 **The derivation core has zero dependencies.** `src/derive/**` and `src/solver/**`
-import only from themselves, from `src/config/**`, and from TypeScript's standard
-library; `src/config/**` is dependency-free as well. That is deliberate: the most
+import only from themselves, from `src/config/**`, from the pure parts of
+`src/modules/**`, and from TypeScript's standard library; those are dependency-free
+as well. That is deliberate: the most
 important code in the project should be readable without knowing any framework, and
 auditable by someone who does not know this stack. React never reaches into it.
 

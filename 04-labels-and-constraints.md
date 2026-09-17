@@ -158,9 +158,9 @@ appended ([03-events](03-events.md)). The checks are:
 4. **Strength is legal** for the constraint.
 5. **Cardinality and validity pass**, including the tag's `valid_for` evaluator —
    for example "does not need a bed" only on children and infants.
-6. **The key is writable through labels.** Keys the kernel or a module sets only
-   through setup events, such as `member-of` and `located-in`, are rejected
-   ([modules](20-modules.md) §3.1).
+6. **The key is writable through labels on this entity kind.** Keys the kernel or
+   a module sets only through setup events, such as `member-of` and `located-in`,
+   are rejected for the kinds that own them ([modules](20-modules.md) §3.1).
 
 Failures are field-level errors on the form, never silent. `type Tag =
 keyof typeof profile.tags` checks profile tag references in code. Append validation

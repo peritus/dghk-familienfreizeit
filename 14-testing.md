@@ -296,7 +296,11 @@ Some parts of the determinism contract are better enforced statically.
 ```jsonc
 {
   "overrides": [{
-    "files": ["src/solver/**/*.ts", "src/derive/**/*.ts", "src/config/**/*.ts"],
+    "files": [
+      "src/solver/**/*.ts", "src/derive/**/*.ts", "src/config/**/*.ts",
+      "src/modules/**/*.ts", "profiles/**/*.ts",
+      "!src/modules/*/app/**", "!src/modules/*/worker/**"
+    ],
     "rules": {
       "no-restricted-globals": ["error",
         { "name": "Date",   "message": "Pass event_date in via config." },
@@ -317,7 +321,9 @@ types; snake_case properties in type declarations and object literals; and quote
 kebab-case keys only where a key is vocabulary. Library-defined names such as React
 props are exempt through the rule's `filter` option.
 
-These overrides extend to `src/derive/**` and `src/config/**`. Profile evaluators
+These overrides cover everything pure: `src/solver/**`, `src/derive/**`,
+`src/config/**`, the active profile, and every module directory outside its `app/`
+and `worker/` ([modules](20-modules.md) §6). Profile evaluators
 (`derive`, `check`, `valid_for`) run inside the solver and are bound by the same
 contract, and the fold is bound by it because the same code runs in a browser,
 where a stray `src/worker` import would be a bundling failure rather than a subtle one.

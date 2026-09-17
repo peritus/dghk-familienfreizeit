@@ -87,7 +87,7 @@ is evaluated once, at profile build.
 |---|---|
 | `entity_kinds` | Kind name (kebab-case), id prefix, and whether ids are caller-generated or derived by the fold. The fold rejects an id reused under another kind. |
 | `events` | Event type, zod payload schema, fold function, append invariants, and the authorisation rule. The fold function may create entity identity and emit labels; it may not emit derived results. |
-| `label_keys` | Label keys the module owns outright, such as `located-in` for inventory, with value type, scopes, and cardinality. A profile may not define a tag with the same key. |
+| `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, and cardinality. Ownership is per (key, entity kind): a profile may not define a tag using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
 | `tag_roles` | A slot a profile tag must fill, such as the keep-apart relation for room assignment: the parameter that names the tag, and the operator, scopes, value type, and strengths the tag must have. |
 | `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](05-solver-contract.md) §1, R1). |
 | `stages` | Pure solver stages with explicit ordering and a typed output section of the plan (§4). |
@@ -129,9 +129,9 @@ time and fails the build when:
 
 - a module is selected twice;
 - a `requires` dependency is not selected;
-- two modules contribute the same entity kind, event type, label key, route, or
-  report id;
-- a profile tag collides with a module-owned label key;
+- two modules contribute the same entity kind, event type, route, or report id,
+  or the same label key for the same entity kind;
+- a profile tag uses a label key on an entity kind a module owns it for;
 - a tag role parameter names no tag, or names a tag of the wrong shape;
 - a parameter fails its schema;
 - a vocabulary identifier is not kebab-case.
