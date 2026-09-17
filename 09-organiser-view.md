@@ -35,7 +35,7 @@ actions. Reports follow the same rule and are defined in [reports](19-reports.md
 shared family reports are rendered from the published world through the family
 family view rather than becoming organiser-only exports.
 
-`/organiser/constraints` renders built-in and custom definitions, shows which labels
+`/organiser/constraints` renders fixed resolver mechanisms and organiser decision labels, shows which labels
 are in use and by how many entities, and lists current
 preflight findings. It is where an organiser looks to answer "what can I even ask
 for".
@@ -120,7 +120,7 @@ order), `roles`. Be generous about header naming and show what was matched.
 complete event history for that family, rendered as prose. The preferences
 block renders tag assignments with their strengths and labels from the
 profile. The event history renders `LabelSet` / `LabelCleared` in prose using
-the built-in or custom constraint definition:
+the resolver mechanism, token, and optional organiser note:
 
 > 12 Sep 14:22 · *Organiser Anna, on behalf of this family* · set Eigenes Bad
 > to preferred, Drinnen schlafen to required.
@@ -173,7 +173,7 @@ everyone is correct but surprising, and the card is where that surfaces.
 
 **Merge and split** open a small dialog and append `groups-with` or
 `separates-from` labels on the people concerned to the pending list. There is no
-party override event and no reason code: the constraint's own description says why,
+party decision event and no separate reason code: the label's optional note says why,
 and party formation re-derives from it like any other constraint. Since party
 formation is the judgement call and the one most worth trying twice, this screen
 benefits from the pending list as much as the board does.
@@ -316,7 +316,7 @@ optional.
 | `↑ ↓` | Move through the party list |
 | `Space` | Add to selection |
 | `Enter` | Open the room picker for the selection |
-| `r` then digits | Assign directly to a room number |
+| `r` then digits | Add a room decision for the selected party |
 | `u` | Drop the selected party's pending constraint |
 | `z` | Undo the last action |
 | `Esc` | Clear selection |
@@ -395,7 +395,7 @@ UNCHANGED  46 people
 ```
 
 Grouping by cause is what makes the diff readable. A flat list of eleven moves
-tells an organiser nothing; moves attributed to a preference or custom constraint,
+tells an organiser nothing; moves attributed to a preference or organiser decision,
 with the remainder marked knock-on, tell them whether to publish.
 
 Attribution is computed, not guessed. For each event between the two positions,
@@ -457,6 +457,6 @@ copy should be German with an English fallback (`family.locale`). Organisation-t
 copy can be either — pick one and be consistent. Room names, buildings and
 workshop titles come from the data and are whatever the organisers typed.
 
-Organisation-team-facing labels come from the built-in or custom definition and family-facing text
+Organisation-team-facing labels come from the built-in resolver mechanism and family-facing text
 from `familyFacing.label`, so the two audiences can be worded differently for
 the same tag.
