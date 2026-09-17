@@ -411,7 +411,7 @@ Also covered:
   solver-input validation fails.
 - **Release control**: implement every scenario in [release control](06-release-control.md)
   §9, including unchanged-head preview equality, selection changes, concurrent appends,
-  per-scope history, dependencies, privacy and code/config mismatch. Communication
+  per-scope history, dependencies, privacy and build/compatibility mismatch. Communication
   carries no extra content hash. Selected-scope errors require their acknowledgements;
   hard consistency gates cannot be acknowledged away.
 - **Live coordination**: cover last-place races, over-capacity preservation, inactive
