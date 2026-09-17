@@ -24,7 +24,7 @@ type CommunicationScope =
 |---|---|---|
 | `accommodation` | Family/person room, bed and place assignments, unplaced results, and the room/building/place descriptors necessary to understand them | The whole accommodation allocation |
 | `workshop-programme` | Title, description, slot identity and label, start/end time, room and location descriptors, participation mode, capacity, age/audience eligibility, leaders, manual cancellation and its family-safe explanation | One workshop |
-| `workshop-allocation` | Solver participant assignments, unassigned outcomes and automatic cancellation results for the slot | All assigned-mode workshops in one slot |
+| `workshop-allocation` | Solver participant assignments and unassigned outcomes for the slot | All assigned-mode workshops in one slot |
 
 Scope identity is stable. Several scopes can be communicated atomically in one
 action. Accommodation is indivisible because releasing individual families could
@@ -210,11 +210,10 @@ exposes both perspectives explicitly, never as per-screen relationship lookups.
 Build a prospective family composition by replacing only selected scopes. Validate
 it, not just the latest solver plan. An active allocation target must be `assigned`, not
 manually cancelled, in the same slot, and compatible with communicated eligibility,
-capacity and required decisions. Automatic cancellation is an allocation outcome:
-it does not mutate manual cancellation or another scope's programme. A communicated
-manual cancellation explicitly marks retained old assignments inactive/cancelled,
-so it can stand alone while replacements are prepared; those entries reserve no
-attendance capacity or slot and are not active targets for this check.
+capacity and required decisions. A communicated manual cancellation explicitly marks
+retained old assignments inactive/cancelled, so it can stand alone while replacements
+are prepared; those entries reserve no attendance capacity or slot and are not active
+targets for this check.
 
 A mode transition away from `assigned` requires communicating removal of its solver
 participants in the old slot. A transition to `assigned` can communicate the programme
