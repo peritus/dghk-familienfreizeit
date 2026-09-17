@@ -182,7 +182,8 @@ report names them.
 A family may `LabelSet` / `LabelCleared` only:
 
 - on entities it owns (itself, or its own people);
-- for tags declaring `family_facing`;
+- for tags declaring `family_facing`, or module-owned writable keys with an explicit
+  family-control contract (such as workshop participation);
 - at strengths that control permits.
 
 Everything else is organiser-only. Organiser-only labels are never rendered in the
@@ -271,6 +272,7 @@ resolved inputs; none re-implements matching:
 | Module | Consumes |
 |---|---|
 | [room assignment](20.3-room-assignment.md) | requirements against room/place capabilities; keep-apart effects; exclusions; resolved placement decisions |
+| [workshops](20.4-workshops.md) | participation references, capacity admission and effective programme/slot resolution |
 | [workshop rankings](20.5-workshop-rankings.md) | the `ordered-choice` operator |
 | [workshop assignment](20.6-workshop-assignment.md) | needs/provides matching, exclusions, eligibility, co-assignment and separation, and decisions naming workshops within their slot |
 
@@ -292,7 +294,7 @@ on append or reported during replay, never silently accepted as effective.
 
 ## 6. Preflight
 
-Preflight runs before any solver stage over the solver input alone
+Solver preflight runs before any solver stage over the solver input alone
 ([solver contract](05-solver-contract.md) §3). The kernel contributes the checks that
 concern labels and definitions themselves; each module contributes checks about its
 mechanism, listed in its specification §9.
@@ -306,6 +308,10 @@ mechanism, listed in its specification §9.
 | `kernel.unknown-tag` | warning | a live label key is no longer in the fixed resolver, profile, or declared custom vocabulary; the fold retains it, the solver ignores it; a new matching token under a known key does not trigger this |
 
 ---
+
+World-level module diagnostics inspect non-solver data separately; they do not
+enter plan preflight or its hash. Release consistency uses the prospective world
+under [release control](06-release-control.md), not an extra solver stage.
 
 ## 7. Ordered values
 
