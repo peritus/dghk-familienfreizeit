@@ -142,7 +142,8 @@ actor/time, notes and delivery state. Privacy filtering follows selection.
 
 Solver output hashes remain an internal regression-test technique, not release
 identity or outstanding-work state. The solver and its seven determinism rules are
-unchanged. Do not use plan hash inequality or event counts as outstanding-work tests.
+unchanged. Do not use solver-output-hash inequality or event counts as outstanding-
+work tests.
 
 ## 4. Derivation and history
 

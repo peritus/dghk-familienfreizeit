@@ -119,7 +119,7 @@ test/fixtures/event-logs/
 The parser reports file and line locations, rejects duplicate properties, and
 uses deterministic envelope defaults unless a fixture supplies historical
 metadata explicitly. JSON remains valid for API messages, serialized rows,
-canonical hashes, and derived results, but authored event-log JSON must not be
+canonical regression-test hashes, and derived results, but authored event-log JSON must not be
 maintained alongside KDL. If a boundary requires JSON, generate it from the
 parsed KDL events in the test rather than adding a parallel fixture.
 
@@ -297,7 +297,8 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
   events, including both halves of a needs/provides pair.
 - Omitting a note equals `null`. Varying only note text with the event envelope
   and other inputs held fixed changes organiser display but not solver input,
-  assignment, scores, or plan hash. Appending any event still advances `input_seq`.
+  assignment, scores, or canonical solver-output hash. Appending any event still
+  advances `input_seq`.
 - Applied tokens, optional notes, authors, and timestamps are visible to a second
   organiser in existing views/history; pending events are local. Family payloads
   never expose internal tokens or organiser notes, and family attempts to write
