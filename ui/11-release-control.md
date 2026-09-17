@@ -69,7 +69,7 @@ All differences are reachable without truncation: full initial content, changed
 fields, removed/added participants, cancellation, and movements grouped by family.
 Family previews use the actual server privacy projection. Dependencies present an
 explicit selection action that refreshes the review; they are never silently added.
-Blocking issues disable confirmation with a reason. Show the reviewed basis,
+Blocking issues disable confirmation with a reason. Show the reviewed `input_seq`,
 `build_revision`, and `compatibility_revision` in secondary
 review details, not in ordinary family flows. There is no communication-content hash.
 
