@@ -20,7 +20,8 @@ Only these capabilities are in scope for the initial release:
 - Organiser-managed inventory: buildings, rooms, beds, and room designations.
 - Magic-link authentication with a code-level organiser allowlist.
 - Deterministic whole-family room assignment with a full human-readable explanation.
-- Deterministic workshop assignment with an explicit fairness objective.
+- Deterministic, stability-aware workshop assignment with an explicit balanced-
+  opportunity objective.
 - Drag-and-drop organiser board that writes constraints, not assignments.
 - Deterministic plans identified by `input_seq`, and communication.
 - Organiser decision labels across fixed resolver mechanisms, with free-form
@@ -174,10 +175,11 @@ same kernel mechanism. Release-control acceptance scenarios govern the full inte
 - Slots and workshops in inventory, explicit assigned/sign-up/interest modes
 - Programme scope contribution, live admission and per-slot allocation scope
 - Mode/slot transition and concurrency fixtures from the module contracts
-- The workshop solver with the fairness ledger
+- The stability-aware workshop solver with the balanced-opportunity ledger
 - Workshop decision labels through all applicable fixed resolver mechanisms
 
-The solver, its fairness objective, co-assignment groups, and under-subscription
+The solver, its stability and balanced-opportunity objectives, co-assignment groups,
+and under-subscription
 cancellation are initial-release work: they are module behaviour the plan depends
 on ([workshop assignment](20.6-workshop-assignment.md)). The family-facing ranking
 UI and the organiser preference heatmap are post-initial enhancements.
