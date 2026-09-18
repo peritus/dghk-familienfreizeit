@@ -67,8 +67,9 @@ sign-ups or interest. Before any communication, own information and permitted
 materials coordination remain available.
 
 This is a response projection, not another Plan or a stored World. The family browser
-receives neither the event log nor hidden organiser content. Shared and family
-reports use the same composition. They identify the current-data sequence and the
+receives neither the event log nor hidden organiser content; the Worker performs the
+derivation and privacy projection before serialisation. Shared and family reports use
+the same family-safe composition. They identify the current-data sequence and the
 scope communication references they use, rather than one global family cut.
 
 Privacy is a separate server-side filter, applied before content leaves the Worker:

@@ -9,10 +9,11 @@ communicated arrangements on the same page. The design constraint is that famili
 state preferences and never see machinery: no scores, solver language, organiser
 notes or other families' preferences.
 
-The Worker returns the signed-in family's response from `GET /api/family/view`.
-Its composition is defined in [release control](06-release-control.md) §2; the event
-log, solver and organiser screens never reach a family's browser. Current inputs
-remain visible whether or not any arrangements have been communicated.
+The Worker returns the signed-in family's server-derived, privacy-projected response
+from `GET /api/family/view`. Its composition is defined in [release control](06-release-control.md)
+§2; the event log, full `World`, solver and organiser-only data never reach a family's
+browser. Current inputs remain visible whether or not any arrangements have been
+communicated.
 
 ---
 
