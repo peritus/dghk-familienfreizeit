@@ -232,7 +232,16 @@ tag that reuses an existing control needs no family view code. See
 *Chosen.* `derive(events, config) → World` and `diff(World, World)` are the read
 side of the application. The organiser application holds a list of pending events and
 renders every screen from `derive(committed ++ pending)`, deriving locally as the
-organiser works and appending only when they apply.
+organiser works and appending only when they apply. This local derivation is an
+organiser-only capability: the organiser browser may receive the committed event log,
+pending events and the full organiser `World`.
+
+The family browser must never receive the event log, pending events, the full `World`,
+solver traces, organiser labels, organiser notes or other organiser-only metadata. The
+Worker derives and privacy-projects the family `World` server-side before returning
+`GET /api/family/view`. Family diffs, badges, reports and notification previews use
+that server-side family projection. They share diff semantics with organiser views,
+not the organiser's unfiltered data or execution environment.
 
 *Rejected alternative:* a sandbox mode on the board, where each drag
 posts a constraint, the server re-solves, and the board reconciles from the
