@@ -38,11 +38,13 @@ Only selected modules contribute scopes. `room-assignment` contributes accommoda
 allocations. A slot allocation may be empty, including when clearing an existing
 allocation after a mode or slot change. A programme without assignment is valid.
 
-Slot and room facts in programme content are resolved at that scope's basis. A
+Slot and room facts in programme content are resolved at that scope's reviewed
+`input_seq`. A
 shared slot-time edit creates outstanding changes for every affected communicated
 workshop; it must not change their family-visible times before their scopes are
-communicated. Different scopes can intentionally retain different historical bases.
-Cross-scope consistency is checked under §5, not inferred from equal basis numbers.
+communicated. Different scopes can intentionally retain different reviewed
+`input_seq` values. Cross-scope consistency is checked under §5, not inferred from
+equal sequence numbers.
 
 ## 2. Live information and family composition
 
@@ -78,10 +80,30 @@ Privacy is a separate server-side filter, applied before content leaves the Work
 - live materials and other references cannot reveal uncommunicated workshop details:
   use a neutral reference description until a safe communicated title is available.
 
+### Field-level temporal and privacy contract
+
+The shared diff and every family response apply this matrix before rendering. The
+source column answers which world supplies the value; the audience column answers who
+may receive it.
+
+| Field | Source | Admin view | Family view | Rule |
+|---|---|---|---|---|
+| Communicated room, bed, place, workshop programme, allocation and cancellation | reviewed `input_seq` | full selected-scope content | own family-visible content | Fixed until a later communication supersedes that scope; never join it to current draft descriptors |
+| Own people, names, roles and withdrawal status | current world | authorised organiser view | own family only | May annotate released content, but never reallocates or rewrites the historical arrangement; current withdrawal may also remove access |
+| Own preferences, rankings, food, free text, materials and live participation | current world | authorised organiser view | own family only | Live immediately; not part of a release diff unless it changes a released arrangement |
+| Other-family identities and shared participation | reviewed content plus current privacy projection | authorised organiser view | only explicitly family-visible values | Current privacy rules may redact it; never infer hidden identities from a diff |
+| Findings, dependencies, scores, traces, resolver causes and organiser notes | reviewed event log/current organiser world | organiser only | never | Explain blocking work to admins without exposing internal causes to families |
+| Communication status, reviewed sequence and communication time | `Communicated` event | full metadata | status and family-safe time only | Status is shared; actor, internal sequence details and notes remain organiser-only unless explicitly safe |
+| Notification recipients, delivery state and retry state | operational tables | organiser only | never | Delivery does not determine visibility and cannot alter the diff |
+
+Current authorisation and privacy are enforced at every read and send. They may
+suppress a response or recipient, but they do not silently change the reviewed
+content recorded by the communication event. If the reviewed sequence or matching
+deployment cannot reproduce a field, show an unavailable state rather than inventing
+a before/after value.
+
 Do not join communicated assignments to current programme/location labels to render
-them. Their descriptors come from the appropriate release content. Current own-person
-names and withdrawal status may annotate historical assignments without reallocating
-places; other-family identities remain subject to current privacy rules.
+them. Their descriptors come from the appropriate release content.
 
 ## 3. Communication event and append
 
@@ -360,5 +382,17 @@ to a newly associated address without review.
     Failure does not undo communication; retries do not duplicate known deliveries.
 14. Missing notification/assignment modules remove their contributions without
     disabling independent programme communication or live coordination.
-15. Build or compatibility drift is attributed; mismatched scopes are unavailable rather than
+15. A name or withdrawal change after communication annotates the released result
+    without changing the reviewed room or workshop placement; loss of current
+    authorisation suppresses access rather than rewriting the communication.
+16. A current preference, material entry or live participation change appears
+    immediately in the permitted live view and does not create a release diff unless
+    it changes released arrangement content.
+17. Organiser notes, solver findings, scores, traces and restricted labels appear
+    only in organiser projections; families receive the same semantic diff after
+    privacy projection and no internal explanation.
+18. If a reviewed sequence cannot be reconstructed, both audiences receive an
+    unavailable state rather than a fabricated before/after comparison; retries do
+    not substitute current content.
+19. Build or compatibility drift is attributed; mismatched scopes are unavailable rather than
     silently recomputed as if communicated. Matching independent scopes remain usable.

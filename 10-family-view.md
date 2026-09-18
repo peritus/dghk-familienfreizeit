@@ -77,9 +77,11 @@ Willkommen, Familie Müller
 ### Communicated arrangements
 
 Communicated accommodation and workshop results take the top as they become
-available. Current preferences remain accessible and editable under the deadline
-policy; communication itself does not lock controls. Each arrangement shows its
-communication status. There is no single before/after switch for the whole page.
+available. Each arrangement shows the shared communication status and can expand an
+inline, privacy-projected before/after diff. The diff is derived from the reviewed
+`input_seq` and remains stable while newer organiser events are pending. Current
+preferences remain accessible and editable under the deadline policy; communication
+itself does not lock controls. There is no single before/after switch for the whole page.
 
 Workshop controls use the communicated programme: assigned workshops offer rankings,
 sign-up workshops offer join/leave controls and current places remaining, and interest
@@ -134,6 +136,12 @@ below specify disclosure; timing is governed separately by
 | Tags declaring `organiser_only` | **Never**, regardless of `family_facing` |
 | Restricted values | Own-family values only where authorised; never shared or other-family |
 | `descriptive` tags | Only explicitly family-facing own inputs; internal descriptive facts remain hidden |
+
+Released arrangement fields come from their reviewed `input_seq`; current own-family
+answers and permitted live participation remain current. Current names and withdrawal
+status may annotate a released arrangement, but never change its historical placement.
+The family sees only its own projected diff, never organiser findings, notes, scores,
+traces or other-family content.
 
 Cross-family co-room requests are outside the active sleeping model, so the family
 view exposes only preferences that constrain the family's own placement unit. When
