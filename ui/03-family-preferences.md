@@ -72,7 +72,10 @@ failed save returns the control to its stored state and says so; nothing is queu
 in the browser ([family view](../10-family-view.md) §3). Empty workshop rankings and incomplete
 people data are warnings, not invented validation rules. Communication adds UI-04
 arrangement cards; it does not replace this page or make current answers disappear.
-Editing follows the profile deadline, independently of communication status.
+Editing remains available after the relevant advisory deadline, independently of
+communication status. Accommodation and workshop sections show their own deadline
+notice; a passed notice does not disable controls. A late change affects current
+family state, while organisers decide whether to review and publish a new plan.
 
 Workshop rows show the control for their communicated mode: rankings, a sign-up
 join/leave button with current availability, or a non-binding interest toggle.

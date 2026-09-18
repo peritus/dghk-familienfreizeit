@@ -92,7 +92,9 @@ These facts are current immediately after a successful append:
 
 Self-organised workshop **details** use their programme scope. Their participation
 is live. No release is required for a saved answer to appear in its own family's
-response. Deadlines and editing authorisation are separate from visibility.
+response. Deadlines are advisory workflow notices and never editing authorisation;
+a late change remains current data until an organiser chooses whether to review and
+publish a new plan.
 
 The Worker composes the family response from the current world and reproducible content
 selected by the latest communication reference for each scope. No accommodation or
@@ -433,7 +435,8 @@ to a newly associated address without review.
     authorisation suppresses access rather than rewriting the communication.
 16. A current preference, material entry or live participation change appears
     immediately in the permitted live view and does not create a release diff unless
-    it changes released arrangement content.
+    it changes released arrangement content. Passing an advisory deadline does not
+    change this rule or automatically trigger a new plan.
 17. Organiser notes, solver findings, scores, traces and restricted labels appear
     only in organiser projections; families receive the same semantic diff after
     privacy projection and no internal explanation.

@@ -81,8 +81,10 @@ Communicated accommodation and workshop results take the top as they become
 available. Each arrangement shows the shared communication status and can expand an
 inline, privacy-projected before/after diff. The diff is derived from the reviewed
 `input_seq` and remains stable while newer organiser events are pending. Current
-preferences remain accessible and editable under the deadline policy; communication
-itself does not lock controls. There is no single before/after switch for the whole page.
+preferences remain accessible and editable. Communication itself does not lock
+controls, and a late edit does not alter a communicated arrangement until an
+organiser explicitly reviews and publishes a new plan. There is no single
+before/after switch for the whole page.
 
 Workshop controls use the communicated programme: assigned workshops offer rankings,
 sign-up workshops offer join/leave controls and current places remaining, and interest
@@ -192,10 +194,11 @@ The same underlying data. Do not build a mobile drag interaction; numbered
 dropdowns are less elegant and more reliable, and this form will mostly be filled
 in on phones.
 
-**The deadline is stated everywhere and enforced softly.** After it, the page
-becomes read-only with *"Änderungen bitte an das Organisationsteam."* plus the
-contact address. Hard-blocking late changes just moves the work to email, which
-is where it was before this application existed.
+**Deadlines are stated everywhere and remain advisory.** Accommodation and workshop
+sections can show separate upcoming or passed notices with the relevant contact
+copy. A passed notice does not disable its controls: families may continue to
+update preferences, while organisers decide whether a late change belongs in a
+newly reviewed and published plan.
 
 ---
 
