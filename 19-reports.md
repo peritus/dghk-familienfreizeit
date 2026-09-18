@@ -35,6 +35,11 @@ Every report identifies:
 | Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
+Reports consume `CommunicationScopeView` for communication status, scope references,
+before/after content, and unavailable-history state. They may add report-specific
+aggregation and redaction, but they do not derive release status or compare scope
+content independently.
+
 The timestamp is not domain state and does not affect derivation or report
 identity. Reports are generated on demand from the world visible to the reader.
 
