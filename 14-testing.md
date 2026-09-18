@@ -419,6 +419,10 @@ Also covered:
   per-scope history, dependencies, privacy and build/compatibility mismatch. Communication
   carries no extra content hash. Selected-scope errors block communication until
   resolved; hard consistency gates cannot be bypassed.
+- **Privacy boundary**: the organiser bundle may derive the full world locally, while
+  family responses, family diffs, reports and notification previews are derived and
+  projected by the Worker; event logs, pending events, full worlds and organiser-only
+  data never cross into the family bundle.
 - **Live coordination**: cover last-place races, over-capacity preservation, inactive
   rankings, sign-up fairness exclusion, interest privacy and immediate material saves
   under the module fixture contracts. These behaviours do not need a second Plan.
