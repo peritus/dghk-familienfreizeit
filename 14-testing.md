@@ -429,6 +429,9 @@ Also covered:
 - **Report contract**: check detailed initial/before/after content, unselected changes,
   exact recipients and no writes from preview/report requests. A reverted edit clears
   its outstanding difference; world-only changes do not create release backlog.
+- **Shared scope read model**: organiser, family, report and notification consumers
+  receive equivalent `CommunicationScopeView` statuses and diffs after their
+  audience projections; no consumer computes release status independently.
 
 ---
 
