@@ -169,7 +169,7 @@ Each selected module adds its own arrays with a declared sort key; for example
 
 `SolverLabel` omits the display-only note from the derived `Label` shape. Free-form
 organiser values resolve through the same fixed mechanisms as profile vocabulary;
-they do not require a custom definition or a `defined_seq`. Source label references
+they do not require a separate declaration. Source label references
 and event sequences provide deterministic ordering and diagnostic attribution.
 Notes and event author/timestamp remain available in the organiser world, but do
 not affect assignment, scoring, or the canonical solver-output hash used by

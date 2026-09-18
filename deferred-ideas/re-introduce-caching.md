@@ -10,8 +10,8 @@ organiser apply run the solver, and fold + solve + trace won't reliably fit in 1
 of CPU. The only alternative it considered was an in-isolate memo, and it turned
 that down because a cold isolate still has to solve from scratch.
 
-`xsppsvly` removed persisted projections (`entity`, `label`,
-`constraint_definition`, `src/project/`). That was the right call. Those tables
+`xsppsvly` removed persisted projections (`entity`, `label`, and project
+projections). That was the right call. Those tables
 were a second copy of domain state with a rebuild step that could fail or race.
 The same commit also dropped the old "KV keyed by `max(seq)`" note.
 

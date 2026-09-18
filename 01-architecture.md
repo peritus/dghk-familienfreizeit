@@ -216,10 +216,11 @@ organiser decision based on a reviewed event-log prefix.
 
 ## Read models
 
-None are stored. `World` is the read model: typed entities, labels, constraint
-definitions, summaries, the plan, diagnostics and release references, built in memory
-by `derive`. Audience responses select permitted content. Stable URLs, authentication
-lookup and screens read this derived model.
+None are stored. `World` is the read model: typed entities, labels, summaries, the
+plan, diagnostics and release references, built in memory by `derive`. Resolver
+constraints are derived from labels and occasion configuration. Audience responses
+select permitted content. Stable URLs, authentication lookup and screens read this
+derived model.
 
 The database holds the event log and operational tables
 ([data model](02-data-model.md) §7), nothing else. If you find a table holding
@@ -301,7 +302,7 @@ src/
     types.ts              discriminated union + zod schemas, shared by both runtimes
   derive/
     index.ts              derive(events, config) — pure
-    fold.ts               events → entities, labels, definitions — pure, no I/O
+    fold.ts               events → entities, labels — pure, no I/O
     diff.ts               diff(world, world) → Change[] — pure
   modules/
     <module-id>/          one directory per module; layout in 20-modules §6

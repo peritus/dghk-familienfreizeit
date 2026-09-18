@@ -130,7 +130,7 @@ the soft co-room terms scored by room assignment.
 
 **Step 4 — organiser decisions.** Active required room-scoped `groups-with` and
 `separates-from` labels apply in source event sequence, then source entity id, key,
-and canonical value order. They need no custom definition. `groups-with` merges
+and canonical value order. They need no separate declaration. `groups-with` merges
 the parties containing its entities, subject to the merge guard. `separates-from`
 separates the named people or family members when they share a party, following the
 resolver's entity expansion. Preferred relations remain placement preferences.
@@ -202,7 +202,7 @@ clearing an applied label appends `LabelCleared`.
 - The merge guard refuses and downgrades, with the diagnostic and trace line.
 - Strictest-strength union and `contributed_by` for merged parties.
 - Organiser decision labels apply in source event order regardless of input order,
-  without requiring custom definitions or mutual family requests.
+  without requiring separate declarations or mutual family requests.
 - Free-form needs survive formation and retain the correct contributors after splits.
 - Workshop-scoped grouping never changes sleeping parties.
 - Party keys change when membership changes; no fixture persists one.

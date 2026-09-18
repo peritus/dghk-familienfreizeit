@@ -13,7 +13,7 @@ The **kernel** is present in every deployment and is never listed in a profile:
 |---|---|
 | Event envelope, append, replay, KDL event source | [events](03-events.md), [data model](02-data-model.md) |
 | Family and person identity, invitation, and person events | [events](03-events.md) |
-| Labels, constraint definitions, fixed resolver operators, append validation | [labels and constraints](04-labels-and-constraints.md) |
+| Labels, fixed resolver operators, append validation | [labels and constraints](04-labels-and-constraints.md) |
 | `derive`, `diff`, the solver pipeline, determinism contract, preflight framework, trace | [architecture](01-architecture.md), [solver contract](05-solver-contract.md) |
 | Plans and release control | [solver contract](05-solver-contract.md), [release control](06-release-control.md) |
 | Authentication, sessions, organiser allowlist | [authentication](11-authentication.md) |

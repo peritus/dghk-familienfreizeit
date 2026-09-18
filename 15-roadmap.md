@@ -75,7 +75,7 @@ constraints](04-labels-and-constraints.md), [architecture](01-architecture.md)
 
 - Implement generic labels, typed entity identity, cardinality, scopes, values,
   strengths, sensitivity, and notes.
-- Implement fixed resolver operators, custom constraint definitions, reference
+- Implement fixed resolver operators, reference
   validation, append-time validation, and replay validation.
 - Implement `derive(events, config)`, world summaries, world checks, `diff`, and
   the pending-event derivation path.
