@@ -221,7 +221,7 @@ const invariants = [
   ['no solver-assigned workshop exceeds capacity',
     (p, s) => /* … */],
 
-  ['every label key names a fixed resolver, profile tag, or declared custom definition, or is reported',
+  ['every label key names a fixed resolver, profile tag, or selected module key, or is reported',
     (p, s) => /* … */],
 
   ['a capability with a derive has no assignments',
@@ -290,8 +290,10 @@ an organiser acts on.
 Use the ordinary KDL fixtures and module/integration tests for these cases:
 
 - `fam_42 needs=naehe_zum_eingang` and `rm_07 provides=naehe_zum_eingang`
-  work without a profile tag or `ConstraintDefined`. Underscores are retained;
+  work as free-form values under fixed resolver keys. Underscores are retained;
   an empty matching token fails append validation.
+- `provides=my-ad-hoc-thing` and `needs=my-ad-hoc-thing` match without a profile
+  vocabulary entry, definition event, or deployment.
 - Required and preferred needs have distinct hard/soft behavior. Multiple
   providers leave a candidate set; the first provider is not silently pinned.
 - `fam_42 excludes=rm_14` prevents placement there in every solver phase, even

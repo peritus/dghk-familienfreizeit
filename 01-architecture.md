@@ -223,7 +223,7 @@ select permitted content. Stable URLs, authentication lookup and screens read th
 derived model.
 
 The database holds the event log and operational tables
-([data model](02-data-model.md) §7), nothing else. If you find a table holding
+([data model](02-data-model.md) §6), nothing else. If you find a table holding
 families, rooms, or labels, or a query that reads event payloads to answer a domain
 question, it is a bug.
 

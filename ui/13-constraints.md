@@ -32,8 +32,8 @@ existing input controls and validation.
 
 Add creates ordinary `LabelSet` events; Clear creates `LabelCleared` for the
 selected application. A new value replaces an existing value only where the
-configured cardinality permits replacement. Both enter the pending list shared across this organiser's
-screens, local to their browser until Apply. Applied labels show the token, optional
+configured cardinality permits replacement. Both enter the pending list shared
+across this organiser's screens, local to their browser until Apply. Applied labels show the token, optional
 note, event author, and timestamp to every organiser. Fixed resolver mechanisms
 are inspectable but not editable. Findings name the rule, affected entities, and
 the next useful screen. Empty state: no decisions yet; Add remains available.

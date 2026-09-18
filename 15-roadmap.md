@@ -69,7 +69,7 @@ hashes are stable, and an unselected module contributes no domain surface.
 
 ## M3 — Generic labels, resolver, and derived world
 
-Specification coverage: [data model](02-data-model.md) §§4–7, [labels and
+Specification coverage: [data model](02-data-model.md) §§4–6, [labels and
 constraints](04-labels-and-constraints.md), [architecture](01-architecture.md)
 §§2–5, [events](03-events.md) §§5–10, and [testing](14-testing.md) §§1–2 and 5.
 
