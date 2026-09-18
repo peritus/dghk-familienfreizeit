@@ -414,6 +414,8 @@ Also covered:
 §9, including unchanged-head preview equality, selection changes, concurrent appends
   that occur after preview and still publish the reviewed `input_seq`, shared badge
   states, inline admin/family projections, and keyboard-accessible expansion of diffs,
+  field-level temporal/privacy cases for names, withdrawal, live answers, materials,
+  cancellations, organiser notes and unavailable historical sequences,
   per-scope history, dependencies, privacy and build/compatibility mismatch. Communication
   carries no extra content hash. Selected-scope errors block communication until
   resolved; hard consistency gates cannot be bypassed.

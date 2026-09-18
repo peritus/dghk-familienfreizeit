@@ -29,7 +29,8 @@ badge opens the canonical before/after diff in place, without navigating to a
 separate release view. The diff shows added, removed and changed fields, allocation
 movements, and cancellation status appropriate to the viewer.
 
-The component receives one semantic scope diff and a privacy projection. Admins get
+The component receives one semantic scope diff and the field-level temporal/privacy
+matrix from [release control](../06-release-control.md). Admins get
 affected families, findings, organiser explanations, and the communication action;
 families get only their own family-visible result and remain read-only. Both use the
 same reviewed `input_seq` when a diff is opened. A newer event shows a non-blocking
