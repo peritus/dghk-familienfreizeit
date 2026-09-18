@@ -41,10 +41,12 @@ emails, notifications, and help text.
 | workshop participant | **teilnehmende Person** | Use **Teilnehmende** for a group taking part in a workshop |
 | slot | **Zeitslot** | Use **Zeitfenster** in prose when *Zeitslot* feels too technical |
 | preference | **Wunsch** | Use **Angabe** when it is not a preference or choice |
-| constraint | **Vorgabe** | Use **Regel** only when explaining behaviour informally |
+| constraint | **Vorgabe** | The calculated effect of a fixed resolver mechanism and the relevant Angaben; use **Regel** only when explaining behaviour informally |
 | organiser decision | **Entscheidung des Organisationsteams** | A human planning decision that guides the calculated result |
 | organiser decision note | **Zusätzliche Informationen** | Optional context; the token itself needs no second name |
 | label | **Angabe** | Do not expose the storage term *Label* in family copy |
+| set a label | **Eine Angabe machen** / **Angabe ändern** | Use for a family-facing action; organiser screens may say **Entscheidung hinzufügen** |
+| clear a label | **Eine Angabe aufheben** | Use when removing an existing family-facing Angabe; do not expose *LabelCleared* |
 | plan | **Einteilung** | The generated room/workshop result |
 | communicate | **An Familien kommunizieren** | Open the selected-scope review; final action: Jetzt an Familien kommunizieren |
 | communicated | **An Familien kommuniziert** | Visible in family views; email delivery is separate |
@@ -72,6 +74,12 @@ Family-facing text should normally hide technical concepts. Say **Deine Angaben*
 **Deine Einteilung**, or **die Veranstaltung**, depending on meaning. Never show
 `event`, `event log`, `projection`, `solver`, `constraint`, or internal IDs in
 family copy unless a support or debugging screen explicitly requires them.
+
+**Vorgabe** describes the constraint that the application calculates from an
+Angabe and the fixed resolver configuration. It is not a separate object that a
+family or organising person defines. An organiser's human planning action is an
+**Entscheidung des Organisationsteams**; the resulting concrete data is still an
+Angabe in the event log.
 
 ## 4. Grammar and formatting
 
