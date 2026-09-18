@@ -43,7 +43,8 @@ identity. Reports are generated on demand from the world visible to the reader.
 Reports never have a table, event type, cache entry or stored snapshot. They render
 ordinary derived worlds and the audience projection defined in
 [release control](06-release-control.md) §2. Organisers may inspect current or pending
-worlds; family/shared reports combine live permitted facts with communicated scopes.
+worlds; family/shared reports combine current permitted facts with communicated scopes
+and use the field-level temporal/privacy matrix in [release control](06-release-control.md).
 
 Renderers aggregate, sort, group and redact. They do not query event payloads,
 perform another relationship lookup, or implement their own release cuts. The
