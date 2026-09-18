@@ -88,7 +88,7 @@ navigation, deployment, or authentication, and text-file mode must be rejected
 by production configuration even if an environment variable is accidentally
 present.
 
-The occasion dates, preference deadline, and occasion-facing name belong in the
+The occasion dates, scoped deadline schedule, and occasion-facing name belong in the
 occasion profile's `meta` ([occasion profiles](16-occasion-profiles.md)) because they are solver
 or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
 enter `build_revision` and `compatibility_revision`.

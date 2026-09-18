@@ -45,7 +45,7 @@ remain current, including during a scope's unavailable state.
 Every releasable room or workshop result carries the shared `✓`, `?`, or `—` communication
 badge. Families can expand `?` to see their own before/after result at the reviewed
 `input_seq`; newer organiser changes are indicated but do not replace the open diff.
-Reviewing preferences opens UI-03 controls with the normal deadline policy. Workshop
+Reviewing preferences opens UI-03 controls with the relevant advisory deadline notice. Workshop
 cards distinguish assigned results, live sign-ups and non-binding interest. They use
 [release control](../06-release-control.md) and cannot join draft programme labels
 into communicated cards.

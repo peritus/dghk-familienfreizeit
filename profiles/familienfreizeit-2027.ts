@@ -36,7 +36,11 @@ export default defineOccasionProfile({
     name: { de: 'DGHK Familienfreizeit 2027', en: 'DGHK family weekend 2027' },
     starts_on: '2027-04-30',
     ends_on: '2027-05-02',
-    preference_deadline: '2027-03-31T21:59:59Z',
+    timezone: 'Europe/Berlin',
+    deadlines: {
+      accommodation: '2027-03-31T21:59:59Z',
+      workshops: '2027-04-15T21:59:59Z',
+    },
     locale: 'de',
     fallback_locale: 'en',
     description: {
@@ -470,24 +474,28 @@ export default defineOccasionProfile({
           title: { de: 'Wer kommt mit', en: 'Who is coming' },
           intro: null,
           tags: ['does-not-need-a-bed'],
+          deadline_scope: null,
         },
         {
           key: 'room-wishes',
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
           tags: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
+          deadline_scope: 'accommodation',
         },
         {
           key: 'workshops',
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
           tags: ['prefers-workshop', 'workshop-with'],
+          deadline_scope: 'workshops',
         },
         {
           key: 'food',
           title: { de: 'Essen', en: 'Food' },
           intro: null,
           tags: ['diet', 'allergies-text'],
+          deadline_scope: null,
         },
       ],
       module_controls: [
@@ -502,10 +510,15 @@ export default defineOccasionProfile({
           help: { de: 'Unverbindlich, ohne Platzreservierung.', en: 'Non-binding; no place reserved.' },
         },
       ],
-      after_deadline: 'read-only',
       deadline_contact: {
-        de: 'Änderungen bitte an das Organisationsteam.',
-        en: 'Please send changes to the organisers.',
+        accommodation: {
+          de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
+          en: 'Please coordinate late room-preference changes with the organisers.',
+        },
+        workshops: {
+          de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
+          en: 'Please coordinate late workshop changes with the organisers.',
+        },
       },
     }),
 

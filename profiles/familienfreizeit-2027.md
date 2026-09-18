@@ -191,8 +191,10 @@ not every children's workshop needs a leader.
 Workshops explicitly choose `assigned`, `sign-up` or `interest` in their setup
 events. Module-owned `signed-up-for` and `interested-in` labels are placed in the
 workshops section through `module_controls`; the profile does not redefine them
-as tags. Shared age/audience policy applies to all participation modes. The ordinary
-preference deadline applies to these controls; organisers can act after it.
+as tags. Shared age/audience policy applies to all participation modes. Workshop
+controls show the workshop deadline as an advisory notice; families may still
+change them after it, and organisers can review and publish a later plan when
+appropriate.
 
 The active kernel [release-control contract](../06-release-control.md) governs
 accommodation, per-workshop details and per-slot solver allocations. Family inputs
@@ -228,9 +230,12 @@ invented records.
 The occasion runs from `2027-04-30` through `2027-05-02`, inclusive; family-facing
 German dates are 30.04.2027 to 02.05.2027. Ages are computed at `2027-04-30`.
 
-The preference deadline in the configuration, `2027-03-31T21:59:59Z` (the end of
-31.03.2027 in German summer time), is a placeholder until the organisation team
-confirms it. After the deadline, the preferences page is read-only.
+The accommodation deadline is `2027-03-31T21:59:59Z` and the workshop deadline is
+`2027-04-15T21:59:59Z`; both are displayed in `Europe/Berlin` time. They are
+advisory workflow dates, not write barriers. Families can continue to update their
+preferences after either date. Organisers decide whether late changes should be
+included in a newly reviewed and published plan; an existing published plan does
+not change automatically.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../18-german-translation-guidelines.md). The

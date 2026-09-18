@@ -13,6 +13,16 @@ the solver is where a bug produces a wrong answer that looks right. API routes a
 screens get smoke tests, because a bug there produces a 500 that someone notices
 immediately.
 
+### Advisory deadline coverage
+
+Family-preference tests cover the two fixed deadline scopes independently. They
+verify that the Worker reports upcoming/passed status using server time, displays
+the matching contact copy, and leaves controls editable after a deadline. A late
+family write follows the ordinary authentication, ownership, schema, and append
+rules; it is not rejected because of the deadline. A late edit changes current
+derived state but does not alter a communicated arrangement or trigger a new plan.
+An explicit organiser review and publish may include that edit in a later plan.
+
 ---
 
 ## 1. The test that matters most

@@ -191,6 +191,6 @@ The profile places module-owned controls through `family-preferences.module_cont
 ([family preferences](20.9-family-preferences.md) §3), supplying section and copy. It
 must not redefine `signed-up-for` or `interested-in` as profile tags. The workshops
 module owns their schemas, resolver references and authorisation. These controls
-complement tag-driven controls and follow the ordinary deadline policy. Release
+complement tag-driven controls and inherit their section's advisory deadline scope. Release
 control is fixed kernel behaviour, specified in [06-release-control](06-release-control.md);
 the profile supplies no executable release rules or stored communicated state.

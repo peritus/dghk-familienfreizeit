@@ -163,11 +163,11 @@ Specification coverage: [family view](10-family-view.md), [family preferences](2
 - Implement the family login path, invitation and reminder messages, family
   authorisation, and own-family privacy projection.
 - Implement profile-driven sections and the closed family-control union.
-- Implement save-on-change, current-response confirmations, deadline read-only
-  behavior, validation explanations, and family assignment cards.
+- Implement save-on-change, current-response confirmations, scoped advisory deadline
+  notices, validation explanations, and family assignment cards.
 - Implement German family copy, English fallback, responsive layout, and browser
   print styles for the family surface.
-- Add control, privacy, deadline, language, and cross-runtime agreement tests.
+- Add control, privacy, advisory-deadline, language, and cross-runtime agreement tests.
 
 Acceptance: a family can inspect current own information, save permitted controls,
 see communicated arrangements, and never receive organiser-only or hidden content.
