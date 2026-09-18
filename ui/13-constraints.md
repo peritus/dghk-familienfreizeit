@@ -23,13 +23,16 @@ and [organiser view](../09-organiser-view.md) §5.
 ```
 
 Adding an organiser decision uses the affected entity, existing resolver key,
-value, and strength where applicable. One optional free-text note supplies context.
-There is no separate decision name: `naehe_zum_eingang` is the value shown on
-both sides of a needs/provides pair. Entity references and workshop-specific
-structured values use the resolver's existing input controls and validation.
+value, and strength where applicable. The resolver key is fixed, but a matching
+value may be entered ad hoc, for example `provides=my-ad-hoc-thing`. One optional
+free-text note supplies context. There is no separate decision name:
+`naehe_zum_eingang` is the value shown on both sides of a needs/provides pair.
+Entity references and workshop-specific structured values use the resolver's
+existing input controls and validation.
 
 Add creates ordinary `LabelSet` events; Clear creates `LabelCleared` for the
-selected application. Both enter the pending list shared across this organiser's
+selected application. A new value replaces an existing value only where the
+configured cardinality permits replacement. Both enter the pending list shared across this organiser's
 screens, local to their browser until Apply. Applied labels show the token, optional
 note, event author, and timestamp to every organiser. Fixed resolver mechanisms
 are inspectable but not editable. Findings name the rule, affected entities, and

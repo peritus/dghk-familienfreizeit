@@ -199,12 +199,16 @@ user, account, and session tables — a second, stored record of who the familie
 *Non-negotiable rules* are in [authentication](11-authentication.md). Follow them
 exactly.
 
-## D11 — Resolver mechanisms live in code; organiser values live in the event log
+## D11 — Resolver mechanisms and vocabulary live in code; organiser values live in the event log
 
 *Chosen.* Resolver mechanisms require a deploy. Organiser decisions may supply
 free-form values to the fixed generic resolver mechanisms, so a new practical fact
 such as `needs=naehe_zum_eingang` and `provides=naehe_zum_eingang` needs no code
-deployment. Organisers cannot add executable operators or solver rules.
+deployment. The resolver's fixed keys, value schemas, scopes, strengths, and UI
+metadata belong to the occasion profile and module code. There is no runtime
+definition event or derived definition state. Organisers cannot add executable
+operators, vocabulary schemas, or solver rules; they add concrete `LabelSet`
+events and clear them with `LabelCleared`.
 
 ## D12 — Weights live in code
 

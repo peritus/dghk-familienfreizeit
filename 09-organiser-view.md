@@ -80,8 +80,10 @@ Touch users get the same room picker through a drawer instead of drag-and-drop.
 ## 5. Organiser decisions and reports
 
 The constraints screen exposes fixed resolver mechanisms: needs/provides, exclusions,
-and separation. Sleeping `groups-with` decisions are rejected or reported as
-outside the active module set. Optional notes stay attached
+and separation. Organisers may enter a new matching value under a mechanism, such as
+`provides=my-ad-hoc-thing`; the value needs no separate vocabulary declaration.
+Sleeping `groups-with` decisions are rejected or reported as outside the active module
+set. Optional notes stay attached
 to the label event; author and timestamp come from the event log.
 
 Reports show family-to-room assignments, unplaced families, capacity and constraint
