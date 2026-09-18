@@ -13,9 +13,9 @@ The model has three layers:
 1. `event` is the only persisted domain table.
 2. Typed entities in the derived world provide durable identity for families,
    people, rooms, beds, places, workshops, and slots.
-3. Labels and constraint definitions in the derived world carry every domain
-   property and every domain relationship, interpreted by the constraint
-   resolver.
+3. Labels in the derived world carry every domain property and every domain
+   relationship. The constraint resolver interprets them using fixed
+   occasion configuration.
 
 None of the derived layers is stored. `derive(events, config)` builds them in
 memory for the events a reader may see ([architecture](01-architecture.md)).
@@ -183,35 +183,7 @@ workshop:9  offered-in=slot_sat-morning
 These labels do not become lookups owned by application code. The resolver
 checks entity kinds, cardinality, ownership, and validity when it resolves them.
 
-## 5. Constraint definitions
-
-Occasion-specific matching vocabulary is data in the event log and has a generic
-derived shape:
-
-```ts
-type ConstraintDefinition = {
-  key: string
-  label: string
-  description: string
-  operator: ResolverOperator
-  config: Json
-  defined_seq: number
-  cleared_seq: number | null
-}
-```
-
-`operator` is one of the four operators a definition may declare:
-`needs-provides`, `excludes`, `groups-with`, and `separates-from`
-([events](03-events.md), `ConstraintDefined`). `config` holds the declared scopes
-and strength from that event. The resolver's other fixed mechanisms — `capacity`,
-`ordered-choice`, and `descriptive` — belong to module and profile vocabulary and
-need no definition event. `config` never contains executable code.
-
-The resolver is the only component allowed to turn labels and definitions into
-relationships, capabilities, placement units, assignments, or diagnostics. The indexes
-the fold builds support lookup; they do not define semantics.
-
-## 6. Capacity and ordered choices
+## 5. Capacity and ordered choices
 
 Capacity is represented by entities and labels, not special property columns: a
 place is the atomic sleeping position, located in a bed, located in a room
@@ -220,7 +192,7 @@ label values validated by the `ordered-choice` operator
 ([workshop rankings](20.5-workshop-rankings.md) §6), which keeps the core model
 generic while preserving that an ordered preference is not an unordered set.
 
-## 7. Operational tables
+## 6. Operational tables
 
 Operational tables identify people by verified email address, never by entity
 id. They are not domain state and are never read by the solver.

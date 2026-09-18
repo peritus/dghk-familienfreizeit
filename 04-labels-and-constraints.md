@@ -12,10 +12,10 @@ A single mechanism for intrinsic facts, preferences, capabilities, relations,
 and organiser decisions. It covers both occasion-specific properties and matching
 constraints without adding entity-specific property columns.
 
-Built-in resolver mechanisms, module-owned keys, and profile vocabulary live in
-code. Organiser values use those fixed mechanisms; custom definitions declare
-matching vocabulary without adding operators. This document covers labels,
-constraints, organiser decisions, and how selected modules consume them.
+Fixed resolver mechanisms, module-owned keys, and profile vocabulary live in code.
+Organiser values use those fixed mechanisms; matching values may be free-form where
+the mechanism permits them. This document covers labels, constraints, organiser
+decisions, and how selected modules consume them.
 
 ---
 
@@ -33,7 +33,7 @@ needs=ground-floor                 this person needs a ground-floor room
 separates-from=fam_27              this family must not share with family fam_27
 ```
 
-Built-in definitions and custom definitions declare the resolver operator:
+Fixed resolver mechanisms declare the resolver operator:
 
 | Mechanism | Scope | Strength | Meaning |
 |---|---|---|---|
@@ -44,11 +44,10 @@ Built-in definitions and custom definitions declare the resolver operator:
 | `capacity` | the entities a module counts | — | Counting, owned by the module |
 | `descriptive` | any | — | Recorded for humans; the solver ignores it |
 
-The first four are the operators a `ConstraintDefined` event may declare
-([events](03-events.md)); `capacity` and `descriptive` come from module and profile
-vocabulary. `descriptive` exists for profile-defined facts that the solver ignores. An organiser
-decision may also carry one optional free-text note; the note is visible to
-organisers but is not solver input.
+The first four are fixed resolver operators; `capacity` and `descriptive` come from
+module and profile vocabulary. `descriptive` exists for profile-defined facts that
+the solver ignores. An organiser decision may also carry one optional free-text
+note; the note is visible to organisers but is not solver input.
 
 ### The three-value scale collapses
 
@@ -156,7 +155,7 @@ with a derivation rejects direct `provides` assignments at append time.
 appended ([03-events](03-events.md)). The checks are:
 
 1. **Key exists** in the fixed resolver vocabulary, active profile vocabulary, or
-   a declared custom definition.
+   selected module vocabulary.
 2. **Scope matches** the entity kind and operator.
 3. **Value shape matches** the resolver mechanism and entity references resolve
    where required; organiser matching tokens may otherwise be free-form.
@@ -169,10 +168,10 @@ appended ([03-events](03-events.md)). The checks are:
 
 Failures are field-level errors on the form, never silent. `type Tag =
 keyof typeof profile.tags` checks profile tag references in code. Append validation
-also knows the fixed resolver keys and declared custom definitions. A matching
+also knows the fixed resolver keys and selected profile/module vocabulary. A matching
 token supplied as a value is not a new key and does not need a profile tag or
-`ConstraintDefined` event. Entity references and structured values still use their
-resolver's schemas; free-form input does not bypass those checks.
+declaration event. Entity references and structured values still use their resolver's
+schemas; free-form input does not bypass those checks.
 
 Tags removed from the profile mid-run are the one remaining case, handled by
 `kernel.unknown-tag` (§6): the fold retains them, the solver ignores them, the
@@ -216,7 +215,7 @@ rm_07  provides=naehe_zum_eingang
 fam_42 excludes=rm_14 (required)
 ```
 
-These labels need no custom definition. Matching tokens are compared as values;
+These labels need no separate declaration. Matching tokens are compared as values;
 entity references are resolved and checked against the selected modules. A required
 exclusion forbids the target even when another decision requests it. Contradictory
 required labels produce diagnostics, never a silent last-writer override of a
@@ -228,23 +227,19 @@ rules at runtime (D11–D12). Notes are available in the derived organiser views
 history, but are excluded from solver input. Trace entries identify the source
 labels so those views can display the optional note and event attribution.
 
-### Custom definitions
+### Free-form matching values
 
-Where a profile needs a declared custom vocabulary, `ConstraintDefined` records
-that definition ([events](03-events.md)). It is data only and is separate from
-applying a decision through an existing resolver:
+An organiser may supply a new matching value without adding vocabulary or deploying
+code. The label key remains a fixed resolver mechanism; the value is the concrete
+token shared by the relevant labels:
 
-```ts
-{
-  key: 'room-with-garden-view',
-  label: 'Zimmer mit Gartenblick',
-  description: 'Requested by the organiser for this family.',
-  operator: 'needs-provides',
-  needs_scopes: ['person', 'family'],
-  provides_scopes: ['room'],
-  strength: 'required'
-}
+```text
+fam_42 needs=room-with-garden-view (required)
+rm_07  provides=room-with-garden-view
 ```
+
+The fixed resolver validates the scopes and value shape for `needs` and `provides`,
+then compares the canonical values. No event defines or retires the token.
 
 | Operator | Example | Effect |
 |---|---|---|
@@ -268,9 +263,9 @@ rejected or reported as outside the active placement model.
 
 ### How modules consume constraints
 
-The resolver materialises labels and definitions into capabilities and active
-constraints once per derivation, including free-form organiser values that are
-absent from `profile.tags`. Each resolved constraint retains its source label
+The resolver materialises labels into capabilities and active constraints once per
+derivation, including free-form organiser values that are absent from
+`profile.tags`. Each resolved constraint retains its source label
 identity (`entity_id`, `key`, canonical `value`) and event sequence for ordering,
 diagnostics, and display. `constraint_key` in module output is a derived reference
 to those labels, never a separate persisted decision id. Modules consume the
@@ -311,7 +306,7 @@ mechanism, listed in its specification §9.
 | `kernel.contradiction` | error | one entity holds `groups-with` and `separates-from` towards the same entity at `required` |
 | `kernel.scope-violation` | error | a label is held by an entity kind outside its tag's scopes |
 | `kernel.valid-for` | warning | a label's `valid_for` evaluator no longer holds for its entity |
-| `kernel.unknown-tag` | warning | a live label key is no longer in the fixed resolver, profile, or declared custom vocabulary; the fold retains it, the solver ignores it; a new matching token under a known key does not trigger this |
+| `kernel.unknown-tag` | warning | a live label key is no longer in the fixed resolver, profile, or selected module vocabulary; the fold retains it, the solver ignores it; a new matching token under a known key does not trigger this |
 
 ---
 
