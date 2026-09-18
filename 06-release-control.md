@@ -18,7 +18,42 @@ type CommunicationScope =
   | { kind: 'accommodation' }
   | { kind: 'workshop-programme', workshop_id: string }
   | { kind: 'workshop-allocation', slot_id: string }
+
+type CommunicationScopeStatus =
+  | 'communicated'
+  | 'changed'
+  | 'never-communicated'
+
+type ScopeDiff = {
+  kind: 'initial' | 'changed' | 'matching'
+  fields: readonly {
+    path: string
+    before: unknown | null
+    after: unknown | null
+  }[]
+  affected_family_ids: readonly string[]
+}
+
+type CommunicationScopeView = {
+  scope: CommunicationScope
+  status: CommunicationScopeStatus
+  communication: {
+    communication_seq: number
+    input_seq: number
+    communicated_at: string
+  } | null
+  current_input_seq: number
+  diff: ScopeDiff | null
+  unavailable: { reason: string } | null
+  newer_events: boolean
+}
 ```
+
+`CommunicationScopeView` is a derived, audience-projected read model. It is not
+persisted and does not become a second domain state. The organiser projection may
+include affected families, findings and communication actions; the family projection
+contains only the signed-in family's permitted fields and replaces inaccessible
+family ids with no value. Both projections use the same status and diff semantics.
 
 | Scope | Held content | Unit |
 |---|---|---|
@@ -279,6 +314,16 @@ content with its last reproducible communicated content. It lists:
 - exact semantic differences and affected families;
 - dependencies and blocking conflicts;
 - selection for communication.
+
+The status is derived from the releasable scope content, not from event count:
+
+- no communication reference produces `never-communicated`;
+- equal content produces `communicated`;
+- different content produces `changed`;
+- an unreproducible historical reference sets `unavailable` while retaining the
+  last known status and never fabricating a diff;
+- events after the candidate's `current_input_seq` set `newer_events` without
+  replacing an already opened diff.
 
 Never-communicated scopes show full initial content. A changed-then-restored value
 has no outstanding difference. Live-only inputs and diagnostics are not backlog;

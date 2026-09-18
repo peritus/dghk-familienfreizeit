@@ -149,6 +149,12 @@ event list is sent to `derive` and append. There is no state manager and no
 data-fetching library: the organiser application makes three kinds of request — load
 the log, apply pending events, and trigger emails.
 
+Release badges and inline diffs are derived through the canonical
+`CommunicationScopeView` contract in [release control](06-release-control.md).
+The organiser application computes the organiser projection from its committed log,
+pending world, communication references and the shared scope-diff function; screens
+must not implement their own status or before/after comparison.
+
 This full-log/local-derivation path is restricted to the organiser application. The
 family bundle never downloads the event log, pending events, full organiser `World`,
 solver traces, organiser labels or notes. It receives only the Worker response after
@@ -159,7 +165,8 @@ server-side derivation and family privacy projection.
 control](06-release-control.md) §2 and filters to that family ([family view](10-family-view.md)).
 The response includes family-projected communication status and diffs; it never
 transfers the source log or the organiser `World`. A control change posts the label
-event and re-renders from the response.
+event and re-renders from the response. The response's scope views are the same
+`CommunicationScopeView` shape after server-side family projection.
 
 **Escaping.** React escapes interpolated values by default.
 `dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, organiser
