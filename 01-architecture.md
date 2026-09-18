@@ -201,13 +201,18 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family | Person events for its own people, and label/constraint events on entities it owns, for family-facing controls |
+| Family | Person events for its own people, and label/constraint events on entities it owns, for family-facing controls; scoped deadlines do not remove this permission |
 | Allowlisted organiser | Everything, through the organiser UI |
 
 An allowlisted organiser may enter a constraint for any entity. The actor identifies
 the authenticated principal and the subject identifies the affected entity. There
 is no separate semantic distinction between an organiser acting for themselves and
 for another family.
+
+Deadline notices are workflow guidance, not a sixth request-lifecycle gate. The
+server may include the current deadline status in a family response, but it does
+not reject a late family event. A later plan or communication is an explicit
+organiser decision based on a reviewed event-log prefix.
 
 ## Read models
 

@@ -23,7 +23,11 @@ export default defineOccasionProfile({
     name: { de: '…', en: '…' },
     starts_on: 'YYYY-MM-DD',
     ends_on: 'YYYY-MM-DD',
-    preference_deadline: 'YYYY-MM-DDTHH:mm:ssZ',
+    timezone: 'Europe/Berlin',
+    deadlines: {
+      accommodation: 'YYYY-MM-DDTHH:mm:ssZ',
+      workshops: 'YYYY-MM-DDTHH:mm:ssZ',
+    },
     locale: 'de',
     fallback_locale: 'en',
     description: { de: '…', en: '…' },
@@ -52,8 +56,16 @@ has no meaning; stage order comes from the modules ([modules](20-modules.md) §4
 | `id` | kebab-case profile id; matches the file name |
 | `name`, `description` | occasion-facing copy |
 | `starts_on`, `ends_on` | inclusive occasion dates; every age is computed at `starts_on` |
-| `preference_deadline` | after it, family controls follow [family preferences](20.9-family-preferences.md) |
+| `timezone` | IANA timezone used when displaying occasion dates and deadline instants |
+| `deadlines` | advisory UTC instants for the fixed `accommodation` and `workshops` workflow scopes |
 | `locale`, `fallback_locale` | family-facing copy language and fallback |
+
+Deadlines are workflow notices, not authorization rules. Families may continue to
+edit their own inputs after a deadline, and organisers decide whether a late change
+belongs in a newly reviewed and published plan. A profile may leave a scope unused
+by setting no deadline for it; the family-preferences module maps controls to scopes.
+The server computes passed/upcoming status for display, but the status never changes
+append validation, authorisation, replay, or the event log.
 
 `PUBLIC_URL`, `EMAIL_FROM`, and secrets are deployment facts, not profile metadata,
 and are not part of the built profile identity ([deployment](13-deployment.md)).

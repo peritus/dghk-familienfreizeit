@@ -176,6 +176,10 @@ family-facing controls. Organisers may set labels through fixed resolver mechani
 profile tags, and declared custom vocabulary. Kernel and module keys reserved for
 setup events remain protected. The resolver validates scopes, values, strengths,
 and references before append ([labels and constraints](04-labels-and-constraints.md) §4).
+Profile deadline status is advisory and is not re-evaluated during replay or used to
+reject an otherwise authorised event. A late event is part of the current log just
+like any other event; release control determines whether it is included in a later
+published plan.
 
 ### `LabelSet`
 ```ts
