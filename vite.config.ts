@@ -3,9 +3,10 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { bundleGraph } from './scripts/bundle-graph.ts'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), ...(process.env.VITEST ? [] : [cloudflare()])],
+  plugins: [react(), tailwindcss(), bundleGraph(), ...(process.env.VITEST ? [] : [cloudflare()])],
   resolve: { alias: { '@': fileURLToPath(new URL('./src/app', import.meta.url)) } },
   build: { manifest: true },
   server: { host: '127.0.0.1', strictPort: true },
