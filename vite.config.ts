@@ -9,5 +9,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), bundleGraph(), ...(process.env.VITEST ? [] : [cloudflare()])],
   resolve: { alias: { '@': fileURLToPath(new URL('./src/app', import.meta.url)) } },
   build: { manifest: true },
-  server: { host: '127.0.0.1', strictPort: true },
+  server: {
+    host: process.env.DGHK_PREVIEW_BIND || '127.0.0.1',
+    port: Number(process.env.DGHK_PREVIEW_PORT || 5173),
+    allowedHosts: process.env.DGHK_PREVIEW_HOST ? [process.env.DGHK_PREVIEW_HOST] : [],
+    strictPort: true,
+  },
 })

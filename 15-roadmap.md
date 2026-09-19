@@ -19,14 +19,18 @@ Specification coverage: [D1](17-decisions.md#d1--cloudflare-workers-paid--d1),
 - Create the Vite, React, Worker, Hono, Tailwind, Wrangler, Vitest, and D1
   configuration.
 - Establish the one-build Worker and browser bundle boundary.
-- Add the application shell, route loading, development configuration, CI, and
-  preview deployment.
+- Add the application shell, route loading, development configuration, one CI
+  target, and one development-preview server task.
 - Initialize the design-system component registry and the shared shell.
 - Verify the Vite, Workers pool, React, and Cloudflare plugin versions together.
 
 Acceptance: the repository builds, the Worker serves one API route and the
-application shell, a Worker test runs through the project configuration, and CI
-builds and tests a preview revision.
+application shell, and a Worker test runs through the project configuration.
+The shared CI target builds and tests locally and is configured in GitHub Actions;
+the development-preview server is defined as a VS Code/Station task. Executing
+the GitHub workflow and launching or remotely deploying the preview are not M0
+acceptance gates. Hosted preview configuration remains part of the deployment
+contract and must be supplied before a hosted deployment.
 
 ## M1 — Event kernel and operational storage
 

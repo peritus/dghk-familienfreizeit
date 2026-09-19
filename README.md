@@ -1,5 +1,9 @@
 # DGHK Familienfreizeit — modular event planning
 
+The M0 runtime foundation is implemented. See [Development](DEVELOPMENT.md) for
+the CI and dev-preview tasks, local verification, and the milestone boundary.
+The [specification review](docs/spec-review.md) records open implementation risks.
+
 ## Reading order
 
 | # | Document | What it settles |
