@@ -11,7 +11,7 @@ sketches live under
 |---|---|---|
 | `/organiser` | Dashboard | Status, staleness, preflight findings, attention |
 | `/organiser/families` | Families | Table, import, invite, chase list |
-| `/organiser/families/:id` | Family detail | People, preferences, event history |
+| `/organiser/families/:id` | Family detail | People (add, edit, withdraw), full editable preferences, event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
 | `/organiser/board` | The board | Whole-family room placement |
 | `/organiser/plans` | Plans | Derived plan investigation and comparison |
@@ -46,9 +46,15 @@ Example findings:
 
 ## 3. Families and inventory
 
-Families is a sortable, filterable table with import and invitation state. Family
-detail shows people, current profile preferences, and the event history. Inventory
-shows buildings, rooms, beds, designations, capacity, and room capabilities.
+Families is a sortable, filterable table with import and invitation state.
+Family detail renders the same trait-driven control union as the family view
+([family preferences](../modules/family-preferences.md) §6), editable, plus
+person management and workshop self-service controls, for organisers taking a
+request by phone or email (D24). Saves write the identical event types as the
+family view, with the organiser as actor and the family or person as
+subject — there is no separate out-of-band marker; the event history below is
+the record. Inventory shows buildings, rooms, beds, designations, capacity,
+and room capabilities.
 
 ## 4. Whole-family assignment board
 

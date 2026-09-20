@@ -13,6 +13,12 @@ The module owns the control union, section layout, deadline notices, and the
 save-on-change contract. The family view shell, privacy boundaries, and the
 assignment page are specified in [family view](../application/family-view.md).
 
+The same control union is reused, editable, by the organiser family-detail
+screen ([organiser view](../application/organiser-view.md) §3), authorised
+per the organiser branch of the authorisation table rather than the family
+branch, so organisers can enter any family-facing fact on a family's behalf
+(D24).
+
 ## 2. Dependencies
 
 Requires: none. Enhances: none. Controls contributed by other modules become
@@ -126,6 +132,7 @@ None.
 |---|---|
 | Family view | The preferences page ([family view](../application/family-view.md) §1, [UI-03](../ui/screens/family-preferences.md)) |
 | Screen | Preference completion columns and chase-list entries for the organiser ([organiser view](../application/organiser-view.md) §2, §3) |
+| Screen | Family detail renders the same control union, editable, organiser-authorised, for phone/email requests ([organiser view](../application/organiser-view.md) §3, D24) |
 | Emails | Reminder copy names what is missing, per person and section |
 | Reports | none |
 
@@ -164,4 +171,6 @@ can review and publish a new plan when they choose.
 
 The family view has no preferences page. It still shows permitted live information,
 communicated arrangements and shared reports under release control. Organisers enter
-preferences and participation through their module screens.
+preferences and participation through their module screens — the same D24
+parity requirement this module satisfies through the shared control union
+when it is selected.
