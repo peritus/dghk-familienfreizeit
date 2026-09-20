@@ -1,7 +1,7 @@
 ---
 id: "015"
 title: Event payload-to-label folding rules are underspecified
-status: open
+status: resolved
 severity: contract-contradiction
 category: kernel
 source: event-payload-folding-investigation
@@ -10,8 +10,6 @@ opened: 2026-09-19
 ---
 
 # Event payload-to-label folding rules are underspecified
-
-Investigation complete. No files were modified; no finalization was required.
 
 ## 1. Inconsistencies and ambiguities
 
@@ -188,6 +186,25 @@ The repository is specification-only; the prescribed future surfaces are:
    - material links;
    - cancellation and withdrawal reasons.
 10. Re-record affected golden outputs only after reviewing semantic diffs and compatibility implications.
+
+## Resolution
+
+The fold no longer infers label keys from payload field names. D18 now defines
+naming conventions only: payload data uses `snake_case`, stored label and profile
+trait keys use `kebab-case`, and code identifiers use the conventions in the
+decision table. Labels are stored domain facts; traits are profile schemas and
+resolver metadata over those labels.
+
+Every setup event and module now declares an explicit mapping for each payload
+field. The declaration identifies identity-only fields, canonical label keys,
+null behavior, and the scope of full-restatement replacement. Relationship keys
+such as `member-of`, `located-in`, `offered-in`, and `held-in` are therefore
+explicit contract entries rather than exceptions to a naming algorithm. Free-form
+values are not renamed. Replay and append use the same mapping and alias rules.
+
+The affected architecture and module contracts were aligned, and this issue is
+resolved. Runtime mapping helpers and fixtures remain implementation work for
+M1 and later module milestones.
 
 ## Related files
 
