@@ -64,6 +64,10 @@ clean fresh working copy, and the mandatory collaborator export.
   into a named destination. Preserve acceptance criteria, unresolved questions and
   binding decisions; a move must not silently resolve or weaken them. Keep the
   section mapping in review notes, not specification history.
+- Issue status changes that cross the open/archived boundary require moving
+  the file between `spec/issues/open/` and `spec/issues/archived/` in the
+  same change, with every relative link in the file corrected for the new
+  depth — see `spec/issues/README.md`.
 
 See [D22](decisions.md#d22--documentation-follows-implementation-status) for the
 rationale and [documentation workflow](docs/engineering/documentation.md) for the

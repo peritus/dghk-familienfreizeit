@@ -80,10 +80,3 @@ the matching directory in the same change, and fix every relative link in
 the file (the `## Related files` list and every inline citation) for the new
 directory depth — every `../`-prefixed link gains or loses exactly one
 `../` when the file moves one level in or out.
-
-There is no index table here listing every issue by number — it duplicated
-what the directory listing and each file's own frontmatter already show, and
-was an extra thing to keep in sync (and a place status drift could hide).
-Use `ls open/ archived/` and each file's frontmatter/title for a quick
-overview, or grep across both directories for a specific `status`,
-`severity`, or `category`.
