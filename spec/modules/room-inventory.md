@@ -77,8 +77,9 @@ that event's `seq`.
 
 ## 5. Events
 
-All payload fields are folded into labels under the kebab-case form of the field
-name (D18), except the entity's own id and `sort_key`, which live on the entity.
+Each inventory event declares an explicit field mapping. Entity ids and `sort_key`
+are identity-only; the remaining fields map to the canonical label keys listed
+below. D18 does not infer label keys from payload field names.
 
 ### `BuildingAdded` / `BuildingUpdated`
 
@@ -86,6 +87,7 @@ name (D18), except the entity's own id and `sort_key`, which live on the entity.
 { building_id: string, name: string, sort_key: number }
 ```
 
+Mapping: `building_id` is identity-only; `name` maps to `name`.
 `BuildingUpdated` is a full restatement.
 
 ### `RoomAdded` / `RoomUpdated`
@@ -101,7 +103,8 @@ name (D18), except the entity's own id and `sort_key`, which live on the entity.
 }
 ```
 
-Folds to `located-in = building_id`, `number`, `floor`, and `room-type`.
+Mapping: `room_id` is identity-only; `building_id` maps to `located-in`,
+`number` to `number`, `floor` to `floor`, and `room_type` to `room-type`.
 `RoomUpdated` is a full restatement. *Invariants:* the building exists and is not
 retired; `number` is unique within the building; `floor` and `room_type` are in the
 module parameters.
@@ -112,7 +115,8 @@ module parameters.
 { room_id: string, designation: Designation, reason: string | null }
 ```
 
-Folds to `designation` and `designation-reason`. A room with no designation event is
+Mapping: `room_id` is identity-only; `designation` maps to `designation` and
+`reason` maps to `designation-reason` when non-null. A room with no designation event is
 `general`. *Invariants:* `designation` is in the module parameters; `blocked`
 requires a non-empty reason. Any compensating constraints stay visible in the event
 history and are cleared explicitly.
@@ -130,7 +134,8 @@ history and are cleared explicitly.
 }
 ```
 
-Folds to `located-in = room_id`, `label`, `bed-type`, and `sleeps`, and generates the
+Mapping: `bed_id` is identity-only; `room_id` maps to `located-in`, `label` to
+`label`, `bed_type` to `bed-type`, and `sleeps` to `sleeps`. The fold generates the
 bed's places. *Invariants:* the room exists; `label` is unique within the room;
 `bed_type` is in the module parameters.
 
@@ -140,7 +145,8 @@ bed's places. *Invariants:* the room exists; `label` is unique within the room;
 { bed_id: string, reason: string | null }
 ```
 
-Retires the bed and its places. A constraint naming a retired place is reported by
+Mapping: `bed_id` is identity-only; `reason` is history-only. The event retires
+the bed and its places. A constraint naming a retired place is reported by
 preflight rather than silently dropped.
 
 All inventory events are organiser-only.

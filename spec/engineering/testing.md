@@ -112,6 +112,10 @@ API tests, D1 integration tests, and the
 browser/Worker agreement test. D1 tests seed their database from the parsed KDL
 events; they do not maintain a second JSON fixture for the same log.
 
+Fold tests assert explicit event mappings rather than deriving expected label keys
+from payload field names. They cover identity-only fields, semantic relationship
+keys, null transitions, full-restatement replacement, and alias normalization.
+
 The canonical fixture tree is:
 
 ```text

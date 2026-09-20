@@ -76,6 +76,8 @@ type MaterialsParams = {
 { request_id: string, reason: string | null }
 ```
 
+Mapping: `request_id` is identity-only; `reason` is history-only.
+
 ### `MaterialCommitted` / `MaterialCommitmentUpdated`
 
 ```ts
@@ -106,8 +108,15 @@ Connects a commitment to a further request, and only when
 { commitment_id: string, reason: string | null }
 ```
 
-Payload fields fold to labels under their kebab-case names, with one `fulfills`
-label per connected request. Updates are full restatements.
+Mapping: `commitment_id` is identity-only; `reason` is history-only.
+
+Each event declares its mapping. `request_id` and `commitment_id` are
+identity-only. `requested_by` maps to `requested-by`, `contributed_by` to
+`contributed-by`, `category` to `category`, `name` to `name`, `quantity_text` to
+`quantity-text`, `description` to `description`, `workshop_id` to `workshop`,
+`concerns_person_id` to `concerns-person`, and `fulfills` to `fulfills`.
+Null mapped fields are absent, and updates are full restatements. Fulfilment
+events add or remove the explicitly named `fulfills` relationship.
 
 *Invariants:* `requested_by` and `contributed_by` resolve to allowed kinds;
 `category` is in the parameters; `workshop_id` is null unless `workshop_links`;

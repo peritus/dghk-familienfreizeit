@@ -95,6 +95,7 @@ is evaluated once, at profile build.
 |---|---|
 | `entity_kinds` | Kind name (kebab-case), id prefix, and whether ids are caller-generated or derived by the fold. The fold rejects an id reused under another kind. |
 | `events` | Event type, zod payload schema, fold function, append invariants, and the authorisation rule. The fold function may create entity identity and emit labels; it may not emit derived results. |
+| `event_mappings` | Explicit payload-field mappings for each event: identity-only fields, canonical label keys, null behavior, and full-restatement replacement scope. No payload field becomes a label by naming convention alone. |
 | `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, cardinality, and setup-only or label-writable policy. Label-writable keys may supply family-control metadata with explicit authorisation. Ownership is per (key, entity kind): a profile may not define a trait using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
 | `trait_roles` | A slot a profile trait must fill, such as the keep-apart relation for room assignment: the parameter that names the trait, and the operator, scopes, value type, and strengths the trait must have. |
 | `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](../architecture/solver-contract.md) §1, R1). |

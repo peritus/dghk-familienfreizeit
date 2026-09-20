@@ -59,7 +59,9 @@ type WorkshopsParams = {
 { slot_id: string, label: string, starts_at: string, ends_at: string, sort_key: number }
 ```
 
-Folds to `label`, `starts-at`, and `ends-at`. *Invariant:* `starts_at < ends_at`.
+Mapping: `slot_id` is identity-only; `label` maps to `label`, `starts_at` to
+`starts-at`, and `ends_at` to `ends-at`. `sort_key` is ordering metadata.
+*Invariant:* `starts_at < ends_at`.
 Slots are processed in `sort_key`, then `id` order, which must be chronological.
 
 ### `WorkshopAdded` / `WorkshopUpdated`
@@ -79,8 +81,11 @@ Slots are processed in `sort_key`, then `id` order, which must be chronological.
 }
 ```
 
-Folds to `offered-in = slot_id`, `title`, `description`, `participation`, `capacity`,
-`min-age`, `max-age`, and `held-in = room_id`. *Invariants:* `assigned` requires
+Mapping: `workshop_id` is identity-only; `slot_id` maps to `offered-in`, `title`
+to `title`, `description` to `description`, `participation` to `participation`,
+`capacity` to `capacity`, `min_age` to `min-age`, `max_age` to `max-age`, and
+non-null `room_id` to `held-in`. Null mapped fields are absent. *Invariants:*
+`assigned` requires
 integer capacity ≥ 0; `sign-up` permits null (unlimited) or integer capacity ≥ 0;
 `interest` requires null capacity.
 `min_age ≤ max_age` when both are set; `room_id` is
@@ -93,7 +98,8 @@ null unless `room-inventory` is selected, and otherwise names a live room.
 ```
 
 Manual cancellation by an organiser. Cancellation is an explicit domain decision;
-the solver never derives cancellation from attendance or capacity.
+the solver never derives cancellation from attendance or capacity. `workshop_id`
+is identity-only and `reason` is history-only.
 
 ### `WorkshopReinstated`
 
@@ -103,8 +109,13 @@ the solver never derives cancellation from attendance or capacity.
 
 Undoes a manual cancellation.
 
+Mapping: `workshop_id` is identity-only; the event changes lifecycle state and
+does not emit a label.
+
 All workshop setup events are organiser-only. Live participation uses ordinary
-label events (§6), with own-family authorisation. Updates are full restatements.
+label events (§6), with own-family authorisation. Updates are full restatements;
+cancellation and reinstatement are lifecycle events with their own explicit
+fold behavior and do not rely on naming conventions.
 Draft changes do not change the operational programme before communication; mode
 and slot transitions follow [release control](../application/release-control.md) §5.
 
