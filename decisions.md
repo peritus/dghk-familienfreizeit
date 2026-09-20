@@ -532,3 +532,55 @@ than fixed narrowly, because the repository has zero installs and no real
 `profiles/familienfreizeit-2027.example.ts`) — the cheapest point at which a
 naming change of this size can happen. D14 and D18 (both of which discuss
 this vocabulary) are updated in the same change to say "trait."
+
+## D24 — Every family self-service action has an organiser equivalent
+
+*Chosen.* Any event a family may author about its own people or entities must
+also be reachable from the organiser UI, entered against the same subject
+with the organiser as actor: every `family_facing` trait's control, person
+management (add, edit, withdraw), and workshop self-service (sign-up,
+interest, ranking) has an organiser-facing entry point, for organisers taking
+a request by phone or email. This is not a new authorisation rule — the
+existing table in [overview](spec/architecture/overview.md) §"Authorisation
+rules" already grants an allowlisted organiser "Everything, through the
+organiser UI," and states there is no separate semantic distinction between
+an organiser acting for themselves and for another family. `PersonAdded` is
+already "Emitted by the family or by an allowlisted organiser"
+([events](spec/architecture/events.md) §"Setup and identity"). D24 is a
+UI-completeness and design-review obligation: no family-facing trait or
+family-authorable event type is spec-complete without a matching
+organiser-facing entry point.
+
+*Mechanism.* The organiser family-detail screen renders the same
+trait-driven control union as the family view
+([family preferences](spec/modules/family-preferences.md) §6), editable,
+plus person management and workshop self-service controls, writing the
+identical event types (`LabelSet`/`LabelCleared`,
+`PersonAdded`/`PersonUpdated`/`PersonWithdrawn`, `signed-up-for`/
+`interested-in` labels) with the organiser as actor and the family or person
+as subject. One renderer, two authenticated contexts.
+
+*On provenance:* no separate out-of-band marker is added. The event
+envelope's `actor` (organiser) versus `subject` (family) already
+distinguishes an organiser-entered fact from a family-entered one, and the
+organiser's event history already shows actor and timestamp. A parallel note
+field would duplicate D7's organiser-decision-note mechanism for a purpose it
+does not serve here.
+
+*Rejected alternative:* a bespoke "record phone call" free-text organiser
+form that does not emit the real structured event. It produces an untyped
+record the solver, reports, and derivation cannot consume, breaking D2 (the
+event log is the only domain state) and D3 (the solver takes well-typed
+input).
+
+*Rejected alternative:* an impersonation session, where an organiser signs in
+as the family. Unneeded complexity — actor/subject separation already
+carries the needed semantics, and a session swap would require its own auth
+surface for no behavioural gain.
+
+*Consequence:* every future `family_facing` trait or family-authorable event
+type is reviewed against this requirement before being considered
+spec-complete, mirroring D14's generator-not-form framing for the organiser
+surface. [Organiser view](spec/application/organiser-view.md) and
+[family preferences](spec/modules/family-preferences.md) are updated to
+state the family-detail screen's coverage explicitly.
