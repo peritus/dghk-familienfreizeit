@@ -1,8 +1,8 @@
 # Implemented architecture
 
-The repository contains the runtime foundation: one Vite build produces a
-Cloudflare Worker and a React browser application. It has no domain event store,
-profile loader, derivation or solver implementation.
+The repository contains a Vite/Cloudflare Worker runtime and the M1 event and
+authentication foundation. Profile composition, full derivation and solver
+implementation remain future milestones.
 
 ## Runtime and build
 
@@ -12,22 +12,26 @@ graph recorder and the Cloudflare plugin. `npm run build` emits `dist/client` an
 The lockfile records the installed package versions; dependency examples in the
 specification are not the installed compatibility matrix.
 
-The [Worker](../../src/worker/index.ts) exposes `GET /api/health`. It executes
-`SELECT 1 AS ok` through the D1 binding and returns `200 {"status":"ok"}` or a
-sanitized `503 {"status":"unavailable"}`. Unknown Worker routes return JSON 404.
-This probes availability, not an application schema or persisted domain state.
+The [Worker](../../src/worker/index.ts) exposes `GET /api/health`, login and
+magic-link redemption, principal inspection, and guarded family/organiser route
+boundaries. `GET /api/health` executes `SELECT 1 AS ok` through the D1 binding and
+returns `200 {"status":"ok"}` or a sanitized `503 {"status":"unavailable"}`.
+Unknown Worker routes return JSON 404.
 
 [Wrangler configuration](../../wrangler.jsonc) serves browser assets with SPA
 fallback. Both bare `/api` and `/auth` prefixes and their descendants run through
 the Worker first, so even top-level navigation to those paths cannot receive the
-SPA HTML. D1 uses a local-only placeholder ID with `remote: false`; no credentials
-or migrations are needed for the foundation. No hosted environment is configured.
+SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
+`0001_m1_kernel.sql`. No hosted environment is configured.
 
 ## Implemented layout
 
 | Path | Responsibility |
 |---|---|
 | `src/worker/` | Hono health endpoint and JSON fallback |
+| `src/events/` | Kernel event schemas, fold, KDL adapter and D1 source |
+| `src/auth/` | Magic links, sessions, rate limits and principals |
+| `migrations/` | Append-only event and operational D1 schema |
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/family-view/` | Public welcome placeholder |
 | `src/app/organiser/` | Lazy public organiser placeholder |
@@ -41,8 +45,8 @@ or migrations are needed for the foundation. No hosted environment is configured
 The browser entry's complete static import closure excludes organiser, derive,
 solver and Worker code; the organiser application is loaded lazily. Worker output
 excludes browser code. [Tests](../engineering/testing.md) verify the emitted graph
-and bundle size budgets. These checks cover the existing foundation; they do not
-prove behavior of domain layers that do not exist.
+and bundle size budgets. Kernel and authentication tests cover M1 behavior; they
+do not prove profile composition, module behavior, or solver behavior.
 
 Separate strict TypeScript projects check browser, Worker and build-tool code.
 They enable `noUncheckedIndexedAccess`. Worker bindings are generated and committed

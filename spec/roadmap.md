@@ -17,26 +17,11 @@ work; their acceptance criteria remain required.
 
 ## M1 — Event kernel and operational storage
 
-Specification coverage: [architecture](architecture/overview.md), [data model](architecture/data-model.md)
-§§1–3, [events](architecture/events.md) §§1–4 and 11, [authentication](application/authentication.md)
-§§3–5, and [deployment](engineering/deployment.md) §§2 and 4.
-
-- Implement the event envelope, append-only event table, sequence-guarded append,
-  batch semantics, and replay validation.
-- Implement family and person identity, invitations, email changes, person
-  updates, withdrawal, and the kernel fold.
-- Implement sessions, magic links, rate limits, organiser allowlisting, and the
-  request authorisation boundary.
-- Add migrations for the event log and operational tables only.
-- Add the KDL event-log loader, canonical parsing rules, and the development-only
-  text event source.
-- Define the narrow kernel-facing profile validation view: entity kinds, label
-  schemas, aliases, event value validators, and resolver descriptors. M1 consumes
-  this view but does not implement profile composition or module registration.
-
-Acceptance: valid events append atomically, stale heads are rejected, replay is
-deterministic, operational records do not enter the domain world, and the
-authentication threat-model tests pass.
+The M1 event and authentication foundation is implemented and documented in
+[implemented architecture](../docs/architecture/overview.md), [event kernel](../docs/architecture/events.md),
+and [authentication](../docs/application/authentication.md). The remaining
+roadmap entries begin with profile and module composition in M2; the full
+architecture and application contracts continue to describe later work.
 
 ## M2 — Profile and module composition
 

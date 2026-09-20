@@ -12,13 +12,19 @@ test('health traverses the Worker handler and its real local D1 binding', async 
   expect(await env.DB.prepare('SELECT 40 + 2 AS answer').first('answer')).toBe(42)
 })
 
-test.each(['/api', '/api/missing', '/api/organiser/log', '/auth', '/auth/unknown-token'])(
+test.each(['/api', '/api/missing', '/api/organiser/log', '/auth']) (
   '%s fails closed with JSON, not an application shell', async (path) => {
     const response = await exports.default.fetch(new Request(`https://example.invalid${path}`))
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({ error: 'not_found' })
   },
 )
+
+test('an expired or unknown magic link redirects to the invalid-link screen', async () => {
+  const response = await app.request('/auth/unknown-token', {}, env)
+  expect(response.status).toBe(302)
+  expect(response.headers.get('location')).toBe('/login?error=expired')
+})
 
 test('the health route does not accept writes', async () => {
   const response = await exports.default.fetch(new Request('https://example.invalid/api/health', { method: 'POST' }))

@@ -32,9 +32,14 @@ test('built Worker reaches a real local D1 database', async () => {
 
 test('API and auth navigations never fall through to the SPA', async () => {
   for (const path of ['/api', '/api/unknown', '/auth', '/auth/unknown']) {
-    const response = await runtime.dispatchFetch(`http://localhost${path}`, { headers: { accept: 'text/html', 'sec-fetch-mode': 'navigate' } })
-    assert.equal(response.status, 404, path)
-    assert.deepEqual(await response.json(), { error: 'not_found' })
+    const response = await runtime.dispatchFetch(`http://localhost${path}`, { redirect: 'manual', headers: { accept: 'text/html', 'sec-fetch-mode': 'navigate' } })
+    if (path === '/auth/unknown') {
+      assert.equal(response.status, 302, path)
+      assert.equal(response.headers.get('location'), '/login?error=expired')
+    } else {
+      assert.equal(response.status, 404, path)
+      assert.deepEqual(await response.json(), { error: 'not_found' })
+    }
   }
 })
 

@@ -20,13 +20,15 @@
   },
   "dependencies": {
     "@base-ui/react": "^1",
+    "@bgotink/kdl": "^0.4.0",
     "class-variance-authority": "^0.7",
     "clsx": "^2",
     "hono": "4.13.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "tailwind-merge": "^3",
-    "wouter": "^3"
+    "wouter": "^3",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.56.0",

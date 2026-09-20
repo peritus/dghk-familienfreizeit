@@ -23,7 +23,7 @@ export async function currentPrincipal(db: D1Database, raw: string | undefined, 
   return { kind: 'family', email, family_id: familyId }
 }
 
-function familyForEmail(world: KernelWorld, email: string): string | null {
+export function familyForEmail(world: KernelWorld, email: string): string | null {
   return world.labels.find((label) => label.key === 'email' && label.value === email)?.entity_id ?? null
 }
 async function refreshSession(db: D1Database, raw: string, email: string, now: string, duration: number): Promise<void> { await db.prepare('UPDATE session SET last_seen_at = ?1, expires_at = ?2 WHERE token_hash = ?3 AND email = ?4').bind(now, new Date(Date.parse(now) + duration).toISOString(), await hash(raw), email).run() }

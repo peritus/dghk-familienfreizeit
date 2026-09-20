@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { env } from 'cloudflare:workers'
 import { appendEvents, eventHead, readEvents } from '../../src/events/store.js'
 
 describe('D1 event source', () => {

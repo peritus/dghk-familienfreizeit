@@ -6,6 +6,8 @@ not mean deployed: hosted CI execution, hosted preview, and production deploymen
 are separate claims and require separate evidence.
 
 - [Architecture](architecture/overview.md): working runtimes, paths and boundaries.
+- [Event kernel](architecture/events.md): event schemas, replay, folding and D1 append behavior.
+- [Authentication](application/authentication.md): magic links, sessions and request principals.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.
 - [Design system](ui/design-system.md): copied primitives and shell styling.
 - [Development](engineering/development.md): installation, CI and local preview.
