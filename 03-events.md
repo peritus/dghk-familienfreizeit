@@ -11,12 +11,10 @@ to `src/events/types.ts`, and to the fold; adding a module event type means addi
 the module specification and the module's `events.ts`. Nothing else.
 
 Semantic setup events (`FamilyInvited`, `PersonAdded`, module events such as
-`RoomAdded`)
-are convenient command vocabulary. Their complete payloads are folded into
-one typed entity identity and generic labels. Constraints and intrinsic facts
-then use the same
-`LabelSet` stream; no event type exists solely for a particular preference or
-organiser decision.
+`RoomAdded`) are convenient command vocabulary. Their complete payloads are
+folded into one typed entity identity and generic labels. Constraints and
+intrinsic facts then use the same `LabelSet` stream; no event type exists solely
+for a particular preference or organiser decision.
 
 ## Shape
 
@@ -172,10 +170,12 @@ they are `LabelSet` and `LabelCleared` events.
 ## Labels and constraints
 
 Families may set labels only on themselves or their own people, through permitted
-family-facing controls. Organisers may set labels through fixed resolver mechanisms,
-profile tags, and declared custom vocabulary. Kernel and module keys reserved for
-setup events remain protected. The resolver validates scopes, values, strengths,
-and references before append ([labels and constraints](04-labels-and-constraints.md) §4).
+family-facing controls. Organisers may set labels through fixed resolver mechanisms
+and profile/module vocabulary. Matching values may be free-form where the fixed
+mechanism permits them. Kernel and module keys reserved for setup events remain
+protected. The resolver validates scopes, values, strengths, and references before
+append ([labels and constraints](04-labels-and-constraints.md) §4).
+
 Profile deadline status is advisory and is not re-evaluated during replay or used to
 reject an otherwise authorised event. A late event is part of the current log just
 like any other event; release control determines whether it is included in a later
@@ -215,23 +215,6 @@ mechanism; the note is context for organisers and never changes the derived plan
 
 `value: null` clears every current value for the key; otherwise the canonical value
 identifies the application to clear. The original label event remains in the log.
-
-### `ConstraintDefined`
-```ts
-{
-  key: string,
-  label: string,
-  description: string,
-  operator: 'needs-provides' | 'excludes' | 'groups-with' | 'separates-from',
-  needs_scopes: string[],
-  provides_scopes: string[],
-  strength: 'required' | 'preferred'
-}
-```
-
-Defines a custom matching vocabulary where a profile needs a declared value shape.
-It contains no executable code; the fixed resolver implements the operators.
-Organiser decisions using the built-in mechanisms do not need a custom definition.
 
 Workshop rankings are `LabelSet` and `LabelCleared` events with structured values
 (D13); see [workshop rankings](20.5-workshop-rankings.md).
@@ -274,7 +257,7 @@ Worth writing down, because the boundary blurs under pressure.
 | Session created / destroyed | Operational | `session` |
 | Email sent, delivered, bounced | Operational telemetry | `email_log` |
 | Page views, login times | Telemetry | Workers analytics, or nowhere |
-| Entities, labels, and definitions as read models | Derivation, not decision | nowhere |
+| Entities and labels as read models | Derivation, not decision | nowhere |
 | Family placement units | Derivation | room-assignment plan section |
 | A plan, whether communicated or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
 | Pending events on an organiser's board | Not yet decided; discarding one must leave no trace | that organiser's browser |
