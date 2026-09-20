@@ -14,10 +14,18 @@ Decision IDs and UI screen IDs remain stable.
 Start with [product scope](application/overview.md) and the
 [domain glossary](architecture/glossary.md), then follow the reading order below.
 The [roadmap](roadmap.md) orders outstanding milestones; the
-[review](review.md) records unresolved findings, not approved resolutions.
-[Binding decisions](../decisions.md) govern both planned and implemented work.
-[UI specifications](ui/README.md) and the
+[issue catalog](issues/README.md) records unresolved findings, not approved
+resolutions. [Binding decisions](../decisions.md) govern both planned and
+implemented work. [UI specifications](ui/README.md) and the
 [illustrative profile](profiles/familienfreizeit-2027.md) elaborate the contracts.
+
+The working foundation those findings are filed against is documented in
+[architecture](../docs/architecture/overview.md), [UI components](../docs/ui/design-system.md),
+and [testing](../docs/engineering/testing.md); those checks do not demonstrate
+domain behavior, runtime inventory fixtures, or the future module/profile
+contracts. The active profile's source inventory reconciles to 38 rooms and
+162 beds: 100 at the lower price and 62 at the higher price, totaling 15,236.
+Runtime event-derived inventory fixtures and counts remain M4 work.
 
 [Deferred ideas](deferred-ideas/README.md) are not approved implementation scope.
 Promoting one requires an explicit scope decision and review of any affected

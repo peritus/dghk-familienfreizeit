@@ -64,5 +64,6 @@ limits. Run `npm run check:docs` to validate local Markdown links and anchors;
 M0 delivers build/runtime wiring, a shared German shell, lazy organiser routing,
 copied design-system primitives, CI and a runnable preview task definition.
 It does not implement authentication, event persistence, migrations, profiles,
-solver, release control, email or domain screens. The review findings below are
-not silently resolved by the scaffolding; see [the spec review](../../spec/review.md).
+solver, release control, email or domain screens. Open findings against this
+scope are not silently resolved by the scaffolding; see
+[the issue catalog](../../spec/issues/README.md).
