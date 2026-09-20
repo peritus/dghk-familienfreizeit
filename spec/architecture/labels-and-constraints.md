@@ -252,7 +252,9 @@ rm_07  provides=room-with-garden-view
 ```
 
 The fixed resolver validates the scopes and value shape for `needs` and `provides`,
-then compares the canonical values. No event defines or retires the token.
+then compares the canonical values. Vocabulary declaration—whether fixed in
+profile/module code or supplied as a free-form matching value—is never an event;
+only `LabelSet` and `LabelCleared` enter the event log.
 
 | Operator | Example | Effect |
 |---|---|---|
