@@ -6,9 +6,6 @@ severity: gap
 category: kernel
 source: ad-hoc-terminology-review-2026-09-19
 related_decisions: []
-related_files:
-  - ../modules/family-preferences.md
-  - ../architecture/labels-and-constraints.md
 opened: 2026-09-19
 ---
 
@@ -30,7 +27,7 @@ to this catalog does not include the entity/event mapping.
 Define `after_deadline` and `deadline_contact` in the relevant module
 contract (most likely alongside the existing scoped-deadline behavior),
 including their entity attachment, event origin, and German field names per
-`../ui/german-translation-guidelines.md`.
+[`ui/german-translation-guidelines.md`](../../ui/german-translation-guidelines.md).
 
 ## Open questions
 
@@ -40,19 +37,24 @@ including their entity attachment, event origin, and German field names per
 ## Resolution
 
 `deadline_contact` is a `family-preferences` concept: `FamilyPreferencesParams`
-(`spec/modules/family-preferences.md:24-42`) defines it as
+([`spec/modules/family-preferences.md:24-42`](../../modules/family-preferences.md)) defines it as
 `{ accommodation: LocalizedText, workshops: LocalizedText }`, one entry per
 configured `deadline_scope`, required and validated ("copy for each configured
 deadline scope"). The Worker returns the upcoming/passed status for each
 configured deadline together with its `deadline_contact` in the family
-response (`spec/modules/family-preferences.md:144-145`).
+response ([`spec/modules/family-preferences.md:144-145`](../../modules/family-preferences.md)).
 
 `after_deadline` is not adopted as a field. The module contract already fixes
 this behavior for every scope rather than making it configurable: "A passed
 deadline keeps its controls editable. It is a prompt to contact the
-organisers, not a write barrier." (`spec/modules/family-preferences.md:145-146`,
+organisers, not a write barrier." ([`spec/modules/family-preferences.md:145-146`](../../modules/family-preferences.md),
 tested at line 157). A `'read-only' | 'editable'` toggle would contradict that
 fixed policy, so introducing it would need a D-numbered decision to first
 change the policy itself — nothing in this review found a reason to. No spec
 change needed beyond confirming `deadline_contact`'s existing definition
 covers the concept in full.
+
+## Related files
+
+- [modules/family-preferences.md](../../modules/family-preferences.md)
+- [architecture/labels-and-constraints.md](../../architecture/labels-and-constraints.md)

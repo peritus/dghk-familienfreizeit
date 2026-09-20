@@ -6,9 +6,6 @@ severity: drift
 category: tooling
 source: spec-review-2026-09-19
 related_decisions: []
-related_files:
-  - package.json
-  - vitest.config.ts
 opened: 2026-09-19
 ---
 
@@ -39,9 +36,14 @@ package metadata resolves).
 
 ## Resolution
 
-`package.json` pins `vitest` at `4.1.11` and `@cloudflare/vitest-plugin` at
-`1.1.13`; `vitest.config.ts` imports `cloudflareTest` from
+[`package.json`](../../../package.json) pins `vitest` at `4.1.11` and `@cloudflare/vitest-plugin` at
+`1.1.13`; [`vitest.config.ts`](../../../vitest.config.ts) imports `cloudflareTest` from
 `@cloudflare/vitest-plugin`, the migration path this issue recommended.
 Execution was verified directly (not just package metadata): `npm install`
 followed by `npm test` runs both the `worker` and `app` Vitest projects and
 passes 16/16 tests. No further action needed.
+
+## Related files
+
+- [package.json](../../../package.json)
+- [vitest.config.ts](../../../vitest.config.ts)

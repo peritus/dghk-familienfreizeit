@@ -6,10 +6,6 @@ severity: contract-contradiction
 category: kernel
 source: coherence-audit-2026-09-19, spec-review-2026-09-19
 related_decisions: [D4]
-related_files:
-  - ../modules/room-assignment.md
-  - ../modules/workshop-assignment.md
-  - ../architecture/solver-contract.md
 opened: 2026-09-19
 ---
 
@@ -17,11 +13,11 @@ opened: 2026-09-19
 
 ## Problem
 
-D4 (`../../decisions.md` — "stable sorted-greedy with bounded repair, not
+D4 ([`decisions.md`](../../../decisions.md) — "stable sorted-greedy with bounded repair, not
 integer programming") requires retaining feasible assignments unless
 coverage or repair justifies a move. Room assignment
-(`../modules/room-assignment.md:103`) has no previous-placement retention phase.
-Workshop assignment (`../modules/workshop-assignment.md:161`) retains assignments
+([`modules/room-assignment.md:103`](../../modules/room-assignment.md)) has no previous-placement retention phase.
+Workshop assignment ([`modules/workshop-assignment.md:161`](../../modules/workshop-assignment.md)) retains assignments
 but supplies no repair procedure for moving a flexible incumbent to
 accommodate someone with only one eligible workshop. Stable sorting alone
 does not guarantee stability when a new participant sorts before an existing
@@ -48,7 +44,7 @@ to move.
 ## Resolution
 
 1. The deterministic anchor already existed: `deriveTransition` (solver
-   contract, `spec/architecture/solver-contract.md:15-33`) derives `before`
+   contract, [`spec/architecture/solver-contract.md:15-33`](../../architecture/solver-contract.md)) derives `before`
    from the committed event-log prefix and `after` from the prospective log —
    the event log remains the only persisted domain state, so no mutable
    previous-plan cache is introduced. Workshop assignment's Step 0 already
@@ -56,7 +52,7 @@ to move.
 
 2. Room assignment was missing the previous-placement retention phase that
    workshop assignment already had. Added a new **Phase 0 — retain valid
-   previous placements** to `spec/modules/room-assignment.md`, seeded from
+   previous placements** to [`spec/modules/room-assignment.md`](../../modules/room-assignment.md), seeded from
    `deriveTransition`'s `before` plan exactly as workshop assignment's Step 0
    is, and renumbered the remaining phases (required decisions, forced
    placements, sorted greedy, bounded repair, unplaceable) to 1 through 5.
@@ -78,3 +74,9 @@ to move.
 
 No D4 boundary was changed — this fully realizes D4's existing bounded-repair
 requirement for room assignment rather than reopening it.
+
+## Related files
+
+- [modules/room-assignment.md](../../modules/room-assignment.md)
+- [modules/workshop-assignment.md](../../modules/workshop-assignment.md)
+- [architecture/solver-contract.md](../../architecture/solver-contract.md)
