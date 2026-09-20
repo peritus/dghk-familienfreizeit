@@ -129,10 +129,10 @@ so its sessions lose access without a cleanup step
   role: string                  // values are validated by the active profile
 }
 ```
-Emitted by the family or by an allowlisted organiser. Folds to `member-of`,
-`given-name`, `family-name`, `birthdate`, and `role`. Everything else about a person —
-bed demand, accessibility, diet — is an ordinary label set by the module or profile
-trait that owns it.
+Emitted by the family or by an allowlisted organiser, on the family's behalf
+(D24). Folds to `member-of`, `given-name`, `family-name`, `birthdate`, and
+`role`. Everything else about a person — bed demand, accessibility, diet — is
+an ordinary label set by the module or profile trait that owns it.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
 registered as an adult by their family and that is their call. Modules use `role`
@@ -142,12 +142,16 @@ for role-based rules; no module turns role into a bed exception.
 ```ts
 { person_id: string, /* full restatement of all mutable fields */ }
 ```
+Emitted by the family for its own people, or by an allowlisted organiser on
+the family's behalf (D24).
 
 ### `PersonWithdrawn`
 ```ts
 { person_id: string, reason: string | null }
 ```
 Excludes the person from newly derived plans. Historical plans keep them.
+Emitted by the family for its own people, or by an allowlisted organiser on
+the family's behalf (D24).
 
 ---
 

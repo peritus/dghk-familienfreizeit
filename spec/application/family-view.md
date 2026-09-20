@@ -75,6 +75,11 @@ Willkommen, Familie Müller
   …
 ```
 
+"Person hinzufügen" emits `PersonAdded`; an organiser can add, edit, or
+withdraw a person on the family's behalf through the organiser family-detail
+screen, writing the identical events (D24;
+[events](../architecture/events.md) §"Setup and identity").
+
 ### Communicated arrangements
 
 Communicated accommodation and workshop results take the top as they become
