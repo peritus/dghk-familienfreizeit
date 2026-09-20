@@ -1,7 +1,7 @@
 ---
 id: "001"
 title: Active profile passes workshop-assignment parameters the module doesn't define
-status: needs-decision
+status: resolved
 severity: build-blocking
 category: module:workshop-assignment
 source: coherence-audit-2026-09-19, spec-review-2026-09-19
@@ -44,10 +44,16 @@ the real profile must typecheck once its builders exist.
 
 ## Open questions
 
-1. Is `co_assignment_trait` a feature [`workshop-assignment.md`](../../modules/workshop-assignment.md) should regain, or residue to drop
-   from the profile?
-2. Drop `cancel_under_subscribed`, or reopen the cancellation-derivation rule
-   in [`workshops.md`](../../modules/workshops.md) §5 (which [`AGENTS.md`](../../../AGENTS.md) would route through decision review)?
+None. The unsupported parameters are removed from the illustrative active
+profile. Co-assignment and automatic cancellation remain out of scope; any
+future reintroduction requires a separate decision review.
+
+## Resolution
+
+Removed `co_assignment_trait` and `cancel_under_subscribed` from
+`workshopAssignment(...)`. The profile now matches the four parameters defined
+by the workshop-assignment contract and does not imply solver-derived
+cancellation.
 
 ## Related files
 

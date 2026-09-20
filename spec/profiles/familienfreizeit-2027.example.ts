@@ -444,8 +444,6 @@ export default defineOccasionProfile({
       objectives: ['min-people-without-top-n', 'min-people-without-any-choice', 'max-rank-weight'],
       top_n: 2,
       rank_weights: [3, 2, 1],
-      co_assignment_trait: 'workshop-with',
-      cancel_under_subscribed: true,
       fill_unassigned: true,
     }),
 

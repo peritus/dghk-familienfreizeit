@@ -599,3 +599,16 @@ submitted spelling is not persisted as identity data.
 authorization, and event provenance must compare the same identity value. A
 single application rule avoids relying on inconsistent database collations or
 provider behavior.
+
+## D26 — Validation boundary and pure domain core
+
+*Chosen.* Boundary validation may use Zod, including event payload schemas and
+the compiled profile-validation view consumed by the kernel. The fold, derived
+world, resolver, and solver remain dependency-free pure TypeScript. The KDL
+parser is confined to the development/test event-source adapter and never enters
+the Worker production bundle or pure domain layer.
+
+*Why:* schema validation is a boundary concern and benefits from one explicit,
+tested contract. Keeping it outside the fold preserves deterministic browser and
+Worker execution without importing I/O, framework, or adapter code into the
+domain core.

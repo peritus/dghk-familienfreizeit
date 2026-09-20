@@ -1,11 +1,11 @@
 ---
 id: "007"
 title: Module contributions mix pure definitions with browser/Worker code
-status: open
+status: resolved
 severity: gap
 category: module:modules
 source: coherence-audit-2026-09-19, spec-review-2026-09-19
-related_decisions: []
+related_decisions: [D26]
 opened: 2026-09-19
 ---
 
@@ -32,8 +32,19 @@ registries.
 
 ## Open questions
 
-1. Does the pure layer's "zero dependencies" rule permit a schema/validation
-   library, or must it be dependency-free in the strict sense?
+None.
+
+## Resolution
+
+M1 establishes the boundary used by later module composition:
+
+- the fold, derived world, and solver remain dependency-free pure TypeScript;
+- payload and profile-boundary schemas may use Zod at the validation boundary;
+- KDL parsing remains isolated in the development/test event-source adapter;
+- pure, Worker, and app module contributions remain separate entry points and
+  are linked only by type-only contracts.
+
+This resolves the open question in [D26](../../../decisions.md#d26--validation-boundary-and-pure-domain-core).
 
 ## Related files
 
