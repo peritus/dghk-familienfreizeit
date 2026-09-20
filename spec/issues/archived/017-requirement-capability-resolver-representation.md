@@ -1,7 +1,7 @@
 ---
 id: "017"
 title: Requirement/capability resolver representation is underspecified
-status: open
+status: resolved
 severity: gap
 category: kernel
 source: issue-5-requirement-capability-resolver (pre-existing)
@@ -358,6 +358,27 @@ chosen representation.
 
 11. Re-record affected golden plans only after the representation and solver
     input contract are fixed.
+
+## Resolution
+
+The resolver boundary is now direct and normalized. Stored labels remain the
+event-derived facts; profile traits remain schemas and resolver metadata over
+those labels.
+
+Profile-backed requirements use their canonical trait key, such as
+`needs-accessible`, and retain the profile's `satisfied_by` capability metadata.
+They are compiled directly into normalized requirements and are never rewritten
+as generic `needs` labels. Profile-derived capabilities are compiled directly
+from property labels and are never persisted as generic `provides` labels.
+
+Generic `needs` and `provides` remain fixed resolver keys for free-form organiser
+matching. Their values are compiled separately into normalized matching
+constraints. Modules consume the normalized requirement, capability, relation,
+and structural records and do not interpret raw trait keys or event payloads.
+Aliases normalize only label keys to canonical profile trait keys; they do not
+rename generic resolver keys or matching values. The active profile, module
+contracts, UI controls, solver boundary, and test requirements now use this
+model, so issue 017 is resolved.
 
 ## Related files
 

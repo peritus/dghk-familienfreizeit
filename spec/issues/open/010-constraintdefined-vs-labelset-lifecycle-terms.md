@@ -27,7 +27,7 @@ against [`ui/german-translation-guidelines.md`](../../ui/german-translation-guid
 defines only `FamilyInvited`, `FamilyEmailChanged`, `PersonAdded`,
 `PersonUpdated`, `PersonWithdrawn`, `LabelSet`, and `LabelCleared`. A
 repository-wide search finds `ConstraintDefined` used nowhere except this
-issue and [issue 017](017-requirement-capability-resolver-representation.md:121).
+issue and [resolved issue 017](../archived/017-requirement-capability-resolver-representation.md#resolution).
 Resolver vocabulary is declared at profile/code time, not through an event:
 [`architecture/labels-and-constraints.md:242`](../../architecture/labels-and-constraints.md) already states "No event
 defines or retires the token" for free-form organiser values, and fixed
@@ -55,9 +55,8 @@ a phantom event name has leaked into the specification. Concrete fixes:
    that vocabulary declaration (fixed or free-form) is never represented by
    an event — only `LabelSet`/`LabelCleared` are — so future readers don't
    reintroduce `ConstraintDefined`.
-2. Fix [`issues/open/017-requirement-capability-resolver-representation.md:121`](017-requirement-capability-resolver-representation.md),
-   which also references `ConstraintDefined`; reword to "profile/fixed
-   resolver vocabulary declaration" (config-time, not an event).
+2. The related [issue 017 resolution](../archived/017-requirement-capability-resolver-representation.md#resolution)
+now defines profile/fixed resolver vocabulary as config-time, not an event.
 3. No change needed in [`ui/german-translation-guidelines.md`](../../ui/german-translation-guidelines.md) or
    [`architecture/events.md`](../../architecture/events.md) — both are already internally consistent for the
    two lifecycle actions that actually exist as events.
