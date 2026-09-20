@@ -33,7 +33,7 @@ export default defineOccasionProfile({
     description: { de: '…', en: '…' },
   },
 
-  tags: {
+  traits: {
     'needs-private-sanitary': requirement({ … }),
     // …
   },
@@ -74,14 +74,14 @@ and are not part of the built profile identity ([deployment](../engineering/depl
 
 The kernel owns the person and family keys set by its events: `member-of`,
 `given-name`, `family-name`, `birthdate`, `display-name`, `email`, and `locale`.
-The profile supplies the value vocabulary for `role` with a `property` tag named
+The profile supplies the value vocabulary for `role` with a `property` trait named
 `role`, because modules refer to role values in their parameters.
 
-## 3. Tags
+## 3. Traits
 
-Labels are the stored fact. Tags are the profile's typed vocabulary over those
-labels. Tag keys are kebab-case (D18), so they are quoted in the `tags` object; the
-builder derives `type Tag = keyof typeof tags`, so a misspelt tag in code is a
+Labels are the stored fact. Traits are the profile's typed vocabulary over those
+labels. Trait keys are kebab-case (D18), so they are quoted in the `traits` object; the
+builder derives `type Trait = keyof typeof traits`, so a misspelt trait in code is a
 compile error.
 
 ### Builders
@@ -99,9 +99,9 @@ Value types: `enumOf([...])`, `text({ max_length })`, `integer({ min, max })`,
 `decimal({ scale })`, `bool()`, `date()`, and `ref('<entity-kind>')`. Options are
 optional.
 
-### Tag fields
+### Trait fields
 
-Every tag has `label` (organiser-facing `LocalizedText`), `scopes`, and a `value`
+Every trait has `title` (organiser-facing `LocalizedText`), `scopes`, and a `value`
 type. Builders accept these further fields where they apply:
 
 | Field | Builders | Meaning |
@@ -112,10 +112,10 @@ type. Builders accept these further fields where they apply:
 | `default` | `property` | value assumed when the entity has no label; never stored |
 | `copy` | `property` with `enumOf` | `LocalizedText` per enum value |
 | `operator` | `relation` | `groups-with` or `separates-from` |
-| `satisfied_by` | `requirement` | capability tag key |
+| `satisfied_by` | `requirement` | capability trait key |
 | `structural` | `requirement` | named structural check provided by a module, e.g. `no-other-families` |
 | `derive` | `capability` | pure evaluator over the entity's labels; makes the capability derived |
-| `valid_for` | all | pure evaluator deciding whether the tag applies to an entity, returning `true` or a reason |
+| `valid_for` | all | pure evaluator deciding whether the trait applies to an entity, returning `true` or a reason |
 | `target` | `relation` | entity kinds the value may reference |
 | `symmetry` | `relation` | `mutual-required`, `implied-mutual`, or `one-sided-soft` |
 | `per`, `choice` | `orderedChoice` | the scope entity kind and the choice entity kind |
@@ -123,18 +123,18 @@ type. Builders accept these further fields where they apply:
 | `penalty` | `requirement`, `relation` | integer score, ≤ 0, when a `preferred` label is violated |
 | `family_facing` | all except `note` | the family control ([family preferences](../modules/family-preferences.md) §6) |
 | `organiser_only` | all | never rendered to families; excludes `family_facing` |
-| `aliases` | all | further keys accepted on replay and mapped to this tag, so a rename costs nothing |
+| `aliases` | all | further keys accepted on replay and mapped to this trait, so a rename costs nothing |
 | `sensitivity` | all | `normal` or `restricted`; restricted values never appear in shared or other-family views |
 
-A tag-specific score lives on its tag, next to the vocabulary it scores. Geometry and
-policy scores that no single tag owns live in module parameters.
+A trait-specific score lives on its trait, next to the vocabulary it scores. Geometry and
+policy scores that no single trait owns live in module parameters.
 
 ### Organiser-supplied values
 
 Fixed resolver mechanisms accept organiser decisions independently of the profile's
-tag catalogue ([labels and constraints](../architecture/labels-and-constraints.md) §5). A new
-`needs`/`provides` token such as `naehe_zum_eingang` is a value, not a new profile tag:
-it needs neither `label` copy nor `family_facing` metadata. The configured schemas
+trait catalogue ([labels and constraints](../architecture/labels-and-constraints.md) §5). A new
+`needs`/`provides` token such as `naehe_zum_eingang` is a value, not a new profile trait:
+it needs neither `title` copy nor `family_facing` metadata. The configured schemas
 still validate entity kinds, references, strengths, and slot-scoped shapes.
 
 Vocabulary naming rules apply to declared keys and enum values. Free-form matching
@@ -153,8 +153,8 @@ determinism lint rules ([testing](../engineering/testing.md) §5) and hashed by 
 ## 4. Module parameters
 
 Each module factory takes its typed parameters, specified in the module document §3.
-A parameter naming a tag ends in `_tag` and must name a tag of the shape the module's
-role requires. Weights are integers. Changes to parameters, tags, and weights are
+A parameter naming a trait ends in `_trait` and must name a trait of the shape the module's
+role requires. Weights are integers. Changes to parameters, traits, and weights are
 deployments, not events (D12).
 
 ## 5. Build identity and history
@@ -168,8 +168,8 @@ boundary used to produce an earlier plan.
 ## 6. UI and copy
 
 Modules contribute surfaces; the profile supplies their words. Organiser-facing
-wording comes from the tag `label`, family-facing wording from `family_facing.label`,
-so the two audiences can be addressed differently for the same tag. A module that is
+wording comes from the trait `title`, family-facing wording from `family_facing.title`,
+so the two audiences can be addressed differently for the same trait. A module that is
 not selected has no surface at all.
 
 `LocalizedText` is either a string in `meta.locale` or an object with one entry per
@@ -189,8 +189,8 @@ deployed occasion, while this document defines the reusable profile contract.
 
 The profile places module-owned controls through `family-preferences.module_controls`
 ([family preferences](../modules/family-preferences.md) §3), supplying section and copy. It
-must not redefine `signed-up-for` or `interested-in` as profile tags. The workshops
+must not redefine `signed-up-for` or `interested-in` as profile traits. The workshops
 module owns their schemas, resolver references and authorisation. These controls
-complement tag-driven controls and inherit their section's advisory deadline scope. Release
+complement trait-driven controls and inherit their section's advisory deadline scope. Release
 control is fixed kernel behaviour, specified in [06-release-control](../application/release-control.md);
 the profile supplies no executable release rules or stored communicated state.

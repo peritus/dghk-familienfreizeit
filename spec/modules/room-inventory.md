@@ -11,7 +11,7 @@ designation, and capacity. It does not decide who sleeps where; that is the job 
 separate module boundary.
 
 Everything else a profile wants to say about a room — sanitary arrangement, price,
-apartment layout, "near the hall" — is a profile tag stored as an ordinary label on
+apartment layout, "near the hall" — is a profile trait stored as an ordinary label on
 the room. Capabilities the solver matches against are derived from those labels or
 assigned directly ([labels and constraints](../architecture/labels-and-constraints.md) §3).
 
@@ -153,10 +153,10 @@ BedAdded bed_id=bed_08-b room_id=rm_08 label="8-B" bed_type=single sleeps=1 sort
 RoomDesignationChanged room_id=rm_08 designation=staff reason=#null
 ```
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys, each owned for the entity kind in its scope. A profile
-may not define a tag using one of these keys on that kind; the same key stays free
+may not define a trait using one of these keys on that kind; the same key stays free
 on other kinds ([modules](contract.md) §3.1).
 
 | Key | Scope | Value | Cardinality | Set by |
@@ -173,7 +173,7 @@ on other kinds ([modules](contract.md) §3.1).
 | `sleeps` | bed | `1` or `2` | exactly one | `BedAdded`, `BedUpdated` |
 
 These keys are set only through their events; a `LabelSet` naming one is rejected.
-Profile tags scoped to `room`, `bed`, or `place` are ordinary labels set with
+Profile traits scoped to `room`, `bed`, or `place` are ordinary labels set with
 `LabelSet` by an organiser.
 
 The module exposes two read-only helpers, never stored as labels:
@@ -181,7 +181,7 @@ The module exposes two read-only helpers, never stored as labels:
 - `placeCount(room)` — live places located in the room's live beds, exposed as `InventoryRoom.place_count`;
 - `buildingOf(room)` — the `located-in` target.
 
-Tag roles: none. The module interprets no profile tag. A profile's capability tags
+Trait roles: none. The module interprets no profile trait. A profile's capability traits
 may derive from module-owned keys, for example `ground-floor` from `floor = ground`.
 
 ## 7. Solver input and stages
@@ -238,8 +238,8 @@ The derived world exposes `world.buildings`, `world.rooms`, `world.beds`, and
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/inventory` — buildings, rooms, beds, designations, and room tags ([UI-08](../ui/screens/inventory.md)) |
-| Report | *Capacity and accommodation cost overview*, inventory part: places by building, designation, and room type; cost when the profile defines a price tag ([reports](../application/reports.md) §3.3) |
+| Screen | `/organiser/inventory` — buildings, rooms, beds, designations, and room traits ([UI-08](../ui/screens/inventory.md)) |
+| Report | *Capacity and accommodation cost overview*, inventory part: places by building, designation, and room type; cost when the profile defines a price trait ([reports](../application/reports.md) §3.3) |
 | Controls | none |
 | Emails | none |
 

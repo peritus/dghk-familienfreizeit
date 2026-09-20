@@ -12,7 +12,7 @@ and family membership are labels interpreted by occasion configuration.
 **Placement unit** — the set of People placed in one room together. In the active
 scope it is exactly one Family's non-withdrawn People, derived on every solver
 run and never stored. Its requirements are the union of the Family's and its
-members' tags, strictest strength winning.
+members' labels, strictest strength winning.
 
 **Place** — one sleeping position. A single bed is one Place. A double bed is two
 Places. This is the atomic unit of capacity. Rooms have Beds; Beds have Places.
@@ -47,7 +47,7 @@ list is the ordinary case and needs no separate code path.
 per decision, including the alternatives it rejected. Not a debug log; a
 first-class deliverable that organisers read.
 
-**Tag** — a named fact in an occasion profile's vocabulary, optionally pointing at
+**Trait** — a named fact in an occasion profile's vocabulary, optionally pointing at
 another entity and optionally carrying a strength. Stored as a generic label.
 
 **Kernel** — the part of the application present in every deployment: event log,
@@ -61,8 +61,8 @@ typed parameters, and its own specification in `spec/modules/<module-id>.md`.
 vocabulary, policy, parameters, and copy for one deployment. The first profile
 is `spec/profiles/familienfreizeit-2027.example.ts`.
 
-**Strength** — `required` (prunes rooms) or `preferred` (scored). An absent tag
-assignment means indifferent.
+**Strength** — `required` (prunes rooms) or `preferred` (scored). An absent label
+means indifferent.
 
 **Preflight** — checks run on a plan's solver input before placement, catching
 infeasibility and contradictions before any placement runs.

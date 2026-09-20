@@ -25,14 +25,14 @@ One scrolling page, not a wizard. A wizard implies a one-time completion; this i
 a form people return to as they change their minds. Everything saves on change.
 
 Section 2 ("Zimmerwünsche") and the later sections are **generated from the
-active occasion profile**: every tag declaring
+active occasion profile**: every trait declaring
 `family_facing` produces a control, in the sections the profile configures.
 Selected module-owned participation controls are placed through `module_controls`
 as defined by [family preferences](../modules/family-preferences.md). The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.
 
 The page, its sections, the closed `control` union, and the save-on-change contract
-are specified by the [family preferences](../modules/family-preferences.md) module. A tag
+are specified by the [family preferences](../modules/family-preferences.md) module. A trait
 that reuses an existing control needs no family view code.
 
 ```
@@ -136,9 +136,9 @@ below specify disclosure; timing is governed separately by
 | Bed labels within their own rooms | Yes |
 | Scores, traces, organiser decisions | No |
 | Organiser notes about them | **No** — free text is theirs, organiser notes are not |
-| Tags declaring `organiser_only` | **Never**, regardless of `family_facing` |
+| Traits declaring `organiser_only` | **Never**, regardless of `family_facing` |
 | Restricted values | Own-family values only where authorised; never shared or other-family |
-| `descriptive` tags | Only explicitly family-facing own inputs; internal descriptive facts remain hidden |
+| `descriptive` traits | Only explicitly family-facing own inputs; internal descriptive facts remain hidden |
 
 Released arrangement fields come from their reviewed `input_seq`; current own-family
 answers and permitted live participation remain current. Current names and withdrawal
@@ -186,7 +186,7 @@ matches what workshop age bounds will do and avoids a confusing mismatch.
 person, such as "Schläft bei den Eltern" for an adult, is disabled with the reason
 next to it, not removed. A missing option makes people
 think the site is broken; a disabled option with a reason answers the question
-before they ask. The tag's `valid_for` evaluator decides: a control whose predicate
+before they ask. The trait's `valid_for` evaluator decides: a control whose predicate
 fails renders disabled with the reason.
 
 **Workshop ranking is drag-to-order on desktop and numbered selects on mobile.**

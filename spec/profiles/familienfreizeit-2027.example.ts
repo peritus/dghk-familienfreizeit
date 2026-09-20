@@ -53,11 +53,11 @@ export default defineOccasionProfile({
     },
   },
 
-  tags: {
+  traits: {
     // ── People ────────────────────────────────────────────────────────────────
 
     'role': property({
-      label: { de: 'Rolle', en: 'Role' },
+      title: { de: 'Rolle', en: 'Role' },
       scopes: ['person'],
       value: enumOf(['adult', 'child', 'infant']),
       cardinality: 'exactly-one',
@@ -69,7 +69,7 @@ export default defineOccasionProfile({
     }),
 
     'does-not-need-a-bed': property({
-      label: { de: 'Braucht kein eigenes Bett', en: 'Does not need a bed' },
+      title: { de: 'Braucht kein eigenes Bett', en: 'Does not need a bed' },
       scopes: ['person'],
       value: bool(),
       cardinality: 'zero-or-one',
@@ -78,7 +78,7 @@ export default defineOccasionProfile({
         person.label('role') !== 'adult' || { de: 'Nur für Kinder und Babys', en: 'Children and infants only' },
       family_facing: {
         control: 'toggle',
-        label: { de: 'Schläft bei den Eltern', en: 'Sleeps with the parents' },
+        title: { de: 'Schläft bei den Eltern', en: 'Sleeps with the parents' },
         help: null,
         scope: 'person',
         strengths: null,
@@ -89,7 +89,7 @@ export default defineOccasionProfile({
     // ── Room properties ───────────────────────────────────────────────────────
 
     'sanitary': property({
-      label: { de: 'Sanitär', en: 'Sanitary facilities' },
+      title: { de: 'Sanitär', en: 'Sanitary facilities' },
       scopes: ['room'],
       value: enumOf(['private', 'shared-floor', 'remote-shared']),
       cardinality: 'exactly-one',
@@ -101,7 +101,7 @@ export default defineOccasionProfile({
     }),
 
     'is-accessible': property({
-      label: { de: 'Barrierefrei', en: 'Accessible' },
+      title: { de: 'Barrierefrei', en: 'Accessible' },
       scopes: ['room'],
       value: bool(),
       cardinality: 'zero-or-one',
@@ -109,7 +109,7 @@ export default defineOccasionProfile({
     }),
 
     'price-per-bed-eur': property({
-      label: { de: 'Preis pro Bett (beide Tage)', en: 'Price per bed (both days)' },
+      title: { de: 'Preis pro Bett (beide Tage)', en: 'Price per bed (both days)' },
       scopes: ['room'],
       value: decimal({ scale: 2 }),
       cardinality: 'exactly-one',
@@ -117,7 +117,7 @@ export default defineOccasionProfile({
     }),
 
     'sleeping-rooms': property({
-      label: { de: 'Schlafräume', en: 'Sleeping rooms' },
+      title: { de: 'Schlafräume', en: 'Sleeping rooms' },
       scopes: ['room'],
       value: integer({ min: 1 }),
       cardinality: 'zero-or-one',
@@ -125,14 +125,14 @@ export default defineOccasionProfile({
     }),
 
     'beds-per-sleeping-room': property({
-      label: { de: 'Betten pro Schlafraum', en: 'Beds per sleeping room' },
+      title: { de: 'Betten pro Schlafraum', en: 'Beds per sleeping room' },
       scopes: ['room'],
       value: integer({ min: 1 }),
       cardinality: 'zero-or-one',
     }),
 
     'has-common-room': property({
-      label: { de: 'Mit Aufenthaltsraum', en: 'Has a common room' },
+      title: { de: 'Mit Aufenthaltsraum', en: 'Has a common room' },
       scopes: ['room'],
       value: bool(),
       cardinality: 'zero-or-one',
@@ -140,7 +140,7 @@ export default defineOccasionProfile({
     }),
 
     'suitable-for-two-families': property({
-      label: { de: 'Für zwei befreundete Familien geeignet', en: 'Suitable for two friendly families' },
+      title: { de: 'Für zwei befreundete Familien geeignet', en: 'Suitable for two friendly families' },
       help: { de: 'Beschreibende Angabe; keine Regel für die Einteilung.', en: 'Descriptive only; not a placement rule.' },
       scopes: ['room'],
       value: bool(),
@@ -151,25 +151,25 @@ export default defineOccasionProfile({
     // ── Room capabilities ─────────────────────────────────────────────────────
 
     'private-sanitary': capability({
-      label: { de: 'Eigenes Bad', en: 'Private bathroom' },
+      title: { de: 'Eigenes Bad', en: 'Private bathroom' },
       scopes: ['room'],
       derive: (room) => room.label('sanitary') === 'private',
     }),
 
     'ground-floor': capability({
-      label: { de: 'Erdgeschoss', en: 'Ground floor' },
+      title: { de: 'Erdgeschoss', en: 'Ground floor' },
       scopes: ['room'],
       derive: (room) => room.label('floor') === 'ground',
     }),
 
     'accessible': capability({
-      label: { de: 'Barrierefrei', en: 'Accessible' },
+      title: { de: 'Barrierefrei', en: 'Accessible' },
       scopes: ['room'],
       derive: (room) => room.label('is-accessible') === true,
     }),
 
     'multi-room-unit': capability({
-      label: { de: 'Wohneinheit mit mehreren Schlafräumen', en: 'Unit with several sleeping rooms' },
+      title: { de: 'Wohneinheit mit mehreren Schlafräumen', en: 'Unit with several sleeping rooms' },
       scopes: ['room'],
       derive: (room) => (room.label('sleeping-rooms') ?? 1) > 1,
     }),
@@ -177,14 +177,14 @@ export default defineOccasionProfile({
     // ── Room requirements ─────────────────────────────────────────────────────
 
     'needs-private-sanitary': requirement({
-      label: { de: 'Eigenes Bad', en: 'Private bathroom' },
+      title: { de: 'Eigenes Bad', en: 'Private bathroom' },
       scopes: ['family'],
       satisfied_by: 'private-sanitary',
       strengths: ['required', 'preferred'],
       weight: 6,
       family_facing: {
         control: 'tri-state',
-        label: { de: 'Eigenes Bad', en: 'Private bathroom' },
+        title: { de: 'Eigenes Bad', en: 'Private bathroom' },
         help: { de: 'Zimmer mit Sanitär kosten 103,00 € statt 88,50 € pro Bett.', en: 'Rooms with a private bathroom cost €103.00 instead of €88.50 per bed.' },
         scope: 'family',
         strengths: ['required', 'preferred'],
@@ -193,14 +193,14 @@ export default defineOccasionProfile({
     }),
 
     'needs-accessible': requirement({
-      label: { de: 'Barrierefreies Zimmer', en: 'Accessible room' },
+      title: { de: 'Barrierefreies Zimmer', en: 'Accessible room' },
       scopes: ['family', 'person'],
       satisfied_by: 'accessible',
       strengths: ['required', 'preferred'],
       weight: 8,
       family_facing: {
         control: 'tri-state',
-        label: { de: 'Barrierefreies Zimmer', en: 'Accessible room' },
+        title: { de: 'Barrierefreies Zimmer', en: 'Accessible room' },
         help: null,
         scope: 'family',
         strengths: ['required', 'preferred'],
@@ -209,7 +209,7 @@ export default defineOccasionProfile({
     }),
 
     'needs-ground-floor': requirement({
-      label: { de: 'Erdgeschoss', en: 'Ground floor' },
+      title: { de: 'Erdgeschoss', en: 'Ground floor' },
       scopes: ['family', 'person'],
       satisfied_by: 'ground-floor',
       strengths: ['required', 'preferred'],
@@ -218,7 +218,7 @@ export default defineOccasionProfile({
     }),
 
     'needs-apartment': requirement({
-      label: { de: 'Wohneinheit mit mehreren Schlafräumen', en: 'Unit with several sleeping rooms' },
+      title: { de: 'Wohneinheit mit mehreren Schlafräumen', en: 'Unit with several sleeping rooms' },
       scopes: ['family'],
       satisfied_by: 'multi-room-unit',
       strengths: ['preferred'],
@@ -227,14 +227,14 @@ export default defineOccasionProfile({
     }),
 
     'sole-occupancy': requirement({
-      label: { de: 'Zimmer nicht teilen', en: 'Do not share the room' },
+      title: { de: 'Zimmer nicht teilen', en: 'Do not share the room' },
       scopes: ['family'],
       structural: 'no-other-families',
       strengths: ['required', 'preferred'],
       penalty: -12,
       family_facing: {
         control: 'tri-state',
-        label: { de: 'Zimmer teilen', en: 'Share a room' },
+        title: { de: 'Zimmer teilen', en: 'Share a room' },
         help: null,
         scope: 'family',
         strengths: ['required', 'preferred'],
@@ -245,7 +245,7 @@ export default defineOccasionProfile({
     // ── Room relations ────────────────────────────────────────────────────────
 
     'apart-from': relation({
-      label: { de: 'Getrennt von', en: 'Keep apart from' },
+      title: { de: 'Getrennt von', en: 'Keep apart from' },
       scopes: ['family', 'person'],
       target: ['family', 'person'],
       operator: 'separates-from',
@@ -260,7 +260,7 @@ export default defineOccasionProfile({
     // ── Workshops ─────────────────────────────────────────────────────────────
 
     'workshop-audience': property({
-      label: { de: 'Zielgruppe', en: 'Audience' },
+      title: { de: 'Zielgruppe', en: 'Audience' },
       scopes: ['workshop'],
       value: enumOf(['children', 'adults']),
       cardinality: 'exactly-one',
@@ -272,7 +272,7 @@ export default defineOccasionProfile({
     }),
 
     'leads-workshop': property({
-      label: { de: 'Leitet Workshop', en: 'Leads workshop' },
+      title: { de: 'Leitet Workshop', en: 'Leads workshop' },
       scopes: ['person'],
       value: ref('workshop'),
       cardinality: 'zero-or-more',
@@ -280,13 +280,13 @@ export default defineOccasionProfile({
     }),
 
     'prefers-workshop': orderedChoice({
-      label: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
+      title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
       scopes: ['person'],
       per: 'slot',
       choice: 'workshop',
       family_facing: {
         control: 'ranking',
-        label: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
+        title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
         help: {
           de: 'Bis zu drei Wünsche pro Zeitfenster, der wichtigste zuerst.',
           en: 'Up to three choices per time slot, most important first.',
@@ -298,7 +298,7 @@ export default defineOccasionProfile({
     }),
 
     'workshop-with': relation({
-      label: { de: 'Workshop zusammen mit', en: 'Workshop together with' },
+      title: { de: 'Workshop zusammen mit', en: 'Workshop together with' },
       scopes: ['person'],
       target: ['person'],
       operator: 'groups-with',
@@ -307,7 +307,7 @@ export default defineOccasionProfile({
       cardinality: 'zero-or-more',
       family_facing: {
         control: 'person-picker',
-        label: { de: 'Workshops gemeinsam mit', en: 'Workshops together with' },
+        title: { de: 'Workshops gemeinsam mit', en: 'Workshops together with' },
         help: null,
         scope: 'person',
         strengths: ['required'],
@@ -318,7 +318,7 @@ export default defineOccasionProfile({
     // ── Food ──────────────────────────────────────────────────────────────────
 
     'diet': property({
-      label: { de: 'Ernährung', en: 'Diet' },
+      title: { de: 'Ernährung', en: 'Diet' },
       scopes: ['person'],
       value: enumOf(['vegetarian', 'vegan', 'carnivore', 'pesco-vegetarian']),
       cardinality: 'exactly-one',
@@ -330,7 +330,7 @@ export default defineOccasionProfile({
       },
       family_facing: {
         control: 'choice',
-        label: { de: 'Ernährung', en: 'Diet' },
+        title: { de: 'Ernährung', en: 'Diet' },
         help: null,
         scope: 'person',
         strengths: null,
@@ -339,14 +339,14 @@ export default defineOccasionProfile({
     }),
 
     'allergies-text': property({
-      label: { de: 'Allergien und Unverträglichkeiten', en: 'Allergies and intolerances' },
+      title: { de: 'Allergien und Unverträglichkeiten', en: 'Allergies and intolerances' },
       scopes: ['person'],
       value: text({ max_length: 2000 }),
       cardinality: 'zero-or-one',
       sensitivity: 'restricted',
       family_facing: {
         control: 'free-text',
-        label: { de: 'Allergien und Unverträglichkeiten', en: 'Allergies and intolerances' },
+        title: { de: 'Allergien und Unverträglichkeiten', en: 'Allergies and intolerances' },
         help: {
           de: 'Bitte so genau wie möglich, zum Beispiel „2x Beifuß (sehr starke Allergie)“.',
           en: 'As precisely as possible, for example “mugwort (severe allergy)”.',
@@ -360,13 +360,13 @@ export default defineOccasionProfile({
     // ── Notes ─────────────────────────────────────────────────────────────────
 
     'family-note': property({
-      label: { de: 'Hinweis der Familie', en: 'Family note' },
+      title: { de: 'Hinweis der Familie', en: 'Family note' },
       scopes: ['family'],
       value: text({ max_length: 2000 }),
       cardinality: 'zero-or-one',
       family_facing: {
         control: 'free-text',
-        label: { de: 'Sonst noch etwas?', en: 'Anything else?' },
+        title: { de: 'Sonst noch etwas?', en: 'Anything else?' },
         help: { de: 'Freitext — das Organisationsteam liest mit.', en: 'Free text — the organisers read it.' },
         scope: 'family',
         strengths: null,
@@ -375,7 +375,7 @@ export default defineOccasionProfile({
     }),
 
     'organiser-note': note({
-      label: { de: 'Notiz des Organisationsteams', en: 'Organiser note' },
+      title: { de: 'Notiz des Organisationsteams', en: 'Organiser note' },
       scopes: ['family', 'person', 'room', 'workshop'],
       value: text({ max_length: 4000 }),
       organiser_only: true,
@@ -415,16 +415,16 @@ export default defineOccasionProfile({
 
     roomAssignment({
       weights: { exact_fit: 10, near_fit: 4, orphan_bed: -8 },
-      keep_apart_tag: 'apart-from',
-      no_bed_tag: 'does-not-need-a-bed',
-      priority_tag: 'needs-accessible',
+      keep_apart_trait: 'apart-from',
+      no_bed_trait: 'does-not-need-a-bed',
+      priority_trait: 'needs-accessible',
       scarce_capabilities: { 'accessible': -3 },
       max_repair_passes: 5,
     }),
 
     workshops({
-      audience_tag: 'workshop-audience',
-      leader_tag: 'leads-workshop',
+      audience_trait: 'workshop-audience',
+      leader_trait: 'leads-workshop',
       leaders_consume_capacity: false,
       require_leader: false,
       excluded_roles: ['infant'],
@@ -435,7 +435,7 @@ export default defineOccasionProfile({
     }),
 
     workshopRankings({
-      ranking_tag: 'prefers-workshop',
+      ranking_trait: 'prefers-workshop',
       max_rank: 3,
       allow_no_preference: true,
     }),
@@ -444,14 +444,14 @@ export default defineOccasionProfile({
       objectives: ['min-people-without-top-n', 'min-people-without-any-choice', 'max-rank-weight'],
       top_n: 2,
       rank_weights: [3, 2, 1],
-      co_assignment_tag: 'workshop-with',
+      co_assignment_trait: 'workshop-with',
       cancel_under_subscribed: true,
       fill_unassigned: true,
     }),
 
     foodPreferences({
-      diet_tag: 'diet',
-      allergies_tag: 'allergies-text',
+      diet_trait: 'diet',
+      allergies_trait: 'allergies-text',
       count_by_day: true,
     }),
 
@@ -477,40 +477,40 @@ export default defineOccasionProfile({
           key: 'people',
           title: { de: 'Wer kommt mit', en: 'Who is coming' },
           intro: null,
-          tags: ['does-not-need-a-bed'],
+          traits: ['does-not-need-a-bed'],
           deadline_scope: null,
         },
         {
           key: 'room-wishes',
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
-          tags: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
+          traits: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
           deadline_scope: 'accommodation',
         },
         {
           key: 'workshops',
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
-          tags: ['prefers-workshop', 'workshop-with'],
+          traits: ['prefers-workshop', 'workshop-with'],
           deadline_scope: 'workshops',
         },
         {
           key: 'food',
           title: { de: 'Essen', en: 'Food' },
           intro: null,
-          tags: ['diet', 'allergies-text'],
+          traits: ['diet', 'allergies-text'],
           deadline_scope: null,
         },
       ],
       module_controls: [
         {
           key: 'workshop-sign-up', section: 'workshops',
-          label: { de: 'Workshop-Anmeldung', en: 'Workshop sign-up' },
+          title: { de: 'Workshop-Anmeldung', en: 'Workshop sign-up' },
           help: { de: 'Du meldest Dich verbindlich an.', en: 'This reserves your place.' },
         },
         {
           key: 'workshop-interest', section: 'workshops',
-          label: { de: 'Interesse', en: 'Interest' },
+          title: { de: 'Interesse', en: 'Interest' },
           help: { de: 'Unverbindlich, ohne Platzreservierung.', en: 'Non-binding; no place reserved.' },
         },
       ],

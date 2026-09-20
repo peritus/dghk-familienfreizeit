@@ -123,7 +123,7 @@ MaterialRequested request_id=mreq_paint requested_by=ws_malen category=material 
 MaterialCommitted commitment_id=mcom_paint-braun contributed_by=fam_braun category=material name="Acrylfarben" quantity_text="5 Tuben" description=#null workshop_id=ws_malen fulfills=mreq_paint
 ```
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys on `material-request` and `material-commitment`, set only
 by the module's events: `requested-by`, `contributed-by`, `category`, `name`,
@@ -132,7 +132,7 @@ by the module's events: `requested-by`, `contributed-by`, `category`, `name`,
 `name` on a building and `description` on a workshop belong to their own modules
 ([modules](contract.md) §3.1).
 
-Tag roles: none.
+Trait roles: none.
 
 Matching is never inferred from similar names. Only `fulfills` connects a commitment
 to a request.

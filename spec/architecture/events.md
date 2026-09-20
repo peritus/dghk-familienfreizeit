@@ -132,7 +132,7 @@ so its sessions lose access without a cleanup step
 Emitted by the family or by an allowlisted organiser. Folds to `member-of`,
 `given-name`, `family-name`, `birthdate`, and `role`. Everything else about a person —
 bed demand, accessibility, diet — is an ordinary label set by the module or profile
-tag that owns it.
+trait that owns it.
 
 *Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
 registered as an adult by their family and that is their call. Modules use `role`
@@ -252,7 +252,7 @@ Worth writing down, because the boundary blurs under pressure.
 
 | Not an event | Why | Where it lives |
 |---|---|---|
-| Occasion-profile changes (adding, removing or reweighting a tag) | Code, identified by `build_revision` | `profiles/<occasion>.ts` |
+| Occasion-profile changes (adding, removing or reweighting a trait) | Code, identified by `build_revision` | `profiles/<occasion>.ts` |
 | Magic link issued / redeemed | Operational secret handling | `magic_link` |
 | Session created / destroyed | Operational | `session` |
 | Email sent, delivered, bounced | Operational telemetry | `email_log` |

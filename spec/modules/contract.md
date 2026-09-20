@@ -23,7 +23,7 @@ A **module** is a selectable unit of domain capability. It owns a mechanism — 
 kinds, events, the label keys it interprets, solver stages, diagnostics, screens,
 reports, and test contracts — and exposes a typed parameter object through which a
 profile supplies policy. A module never owns occasion vocabulary; it names the
-*roles* a profile tag must fill and checks the tag's shape.
+*roles* a profile trait must fill and checks the trait's shape.
 
 Nothing about the kernel is optional, so listing it in a profile would add noise
 without adding a choice. Everything a profile can choose is a module.
@@ -62,7 +62,7 @@ export interface ModuleContributions {
   entity_kinds: readonly EntityKindDefinition[]
   events: readonly EventDefinition[]
   label_keys: readonly BuiltInLabelKey[]
-  tag_roles: readonly TagRole[]
+  trait_roles: readonly TraitRole[]
   solver_input: readonly SolverInputContribution[]
   stages: readonly SolverStage[]
   rules: readonly Rule[]
@@ -95,8 +95,8 @@ is evaluated once, at profile build.
 |---|---|
 | `entity_kinds` | Kind name (kebab-case), id prefix, and whether ids are caller-generated or derived by the fold. The fold rejects an id reused under another kind. |
 | `events` | Event type, zod payload schema, fold function, append invariants, and the authorisation rule. The fold function may create entity identity and emit labels; it may not emit derived results. |
-| `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, cardinality, and setup-only or label-writable policy. Label-writable keys may supply family-control metadata with explicit authorisation. Ownership is per (key, entity kind): a profile may not define a tag using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
-| `tag_roles` | A slot a profile tag must fill, such as the keep-apart relation for room assignment: the parameter that names the tag, and the operator, scopes, value type, and strengths the tag must have. |
+| `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, cardinality, and setup-only or label-writable policy. Label-writable keys may supply family-control metadata with explicit authorisation. Ownership is per (key, entity kind): a profile may not define a trait using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
+| `trait_roles` | A slot a profile trait must fill, such as the keep-apart relation for room assignment: the parameter that names the trait, and the operator, scopes, value type, and strengths the trait must have. |
 | `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](../architecture/solver-contract.md) §1, R1). |
 | `stages` | Pure solver stages with explicit ordering and a typed output section of the plan (§4). |
 | `rules` | Hard and soft rules, each with `describe` ([solver contract](../architecture/solver-contract.md) §4). |
@@ -114,8 +114,8 @@ is evaluated once, at profile build.
 ### 3.2 Parameters
 
 Parameters are data. They follow the naming decision (D18): snake_case fields,
-kebab-case vocabulary values, integer weights. A parameter that names a profile tag
-ends in `_tag` and holds the tag key. Functions are allowed only where a module
+kebab-case vocabulary values, integer weights. A parameter that names a profile trait
+ends in `_trait` and holds the trait key. Functions are allowed only where a module
 specification names a pure evaluator slot, and they are hashed by source like every
 other profile function.
 
@@ -142,8 +142,8 @@ time and fails the build when:
 - a `requires` dependency is not selected;
 - two modules contribute the same entity kind, event type, route, or report id,
   or the same label key for the same entity kind;
-- a profile tag uses a label key on an entity kind a module owns it for;
-- a tag role parameter names no tag, or names a tag of the wrong shape;
+- a profile trait uses a label key on an entity kind a module owns it for;
+- a trait role parameter names no trait, or names a trait of the wrong shape;
 - a parameter fails its schema;
 - a vocabulary identifier is not kebab-case.
 
@@ -236,7 +236,7 @@ Each `spec/modules/<module-id>.md` uses these sections, omitting none; an empty 
 3. Parameters
 4. Entity kinds
 5. Events
-6. Labels and tag roles
+6. Labels and trait roles
 7. Solver input and stages
 8. Rules and scoring
 9. Preflight checks (also identify any separate world diagnostics)

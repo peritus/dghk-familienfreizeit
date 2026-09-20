@@ -41,17 +41,17 @@ Specification coverage: [occasion profiles](profiles/contract.md), [modules](mod
 §§1–4 and 6–7, [decisions D11–D12](../decisions.md), and [testing](engineering/testing.md)
 §§2 and 5.
 
-- Implement `defineOccasionProfile`, typed tag builders, localized copy, tag
+- Implement `defineOccasionProfile`, typed trait builders, localized copy, trait
   validation, evaluator restrictions, and defaulted module parameters.
 - Implement module registration, dependency and enhancement validation, duplicate
   contribution checks, and selected-module composition.
 - Inject the exact commit `build_revision` and hardcoded `compatibility_revision` into
   the Worker and browser bundle.
-- Add profile-builder tests for tag shapes, vocabulary naming, module roles,
+- Add profile-builder tests for trait shapes, vocabulary naming, module roles,
   dependencies, and evaluator determinism.
 - Load the active Familienfreizeit profile as the first profile fixture.
 
-Acceptance: a profile cannot select invalid modules or tag roles, configuration
+Acceptance: a profile cannot select invalid modules or trait roles, configuration
 hashes are stable, and an unselected module contributes no domain surface.
 
 ## M3 — Generic labels, resolver, and derived world

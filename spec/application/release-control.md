@@ -111,7 +111,7 @@ scope communication references they use, rather than one global family cut.
 
 Privacy is a separate server-side filter, applied before content leaves the Worker:
 
-- organiser-only tags, notes, traces, scores and keep-apart relations never appear;
+- organiser-only traits, notes, traces, scores and keep-apart relations never appear;
 - other families' preferences and restricted values never appear in shared views;
 - a family may read its own allergy text and other permitted own-family values;
 - current session ownership controls access, including to historical arrangements;

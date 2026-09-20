@@ -236,12 +236,12 @@ interface Rule<Candidate = unknown, Target = unknown, Ctx = unknown> {
 }
 ```
 
-**`describe` is mandatory. A rule that cannot explain itself does not ship.** Tag
-rules take their wording from the profile's tag copy. Explanation lives next to the
+**`describe` is mandatory. A rule that cannot explain itself does not ship.** Trait
+rules take their wording from the profile's trait copy. Explanation lives next to the
 logic, in the same file and the same diff, so it cannot rot separately.
 
 **Integer scores only** (R6). Every weight lives in the profile, on the module
-parameter or on the tag it belongs to, and is fixed by the `build_revision`.
+parameter or on the trait it belongs to, and is fixed by the `build_revision`.
 
 **Hard rules are binary.** A `required` requirement is not worth points; it prunes.
 

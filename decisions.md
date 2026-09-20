@@ -226,9 +226,9 @@ property table. Rationale in [workshop rankings](spec/modules/workshop-rankings.
 
 ## D14 — `family_facing` in the occasion profile drives the family view
 
-*Chosen.* The preferences page is a renderer: every tag that declares
+*Chosen.* The preferences page is a renderer: every trait that declares
 `family_facing` in the active profile produces a control, in profile order. Adding a
-tag that reuses an existing control needs no family view code. See
+trait that reuses an existing control needs no family view code. See
 [family view](spec/application/family-view.md) §1.
 
 ## D15 — Derivation is a named primitive, and the client may call it
@@ -335,10 +335,10 @@ TypeScript, KDL, and these documents:
 | Code identifiers: variables, parameters, functions, methods, module factories | `camelCase` | `ageAt`, `buildSolverInput`, `roomInventory()` |
 | Types, interfaces, classes, React components | `PascalCase` | `SolverInput`, `RoomInventoryParams`, `FamilyView` |
 | Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
-| Vocabulary identifiers: label and tag keys, enum and tag values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `apart-from`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.tag-requirements` |
+| Vocabulary identifiers: label and trait keys, enum and trait values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `apart-from`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.trait-requirements` |
 | Entity ids | kind prefix, `_`, then a free suffix | `fam_27`, `per_peter`, `slot_sat-morning` |
 | Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `PUBLIC_URL`, `DB` |
-| Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `tag-requirements.ts` |
+| Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `trait-requirements.ts` |
 | Human-readable copy | free text from the profile | `Eigenes Bad` |
 
 Organiser-supplied free-form matching tokens are data values, not declared
@@ -365,8 +365,8 @@ LabelSet entity_id=fam_mueller key=needs-private-sanitary value=private-sanitary
 ```
 
 In TypeScript a kebab-case key is quoted where it is an object key
-(`'apart-from': relation({ … })`), and a profile's tag type is derived from those
-keys, so a misspelt tag is still a compile error.
+(`'apart-from': relation({ … })`), and a profile's trait type is derived from those
+keys, so a misspelt trait is still a compile error.
 
 *Rejected alternative:* snake_case for every identifier, Python-style. Every file
 would mix our names with library camelCase, and React hooks and component props
@@ -491,3 +491,44 @@ unresolved findings. Local link and heading checks run in CI; source and review
 establish semantic accuracy. The mandatory maintenance rules live in
 [AGENTS.md](AGENTS.md#documentation-and-specification), with the practical
 [documentation workflow](docs/engineering/documentation.md).
+
+## D23 — Profile vocabulary entries are called traits, not tags
+
+*Chosen.* The profile-vocabulary concept previously called "tag" is renamed
+"trait" throughout the specification, code identifiers, and diagnostics
+(`type Trait`, `traits: {...}`, `_trait`-suffixed parameters, `trait_roles`,
+`kernel.unknown-trait`, `hard.trait-requirements`). The stored-value concept
+("label," `LabelSet`/`LabelCleared`) is unchanged.
+
+"Tag" and "label" are close enough in ordinary English that the specification
+itself accumulated real drift: the glossary's own "Tag" definition
+([architecture/glossary.md](spec/architecture/glossary.md)) was contradicted twice in the same
+file, and the identical error was repeated in
+[labels-and-constraints.md](spec/architecture/labels-and-constraints.md) — three sentences that
+said "tag" while describing the held/stored labels on an entity. Separately,
+[profiles/contract.md](spec/profiles/contract.md) named a tag's organiser-facing display-copy
+field `label`, directly colliding with the unrelated storage-mechanism
+`label`; that field is renamed `title` as part of the same change (D23 covers
+only the tag→trait rename; the `label`→`title` field rename is a distinct
+fix applied alongside it, tracked in [issue 012](spec/issues/archived/012-tag-vs-label-terminology.md)).
+
+*Rejected alternative:* key/value. `LabelSet` events already have literal
+`key` and `value` fields — a label already is a key/value pair on an entity,
+so this pairing would create a second, worse collision rather than resolve
+the first.
+
+*Rejected alternative:* question/answer. Reads naturally for family
+preferences and is lightly echoed by existing informal prose
+([application/family-view.md](spec/application/family-view.md)), but overclaims a binding the
+system doesn't have: free-form organiser-supplied values are labels with no
+corresponding tag/trait at all
+([labels-and-constraints.md](spec/architecture/labels-and-constraints.md) §"Free-form matching
+values": "No event defines or retires the token"). Calling every label an
+"answer" to a trait's "question" would misdescribe that case.
+
+*Consequence:* this was done as a repository-wide mechanical rename rather
+than fixed narrowly, because the repository has zero installs and no real
+`defineOccasionProfile` implementation yet (only the illustrative
+`profiles/familienfreizeit-2027.example.ts`) — the cheapest point at which a
+naming change of this size can happen. D14 and D18 (both of which discuss
+this vocabulary) are updated in the same change to say "trait."

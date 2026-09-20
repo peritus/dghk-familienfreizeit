@@ -26,8 +26,8 @@ when selected, a workshop may be held in a room.
 
 ```ts
 type WorkshopsParams = {
-  audience_tag: string | null        // workshop property restricting participation
-  leader_tag: string | null          // person property naming a led workshop
+  audience_trait: string | null        // workshop property restricting participation
+  leader_trait: string | null          // person property naming a led workshop
   leaders_consume_capacity: boolean
   require_leader: boolean
   excluded_roles: readonly string[]
@@ -37,10 +37,10 @@ type WorkshopsParams = {
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `audience_tag` | `null` | fills the audience role (§6) |
-| `leader_tag` | `null` | fills the leadership role (§6) |
-| `leaders_consume_capacity` | `false` | `true` requires `leader_tag` |
-| `require_leader` | `false` | `true` requires `leader_tag` |
+| `audience_trait` | `null` | fills the audience role (§6) |
+| `leader_trait` | `null` | fills the leadership role (§6) |
+| `leaders_consume_capacity` | `false` | `true` requires `leader_trait` |
+| `require_leader` | `false` | `true` requires `leader_trait` |
 | `excluded_roles` | `[]` | role values excluded from participation |
 | `audience_rules` | `{}` | audience values mapped to eligible role values |
 
@@ -115,7 +115,7 @@ LabelSet entity_id=ws_toepfern key=workshop-audience value=children strength=#nu
 LabelSet entity_id=per_anna key=leads-workshop value=ws_toepfern strength=#null
 ```
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys, each owned for the entity kind named beside it:
 `label`, `starts-at`, `ends-at` on `slot`; `offered-in`, `title`, `description`,
@@ -123,10 +123,10 @@ Module-owned label keys, each owned for the entity kind named beside it:
 on `workshop`. All are set only by the module's events, and the same key stays
 free on entity kinds this module does not own ([modules](contract.md) §3.1).
 
-| Role | Parameter | Required tag shape |
+| Role | Parameter | Required trait shape |
 |---|---|---|
-| Audience | `audience_tag` | `property`, scope `workshop`, value `enumOf(…)`, cardinality exactly one, organiser-only |
-| Leadership | `leader_tag` | `property`, scope `person`, value `ref('workshop')`, cardinality zero or more, organiser-only |
+| Audience | `audience_trait` | `property`, scope `workshop`, value `enumOf(…)`, cardinality exactly one, organiser-only |
+| Leadership | `leader_trait` | `property`, scope `person`, value `ref('workshop')`, cardinality zero or more, organiser-only |
 
 A workshop may have zero, one, or many leaders, and a person may lead many
 workshops. Children may lead. Leadership is not participation: a leader is not

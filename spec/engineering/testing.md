@@ -1,7 +1,7 @@
 # Testing
 
 Testing is layered like the application. Generic module contract tests prove
-reusable behavior; each occasion profile supplies fixtures, golden plans, tag
+reusable behavior; each occasion profile supplies fixtures, golden plans, trait
 validation cases, and enabled-module integration cases. A profile never needs
 tests for modules it did not select.
 
@@ -203,7 +203,7 @@ const invariants = [
     (p, s) => /* conservation of people */],
 
   ['no-bed people have a room and no place',
-    (p, s) => /* no_bed_tag => room_id exists and place_id is null */],
+    (p, s) => /* no_bed_trait => room_id exists and place_id is null */],
 
   ['bed demand equals non-null place assignments',
     (p, s) => /* no null place consumes bed capacity */],
@@ -221,7 +221,7 @@ const invariants = [
   ['no solver-assigned workshop exceeds capacity',
     (p, s) => /* … */],
 
-  ['every label key names a fixed resolver, profile tag, or selected module key, or is reported',
+  ['every label key names a fixed resolver, profile trait, or selected module key, or is reported',
     (p, s) => /* … */],
 
   ['a capability with a derive has no assignments',
@@ -264,12 +264,12 @@ capacity exactly equal to demand, capacity one short.
 Cheap, and they catch the failure mode where the Worker boots and solves
 wrongly:
 
-- every tag has a non-empty `label`;
-- every `satisfied_by` names a tag built with `capability`;
+- every trait has a non-empty `title`;
+- every `satisfied_by` names a trait built with `capability`;
 - every `ref` names an entity kind of the kernel or a selected module;
-- no alias collides with another tag or alias, or with a module-owned key;
+- no alias collides with another trait or alias, or with a module-owned key;
 - every `family_facing.control` has a renderer contributed by a selected module;
-- every `_tag` parameter names a tag of the shape its module role requires;
+- every `_trait` parameter names a trait of the shape its module role requires;
 - every selected module's `requires` is satisfied and stage order has no cycle;
 - `defineOccasionProfile` throws on each of the above when deliberately broken.
 

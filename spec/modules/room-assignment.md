@@ -29,9 +29,9 @@ Requires: [`room-inventory`](room-inventory.md). Enhances: none.
 ```ts
 type RoomAssignmentParams = {
   weights: { exact_fit: number; near_fit: number; orphan_bed: number }
-  keep_apart_tag: string | null
-  no_bed_tag: string | null
-  priority_tag: string | null
+  keep_apart_trait: string | null
+  no_bed_trait: string | null
+  priority_trait: string | null
   scarce_capabilities: Readonly<Record<string, number>>
   max_repair_passes: number
 }
@@ -42,9 +42,9 @@ type RoomAssignmentParams = {
 | `weights.exact_fit` | `10` | integer |
 | `weights.near_fit` | `4` | integer |
 | `weights.orphan_bed` | `-8` | integer ≤ 0 |
-| `keep_apart_tag` | `null` | fills the keep-apart role (§6) |
-| `no_bed_tag` | `null` | fills the no-bed role (§6) |
-| `priority_tag` | `null` | a `requirement` tag scoped to `person` or `family` |
+| `keep_apart_trait` | `null` | fills the keep-apart role (§6) |
+| `no_bed_trait` | `null` | fills the no-bed role (§6) |
+| `priority_trait` | `null` | a `requirement` trait scoped to `person` or `family` |
 | `scarce_capabilities` | `{}` | room capability → integer penalty ≤ 0 |
 | `max_repair_passes` | `5` | integer ≥ 0 |
 
@@ -61,14 +61,14 @@ None.
 None of its own. Organiser decisions on the board are ordinary constraints added
 with `LabelSet` (D6).
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys: none.
 
-| Role | Parameter | Required tag shape |
+| Role | Parameter | Required trait shape |
 |---|---|---|
-| Keep apart | `keep_apart_tag` | `relation`, operator `separates-from`, scopes `family` or `person`, symmetry `implied-mutual`, strengths `required` and `preferred` |
-| No bed demand | `no_bed_tag` | `property`, scope `person`, boolean |
+| Keep apart | `keep_apart_trait` | `relation`, operator `separates-from`, scopes `family` or `person`, symmetry `implied-mutual`, strengths `required` and `preferred` |
+| No bed demand | `no_bed_trait` | `property`, scope `person`, boolean |
 
 Room assignment interprets every requirement, capability, exclusion, and separation
 decision applicable to rooms or places, including free-form organiser labels. A
@@ -96,7 +96,7 @@ type FamilyPlacementUnit = {
 
 The unit contains all non-withdrawn people in one family. Requirements are the
 strictest-strength union of the family's and its members' room requirements.
-`bed_demand` excludes people whose `no_bed_tag` property is true, while the family
+`bed_demand` excludes people whose `no_bed_trait` property is true, while the family
 remains one placement unit. A no-bed person still occupies the family's room but
 does not occupy a generated place.
 
@@ -175,14 +175,14 @@ Hard rules prune a room. They are not worth points.
 |---|---|
 | `hard.capacity` | free places < `family.bed_demand` |
 | `hard.designation` | the room is not `general` |
-| `hard.tag-requirements` | a required family requirement is not satisfied |
+| `hard.trait-requirements` | a required family requirement is not satisfied |
 | `hard.keep-apart` | the room holds a family the candidate is kept apart from at `required` |
 | `hard.resolver-decisions` | the resolver rejects the room or place for a required decision |
 
 Requirements are satisfied by room capabilities or named structural checks. The
 module provides one structural check, `no-other-families`: the room holds no
 person of another family. At `required` it prunes; at `preferred` it contributes
-the tag's penalty when another family shares the room.
+the trait's penalty when another family shares the room.
 
 The scoring table uses exact fit, near fit, orphan-bed, priority, and scarce
 capability terms. Each trace line names the terms and weights that produced it.
@@ -213,7 +213,7 @@ type RoomAssignment = {
 ```
 
 Every non-withdrawn person in a placed family appears exactly once. A normal
-person has a generated `place_id`; a person whose `no_bed_tag` property is true
+person has a generated `place_id`; a person whose `no_bed_trait` property is true
 has `place_id: null` and shares the family's `room_id`. Null place ids do not
 consume capacity and are excluded from place-uniqueness checks. An unplaced
 family lists all of its non-withdrawn people under `unplaced` rather than emitting

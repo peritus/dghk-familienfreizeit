@@ -5,8 +5,8 @@ Module id `family-preferences` · factory `familyPreferences`
 ## 1. Purpose and boundary
 
 Family preferences renders the page where a family states its preferences. The page
-is a renderer, not a form: every profile tag declaring `family_facing` produces a
-control, grouped into the sections this module's parameters name (D14). Adding a tag
+is a renderer, not a form: every profile trait declaring `family_facing` produces a
+control, grouped into the sections this module's parameters name (D14). Adding a trait
 that reuses an existing control needs no family view code.
 
 The module owns the control union, section layout, deadline notices, and the
@@ -26,7 +26,7 @@ type FamilyPreferencesParams = {
     key: string                        // kebab-case
     title: LocalizedText
     intro: LocalizedText | null
-    tags: readonly string[]            // family_facing tags, in display order
+    traits: readonly string[]            // family_facing traits, in display order
     deadline_scope: 'accommodation' | 'workshops' | null
   }[]
   module_controls: readonly {
@@ -44,7 +44,7 @@ type FamilyPreferencesParams = {
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `sections` | — (required) | every `family_facing` tag appears in exactly one section; no other tags appear; each section declares its deadline scope |
+| `sections` | — (required) | every `family_facing` trait appears in exactly one section; no other traits appear; each section declares its deadline scope |
 | `module_controls` | `[]` | unique selected module control keys; section exists; cannot redefine key schemas or authorisation |
 | `deadline_contact` | — (required) | copy for each configured deadline scope |
 
@@ -60,9 +60,9 @@ None.
 None of its own. Controls emit `LabelSet` and `LabelCleared` through the family
 routes, authorised per [labels and constraints](../architecture/labels-and-constraints.md) §4.
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
-None. The module reads each tag's `family_facing` declaration:
+None. The module reads each trait's `family_facing` declaration:
 
 ```ts
 type FamilyFacing = {
@@ -75,12 +75,12 @@ type FamilyFacing = {
 }
 ```
 
-A tag declaring `organiser_only: true` may not declare `family_facing`; the profile
+A trait declaring `organiser_only: true` may not declare `family_facing`; the profile
 build rejects both together.
 
 ### The control union
 
-`control` is a closed union. Adding a tag that uses an existing control is a
+`control` is a closed union. Adding a trait that uses an existing control is a
 one-file change; adding a new kind of control is two files — the control and its
 renderer in `src/modules/<module-id>/app/controls/`.
 
@@ -88,7 +88,7 @@ renderer in `src/modules/<module-id>/app/controls/`.
 |---|---|---|---|
 | `tri-state` | this module | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `LabelCleared` |
 | `toggle` | this module | one checkbox | `LabelSet` with no strength, or `LabelCleared` |
-| `choice` | this module | one select over the tag's enum or referenced entities | `LabelSet` replacing the current value, or `LabelCleared` when optional |
+| `choice` | this module | one select over the trait's enum or referenced entities | `LabelSet` replacing the current value, or `LabelCleared` when optional |
 | `free-text` | this module | a text area | `LabelSet` with the text, or `LabelCleared` when emptied |
 | `family-picker` | this module | searchable family list, multi-select | one `LabelSet` per selection, value = family id |
 | `person-picker` | this module | people within the same family | one `LabelSet` per selection, value = person id |
@@ -96,11 +96,11 @@ renderer in `src/modules/<module-id>/app/controls/`.
 | `workshop-interest` | [`workshops`](workshops.md) | non-binding interest toggle | `interested-in` set/clear |
 | `ranking` | [`workshop-rankings`](workshop-rankings.md) | ordered choices per slot | clears the slot's labels and sets the new ones in one append |
 
-`invert: true` flips the wording so a positively named tag can read negatively, for
+`invert: true` flips the wording so a positively named trait can read negatively, for
 example "Zimmer teilen: gerne / lieber nicht / auf keinen Fall", while the stored
-tag keeps its name.
+trait keeps its name.
 
-A control whose tag's `valid_for` fails for the entity renders disabled with the
+A control whose trait's `valid_for` fails for the entity renders disabled with the
 reason, not hidden. A missing option makes people think the site is broken; a
 disabled one with a reason answers the question.
 
@@ -129,9 +129,9 @@ None.
 | Emails | Reminder copy names what is missing, per person and section |
 | Reports | none |
 
-Module-owned controls are placed by `module_controls`, after the section's tags in
+Module-owned controls are placed by `module_controls`, after the section's traits in
 configured order. They reuse module schemas and authorisation, not duplicate profile
-tag definitions. `workshop-sign-up` and `workshop-interest` are supplied by workshops.
+trait definitions. `workshop-sign-up` and `workshop-interest` are supplied by workshops.
 Only the appropriate control for the effective mode appears. `ranking` remains
 contributed by workshop-rankings.
 
@@ -151,12 +151,12 @@ can review and publish a new plan when they choose.
 ## 12. Tests
 
 - Every `family_facing.control` has a renderer.
-- Every `family_facing` tag appears in exactly one section.
+- Every `family_facing` trait appears in exactly one section.
 - Module controls are unique, selected, authorised and do not redefine built-in keys.
 - Communication never hides saved values or independently locks controls.
 - Passed deadlines show the correct scoped notice while controls remain editable.
 - Late family writes are accepted through the ordinary ownership and label rules.
-- A family cannot set an `organiser_only` tag or a strength its control does not
+- A family cannot set an `organiser_only` trait or a strength its control does not
   allow.
 - `valid_for` failures render disabled with the reason.
 

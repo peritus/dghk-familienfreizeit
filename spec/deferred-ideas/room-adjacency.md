@@ -61,7 +61,7 @@ Returns the pair to the derived distance.
 
 *Invariants:* both rooms exist and differ. Both events are organiser-only.
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label key:
 
@@ -71,7 +71,7 @@ Module-owned label key:
 
 Set only by the module's events.
 
-Tag roles: none. Relation tags opt into adjacency through their own
+Trait roles: none. Relation traits opt into adjacency through their own
 `adjacent_weight` ([room assignment](../modules/room-assignment.md) §8).
 
 ## 7. Solver input and stages
@@ -119,7 +119,7 @@ No plan section. `world.adjacency(room_a, room_b)` returns the distance.
 
 ## 13. When not selected
 
-No distance exists. Relation tags that declare `adjacent_weight` fail the profile
+No distance exists. Relation traits that declare `adjacent_weight` fail the profile
 build, and co-room preferences score only same-room placement.
 
 ## Integration points
@@ -130,7 +130,7 @@ Adopting the idea would require, beyond this module:
   `soft.co-room` scoring parties that cannot share a room by distance.
 - **Sleeping parties:** the refused-merge trace could promise to try to place the
   families near each other.
-- **Occasion profiles:** an `adjacent_weight` field on relation tags.
+- **Occasion profiles:** an `adjacent_weight` field on relation traits.
 - **Events:** `RoomAdjacencySet` and `RoomAdjacencyCleared` in the module event
   table.
 - **Inventory screen:** a "near to" list with override controls on room detail.

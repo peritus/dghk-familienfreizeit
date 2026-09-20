@@ -30,16 +30,16 @@ Requires: [`room-inventory`](../modules/room-inventory.md). Enhances: none.
 
 ```ts
 type SleepingPartiesParams = {
-  co_room_tag: string                // relation tag whose mutual required pairs merge families
-  no_bed_tag: string | null          // boolean person tag; true means no bed demand
+  co_room_trait: string                // relation trait whose mutual required pairs merge families
+  no_bed_trait: string | null          // boolean person trait; true means no bed demand
   size_one_warning_threshold: number // dashboard warning above this many one-person parties
 }
 ```
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `co_room_tag` | — (required) | names a tag filling the co-room role (§6) |
-| `no_bed_tag` | `null` | names a boolean property tag scoped to `person` |
+| `co_room_trait` | — (required) | names a trait filling the co-room role (§6) |
+| `no_bed_trait` | `null` | names a boolean property trait scoped to `person` |
 | `size_one_warning_threshold` | `5` | integer ≥ 0 |
 
 ## 4. Entity kinds
@@ -50,19 +50,19 @@ None. Parties are derived values, not entities.
 
 None. Formation reads family, person, and label events.
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys: none.
 
-| Role | Parameter | Required tag shape |
+| Role | Parameter | Required trait shape |
 |---|---|---|
-| Co-room relation | `co_room_tag` | `relation`, operator `groups-with`, scopes `family` or `person`, target the same scope, symmetry `mutual-required`, strengths `required` and `preferred` |
-| No bed demand | `no_bed_tag` | `property`, scope `person`, boolean |
+| Co-room relation | `co_room_trait` | `relation`, operator `groups-with`, scopes `family` or `person`, target the same scope, symmetry `mutual-required`, strengths `required` and `preferred` |
+| No bed demand | `no_bed_trait` | `property`, scope `person`, boolean |
 
 Formation also reads, without a role parameter:
 
 - every resolved requirement scoped to `family` or `person` that targets a room
-  or place, including profile tags and free-form organiser `needs` values;
+  or place, including profile traits and free-form organiser `needs` values;
 - every active room-scoped `groups-with` or `separates-from` decision on `person`
   or `family` entities. Workshop-scoped relations belong to workshop assignment.
 
@@ -81,13 +81,13 @@ type Party = {
   person_ids: readonly string[]    // sorted
   family_ids: readonly string[]    // sorted
   size: number                     // headcount
-  bed_demand: number               // members without no_bed_tag = true
+  bed_demand: number               // members without no_bed_trait = true
   requirements: readonly PartyRequirement[]
   provenance: readonly string[]    // human-readable lines
 }
 
 type PartyRequirement = {
-  tag: string                      // resolved profile tag or free-form matching token
+  trait: string                      // resolved profile trait or free-form matching token
   strength: 'required' | 'preferred'
   contributed_by: readonly string[] // family or person ids, sorted
 }
@@ -107,11 +107,11 @@ the family or any member becomes a party requirement. Requirements union across
 members with the strictest strength winning (`required` > `preferred`), and
 `contributed_by` records who stated it.
 
-The resolver supplies requirements from both profile tags and ordinary `needs`
-labels; the stage must not discard a token because it is absent from `profile.tags`.
+The resolver supplies requirements from both profile traits and ordinary `needs`
+labels; the stage must not discard a token because it is absent from `profile.traits`.
 
 **Step 3 — preference merges.** Build an undirected graph over families where an
-edge exists if and only if both directions carry `co_room_tag` at `required`.
+edge exists if and only if both directions carry `co_room_trait` at `required`.
 Union-find over that graph; each component merges its families' parties.
 A merged party's `bed_demand` is the sum and its requirements are the strictest
 union.
@@ -187,7 +187,7 @@ reported by room assignment and attributed to the events that caused them.
 | Kind | Contribution |
 |---|---|
 | Screen | `/organiser/parties` — party review with provenance, requirement contributors, merge and split ([party review](party-review.md)) |
-| Controls | none; the co-room tag's control is declared by the profile |
+| Controls | none; the co-room trait's control is declared by the profile |
 | Reports | none of its own |
 | Emails | none |
 
@@ -212,7 +212,7 @@ clearing an applied label appends `LabelCleared`.
 ## 13. When not selected
 
 No parties are formed; whole families remain the placement unit, the party review
-screen is absent, and the co-room tag cannot be defined.
+screen is absent, and the co-room trait cannot be defined.
 
 ## Integration points
 

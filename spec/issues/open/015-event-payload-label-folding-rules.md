@@ -71,7 +71,7 @@ This matters especially for full updates and `held-in`, `workshop`, `concerns-pe
 
 ### Alias ambiguity
 
-[`profiles/contract.md:112-115`](../../profiles/contract.md) permits profile aliases “accepted on replay and mapped to this tag,” while [`engineering/testing.md:257-264`](../../engineering/testing.md) requires alias-collision checks. The documents do not clarify whether aliases apply to:
+[`profiles/contract.md:112-115`](../../profiles/contract.md) permits profile aliases “accepted on replay and mapped to this trait,” while [`engineering/testing.md:257-264`](../../engineering/testing.md) requires alias-collision checks. The documents do not clarify whether aliases apply to:
 
 - ordinary `LabelSet` keys only;
 - setup-generated keys;
@@ -141,7 +141,7 @@ The repository is specification-only; the prescribed future surfaces are:
 - `src/derive/fold.ts` — canonical event-to-entity/label fold ([`architecture/overview.md:297-300`](../../architecture/overview.md))
 - `src/modules/<module-id>/events.ts` — module schemas and fold functions ([`modules/contract.md:210-223`](../../modules/contract.md))
 - `src/config/define.ts` — label ownership, aliases, and profile validation
-- resolver validation for setup-only keys, references, cardinality, and unknown tags
+- resolver validation for setup-only keys, references, cardinality, and unknown traits
 - KDL loader and replay validation
 - module contract tests, fixture logs, and golden-plan tests
 
@@ -156,7 +156,7 @@ The repository is specification-only; the prescribed future surfaces are:
   - materials `workshop_id`;
   - material `concerns_person_id`.
 - Null references must not become dangling references or resolvable entity ids.
-- Unknown live label keys are retained, ignored by the solver, and reported as `kernel.unknown-tag` per [`architecture/labels-and-constraints.md:302-309`](../../architecture/labels-and-constraints.md).
+- Unknown live label keys are retained, ignored by the solver, and reported as `kernel.unknown-trait` per [`architecture/labels-and-constraints.md:302-309`](../../architecture/labels-and-constraints.md).
 - Historical aliases should normalize old label keys during replay; aliases must not collide with canonical keys or module-owned keys ([`profiles/contract.md:112-115`](../../profiles/contract.md), [`engineering/testing.md:257-264`](../../engineering/testing.md)).
 - Fixture KDL remains snake_case at the payload boundary. Derived assertions should verify canonical label keys, not merely successful parsing ([`architecture/events.md:36-63`](../../architecture/events.md), [`engineering/testing.md:100-124`](../../engineering/testing.md)).
 - A semantic mapping change is a domain-model compatibility change, not a SQL migration. Old events must be replayed or transformed through an ordinary corrective append; event rows must not be edited ([`engineering/deployment.md:137-146`](../../engineering/deployment.md)).
@@ -178,7 +178,7 @@ The repository is specification-only; the prescribed future surfaces are:
    - workshops;
    - materials;
    - any future setup-event modules.
-6. Specify resolver behavior for setup-only keys, semantic references, aliases, nulls, and unknown tags.
+6. Specify resolver behavior for setup-only keys, semantic references, aliases, nulls, and unknown traits.
 7. Implement shared mapping helpers in the kernel fold, with module-specific mapping declarations in each `events.ts`.
 8. Add replay and fold tests for every mapping, especially alias pairs and null/reference transitions.
 9. Extend KDL fixtures with expected derived labels for:

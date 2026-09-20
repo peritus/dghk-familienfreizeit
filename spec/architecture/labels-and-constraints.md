@@ -1,6 +1,6 @@
 # Labels and constraints
 
-Labels are the generic storage mechanism. A profile supplies the concrete tag
+Labels are the generic storage mechanism. A profile supplies the concrete trait
 vocabulary, value shapes, scopes, and UI metadata that generic modules interpret.
 Organisers may add free-form values through the fixed resolver mechanisms. The
 examples in this document use placeholders; the concrete 2027 vocabulary is in
@@ -19,7 +19,7 @@ decisions, and how selected modules consume them.
 
 ---
 
-## 1. What a tag is
+## 1. What a trait is
 
 A typed key/value fact about an entity, optionally pointing at another entity and
 optionally carrying a strength.
@@ -126,7 +126,7 @@ value is never stored as a competing column or manually assigned fact:
 
 ```ts
 function capabilities(room: Entity, labels: Label[]): ReadonlySet<string> {
-  const out = new Set<Tag>()
+  const out = new Set<Trait>()
   for (const a of labelsFor(room.id, labels)) {
     if (a.key === 'provides') out.add(a.value)
   }
@@ -144,7 +144,7 @@ schema migration for every new property:
 - If `near-the-hall` turns out to matter every year, it can become a built-in
   configured capability without changing the database schema.
 
-One rule: **a capability is derived or assigned, never both.** A profile tag
+One rule: **a capability is derived or assigned, never both.** A profile trait
 with a derivation rejects direct `provides` assignments at append time.
 
 ---
@@ -160,21 +160,21 @@ appended ([03-events](events.md)). The checks are:
 3. **Value shape matches** the resolver mechanism and entity references resolve
    where required; organiser matching tokens may otherwise be free-form.
 4. **Strength is legal** for the constraint.
-5. **Cardinality and validity pass**, including the tag's `valid_for` evaluator —
+5. **Cardinality and validity pass**, including the trait's `valid_for` evaluator —
    for example "does not need a bed" only on children and infants.
 6. **The key is writable through labels on this entity kind.** Keys the kernel or
    a module sets only through setup events, such as `member-of` and `located-in`,
    are rejected for the kinds that own them ([modules](../modules/contract.md) §3.1).
 
-Failures are field-level errors on the form, never silent. `type Tag =
-keyof typeof profile.tags` checks profile tag references in code. Append validation
+Failures are field-level errors on the form, never silent. `type Trait =
+keyof typeof profile.traits` checks profile trait references in code. Append validation
 also knows the fixed resolver keys and selected profile/module vocabulary. A matching
-token supplied as a value is not a new key and does not need a profile tag or
+token supplied as a value is not a new key and does not need a profile trait or
 declaration event. Entity references and structured values still use their resolver's
 schemas; free-form input does not bypass those checks.
 
-Tags removed from the profile mid-run are the one remaining case, handled by
-`kernel.unknown-tag` (§6): the fold retains them, the solver ignores them, the
+Traits removed from the profile mid-run are the one remaining case, handled by
+`kernel.unknown-trait` (§6): the fold retains them, the solver ignores them, the
 report names them.
 
 ### Authorisation
@@ -182,7 +182,7 @@ report names them.
 A family may `LabelSet` / `LabelCleared` only:
 
 - on entities it owns (itself, or its own people);
-- for tags declaring `family_facing`, or module-owned writable keys with an explicit
+- for traits declaring `family_facing`, or module-owned writable keys with an explicit
   family-control contract (such as workshop participation);
 - at strengths that control permits.
 
@@ -265,7 +265,7 @@ rejected or reported as outside the active placement model.
 
 The resolver materialises labels into capabilities and active constraints once per
 derivation, including free-form organiser values that are absent from
-`profile.tags`. Each resolved constraint retains its source label
+`profile.traits`. Each resolved constraint retains its source label
 identity (`entity_id`, `key`, canonical `value`) and event sequence for ordering,
 diagnostics, and display. `constraint_key` in module output is a derived reference
 to those labels, never a separate persisted decision id. Modules consume the
@@ -278,7 +278,7 @@ resolved inputs; none re-implements matching:
 | [workshop rankings](../modules/workshop-rankings.md) | the `ordered-choice` operator |
 | [workshop assignment](../modules/workshop-assignment.md) | needs/provides matching, exclusions, eligibility, separation, and decisions naming workshops within their slot |
 
-Relation symmetry is declared on the tag and interpreted by the resolver:
+Relation symmetry is declared on the trait and interpreted by the resolver:
 
 - `mutual-required` — both directions must exist at `required` to bind;
 - `implied-mutual` — one label binds both directions;
@@ -304,9 +304,9 @@ mechanism, listed in its specification §9.
 |---|---|---|
 | `kernel.dangling-reference` | error | a label or constraint names a withdrawn, retired, or absent entity |
 | `kernel.contradiction` | error | one entity holds `groups-with` and `separates-from` towards the same entity at `required` |
-| `kernel.scope-violation` | error | a label is held by an entity kind outside its tag's scopes |
+| `kernel.scope-violation` | error | a label is held by an entity kind outside its trait's scopes |
 | `kernel.valid-for` | warning | a label's `valid_for` evaluator no longer holds for its entity |
-| `kernel.unknown-tag` | warning | a live label key is no longer in the fixed resolver, profile, or selected module vocabulary; the fold retains it, the solver ignores it; a new matching token under a known key does not trigger this |
+| `kernel.unknown-trait` | warning | a live label key is no longer in the fixed resolver, profile, or selected module vocabulary; the fold retains it, the solver ignores it; a new matching token under a known key does not trigger this |
 
 ---
 
@@ -338,7 +338,7 @@ assignments, or you get two answers to "does Room 14 have an ensuite". Enforced
 at append time and tested in [testing](../engineering/testing.md).
 
 **Requirement inflation through unions.** A placement unit's requirements are the
-strictest-strength union of the family's and its members' tags, which is correct
+strictest-strength union of the family's and its members' labels, which is correct
 and still surprises people. Merging units across families would sharpen this, and
 belongs to the sleeping-parties design.
 

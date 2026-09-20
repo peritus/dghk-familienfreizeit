@@ -26,7 +26,7 @@ Requires: [`workshops`](workshops.md). Enhances: none.
 
 ```ts
 type WorkshopRankingsParams = {
-  ranking_tag: string
+  ranking_trait: string
   max_rank: number
   allow_no_preference: boolean
 }
@@ -34,7 +34,7 @@ type WorkshopRankingsParams = {
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `ranking_tag` | — (required) | fills the ranking role (§6) |
+| `ranking_trait` | — (required) | fills the ranking role (§6) |
 | `max_rank` | `3` | integer ≥ 1 |
 | `allow_no_preference` | `true` | — |
 
@@ -54,13 +54,13 @@ LabelSet entity_id=per_jonas key=prefers-workshop value=#"{"slot":"slot_sat-morn
 LabelSet entity_id=per_emma key=prefers-workshop value=#"{"slot":"slot_sat-morning","workshop":null,"rank":null}"# strength=#null
 ```
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys: none.
 
-| Role | Parameter | Required tag shape |
+| Role | Parameter | Required trait shape |
 |---|---|---|
-| Ranking | `ranking_tag` | `orderedChoice`, scope `person`, per `slot`, choice `ref('workshop')` |
+| Ranking | `ranking_trait` | `orderedChoice`, scope `person`, per `slot`, choice `ref('workshop')` |
 
 The structured value is:
 
@@ -155,5 +155,5 @@ the preference heatmap.
 
 ## 13. When not selected
 
-No ranking tag can be defined; the ranking control, heatmap, and chase-list entry are
+No ranking trait can be defined; the ranking control, heatmap, and chase-list entry are
 absent; `workshop-assignment` cannot be selected.

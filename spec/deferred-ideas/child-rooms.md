@@ -35,20 +35,20 @@ Adopting it would add a `child` designation to `room-inventory`.
 
 ```ts
 type ChildRoomsParams = {
-  needs_group_tag: string            // person requirement naming a child group
-  provides_group_tag: string         // room capability naming a child group
+  needs_group_trait: string            // person requirement naming a child group
+  provides_group_trait: string         // room capability naming a child group
   child_role: string                 // value of the kernel `role` label that is eligible
-  priority_tag: string | null        // requirement whose holders are placed first
+  priority_trait: string | null        // requirement whose holders are placed first
   min_occupants: number              // a child room with fewer children is not used
 }
 ```
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `needs_group_tag` | — (required) | fills the child-group need role (§6) |
-| `provides_group_tag` | — (required) | fills the child-group provision role (§6) |
+| `needs_group_trait` | — (required) | fills the child-group need role (§6) |
+| `provides_group_trait` | — (required) | fills the child-group provision role (§6) |
 | `child_role` | `'child'` | a value of the profile's `role` vocabulary |
-| `priority_tag` | `null` | a `requirement` tag scoped to `person` or `family` |
+| `priority_trait` | `null` | a `requirement` trait scoped to `person` or `family` |
 | `min_occupants` | `2` | integer ≥ 1 |
 
 ## 4. Entity kinds
@@ -89,15 +89,15 @@ LabelSet entity_id=rm_02 key=provides-child-group value=cg_jungs-8-11 strength=#
 LabelSet entity_id=per_jonas key=needs-child-group value=cg_jungs-8-11 strength=required
 ```
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys on `child-group`: `name` (exactly one), `description` (zero
 or one), both set only by the module's events.
 
-| Role | Parameter | Required tag shape |
+| Role | Parameter | Required trait shape |
 |---|---|---|
-| Child-group need | `needs_group_tag` | `requirement`, scope `person`, value `ref('child-group')`, strengths `required` and `preferred`, cardinality zero or one, `valid_for` the person's `role` equals `child_role` |
-| Child-group provision | `provides_group_tag` | `capability`, scope `room`, value `ref('child-group')`, assigned (not derived), `valid_for` the room's `designation` is `child` |
+| Child-group need | `needs_group_trait` | `requirement`, scope `person`, value `ref('child-group')`, strengths `required` and `preferred`, cardinality zero or one, `valid_for` the person's `role` equals `child_role` |
+| Child-group provision | `provides_group_trait` | `capability`, scope `room`, value `ref('child-group')`, assigned (not derived), `valid_for` the room's `designation` is `child` |
 
 ## 7. Solver input and stages
 
@@ -114,12 +114,12 @@ type ChildRoomsInput = {
 ```
 eligible = persons where
     role = child_role
-  and has a needs_group_tag label
+  and has a needs_group_trait label
   and not bound by an active required constraint to a place or room
       outside the child rooms
 
 sort eligible by:
-  1. holds priority_tag at any strength, first
+  1. holds priority_trait at any strength, first
   2. age at meta.starts_on, ascending
   3. family_id ascending
   4. person_id ascending
@@ -127,7 +127,7 @@ sort eligible by:
 child_rooms = rooms where designation = child, sorted by (sort_key, id)
 
 for each room in child_rooms:
-    candidates = eligible, not yet placed, whose needs_group_tag value
+    candidates = eligible, not yet placed, whose needs_group_trait value
                  the room provides
     take up to room.place_count, in eligible order
     if taken < min_occupants: release them
@@ -191,7 +191,7 @@ child, attributed to the child's family.
 | Kind | Contribution |
 |---|---|
 | Screen | Child-group management on the inventory screen; the children's-room section of the party review |
-| Controls | none; the need tag declares its own control in the profile |
+| Controls | none; the need trait declares its own control in the profile |
 | Reports | Accommodation overview gains child-group capability and occupants per child room |
 | Emails | none |
 
@@ -208,7 +208,7 @@ child, attributed to the child's family.
 
 ## 13. When not selected
 
-No child groups exist; the `child` designation is invalid; the child-group tags
+No child groups exist; the `child` designation is invalid; the child-group traits
 cannot be defined; party formation starts from whole families.
 
 ## Integration points
@@ -228,7 +228,7 @@ Adopting the idea would require, beyond this module:
 - **Family view:** a "Kinderzimmer" section on the preferences page and a
   children's-room card on the assignment page.
 - **Reports:** child-group capability and occupants in the accommodation overview.
-- **Profile:** `needs-child-group` and `provides-child-group` tags, a
+- **Profile:** `needs-child-group` and `provides-child-group` traits, a
   `child-rooms` section in `family-preferences`, and `min_occupants`.
 - **Tests:** a property test that every child-room assignment satisfies the
   child-group requirement, and a fixture with children released for capacity.

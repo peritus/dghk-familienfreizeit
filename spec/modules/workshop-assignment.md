@@ -53,7 +53,7 @@ module. Organiser workshop decisions use ordinary `LabelSet` and `LabelCleared` 
 with an optional note
 and the event's existing author and timestamp (§7).
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys: none.
 

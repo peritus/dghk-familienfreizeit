@@ -16,8 +16,8 @@ opened: 2026-09-19
 The current specification uses a mixed representation whose compilation boundary
 is underspecified.
 
-Profile tags are not all stored as literal `needs`/`provides` rows. Profile
-requirements and capabilities use profile tag keys, while free-form organiser
+Profile traits are not all stored as literal `needs`/`provides` rows. Profile
+requirements and capabilities use profile trait keys, while free-form organiser
 decisions use literal generic `needs` and `provides` keys. The documents imply
 that the profile vocabulary is compiled into the generic resolver, but they do
 not define that compilation precisely enough for event storage, append
@@ -104,7 +104,7 @@ LabelSet entity_id=fam_mueller key=needs-private-sanitary value=private-sanitary
 ```
 
 Under this apparent encoding, a profile requirement is a direct label whose key
-is the profile requirement tag and whose value names the provider capability.
+is the profile requirement trait and whose value names the provider capability.
 The `satisfied_by` field is profile metadata that connects the requirement to
 the capability; it is not itself a stored second label.
 
@@ -118,15 +118,15 @@ rm_07  provides=naehe_zum_eingang
 ```
 
 These values are organiser-supplied matching tokens. They are not declared
-profile tags, do not need profile copy, and do not require a `ConstraintDefined`
+profile traits, do not need profile copy, and do not require a `ConstraintDefined`
 event when they use an existing fixed resolver mechanism.
 
 ### Overall conclusion
 
 The current model is mixed:
 
-- Profile requirements/capabilities: direct profile tag keys, compiled through
-  tag metadata.
+- Profile requirements/capabilities: direct profile trait keys, compiled through
+  trait metadata.
 - Derived capabilities: resolver projections, never persisted as labels.
 - Free-form organiser matching: generic `needs`/`provides` labels.
 - Aliases: supported by the profile contract, but none are used by this profile
@@ -186,7 +186,7 @@ The current model is mixed:
 
    [`modules/room-assignment.md`](../../modules/room-assignment.md) says it consumes every requirement and capability,
    but its `Requirement` input type is not defined sufficiently to show whether
-   it contains the profile tag key, provider capability, or both.
+   it contains the profile trait key, provider capability, or both.
 
 8. **The active profile Markdown documents semantics but not event encoding.**
 
@@ -198,18 +198,18 @@ The current model is mixed:
    [`modules/workshops.md`](../../modules/workshops.md) refers to “applicable required resolver decisions” but
    does not define whether profile requirements participate in workshop
    eligibility through the same normalized mechanism. The active profile
-   currently has no workshop needs/provides tags, so this boundary remains
+   currently has no workshop needs/provides traits, so this boundary remains
    latent.
 
 10. **Aliases are underspecified in relation to resolver keys.**
 
     `aliases` are documented as replay mappings, but the profile does not use
-    them and no rule says whether an alias normalizes to a profile tag key, a
+    them and no rule says whether an alias normalizes to a profile trait key, a
     generic resolver key, or both.
 
 ## 3. Canonical representation and resolver pipeline
 
-The canonical representation should preserve the profile-specific tag keys
+The canonical representation should preserve the profile-specific trait keys
 already chosen by D18:
 
 ```text
@@ -229,7 +229,7 @@ rm_07  provides=near-the-entrance
 
 The governing rule should be:
 
-> Profile tag keys are storage vocabulary; resolver operators are compiled
+> Profile trait keys are storage vocabulary; resolver operators are compiled
 > semantics. A profile requirement key is not itself the generic `needs` key,
 > and a derived capability is not stored as a `provides` label.
 
@@ -239,7 +239,7 @@ The governing rule should be:
 
 2. The fold stores active labels exactly as written.
 
-3. Profile compilation validates tag definitions and creates normalized
+3. Profile compilation validates trait definitions and creates normalized
    descriptors:
 
    - `property` → descriptive fact;
@@ -273,7 +273,7 @@ The governing rule should be:
    - normalized `constraints` / requirements;
    - relevant source labels for traceability.
 
-8. Modules consume normalized requirements and never interpret raw profile tag
+8. Modules consume normalized requirements and never interpret raw profile trait
    keys themselves.
 
 ## 4. Affected documents
@@ -318,7 +318,7 @@ chosen representation.
 
 ## 5. Dependency-ordered implementation/documentation plan
 
-1. Specify the distinction between profile tag keys and generic resolver keys.
+1. Specify the distinction between profile trait keys and generic resolver keys.
 
 2. Define the compiled profile descriptor types for properties, capabilities,
    requirements, relations, and aliases.

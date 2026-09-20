@@ -1,7 +1,7 @@
 # Data model
 
 This document defines the generic data model shared by occasion profiles. Concrete
-tags, values, module selection, and occasion policies belong in the occasion profile;
+traits, values, module selection, and occasion policies belong in the occasion profile;
 they must not require new typed property columns or domain foreign keys.
 
 Persisted tables use the SQLite dialect and target Cloudflare D1; their DDL is

@@ -44,7 +44,7 @@ None.
 None of its own. `Communicated.notify` requires this module. The complete event
 contract belongs to [release control](../application/release-control.md) §3.
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 None.
 

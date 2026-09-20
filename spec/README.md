@@ -38,7 +38,7 @@ binding decisions. Move only its accepted requirements into the active topic.
 | 1 | [Architecture](architecture/overview.md) | Kernel and modules, request lifecycle, and boundaries |
 | 2 | [Data model](architecture/data-model.md) | Generic identity, labels, relationships, and projections |
 | 3 | [Event model](architecture/events.md) | Generic event envelope, replay, and lifecycle |
-| 4 | [Labels and constraints](architecture/labels-and-constraints.md) | Tag vocabulary, resolver operators, and validation |
+| 4 | [Labels and constraints](architecture/labels-and-constraints.md) | Trait vocabulary, resolver operators, and validation |
 | 5 | [Solver contract](architecture/solver-contract.md) | Determinism contract, solver input, pipeline, rules, and trace |
 | 6 | [Release control](application/release-control.md) | Held arrangements, communication scopes, review and visibility |
 | 7 | [Organiser view](application/organiser-view.md) | Organisation-team surfaces and module-provided screens |

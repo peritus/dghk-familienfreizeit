@@ -20,16 +20,16 @@ Requires: none. Enhances: none.
 
 ```ts
 type FoodPreferencesParams = {
-  diet_tag: string
-  allergies_tag: string | null
+  diet_trait: string
+  allergies_trait: string | null
   count_by_day: boolean
 }
 ```
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `diet_tag` | — (required) | fills the diet role (§6) |
-| `allergies_tag` | `null` | fills the allergies role (§6) |
+| `diet_trait` | — (required) | fills the diet role (§6) |
+| `allergies_trait` | `null` | fills the allergies role (§6) |
 | `count_by_day` | `true` | counts diets per occasion day from `meta.starts_on` to `meta.ends_on` |
 
 ## 4. Entity kinds
@@ -46,14 +46,14 @@ LabelSet entity_id=per_anna key=diet value=vegetarian strength=#null
 LabelSet entity_id=per_jonas key=allergies-text value="2x Beifuß (sehr starke Allergie)" strength=#null
 ```
 
-## 6. Labels and tag roles
+## 6. Labels and trait roles
 
 Module-owned label keys: none.
 
-| Role | Parameter | Required tag shape |
+| Role | Parameter | Required trait shape |
 |---|---|---|
-| Diet | `diet_tag` | `property`, scope `person`, value `enumOf(…)`, cardinality exactly one |
-| Allergies | `allergies_tag` | `property`, scope `person`, value `text()`, cardinality zero or one, sensitivity `restricted` |
+| Diet | `diet_trait` | `property`, scope `person`, value `enumOf(…)`, cardinality exactly one |
+| Allergies | `allergies_trait` | `property`, scope `person`, value `text()`, cardinality zero or one, sensitivity `restricted` |
 
 "Exactly one" is enforced as: setting a diet replaces the current value in the same
 append, and a person without a diet appears on the chase list. Allergy text is
@@ -91,7 +91,7 @@ Counts use people who are not withdrawn.
 
 | Kind | Contribution |
 |---|---|
-| Controls | The diet tag uses `choice`; the allergies tag uses `free-text` ([family preferences](family-preferences.md)) |
+| Controls | The diet trait uses `choice`; the allergies trait uses `free-text` ([family preferences](family-preferences.md)) |
 | Screen | Diet and allergy columns on family detail; missing diets on the chase list |
 | Reports | Food service overview (aggregates, may be shared); allergy and safety sheet (organiser-only, restricted); food part of the family information sheet ([reports](../application/reports.md) §3) |
 | Emails | Reminder copy may name people without a diet |
@@ -109,5 +109,5 @@ and own-family views.
 
 ## 13. When not selected
 
-No food tags can be defined; the food reports, columns, and chase-list entries are
+No food traits can be defined; the food reports, columns, and chase-list entries are
 absent.

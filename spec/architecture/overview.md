@@ -127,7 +127,7 @@ by `build_revision`. A module
 that is not selected contributes no event type, solver stage, trace section, route,
 screen, report, or required fixture.
 
-Modules own mechanisms. The profile owns vocabulary and policy: concrete tags and
+Modules own mechanisms. The profile owns vocabulary and policy: concrete traits and
 values, module parameters, pure derivations and checks, scoring weights, and
 user-facing copy ([occasion profiles](../profiles/contract.md)). Profile functions
 are deterministic evaluators only.
@@ -297,7 +297,7 @@ src/
   events/types.ts         discriminated union and zod schemas, shared by both runtimes
   derive/                 pure index.ts composition, fold.ts and diff.ts; no I/O
   modules/<module-id>/    pure stages/rules, separate app/worker contributions
-  config/                 define.ts: defineOccasionProfile, defineModule and tag builders
+  config/                 define.ts: defineOccasionProfile, defineModule and trait builders
                           index.ts: re-export the active profile
   solver/                 solver-input.ts, preflight.ts, pipeline.ts, trace.ts,
                           canonical.ts (canonical JSON + SHA-256), index.ts

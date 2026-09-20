@@ -102,9 +102,9 @@ Module-owned keys and parameters:
 | `bed-type` | `single`, `double` |
 | `designation` | `general`, `staff`, `blocked` |
 
-Profile room tags:
+Profile room traits:
 
-| Tag | Builder | Values | Use |
+| Trait | Builder | Values | Use |
 |---|---|---|---|
 | `sanitary` | property | `private`, `shared-floor`, `remote-shared` | sanitary arrangement |
 | `is-accessible` | property | boolean, default `false` | accessibility fact |
@@ -114,7 +114,7 @@ Profile room tags:
 | `has-common-room` | property | `true` for rooms 35–37 | apartment layout |
 | `suitable-for-two-families` | property | `true` for rooms 35–37 | descriptive; not a placement rule |
 
-Room capacity is the module's place count, not a tag.
+Room capacity is the module's place count, not a trait.
 
 Derived capabilities are resolver projections, never assigned:
 
@@ -131,7 +131,7 @@ not a booking or billing rule.
 
 ## 3. People and room vocabulary
 
-| Tag | Builder | Scope | Semantics |
+| Trait | Builder | Scope | Semantics |
 |---|---|---|---|
 | `role` | property | person | `adult`, `child`, or `infant`; stated in `PersonAdded`, not derived from birthdate |
 | `does-not-need-a-bed` | property | person | default `false`; when true the person has no bed demand but remains in the family's placement unit; children and infants only |
@@ -153,7 +153,7 @@ separate sleeping-parties module.
 Food data is per person ([food preferences](../modules/food-preferences.md)): every
 person has exactly one `diet` and may have one `allergies-text`.
 
-| Tag | Values or format | Cardinality |
+| Trait | Values or format | Cardinality |
 |---|---|---|
 | `diet` | `vegetarian`, `vegan`, `carnivore`, `pesco-vegetarian` | exactly one |
 | `allergies-text` | free text, retained as entered; restricted | zero or one |
@@ -169,25 +169,25 @@ family assignments.
 | Module | Parameter | Value | Why |
 |---|---|---|---|
 | `room-assignment` | `weights` | exact fit 10, near fit 4, orphan bed −8 | module defaults; tune with `npm run tune` |
-| | `keep_apart_tag` | `apart-from` | |
-| | `priority_tag` | `needs-accessible` | accessible needs claim scarce places first |
+| | `keep_apart_trait` | `apart-from` | |
+| | `priority_trait` | `needs-accessible` | accessible needs claim scarce places first |
 | | `scarce_capabilities` | `accessible: −3` | use accessible rooms for others only when it helps |
 | | `max_repair_passes` | `5` | module default |
 
-Tag weights and penalties (§3) and these parameters are starting values; changing
+Trait weights and penalties (§3) and these parameters are starting values; changing
 them is a deployment, reviewed through the plan diff before communicating.
 
 ## 6. Workshop policy
 
 | Module | Parameter | Value |
 |---|---|---|
-| `workshops` | `audience_tag` | `workshop-audience` (`children`, `adults`; organiser-only) |
-| | `leader_tag` | `leads-workshop` (zero or more workshops per person) |
+| `workshops` | `audience_trait` | `workshop-audience` (`children`, `adults`; organiser-only) |
+| | `leader_trait` | `leads-workshop` (zero or more workshops per person) |
 | | `leaders_consume_capacity` | `false` |
 | | `require_leader` | `false` |
 | | `excluded_roles` | `infant` |
 | | `audience_rules` | `children` → `child`; `adults` → `adult` |
-| `workshop-rankings` | `ranking_tag` | `prefers-workshop` |
+| `workshop-rankings` | `ranking_trait` | `prefers-workshop` |
 | | `max_rank` | `3` |
 | | `allow_no_preference` | `true` |
 | `workshop-assignment` | `objectives` | fewest people without a top-2 choice, then fewest without any choice, then most rank weight |
@@ -200,7 +200,7 @@ not every children's workshop needs a leader.
 Workshops explicitly choose `assigned`, `sign-up` or `interest` in their setup
 events. Module-owned `signed-up-for` and `interested-in` labels are placed in the
 workshops section through `module_controls`; the profile does not redefine them
-as tags. Shared age/audience policy applies to all participation modes. Workshop
+as traits. Shared age/audience policy applies to all participation modes. Workshop
 controls show the workshop deadline as an advisory notice; families may still
 change them after it, and organisers can review and publish a later plan when
 appropriate.
