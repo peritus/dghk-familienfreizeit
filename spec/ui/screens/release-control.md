@@ -13,9 +13,11 @@ The authoritative report, review, dependency and confirmation contracts are in
 [release control](../../application/release-control.md) §6–8. This document owns their layout
 and interaction, not another definition of communication semantics.
 
-## Shared inline status and diff
+## Organiser inline status and diff
 
-Every releasable scope renders the same status badge wherever it appears:
+This three-state badge is **organiser-only**. It renders on every organiser
+surface that shows release status ([workshops](workshops.md),
+[family detail](family-detail.md), [organiser dashboard](organiser-dashboard.md)):
 
 | Badge | Meaning |
 |---|---|
@@ -27,14 +29,19 @@ Badges have text labels and tooltips; colour is supplementary. The tooltip inclu
 the last communication time and reviewed `input_seq` when one exists. Expanding a
 badge opens the canonical before/after diff in place, without navigating to a
 separate release view. The diff shows added, removed and changed fields, allocation
-movements, and cancellation status appropriate to the viewer.
+movements, and cancellation status appropriate to the viewer. A newer event shows a
+non-blocking "newer changes exist" indicator and never silently replaces the open
+diff. This component consumes [`CommunicationScopeView`](../../application/release-control.md), whose
+`status`/`newer_events` are derived against current candidate (draft) content — safe
+here because organisers are authorized to see draft state.
 
-The component receives one semantic scope diff and the field-level temporal/privacy
-matrix from [release control](../../application/release-control.md). Admins get
-affected families, findings, organiser explanations, and the communication action;
-families get only their own family-visible result and remain read-only. Both use the
-same reviewed `input_seq` when a diff is opened. A newer event shows a non-blocking
-“newer changes exist” indicator and never silently replaces the open diff.
+**Families see a different, two-state badge** ([UI-04](family-assignment.md)):
+`✓` communicated or `—` never communicated, consuming
+[`FamilyScopeView`](../../application/release-control.md) instead. There is no `?` state and no
+"newer changes exist" indicator on any family-facing surface — both would
+disclose that an uncommunicated draft exists, which release control must
+never do. Expanding `✓` shows the diff between the two most recent
+communications, not against current organiser state.
 
 ## Outstanding changes overview
 

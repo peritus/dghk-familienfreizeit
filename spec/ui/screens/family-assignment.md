@@ -42,9 +42,11 @@ adjustment, and revision-mismatch unavailable states. Show the relevant communic
 status instead of one global page state. Own answers and live materials/participation
 remain current, including during a scope's unavailable state.
 
-Every releasable room or workshop result carries the shared `✓`, `?`, or `—` communication
-badge. Families can expand `?` to see their own before/after result at the reviewed
-`input_seq`; newer organiser changes are indicated but do not replace the open diff.
+Every releasable room or workshop result carries a two-state family badge, `✓`
+communicated or `—` never communicated ([`FamilyScopeStatus`](../../application/release-control.md);
+no `?`/changed state exists on this screen). Families can expand `✓` to see the
+diff from their previous communication, when one exists. No state, badge, or
+control on this screen indicates that the organisers are preparing a change.
 Reviewing preferences opens UI-03 controls with the relevant advisory deadline notice. Workshop
 cards distinguish assigned results, live sign-ups and non-binding interest. They use
 [release control](../../application/release-control.md) and cannot join draft programme labels

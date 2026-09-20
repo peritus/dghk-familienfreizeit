@@ -47,13 +47,42 @@ type CommunicationScopeView = {
   unavailable: { reason: string } | null
   newer_events: boolean
 }
+
+type FamilyScopeStatus =
+  | 'never-communicated'
+  | 'communicated'
+
+type FamilyScopeView = {
+  scope: CommunicationScope
+  status: FamilyScopeStatus
+  communication: {
+    communication_seq: number
+    input_seq: number
+    communicated_at: string
+  } | null
+  diff: ScopeDiff | null
+  unavailable: { reason: string } | null
+}
 ```
 
-`CommunicationScopeView` is a derived, audience-projected read model. It is not
-persisted and does not become a second domain state. The organiser projection may
-include affected families, findings and communication actions; the family projection
-contains only the signed-in family's permitted fields and replaces inaccessible
-family ids with no value. Both projections use the same status and diff semantics.
+`CommunicationScopeView` is the organiser-audience derived read model. It is not
+persisted and does not become a second domain state. It may include affected
+families, findings and communication actions, and its `status`/`diff`/
+`newer_events` are computed against the scope's current candidate content —
+§6 below.
+
+The family audience never receives `CommunicationScopeView`. It receives
+`FamilyScopeView`, computed solely from that scope's `Communicated` event
+history — never from a comparison against current or draft world content.
+`never-communicated` means no `Communicated` event has ever covered this
+scope; `communicated` means at least one has, and `diff` (when non-null)
+compares the two most recent communications, both already-released facts.
+There is deliberately no `'changed'` member of `FamilyScopeStatus`, no
+`current_input_seq`, and no `newer_events`: all three are positioned
+relative to live/draft state, which the family projection must never be
+able to express, let alone leak. A family cannot learn that the organisers
+are preparing a change — only that a scope either has or hasn't been
+communicated, and what its most recent communicated update was.
 
 | Scope | Held content | Unit |
 |---|---|---|
@@ -308,7 +337,9 @@ functionality outside the active module set.
 
 ## 6. Outstanding changes report
 
-**Noch nicht an Familien kommuniziert** compares each scope's current candidate
+This report and its `status`/`newer_events` derivation are organiser-only —
+they produce `CommunicationScopeView`, never `FamilyScopeView`. **Noch nicht
+an Familien kommuniziert** compares each scope's current candidate
 content with its last reproducible communicated content. It lists:
 
 - never communicated, changed, matching, or revision-mismatch state;

@@ -83,13 +83,16 @@ screen, writing the identical events (D24;
 ### Communicated arrangements
 
 Communicated accommodation and workshop results take the top as they become
-available. Each arrangement shows the shared communication status and can expand an
-inline, privacy-projected before/after diff. The diff is derived from the reviewed
-`input_seq` and remains stable while newer organiser events are pending. Current
-preferences remain accessible and editable. Communication itself does not lock
-controls, and a late edit does not alter a communicated arrangement until an
-organiser explicitly reviews and publishes a new plan. There is no single
-before/after switch for the whole page.
+available. Each arrangement shows its [`FamilyScopeStatus`](release-control.md) —
+`communicated` or `never-communicated`, never `changed` — and, when
+`communicated`, can expand an inline before/after diff between its two most
+recent communications. Both sides of that diff are already-released facts,
+so nothing about a currently-preparing organiser change is disclosed;
+current draft/live state never enters this computation. Current preferences
+remain accessible and editable. Communication itself does not lock controls,
+and a late edit does not alter a communicated arrangement until an organiser
+explicitly reviews and publishes a new plan. There is no single before/after
+switch for the whole page.
 
 Workshop controls use the communicated programme: assigned workshops offer rankings,
 sign-up workshops offer join/leave controls and current places remaining, and interest

@@ -35,10 +35,13 @@ Every report identifies:
 | Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
-Reports consume `CommunicationScopeView` for communication status, scope references,
-before/after content, and unavailable-history state. They may add report-specific
-aggregation and redaction, but they do not derive release status or compare scope
-content independently.
+Organiser reports consume `CommunicationScopeView`; family and shared reports
+consume [`FamilyScopeView`](release-control.md), never `CommunicationScopeView` —
+the same audience split as the family application ([release control](release-control.md) §1). Both
+supply communication status, scope references, before/after content, and
+unavailable-history state. Reports may add report-specific aggregation and
+redaction, but they do not derive release status or compare scope content
+independently.
 
 The timestamp is not domain state and does not affect derivation or report
 identity. Reports are generated on demand from the world visible to the reader.
@@ -68,9 +71,11 @@ useful coordination report unavailable.
 | `family` | The family represented by the session | Its people, room, workshops, food entries, materials, and instructions |
 | `organiser` | Allowlisted organisers | Full contacts, detailed allergies, operational notes, unresolved issues, and audit detail |
 
-A family report uses the release-control projection. It must not reveal held
-arrangements or private constraint decisions. A shared report must show only fields that the
-occasion profile has declared safe for that audience.
+A family report uses the `FamilyScopeView` release-control projection. It must
+not reveal held arrangements or private constraint decisions — including via
+communication status, since `FamilyScopeView` has no state that can only be
+true while a draft change is being prepared. A shared report must show only
+fields that the occasion profile has declared safe for that audience.
 
 ## 3. Report catalogue
 
