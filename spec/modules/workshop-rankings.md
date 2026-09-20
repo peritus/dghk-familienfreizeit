@@ -142,7 +142,7 @@ the preference heatmap.
 | Kind | Contribution |
 |---|---|
 | Controls | `ranking` — drag-to-order on desktop, numbered selects on mobile ([family preferences](family-preferences.md)) |
-| Screen | Preference heatmap on `/organiser/workshops`; missing rankings on the dashboard chase list ([organiser view](../application/organiser-view.md) §1, §2) |
+| Screen | Preference heatmap panel in the workshops screen ([UI-12](../ui/screens/workshops.md), owned by [`workshops`](workshops.md)); missing rankings on the dashboard chase list ([organiser view](../application/organiser-view.md) §1, §2) |
 | Screen | Organiser family detail renders the same `ranking` control per person, for phone/email requests (D24) |
 | Reports | Missing workshop choices in the open-issues report ([reports](../application/reports.md) §3.3) |
 | Emails | Reminder copy may name the people and slots without rankings |
