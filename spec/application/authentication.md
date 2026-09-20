@@ -7,6 +7,13 @@ Magic link, no passwords, invite-only. One login per family. Organiser access is
 code-level allowlist of verified email addresses, exposed through a separate
 organiser URL and UI.
 
+Every email address uses one canonical identity form: Unicode NFC normalization,
+trimming surrounding whitespace, and locale-independent lowercasing. Syntax is
+validated after canonicalization. No provider-specific rewrites are applied: dots,
+plus-addresses, domains, and local parts otherwise remain exactly as supplied.
+The canonical form is used for family event payloads, event actors, sessions,
+magic links, rate-limit buckets, email delivery records, and organiser allowlists.
+
 Roughly 120 lines of Web Crypto. That is a deliberate choice over a library, and
 it is only defensible if the rules in §3 are followed exactly.
 
@@ -148,6 +155,11 @@ domain decisions; these are operational secrets with a deletion policy.
 **10 — Organiser status is checked per request from the allowlist.**
 Not from the cookie, a JWT claim, or a family label. Changing the allowlist
 requires a deploy for now, and the lookup uses the verified session identity.
+
+**11 — Email identity is canonical before comparison or storage.**
+Requests canonicalize and validate the address before rate limiting, family lookup,
+allowlist matching, magic-link insertion, event creation, or session creation.
+The raw submitted spelling is not an identity value and is not persisted.
 
 ---
 

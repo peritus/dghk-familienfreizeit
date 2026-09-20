@@ -582,3 +582,20 @@ spec-complete, mirroring D14's generator-not-form framing for the organiser
 surface. [Organiser view](spec/application/organiser-view.md) and
 [family preferences](spec/modules/family-preferences.md) are updated to
 state the family-detail screen's coverage explicitly.
+
+## D25 — Canonical email identity
+
+*Chosen.* The application canonicalizes every email identity by Unicode NFC
+normalization, trimming surrounding whitespace, and locale-independent
+lowercasing. It validates syntax after canonicalization and uses that result for
+family event payloads, event actors, sessions, magic links, rate limits, email
+delivery records, and organiser allowlists.
+
+Provider-specific transformations are not applied: dots, plus-addresses, and
+other mailbox-provider conventions remain part of the supplied address. The raw
+submitted spelling is not persisted as identity data.
+
+*Why:* family uniqueness, session revocation after an email change, organiser
+authorization, and event provenance must compare the same identity value. A
+single application rule avoids relying on inconsistent database collations or
+provider behavior.
