@@ -282,6 +282,13 @@ validation view and verifies append/replay behavior without importing profile
 builders or module registration; a profile test verifies that M2 constructs the
 same view from typed traits and selected modules.
 
+Canonical identity tests cover email values with surrounding whitespace, mixed
+case, and composed/decomposed Unicode; all produce the same canonical identity.
+Tests also prove that provider-specific dot and plus-address transformations are
+not applied, duplicate family invites are rejected after canonicalization, an
+email change invalidates the old session identity, and actor, allowlist, session,
+magic-link, rate-limit, and delivery records use the same canonical value.
+
 Each module additionally ships contract tests and names the fixtures a profile
 selecting it must supply (module specification §12).
 
