@@ -1,7 +1,7 @@
 ---
 id: "013"
 title: Vitest version pin doesn't match Cloudflare's current test integration
-status: open
+status: resolved
 severity: drift
 category: tooling
 source: spec-review-2026-09-19
@@ -36,3 +36,12 @@ package metadata resolves).
 
 1. Pin Vitest 4.1 with the current integration, or move to
    `@cloudflare/vitest-plugin` now?
+
+## Resolution
+
+`package.json` pins `vitest` at `4.1.11` and `@cloudflare/vitest-plugin` at
+`1.1.13`; `vitest.config.ts` imports `cloudflareTest` from
+`@cloudflare/vitest-plugin`, the migration path this issue recommended.
+Execution was verified directly (not just package metadata): `npm install`
+followed by `npm test` runs both the `worker` and `app` Vitest projects and
+passes 16/16 tests. No further action needed.
