@@ -1,7 +1,7 @@
 ---
 id: "011"
 title: "\"space\" is used as a resolver scope but isn't a typed entity kind"
-status: open
+status: resolved
 severity: gap
 category: kernel
 source: ad-hoc-terminology-review-2026-09-19
@@ -37,3 +37,15 @@ shorthand that should be replaced with the explicit kind it actually means
    kind (room, place, workshop) it actually refers to? The terminology
    review's guess is German Raum, Schlafplatz, or Workshop, depending on the
    actual scope — this needs to be checked case by case.
+
+## Resolution
+
+Re-checked `spec/architecture/labels-and-constraints.md` and
+`spec/architecture/data-model.md`: `space` does not appear as a resolver
+scope, or in any other typed-entity-kind position, in either file. A
+repository-wide search finds `space` used only in unrelated prose (a
+non-breaking space rule in the German translation guidelines, and "until
+space exists" in a release-control table row) — neither is a resolver scope.
+The loose terminology this issue flagged is no longer present; scopes are
+already expressed with the existing typed kinds (`room`, `place`, `workshop`,
+etc.). No spec change needed.

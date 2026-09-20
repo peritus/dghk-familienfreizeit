@@ -1,7 +1,7 @@
 ---
 id: "009"
 title: Explicit deadline concept fields are not fully specified
-status: open
+status: resolved
 severity: gap
 category: kernel
 source: ad-hoc-terminology-review-2026-09-19
@@ -36,3 +36,23 @@ including their entity attachment, event origin, and German field names per
 
 1. Which entity/scope owns `after_deadline`/`deadline_contact` — is this a
    family-preferences concept, a release-control concept, or both?
+
+## Resolution
+
+`deadline_contact` is a `family-preferences` concept: `FamilyPreferencesParams`
+(`spec/modules/family-preferences.md:24-42`) defines it as
+`{ accommodation: LocalizedText, workshops: LocalizedText }`, one entry per
+configured `deadline_scope`, required and validated ("copy for each configured
+deadline scope"). The Worker returns the upcoming/passed status for each
+configured deadline together with its `deadline_contact` in the family
+response (`spec/modules/family-preferences.md:144-145`).
+
+`after_deadline` is not adopted as a field. The module contract already fixes
+this behavior for every scope rather than making it configurable: "A passed
+deadline keeps its controls editable. It is a prompt to contact the
+organisers, not a write barrier." (`spec/modules/family-preferences.md:145-146`,
+tested at line 157). A `'read-only' | 'editable'` toggle would contradict that
+fixed policy, so introducing it would need a D-numbered decision to first
+change the policy itself — nothing in this review found a reason to. No spec
+change needed beyond confirming `deadline_contact`'s existing definition
+covers the concept in full.
