@@ -6,10 +6,6 @@ severity: drift
 category: kernel
 source: ad-hoc-terminology-review-2026-09-19
 related_decisions: [D18]
-related_files:
-  - ../architecture/labels-and-constraints.md
-  - ../profiles/contract.md
-  - ../ui/german-translation-guidelines.md
 opened: 2026-09-19
 ---
 
@@ -30,10 +26,16 @@ documentation — i.e. the German split should track the English split.
 Audit uses of "tag" and "label" across the kernel and profile documents and
 make the distinction consistent: profile/vocabulary-level things are tags,
 entity-level stored values are labels. Apply the same split to the German
-terms per `../ui/german-translation-guidelines.md`.
+terms per [`ui/german-translation-guidelines.md`](../../ui/german-translation-guidelines.md).
 
 ## Open questions
 
 1. Confirm the proposed German split (Angabe for family-facing labels, Tag
    reserved for technical/profile documentation) doesn't collide with
    existing German usage elsewhere.
+
+## Related files
+
+- [architecture/labels-and-constraints.md](../../architecture/labels-and-constraints.md)
+- [profiles/contract.md](../../profiles/contract.md)
+- [ui/german-translation-guidelines.md](../../ui/german-translation-guidelines.md)

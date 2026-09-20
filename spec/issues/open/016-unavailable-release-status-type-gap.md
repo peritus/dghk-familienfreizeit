@@ -6,16 +6,6 @@ severity: gap
 category: module:release-control
 source: issue-2-unavailable-release-status (pre-existing)
 related_decisions: [D16]
-related_files:
-  - ../application/release-control.md
-  - ../ui/screens/release-control.md
-  - ../ui/screens/family-assignment.md
-  - ../application/family-view.md
-  - ../application/reports.md
-  - ../modules/change-notifications.md
-  - ../ui/frontend.md
-  - ../engineering/deployment.md
-  - ../ui/german-translation-guidelines.md
 opened: 2026-09-19
 ---
 
@@ -283,17 +273,17 @@ explicit conservative recipient policy and the same family privacy projection.
 
 The following documents and contracts need coordinated updates:
 
-- ../application/release-control.md: status union, unavailable reason, view invariants,
+- [application/release-control.md](../../application/release-control.md): status union, unavailable reason, view invariants,
   recovery preview, and notification rules;
-- ../ui/screens/release-control.md: organiser badge, rows, history, and recovery actions;
-- ../ui/screens/family-assignment.md and ../application/family-view.md: unavailable card, control
+- [ui/screens/release-control.md](../../ui/screens/release-control.md): organiser badge, rows, history, and recovery actions;
+- [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md) and [application/family-view.md](../../application/family-view.md): unavailable card, control
   behavior, and privacy boundaries;
-- ../application/reports.md: organiser, family, shared, and change-notice rendering;
-- ../modules/change-notifications.md: unavailable previews, recovery messages, and
+- [application/reports.md](../../application/reports.md): organiser, family, shared, and change-notice rendering;
+- [modules/change-notifications.md](../../modules/change-notifications.md): unavailable previews, recovery messages, and
   retry rules;
-- ../ui/frontend.md: projected API shape and shared renderer behavior;
-- ../engineering/deployment.md: deployment-impact and recovery runbook wording;
-- ../ui/german-translation-guidelines.md: user-facing unavailable and recovery copy;
+- [ui/frontend.md](../../ui/frontend.md): projected API shape and shared renderer behavior;
+- [engineering/deployment.md](../../engineering/deployment.md): deployment-impact and recovery runbook wording;
+- [ui/german-translation-guidelines.md](../../ui/german-translation-guidelines.md): user-facing unavailable and recovery copy;
 - workshop and ranking contracts that depend on an effective communicated
   programme;
 - the profile/module contracts where unavailable programme state affects controls.
@@ -340,4 +330,16 @@ Tests should cover:
 The central design decision is simple: unavailable is a real shared status, not an
 auxiliary warning. It means “the old result cannot safely be reproduced,” not “the
 system has no current data.”
+
+## Related files
+
+- [application/release-control.md](../../application/release-control.md)
+- [ui/screens/release-control.md](../../ui/screens/release-control.md)
+- [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md)
+- [application/family-view.md](../../application/family-view.md)
+- [application/reports.md](../../application/reports.md)
+- [modules/change-notifications.md](../../modules/change-notifications.md)
+- [ui/frontend.md](../../ui/frontend.md)
+- [engineering/deployment.md](../../engineering/deployment.md)
+- [ui/german-translation-guidelines.md](../../ui/german-translation-guidelines.md)
 

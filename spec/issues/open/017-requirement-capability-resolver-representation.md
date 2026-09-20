@@ -6,18 +6,6 @@ severity: gap
 category: kernel
 source: issue-5-requirement-capability-resolver (pre-existing)
 related_decisions: [D18]
-related_files:
-  - ../architecture/data-model.md
-  - ../architecture/events.md
-  - ../architecture/labels-and-constraints.md
-  - ../architecture/solver-contract.md
-  - ../profiles/contract.md
-  - ../modules/contract.md
-  - ../modules/room-assignment.md
-  - ../modules/workshops.md
-  - ../modules/workshop-assignment.md
-  - ../profiles/familienfreizeit-2027.md
-  - ../profiles/familienfreizeit-2027.example.ts
 opened: 2026-09-19
 ---
 
@@ -63,8 +51,8 @@ floor=ground
 ```
 
 The relevant profile properties are defined in
-`../profiles/familienfreizeit-2027.example.ts` and documented in
-`../profiles/familienfreizeit-2027.md`:
+[`profiles/familienfreizeit-2027.example.ts`](../../profiles/familienfreizeit-2027.example.ts) and documented in
+[`profiles/familienfreizeit-2027.md`](../../profiles/familienfreizeit-2027.md):
 
 - `sanitary` is a room property with values `private`, `shared-floor`, and
   `remote-shared`.
@@ -108,7 +96,7 @@ The active profile declares:
 })
 ```
 
-The D18 example in `../../decisions.md` makes the intended event encoding
+The D18 example in [`decisions.md`](../../../decisions.md) makes the intended event encoding
 explicit:
 
 ```kdl
@@ -148,14 +136,14 @@ The current model is mixed:
 
 1. **Generic examples conflict with the active profile model.**
 
-   `../architecture/labels-and-constraints.md` and `../architecture/data-model.md` describe:
+   [`architecture/labels-and-constraints.md`](../../architecture/labels-and-constraints.md) and [`architecture/data-model.md`](../../architecture/data-model.md) describe:
 
    ```text
    needs=private-sanitary
    provides=private-sanitary
    ```
 
-   But `../../decisions.md` specifies:
+   But [`decisions.md`](../../../decisions.md) specifies:
 
    ```text
    key=needs-private-sanitary value=private-sanitary
@@ -166,25 +154,25 @@ The current model is mixed:
 
 2. **Capability materialization is described two ways.**
 
-   `../architecture/labels-and-constraints.md` says a room's capability set is read from
+   [`architecture/labels-and-constraints.md`](../../architecture/labels-and-constraints.md) says a room's capability set is read from
    `provides` labels, but the active profile's capabilities use
    `capability({ derive })` and do not produce `provides` labels.
 
 3. **Solver input names normalized structures without defining them.**
 
-   `../architecture/solver-contract.md` names `capabilities` and `constraints` in
+   [`architecture/solver-contract.md`](../../architecture/solver-contract.md) names `capabilities` and `constraints` in
    `SolverInput`, but does not define the normalized shape of a profile
    requirement or explain how `satisfied_by` becomes a solver constraint.
 
 4. **The profile contract defines metadata but not the compiled boundary.**
 
-   `../profiles/contract.md` defines `requirement.satisfied_by`,
+   [`profiles/contract.md`](../../profiles/contract.md) defines `requirement.satisfied_by`,
    `capability.derive`, and aliases independently, but does not specify the
    compiled representation or resolver stages connecting them.
 
 5. **The event contract documents only generic examples.**
 
-   `../architecture/events.md` says `LabelSet.key` is the resolver mechanism key and gives
+   [`architecture/events.md`](../../architecture/events.md) says `LabelSet.key` is the resolver mechanism key and gives
    only generic `needs`/`provides` examples. It does not document
    profile-specific requirement keys such as `needs-accessible`.
 
@@ -196,7 +184,7 @@ The current model is mixed:
 
 7. **Room assignment consumes an undefined `Requirement` shape.**
 
-   `../modules/room-assignment.md` says it consumes every requirement and capability,
+   [`modules/room-assignment.md`](../../modules/room-assignment.md) says it consumes every requirement and capability,
    but its `Requirement` input type is not defined sufficiently to show whether
    it contains the profile tag key, provider capability, or both.
 
@@ -207,7 +195,7 @@ The current model is mixed:
 
 9. **Workshop resolver participation is not fully bounded.**
 
-   `../modules/workshops.md` refers to “applicable required resolver decisions” but
+   [`modules/workshops.md`](../../modules/workshops.md) refers to “applicable required resolver decisions” but
    does not define whether profile requirements participate in workshop
    eligibility through the same normalized mechanism. The active profile
    currently has no workshop needs/provides tags, so this boundary remains
@@ -292,40 +280,40 @@ The governing rule should be:
 
 ### Profile
 
-- `../profiles/contract.md`
-- `../profiles/familienfreizeit-2027.md`
-- `../profiles/familienfreizeit-2027.example.ts`
+- [`profiles/contract.md`](../../profiles/contract.md)
+- [`profiles/familienfreizeit-2027.md`](../../profiles/familienfreizeit-2027.md)
+- [`profiles/familienfreizeit-2027.example.ts`](../../profiles/familienfreizeit-2027.example.ts)
 
 ### Core model and events
 
-- `../architecture/data-model.md`
-- `../architecture/events.md`
-- `../architecture/labels-and-constraints.md`
-- `../architecture/solver-contract.md`
+- [`architecture/data-model.md`](../../architecture/data-model.md)
+- [`architecture/events.md`](../../architecture/events.md)
+- [`architecture/labels-and-constraints.md`](../../architecture/labels-and-constraints.md)
+- [`architecture/solver-contract.md`](../../architecture/solver-contract.md)
 
 ### Modules
 
-- `../modules/contract.md`
-- `../modules/room-inventory.md`
-- `../modules/room-assignment.md`
-- `../modules/workshops.md`
-- `../modules/workshop-assignment.md`
+- [`modules/contract.md`](../../modules/contract.md)
+- [`modules/room-inventory.md`](../../modules/room-inventory.md)
+- [`modules/room-assignment.md`](../../modules/room-assignment.md)
+- [`modules/workshops.md`](../../modules/workshops.md)
+- [`modules/workshop-assignment.md`](../../modules/workshop-assignment.md)
 
 ### Validation and fixtures
 
-- `../engineering/testing.md`
+- [`engineering/testing.md`](../../engineering/testing.md)
 - Profile KDL fixtures under `test/fixtures/event-logs/`
 - Profile validation tests and golden-plan expectations
 
 ### UI
 
-- `../ui/screens/family-preferences.md`
-- `../ui/screens/family-detail.md`
-- `../ui/screens/inventory.md`
-- `../ui/screens/constraints.md`
-- `../application/organiser-view.md`
+- [`ui/screens/family-preferences.md`](../../ui/screens/family-preferences.md)
+- [`ui/screens/family-detail.md`](../../ui/screens/family-detail.md)
+- [`ui/screens/inventory.md`](../../ui/screens/inventory.md)
+- [`ui/screens/constraints.md`](../../ui/screens/constraints.md)
+- [`application/organiser-view.md`](../../application/organiser-view.md)
 
-The canonical example in `../../decisions.md` must also remain aligned with the
+The canonical example in [`decisions.md`](../../../decisions.md) must also remain aligned with the
 chosen representation.
 
 ## 5. Dependency-ordered implementation/documentation plan
@@ -371,24 +359,24 @@ chosen representation.
 11. Re-record affected golden plans only after the representation and solver
     input contract are fixed.
 
-## Source documents reviewed
+## Related files
 
-- `../architecture/data-model.md`
-- `../architecture/events.md`
-- `../architecture/labels-and-constraints.md`
-- `../architecture/solver-contract.md`
-- `../profiles/contract.md`
-- `../modules/contract.md`
-- `../modules/room-assignment.md`
-- `../modules/workshops.md`
-- `../profiles/familienfreizeit-2027.md`
-- `../profiles/familienfreizeit-2027.example.ts`
-- `../../decisions.md`
-- `../engineering/testing.md`
-- `../modules/room-inventory.md`
-- `../modules/workshop-assignment.md`
-- `../application/organiser-view.md`
-- `../ui/screens/family-preferences.md`
-- `../ui/screens/family-detail.md`
-- `../ui/screens/inventory.md`
-- `../ui/screens/constraints.md`
+- [`architecture/data-model.md`](../../architecture/data-model.md)
+- [`architecture/events.md`](../../architecture/events.md)
+- [`architecture/labels-and-constraints.md`](../../architecture/labels-and-constraints.md)
+- [`architecture/solver-contract.md`](../../architecture/solver-contract.md)
+- [`profiles/contract.md`](../../profiles/contract.md)
+- [`modules/contract.md`](../../modules/contract.md)
+- [`modules/room-assignment.md`](../../modules/room-assignment.md)
+- [`modules/workshops.md`](../../modules/workshops.md)
+- [`profiles/familienfreizeit-2027.md`](../../profiles/familienfreizeit-2027.md)
+- [`profiles/familienfreizeit-2027.example.ts`](../../profiles/familienfreizeit-2027.example.ts)
+- [`decisions.md`](../../../decisions.md)
+- [`engineering/testing.md`](../../engineering/testing.md)
+- [`modules/room-inventory.md`](../../modules/room-inventory.md)
+- [`modules/workshop-assignment.md`](../../modules/workshop-assignment.md)
+- [`application/organiser-view.md`](../../application/organiser-view.md)
+- [`ui/screens/family-preferences.md`](../../ui/screens/family-preferences.md)
+- [`ui/screens/family-detail.md`](../../ui/screens/family-detail.md)
+- [`ui/screens/inventory.md`](../../ui/screens/inventory.md)
+- [`ui/screens/constraints.md`](../../ui/screens/constraints.md)

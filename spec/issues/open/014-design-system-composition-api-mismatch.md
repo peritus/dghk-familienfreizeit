@@ -6,8 +6,6 @@ severity: drift
 category: tooling
 source: spec-review-2026-09-19
 related_decisions: []
-related_files:
-  - ../ui/frontend.md
 opened: 2026-09-19
 ---
 
@@ -25,7 +23,7 @@ https://base-ui.com/react/handbook/composition.
 
 ## Recommendation
 
-Update the design-system composition recipe in `../ui/frontend.md` (or
+Update the design-system composition recipe in [`ui/frontend.md`](../../ui/frontend.md) (or
 wherever it lives) to describe the `render` API instead of `asChild`. Later
 interactive controls must follow the `render` API and retain accessible
 semantics.
@@ -34,3 +32,7 @@ semantics.
 
 None — this is a documentation correction once someone confirms the doc
 location, not a design decision.
+
+## Related files
+
+- [ui/frontend.md](../../ui/frontend.md)
