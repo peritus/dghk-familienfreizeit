@@ -70,14 +70,14 @@ its number retired, it does not get filled by the next new issue.
 | [003](003-organiser-workshops-route-collision.md) | Three modules contribute the same organiser route with no composition mechanism | open | build-blocking | coherence-audit |
 | [004](004-family-diff-privacy-leak.md) | Family "changed" badge can reveal that an uncommunicated candidate exists | needs-decision | privacy | coherence-audit, spec-review |
 | [005](005-reviewed-prefix-concurrent-revalidation.md) | Reviewed-prefix confirmation has no concurrent-live-state contract | needs-decision | contract-contradiction | spec-review |
-| [006](006-solver-stability-repair-underspecified.md) | Room/workshop assignment don't fully realize D4's stability contract | needs-decision | contract-contradiction | coherence-audit, spec-review |
+| [006](006-solver-stability-repair-underspecified.md) | Room/workshop assignment don't fully realize D4's stability contract | resolved | contract-contradiction | coherence-audit, spec-review |
 | [007](007-module-composition-runtime-boundary.md) | Module contributions mix pure definitions with browser/Worker code | open | gap | coherence-audit, spec-review |
 | [008](008-milestone-ordering-release-control-prereqs.md) | M8/M9 need release-control prerequisites that ship in M12 | open | gap | spec-review |
-| [009](009-deadline-concept-fields-underspecified.md) | Explicit deadline concept fields are not fully specified | open | gap | ad-hoc terminology review |
+| [009](009-deadline-concept-fields-underspecified.md) | Explicit deadline concept fields are not fully specified | resolved | gap | ad-hoc terminology review |
 | [010](010-constraintdefined-vs-labelset-lifecycle-terms.md) | ConstraintDefined vs LabelSet lifecycle terminology is inconsistent | open | drift | ad-hoc terminology review |
-| [011](011-space-scope-not-typed-entity.md) | "space" is used as a resolver scope but isn't a typed entity kind | open | gap | ad-hoc terminology review |
+| [011](011-space-scope-not-typed-entity.md) | "space" is used as a resolver scope but isn't a typed entity kind | resolved | gap | ad-hoc terminology review |
 | [012](012-tag-vs-label-terminology.md) | "tag" and "label" are used inconsistently | open | drift | ad-hoc terminology review |
-| [013](013-vitest-version-pin-cloudflare-plugin.md) | Vitest version pin doesn't match Cloudflare's current test integration | open | drift | spec-review |
+| [013](013-vitest-version-pin-cloudflare-plugin.md) | Vitest version pin doesn't match Cloudflare's current test integration | resolved | drift | spec-review |
 | [014](014-design-system-composition-api-mismatch.md) | Design-system doc mentions asChild while Base UI uses the render API | open | drift | spec-review |
 | [015](015-event-payload-label-folding-rules.md) | Event payload-to-label folding rules are underspecified | open | contract-contradiction | event-payload-folding-investigation |
 | [016](016-unavailable-release-status-type-gap.md) | Unavailable release status is not a first-class state | needs-decision | gap | issue-2 (pre-existing) |
