@@ -85,7 +85,10 @@ the second appears on the organiser's chase list, the first does not.
 
 A family may set rankings for its own people. Eligibility is not checked at append:
 a person may rank a workshop they turn out to be ineligible for, and assignment
-reports it.
+reports it. An organiser may set the same ranking labels on a family's behalf
+through the family-detail screen's `ranking` control, for phone/email
+requests (D24); this is distinct from the organiser's own draft rankings
+against the unpublished programme (rule 1 above).
 
 ## 7. Solver input and stages
 
@@ -140,6 +143,7 @@ the preference heatmap.
 |---|---|
 | Controls | `ranking` — drag-to-order on desktop, numbered selects on mobile ([family preferences](family-preferences.md)) |
 | Screen | Preference heatmap on `/organiser/workshops`; missing rankings on the dashboard chase list ([organiser view](../application/organiser-view.md) §1, §2) |
+| Screen | Organiser family detail renders the same `ranking` control per person, for phone/email requests (D24) |
 | Reports | Missing workshop choices in the open-issues report ([reports](../application/reports.md) §3.3) |
 | Emails | Reminder copy may name the people and slots without rankings |
 

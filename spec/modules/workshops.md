@@ -148,7 +148,8 @@ have module-provided family controls. The profile supplies control copy/placemen
 without redefining these keys. Relations are resolved centrally, not in screens.
 
 A family may change only its own non-withdrawn people's participation. Organisers
-may act on their behalf. Admission uses the communicated programme and current
+may act on their behalf, through the same family-detail controls as the
+family view (D24). Admission uses the communicated programme and current
 resolved participation ([release control](../application/release-control.md) §5). Reject new
 labels for hidden, cancelled or wrong-mode workshops, ineligible people, duplicate
 sign-ups in one communicated slot, or a full sign-up workshop. Clearing an existing
@@ -257,6 +258,7 @@ appear in organiser coordination views, not as release backlog.
 | Reports | Workshop programme (shared); leaders in workshop rosters ([reports](../application/reports.md) §3) |
 | Controls | `workshop-sign-up` and `workshop-interest`, module-owned person label controls; confirmations use the current response |
 | Family view | Live sign-up list with minimum coordination names where profile sharing permits; own interest state without shared interest names |
+| Screen | Organiser family detail renders the same sign-up/interest controls per person, for phone/email requests (D24) |
 | Emails | none; release control selects communication recipients |
 
 ## 12. Tests
