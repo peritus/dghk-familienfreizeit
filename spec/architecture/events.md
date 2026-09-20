@@ -112,6 +112,11 @@ The `LabelSet` and `LabelCleared` payloads already carry their canonical `key`
 explicitly and therefore do not use setup-event mappings. A profile trait may
 describe any resulting label key, but the trait does not alter the event mapping.
 
+Email addresses are values, not secrets, but their canonical form is part of the
+event contract. `FamilyEmailChanged.old_email` and `new_email` are canonicalized
+before validation, and replay rejects historical rows that do not satisfy the
+canonical form rather than silently changing their identity.
+
 ---
 
 ## Setup and identity
