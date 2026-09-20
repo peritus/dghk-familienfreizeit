@@ -17,6 +17,18 @@ Organiser values use those fixed mechanisms; matching values may be free-form wh
 the mechanism permits them. This document covers labels, constraints, organiser
 decisions, and how selected modules consume them.
 
+There are two distinct label categories at the resolver boundary:
+
+- Profile-trait labels use the profile's canonical trait key, such as
+  `needs-accessible`. The profile trait supplies the value schema and, for a
+  requirement, the `satisfied_by` capability and scoring metadata.
+- Generic resolver labels use fixed operator keys such as `needs`, `provides`,
+  `excludes`, and `separates-from`. Their matching values may be free-form.
+
+The resolver compiles both categories directly into normalized constraints and
+capabilities. It does not rewrite a profile-trait label into a generic `needs` or
+`provides` label.
+
 ---
 
 ## 1. What a trait is
@@ -25,11 +37,10 @@ A typed key/value fact about an entity, optionally pointing at another entity an
 optionally carrying a strength.
 
 ```
-provides=private-sanitary          a room has its own bathroom
-needs=private-sanitary (required)  a family cannot accept a room without one
-needs=room-with-garden-view        a person needs a matching room capability
-provides=room-with-garden-view     a room offers that capability
-needs=ground-floor                 this person needs a ground-floor room
+needs-accessible=true (required)   a family requires an accessible room
+needs-private-sanitary=true        a family prefers a private bathroom
+needs=room-with-garden-view        a person needs a free-form matching token
+provides=room-with-garden-view     a room offers that free-form token
 separates-from=fam_27              this family must not share with family fam_27
 ```
 
@@ -56,8 +67,8 @@ preferred label, or no label:
 
 | Preference | Stored form |
 |---|---|
-| Required | `needs=private-sanitary`, strength `required` |
-| Preferred | `needs=private-sanitary`, strength `preferred` |
+| Required | `needs-private-sanitary=true`, strength `required` |
+| Preferred | `needs-private-sanitary=true`, strength `preferred` |
 | Indifferent | no row |
 
 `indifferent` stops being a value and becomes an absence, which is what it always
@@ -94,11 +105,10 @@ references validated where the mechanism requires them.
 ### Matching is a resolver lookup
 
 ```ts
-const providers = world.labels.byKeyValue('provides')     // value → entity ids
-const matches = world.labels
-  .live('needs')
-  .filter(need => need.strength !== null)
-  .flatMap(need => (providers.get(need.value) ?? []).map(p => [need.entity_id, p]))
+const resolved = resolve(world.labels, profile)
+const matches = resolved.constraints
+  .filter(constraint => constraint.kind === 'generic-needs-provides')
+  .flatMap(constraint => constraint.matches)
 ```
 
 The code illustrates the shape only; the constraint resolver owns scope checks,
@@ -119,16 +129,19 @@ before it returns a world. They are not authoritative inputs.
 
 ## 3. Capabilities come from labels
 
-A room's capability set is read from its `provides` labels. Properties such as
-`sanitary=private`, `floor=ground`, and `is-accessible=true` are labels too. A
-configured resolver may derive a capability from those labels, but the derived
+A room's normalized capability set is compiled by the resolver. It includes
+generic `provides` labels and profile capabilities derived from property labels
+such as `sanitary=private`, `floor=ground`, and `is-accessible=true`. A derived
 value is never stored as a competing column or manually assigned fact:
 
 ```ts
-function capabilities(room: Entity, labels: Label[]): ReadonlySet<string> {
-  const out = new Set<Trait>()
+function capabilities(room: Entity, labels: Label[], profile: Profile): ReadonlySet<string> {
+  const out = new Set<string>()
   for (const a of labelsFor(room.id, labels)) {
     if (a.key === 'provides') out.add(a.value)
+  }
+  for (const capability of profile.derivedCapabilities('room')) {
+    if (capability.derive(room)) out.add(capability.key)
   }
   return out
 }
@@ -263,13 +276,16 @@ rejected or reported as outside the active placement model.
 
 ### How modules consume constraints
 
-The resolver materialises labels into capabilities and active constraints once per
-derivation, including free-form organiser values that are absent from
-`profile.traits`. Each resolved constraint retains its source label
-identity (`entity_id`, `key`, canonical `value`) and event sequence for ordering,
-diagnostics, and display. `constraint_key` in module output is a derived reference
-to those labels, never a separate persisted decision id. Modules consume the
-resolved inputs; none re-implements matching:
+The resolver materialises labels into normalized capabilities and active
+constraints once per derivation, including free-form organiser values that are
+absent from `profile.traits`. A profile-trait requirement is compiled using its
+trait key, `satisfied_by`, strength, and configured score. A generic
+`needs`/`provides` pair is compiled using its fixed operator and matching value.
+Each resolved constraint retains its source label identity (`entity_id`, `key`,
+canonical `value`) and event sequence for ordering, diagnostics, and display.
+`constraint_key` in module output is a derived reference to those labels, never a
+separate persisted decision id. Modules consume the resolved inputs; none
+re-implements matching:
 
 | Module | Consumes |
 |---|---|

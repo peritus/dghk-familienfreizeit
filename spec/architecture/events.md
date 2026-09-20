@@ -226,6 +226,12 @@ ids, or structured values such as workshop rankings. For example:
 { entity_id: 'rm_07', key: 'provides', value: 'naehe_zum_eingang', strength: null, note: null }
 ```
 
+Profile-backed requirements use their explicit trait key and the canonical value
+defined by the profile mapping. For example, the active profile writes
+`key=needs-accessible value=accessible`; the resolver uses the trait's
+`satisfied_by: 'accessible'` metadata and does not rewrite this as
+`key=needs value=accessible`.
+
 Omitting the optional note is equivalent to `note: null`, including when replaying
 events and loading fixtures. Family-facing controls cannot set organiser notes.
 

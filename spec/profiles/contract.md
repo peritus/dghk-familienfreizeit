@@ -123,11 +123,18 @@ type. Builders accept these further fields where they apply:
 | `penalty` | `requirement`, `relation` | integer score, ≤ 0, when a `preferred` label is violated |
 | `family_facing` | all except `note` | the family control ([family preferences](../modules/family-preferences.md) §6) |
 | `organiser_only` | all | never rendered to families; excludes `family_facing` |
-| `aliases` | all | further keys accepted on replay and mapped to this trait, so a rename costs nothing |
+| `aliases` | all | further label keys accepted on replay and normalized to this trait key before validation; aliases never apply to generic resolver keys or values |
 | `sensitivity` | all | `normal` or `restricted`; restricted values never appear in shared or other-family views |
 
 A trait-specific score lives on its trait, next to the vocabulary it scores. Geometry and
 policy scores that no single trait owns live in module parameters.
+
+At profile compilation, a `requirement` trait becomes a resolver descriptor with
+its canonical trait key, `satisfied_by` capability key, scopes, legal strengths,
+and score terms. A `capability` trait becomes either a derived capability or an
+assigned capability descriptor; a trait with `derive` rejects direct assignment.
+These descriptors are consumed by the resolver and are not persisted as extra
+rows or converted into generic `needs`/`provides` labels.
 
 ### Organiser-supplied values
 

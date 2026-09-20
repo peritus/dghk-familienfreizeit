@@ -156,6 +156,39 @@ type SolverInput = Readonly<{
 }> & ModuleSolverInputs                  // arrays contributed by selected modules
 ```
 
+The resolver's normalized boundary is:
+
+```ts
+type SourceLabel = {
+  entity_id: EntityId
+  key: string
+  value: Json
+  set_seq: number
+}
+
+type ResolvedCapability = {
+  entity_id: EntityId
+  capability_key: string
+  source: 'profile-derived' | 'generic-provides'
+  source_label: SourceLabel | null
+}
+
+type ResolvedRequirement = {
+  holder_id: EntityId
+  capability_key: string | null
+  kind: 'profile-requirement' | 'generic-needs' | 'relation' | 'structural'
+  strength: 'required' | 'preferred' | null
+  weight: number | null
+  penalty: number | null
+  source_label: SourceLabel
+}
+```
+
+`profile-requirement` uses the profile trait's `satisfied_by` key; it does not
+become a generic `needs` label. Generic needs/provides records use their fixed
+operator keys and canonical matching values. Modules consume these normalized
+records and never inspect raw profile trait definitions or event payloads.
+
 `capabilities` and active constraints are materialised once by the resolver, from
 labels and profile derivations ([labels and constraints](labels-and-constraints.md) §3).
 Only labels/constraints consumed by selected solver stages and their applicable
