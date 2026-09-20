@@ -1,4 +1,4 @@
-import { canonicalEmail, canonicalJson, type Event, type JsonValue } from './types.js'
+import { canonicalEmail, canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
 
 export type EntityKind = 'family' | 'person'
 export type Entity = { id: string; kind: EntityKind; sort_key: number; created_seq: number; retired_seq: number | null }
@@ -16,21 +16,27 @@ export type KernelConfig = {
 type MutableWorld = { families: Map<string, Entity>; persons: Map<string, Entity>; labels: Map<string, Label>; emails: Map<string, string>; withdrawn: Set<string>; head_seq: number }
 
 export function derive(events: readonly Event[], config: KernelConfig = {}): KernelWorld {
-  validateEventStream(events, config)
+  const validatedEvents = normalizeEvents(events, config)
   const state: MutableWorld = { families: new Map(), persons: new Map(), labels: new Map(), emails: new Map(), withdrawn: new Set(), head_seq: 0 }
-  for (const event of events) applyEvent(state, event, config)
+  for (const event of validatedEvents) applyEvent(state, event, config)
   return { families: [...state.families.values()].sort(sortEntities), persons: [...state.persons.values()].sort(sortEntities), labels: [...state.labels.values()].sort((a, b) => a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key)), withdrawn_person_ids: [...state.withdrawn].sort(), head_seq: state.head_seq }
 }
 export function validateEventStream(events: readonly Event[], config: KernelConfig = {}): void {
+  normalizeEvents(events, config)
+}
+
+function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[] {
+  const validatedEvents = events.map((event) => parseEvent(event))
   let expectedSeq = 1
-  for (const event of events) {
+  for (const event of validatedEvents) {
     if (event.seq !== expectedSeq) throw new Error(`event sequence gap: expected ${expectedSeq}, got ${event.seq}`)
     const validator = config.event_value_validators?.[event.type]
     if (validator) { const error = validator(event.payload); if (error) throw new Error(error) }
     expectedSeq += 1
   }
   const state: MutableWorld = { families: new Map(), persons: new Map(), labels: new Map(), emails: new Map(), withdrawn: new Set(), head_seq: 0 }
-  for (const event of events) applyEvent(state, event, config)
+  for (const event of validatedEvents) applyEvent(state, event, config)
+  return validatedEvents
 }
 function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): void {
   if (event.seq !== state.head_seq + 1) throw new Error(`event sequence gap at ${event.seq}`)

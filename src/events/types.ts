@@ -3,7 +3,7 @@ import { z } from 'zod'
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
 
 const jsonValueSchema = z.custom<JsonValue>((value) => isJsonValue(value))
-const emailSchema = z.string().email().transform((value) => canonicalEmail(value))
+const emailSchema = z.string().trim().email().transform((value) => canonicalEmail(value))
 const localeSchema = z.enum(['de', 'en'])
 const roleSchema = z.string().min(1).max(64)
 const labelKeySchema = z.string().min(1).regex(/^[a-z][a-z0-9-]*$/)

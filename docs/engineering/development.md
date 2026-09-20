@@ -42,12 +42,13 @@ the task process; the Vite configuration reads them directly. No machine-specifi
 hostname or port is committed.
 
 `wrangler.jsonc` uses a local-only placeholder D1 id with `remote: false`. It needs
-no account, secrets, cloud database or migration to run M0. `/api/health` checks
-the actual local D1 binding, returning `200 {"status":"ok"}` or a sanitized `503`.
-Unimplemented API/auth routes return JSON 404, including top-level navigations;
-they cannot accidentally return the SPA shell. `/`, `/login`, `/family` and
-`/organiser` contain honest foundation placeholders, not authentication or domain
-features. The organiser placeholder is public and contains no private data.
+no account or hosted secrets to run the M0/M1 local foundation. `/api/health`
+checks the actual local D1 binding, returning `200 {"status":"ok"}` or a
+sanitized `503`. The Worker now provides M1 login, magic-link, principal, family,
+and organiser boundaries; remaining unimplemented API routes return JSON 404,
+including top-level navigations. `/`, `/login`, `/family` and `/organiser` still
+contain honest UI placeholders. The organiser placeholder is public and contains
+no private data.
 
 Hosted preview/prod deployment requires separate real D1 bindings, environment
 configuration and secrets under [deployment](../../spec/engineering/deployment.md). There is no
@@ -61,9 +62,10 @@ limits. Run `npm run check:docs` to validate local Markdown links and anchors;
 
 ## Implemented scope
 
-M0 delivers build/runtime wiring, a shared German shell, lazy organiser routing,
-copied design-system primitives, CI and a runnable preview task definition.
-It does not implement authentication, event persistence, migrations, profiles,
-solver, release control, email or domain screens. Open findings against this
-scope are not silently resolved by the scaffolding; see
+M0 delivered build/runtime wiring, a shared German shell, lazy organiser routing,
+copied design-system primitives, CI and a runnable preview task definition. M1
+adds the event kernel, local D1 schema, KDL fixtures, magic-link authentication
+and request authorization. Profiles, solver, release control, email delivery
+and domain screens remain future work. Open findings against this scope are not
+silently resolved by the scaffolding; see
 [the issue catalog](../../spec/issues/README.md).

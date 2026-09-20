@@ -29,7 +29,9 @@ without session cleanup.
 
 `/api/family/view` requires a family principal. Organiser routes return JSON 404
 to non-organisers. `/api/me` exposes only the current principal kind and identity
-needed by the shell.
+needed by the shell. `POST /api/events` sets the verified actor server-side,
+rejects stale heads, and permits family principals only to append events about
+their own family or people; organiser principals may append setup events.
 
 ## Limits
 

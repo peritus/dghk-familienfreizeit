@@ -4,6 +4,10 @@ import { isEventType, parsePayload, type Event, type EventType } from './types.j
 
 const fixedTimestamp = '2026-01-01T00:00:00.000Z'
 export function loadKdl(text: string, config: KernelConfig = {}): Event[] { const document = parse(text); const events = document.nodes.map((node, index) => nodeToEvent(node, index + 1)); derive(events, config); return events }
+export class TextFileEventSource {
+  constructor(private readonly text: string, private readonly config: KernelConfig = {}) {}
+  load(): Event[] { return loadKdl(this.text, this.config) }
+}
 function nodeToEvent(node: Node, defaultSeq: number): Event {
   const typeName = node.getName(); if (!isEventType(typeName)) throw new Error(`line ${defaultSeq}: unknown event type ${typeName}`); if (node.children !== null) throw new Error(`line ${defaultSeq}: child blocks are not allowed`)
   const payload: Record<string, unknown> = {}; let seq = defaultSeq; let at = fixedTimestamp; let actor = 'fixture'; let subject: string | null = null

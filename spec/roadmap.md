@@ -6,8 +6,9 @@ the documents linked from each milestone.
 
 The milestones are ordered by dependency. A milestone is complete only when its
 implementation, fixtures, tests, and operational requirements listed here are
-complete. Cross-cutting requirements are repeated in the milestones they affect
-and summarized in the final hardening milestone.
+complete. M1 is delivered; the remaining sections describe outstanding work.
+Cross-cutting requirements are repeated in the milestones they affect and
+summarized in the final hardening milestone.
 
 The prerequisite runtime foundation is documented in
 [implemented architecture](../docs/architecture/overview.md),

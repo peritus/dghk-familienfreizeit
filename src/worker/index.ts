@@ -1,9 +1,10 @@
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { derive } from '../events/fold.js'
-import { readEvents } from '../events/store.js'
-import { canonicalEmail } from '../events/types.js'
+import { appendEvents, readEvents, StaleHeadError } from '../events/store.js'
+import { canonicalEmail, parseEvent } from '../events/types.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
+import { canAppendEvent } from '../auth/authorization.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
 import { issueMagicLink, redeemMagicLink } from '../auth/service.js'
@@ -44,6 +45,31 @@ app.get('/api/me', async (context) => {
   const principal = await principalFromContext(context)
   if (!principal) { context.header('Set-Cookie', expiredSessionCookie()); return context.json({ error: 'unauthorized' }, 401) }
   return context.json({ principal })
+})
+
+app.post('/api/events', async (context) => {
+  const principal = await principalFromContext(context)
+  if (!principal) return context.json({ error: 'unauthorized' }, 401)
+  const body = await context.req.json<{ expected_head?: number; events?: Array<{ type: string; subject?: string | null; payload?: unknown }> }>().catch(() => null)
+  if (!body || typeof body.expected_head !== 'number' || !Number.isSafeInteger(body.expected_head) || body.expected_head < 0 || !Array.isArray(body.events)) return context.json({ error: 'invalid_request' }, 400)
+  const expectedHead: number = body.expected_head
+  const existing = await readEvents(context.env.DB)
+  const world = derive(existing)
+  const now = new Date().toISOString()
+  const drafts = body.events.map((draft) => ({ at: now, actor: principal.email, subject: draft.subject ?? null, type: draft.type, payload: draft.payload }))
+  try {
+    const events = drafts.map((draft, index) => {
+      const event = parseEvent({ ...draft, seq: expectedHead + index + 1 })
+      if (!canAppendEvent(principal, event, world)) throw new Error('forbidden')
+      return event
+    })
+    await appendEvents(context.env.DB, expectedHead, events)
+    return context.json({ head: expectedHead + events.length }, 201)
+  } catch (error) {
+    if (error instanceof Error && error.message === 'forbidden') return context.json({ error: 'forbidden' }, 403)
+    if (error instanceof StaleHeadError) return context.json({ error: 'stale_head', expected_head: error.expected, actual_head: error.actual }, 409)
+    return context.json({ error: 'invalid_event' }, 400)
+  }
 })
 
 app.get('/api/family/view', async (context) => {

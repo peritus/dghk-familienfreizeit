@@ -30,10 +30,10 @@ retired for future derivation.
 
 ## Development event source
 
-`loadKdl` accepts the restricted KDL fixture format: one top-level event node per
-line, named properties only, no child blocks, no duplicate properties, and
-deterministic fixture envelope defaults. It passes payload parsing and replay
-invariants through the same kernel path as D1.
+`loadKdl` and `TextFileEventSource` accept the restricted KDL fixture format: one
+top-level event node per line, named properties only, no child blocks, no duplicate
+properties, and deterministic fixture envelope defaults. They pass payload parsing
+and replay invariants through the same kernel path as D1.
 
 The KDL parser is an adapter dependency. The fold itself remains dependency-free;
 boundary validation may use Zod as defined by [D26](../../decisions.md#d26--validation-boundary-and-pure-domain-core).
