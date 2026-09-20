@@ -105,7 +105,7 @@ is evaluated once, at profile build.
 | `world_checks` | Diagnostics over resolved non-solver facts, with subjects, severity and check id; kept outside solver preflight. |
 | `release_scopes` | Canonical content accessors and subject attribution for kernel scope kinds defined in [release control](../application/release-control.md); no module-specific release mechanism. |
 | `change_kinds` | What `diff` reports for world facts or plan output, with subject/family attribution. Release control selects scope content differences; arbitrary world changes do not imply held work. |
-| `routes`, `screens` | Worker handlers and organiser or family screens. A route or screen of an unselected module does not exist in the build. |
+| `routes`, `screens` | Worker handlers and organiser or family screens. A module contributes a `screens` entry only for a route it renders as its own top-level screen ([§4](#4-composition) forbids two modules contributing the same route). Content a module adds inside another module's screen is described in prose against that screen's identity, not as a second `screens` entry for the same route — a contributing (non-owning) module's `ScreenDefinition` names the host screen it targets and carries no independent `route` value, so the collision check has nothing to compare for contributed content. A route or screen of an unselected module does not exist in the build. |
 | `family_controls` | Additional `control` kinds and module-owned control definitions for the preferences renderer ([family preferences](family-preferences.md)). |
 | `reports` | Report definitions with audience and sensitivity ([reports](../application/reports.md)). |
 | `emails` | Email kinds with their trigger and the plan data they may include. |

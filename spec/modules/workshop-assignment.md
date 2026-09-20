@@ -292,7 +292,7 @@ transition view. The transition compares the before and after derived plans.
 
 | Kind | Contribution |
 |---|---|
-| Screen | Intake, fill, cancellations, and fairness summary on `/organiser/workshops` ([UI-12](../ui/screens/workshops.md)); workshop rows in the plan diff |
+| Screen | Intake, fill, cancellations, and fairness summary panels in the workshops screen ([UI-12](../ui/screens/workshops.md), owned by [`workshops`](workshops.md)); workshop rows in the plan diff |
 | Family view | Workshops on the assignment page ([family view](../application/family-view.md) §1) |
 | Reports | Workshop rosters; shared workshop roster when the profile permits it; workshop part of the family information sheet ([reports](../application/reports.md) §3) |
 | Controls, emails | none; change emails read `workshop-assignment-changed` |

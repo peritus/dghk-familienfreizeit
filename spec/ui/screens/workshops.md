@@ -4,7 +4,7 @@
 
 Organisers edit workshop details and participation mode, inspect live sign-ups and
 interest counts, and review assigned-mode capacity, rankings and fairness.
-Route: `/organiser/workshops`. Governing specs: [workshops](../../modules/workshops.md), [workshop rankings](../../modules/workshop-rankings.md), and [workshop assignment](../../modules/workshop-assignment.md).
+Route: `/organiser/workshops`, owned by [workshops](../../modules/workshops.md). [Workshop rankings](../../modules/workshop-rankings.md) contributes the preference heatmap and [workshop assignment](../../modules/workshop-assignment.md) contributes intake, fill, cancellations, and fairness data shown on this screen.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
