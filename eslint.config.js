@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint'
 
 const browserFiles = ['src/app/**/*.{ts,tsx}', 'src/modules/*/app/**/*.{ts,tsx}']
 const workerFiles = ['src/worker/**/*.ts', 'src/modules/*/worker/**/*.ts']
-const pureFiles = ['src/derive/**/*.ts', 'src/solver/**/*.ts', 'src/config/**/*.ts', 'src/modules/**/*.ts', 'profiles/**/*.ts']
+const pureFiles = ['src/derive/**/*.ts', 'src/solver/**/*.ts', 'src/config/**/*.ts', 'src/modules/**/*.ts', 'profiles/**/*.ts', 'spec/profiles/**/*.example.ts']
 const naming = [
   'error',
   { selector: ['variable', 'function'], format: ['camelCase', 'PascalCase'], leadingUnderscore: 'allow' },
@@ -21,7 +21,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   { rules: { '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }] } },
   { files: ['**/*.{js,mjs}', '*config.ts', 'scripts/**/*.ts'], languageOptions: { globals: globals.node } },
-  { files: ['src/**/*.{ts,tsx}', 'profiles/**/*.ts'], rules: { '@typescript-eslint/naming-convention': naming } },
+  { files: ['src/**/*.{ts,tsx}', 'profiles/**/*.ts', 'spec/profiles/**/*.example.ts'], rules: { '@typescript-eslint/naming-convention': naming } },
   {
     files: browserFiles,
     languageOptions: { globals: globals.browser },
