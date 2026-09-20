@@ -6,9 +6,6 @@ severity: gap
 category: module:modules
 source: coherence-audit-2026-09-19, spec-review-2026-09-19
 related_decisions: []
-related_files:
-  - ../modules/contract.md
-  - ../architecture/overview.md
 opened: 2026-09-19
 ---
 
@@ -16,9 +13,9 @@ opened: 2026-09-19
 
 ## Problem
 
-Module contributions (`../modules/contract.md §52` region) combine domain
+Module contributions ([`modules/contract.md`](../../modules/contract.md) §52 region) combine domain
 registration, validation, Worker routes and application (React) components in
-one registry, while `../architecture/overview.md` requires a pure shared
+one registry, while [`architecture/overview.md`](../../architecture/overview.md) requires a pure shared
 derive/solver boundary. Eagerly importing a single registry could pull
 browser components into the Worker or Worker-only libraries into the client,
 despite the strict import boundaries the architecture doc otherwise
@@ -37,3 +34,8 @@ registries.
 
 1. Does the pure layer's "zero dependencies" rule permit a schema/validation
    library, or must it be dependency-free in the strict sense?
+
+## Related files
+
+- [modules/contract.md](../../modules/contract.md)
+- [architecture/overview.md](../../architecture/overview.md)

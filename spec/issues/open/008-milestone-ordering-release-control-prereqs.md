@@ -6,8 +6,6 @@ severity: gap
 category: process
 source: spec-review-2026-09-19
 related_decisions: [D16]
-related_files:
-  - ../roadmap.md
 opened: 2026-09-19
 ---
 
@@ -15,7 +13,7 @@ opened: 2026-09-19
 
 ## Problem
 
-M8/M9 (`../roadmap.md:156`) require communicated views and programme
+M8/M9 ([`roadmap.md:156`](../../roadmap.md)) require communicated views and programme
 admission, but the release-control machinery that makes those views safe to
 show only appears in M12. These milestones cannot safely expose draft state
 in the meantime — building them as currently ordered risks a window where
@@ -33,3 +31,7 @@ bypass D16 to satisfy an earlier screen-completion gate.
 1. Pull forward a minimal release-control read/write slice into M8/M9, or
    split those milestones into pre-M12 (private) and post-M12 (accepted)
    phases?
+
+## Related files
+
+- [roadmap.md](../../roadmap.md)

@@ -6,8 +6,6 @@ severity: contract-contradiction
 category: module:release-control
 source: spec-review-2026-09-19
 related_decisions: []
-related_files:
-  - ../application/release-control.md
 opened: 2026-09-19
 ---
 
@@ -15,7 +13,7 @@ opened: 2026-09-19
 
 ## Problem
 
-`../application/release-control.md §7` (Detailed preview and confirmation) permits
+[`application/release-control.md`](../../application/release-control.md) §7 (Detailed preview and confirmation) permits
 confirmation of an older reviewed prefix despite newer events, while §5
 requires the prospective family composition to satisfy mode, capacity and
 participation invariants. Example: a mode-change review clears incompatible
@@ -44,4 +42,8 @@ an implicit implementation choice.
 
 1. Atomic revalidation against live participation at confirm time,
    invalidate-on-any-head-change, or block live writes during review — which
-   concurrency rule should `../application/release-control.md` adopt?
+   concurrency rule should [`application/release-control.md`](../../application/release-control.md) adopt?
+
+## Related files
+
+- [application/release-control.md](../../application/release-control.md)
