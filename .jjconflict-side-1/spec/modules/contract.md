@@ -28,6 +28,18 @@ profile supplies policy. A module never owns occasion vocabulary; it names the
 Nothing about the kernel is optional, so listing it in a profile would add noise
 without adding a choice. Everything a profile can choose is a module.
 
+### Kernel/profile boundary
+
+M1 consumes a narrow, already-built validation view from the active profile. The
+view supplies entity kinds, label schemas and ownership, replay aliases, event
+value validators, and resolver descriptors such as requirement-to-capability
+relationships. The kernel uses this view for append validation, replay, and
+derivation; it does not build the profile or register modules.
+
+M2 owns `defineOccasionProfile`, trait builders, module registration, dependency
+checking, contribution composition, configuration hashing, and construction of
+this validation view. The view is the stable boundary between those milestones.
+
 ## 2. Authority
 
 A module specification is the single authoritative description of its mechanism:

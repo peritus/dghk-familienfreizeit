@@ -49,6 +49,13 @@ The module list is explicit. There are no hidden presets and no runtime feature
 flags that can change solver semantics after deployment. Module order in the list
 has no meaning; stage order comes from the modules ([modules](../modules/contract.md) §4.1).
 
+The kernel does not depend on the profile builder's implementation. Before M2's
+composition work is complete, M1 consumes the profile's validation view: entity
+kinds, label schemas, aliases, event value validators, and compiled resolver
+descriptors. M2 constructs that view from the typed profile and selected module
+contributions; M1 validates and derives against the view without inspecting raw
+profile-builder or module-parameter objects.
+
 ### Meta
 
 | Field | Meaning |

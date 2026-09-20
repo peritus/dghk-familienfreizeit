@@ -277,6 +277,11 @@ wrongly:
 - every selected module's `requires` is satisfied and stage order has no cycle;
 - `defineOccasionProfile` throws on each of the above when deliberately broken.
 
+The M1/M2 boundary also has contract coverage: a kernel test supplies a minimal
+validation view and verifies append/replay behavior without importing profile
+builders or module registration; a profile test verifies that M2 constructs the
+same view from typed traits and selected modules.
+
 Each module additionally ships contract tests and names the fixtures a profile
 selecting it must supply (module specification §12).
 

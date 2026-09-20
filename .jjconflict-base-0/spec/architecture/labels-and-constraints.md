@@ -167,8 +167,8 @@ with a derivation rejects direct `provides` assignments at append time.
 `LabelSet` is validated against fixed resolver and profile schemas before it is
 appended ([03-events](events.md)). The checks are:
 
-1. **Key exists** in the fixed resolver vocabulary, active profile vocabulary, or
-   selected module vocabulary.
+1. **Key exists** in the fixed resolver vocabulary or in the active profile
+   validation view supplied by the selected profile and modules.
 2. **Scope matches** the entity kind and operator.
 3. **Value shape matches** the resolver mechanism and entity references resolve
    where required; organiser matching tokens may otherwise be free-form.

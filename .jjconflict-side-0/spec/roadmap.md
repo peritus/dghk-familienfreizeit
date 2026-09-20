@@ -30,6 +30,9 @@ Specification coverage: [architecture](architecture/overview.md), [data model](a
 - Add migrations for the event log and operational tables only.
 - Add the KDL event-log loader, canonical parsing rules, and the development-only
   text event source.
+- Define the narrow kernel-facing profile validation view: entity kinds, label
+  schemas, aliases, event value validators, and resolver descriptors. M1 consumes
+  this view but does not implement profile composition or module registration.
 
 Acceptance: valid events append atomically, stale heads are rejected, replay is
 deterministic, operational records do not enter the domain world, and the

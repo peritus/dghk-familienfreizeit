@@ -72,6 +72,10 @@ redundant and is not — it catches the case where a schema changed and old even
 no longer parse, which is the moment you need to write a migration rather than
 discover the problem in the solver.
 
+Profile-dependent payload validation enters through the kernel validation view
+described in [the module contract](../modules/contract.md#kernelprofile-boundary).
+The event kernel does not import profile builders or module registration code.
+
 ## Rules for payloads
 
 1. **Payloads carry values, not references to mutable state.** `PersonAdded`
