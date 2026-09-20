@@ -98,7 +98,7 @@ Module-owned keys and parameters:
 | Key | Values in this profile |
 |---|---|
 | `room-type` | `standard`, `apartment`, `bungalow`, `schlaffass` |
-| `floor` | `ground`, `1`, `2`; none for bungalow and Schlaffass rooms |
+| `floor` | `ground`, `first`, `second`; none for bungalow and Schlaffass rooms |
 | `bed-type` | `single`, `double` |
 | `designation` | `general`, `staff`, `blocked` |
 

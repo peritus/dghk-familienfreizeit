@@ -1,7 +1,7 @@
 ---
 id: "002"
 title: Active profile's floor values fail their own module's kebab-case validation
-status: open
+status: resolved
 severity: build-blocking
 category: module:room-inventory
 source: coherence-audit-2026-09-19
@@ -33,10 +33,25 @@ enum values from D18's kebab-case rule in [`room-inventory.md`](../../modules/ro
 change and should only be taken if there's a real reason floor numbers need
 to render as bare digits somewhere.
 
-## Open questions
+## Resolution
 
-1. Rename to `first`/`second` (or `floor-1`/`floor-2`), or exempt numeric
-   enum values in [`room-inventory.md`](../../modules/room-inventory.md) §3 and D18?
+Renamed `'1'`/`'2'` to `'first'`/`'second'` — reads naturally next to the
+existing `'ground'` value and avoids the `floor-1`/`floor` stutter that
+would result from the other option, since the property these values fill is
+itself already named `floor`.
+
+Updated in three places:
+- [`profiles/familienfreizeit-2027.example.ts`](../../profiles/familienfreizeit-2027.example.ts): the `floors` array and the
+  `copy.floors` object keys.
+- [`profiles/familienfreizeit-2027.md`](../../profiles/familienfreizeit-2027.md): the documented `floor` value list.
+- [`modules/room-inventory.md:150`](../../modules/room-inventory.md): a KDL illustration used `floor="1"`, the same
+  violation in example form; updated to `floor="first"`.
+
+A repository-wide search confirmed no other file sets a bare `'1'`/`'2'`
+floor value (the unrelated `room-adjacency.md` `same_floor: 1 | 2 | 3` is a
+deferred-idea numeric distance parameter, not this enum, and was left
+untouched). No decision change was needed — the profile now conforms to the
+kebab-case rule it was already violating.
 
 ## Related files
 

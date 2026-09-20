@@ -385,15 +385,15 @@ export default defineOccasionProfile({
 
   modules: [
     roomInventory({
-      floors: ['ground', '1', '2'],
+      floors: ['ground', 'first', 'second'],
       room_types: ['standard', 'apartment', 'bungalow', 'schlaffass'],
       bed_types: ['single', 'double'],
       designations: ['general', 'staff', 'blocked'],
       copy: {
         floors: {
           'ground': { de: 'Erdgeschoss', en: 'Ground floor' },
-          '1': { de: '1. Stock', en: '1st floor' },
-          '2': { de: '2. Stock', en: '2nd floor' },
+          'first': { de: '1. Stock', en: '1st floor' },
+          'second': { de: '2. Stock', en: '2nd floor' },
         },
         room_types: {
           'standard': { de: 'Zimmer', en: 'Room' },

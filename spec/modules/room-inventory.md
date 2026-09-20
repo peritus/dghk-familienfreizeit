@@ -147,7 +147,7 @@ All inventory events are organiser-only.
 
 ```kdl
 BuildingAdded building_id=bld_haupthaus name="Haupthaus" sort_key=1
-RoomAdded room_id=rm_08 building_id=bld_haupthaus number="8" floor="1" room_type=standard sort_key=8
+RoomAdded room_id=rm_08 building_id=bld_haupthaus number="8" floor="first" room_type=standard sort_key=8
 BedAdded bed_id=bed_08-a room_id=rm_08 label="8-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_08-b room_id=rm_08 label="8-B" bed_type=single sleeps=1 sort_key=2
 RoomDesignationChanged room_id=rm_08 designation=staff reason=#null
