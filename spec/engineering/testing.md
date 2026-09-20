@@ -298,6 +298,11 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
   an empty matching token fails append validation.
 - `provides=my-ad-hoc-thing` and `needs=my-ad-hoc-thing` match without a profile
   vocabulary entry, definition event, or deployment.
+- `key=needs-accessible value=accessible` resolves through the profile trait's
+  `satisfied_by` capability and never becomes a generic `needs` label.
+- A profile-derived capability is present in normalized resolver output without
+  creating a persisted `provides` label; assigning `provides=accessible` to a
+  derived capability is rejected.
 - Required and preferred needs have distinct hard/soft behavior. Multiple
   providers leave a candidate set; the first provider is not silently pinned.
 - `fam_42 excludes=rm_14` prevents placement there in every solver phase, even

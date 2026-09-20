@@ -65,6 +65,10 @@ None.
 
 None of its own. Controls emit `LabelSet` and `LabelCleared` through the family
 routes, authorised per [labels and constraints](../architecture/labels-and-constraints.md) §4.
+For a profile trait, the control uses that trait's canonical label key and value
+schema; it does not emit a generic `needs` or `provides` label. A tri-state
+requirement therefore emits the trait key with `strength=required` or
+`strength=preferred`, and clears that same key for the indifferent state.
 
 ## 6. Labels and trait roles
 

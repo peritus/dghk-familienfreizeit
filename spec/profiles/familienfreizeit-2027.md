@@ -144,6 +144,12 @@ not a booking or billing rule.
 | `family-note` | property | family | free text the family writes and organisers read |
 | `organiser-note` | note | family, person, room, workshop | organiser-only, restricted; the solver never reads it |
 
+Requirement controls write the profile trait key directly. For example, a
+required accessible-room preference is the `LabelSet` form
+`key=needs-accessible value=accessible strength=required`; the resolver uses the
+trait's `satisfied_by` metadata to match the derived `accessible` capability.
+It is not stored as `key=needs value=accessible`.
+
 Keep-apart relations are never visible to families, which is why `apart-from` is
 both organiser-only and restricted. Cross-family co-rooming belongs to the
 separate sleeping-parties module.

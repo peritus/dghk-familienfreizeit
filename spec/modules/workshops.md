@@ -168,7 +168,9 @@ label remains possible even when its target is cancelled or the person is now
 ineligible. Repeating the same live label is idempotent and consumes no extra place.
 
 Eligibility requires a non-withdrawn person, an allowed role, the configured audience
-rule, age bounds at the occasion start, and applicable required resolver decisions.
+rule, age bounds at the occasion start, and applicable required normalized resolver
+decisions. Profile-trait requirements and generic needs/provides constraints enter
+through the same resolver output.
 The same policy serves assigned and live modes. Interest is non-binding and does
 not reserve a slot or consume capacity. People can express interest in several
 workshops in one slot. Shared views expose no interest names; a family's own choices

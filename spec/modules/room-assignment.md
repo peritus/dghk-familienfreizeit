@@ -70,8 +70,10 @@ Module-owned label keys: none.
 | Keep apart | `keep_apart_trait` | `relation`, operator `separates-from`, scopes `family` or `person`, symmetry `implied-mutual`, strengths `required` and `preferred` |
 | No bed demand | `no_bed_trait` | `property`, scope `person`, boolean |
 
-Room assignment interprets every requirement, capability, exclusion, and separation
-decision applicable to rooms or places, including free-form organiser labels. A
+Room assignment consumes the normalized requirements, capabilities, exclusions,
+and separations produced by the resolver ([solver contract](../architecture/solver-contract.md) §2).
+It does not interpret raw profile trait keys or event payloads. Free-form organiser labels
+are included through the same normalized boundary. A
 required `separates-from` relation prunes rooms that contain the named other family.
 Grouping relations for sleeping placement are not active in the current module set.
 
@@ -124,8 +126,9 @@ room or place, in source event sequence, entity id, key, and canonical value ord
    A required decision that supersedes a retained placement is recorded as a
    required move.
 
-`provides` adds a capability; `excludes` removes a feasible target. Preferred
-decisions contribute soft terms and never force phase-1 placement. A plan with
+Normalized capabilities and requirements determine feasible targets;
+`excludes` removes a feasible target. Preferred decisions contribute soft terms
+and never force phase-1 placement. A plan with
 unresolved conflicts is computed for diagnosis, but communication is blocked until
 the error findings are resolved ([events](../architecture/events.md), `Communicated`).
 

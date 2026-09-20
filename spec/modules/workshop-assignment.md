@@ -147,8 +147,10 @@ eligible(person, workshop) :=
  and all applicable required resolver decisions allow this person and workshop
 ```
 
-The last check includes free-form needs/provides matching and `excludes` targeting
-this workshop. A family-scoped decision affects its people through the resolver.
+The last check consumes normalized resolver constraints, including profile-trait
+requirements, free-form needs/provides matching, and `excludes` targeting this
+workshop. A family-scoped decision affects its people through the resolver; this
+module does not interpret raw trait keys.
 Eligibility and capacity apply in every step, including explicit placement,
 fill. A required decision requesting an ineligible
 workshop produces a conflict; it does not bypass these checks.
