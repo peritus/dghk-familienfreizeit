@@ -100,7 +100,18 @@ strictest-strength union of the family's and its members' room requirements.
 remains one placement unit. A no-bed person still occupies the family's room but
 does not occupy a generated place.
 
-#### Phase 0 — required placement decisions
+#### Phase 0 — retain valid previous placements
+
+Seed placements from the `before` plan supplied by
+[`deriveTransition`](../architecture/solver-contract.md) when the family, room,
+capacity, designation, requirements, exclusions, and keep-apart relations remain
+valid. New or invalidated families are left unplaced. These retained placements
+are provisional: a feasible required placement decision supersedes a retained
+placement for the same family and releases its previous capacity. A first
+allocation, or a transition without a compatible prior assignment, has no
+retained placements and proceeds straight to phase 1.
+
+#### Phase 1 — required placement decisions
 
 For each active required positive placement decision that resolves to a particular
 room or place, in source event sequence, entity id, key, and canonical value order:
@@ -110,13 +121,15 @@ room or place, in source event sequence, entity id, key, and canonical value ord
    against the family and target. If any fails, record a conflict, skip, and trace.
 3. Otherwise place the family and mark it placed. Later decisions for an already
    placed family either agree or produce a conflict, never a second assignment.
+   A required decision that supersedes a retained placement is recorded as a
+   required move.
 
 `provides` adds a capability; `excludes` removes a feasible target. Preferred
-decisions contribute soft terms and never force phase-0 placement. A plan with
+decisions contribute soft terms and never force phase-1 placement. A plan with
 unresolved conflicts is computed for diagnosis, but communication is blocked until
 the error findings are resolved ([events](../architecture/events.md), `Communicated`).
 
-#### Phase 1 — forced placements, to fixpoint
+#### Phase 2 — forced placements, to fixpoint
 
 ```text
 repeat:
@@ -131,20 +144,22 @@ repeat:
 until not changed, or iterations > family count
 ```
 
-#### Phase 2 — sorted greedy
+#### Phase 3 — sorted greedy
 
 Sort remaining families by required priority, feasible room count, `bed_demand`
 descending, lowest `family_id`, then the canonical family key. Score each feasible
 room and place the highest-scoring one, tracing the runners-up.
 
-#### Phase 3 — bounded repair
+#### Phase 4 — bounded repair
 
-Try deterministic pairwise swaps of placed families for at most
-`max_repair_passes`. A swap is accepted only when both placements remain feasible
-and the total score strictly improves. Required targets, exclusions, and
-keep-apart relations remain binding.
+Try deterministic pairwise swaps of placed families — retained or newly placed —
+for at most `max_repair_passes`. A swap is accepted only when both placements
+remain feasible and the total score strictly improves. Required targets,
+exclusions, and keep-apart relations remain binding. A retained placement is
+moved only when this phase or phase 1 finds it necessary — stable sorting in
+phase 3 does not by itself justify displacing it.
 
-#### Phase 4 — the unplaceable
+#### Phase 5 — the unplaceable
 
 For each unplaced family, evaluate every room and report the most common blocking
 rule and closest near-miss:
@@ -229,7 +244,15 @@ wholly unplaced.
 - No-bed people receive their family's room but no generated place, and do not
   consume bed capacity.
 - Required placement decisions apply in source event order and never create a second assignment.
+- An unchanged prospective event set retains every valid prior placement.
+- Capacity loss or invalidation moves the minimum necessary set of families under
+  the documented bounded-repair procedure.
+- A newly arriving family does not displace an existing placement when a feasible
+  alternative room exists.
+- A required decision that supersedes a retained placement is recorded as a
+  required move.
 - Pairwise repair preserves all hard rules.
+- A first allocation without a previous plan follows the initial-allocation path.
 - A whole-family fixture produces stable assignments and a readable trace.
 - Sleeping-party and child-room fixtures belong to their separate module tests.
 

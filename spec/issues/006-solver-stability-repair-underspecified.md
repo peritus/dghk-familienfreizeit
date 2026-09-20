@@ -1,7 +1,7 @@
 ---
 id: "006"
 title: Room/workshop assignment don't fully realize D4's stability contract
-status: needs-decision
+status: resolved
 severity: contract-contradiction
 category: kernel
 source: coherence-audit-2026-09-19, spec-review-2026-09-19
@@ -44,3 +44,37 @@ to move.
    `derive(events, config)`?
 2. What are the bounded-repair limits, and should D4 be revisited if they
    turn out to be impractical?
+
+## Resolution
+
+1. The deterministic anchor already existed: `deriveTransition` (solver
+   contract, `spec/architecture/solver-contract.md:15-33`) derives `before`
+   from the committed event-log prefix and `after` from the prospective log —
+   the event log remains the only persisted domain state, so no mutable
+   previous-plan cache is introduced. Workshop assignment's Step 0 already
+   consumed this correctly.
+
+2. Room assignment was missing the previous-placement retention phase that
+   workshop assignment already had. Added a new **Phase 0 — retain valid
+   previous placements** to `spec/modules/room-assignment.md`, seeded from
+   `deriveTransition`'s `before` plan exactly as workshop assignment's Step 0
+   is, and renumbered the remaining phases (required decisions, forced
+   placements, sorted greedy, bounded repair, unplaceable) to 1 through 5.
+   Phase 1 (required decisions) now records a decision that supersedes a
+   retained placement as a required move, and phase 4 (bounded repair)
+   clarifies that a retained placement moves only when phase 1 or phase 4
+   itself finds it necessary — stable sorting in phase 3 does not by itself
+   justify displacing it. Added retention/repair test fixtures to the
+   module's test list mirroring workshop assignment's ("unchanged prospective
+   event set retains every valid prior placement", "capacity loss moves the
+   minimum necessary set", "a new family does not displace an existing
+   placement when a feasible alternative exists").
+
+   Bounded-repair limits stay a per-profile numeric configuration
+   (`max_repair_passes`), same as workshop assignment — the contract bounds
+   the *mechanism* (deterministic pairwise swaps, capped passes, no size
+   requirement), not a fixed number the spec pins outright. No evidence
+   surfaced that this bound is impractical, so D4 does not need revisiting.
+
+No D4 boundary was changed — this fully realizes D4's existing bounded-repair
+requirement for room assignment rather than reopening it.
