@@ -353,9 +353,7 @@ not clash with React, Hono, zod, and the DOM, which are all camelCase.
 
 Vocabulary identifiers are values, not fields. They appear inside data
 (`LabelSet key=apart-from`) and name things a person refers to in review, the trace,
-and the constraint screen. Setup-event payload fields that the fold turns into labels
-change only their separator: the payload field `does_not_need_a_bed` becomes the
-label key `does-not-need-a-bed`.
+and the constraint screen.
 
 In KDL a kebab-case identifier is a valid bare value, so vocabulary needs no quoting
 in event logs:

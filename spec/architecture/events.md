@@ -83,13 +83,34 @@ discover the problem in the solver.
 4. **No event ever contains a secret.** No tokens, no hashes of tokens, no
    session ids.
 
-Setup event payloads are complete command inputs, not a second data model. The
-fold creates the typed entity identity and emits the payload's mutable
-values as labels, under the kebab-case form of the field name (D18). For example,
-`PersonAdded.given_name` and `birthdate` become the labels `given-name` and
-`birthdate` on the new person, and `RoomAdded.room_type` becomes `room-type` on the
-room. Occasion-specific config defines
-which labels are legal and how the resolver uses them.
+Setup event payloads are complete command inputs, not a second data model. Each
+event or module declares an explicit fold mapping for its fields. A mapping marks
+each field as identity-only or assigns its canonical stored label key; there is
+no implicit payload-field-to-label conversion rule. The same mapping is used when
+appending and replaying. Occasion-specific config defines which resulting labels
+are legal and how the resolver uses them.
+
+For a full restatement, a null field means that its mapped label is absent and
+an omitted field is valid only when the event schema explicitly permits omission.
+An update replaces the complete set of labels owned by that event family rather
+than merging with the previous payload. Labels from other event families and
+ordinary `LabelSet` events are preserved. Historical aliases normalize to the
+canonical label key before ownership, cardinality, and resolver validation; an
+alias must not collide with a canonical key or another alias.
+
+The kernel mappings are:
+
+| Event | Identity-only fields | Explicit label mappings | Other behavior |
+|---|---|---|---|
+| `FamilyInvited` | `family_id` | `display_name` → `display-name`; `email` → `email`; `locale` → `locale` | creates the family |
+| `FamilyEmailChanged` | `family_id` | `new_email` → `email` | `old_email` is history-only; replaces the current email label |
+| `PersonAdded` | `person_id` | `family_id` → `member-of`; `given_name` → `given-name`; `family_name` → `family-name`; `birthdate` → `birthdate`; `role` → `role` | creates the person |
+| `PersonUpdated` | `person_id` | the same mappings as `PersonAdded` | full replacement of setup-owned person labels |
+| `PersonWithdrawn` | `person_id` | none | `reason` is history-only; withdrawal is lifecycle state |
+
+The `LabelSet` and `LabelCleared` payloads already carry their canonical `key`
+explicitly and therefore do not use setup-event mappings. A profile trait may
+describe any resulting label key, but the trait does not alter the event mapping.
 
 ---
 

@@ -36,6 +36,11 @@ Conventions:
 - Label values are canonical JSON scalars or objects, validated by occasion config.
 - `sort_key` is the deterministic ordering anchor for every solver input.
 
+Labels are stored domain facts emitted by events. Traits are profile-defined
+schemas and resolver metadata over those label keys; a fold emits labels and
+never creates traits. Event and module contracts explicitly map payload fields to
+label keys, so the data model does not infer a label key from a field name.
+
 ## 1. The write side
 
 One table. It is the source of truth and the only domain data that is stored.
@@ -148,6 +153,12 @@ type Label = {
 The world exposes the latest uncleared value for each configured label, indexed
 by entity and by key and value. Keeping `set_seq` and `cleared_seq` makes replay
 and temporal derivation explicit; the event log remains canonical.
+
+Setup-owned labels are replaced as a group by their full-restatement event.
+Labels from other event families and ordinary `LabelSet` events are independent
+and remain in the world. Semantic relationship labels such as `member-of` and
+`located-in` are declared by the event or module mapping; they are not inferred
+by application lookups over event payloads.
 
 Notes remain in the derived organiser world for display. The label's `set_seq`
 links to its event's existing author and timestamp; no decision entity or metadata
