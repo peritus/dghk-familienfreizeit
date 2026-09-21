@@ -52,6 +52,13 @@ export type LabelSchema = {
   validate?: (value: JsonValue) => string | null
   scopes?: readonly string[]
   cardinality?: 'zero-or-one' | 'exactly-one' | 'zero-or-more'
+  /**
+   * Authorization-only precursor to the full `family_facing` control contract
+   * (spec/modules/family-preferences.md §6): whether a family principal may
+   * LabelSet/LabelCleared this key on entities it owns. Superseded by a
+   * `family_facing` declaration once that module exists.
+   */
+  family_writable?: boolean
 }
 
 export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }

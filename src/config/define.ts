@@ -24,6 +24,13 @@ type TraitBase = {
   cardinality?: Cardinality
   aliases?: readonly string[]
   organiser_only?: boolean
+  /**
+   * Authorization-only precursor to the full `family_facing` control contract
+   * (spec/modules/family-preferences.md §6): whether a family may
+   * LabelSet/LabelCleared this trait's key on entities it owns. Mutually
+   * exclusive with `organiser_only`.
+   */
+  family_writable?: boolean
   valid_for?: (entity: { label(key: string): JsonValue | undefined }) => boolean | LocalizedText
 }
 
@@ -211,6 +218,8 @@ function validateTraits(traits: Record<string, Trait>, meta: ProfileMeta): void 
     }
     if (trait.kind === 'property' && trait.copy && trait.value.kind !== 'enum')
       throw new Error(`trait ${key} copy requires enum value`)
+    if (trait.organiser_only && trait.family_writable)
+      throw new Error(`trait ${key} cannot be both organiser_only and family_writable`)
     for (const evaluator of [
       trait.valid_for,
       trait.kind === 'capability' ? trait.derive : undefined,
@@ -273,6 +282,7 @@ function validationView(
     aliases: trait.aliases,
     scopes: trait.scopes,
     cardinality: trait.cardinality,
+    family_writable: trait.family_writable,
     validate: (value) => validateValueValue(trait.value, value),
   }))
   for (const module of modules)

@@ -24,6 +24,10 @@ export default mergeConfig(
           extends: true,
           test: { name: 'kernel', include: ['test/events/**/*.test.ts'] },
         },
+        {
+          extends: true,
+          test: { name: 'config', include: ['test/config/**/*.test.ts'] },
+        },
       ],
     },
   }),

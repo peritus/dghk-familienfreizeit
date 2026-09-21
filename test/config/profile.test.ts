@@ -25,7 +25,7 @@ describe('occasion profile', () => {
   test('rejects invalid vocabulary and impure evaluators', () => {
     expect(() =>
       defineOccasionProfile({
-        ...meta,
+        meta,
         traits: {
           bad_key: property({ title: 'Bad', scopes: ['person'], value: enumOf(['not valid']) }),
         },
@@ -33,7 +33,7 @@ describe('occasion profile', () => {
     ).toThrow(/kebab/)
     expect(() =>
       defineOccasionProfile({
-        ...meta,
+        meta,
         traits: {
           clock: capability({
             title: 'Clock',
@@ -61,19 +61,49 @@ describe('occasion profile', () => {
       role: property({ title: 'Role', scopes: ['person'], value: enumOf(['adult']) }),
       'room-capability': capability({ title: 'Room', scopes: ['family'], value: enumOf(['yes']) }),
     }
-    expect(() => defineOccasionProfile({ ...meta, traits, modules: [assignment({})] })).toThrow(
+    expect(() => defineOccasionProfile({ meta, traits, modules: [assignment({})] })).toThrow(
       /requires inventory/,
     )
     expect(() =>
-      defineOccasionProfile({ ...meta, traits, modules: [inventory({}), assignment({})] }),
+      defineOccasionProfile({ meta, traits, modules: [inventory({}), assignment({})] }),
     ).not.toThrow()
     expect(() =>
       defineOccasionProfile({
-        ...meta,
+        meta,
         traits,
         modules: [inventory({}), assignment({ room_trait: 'role' })],
       }),
     ).toThrow(/wrong trait shape/)
+  })
+  test('threads family_writable onto the validation view and rejects it with organiser_only', () => {
+    const profile = defineOccasionProfile({
+      meta,
+      traits: {
+        role: property({
+          title: 'Role',
+          scopes: ['person'],
+          value: enumOf(['adult']),
+          family_writable: true,
+        }),
+      },
+    })
+    expect(
+      profile.validation_view.label_schemas?.find(({ key }) => key === 'role')?.family_writable,
+    ).toBe(true)
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits: {
+          role: property({
+            title: 'Role',
+            scopes: ['person'],
+            value: enumOf(['adult']),
+            organiser_only: true,
+            family_writable: true,
+          }),
+        },
+      }),
+    ).toThrow(/organiser_only and family_writable/)
   })
   test('rejects duplicate module contributions', () => {
     const module = (id: string) => ({
@@ -83,7 +113,7 @@ describe('occasion profile', () => {
       contributions: { events: [{ type: 'Setup' }] },
     })
     expect(() =>
-      defineOccasionProfile({ ...meta, traits: {}, modules: [module('one'), module('two')] }),
+      defineOccasionProfile({ meta, traits: {}, modules: [module('one'), module('two')] }),
     ).toThrow(/duplicate contribution/)
   })
 })
