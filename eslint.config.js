@@ -1,5 +1,6 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import stylistic from '@stylistic/eslint-plugin'
 import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from 'typescript-eslint'
 
@@ -37,6 +38,21 @@ export default tseslint.config(
   { ignores: ['dist/**', '.wrangler/**', 'node_modules/**', 'worker-configuration.d.ts'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  { plugins: { '@stylistic': stylistic } },
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@stylistic/padding-line-between-statements': [
+        'error',
+        {
+          blankLine: 'always',
+          prev: ['type', 'interface', 'enum', 'class', 'function'],
+          next: ['type', 'interface', 'enum', 'class', 'function'],
+        },
+        { blankLine: 'always', prev: 'export', next: 'export' },
+      ],
+    },
+  },
   { rules: { '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }] } },
   {
     files: ['**/*.{js,mjs}', '*config.ts', 'scripts/**/*.ts'],

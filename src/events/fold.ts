@@ -1,6 +1,7 @@
 import { canonicalEmail, canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
 
 export type EntityKind = 'family' | 'person'
+
 export type Entity = {
   id: string
   kind: EntityKind
@@ -8,6 +9,7 @@ export type Entity = {
   created_seq: number
   retired_seq: number | null
 }
+
 export type Label = {
   entity_id: string
   key: string
@@ -16,6 +18,7 @@ export type Label = {
   note: string | null
   set_seq: number
 }
+
 export type KernelWorld = {
   families: Entity[]
   persons: Entity[]
@@ -23,12 +26,15 @@ export type KernelWorld = {
   withdrawn_person_ids: string[]
   head_seq: number
 }
+
 export type LabelSchema = {
   key: string
   aliases?: readonly string[]
   validate?: (value: JsonValue) => string | null
 }
+
 export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }
+
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
   label_schemas?: readonly LabelSchema[]
@@ -69,6 +75,7 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     head_seq: state.head_seq,
   }
 }
+
 export function validateEventStream(events: readonly Event[], config: KernelConfig = {}): void {
   normalizeEvents(events, config)
 }
@@ -97,6 +104,7 @@ function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[
   for (const event of validatedEvents) applyEvent(state, event, config)
   return validatedEvents
 }
+
 function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): void {
   if (event.seq !== state.head_seq + 1) throw new Error(`event sequence gap at ${event.seq}`)
   switch (event.type) {
@@ -168,6 +176,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
   }
   state.head_seq = event.seq
 }
+
 function addPerson(state: MutableWorld, event: Extract<Event, { type: 'PersonAdded' }>): void {
   const { person_id: personId, family_id: familyId } = event.payload
   requireEntity(state.families, familyId, 'family')
@@ -175,6 +184,7 @@ function addPerson(state: MutableWorld, event: Extract<Event, { type: 'PersonAdd
   state.persons.set(personId, entity(personId, 'person', event.seq))
   writePersonLabels(state, event)
 }
+
 function updatePerson(state: MutableWorld, event: Extract<Event, { type: 'PersonUpdated' }>): void {
   requireEntity(state.persons, event.payload.person_id, 'person')
   requireEntity(state.families, event.payload.family_id, 'family')
@@ -182,6 +192,7 @@ function updatePerson(state: MutableWorld, event: Extract<Event, { type: 'Person
     replaceLabels(state, event.payload.person_id, key)
   writePersonLabels(state, event)
 }
+
 function writePersonLabels(
   state: MutableWorld,
   event: Extract<Event, { type: 'PersonAdded' | 'PersonUpdated' }>,
@@ -200,6 +211,7 @@ function writePersonLabels(
   setLabel(state, event, personId, 'birthdate', birthdate, null, null)
   setLabel(state, event, personId, 'role', role, null, null)
 }
+
 function setLabel(
   state: MutableWorld,
   event: Event,
@@ -218,6 +230,7 @@ function setLabel(
     set_seq: event.seq,
   })
 }
+
 function setConfiguredLabel(
   state: MutableWorld,
   event: Event,
@@ -234,6 +247,7 @@ function setConfiguredLabel(
   if (error) throw new Error(error)
   setLabel(state, event, entityId, canonicalKey, value, strength, note)
 }
+
 function configuredLabelKey(config: KernelConfig, key: string): string {
   const canonicalKey = config.aliases?.[key] ?? key
   const schemas = config.label_schemas ?? []
@@ -259,22 +273,28 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
     throw new Error(`unknown label key: ${key}`)
   return canonicalKey
 }
+
 function replaceLabels(state: MutableWorld, entityId: string, key: string): void {
   for (const keyValue of state.labels.keys())
     if (keyValue.startsWith(`${entityId}|${key}|`)) state.labels.delete(keyValue)
 }
+
 function labelKey(entityId: string, key: string, value: JsonValue): string {
   return `${entityId}|${key}|${canonicalJson(value)}`
 }
+
 function requireKnownEntity(state: MutableWorld, id: string): void {
   if (!state.families.has(id) && !state.persons.has(id)) throw new Error(`unknown entity: ${id}`)
 }
+
 function requireEntity(map: Map<string, Entity>, id: string, kind: EntityKind): void {
   if (!map.has(id)) throw new Error(`unknown ${kind}: ${id}`)
 }
+
 function entity(id: string, kind: EntityKind, seq: number): Entity {
   return { id, kind, sort_key: seq, created_seq: seq, retired_seq: null }
 }
+
 function sortEntities(a: Entity, b: Entity): number {
   return a.sort_key - b.sort_key || a.id.localeCompare(b.id)
 }

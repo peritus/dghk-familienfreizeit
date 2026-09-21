@@ -1,6 +1,7 @@
 import { canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
 
 export type EventDraft = Omit<Event, 'seq'>
+
 export class StaleHeadError extends Error {
   constructor(
     public readonly expected: number,

@@ -9,6 +9,7 @@ export function loadKdl(text: string, config: KernelConfig = {}): Event[] {
   derive(events, config)
   return events
 }
+
 export class TextFileEventSource {
   constructor(
     private readonly text: string,
@@ -48,10 +49,12 @@ function nodeToEvent(node: Node, defaultSeq: number): Event {
     payload: parsePayload(typeName as EventType, payload),
   } as Event
 }
+
 function requireString(value: unknown, key: string): string {
   if (typeof value !== 'string') throw new Error(`${key} must be a string`)
   return value
 }
+
 function requireNumber(value: unknown, key: string): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value))
     throw new Error(`${key} must be an integer`)

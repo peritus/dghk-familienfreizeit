@@ -25,10 +25,12 @@ export type FamilyInvited = {
   type: 'FamilyInvited'
   payload: { family_id: string; email: string; display_name: string; locale: 'de' | 'en' }
 }
+
 export type FamilyEmailChanged = {
   type: 'FamilyEmailChanged'
   payload: { family_id: string; old_email: string; new_email: string }
 }
+
 export type PersonAdded = {
   type: 'PersonAdded'
   payload: {
@@ -40,6 +42,7 @@ export type PersonAdded = {
     role: string
   }
 }
+
 export type PersonUpdated = {
   type: 'PersonUpdated'
   payload: {
@@ -51,10 +54,12 @@ export type PersonUpdated = {
     role: string
   }
 }
+
 export type PersonWithdrawn = {
   type: 'PersonWithdrawn'
   payload: { person_id: string; reason: string | null }
 }
+
 export type LabelSet = {
   type: 'LabelSet'
   payload: {
@@ -65,10 +70,12 @@ export type LabelSet = {
     note: string | null
   }
 }
+
 export type LabelCleared = {
   type: 'LabelCleared'
   payload: { entity_id: string; key: string; value: JsonValue | null }
 }
+
 export type KernelEvent =
   | FamilyInvited
   | FamilyEmailChanged
@@ -77,7 +84,9 @@ export type KernelEvent =
   | PersonWithdrawn
   | LabelSet
   | LabelCleared
+
 export type EventType = KernelEvent['type']
+
 export type Event = KernelEvent & { seq: number; at: string; actor: string; subject: string | null }
 
 const payloadSchemas: {
@@ -129,6 +138,7 @@ export function parsePayload(type: EventType, payload: unknown): KernelEvent['pa
   const parsed: unknown = payloadSchemas[type].parse(payload)
   return parsed as KernelEvent['payload']
 }
+
 export function parseEvent(input: unknown): Event {
   const value = input as Partial<Event> & { payload?: unknown }
   const seq = value.seq
@@ -150,15 +160,18 @@ export function parseEvent(input: unknown): Event {
     payload: parsePayload(value.type, value.payload),
   } as Event
 }
+
 export function isEventType(value: unknown): value is EventType {
   return typeof value === 'string' && value in payloadSchemas
 }
+
 export function canonicalEmail(value: string): string {
   const email = value.normalize('NFC').trim().toLocaleLowerCase('en-US')
   if (!email.includes('@') || email.startsWith('@') || email.endsWith('@'))
     throw new Error('invalid email address')
   return email
 }
+
 export function canonicalJson(value: JsonValue): string {
   return JSON.stringify(sortJson(value))
 }
@@ -172,6 +185,7 @@ function sortJson(value: JsonValue): JsonValue {
     )
   return value
 }
+
 function isJsonValue(value: unknown): value is JsonValue {
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return true
   if (typeof value === 'number') return Number.isFinite(value)

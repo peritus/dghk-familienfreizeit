@@ -6,6 +6,7 @@ import { hash } from './service.js'
 export type Principal =
   | { kind: 'organiser'; email: string }
   | { kind: 'family'; email: string; family_id: string }
+
 export type PrincipalOptions = { isOrganiser: (email: string) => boolean; now?: () => string }
 
 export async function currentPrincipal(

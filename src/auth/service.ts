@@ -1,7 +1,9 @@
 import { canonicalEmail } from '../events/types.js'
 
 export type AuthClock = () => string
+
 export type AuthOptions = { now?: AuthClock; isOrganiser: (email: string) => boolean }
+
 export type LoginResult = { accepted: true; token: string | null }
 
 const fifteenMinutes = 15 * 60 * 1000
