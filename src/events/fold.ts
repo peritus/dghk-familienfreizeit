@@ -128,6 +128,7 @@ export type LabelSchema = {
   family_writable?: boolean
   valid_for?: (entity: { label(key: string): JsonValue | undefined }) =>
     | boolean
+    | string
     | Readonly<Record<string, string>>
 }
 
@@ -465,6 +466,8 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
   const resolverKeys = new Set(
     (config.resolver_descriptors ?? []).map((descriptor) => descriptor.key),
   )
+  for (const key of ['needs', 'provides', 'excludes', 'groups-with', 'separates-from'])
+    resolverKeys.add(key)
   if (
     schemas.length > 0 &&
     !schemas.some((schema) => schema.key === canonicalKey) &&

@@ -1,6 +1,9 @@
 import { expect, test } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { derive, guardModuleFold, type ModuleFoldCapability } from '../../src/events/fold.js'
 import type { Event } from '../../src/events/types.js'
+import { loadKdl } from '../../src/events/kdl.js'
+import { derivePending, diff, projectFamilyWorld, projectSharedWorld } from '../../src/events/world.js'
 
 const events: Event[] = [
   {
@@ -172,4 +175,44 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
   expect(() => undeclaredKey(capability, { type: 'WidgetAdded', payload: {}, seq: 1 })).toThrow(
     /did not declare label key: widget-price/,
   )
+})
+
+test('compiles resolver diagnostics and preserves restricted facts only for their family', () => {
+  const config = {
+    label_schemas: [
+      { key: 'private-note', scopes: ['family'] as const, sensitivity: 'restricted' as const },
+    ],
+  }
+  const world = derive(
+    loadKdl(readFileSync(new URL('../fixtures/m3/labels-and-resolver.kdl', import.meta.url), 'utf8'), config),
+    config,
+  )
+  expect(world.diagnostics.map((item) => item.id)).toEqual([
+    'kernel.contradiction',
+    'kernel.contradiction',
+  ])
+  expect(world.constraints).toContainEqual({
+    key: 'needs', holder_id: 'fam_1', value: 'quiet-room', strength: 'required', set_seq: 3,
+  })
+  expect(projectSharedWorld(world).labels.some((label) => label.key === 'private-note')).toBe(false)
+  expect(projectFamilyWorld(world, 'fam_2').labels.some((label) => label.key === 'private-note')).toBe(false)
+  expect(projectFamilyWorld(world, 'fam_1').labels.some((label) => label.key === 'private-note')).toBe(true)
+})
+
+test('derives pending events and stable world changes without persistence', () => {
+  const pending: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelSet',
+    payload: { entity_id: 'fam_1', key: 'needs', value: 'garden', strength: null, note: null },
+  }
+  const before = derive(events)
+  const after = derivePending(events, [pending])
+  expect(after.head_seq).toBe(3)
+  expect(diff(before, after)).toEqual([
+    { kind: 'label-cleared', subject_id: 'fam_1', key: 'needs', value: '"quiet-room"' },
+    { kind: 'label-set', subject_id: 'fam_1', key: 'needs', value: '"garden"' },
+  ])
 })

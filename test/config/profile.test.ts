@@ -105,6 +105,23 @@ describe('occasion profile', () => {
       }),
     ).toThrow(/organiser_only and family_writable/)
   })
+  test('compiles capability derivations, sensitivity, and validity into the kernel view', () => {
+    const profile = defineOccasionProfile({
+      meta,
+      traits: {
+        floor: property({ title: 'Floor', scopes: ['family'], value: enumOf(['ground']) }),
+        accessible: capability({
+          title: 'Accessible',
+          scopes: ['family'],
+          value: enumOf(['yes']),
+          sensitivity: 'restricted',
+          derive: (entity) => entity.label('floor') === 'ground',
+        }),
+      },
+    })
+    expect(profile.validation_view.capability_descriptors).toHaveLength(1)
+    expect(profile.validation_view.label_schemas?.find((schema) => schema.key === 'accessible')?.sensitivity).toBe('restricted')
+  })
   test('rejects duplicate module contributions', () => {
     const module = (id: string) => ({
       id,

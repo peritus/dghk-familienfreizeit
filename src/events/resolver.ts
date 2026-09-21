@@ -39,7 +39,8 @@ export function resolve(labels: readonly Label[], entities: readonly Entity[], c
     const schema = schemas.get(label.key)
     const descriptor = descriptors.get(label.key)
     const fixed = ['needs', 'provides', 'excludes', 'groups-with', 'separates-from'].includes(label.key)
-    if (!schema && !descriptor && !fixed) {
+    const kernel = ['display-name', 'email', 'locale', 'member-of', 'given-name', 'family-name', 'birthdate', 'role'].includes(label.key)
+    if (!schema && !descriptor && !fixed && !kernel) {
       diagnostics.push(diagnostic('kernel.unknown-trait', 'warning', label.entity_id, `unknown trait: ${label.key}`))
       continue
     }
