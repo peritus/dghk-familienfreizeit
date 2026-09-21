@@ -29,11 +29,13 @@ Specification coverage: [occasion profiles](profiles/contract.md), [modules](mod
   the Worker and browser bundle.
 - Add profile-builder tests for trait shapes, vocabulary naming, module roles,
   dependencies, and evaluator determinism.
-- Load the active Familienfreizeit profile as the first profile fixture.
+- Load a kernel-only profile as the first executable fixture. It exercises the
+  profile builder and M1 validation view without selecting domain modules.
 
 Acceptance: a profile cannot select invalid modules or trait roles, the Worker
 and browser receive matching `build_revision` and `compatibility_revision`
-values, and an unselected module contributes no domain surface.
+values, an unselected module contributes no domain surface, and the kernel-only
+fixture validates without module contributions.
 
 ## M3 — Generic labels, resolver, and derived world
 
@@ -251,10 +253,13 @@ notification sections of [release control](application/release-control.md) §8, 
   delivery claims, retries, suppression, unknown-send handling, and idempotency.
 - Implement operational `email_log`, provider configuration, and delivery status
   separate from domain visibility.
+- Load and validate the full Familienfreizeit profile with every selected module
+  contribution as an integration fixture.
 - Add recipient/body agreement, unchanged-content, failure, retry, and privacy tests.
 
 Acceptance: recipient previews equal sends for the reviewed `input_seq` and scopes;
-delivery failure never rolls back communication or widens visibility.
+delivery failure never rolls back communication or widens visibility, and the full
+active profile validates with all selected module contributions.
 
 ## M15 — Deployment, security, and launch hardening
 

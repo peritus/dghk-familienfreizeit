@@ -8,6 +8,9 @@ When profile support works and is verified, put executable configuration in root
 `profiles/`, document its delivered behavior in `docs/profiles/`, and retain only
 outstanding requirements here.
 
+M2 uses a kernel-only executable fixture while module contributions are introduced.
+This complete selected-module profile becomes an executable integration fixture in
+M14, after every selected module contribution exists.
 
 This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.example.ts); this document

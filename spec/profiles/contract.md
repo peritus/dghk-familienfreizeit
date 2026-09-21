@@ -3,7 +3,7 @@
 An occasion profile composes modules for one deployment. It is the authoritative
 source for that deployment's module selection and parameters, vocabulary, policy,
 copy, and pure evaluators. The module contract is in [modules](../modules/contract.md); the
-active profile is [familienfreizeit-2027](familienfreizeit-2027.md),
+full active profile is [familienfreizeit-2027](familienfreizeit-2027.md),
 configured in [`spec/profiles/familienfreizeit-2027.example.ts`](familienfreizeit-2027.example.ts).
 
 ## 1. Profile shape
@@ -55,6 +55,10 @@ kinds, label schemas, aliases, event value validators, and compiled resolver
 descriptors. M2 constructs that view from the typed profile and selected module
 contributions; M1 validates and derives against the view without inspecting raw
 profile-builder or module-parameter objects.
+
+M2 begins with a kernel-only executable profile fixture. The full active profile
+is an integration fixture once every selected module contribution exists; M14
+validates that complete composition.
 
 ### Meta
 
