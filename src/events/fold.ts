@@ -13,6 +13,7 @@ import {
   type PersonWithdrawn,
 } from './types.js'
 import { resolve, type Diagnostic, type ResolvedConstraint } from './resolver.js'
+import type { ResolvedCapability } from './resolver.js'
 
 /** Written only by FamilyInvited/FamilyEmailChanged/PersonAdded/PersonUpdated; LabelSet/LabelCleared reject them. */
 const kernelSetupOwnedLabelKeys = new Set([
@@ -57,6 +58,7 @@ export type KernelWorld = {
   labels_by_entity: Readonly<Record<string, readonly Label[]>>
   labels_by_key: Readonly<Record<string, readonly Label[]>>
   constraints: readonly ResolvedConstraint[]
+  capabilities: readonly ResolvedCapability[]
   diagnostics: readonly Diagnostic[]
   /** One sorted collection per entity kind, kernel and module-owned alike. */
   entities_by_kind: Readonly<Record<string, readonly Entity[]>>
@@ -178,7 +180,7 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     ...state.persons.values(),
     ...state.module_entities.values(),
   ].sort(sortEntities)
-  const resolved = resolve(activeLabels, entities)
+  const resolved = resolve(activeLabels, entities, config)
   return {
     families: [...state.families.values()].sort(sortEntities),
     persons: [...state.persons.values()].sort(sortEntities),
@@ -188,6 +190,7 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     labels_by_entity: indexLabels(activeLabels, (label) => label.entity_id),
     labels_by_key: indexLabels(activeLabels, (label) => label.key),
     constraints: resolved.constraints,
+    capabilities: resolved.capabilities,
     diagnostics: resolved.diagnostics,
     entities_by_kind: entitiesByKind(entities),
   }
@@ -383,6 +386,7 @@ function setLabel(
   value: JsonValue,
   strength: 'required' | 'preferred' | null,
   note: string | null,
+  sensitivity: Label['sensitivity'] = 'normal',
 ): void {
   state.labels.set(labelKey(entityId, key, value), {
     entity_id: entityId,
@@ -393,6 +397,7 @@ function setLabel(
     note,
     set_seq: event.seq,
     cleared_seq: null,
+    sensitivity,
   })
 }
 
@@ -420,13 +425,19 @@ function setConfiguredLabel(
   const canonicalKey = configuredLabelKey(config, key)
   const schema = config.label_schemas?.find((candidate) => candidate.key === canonicalKey)
   const target = state.entities_by_id.get(entityId)
+  if (
+    canonicalKey === 'provides' &&
+    typeof value === 'string' &&
+    config.capability_descriptors?.some((descriptor) => descriptor.key === value && descriptor.derive)
+  )
+    throw new Error(`derived capability cannot be assigned: ${value}`)
   if (schema?.scopes && target && !schema.scopes.includes(target.kind))
     throw new Error(`label ${canonicalKey} is not valid for ${target.kind}`)
   if (schema?.cardinality !== 'zero-or-more')
     replaceLabels(state, entityId, canonicalKey, event.seq)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
-  setLabel(state, event, entityId, canonicalKey, value, strength, note)
+  setLabel(state, event, entityId, canonicalKey, value, strength, note, schema?.sensitivity ?? 'normal')
 }
 
 function configuredLabelKey(config: KernelConfig, key: string): string {
