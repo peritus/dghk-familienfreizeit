@@ -43,11 +43,11 @@ boundary validation may use Zod as defined by [D26](../../decisions.md#d26--vali
 `derive(events, config)` is implemented: it folds the kernel's seven event
 types into typed families/people and generic labels (`src/events/fold.ts`),
 and the fixed resolver operators validate label scope, value shape, and
-references (`src/events/resolver.ts`). Module-contributed entity kinds and
-events have no executable path yet — only the kernel's own event types above
-replay; see [outstanding data model](../../spec/architecture/data-model.md) §1
-and [module contract](../../spec/modules/contract.md) §3. Most of the
-resolver's capability-compilation contract, four of its five preflight
-diagnostics, world summaries, world checks, `diff`, the pending-event
-derivation path, and solver stages remain outstanding — see
+references (`src/events/resolver.ts`). A selected module may now contribute
+its own event types and entity kinds into this same replay path — see
+[implemented typed entity identity](data-model.md#typed-entity-identity) —
+though this is proven against a synthetic test module only; no real module
+selects it yet. Most of the resolver's capability-compilation contract, four
+of its five preflight diagnostics, world summaries, world checks, `diff`, the
+pending-event derivation path, and solver stages remain outstanding — see
 [outstanding labels and constraints](../../spec/architecture/labels-and-constraints.md).

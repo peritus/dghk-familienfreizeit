@@ -61,6 +61,33 @@ fixture fails at load time rather than silently producing an unreplayable log.
 KDL is an authored-input format only; `Event[]` remains the sole type passed to
 `derive`.
 
+## Typed entity identity
+
+```ts
+type Entity = {
+  id: string
+  kind: EntityKind          // kernel: 'family' | 'person'; modules: any other string
+  sort_key: number
+  created_seq: number
+  retired_seq: number | null
+}
+```
+
+The kernel defines `family` and `person`. A selected module contributes any
+other kind through `ModuleContributions.entity_kinds`
+([module contract](../../spec/modules/contract.md) §3.1); `defineOccasionProfile`
+composes the selected modules' kinds and event fold functions into
+`derive`'s dispatch, and `guardModuleFold` (`src/events/fold.ts`) rejects a
+module fold call that creates an entity of a kind it didn't itself declare.
+An id is rejected if reused under a different kind, kernel or module alike —
+one shared `entities_by_id` map backs this check across all entities.
+`world.entities_by_kind` exposes one sorted collection per kind this way,
+generically, for every kind including `family`/`person`; see
+[outstanding data model](../../spec/architecture/data-model.md) §1 for the
+still-aspirational named per-kind accessors (`world.rooms`, …) this doesn't
+yet provide. Proven against a synthetic test module, not yet against a real
+one — see [issue 021](../../spec/issues/archived/021-module-owned-entity-fold-boundary.md).
+
 ## Operational tables
 
 Sessions, magic links, rate limits, and email delivery are not domain state:
@@ -110,8 +137,9 @@ deleted.
 
 ## Limits
 
-Typed entity identity, generic labels, and their resolver semantics are
-specified in [outstanding data model](../../spec/architecture/data-model.md)
+Named per-kind entity accessors, generic labels, and their resolver semantics
+are specified in [outstanding data model](../../spec/architecture/data-model.md)
 §§1–3 and [labels and constraints](../../spec/architecture/labels-and-constraints.md)
-— the entity/label shapes described there are only partially implemented today
-(see [event kernel](events.md) Limits).
+— the label shapes described there are only partially implemented today (see
+[event kernel](events.md) Limits). No real module exists yet to select and
+exercise the entity-kind mechanism above outside tests.

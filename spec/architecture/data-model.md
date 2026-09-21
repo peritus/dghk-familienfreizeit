@@ -46,32 +46,15 @@ label keys, so the data model does not infer a label key from a field name.
 
 ## 1. Typed entity identity
 
-The generic entity record is the common identity and lifecycle shape.
+The generic `Entity` shape, the kernel's `family`/`person` kinds, and the
+mechanism a selected module uses to contribute any other kind are implemented;
+see [implemented typed entity identity](../../docs/architecture/data-model.md).
 
-```ts
-type Entity = {
-  id: string
-  kind: EntityKind          // kernel: 'family' | 'person'
-                            // modules: 'building' | 'room' | 'bed' | 'place' | 'slot' | 'workshop' | …
-  sort_key: number
-  created_seq: number
-  retired_seq: number | null
-}
-```
-
-The world exposes one typed, `sort_key`-ordered collection per kind
-(`world.families`, `world.rooms`, …). The collections give the application
-explicit entity boundaries without carrying any property beyond identity.
-
-An entity's `kind` is fixed by the setup event that created it, and the fold
-rejects an id reused under a different kind. This is an identity assertion, not a
-domain rule. Domain rules belong to occasion config and the resolver.
-
-The kernel defines `family` and `person`. Every other kind is contributed by a
-selected module ([modules](../modules/contract.md) §3.1) without changing the core model: a
-room-only occasion has buildings, rooms, beds, and places; a workshop-only occasion
-has slots and workshops. Additional modules may add kinds such as `venue` or
-`vendor` without changing the core model.
+Not yet provided: named, typed per-kind accessors on the world (`world.rooms`,
+`world.beds`, …) — only the generic `world.entities_by_kind['room']`-style
+bucket exists today. A room-only occasion should eventually expose buildings,
+rooms, beds, and places this way; a workshop-only occasion, slots and
+workshops; without changing the core model.
 
 ## 2. Labels
 
