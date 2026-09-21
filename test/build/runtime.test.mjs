@@ -31,7 +31,10 @@ after(() => runtime.dispose())
 test('built Worker reaches a real local D1 database', async () => {
   const response = await runtime.dispatchFetch('http://localhost/api/health')
   assert.equal(response.status, 200, await response.clone().text())
-  assert.deepEqual(await response.json(), { status: 'ok' })
+  const health = await response.json()
+  assert.equal(health.status, 'ok')
+  assert.match(health.build_revision, /^(development|[0-9a-f]{40})$/)
+  assert.equal(health.compatibility_revision, 1)
 })
 
 test('API and auth navigations never fall through to the SPA', async () => {

@@ -1,5 +1,6 @@
 import { env, exports } from 'cloudflare:workers'
 import { afterEach, expect, test, vi } from 'vitest'
+import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
 import app from '../../src/worker'
 
 afterEach(() => vi.restoreAllMocks())
@@ -8,7 +9,11 @@ test('health traverses the Worker handler and its real local D1 binding', async 
   const response = await exports.default.fetch(new Request('https://example.invalid/api/health'))
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type')).toContain('application/json')
-  expect(await response.json()).toEqual({ status: 'ok' })
+  expect(await response.json()).toEqual({
+    status: 'ok',
+    build_revision: buildRevision,
+    compatibility_revision: compatibilityRevision,
+  })
   expect(await env.DB.prepare('SELECT 40 + 2 AS answer').first('answer')).toBe(42)
 })
 
