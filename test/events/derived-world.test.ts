@@ -3,7 +3,12 @@ import { readFileSync } from 'node:fs'
 import { derive, guardModuleFold, type ModuleFoldCapability } from '../../src/events/fold.js'
 import type { Event } from '../../src/events/types.js'
 import { loadKdl } from '../../src/events/kdl.js'
-import { derivePending, diff, projectFamilyWorld, projectSharedWorld } from '../../src/events/world.js'
+import {
+  derivePending,
+  diff,
+  projectFamilyWorld,
+  projectSharedWorld,
+} from '../../src/events/world.js'
 
 const events: Event[] = [
   {
@@ -184,7 +189,10 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
     ],
   }
   const world = derive(
-    loadKdl(readFileSync(new URL('../fixtures/m3/labels-and-resolver.kdl', import.meta.url), 'utf8'), config),
+    loadKdl(
+      readFileSync(new URL('../fixtures/m3/labels-and-resolver.kdl', import.meta.url), 'utf8'),
+      config,
+    ),
     config,
   )
   expect(world.diagnostics.map((item) => item.id)).toEqual([
@@ -192,11 +200,19 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
     'kernel.contradiction',
   ])
   expect(world.constraints).toContainEqual({
-    key: 'needs', holder_id: 'fam_1', value: 'quiet-room', strength: 'required', set_seq: 3,
+    key: 'needs',
+    holder_id: 'fam_1',
+    value: 'quiet-room',
+    strength: 'required',
+    set_seq: 3,
   })
   expect(projectSharedWorld(world).labels.some((label) => label.key === 'private-note')).toBe(false)
-  expect(projectFamilyWorld(world, 'fam_2').labels.some((label) => label.key === 'private-note')).toBe(false)
-  expect(projectFamilyWorld(world, 'fam_1').labels.some((label) => label.key === 'private-note')).toBe(true)
+  expect(
+    projectFamilyWorld(world, 'fam_2').labels.some((label) => label.key === 'private-note'),
+  ).toBe(false)
+  expect(
+    projectFamilyWorld(world, 'fam_1').labels.some((label) => label.key === 'private-note'),
+  ).toBe(true)
 })
 
 test('derives pending events and stable world changes without persistence', () => {

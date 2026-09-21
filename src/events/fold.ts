@@ -126,10 +126,9 @@ export type LabelSchema = {
    * `family_facing` declaration once that module exists.
    */
   family_writable?: boolean
-  valid_for?: (entity: { label(key: string): JsonValue | undefined }) =>
-    | boolean
-    | string
-    | Readonly<Record<string, string>>
+  valid_for?: (entity: {
+    label(key: string): JsonValue | undefined
+  }) => boolean | string | Readonly<Record<string, string>>
 }
 
 export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }
@@ -141,6 +140,7 @@ export type CapabilityDescriptor = {
 }
 
 export type WorldSummaryDefinition = { id: string; summarize: (world: KernelWorld) => unknown }
+
 export type WorldCheck = (world: KernelWorld) => readonly Diagnostic[]
 
 export type KernelConfig = {
@@ -200,14 +200,20 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     entities_by_kind: entitiesByKind(entities),
   }
   const summaries = Object.fromEntries(
-    (config.world_summaries ?? []).map((definition) => [definition.id, definition.summarize(world)]),
+    (config.world_summaries ?? []).map((definition) => [
+      definition.id,
+      definition.summarize(world),
+    ]),
   )
   const checks = (config.world_checks ?? []).flatMap((check) => check(world))
   return {
     ...world,
     summaries,
     diagnostics: [...world.diagnostics, ...checks].sort(
-      (a, b) => a.id.localeCompare(b.id) || a.subject_id.localeCompare(b.subject_id) || a.message.localeCompare(b.message),
+      (a, b) =>
+        a.id.localeCompare(b.id) ||
+        a.subject_id.localeCompare(b.subject_id) ||
+        a.message.localeCompare(b.message),
     ),
   }
 }
@@ -444,7 +450,9 @@ function setConfiguredLabel(
   if (
     canonicalKey === 'provides' &&
     typeof value === 'string' &&
-    config.capability_descriptors?.some((descriptor) => descriptor.key === value && descriptor.derive)
+    config.capability_descriptors?.some(
+      (descriptor) => descriptor.key === value && descriptor.derive,
+    )
   )
     throw new Error(`derived capability cannot be assigned: ${value}`)
   if (schema?.scopes && target && !schema.scopes.includes(target.kind))
@@ -453,7 +461,16 @@ function setConfiguredLabel(
     replaceLabels(state, entityId, canonicalKey, event.seq)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
-  setLabel(state, event, entityId, canonicalKey, value, strength, note, schema?.sensitivity ?? 'normal')
+  setLabel(
+    state,
+    event,
+    entityId,
+    canonicalKey,
+    value,
+    strength,
+    note,
+    schema?.sensitivity ?? 'normal',
+  )
 }
 
 function configuredLabelKey(config: KernelConfig, key: string): string {

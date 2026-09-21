@@ -120,7 +120,10 @@ describe('occasion profile', () => {
       },
     })
     expect(profile.validation_view.capability_descriptors).toHaveLength(1)
-    expect(profile.validation_view.label_schemas?.find((schema) => schema.key === 'accessible')?.sensitivity).toBe('restricted')
+    expect(
+      profile.validation_view.label_schemas?.find((schema) => schema.key === 'accessible')
+        ?.sensitivity,
+    ).toBe('restricted')
   })
   test('rejects duplicate module contributions', () => {
     const module = (id: string) => ({

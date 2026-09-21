@@ -326,9 +326,7 @@ function validationView(
       scopes: trait.scopes,
     }))
   const capabilityDescriptors = Object.entries(traits).flatMap(([key, trait]) =>
-    trait.kind === 'capability'
-      ? [{ key, scopes: trait.scopes, derive: trait.derive }]
-      : [],
+    trait.kind === 'capability' ? [{ key, scopes: trait.scopes, derive: trait.derive }] : [],
   )
   const eventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
   const eventFoldDispatch: Record<string, ModuleEventFold> = {}
