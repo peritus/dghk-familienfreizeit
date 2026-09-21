@@ -116,4 +116,40 @@ describe('occasion profile', () => {
       defineOccasionProfile({ meta, traits: {}, modules: [module('one'), module('two')] }),
     ).toThrow(/duplicate contribution/)
   })
+  test('rejects a module shadowing a kernel entity kind or event type', () => {
+    const noopFold = (): void => {}
+    const shadowsKind = defineModule({
+      id: 'shadow-kind',
+      params: z.object({}),
+      contribute: () => ({ entity_kinds: [{ id: 'family', prefix: 'xx_' }] }),
+    })
+    expect(() => defineOccasionProfile({ meta, traits: {}, modules: [shadowsKind({})] })).toThrow(
+      /duplicate contribution/,
+    )
+    const shadowsEvent = defineModule({
+      id: 'shadow-event',
+      params: z.object({}),
+      contribute: () => ({
+        events: [{ type: 'FamilyInvited', payload: z.object({}), fold: noopFold }],
+      }),
+    })
+    expect(() => defineOccasionProfile({ meta, traits: {}, modules: [shadowsEvent({})] })).toThrow(
+      /duplicate contribution/,
+    )
+  })
+  test('rejects two modules declaring the same entity-kind id prefix', () => {
+    const withPrefix = (id: string) =>
+      defineModule({
+        id,
+        params: z.object({}),
+        contribute: () => ({ entity_kinds: [{ id: `${id}-kind`, prefix: 'wg_' }] }),
+      })
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits: {},
+        modules: [withPrefix('one')({}), withPrefix('two')({})],
+      }),
+    ).toThrow(/duplicate contribution/)
+  })
 })

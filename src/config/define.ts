@@ -1,5 +1,12 @@
-import type { KernelConfig, LabelSchema, ResolverDescriptor } from '../events/fold.js'
-import type { JsonValue } from '../events/types.js'
+import type { ZodType } from 'zod'
+import {
+  guardModuleFold,
+  type KernelConfig,
+  type LabelSchema,
+  type ModuleEventFold,
+  type ResolverDescriptor,
+} from '../events/fold.js'
+import { kernelEventTypes, type JsonValue } from '../events/types.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -93,8 +100,8 @@ export type ProfileModule = {
 }
 
 export type ModuleContributions = {
-  entity_kinds?: readonly { id: string }[]
-  events?: readonly { type: string }[]
+  entity_kinds?: readonly { id: string; prefix: string }[]
+  events?: readonly { type: string; payload: ZodType<JsonValue>; fold: ModuleEventFold }[]
   label_keys?: readonly {
     key: string
     scopes: readonly string[]
@@ -251,14 +258,21 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
         throw new Error(`module ${module.id} role ${role.parameter} has wrong trait shape`)
     }
   }
-  duplicate(
-    modules.flatMap(
+  duplicate([
+    ...kernelEntityKinds.map((id) => `entity:${id}`),
+    ...modules.flatMap(
       (module) => module.contributions.entity_kinds?.map(({ id }) => `entity:${id}`) ?? [],
     ),
-  )
+  ])
+  duplicate([
+    ...kernelEventTypes.map((type) => `event:${type}`),
+    ...modules.flatMap(
+      (module) => module.contributions.events?.map(({ type }) => `event:${type}`) ?? [],
+    ),
+  ])
   duplicate(
     modules.flatMap(
-      (module) => module.contributions.events?.map(({ type }) => `event:${type}`) ?? [],
+      (module) => module.contributions.entity_kinds?.map(({ prefix }) => `prefix:${prefix}`) ?? [],
     ),
   )
   duplicate(
@@ -272,6 +286,8 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
     ),
   )
 }
+
+const kernelEntityKinds = ['family', 'person']
 
 function validationView(
   traits: Record<string, Trait>,
@@ -302,7 +318,28 @@ function validationView(
       operator: trait.kind === 'relation' ? trait.operator : trait.kind,
       scopes: trait.scopes,
     }))
-  return { label_schemas: schemas, aliases, resolver_descriptors: resolverDescriptors }
+  const eventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
+  const eventFoldDispatch: Record<string, ModuleEventFold> = {}
+  for (const module of modules) {
+    const allowedKinds = new Set(module.contributions.entity_kinds?.map(({ id }) => id) ?? [])
+    const allowedLabelKeys = new Set(module.contributions.label_keys?.map(({ key }) => key) ?? [])
+    for (const event of module.contributions.events ?? []) {
+      eventPayloadSchemas[event.type] = event.payload
+      eventFoldDispatch[event.type] = guardModuleFold(
+        module.id,
+        allowedKinds,
+        allowedLabelKeys,
+        event.fold,
+      )
+    }
+  }
+  return {
+    label_schemas: schemas,
+    aliases,
+    resolver_descriptors: resolverDescriptors,
+    event_payload_schemas: eventPayloadSchemas,
+    event_fold_dispatch: eventFoldDispatch,
+  }
 }
 
 function validateValue(key: string, value: ValueDefinition): void {
