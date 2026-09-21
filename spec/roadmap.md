@@ -15,28 +15,6 @@ The prerequisite runtime foundation is documented in
 [testing](../docs/engineering/testing.md). The milestones below cover outstanding
 work; their acceptance criteria remain required.
 
-## M2 — Profile and module composition
-
-Specification coverage: [occasion profiles](profiles/contract.md), [modules](modules/contract.md)
-§§1–4 and 6–7, [decisions D11–D12](../decisions.md), and [testing](engineering/testing.md)
-§§2 and 5.
-
-- Implement `defineOccasionProfile`, typed trait builders, localized copy, trait
-  validation, evaluator restrictions, and defaulted module parameters.
-- Implement module registration, dependency and enhancement validation, duplicate
-  contribution checks, and selected-module composition.
-- Inject the exact commit `build_revision` and hardcoded `compatibility_revision` into
-  the Worker and browser bundle.
-- Add profile-builder tests for trait shapes, vocabulary naming, module roles,
-  dependencies, and evaluator determinism.
-- Load a kernel-only profile as the first executable fixture. It exercises the
-  profile builder and M1 validation view without selecting domain modules.
-
-Acceptance: a profile cannot select invalid modules or trait roles, the Worker
-and browser receive matching `build_revision` and `compatibility_revision`
-values, an unselected module contributes no domain surface, and the kernel-only
-fixture validates without module contributions.
-
 ## M3 — Generic labels, resolver, and derived world
 
 Specification coverage: [data model](architecture/data-model.md) §§4–6, [labels and

@@ -1,7 +1,7 @@
 # Implemented architecture
 
-The repository contains a Vite/Cloudflare Worker runtime and the M1 event and
-authentication foundation. Profile composition, full derivation and solver
+The repository contains a Vite/Cloudflare Worker runtime, the M1 event and
+authentication foundation, and M2 profile composition. Full derivation and solver
 implementation remain future milestones.
 
 ## Runtime and build
@@ -15,7 +15,8 @@ specification are not the installed compatibility matrix.
 The [Worker](../../src/worker/index.ts) exposes `GET /api/health`, login and
 magic-link redemption, principal inspection, and guarded family/organiser route
 boundaries. `GET /api/health` executes `SELECT 1 AS ok` through the D1 binding and
-returns `200 {"status":"ok"}` or a sanitized `503 {"status":"unavailable"}`.
+returns `200` with its status and build/compatibility identities, or a sanitized
+`503 {"status":"unavailable"}`.
 Unknown Worker routes return JSON 404.
 
 [Wrangler configuration](../../wrangler.jsonc) serves browser assets with SPA
@@ -31,6 +32,8 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 | `src/worker/` | Hono health endpoint and JSON fallback |
 | `src/events/` | Kernel event schemas, fold, KDL adapter and D1 source |
 | `src/auth/` | Magic links, sessions, rate limits and principals |
+| `src/config/` | Active profile, trait builders and build identity |
+| `src/modules/define.ts` | Module factory and defaulted parameter parsing |
 | `migrations/` | Append-only event and operational D1 schema |
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/family-view/` | Public welcome placeholder |

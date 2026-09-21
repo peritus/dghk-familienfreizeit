@@ -7,6 +7,7 @@ are separate claims and require separate evidence.
 
 - [Architecture](architecture/overview.md): working runtimes, paths and boundaries.
 - [Event kernel](architecture/events.md): event schemas, replay, folding and D1 append behavior.
+- [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
 - [Authentication](application/authentication.md): magic links, sessions and request principals.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.
 - [Design system](ui/design-system.md): copied primitives and shell styling.
