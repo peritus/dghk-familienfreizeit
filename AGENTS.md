@@ -44,7 +44,10 @@ clean fresh working copy, and the mandatory collaborator export.
   partially implemented topics by section. When delivering a requirement, update
   `docs/` and remove its fulfilled portion from `spec/` in the same change; retain
   outstanding portions with links to the working foundation. Do not keep duplicate
-  authoritative descriptions or completed-plan archives.
+  authoritative descriptions or completed-plan archives. The roadmap lists
+  outstanding milestones only: after a milestone is delivered and verified,
+  remove its entire entry rather than retaining a delivered-status summary, and
+  describe the implemented scope in `docs/`.
 - Organize by topic, with matching `docs/` and `spec/` paths where useful. Create
   directories as needed, use kebab-case filenames without ordering prefixes, and
   define reading order in indexes. Preserve decision IDs and UI screen IDs.

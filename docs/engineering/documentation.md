@@ -25,7 +25,10 @@ an example does not mean the application loads or typechecks it.
 2. Document the delivered behavior and relevant limits under `docs/` in the same
    change. Put working runtime code in its normal source/configuration directory.
 3. Remove the fulfilled requirement from `spec/`; retain and link outstanding
-   portions, including unresolved questions and acceptance criteria.
+   portions, including unresolved questions and acceptance criteria. The roadmap
+   is an outstanding-work index: after a milestone is delivered and verified,
+   remove its complete entry rather than leaving a delivered-status summary.
+   Describe the delivered scope and its limits under `docs/`.
 4. Update indexes, roadmap, references and relevant tooling paths. Preserve stable
    decision and screen IDs. Version control keeps completed plans; neither
    directory needs an archive or duplicate authoritative description.
