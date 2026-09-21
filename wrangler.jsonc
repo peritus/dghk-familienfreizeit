@@ -7,7 +7,7 @@
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api", "/api/*", "/auth", "/auth/*"]
+    "run_worker_first": ["/api", "/api/*", "/auth", "/auth/*"],
   },
   "d1_databases": [
     {
@@ -16,8 +16,8 @@
       // Local-only placeholder. Replace deliberately before any remote deployment.
       "database_id": "00000000-0000-0000-0000-000000000001",
       "remote": false,
-      "migrations_dir": "migrations"
-    }
+      "migrations_dir": "migrations",
+    },
   ],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
 }
