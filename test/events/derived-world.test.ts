@@ -86,6 +86,33 @@ test('clears every value for a key when LabelCleared carries a null value', () =
   ).toHaveLength(2)
 })
 
+test('rejects LabelSet/LabelCleared on setup-owned kernel keys', () => {
+  const setEmail: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelSet',
+    payload: {
+      entity_id: 'fam_1',
+      key: 'email',
+      value: 'other@test.invalid',
+      strength: null,
+      note: null,
+    },
+  }
+  expect(() => derive([...events, setEmail])).toThrow(/setup-owned/)
+  const clearRole: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelCleared',
+    payload: { entity_id: 'fam_1', key: 'display-name', value: null },
+  }
+  expect(() => derive([...events, clearRole])).toThrow(/setup-owned/)
+})
+
 test('enforces configured label scopes and replacement cardinality', () => {
   const config = {
     label_schemas: [

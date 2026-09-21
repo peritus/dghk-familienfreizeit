@@ -1,6 +1,18 @@
 import { canonicalEmail, canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
 import { resolve, type Diagnostic, type ResolvedConstraint } from './resolver.js'
 
+/** Written only by FamilyInvited/FamilyEmailChanged/PersonAdded/PersonUpdated; LabelSet/LabelCleared reject them. */
+const kernelSetupOwnedLabelKeys = new Set([
+  'display-name',
+  'email',
+  'locale',
+  'member-of',
+  'given-name',
+  'family-name',
+  'birthdate',
+  'role',
+])
+
 export type EntityKind = 'family' | 'person'
 
 export type Entity = {
@@ -290,25 +302,18 @@ function setConfiguredLabel(
 
 function configuredLabelKey(config: KernelConfig, key: string): string {
   const canonicalKey = config.aliases?.[key] ?? key
+  if (kernelSetupOwnedLabelKeys.has(canonicalKey))
+    throw new Error(
+      `label key is setup-owned and cannot be written via LabelSet/LabelCleared: ${canonicalKey}`,
+    )
   const schemas = config.label_schemas ?? []
   const resolverKeys = new Set(
     (config.resolver_descriptors ?? []).map((descriptor) => descriptor.key),
   )
-  const kernelKeys = new Set([
-    'display-name',
-    'email',
-    'locale',
-    'member-of',
-    'given-name',
-    'family-name',
-    'birthdate',
-    'role',
-  ])
   if (
     schemas.length > 0 &&
     !schemas.some((schema) => schema.key === canonicalKey) &&
-    !resolverKeys.has(canonicalKey) &&
-    !kernelKeys.has(canonicalKey)
+    !resolverKeys.has(canonicalKey)
   )
     throw new Error(`unknown label key: ${key}`)
   return canonicalKey
