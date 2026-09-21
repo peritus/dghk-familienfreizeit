@@ -8,6 +8,8 @@
     "src/worker/**/*.ts",
     "src/events/**/*.ts",
     "src/auth/**/*.ts",
+    "src/config/**/*.ts",
+    "src/modules/**/*.ts",
     "worker-configuration.d.ts",
     "test/worker/**/*.ts"
   ]
