@@ -1,6 +1,8 @@
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { derive } from '../events/fold.js'
+import { activeProfile } from '../config/index.js'
+import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendEvents, readEvents, StaleHeadError } from '../events/store.js'
 import { canonicalEmail, parseEvent } from '../events/types.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
@@ -26,7 +28,7 @@ app.post('/api/login', async (context) => {
     .catch(() => null)
   if (!email) return context.json({ accepted: true })
   const events = await readEvents(context.env.DB)
-  const world = derive(events)
+  const world = derive(events, activeProfile.validation_view)
   const familyExists = familyForEmail(world, email) !== null
   await issueMagicLink(
     context.env.DB,
@@ -59,7 +61,12 @@ app.get('/auth/:token', async (context) => {
 app.get('/api/health', async (context) => {
   try {
     const row = await context.env.DB.prepare('SELECT 1 AS ok').first<{ ok: number }>()
-    if (row?.ok === 1) return context.json({ status: 'ok' })
+    if (row?.ok === 1)
+      return context.json({
+        status: 'ok',
+        build_revision: buildRevision,
+        compatibility_revision: compatibilityRevision,
+      })
   } catch {
     // Report availability without disclosing binding details or database errors.
   }
@@ -94,7 +101,7 @@ app.post('/api/events', async (context) => {
     return context.json({ error: 'invalid_request' }, 400)
   const expectedHead: number = body.expected_head
   const existing = await readEvents(context.env.DB)
-  const world = derive(existing)
+  const world = derive(existing, activeProfile.validation_view)
   const now = new Date().toISOString()
   const drafts = body.events.map((draft) => ({
     at: now,
