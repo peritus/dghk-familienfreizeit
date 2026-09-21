@@ -6,23 +6,14 @@ the documents linked from each milestone.
 
 The milestones are ordered by dependency. A milestone is complete only when its
 implementation, fixtures, tests, and operational requirements listed here are
-complete. M1 is delivered; the remaining sections describe outstanding work.
-Cross-cutting requirements are repeated in the milestones they affect and
-summarized in the final hardening milestone.
+complete. Cross-cutting requirements are repeated in the milestones they affect
+and summarized in the final hardening milestone.
 
 The prerequisite runtime foundation is documented in
 [implemented architecture](../docs/architecture/overview.md),
 [development](../docs/engineering/development.md), and
 [testing](../docs/engineering/testing.md). The milestones below cover outstanding
 work; their acceptance criteria remain required.
-
-## M1 — Event kernel and operational storage
-
-The M1 event and authentication foundation is implemented and documented in
-[implemented architecture](../docs/architecture/overview.md), [event kernel](../docs/architecture/events.md),
-and [authentication](../docs/application/authentication.md). The remaining
-roadmap entries begin with profile and module composition in M2; the full
-architecture and application contracts continue to describe later work.
 
 ## M2 — Profile and module composition
 
