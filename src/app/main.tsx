@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app'
+import { buildRevision, compatibilityRevision } from '../config/build.js'
 import './globals.css'
 
 const root = document.getElementById('root')
@@ -10,3 +11,7 @@ createRoot(root).render(
     <App />
   </StrictMode>,
 )
+
+// Make the bundle identity observable to the organiser runtime without a second source of truth.
+void buildRevision
+void compatibilityRevision
