@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { derive } from '../../src/events/fold.js'
+import { derive, guardModuleFold, type ModuleFoldCapability } from '../../src/events/fold.js'
 import type { Event } from '../../src/events/types.js'
 
 const events: Event[] = [
@@ -131,4 +131,45 @@ test('enforces configured label scopes and replacement cardinality', () => {
       config,
     ),
   ).toThrow(/sequence gap|unknown entity/)
+})
+
+test('guardModuleFold rejects capability calls outside a module’s own declared kinds and keys', () => {
+  const calls: string[] = []
+  const capability: ModuleFoldCapability = {
+    createEntity: (kind, id, seq) => {
+      calls.push(`createEntity:${kind}:${id}:${seq}`)
+      return { id, kind, sort_key: seq, created_seq: seq, retired_seq: null }
+    },
+    setLabel: (entityId, key) => {
+      calls.push(`setLabel:${entityId}:${key}`)
+    },
+  }
+  const allowedKinds = new Set(['widget'])
+  const allowedKeys = new Set(['widget-color'])
+
+  const wellBehaved = guardModuleFold(
+    'fixture-widgets',
+    allowedKinds,
+    allowedKeys,
+    (cap, event) => {
+      cap.createEntity('widget', 'wg_1', event.seq)
+      cap.setLabel('wg_1', 'widget-color', 'red', null, null)
+    },
+  )
+  wellBehaved(capability, { type: 'WidgetAdded', payload: {}, seq: 1 })
+  expect(calls).toEqual(['createEntity:widget:wg_1:1', 'setLabel:wg_1:widget-color'])
+
+  const undeclaredKind = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
+    cap.createEntity('gadget', 'gd_1', 1)
+  })
+  expect(() => undeclaredKind(capability, { type: 'WidgetAdded', payload: {}, seq: 1 })).toThrow(
+    /did not declare entity kind: gadget/,
+  )
+
+  const undeclaredKey = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
+    cap.setLabel('wg_1', 'widget-price', 3, null, null)
+  })
+  expect(() => undeclaredKey(capability, { type: 'WidgetAdded', payload: {}, seq: 1 })).toThrow(
+    /did not declare label key: widget-price/,
+  )
 })
