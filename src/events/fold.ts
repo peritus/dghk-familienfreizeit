@@ -45,6 +45,7 @@ export type Label = {
   note: string | null
   set_seq: number
   cleared_seq: number | null
+  sensitivity: 'normal' | 'restricted'
 }
 
 export type KernelWorld = {
@@ -114,6 +115,7 @@ export type LabelSchema = {
   validate?: (value: JsonValue) => string | null
   scopes?: readonly string[]
   cardinality?: 'zero-or-one' | 'exactly-one' | 'zero-or-more'
+  sensitivity?: 'normal' | 'restricted'
   /**
    * Authorization-only precursor to the full `family_facing` control contract
    * (spec/modules/family-preferences.md §6): whether a family principal may
@@ -121,15 +123,28 @@ export type LabelSchema = {
    * `family_facing` declaration once that module exists.
    */
   family_writable?: boolean
+  valid_for?: (entity: { label(key: string): JsonValue | undefined }) => boolean | string
 }
 
 export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }
+
+export type CapabilityDescriptor = {
+  key: string
+  scopes: readonly EntityKind[]
+  derive?: (entity: { label(key: string): JsonValue | undefined }) => boolean
+}
+
+export type WorldSummaryDefinition = { id: string; summarize: (world: KernelWorld) => unknown }
+export type WorldCheck = (world: KernelWorld) => readonly Diagnostic[]
 
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
   label_schemas?: readonly LabelSchema[]
   aliases?: Readonly<Record<string, string>>
   resolver_descriptors?: readonly ResolverDescriptor[]
+  capability_descriptors?: readonly CapabilityDescriptor[]
+  world_summaries?: readonly WorldSummaryDefinition[]
+  world_checks?: readonly WorldCheck[]
   event_value_validators?: Readonly<Record<string, (value: unknown) => string | null>>
   /** Merged kernel + selected-module payload schemas; see `defineOccasionProfile`. */
   event_payload_schemas?: EventPayloadSchemas

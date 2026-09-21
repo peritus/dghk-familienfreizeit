@@ -5,6 +5,8 @@ import {
   type LabelSchema,
   type ModuleEventFold,
   type ResolverDescriptor,
+  type WorldCheck,
+  type WorldSummaryDefinition,
 } from '../events/fold.js'
 import { kernelEventTypes, type JsonValue } from '../events/types.js'
 
@@ -38,6 +40,7 @@ type TraitBase = {
    * exclusive with `organiser_only`.
    */
   family_writable?: boolean
+  sensitivity?: 'normal' | 'restricted'
   valid_for?: (entity: { label(key: string): JsonValue | undefined }) => boolean | LocalizedText
 }
 
@@ -110,6 +113,8 @@ export type ModuleContributions = {
   trait_roles?: readonly TraitRole[]
   routes?: readonly { route: string }[]
   reports?: readonly { id: string }[]
+  world_summaries?: readonly WorldSummaryDefinition[]
+  world_checks?: readonly WorldCheck[]
 }
 
 export type TraitRole = {
@@ -299,6 +304,8 @@ function validationView(
     scopes: trait.scopes,
     cardinality: trait.cardinality,
     family_writable: trait.family_writable,
+    sensitivity: trait.sensitivity,
+    valid_for: trait.valid_for,
     validate: (value) => validateValueValue(trait.value, value),
   }))
   for (const module of modules)
@@ -318,6 +325,11 @@ function validationView(
       operator: trait.kind === 'relation' ? trait.operator : trait.kind,
       scopes: trait.scopes,
     }))
+  const capabilityDescriptors = Object.entries(traits).flatMap(([key, trait]) =>
+    trait.kind === 'capability'
+      ? [{ key, scopes: trait.scopes, derive: trait.derive }]
+      : [],
+  )
   const eventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
   const eventFoldDispatch: Record<string, ModuleEventFold> = {}
   for (const module of modules) {
@@ -337,6 +349,9 @@ function validationView(
     label_schemas: schemas,
     aliases,
     resolver_descriptors: resolverDescriptors,
+    capability_descriptors: capabilityDescriptors,
+    world_summaries: modules.flatMap((module) => module.contributions.world_summaries ?? []),
+    world_checks: modules.flatMap((module) => module.contributions.world_checks ?? []),
     event_payload_schemas: eventPayloadSchemas,
     event_fold_dispatch: eventFoldDispatch,
   }
