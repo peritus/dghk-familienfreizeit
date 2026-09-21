@@ -22,5 +22,9 @@ Pages commit variable); local builds use the checked-out JJ parent revision. The
 compatibility revision is the hardcoded integer `1`. The health response includes
 both values so a runtime can identify the Worker artifact it reached.
 
-Profile composition does not implement module domain behavior, generic labels,
-or solver stages. Those remain in the outstanding milestone specifications.
+Profile composition does not implement module domain behavior or solver
+stages — no module is selected by the executable profile yet, and no module
+has an executable path to contribute entity kinds or events into `derive`
+([module contract](../../spec/modules/contract.md) §3). Generic labels and the
+fixed resolver operators are implemented; see [event kernel](events.md).
+Those remaining gaps stay in the outstanding milestone specifications.

@@ -1,8 +1,10 @@
 # Implemented architecture
 
 The repository contains a Vite/Cloudflare Worker runtime, the M1 event and
-authentication foundation, and M2 profile composition. Full derivation and solver
-implementation remain future milestones.
+authentication foundation, M2 profile composition, and M3's generic labels,
+fixed resolver operators, and `derive(events, config)`. World summaries, world
+checks, `diff`, the pending-event path, and the solver remain future
+milestones.
 
 ## Runtime and build
 
@@ -48,8 +50,13 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 The browser entry's complete static import closure excludes organiser, derive,
 solver and Worker code; the organiser application is loaded lazily. Worker output
 excludes browser code. [Tests](../engineering/testing.md) verify the emitted graph
-and bundle size budgets. Kernel and authentication tests cover M1 behavior; they
-do not prove profile composition, module behavior, or solver behavior.
+and bundle size budgets. Kernel, authentication, profile-composition, and
+derived-world tests cover M1–M3 behavior; they do not prove module domain
+behavior or solver behavior, since no module is selected by the executable
+profile yet and no solver stage exists. `derive(events, config)` itself is
+dependency-free pure TypeScript ([D26](../../decisions.md#d26--validation-boundary-and-pure-domain-core)),
+enforced by lint rules over `src/events/fold.ts` and `src/events/resolver.ts`
+([testing](../engineering/testing.md)).
 
 Separate strict TypeScript projects check browser, Worker and build-tool code.
 They enable `noUncheckedIndexedAccess`. Worker bindings are generated and committed
