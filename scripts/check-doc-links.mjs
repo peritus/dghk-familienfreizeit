@@ -13,7 +13,7 @@ async function markdownFiles(directory) {
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     if (excluded.has(entry.name) || entry.isSymbolicLink()) continue
     const filename = path.join(directory, entry.name)
-    if (entry.isDirectory()) files.push(...await markdownFiles(filename))
+    if (entry.isDirectory()) files.push(...(await markdownFiles(filename)))
     else if (entry.name.endsWith('.md')) files.push(filename)
   }
   return files
@@ -25,12 +25,14 @@ function inspectMarkdown(source) {
   const anchors = new Set()
   const links = []
   function inlineText(children) {
-    return children.map((token) => {
-      if (token.type === 'image') return inlineText(token.children ?? [])
-      if (token.type === 'text' || token.type === 'code_inline') return token.content
-      if (token.type === 'softbreak' || token.type === 'hardbreak') return ' '
-      return ''
-    }).join('')
+    return children
+      .map((token) => {
+        if (token.type === 'image') return inlineText(token.children ?? [])
+        if (token.type === 'text' || token.type === 'code_inline') return token.content
+        if (token.type === 'softbreak' || token.type === 'hardbreak') return ' '
+        return ''
+      })
+      .join('')
   }
   function inspect(token, line) {
     if (token.type === 'link_open') links.push({ destination: token.attrGet('href'), line })
@@ -39,7 +41,9 @@ function inspectMarkdown(source) {
       // Only actual tags carry anchors/links; ignore comments and their contents.
       const html = token.content.replace(/<!--[\s\S]*?-->/g, '')
       for (const tag of html.matchAll(/<[a-z][^>]*>/gi)) {
-        for (const attribute of tag[0].matchAll(/\s(id|name|href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)) {
+        for (const attribute of tag[0].matchAll(
+          /\s(id|name|href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,
+        )) {
           const value = attribute[2] ?? attribute[3] ?? attribute[4]
           if (/^(id|name)$/i.test(attribute[1])) anchors.add(value)
           else links.push({ destination: value, line })
@@ -67,9 +71,11 @@ export async function checkDocLinks(directory) {
   let checked = 0
   for (const [file, document] of documents) {
     for (const { destination, line } of document.links) {
-      if (!destination || /^[a-z][\w+.-]*:/i.test(destination) || destination.startsWith('//')) continue
+      if (!destination || /^[a-z][\w+.-]*:/i.test(destination) || destination.startsWith('//'))
+        continue
       checked++
-      const fail = (reason) => errors.push(`${path.relative(root, file)}:${line}: ${destination}: ${reason}`)
+      const fail = (reason) =>
+        errors.push(`${path.relative(root, file)}:${line}: ${destination}: ${reason}`)
       let pathname, fragment
       try {
         const hash = destination.indexOf('#')
@@ -80,7 +86,12 @@ export async function checkDocLinks(directory) {
         fail('invalid URL encoding')
         continue
       }
-      const target = pathname ? path.resolve(pathname.startsWith('/') ? root : path.dirname(file), pathname.replace(/^\/+/, '')) : file
+      const target = pathname
+        ? path.resolve(
+            pathname.startsWith('/') ? root : path.dirname(file),
+            pathname.replace(/^\/+/, ''),
+          )
+        : file
       if (path.relative(root, target).split(path.sep)[0] === '..') {
         fail('target escapes repository')
         continue
@@ -106,6 +117,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
     process.stderr.write(`${result.errors.join('\n')}\n`)
     process.exitCode = 1
   } else {
-    process.stdout.write(`Documentation links: ${result.checked} local links in ${result.files} Markdown files passed.\n`)
+    process.stdout.write(
+      `Documentation links: ${result.checked} local links in ${result.files} Markdown files passed.\n`,
+    )
   }
 }

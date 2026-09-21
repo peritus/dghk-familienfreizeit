@@ -10,13 +10,17 @@ export function bundleGraph(): Plugin {
       this.emitFile({
         type: 'asset',
         fileName: '.vite/bundle-graph.json',
-        source: JSON.stringify(chunks.map((chunk) => ({
-          file: chunk.fileName,
-          entry: chunk.isEntry,
-          imports: chunk.imports,
-          dynamic_imports: chunk.dynamicImports,
-          modules: Object.keys(chunk.modules).map((id) => relative(process.cwd(), id).replaceAll('\\', '/')),
-        }))),
+        source: JSON.stringify(
+          chunks.map((chunk) => ({
+            file: chunk.fileName,
+            entry: chunk.isEntry,
+            imports: chunk.imports,
+            dynamic_imports: chunk.dynamicImports,
+            modules: Object.keys(chunk.modules).map((id) =>
+              relative(process.cwd(), id).replaceAll('\\', '/'),
+            ),
+          })),
+        ),
       })
     },
   }
