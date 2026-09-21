@@ -7,13 +7,20 @@ export default function OrganiserApp() {
     <Switch>
       <Route path="/">
         <Card className="bg-white">
-          <CardHeader><h1 className="text-2xl">Ansicht des Organisationsteams</h1></CardHeader>
+          <CardHeader>
+            <h1 className="text-2xl">Ansicht des Organisationsteams</h1>
+          </CardHeader>
           <CardContent>
-            <p>Die Verwaltungsfunktionen werden vorbereitet. Hier sind noch keine Familiendaten verfügbar.</p>
+            <p>
+              Die Verwaltungsfunktionen werden vorbereitet. Hier sind noch keine Familiendaten
+              verfügbar.
+            </p>
           </CardContent>
         </Card>
       </Route>
-      <Route><NotFound /></Route>
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   )
 }

@@ -19,7 +19,9 @@ export function NotFound() {
     <section className="space-y-6">
       <h1 className="text-2xl">Diese Seite gibt es nicht</h1>
       <p>Über die Startseite findest Du zurück.</p>
-      <Link href="~/" className={buttonVariants({ variant: 'neutral' })}>Zur Startseite</Link>
+      <Link href="~/" className={buttonVariants({ variant: 'neutral' })}>
+        Zur Startseite
+      </Link>
     </section>
   )
 }
@@ -42,7 +44,9 @@ export class RouteBoundary extends Component<{ children: ReactNode }, { failed: 
         <AlertTitle>Die Ansicht konnte nicht geladen werden</AlertTitle>
         <AlertDescription>
           <p>Bitte lade die Seite neu. Deine gespeicherten Angaben bleiben erhalten.</p>
-          <Button className="mt-4" onClick={() => window.location.reload()}>Neu laden</Button>
+          <Button className="mt-4" onClick={() => window.location.reload()}>
+            Neu laden
+          </Button>
         </AlertDescription>
       </Alert>
     )

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* Neobrutalism orange registry tokens; see THIRD_PARTY.md. */
 :root {
@@ -32,9 +32,19 @@
 }
 
 @layer base {
-  body { @apply m-0 bg-background font-sans text-base leading-relaxed text-foreground; }
-  h1, h2, h3, h4, h5, h6 { @apply font-heading; }
-  a:focus-visible, button:focus-visible {
+  body {
+    @apply m-0 bg-background font-sans text-base leading-relaxed text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+  a:focus-visible,
+  button:focus-visible {
     @apply outline-2 outline-offset-4 outline-black;
   }
 }

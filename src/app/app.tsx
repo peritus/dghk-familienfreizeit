@@ -16,13 +16,23 @@ export function App() {
     <Shell>
       <RouteBoundary key={location}>
         <Switch>
-          <Route path="/"><Welcome /></Route>
-          <Route path="/login"><Welcome /></Route>
-          <Route path="/family"><Welcome /></Route>
-          <Route path="/organiser" nest>
-            <Suspense fallback={<RouteLoading />}><OrganiserApp /></Suspense>
+          <Route path="/">
+            <Welcome />
           </Route>
-          <Route><NotFound /></Route>
+          <Route path="/login">
+            <Welcome />
+          </Route>
+          <Route path="/family">
+            <Welcome />
+          </Route>
+          <Route path="/organiser" nest>
+            <Suspense fallback={<RouteLoading />}>
+              <OrganiserApp />
+            </Suspense>
+          </Route>
+          <Route>
+            <NotFound />
+          </Route>
         </Switch>
       </RouteBoundary>
     </Shell>
