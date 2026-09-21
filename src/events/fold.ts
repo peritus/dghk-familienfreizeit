@@ -1,4 +1,15 @@
-import { canonicalEmail, canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
+import {
+  canonicalEmail,
+  canonicalJson,
+  parseEvent,
+  type Event,
+  type FamilyEmailChanged,
+  type FamilyInvited,
+  type JsonValue,
+  type LabelCleared,
+  type LabelSet,
+  type PersonWithdrawn,
+} from './types.js'
 import { resolve, type Diagnostic, type ResolvedConstraint } from './resolver.js'
 
 /** Written only by FamilyInvited/FamilyEmailChanged/PersonAdded/PersonUpdated; LabelSet/LabelCleared reject them. */
@@ -143,7 +154,12 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
   if (event.seq !== state.head_seq + 1) throw new Error(`event sequence gap at ${event.seq}`)
   switch (event.type) {
     case 'FamilyInvited': {
-      const { family_id: familyId, email, display_name: displayName, locale } = event.payload
+      const {
+        family_id: familyId,
+        email,
+        display_name: displayName,
+        locale,
+      } = (event as unknown as FamilyInvited).payload
       if (state.families.has(familyId)) throw new Error(`family already exists: ${familyId}`)
       const normalizedEmail = canonicalEmail(email)
       if (state.emails.has(normalizedEmail))
@@ -160,7 +176,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         family_id: familyId,
         old_email: oldEmailValue,
         new_email: newEmailValue,
-      } = event.payload
+      } = (event as unknown as FamilyEmailChanged).payload
       requireEntity(state.families, familyId, 'family')
       const oldEmail = canonicalEmail(oldEmailValue)
       const newEmail = canonicalEmail(newEmailValue)
@@ -175,42 +191,40 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       break
     }
     case 'PersonAdded':
-      addPerson(state, event)
+      addPerson(state, event as Extract<Event, { type: 'PersonAdded' }>)
       break
     case 'PersonUpdated':
-      updatePerson(state, event)
+      updatePerson(state, event as Extract<Event, { type: 'PersonUpdated' }>)
       break
-    case 'PersonWithdrawn':
-      requireEntity(state.persons, event.payload.person_id, 'person')
-      state.withdrawn.add(event.payload.person_id)
-      state.persons.get(event.payload.person_id)!.retired_seq = event.seq
+    case 'PersonWithdrawn': {
+      const { person_id: personId } = (event as unknown as PersonWithdrawn).payload
+      requireEntity(state.persons, personId, 'person')
+      state.withdrawn.add(personId)
+      state.persons.get(personId)!.retired_seq = event.seq
       break
-    case 'LabelSet':
-      requireKnownEntity(state, event.payload.entity_id)
-      setConfiguredLabel(
-        state,
-        event,
-        config,
-        event.payload.entity_id,
-        event.payload.key,
-        event.payload.value,
-        event.payload.strength,
-        event.payload.note,
-      )
+    }
+    case 'LabelSet': {
+      const {
+        entity_id: entityId,
+        key,
+        value,
+        strength,
+        note,
+      } = (event as unknown as LabelSet).payload
+      requireKnownEntity(state, entityId)
+      setConfiguredLabel(state, event, config, entityId, key, value, strength, note)
       break
+    }
     case 'LabelCleared': {
-      requireKnownEntity(state, event.payload.entity_id)
-      const clearKey = configuredLabelKey(config, event.payload.key)
-      if (event.payload.value === null) {
-        const prefix = `${event.payload.entity_id}|${clearKey}|`
-        for (const key of state.labels.keys())
-          if (key.startsWith(prefix)) clearLabel(state, key, event.seq)
+      const { entity_id: entityId, key, value } = (event as unknown as LabelCleared).payload
+      requireKnownEntity(state, entityId)
+      const clearKey = configuredLabelKey(config, key)
+      if (value === null) {
+        const prefix = `${entityId}|${clearKey}|`
+        for (const mapKey of state.labels.keys())
+          if (mapKey.startsWith(prefix)) clearLabel(state, mapKey, event.seq)
       } else {
-        clearLabel(
-          state,
-          labelKey(event.payload.entity_id, clearKey, event.payload.value),
-          event.seq,
-        )
+        clearLabel(state, labelKey(entityId, clearKey, value), event.seq)
       }
       break
     }

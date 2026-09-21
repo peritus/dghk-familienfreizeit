@@ -87,9 +87,22 @@ export type KernelEvent =
 
 export type EventType = KernelEvent['type']
 
-export type Event = KernelEvent & { seq: number; at: string; actor: string; subject: string | null }
+/**
+ * `KernelEvent`'s own seven types plus any module-contributed type, opened up
+ * to a generic `{ type: string; payload: JsonValue }` shape. A selected
+ * module's payload schema and fold function (composed by `defineOccasionProfile`)
+ * supply the type safety `KernelEvent`'s literal union gives its own cases.
+ */
+export type Event = (KernelEvent | { type: string; payload: JsonValue }) & {
+  seq: number
+  at: string
+  actor: string
+  subject: string | null
+}
 
-const payloadSchemas: {
+export type EventPayloadSchemas = Readonly<Record<string, z.ZodType<JsonValue>>>
+
+export const kernelPayloadSchemas: {
   [K in EventType]: z.ZodType<Extract<KernelEvent, { type: K }>['payload']>
 } = {
   FamilyInvited: z.object({
@@ -134,12 +147,22 @@ const payloadSchemas: {
   }),
 }
 
-export function parsePayload(type: EventType, payload: unknown): KernelEvent['payload'] {
-  const parsed: unknown = payloadSchemas[type].parse(payload)
-  return parsed as KernelEvent['payload']
+export const kernelEventTypes = Object.keys(kernelPayloadSchemas) as EventType[]
+
+export function parsePayload(
+  type: string,
+  payload: unknown,
+  schemas: EventPayloadSchemas = kernelPayloadSchemas,
+): JsonValue {
+  const schema = schemas[type]
+  if (!schema) throw new Error(`unknown event type: ${type}`)
+  return schema.parse(payload)
 }
 
-export function parseEvent(input: unknown): Event {
+export function parseEvent(
+  input: unknown,
+  schemas: EventPayloadSchemas = kernelPayloadSchemas,
+): Event {
   const value = input as Partial<Event> & { payload?: unknown }
   const seq = value.seq
   if (typeof seq !== 'number' || !Number.isSafeInteger(seq) || seq < 1)
@@ -150,19 +173,23 @@ export function parseEvent(input: unknown): Event {
     throw new Error('event actor is required')
   if (value.subject !== null && typeof value.subject !== 'string')
     throw new Error('event subject must be a string or null')
-  if (!isEventType(value.type)) throw new Error(`unknown event type: ${String(value.type)}`)
+  if (typeof value.type !== 'string' || !(value.type in schemas))
+    throw new Error(`unknown event type: ${String(value.type)}`)
   return {
     seq,
     at: new Date(value.at).toISOString(),
     actor: value.actor,
     subject: value.subject ?? null,
     type: value.type,
-    payload: parsePayload(value.type, value.payload),
+    payload: parsePayload(value.type, value.payload, schemas),
   } as Event
 }
 
-export function isEventType(value: unknown): value is EventType {
-  return typeof value === 'string' && value in payloadSchemas
+export function isEventType(
+  value: unknown,
+  schemas: EventPayloadSchemas = kernelPayloadSchemas,
+): boolean {
+  return typeof value === 'string' && value in schemas
 }
 
 export function canonicalEmail(value: string): string {

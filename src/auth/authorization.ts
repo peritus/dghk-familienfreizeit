@@ -1,5 +1,12 @@
 import type { KernelConfig, KernelWorld } from '../events/fold.js'
-import type { Event } from '../events/types.js'
+import type {
+  Event,
+  LabelCleared,
+  LabelSet,
+  PersonAdded,
+  PersonUpdated,
+  PersonWithdrawn,
+} from '../events/types.js'
 import type { Principal } from './principal.js'
 
 export function canAppendEvent(
@@ -11,13 +18,14 @@ export function canAppendEvent(
   if (principal.kind === 'organiser') return true
   if (event.type === 'FamilyInvited' || event.type === 'FamilyEmailChanged') return false
   if (event.type === 'LabelSet' || event.type === 'LabelCleared')
-    if (!isFamilyWritable(config, event.payload.key)) return false
+    if (!isFamilyWritable(config, (event as unknown as LabelSet | LabelCleared).payload.key))
+      return false
   const entityId =
     event.type === 'PersonAdded' || event.type === 'PersonUpdated'
-      ? event.payload.family_id
+      ? (event as unknown as PersonAdded | PersonUpdated).payload.family_id
       : event.type === 'PersonWithdrawn'
-        ? event.payload.person_id
-        : event.payload.entity_id
+        ? (event as unknown as PersonWithdrawn).payload.person_id
+        : (event as unknown as LabelSet | LabelCleared).payload.entity_id
   return familyForEntity(world, entityId) === principal.family_id
 }
 
