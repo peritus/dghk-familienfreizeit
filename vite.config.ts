@@ -28,9 +28,17 @@ export default defineConfig({
 
 function revisionFromJj(): string {
   try {
-    return execFileSync('jj', ['log', '-r', '@-', '--no-graph', '-T', 'commit_id'], {
-      encoding: 'utf8',
-    }).trim()
+    const workingCopyIsEmpty =
+      execFileSync('jj', ['log', '-r', '@', '--no-graph', '-T', 'empty'], {
+        encoding: 'utf8',
+      }).trim() === 'true'
+    return execFileSync(
+      'jj',
+      ['log', '-r', workingCopyIsEmpty ? '@-' : '@', '--no-graph', '-T', 'commit_id'],
+      {
+        encoding: 'utf8',
+      },
+    ).trim()
   } catch {
     return 'development'
   }
