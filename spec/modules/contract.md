@@ -37,8 +37,8 @@ relationships. The kernel uses this view for append validation, replay, and
 derivation; it does not build the profile or register modules.
 
 M2 owns `defineOccasionProfile`, trait builders, module registration, dependency
-checking, contribution composition, configuration hashing, and construction of
-this validation view. The view is the stable boundary between those milestones.
+checking, contribution composition, and construction of this validation view.
+The view is the stable boundary between those milestones.
 
 ## 2. Authority
 

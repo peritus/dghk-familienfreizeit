@@ -40,8 +40,9 @@ Specification coverage: [occasion profiles](profiles/contract.md), [modules](mod
   dependencies, and evaluator determinism.
 - Load the active Familienfreizeit profile as the first profile fixture.
 
-Acceptance: a profile cannot select invalid modules or trait roles, configuration
-hashes are stable, and an unselected module contributes no domain surface.
+Acceptance: a profile cannot select invalid modules or trait roles, the Worker
+and browser receive matching `build_revision` and `compatibility_revision`
+values, and an unselected module contributes no domain surface.
 
 ## M3 — Generic labels, resolver, and derived world
 
