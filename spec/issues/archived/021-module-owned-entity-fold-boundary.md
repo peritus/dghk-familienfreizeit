@@ -1,7 +1,7 @@
 ---
 id: "021"
 title: Module-owned entity and event contributions have no fold boundary
-status: open
+status: resolved
 severity: build-blocking
 category: kernel
 source: M4 implementation investigation
@@ -73,6 +73,46 @@ already-scoped M4 work and should not gate this boundary landing.
 ## Open questions
 
 None.
+
+## Resolution
+
+Implemented as recommended, proven against a synthetic `fixture-widgets`
+module rather than a real one:
+
+- `ModuleContributions.entity_kinds` now carries `{ id, prefix }` and
+  `.events` carries `{ type, payload: ZodType<JsonValue>, fold }`
+  (`src/config/define.ts`). The `identity` (`caller-generated` vs `derived`)
+  distinction from the recommendation above was **not** added — no module
+  yet needs fold-derived ids (room-inventory's `place` kind will be the
+  first), so it's left for whoever builds that to add rather than speculated
+  on now.
+- `src/events/types.ts`'s `Event`/`parseEvent` opened from a closed
+  `KernelEvent` union to `KernelEvent | { type: string; payload: JsonValue }`,
+  parameterized by an optional merged schema map (`kernelPayloadSchemas` by
+  default).
+- `src/events/fold.ts` gained `KernelWorld.entities_by_kind` (one sorted
+  collection per kind, kernel and module alike), `ModuleFoldCapability`
+  (`createEntity`, `setLabel`), and `guardModuleFold`, which wraps a raw
+  module fold function so every capability call is checked against that
+  module's own declared kinds/keys before it reaches real world state —
+  the actual "may create identity and emit labels" enforcement, done by
+  construction rather than convention. A single `entities_by_id` map now
+  backs "an id reused under another kind" for kernel and module entities
+  alike.
+- `defineOccasionProfile`'s `validationView` (`src/config/define.ts`) composes
+  the merged `event_payload_schemas` and `event_fold_dispatch` from selected
+  modules, wrapping each module's fold in `guardModuleFold`; `validateModules`
+  now reserves the kernel's own entity kinds/event types against module
+  shadowing and rejects a cross-module entity-kind prefix collision, extending
+  the existing duplicate-contribution checks.
+- Proven by `test/events/module-fold-boundary.test.ts`: a selected synthetic
+  module's event creates an entity and a label through the composed dispatch;
+  an event type no selected module defines still fails replay (§4.2); a fold
+  attempting to touch an undeclared entity kind or label key is rejected; an
+  id reused under another kind is rejected.
+
+Building a real `room-inventory` module against this mechanism remains
+separate, out-of-scope work.
 
 ## Related files
 
