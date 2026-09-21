@@ -72,7 +72,7 @@ or clears something:
 
 ```text
 AlertDialog
-└─ AlertDialogTrigger asChild → Button
+└─ AlertDialogTrigger render={<Button />}
    AlertDialogContent
    ├─ AlertDialogHeader
    │  ├─ AlertDialogTitle
@@ -81,6 +81,12 @@ AlertDialog
       ├─ AlertDialogCancel
       └─ AlertDialogAction
 ```
+
+Compose a primitive with one of our own components through Base UI's
+[`render` prop](https://base-ui.com/react/handbook/composition), which takes the
+element to render in place of the primitive's default and merges the primitive's
+props and accessible semantics into it. Every interactive control follows this
+API and keeps those semantics intact.
 
 The description states the concrete consequence. `AlertDialogAction` is the
 high-contrast offset-shadow primary action; `AlertDialogCancel` is the quieter
