@@ -4,9 +4,10 @@ This document defines the generic data model shared by occasion profiles. Concre
 traits, values, module selection, and occasion policies belong in the occasion profile;
 they must not require new typed property columns or domain foreign keys.
 
-Persisted tables use the SQLite dialect and target Cloudflare D1; their DDL is
-the real thing, intended to be copied into migrations. Derived shapes are
-TypeScript types and are the single definition of what `fold` produces.
+The event table, its KDL development representation, and the operational tables
+are implemented; see the [implemented write side and text fixtures](../../docs/architecture/data-model.md).
+This document covers the remaining, still-outstanding layers of the model:
+typed entity identity for module-owned kinds, generic labels, and capacity.
 
 The model has three layers:
 
@@ -43,68 +44,7 @@ schemas and resolver metadata over those label keys; a fold emits labels and
 never creates traits. Event and module contracts explicitly map payload fields to
 label keys, so the data model does not infer a label key from a field name.
 
-## 1. The write side
-
-One table. It is the source of truth and the only domain data that is stored.
-
-```sql
-CREATE TABLE event (
-  seq     INTEGER PRIMARY KEY,       -- head + 1 at append; see below
-  at      TEXT    NOT NULL,
-  actor   TEXT    NOT NULL,          -- the verified email of the authenticated principal
-  type    TEXT    NOT NULL,
-  subject TEXT,
-  payload TEXT    NOT NULL           -- canonical JSON
-);
-
-CREATE INDEX event_type_idx    ON event(type, seq);
-```
-
-`seq` is the total order of the system. A plan records the `input_seq` through which
-its solver input was built. Events are never deleted.
-
-The append assigns `seq` explicitly: the head the request derived from, plus one
-for each event in the batch. The primary key is therefore the concurrency guard. If
-another request appended first, the batch collides, D1 rolls it back, and nothing
-is written. Every invariant checked against the derived world before the append
-holds after it.
-
-`actor` identifies the authenticated principal. Organiser authorization comes from
-the verified login identity and a code-level allowlist, not from a domain label.
-
-Operational data—sessions, magic links, rate limits, delivery receipts, and page
-views—does not belong in this table.
-
-## 2. Development text representation
-
-The production event source is D1. Development and tests may instead load the
-same event model from a KDL text file through `TextFileEventSource`. KDL is a
-standard node-oriented document language whose properties use `key=value`
-syntax. The project uses a deliberately small subset:
-
-```kdl
-FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
-PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role=adult
-```
-
-The first token is the event type. All remaining entries must be properties;
-positional arguments and child blocks are not allowed. Blank lines, ordinary KDL
-comments, and UTF-8 are supported. Duplicate properties are errors even though
-KDL otherwise permits the rightmost property to shadow earlier ones.
-
-The loader maps node properties to an existing event payload, applies the same
-schema and invariant checks as D1 replay, and then constructs the complete event
-envelope. Unless explicitly supplied for a historical fixture, `seq` is the
-one-based file position, `actor` is `fixture`, `at` is a fixed deterministic
-timestamp, and `subject` is null ([events](events.md)). No domain
-meaning is assigned by the text format itself.
-
-KDL files are authored inputs, not a second domain model. `Event[]` remains the
-boundary passed to `derive`, and authored KDL fixtures are the canonical event
-inputs for development and tests. JSON remains appropriate for API payloads,
-canonical regression-test hashes, and derived output.
-
-## 3. Typed entity identity
+## 1. Typed entity identity
 
 The generic entity record is the common identity and lifecycle shape.
 
@@ -133,7 +73,7 @@ room-only occasion has buildings, rooms, beds, and places; a workshop-only occas
 has slots and workshops. Additional modules may add kinds such as `venue` or
 `vendor` without changing the core model.
 
-## 4. Labels
+## 2. Labels
 
 Labels carry all properties, capabilities, preferences, and references to other
 entities. A value that names another entity is still just a value; the resolver
@@ -196,7 +136,7 @@ workshop:9  offered-in=slot_sat-morning
 These labels do not become lookups owned by application code. The resolver
 checks entity kinds, cardinality, ownership, and validity when it resolves them.
 
-## 5. Capacity and ordered choices
+## 3. Capacity and ordered choices
 
 Capacity is represented by entities and labels, not special property columns: a
 place is the atomic sleeping position, located in a bed, located in a room
@@ -204,55 +144,3 @@ place is the atomic sleeping position, located in a bed, located in a room
 label values validated by the `ordered-choice` operator
 ([workshop rankings](../modules/workshop-rankings.md) §6), which keeps the core model
 generic while preserving that an ordered preference is not an unordered set.
-
-## 6. Operational tables
-
-Operational tables identify people by verified email address, never by entity
-id. They are not domain state and are never read by the solver.
-
-```sql
-CREATE TABLE magic_link (
-  token_hash  TEXT PRIMARY KEY,
-  email       TEXT NOT NULL COLLATE NOCASE,
-  expires_at  TEXT NOT NULL,
-  created_at  TEXT NOT NULL,
-  created_ip  TEXT
-);
-
-CREATE TABLE session (
-  token_hash   TEXT PRIMARY KEY,
-  email        TEXT NOT NULL COLLATE NOCASE,
-  expires_at   TEXT NOT NULL,
-  created_at   TEXT NOT NULL,
-  last_seen_at TEXT
-);
-
-CREATE TABLE rate_limit (
-  bucket     TEXT PRIMARY KEY,
-  count      INTEGER NOT NULL,
-  expires_at TEXT NOT NULL
-);
-
-CREATE TABLE email_log (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  to_email      TEXT NOT NULL,
-  kind          TEXT NOT NULL,
-  communication_seq INTEGER,
-  family_id     TEXT,             -- operational recipient identity, not a domain FK
-  delivery_key  TEXT UNIQUE,      -- communication seq + family + kind
-  status        TEXT NOT NULL,    -- pending | sending | sent | failed | unknown
-  sent_at       TEXT,
-  provider_id   TEXT,
-  error         TEXT
-);
-```
-
-Every request resolves the session's address afresh: to an organiser through the
-allowlist, or to a family through the derived world. An address that no longer
-belongs to a family resolves to nothing, so there is no mapping table to keep in
-step with the log ([authentication](../application/authentication.md) §3).
-
-## Cleanup
-
-Expired magic links, sessions, and rate-limit buckets may be deleted. Events are
-never deleted.

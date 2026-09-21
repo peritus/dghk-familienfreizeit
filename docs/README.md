@@ -7,6 +7,7 @@ are separate claims and require separate evidence.
 
 - [Architecture](architecture/overview.md): working runtimes, paths and boundaries.
 - [Event kernel](architecture/events.md): event schemas, replay, folding and D1 append behavior.
+- [Data model](architecture/data-model.md): the event table, KDL text fixtures and operational tables.
 - [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
 - [Authentication](application/authentication.md): magic links, sessions and request principals.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.

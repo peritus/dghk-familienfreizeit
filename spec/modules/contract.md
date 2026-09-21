@@ -11,7 +11,7 @@ The **kernel** is present in every deployment and is never listed in a profile:
 
 | Kernel part | Specified in |
 |---|---|
-| Event envelope, append, replay, KDL event source | [events](../architecture/events.md), [data model](../architecture/data-model.md) |
+| Event envelope, append, replay, KDL event source | [events](../architecture/events.md), [implemented data model](../../docs/architecture/data-model.md) |
 | Family and person identity, invitation, and person events | [events](../architecture/events.md) |
 | Labels, fixed resolver operators, append validation | [labels and constraints](../architecture/labels-and-constraints.md) |
 | `derive`, `diff`, the solver pipeline, determinism contract, preflight framework, trace | [architecture](../architecture/overview.md), [solver contract](../architecture/solver-contract.md) |
