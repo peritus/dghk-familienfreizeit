@@ -1,4 +1,5 @@
 import { canonicalEmail, canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
+import { resolve, type Diagnostic, type ResolvedConstraint } from './resolver.js'
 
 export type EntityKind = 'family' | 'person'
 
@@ -25,12 +26,18 @@ export type KernelWorld = {
   labels: Label[]
   withdrawn_person_ids: string[]
   head_seq: number
+  labels_by_entity: Readonly<Record<string, readonly Label[]>>
+  labels_by_key: Readonly<Record<string, readonly Label[]>>
+  constraints: readonly ResolvedConstraint[]
+  diagnostics: readonly Diagnostic[]
 }
 
 export type LabelSchema = {
   key: string
   aliases?: readonly string[]
   validate?: (value: JsonValue) => string | null
+  scopes?: readonly string[]
+  cardinality?: 'zero-or-one' | 'exactly-one' | 'zero-or-more'
 }
 
 export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }
@@ -62,17 +69,22 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     head_seq: 0,
   }
   for (const event of validatedEvents) applyEvent(state, event, config)
+  const labels = [...state.labels.values()].sort(
+    (a, b) =>
+      a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),
+  )
+  const entities = [...state.families.values(), ...state.persons.values()].sort(sortEntities)
+  const resolved = resolve(labels, entities)
   return {
     families: [...state.families.values()].sort(sortEntities),
     persons: [...state.persons.values()].sort(sortEntities),
-    labels: [...state.labels.values()].sort(
-      (a, b) =>
-        a.set_seq - b.set_seq ||
-        a.entity_id.localeCompare(b.entity_id) ||
-        a.key.localeCompare(b.key),
-    ),
+    labels,
     withdrawn_person_ids: [...state.withdrawn].sort(),
     head_seq: state.head_seq,
+    labels_by_entity: indexLabels(labels, (label) => label.entity_id),
+    labels_by_key: indexLabels(labels, (label) => label.key),
+    constraints: resolved.constraints,
+    diagnostics: resolved.diagnostics,
   }
 }
 
@@ -243,6 +255,10 @@ function setConfiguredLabel(
 ): void {
   const canonicalKey = configuredLabelKey(config, key)
   const schema = config.label_schemas?.find((candidate) => candidate.key === canonicalKey)
+  const entity = state.families.get(entityId) ?? state.persons.get(entityId)
+  if (schema?.scopes && entity && !schema.scopes.includes(entity.kind))
+    throw new Error(`label ${canonicalKey} is not valid for ${entity.kind}`)
+  if (schema?.cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
   setLabel(state, event, entityId, canonicalKey, value, strength, note)
@@ -297,4 +313,13 @@ function entity(id: string, kind: EntityKind, seq: number): Entity {
 
 function sortEntities(a: Entity, b: Entity): number {
   return a.sort_key - b.sort_key || a.id.localeCompare(b.id)
+}
+
+function indexLabels(
+  labels: readonly Label[],
+  key: (label: Label) => string,
+): Readonly<Record<string, readonly Label[]>> {
+  const index: Record<string, Label[]> = {}
+  for (const label of labels) (index[key(label)] ??= []).push(label)
+  return index
 }
