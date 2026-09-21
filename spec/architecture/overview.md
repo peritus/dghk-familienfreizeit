@@ -48,6 +48,11 @@ solver input builder, and the solver composed; it inherits the determinism contr
 [solver contract](solver-contract.md) §1 whole, so identical event lists produce
 byte-identical worlds on any machine.
 
+`derive` is implemented in milestones. M3 establishes the generic folded and
+resolved world plus normalized solver input. M5 composes solver stages and adds
+plan output to that world. The M3 world shape is therefore an extensible
+foundation, not the final plan shape.
+
 Three consequences are worth stating, because most of this document rests on them.
 
 **Every question about state is a call on `derive`.** Current state is

@@ -59,6 +59,12 @@ constraints](architecture/labels-and-constraints.md), [architecture](architectur
 - Implement deterministic canonical sorting and the common diagnostic contract.
 - Add shuffle-invariance, replay, privacy, cardinality, and resolver fixtures.
 
+M3 establishes the first derived `World` shape: typed entities, labels, resolved
+constraints and capabilities, world summaries, diagnostics, privacy projections,
+and normalized solver input. The shape is intentionally extensible. M5 adds
+solver stages, plan sections, traces, and plan metadata to this world; M3 does
+not need to freeze the final solver-facing shape.
+
 Acceptance: every read model is derived in memory from events and configuration;
 no domain projection table or event-payload lookup path is introduced.
 
@@ -91,6 +97,10 @@ of [architecture](architecture/overview.md), and [testing](engineering/testing.m
 - Implement `solve(solverInput, config) -> plan` without I/O, clocks, randomness,
   or mutable external state.
 - Add golden plans, property tests, required trace assertions, and hash fixtures.
+
+M5 extends the M3 `World` with solver execution and plan output. It may add or
+refine world fields as needed for the solver contract, while preserving the M3
+event, label, resolver, diagnostic, and privacy boundaries.
 
 Acceptance: identical inputs produce byte-identical plans; shuffled source input
 does not change output; every rule and diagnostic has a stable explanation.
