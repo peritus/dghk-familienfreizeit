@@ -60,6 +60,7 @@ export type KernelWorld = {
   constraints: readonly ResolvedConstraint[]
   capabilities: readonly ResolvedCapability[]
   diagnostics: readonly Diagnostic[]
+  summaries: Readonly<Record<string, unknown>>
   /** One sorted collection per entity kind, kernel and module-owned alike. */
   entities_by_kind: Readonly<Record<string, readonly Entity[]>>
 }
@@ -125,7 +126,9 @@ export type LabelSchema = {
    * `family_facing` declaration once that module exists.
    */
   family_writable?: boolean
-  valid_for?: (entity: { label(key: string): JsonValue | undefined }) => boolean | string
+  valid_for?: (entity: { label(key: string): JsonValue | undefined }) =>
+    | boolean
+    | Readonly<Record<string, string>>
 }
 
 export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }
@@ -181,7 +184,7 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     ...state.module_entities.values(),
   ].sort(sortEntities)
   const resolved = resolve(activeLabels, entities, config)
-  return {
+  const world: KernelWorld = {
     families: [...state.families.values()].sort(sortEntities),
     persons: [...state.persons.values()].sort(sortEntities),
     labels,
@@ -192,7 +195,19 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     constraints: resolved.constraints,
     capabilities: resolved.capabilities,
     diagnostics: resolved.diagnostics,
+    summaries: {},
     entities_by_kind: entitiesByKind(entities),
+  }
+  const summaries = Object.fromEntries(
+    (config.world_summaries ?? []).map((definition) => [definition.id, definition.summarize(world)]),
+  )
+  const checks = (config.world_checks ?? []).flatMap((check) => check(world))
+  return {
+    ...world,
+    summaries,
+    diagnostics: [...world.diagnostics, ...checks].sort(
+      (a, b) => a.id.localeCompare(b.id) || a.subject_id.localeCompare(b.subject_id) || a.message.localeCompare(b.message),
+    ),
   }
 }
 
