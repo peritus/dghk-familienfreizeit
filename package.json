@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "test": "vitest run",
     "test:build": "node --test test/build/*.test.mjs",
-    "ci": "npm run test:docs && npm run typecheck && npm run lint && npm test && npm run build && npm run test:build",
+    "ci": "npm run format:check && npm run test:docs && npm run typecheck && npm run lint && npm test && npm run build && npm run test:build",
     "check:docs": "node scripts/check-doc-links.mjs",
     "test:docs": "node --test test/docs/*.test.mjs && npm run check:docs"
   },
