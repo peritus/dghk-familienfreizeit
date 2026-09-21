@@ -17,18 +17,28 @@ work; their acceptance criteria remain required.
 
 ## M3 — Generic labels, resolver, and derived world
 
-Specification coverage: [data model](architecture/data-model.md) §§4–6, [labels and
+Generic labels (cardinality, scopes, values, strengths, notes), kernel typed
+entity identity, `derive(events, config)`, fixed resolver operators and
+reference validation, append-time validation (including setup-owned key
+rejection and `family_writable` authorization), replay validation, and
+deterministic canonical sorting are implemented; see
+[implemented event kernel](../docs/architecture/events.md) and
+[implemented data model](../docs/architecture/data-model.md).
+
+Specification coverage: [data model](architecture/data-model.md) §2, [labels and
 constraints](architecture/labels-and-constraints.md), [architecture](architecture/overview.md)
 §§2–5, [events](architecture/events.md) §§5–10, and [testing](engineering/testing.md) §§1–2 and 5.
 
-- Implement generic labels, typed entity identity, cardinality, scopes, values,
-  strengths, sensitivity, and notes.
-- Implement fixed resolver operators, reference
-  validation, append-time validation, and replay validation.
-- Implement `derive(events, config)`, world summaries, world checks, `diff`, and
-  the pending-event derivation path.
-- Implement deterministic canonical sorting and the common diagnostic contract.
-- Add shuffle-invariance, replay, privacy, cardinality, and resolver fixtures.
+- Implement label sensitivity (`normal` / `restricted`, excluded from shared and
+  other-family views).
+- Implement the capability-derivation compiler and the remaining preflight
+  diagnostics (`kernel.contradiction`, `kernel.scope-violation`,
+  `kernel.valid-for`, `kernel.unknown-trait`; only `kernel.dangling-reference`
+  and `kernel.invalid-resolver-value` exist today).
+- Implement world summaries, world checks, `diff`, and the pending-event
+  derivation path.
+- Add shuffle-invariance, replay, privacy, cardinality, and resolver fixtures
+  as KDL-based fixtures, not only inline unit tests.
 
 M3 establishes the first derived `World` shape: typed entities, labels, resolved
 constraints and capabilities, world summaries, diagnostics, privacy projections,
