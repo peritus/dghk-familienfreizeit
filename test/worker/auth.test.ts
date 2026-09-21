@@ -120,4 +120,53 @@ describe('authentication boundary', () => {
     )
     expect(forbidden.status).toBe(403)
   })
+
+  test('rejects a family LabelSet on a key that is not declared family_writable', async () => {
+    const now = new Date().toISOString()
+    await env.DB.prepare(
+      'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (1, ?1, ?2, ?3, NULL, ?4)',
+    )
+      .bind(
+        now,
+        'organiser@example.test',
+        'FamilyInvited',
+        JSON.stringify({
+          family_id: 'fam_labelset',
+          email: 'family-labelset@example.test',
+          display_name: 'Label',
+          locale: 'de',
+        }),
+      )
+      .run()
+    const options = {
+      now: () => now,
+      isOrganiser: (email: string) => email === 'organiser@example.test',
+    }
+    const link = await issueMagicLink(env.DB, 'family-labelset@example.test', null, true, options)
+    const session = await redeemMagicLink(env.DB, link.token!, options)
+    const response = await app.request(
+      '/api/events',
+      {
+        method: 'POST',
+        headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          expected_head: 1,
+          events: [
+            {
+              type: 'LabelSet',
+              payload: {
+                entity_id: 'fam_labelset',
+                key: 'role',
+                value: 'adult',
+                strength: null,
+                note: null,
+              },
+            },
+          ],
+        }),
+      },
+      env,
+    )
+    expect(response.status).toBe(403)
+  })
 })

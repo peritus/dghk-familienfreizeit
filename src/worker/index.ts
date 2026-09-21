@@ -113,7 +113,8 @@ app.post('/api/events', async (context) => {
   try {
     const events = drafts.map((draft, index) => {
       const event = parseEvent({ ...draft, seq: expectedHead + index + 1 })
-      if (!canAppendEvent(principal, event, world)) throw new Error('forbidden')
+      if (!canAppendEvent(principal, event, world, activeProfile.validation_view))
+        throw new Error('forbidden')
       return event
     })
     await appendEvents(context.env.DB, expectedHead, events)
