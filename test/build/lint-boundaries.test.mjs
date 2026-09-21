@@ -7,6 +7,7 @@ for (const [file, source, rule] of [
   ['src/app/probe.ts', "import 'hono'", 'no-restricted-imports'],
   ['src/worker/probe.ts', "import '../app/app'", 'no-restricted-imports'],
   ['src/derive/probe.ts', 'Date.now()', 'no-restricted-globals'],
+  ['src/events/fold.ts', 'Date.now()', 'no-restricted-globals'],
   ['src/solver/probe.ts', 'Math.random()', 'no-restricted-properties'],
   ['spec/profiles/probe.example.ts', 'Date.now()', 'no-restricted-globals'],
   [

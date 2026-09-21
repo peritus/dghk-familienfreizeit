@@ -8,6 +8,8 @@ const browserFiles = ['src/app/**/*.{ts,tsx}', 'src/modules/*/app/**/*.{ts,tsx}'
 const workerFiles = ['src/worker/**/*.ts', 'src/modules/*/worker/**/*.ts']
 const pureFiles = [
   'src/derive/**/*.ts',
+  'src/events/fold.ts',
+  'src/events/resolver.ts',
   'src/solver/**/*.ts',
   'src/config/**/*.ts',
   'src/modules/**/*.ts',
