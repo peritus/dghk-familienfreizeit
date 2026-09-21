@@ -271,6 +271,8 @@ function validationView(
   const schemas: LabelSchema[] = Object.entries(traits).map(([key, trait]) => ({
     key,
     aliases: trait.aliases,
+    scopes: trait.scopes,
+    cardinality: trait.cardinality,
     validate: (value) => validateValueValue(trait.value, value),
   }))
   for (const module of modules)
