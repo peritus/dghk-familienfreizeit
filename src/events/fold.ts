@@ -15,9 +15,11 @@ export type Label = {
   entity_id: string
   key: string
   value: JsonValue
+  value_type: 'null' | 'boolean' | 'number' | 'string' | 'array' | 'object'
   strength: 'required' | 'preferred' | null
   note: string | null
   set_seq: number
+  cleared_seq: number | null
 }
 
 export type KernelWorld = {
@@ -73,16 +75,17 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     (a, b) =>
       a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),
   )
+  const activeLabels = labels.filter((label) => label.cleared_seq === null)
   const entities = [...state.families.values(), ...state.persons.values()].sort(sortEntities)
-  const resolved = resolve(labels, entities)
+  const resolved = resolve(activeLabels, entities)
   return {
     families: [...state.families.values()].sort(sortEntities),
     persons: [...state.persons.values()].sort(sortEntities),
     labels,
     withdrawn_person_ids: [...state.withdrawn].sort(),
     head_seq: state.head_seq,
-    labels_by_entity: indexLabels(labels, (label) => label.entity_id),
-    labels_by_key: indexLabels(labels, (label) => label.key),
+    labels_by_entity: indexLabels(activeLabels, (label) => label.entity_id),
+    labels_by_key: indexLabels(activeLabels, (label) => label.key),
     constraints: resolved.constraints,
     diagnostics: resolved.diagnostics,
   }
@@ -148,7 +151,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         throw new Error(`email already belongs to a family: ${newEmail}`)
       state.emails.delete(oldEmail)
       state.emails.set(newEmail, familyId)
-      replaceLabels(state, familyId, 'email')
+      replaceLabels(state, familyId, 'email', event.seq)
       setLabel(state, event, familyId, 'email', newEmail, null, null)
       break
     }
@@ -179,10 +182,17 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
     case 'LabelCleared': {
       requireKnownEntity(state, event.payload.entity_id)
       const clearKey = configuredLabelKey(config, event.payload.key)
-      if (event.payload.value === null)
+      if (event.payload.value === null) {
+        const prefix = `${event.payload.entity_id}|${clearKey}|`
         for (const key of state.labels.keys())
-          if (key.startsWith(`${event.payload.entity_id}|${clearKey}|`)) state.labels.delete(key)
-          else state.labels.delete(labelKey(event.payload.entity_id, clearKey, event.payload.value))
+          if (key.startsWith(prefix)) clearLabel(state, key, event.seq)
+      } else {
+        clearLabel(
+          state,
+          labelKey(event.payload.entity_id, clearKey, event.payload.value),
+          event.seq,
+        )
+      }
       break
     }
   }
@@ -201,7 +211,7 @@ function updatePerson(state: MutableWorld, event: Extract<Event, { type: 'Person
   requireEntity(state.persons, event.payload.person_id, 'person')
   requireEntity(state.families, event.payload.family_id, 'family')
   for (const key of ['member-of', 'given-name', 'family-name', 'birthdate', 'role'])
-    replaceLabels(state, event.payload.person_id, key)
+    replaceLabels(state, event.payload.person_id, key, event.seq)
   writePersonLabels(state, event)
 }
 
@@ -237,10 +247,23 @@ function setLabel(
     entity_id: entityId,
     key,
     value,
+    value_type: jsonValueType(value),
     strength,
     note,
     set_seq: event.seq,
+    cleared_seq: null,
   })
+}
+
+function clearLabel(state: MutableWorld, key: string, seq: number): void {
+  const label = state.labels.get(key)
+  if (label && label.cleared_seq === null) state.labels.set(key, { ...label, cleared_seq: seq })
+}
+
+function jsonValueType(value: JsonValue): Label['value_type'] {
+  if (value === null) return 'null'
+  if (Array.isArray(value)) return 'array'
+  return typeof value as 'boolean' | 'number' | 'string' | 'object'
 }
 
 function setConfiguredLabel(
@@ -258,7 +281,8 @@ function setConfiguredLabel(
   const entity = state.families.get(entityId) ?? state.persons.get(entityId)
   if (schema?.scopes && entity && !schema.scopes.includes(entity.kind))
     throw new Error(`label ${canonicalKey} is not valid for ${entity.kind}`)
-  if (schema?.cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
+  if (schema?.cardinality !== 'zero-or-more')
+    replaceLabels(state, entityId, canonicalKey, event.seq)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
   setLabel(state, event, entityId, canonicalKey, value, strength, note)
@@ -290,9 +314,10 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
   return canonicalKey
 }
 
-function replaceLabels(state: MutableWorld, entityId: string, key: string): void {
+function replaceLabels(state: MutableWorld, entityId: string, key: string, seq: number): void {
+  const prefix = `${entityId}|${key}|`
   for (const keyValue of state.labels.keys())
-    if (keyValue.startsWith(`${entityId}|${key}|`)) state.labels.delete(keyValue)
+    if (keyValue.startsWith(prefix)) clearLabel(state, keyValue, seq)
 }
 
 function labelKey(entityId: string, key: string, value: JsonValue): string {
