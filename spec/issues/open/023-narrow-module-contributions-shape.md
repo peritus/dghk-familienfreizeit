@@ -6,7 +6,7 @@ severity: gap
 category: kernel
 source: M4 readiness assessment
 related_decisions: []
-related_milestones: [M2, M4, M5, M9, M10, M11, M12, M13, M14]
+related_milestones: [M2, M4, M5, M7, M8, M9, M10, M11, M12, M13]
 opened: 2026-09-21
 ---
 
@@ -35,20 +35,13 @@ contract-shape mismatch from the ten absent direct fields.
 
 ## Evidence
 
-The M4 roadmap entry ([`roadmap.md`](../../roadmap.md#m4--inventory-and-real-occasion-data)) requires "buildings,
+The inventory slice requires "buildings,
 rooms, beds, places, capacity, retirement, room labels, **and
-inventory world summaries**" and "the organiser inventory screen and
-inventory report contribution." `world_summaries` and `world_checks` were
-added and wired into `derive` as kernel work landed for M3 (`config: compile
-M3 resolver and world contributions`), closing the part of this gap M4's
-roadmap entry names explicitly. `screens` remains unimplemented — correctly:
-[issue 018](018-m7-organiser-surfaces-depend-on-later-milestones.md) and
-[issue 019](019-module-delivery-needs-surface-staging.md) cover whether M4
-owes a renderable organiser screen at all, or only a domain contract that M7
-later renders; that question is process/milestone-ordering, not this issue's
-to resolve. `reports` still exists as a contribution but nothing consumes it
-either (no report-rendering path exists yet), so it remains a
-registered-but-unconsumed shape.
+inventory world summaries", the organiser inventory screen, and its report.
+The end-to-end rule in [issue 019](019-module-delivery-needs-surface-staging.md)
+now makes the first real screen/report consumer part of that slice rather than
+allowing registered-but-unconsumed surfaces. Other fields remain deferred until
+their first real caller exists.
 
 This is the direct sibling of [issue 021](../archived/021-module-owned-entity-fold-boundary.md):
 that issue closed the gap for `entity_kinds`/`events` specifically because
@@ -62,23 +55,14 @@ corresponding consumer and composition checks exist.
 
 ## Recommendation
 
-Extend `ModuleContributions` and `defineOccasionProfile`'s composition
-incrementally, driven by what M4 (and the modules immediately after it)
-actually need, rather than building all ten absent direct fields speculatively ahead of
-a real caller — the same reasoning [issue 021](../archived/021-module-owned-entity-fold-boundary.md)'s
-resolution used ("built and proven against a synthetic module... not against
-a real inventory module"). `preflight_checks` is the next one likely needed,
-once room-inventory's "invalid-reference tests" acceptance criterion is
-implemented — but only once `solve()`'s preflight step exists to consume it
-(M5); wiring the contribution kind ahead of that consumer would be
-unverifiable dead code, so it should wait for a real caller on both ends, not
-just the module side. `screens` should wait for [018](018-m7-organiser-surfaces-depend-on-later-milestones.md)/[019](019-module-delivery-needs-surface-staging.md)
-to settle which milestone owns rendering it. The rest (`stages`, `rules`,
-`solver_input`, `release_scopes`, `change_kinds`, `family_controls`, `emails`,
-`fixtures`) belong to later milestones per the module catalogue and should stay
-unimplemented until a milestone actually needs them. Resolve the separate
-`event_mappings`/`typed_contributions` question at the same contract review so
-the table and interface do not continue to describe different API shapes.
+Extend `ModuleContributions` and `defineOccasionProfile` incrementally at the
+first real consumer. Add solver fields with the solver/room-assignment slice,
+screen and family-control fields with the application slices, release and
+change fields with release control, reports with the report host, and email
+fields only for active authentication email behavior. Do not add unused fields
+speculatively. Resolve `event_mappings` and `typed_contributions` during the
+same contract review as either internal composition structures or explicit API
+fields.
 
 ## Open questions
 
