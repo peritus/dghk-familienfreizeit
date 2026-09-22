@@ -31,10 +31,7 @@ export function projectSharedWorld(world: KernelWorld): KernelWorld {
 export function projectFamilyWorld(world: KernelWorld, familyId: string): KernelWorld {
   const personIds = new Set(
     world.labels
-      .filter(
-        (label) =>
-          label.key === 'member-of' && label.value === familyId && label.cleared_seq === null,
-      )
+      .filter((label) => label.key === 'member-of' && label.value === familyId)
       .map((label) => label.entity_id),
   )
   const visibleIds = new Set([familyId, ...personIds])
@@ -50,19 +47,17 @@ export function projectFamilyWorld(world: KernelWorld, familyId: string): Kernel
 export function diff(before: KernelWorld, after: KernelWorld): readonly WorldChange[] {
   const changes: WorldChange[] = []
   const beforeEntities = new Map(allEntities(before).map((entity) => [entity.id, entity]))
-  for (const entity of allEntities(after)) {
-    const prior = beforeEntities.get(entity.id)
-    if (!prior) changes.push({ kind: 'entity-created', subject_id: entity.id })
-    else if (prior.retired_seq === null && entity.retired_seq !== null)
-      changes.push({ kind: 'entity-retired', subject_id: entity.id })
-  }
+  const afterEntities = new Map(allEntities(after).map((entity) => [entity.id, entity]))
+  for (const id of afterEntities.keys())
+    if (!beforeEntities.has(id)) changes.push({ kind: 'entity-created', subject_id: id })
+  for (const id of beforeEntities.keys())
+    if (!afterEntities.has(id)) changes.push({ kind: 'entity-retired', subject_id: id })
   const beforeLabels = new Map(before.labels.map((label) => [labelId(label), label]))
-  for (const label of after.labels) {
-    const prior = beforeLabels.get(labelId(label))
-    if (!prior) changes.push(labelChange('label-set', label))
-    else if (prior.cleared_seq === null && label.cleared_seq !== null)
-      changes.push(labelChange('label-cleared', label))
-  }
+  const afterLabels = new Map(after.labels.map((label) => [labelId(label), label]))
+  for (const [id, label] of afterLabels)
+    if (!beforeLabels.has(id)) changes.push(labelChange('label-set', label))
+  for (const [id, label] of beforeLabels)
+    if (!afterLabels.has(id)) changes.push(labelChange('label-cleared', label))
   return changes.sort(
     (a, b) =>
       a.subject_id.localeCompare(b.subject_id) ||
@@ -78,15 +73,14 @@ function project(
   families: readonly Entity[],
   persons: readonly Entity[],
 ): KernelWorld {
-  const active = labels.filter((label) => label.cleared_seq === null)
   const entities = [...families, ...persons]
   return {
     ...world,
     families: [...families],
     persons: [...persons],
     labels: [...labels],
-    labels_by_entity: index(active, (label) => label.entity_id),
-    labels_by_key: index(active, (label) => label.key),
+    labels_by_entity: index(labels, (label) => label.entity_id),
+    labels_by_key: index(labels, (label) => label.key),
     constraints: world.constraints.filter((constraint) =>
       entities.some((entity) => entity.id === constraint.holder_id),
     ),

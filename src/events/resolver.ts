@@ -124,10 +124,7 @@ export function resolve(
             strength: label.strength,
             set_seq: label.set_seq,
           })
-        if (
-          referencesEntity(operator, label.key, label.value) &&
-          (!entityById.has(label.value) || entityById.get(label.value)?.retired_seq !== null)
-        )
+        if (referencesEntity(operator, label.key, label.value) && !entityById.has(label.value))
           diagnostics.push(
             diagnostic(
               'kernel.dangling-reference',
