@@ -203,13 +203,13 @@ migration ([deployment](../engineering/deployment.md) §2).
 |---|---|---|---|
 | [`programme-core`](programme-core.md) | Common programme-session identity and scheduleable-session boundary | — | — |
 | [`call-for-papers`](call-for-papers.md) | Calls, submissions, review, selection, and immutable candidate rounds | `programme-core` | — |
-| [`official-workshops`](official-workshops.md) | Official workshop facts and scheduleable sessions | `programme-core`, `call-for-papers` | — |
+| [`official-workshops`](official-workshops.md) | Official workshop facts and scheduleable sessions | `programme-core` | `call-for-papers` |
 | [`self-organized-sessions`](self-organized-sessions.md) | Immediate self-organised sessions and proposer placements | `programme-core` | — |
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
 | [`workshop-scheduling`](workshop-scheduling.md) | Scheduled offerings, placement, conflicts, and schedule release | `programme-core`, `workshop-space` | `official-workshops`, `self-organized-sessions` |
-| [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `programme-core`, `call-for-papers`, `official-workshops` | — |
+| [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `programme-core`, `official-workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`food-preferences`](food-preferences.md) | Per-person diet and allergy text | — | — |
 | [`materials`](materials.md) | Material requests, commitments, and fulfilment | — | `official-workshops` |
@@ -218,9 +218,10 @@ migration ([deployment](../engineering/deployment.md) §2).
 
 `requires` is transitive. A room-only occasion selects `room-inventory` and
 `room-assignment`; it places whole families and has no child rooms. A
-An official-workshop occasion selects `programme-core`, `call-for-papers`,
-`official-workshops`, `workshop-rankings`, `workshop-scheduling`, and
-`workshop-assignment`; a self-organised-only occasion can select the core,
+An official-workshop occasion may select `programme-core`, `official-workshops`,
+`workshop-rankings`, `workshop-scheduling`, and `workshop-assignment` without
+`call-for-papers`; adding that module supplies a later proposal source for the
+same official boundary. A self-organised-only occasion can select the core,
 self-organised, space, and scheduling modules without ranking or attendance.
 Neither has room entities or the accommodation board unless those modules are
 selected separately.

@@ -14,8 +14,9 @@ fact. [Workshop attendance](workshop-assignment.md) consumes rankings only after
 
 ## 2. Dependencies and parameters
 
-Requires [programme core](programme-core.md), [call for papers](call-for-papers.md),
-and [official workshops](official-workshops.md). Parameters remain:
+Requires [programme core](programme-core.md) and [official workshops](official-workshops.md).
+Candidate rounds may be published by organiser-authored official workshops or by
+the optional call-for-papers source. Parameters remain:
 
 ```ts
 type WorkshopRankingsParams = {
