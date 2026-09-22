@@ -111,6 +111,7 @@ is evaluated once, at profile build.
 | `label_keys` | Label keys the module owns, each for the entity kinds in its scope — such as `located-in` on rooms, beds, and places — with value type, scopes, cardinality, and setup-only or label-writable policy. Label-writable keys may supply family-control metadata with explicit authorisation. Ownership is per (key, entity kind): a profile may not define a trait using a key on an entity kind a module owns it for, and the same key stays free on other kinds. |
 | `trait_roles` | A slot a profile trait must fill, such as the keep-apart relation for room assignment: the parameter that names the trait, and the operator, scopes, value type, and strengths the trait must have. |
 | `solver_input` | Arrays the module adds to `SolverInput`, each with its declared sort key ([solver contract](../architecture/solver-contract.md) §1, R1). |
+| `typed_contributions` | Pure, typed values a selected source module exposes to a dependent module. Consumers receive derived facts through this boundary and never inspect another module's raw event payloads. |
 | `stages` | Pure solver stages with explicit ordering and a typed output section of the plan (§4). |
 | `rules` | Hard and soft rules, each with `describe` ([solver contract](../architecture/solver-contract.md) §4). |
 | `preflight_checks` | Checks run before any stage, with an id, severity, and message template. |
@@ -200,12 +201,17 @@ migration ([deployment](../engineering/deployment.md) §2).
 
 | Module | Owns | Requires | Enhances |
 |---|---|---|---|
+| [`programme-core`](programme-core.md) | Common programme-session identity and scheduleable-session boundary | — | — |
+| [`call-for-papers`](call-for-papers.md) | Calls, submissions, review, selection, and immutable candidate rounds | `programme-core` | — |
+| [`official-workshops`](official-workshops.md) | Official workshop facts and scheduleable sessions | `programme-core`, `call-for-papers` | — |
+| [`self-organized-sessions`](self-organized-sessions.md) | Immediate self-organised sessions and proposer placements | `programme-core` | — |
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
+| [`workshop-scheduling`](workshop-scheduling.md) | Scheduled offerings, placement, conflicts, and schedule release | `programme-core`, `workshop-space` | `official-workshops`, `self-organized-sessions` |
 | [`workshops`](workshops.md) | Slots, workshops, audience, leadership, cancellation | — | — |
 | [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
-| [`workshop-assignment`](workshop-assignment.md) | Fair workshop assignment | `workshop-rankings` | — |
+| [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`food-preferences`](food-preferences.md) | Per-person diet and allergy text | — | — |
 | [`materials`](materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
 | [`family-preferences`](family-preferences.md) | The profile-driven preferences page | — | — |
