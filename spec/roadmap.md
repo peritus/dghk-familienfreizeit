@@ -21,15 +21,16 @@ Specification coverage: [room inventory](modules/room-inventory.md), the invento
 parts of [reports](application/reports.md), [profile configuration](profiles/familienfreizeit-2027.md)
 §§2 and 9, and the inventory parts of [organiser view](application/organiser-view.md).
 
-- Implement buildings, rooms, beds, places, designations, capacity, retirement,
+- Implement buildings, rooms, beds, places, capacity, retirement,
   room labels, and inventory world summaries.
 - Implement inventory events, invariants, authorisation, and event fixtures.
 - Enter and validate the 38-room, 162-bed occasion inventory as KDL fixtures.
 - Implement the organiser inventory screen and inventory report contribution.
-- Add capacity, cost, designation, retired-place, and invalid-reference tests.
+- Add capacity, cost, retired-place, and invalid-reference tests.
 
-Acceptance: the real inventory replays from KDL, generates stable places, excludes
-staff and blocked rooms from family placement, and produces the documented counts.
+Acceptance: the real inventory replays from KDL, generates stable places, makes
+every live room available to family placement subject to its hard rules, and
+produces the documented counts.
 
 ## M5 — Deterministic solver contract
 

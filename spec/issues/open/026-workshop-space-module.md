@@ -60,7 +60,7 @@ Its entity kinds and generated `place` identities are all accommodation-shaped:
 ([room inventory entities](../../modules/room-inventory.md#4-entity-kinds)).
 
 The module's solver input is likewise sleeping inventory: buildings, rooms, and
-bed-derived places. It excludes blocked rooms and retired sleeping places, and
+bed-derived places. It excludes retired sleeping places, and
 has no workshop-location stage ([room inventory solver input](../../modules/room-inventory.md#7-solver-input-and-stages)).
 
 ### Workshops currently depend on accommodation rooms

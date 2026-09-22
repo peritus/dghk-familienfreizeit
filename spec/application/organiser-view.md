@@ -12,7 +12,7 @@ sketches live under
 | `/organiser` | Dashboard | Status, staleness, preflight findings, attention |
 | `/organiser/families` | Families | Table, import, invite, chase list |
 | `/organiser/families/:id` | Family detail | People (add, edit, withdraw), full editable preferences, event history |
-| `/organiser/inventory` | Inventory | Buildings, rooms, beds, designations |
+| `/organiser/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
 | `/organiser/board` | The board | Whole-family room placement |
 | `/organiser/plans` | Plans | Derived plan investigation and comparison |
 | `/organiser/releases` | Release control | Outstanding scopes, detailed preview, communicate |
@@ -53,8 +53,8 @@ person management and workshop self-service controls, for organisers taking a
 request by phone or email (D24). Saves write the identical event types as the
 family view, with the organiser as actor and the family or person as
 subject — there is no separate out-of-band marker; the event history below is
-the record. Inventory shows buildings, rooms, beds, designations, capacity,
-and room capabilities.
+the record. Inventory shows buildings, rooms, beds, capacity, and room
+capabilities.
 
 ## 4. Whole-family assignment board
 
