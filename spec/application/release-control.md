@@ -16,7 +16,9 @@ than define independent release mechanisms.
 ```ts
 type CommunicationScope =
   | { kind: 'accommodation' }
-  | { kind: 'workshop-programme', workshop_id: string }
+  | { kind: 'workshop-candidates', round_id: string }
+  | { kind: 'workshop-programme', session_id: string }
+  | { kind: 'workshop-schedule', slot_id: string }
   | { kind: 'workshop-allocation', slot_id: string }
 
 type CommunicationScopeStatus =
@@ -87,20 +89,25 @@ communicated, and what its most recent communicated update was.
 | Scope | Held content | Unit |
 |---|---|---|
 | `accommodation` | Family/person room, bed and place assignments, unplaced results, and the room/building/place descriptors necessary to understand them | The whole accommodation allocation |
-| `workshop-programme` | Title, description, slot identity and label, start/end time, room and location descriptors, participation mode, capacity, age/audience eligibility, leaders, manual cancellation and its family-safe explanation | One workshop |
+| `workshop-candidates` | The selected programme-session identities and family-safe candidate descriptions for an immutable ranking round | One candidate round |
+| `workshop-programme` | Session title, description, participation mode, capacity, age/audience eligibility, leaders, cancellation, and its family-safe explanation | One programme session |
+| `workshop-schedule` | Scheduled offering identities, slot/time, space/location, placement diagnostics, and unscheduled outcomes | All offerings in one slot |
 | `workshop-allocation` | Solver participant assignments and unassigned outcomes for the slot | All assigned-mode workshops in one slot |
 
 Scope identity is stable. Several scopes can be communicated atomically in one
 action. Accommodation is indivisible because releasing individual families could
 promise the same bed twice. Workshop allocation is per slot because moving a person
 between individually released workshops could show them in both or neither.
-Programme scopes are independent: a workshop can collect rankings before its slot
-allocation is communicated.
+Candidate and programme scopes are independent: an eligible person can rank a
+published candidate round before its sessions have a schedule. Schedule release
+precedes attendance allocation release.
 
 Only selected modules contribute scopes. `room-assignment` contributes accommodation;
-`workshops` contributes programme scopes; `workshop-assignment` contributes slot
-allocations. A slot allocation may be empty, including when clearing an existing
-allocation after a mode or slot change. A programme without assignment is valid.
+`call-for-papers` contributes candidate rounds; `programme-core` and source modules
+contribute programme scopes; `workshop-scheduling` contributes schedule scopes;
+`workshop-assignment` contributes slot allocations. A slot allocation may be empty,
+including when clearing an existing allocation after a mode or slot change. A
+programme without assignment is valid.
 
 Slot and room facts in programme content are resolved at that scope's reviewed
 `input_seq`. A
@@ -285,15 +292,17 @@ not claim an empty diff when the old content cannot be reproduced.
 ## 5. Programme, participation and dependencies
 
 The **communicated programme** is the operational contract for family controls and
-live admission. Its slot, mode, capacity and eligibility govern those operations,
+live admission. Its mode, capacity and eligibility govern those operations,
 checked against participation from the current log. Draft programme edits do not
 change these controls. Organisers can plan against the draft programme; the resolver
 exposes both perspectives explicitly, never as per-screen relationship lookups.
 
 | Change | Release requirement |
 |---|---|
+| Candidate round | Publish the immutable candidate set before accepting rankings; each person's visible choices remain eligibility-filtered |
 | New allocation | Every target must have a compatible communicated programme, or its programme scope must be selected in the same action |
-| Title/description/location/time | May be selected independently when the resulting arrangements remain coherent; show affected families and check room, leader and participant scheduling conflicts |
+| Title/description | May be selected independently; show affected families and retain the stable session and ranking identity |
+| New or changed schedule | Release the reviewed offerings and resolve availability, space, leader, separation, and unscheduled-session conflicts before attendance release |
 | Capacity below live sign-ups | Preserve everyone; warn of over-capacity and block further admission until space exists |
 | Capacity below existing solver intake | Include a compatible allocation update; do not leave a communicated allocation above its effective capacity |
 | Mode change | Explicitly resolve incompatible active sign-up/interest labels before release; never convert participation types or resurrect dormant lists |
@@ -311,11 +320,11 @@ targets for this check.
 
 A mode transition away from `assigned` requires communicating removal of its solver
 participants in the old slot. A transition to `assigned` can communicate the programme
-first and allocation later. Incompatible retained sign-up/interest labels, including cancelled/inactive ones,
+and schedule first, then allocation later. Incompatible retained sign-up/interest labels, including cancelled/inactive ones,
 must be explicitly cleared through ordinary authorised events before confirming the mode transition.
 They are never automatically cleared by `Communicated`. The mode-change preview names
 the affected people and required work. Old rankings remain recorded but are inactive
-when their workshop is no longer assigned in the relevant programme.
+when their session is no longer in the active candidate round or programme.
 
 A person with a live sign-up is excluded from draft solver allocation in the sign-up's
 **communicated slot**. If draft slot edits differ, report the transition conflict;

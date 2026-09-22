@@ -25,15 +25,19 @@ import {
   text,
 } from '../../src/config/define'
 import { changeNotifications } from '../../src/modules/change-notifications'
+import { callForPapers } from '../../src/modules/call-for-papers'
 import { familyPreferences } from '../../src/modules/family-preferences'
 import { foodPreferences } from '../../src/modules/food-preferences'
 import { materials } from '../../src/modules/materials'
 import { roomAssignment } from '../../src/modules/room-assignment'
 import { roomInventory } from '../../src/modules/room-inventory'
+import { officialWorkshops } from '../../src/modules/official-workshops'
+import { programmeCore } from '../../src/modules/programme-core'
+import { selfOrganizedSessions } from '../../src/modules/self-organized-sessions'
 import { workshopAssignment } from '../../src/modules/workshop-assignment'
 import { workshopRankings } from '../../src/modules/workshop-rankings'
+import { workshopScheduling } from '../../src/modules/workshop-scheduling'
 import { workshopSpace } from '../../src/modules/workshop-space'
-import { workshops } from '../../src/modules/workshops'
 
 export default defineOccasionProfile({
   meta: {
@@ -262,7 +266,7 @@ export default defineOccasionProfile({
 
     'workshop-audience': property({
       title: { de: 'Zielgruppe', en: 'Audience' },
-      scopes: ['workshop'],
+      scopes: ['programme-session'],
       value: enumOf(['children', 'adults']),
       cardinality: 'exactly-one',
       organiser_only: true,
@@ -275,7 +279,7 @@ export default defineOccasionProfile({
     'leads-workshop': property({
       title: { de: 'Leitet Workshop', en: 'Leads workshop' },
       scopes: ['person'],
-      value: ref('workshop'),
+      value: ref('programme-session'),
       cardinality: 'zero-or-more',
       organiser_only: true,
     }),
@@ -283,14 +287,14 @@ export default defineOccasionProfile({
     'prefers-workshop': orderedChoice({
       title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
       scopes: ['person'],
-      per: 'slot',
-      choice: 'workshop',
+      per: 'round',
+      choice: 'programme-session',
       family_facing: {
         control: 'ranking',
         title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
         help: {
-          de: 'Bis zu drei Wünsche pro Zeitfenster, der wichtigste zuerst.',
-          en: 'Up to three choices per time slot, most important first.',
+          de: 'Bis zu drei Workshop-Wünsche, der wichtigste zuerst.',
+          en: 'Up to three workshop choices, most important first.',
         },
         scope: 'person',
         strengths: null,
@@ -377,7 +381,7 @@ export default defineOccasionProfile({
 
     'organiser-note': note({
       title: { de: 'Notiz des Organisationsteams', en: 'Organiser note' },
-      scopes: ['family', 'person', 'room', 'workshop', 'workshop-space'],
+      scopes: ['family', 'person', 'room', 'programme-session', 'workshop-space'],
       value: text({ max_length: 4000 }),
       organiser_only: true,
       sensitivity: 'restricted',
@@ -419,7 +423,11 @@ export default defineOccasionProfile({
 
     workshopSpace(),
 
-    workshops({
+    programmeCore(),
+
+    callForPapers(),
+
+    officialWorkshops({
       audience_trait: 'workshop-audience',
       leader_trait: 'leads-workshop',
       leaders_consume_capacity: false,
@@ -430,6 +438,10 @@ export default defineOccasionProfile({
         'adults': ['adult'],
       },
     }),
+
+    selfOrganizedSessions(),
+
+    workshopScheduling(),
 
     workshopRankings({
       ranking_trait: 'prefers-workshop',
@@ -452,7 +464,7 @@ export default defineOccasionProfile({
 
     materials({
       categories: ['snacks', 'games', 'material'],
-      requester_kinds: ['family', 'person', 'workshop'],
+      requester_kinds: ['family', 'person', 'programme-session'],
       contributor_kinds: ['family', 'person'],
       workshop_links: true,
       person_links: true,

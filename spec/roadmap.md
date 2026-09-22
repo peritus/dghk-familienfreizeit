@@ -130,29 +130,34 @@ the workshop parts of [reports](application/reports.md).
 Acceptance: live participation uses the effective communicated programme, draft
 changes do not change admission, and concurrent last-place requests cannot both win.
 
-## M10 — Workshop rankings and assignment
+## M10 — Workshop proposals, scheduling, rankings, and attendance
 
-Specification coverage: [workshop rankings](modules/workshop-rankings.md), [workshop
-assignment](modules/workshop-assignment.md), workshop solver sections of [solver
-contract](architecture/solver-contract.md), and workshop tests in [testing](engineering/testing.md).
+Specification coverage: [programme core](modules/programme-core.md), [call for papers](modules/call-for-papers.md),
+[official workshops](modules/official-workshops.md), [self-organized sessions](modules/self-organized-sessions.md),
+[workshop scheduling](modules/workshop-scheduling.md), [workshop rankings](modules/workshop-rankings.md),
+[workshop attendance](modules/workshop-assignment.md), the workshop solver sections of
+[solver contract](architecture/solver-contract.md), and workshop tests in [testing](engineering/testing.md).
 
-- Issue 025 follows Issue 026 and owns the schedule stage that consumes
-  `WorkshopSpaceInput`: proposal/offering identity, pre-schedule rankings,
-  space assignment, conflicts, and schedule release. None of those decisions
-  are added to `workshop-space` here.
-- Implement structured ordered-choice rankings, no-preference values, rank
-  validation, and communicated-programme rules.
-- Implement eligibility, reservations, fixed resolver
-  decisions, previous-plan retention, balanced-opportunity ledger, ranked
-  allocation, manual cancellation, fill, and workshop plan output.
-- Implement the preference heatmap, ranking controls, workshop findings, rosters,
-  and allocation diffs.
-- Add fairness, capacity, separation, age, cancellation, and deterministic
-  workshop fixtures.
+- Implement the cooperating modules and their typed contribution boundary. The
+  workshop-space module remains an independent inventory of physical facts.
+- Implement proposal review, immutable candidate rounds, official and
+  self-organised session paths, and programme-session/offering identity.
+- Implement eligibility-filtered pre-schedule rankings, no-preference values,
+  deterministic demand summary, configured-slot/space scheduling, conflicts,
+  and schedule release.
+- Implement attendance eligibility, reservations, fixed resolver decisions,
+  previous-plan retention, balanced-opportunity ledger, ranked allocation,
+  manual cancellation, fill, and attendance release.
+- Implement the proposal, candidate, demand, schedule, ranking, attendance,
+  heatmap, roster, finding, and allocation-diff surfaces.
+- Add proposal, ranking-before-schedule, demand, fairness, capacity, separation,
+  age, cancellation, unscheduled, and deterministic lifecycle fixtures.
 
-Acceptance: each person receives at most one assigned workshop per slot; valid
-previous assignments are retained when possible; unavoidable movement is bounded
-and explained; balanced-opportunity objectives are applied lexicographically to
+Acceptance: official proposals can be ranked before scheduling; selected sessions
+are placed or reported as blocking unscheduled outcomes; each person receives at
+most one assigned offering per overlapping period; valid previous assignments are
+retained when possible; unavoidable movement is bounded and explained;
+balanced-opportunity objectives are applied lexicographically to
 unresolved contests; and every allocation decision is traced.
 
 ## M11 — Food and materials coordination

@@ -55,9 +55,14 @@ binding decisions. Move only its accepted requirements into the active topic.
 | 18 | [Room assignment](modules/room-assignment.md) | Deterministic placement, room scoring, and the board |
 | 19 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
 | 20 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
-| 21 | [Workshop rankings](modules/workshop-rankings.md) | Ordered per-person workshop choices |
-| 22 | [Workshop assignment](modules/workshop-assignment.md) | Fair workshop assignment |
-| 23 | [Food preferences](modules/food-preferences.md) | Per-person diet and allergy text |
-| 24 | [Materials](modules/materials.md) | Requests, commitments, and fulfilment |
-| 25 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
-| 26 | [Change notifications](modules/change-notifications.md) | Communication and change emails |
+| 21 | [Programme core](modules/programme-core.md) | Shared programme-session identity and typed module boundary |
+| 22 | [Call for papers](modules/call-for-papers.md) | Official proposal review, selection, and candidate rounds |
+| 23 | [Official workshops](modules/official-workshops.md) | Official workshop facts and eligibility |
+| 24 | [Self-organized sessions](modules/self-organized-sessions.md) | Immediate self-organised sessions and proposer placement |
+| 25 | [Workshop scheduling](modules/workshop-scheduling.md) | Offerings, placement, conflicts, and schedule release |
+| 26 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered pre-schedule choices |
+| 27 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
+| 28 | [Food preferences](modules/food-preferences.md) | Per-person diet and allergy text |
+| 29 | [Materials](modules/materials.md) | Requests, commitments, and fulfilment |
+| 30 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
+| 31 | [Change notifications](modules/change-notifications.md) | Communication and change emails |

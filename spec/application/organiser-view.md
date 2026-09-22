@@ -19,7 +19,7 @@ sketches live under
 | `/organiser/releases` | Release control | Outstanding scopes, detailed preview, communicate |
 | `/organiser/releases/history` | Communication history | Scope references, actor, time and reproducible comparisons |
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
-| `/organiser/workshops` | Workshops | Slots, capacity, fill, rankings |
+| `/organiser/workshops` | Workshops | Calls, proposals, candidate rounds, demand, schedule, capacity, fill, rankings |
 | `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
 | `/organiser/materials` | Materials | Requests, commitments, and fulfilment |
 | `/organiser/reports` | Reports | Printable operational reports |
@@ -60,9 +60,9 @@ capabilities.
 Workshop spaces have a separate maintenance surface at
 `/organiser/workshop-spaces`. It shows live and retired typed spaces, display
 and location descriptions, physical capacity, event-backed availability
-windows, deterministic order, and resolver-backed capabilities. It does not
-show scheduled offerings or communicate a location; schedule review belongs to
-the later Issue 025 contract.
+windows, deterministic order, and resolver-backed capabilities. The workshop
+screen consumes these facts to show scheduled offerings, placement conflicts,
+and unscheduled selected sessions.
 
 ## 4. Whole-family assignment board
 
@@ -101,5 +101,6 @@ set. Optional notes stay attached
 to the label event; author and timestamp come from the event log.
 
 Reports show family-to-room assignments, unplaced families, capacity and constraint
-findings, workshop results, and communication status. They do not show party or
-child-room sections in the active scope.
+findings, workshop proposals, demand, schedule results, attendance results, and
+communication status. They do not show party or child-room sections in the active
+scope.
