@@ -54,4 +54,33 @@ describe('event append authorization', () => {
     }
     expect(canAppendEvent(family, otherFamilysLabel, world, config)).toBe(false)
   })
+
+  const moduleEvent: Event = {
+    seq: 2,
+    at: '2027-01-01T00:00:01Z',
+    actor: 'a@test.invalid',
+    subject: null,
+    type: 'BuildingAdded',
+    payload: { building_id: 'bld_1', name: 'Haupthaus', sort_key: 1 },
+  } as unknown as Event
+
+  test('a module event with no declared authorization rule denies a family principal (issue 022)', () => {
+    const world = derive(events)
+    expect(canAppendEvent(family, moduleEvent, world, {})).toBe(false)
+  })
+
+  test('a module event dispatches to its own declared authorization rule', () => {
+    const world = derive(events)
+    const organiserOnly = { event_authorize_dispatch: { BuildingAdded: () => false } }
+    expect(canAppendEvent(family, moduleEvent, world, organiserOnly)).toBe(false)
+
+    const anyoneMay = { event_authorize_dispatch: { BuildingAdded: () => true } }
+    expect(canAppendEvent(family, moduleEvent, world, anyoneMay)).toBe(true)
+  })
+
+  test('an organiser may always append a module event regardless of its declared rule', () => {
+    const world = derive(events)
+    const organiserOnly = { event_authorize_dispatch: { BuildingAdded: () => false } }
+    expect(canAppendEvent(organiser, moduleEvent, world, organiserOnly)).toBe(true)
+  })
 })
