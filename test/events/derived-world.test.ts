@@ -45,7 +45,7 @@ test('derives deterministic indexes and normalized resolver constraints', () => 
   expect(derive([...events].reverse().reverse())).toEqual(world)
 })
 
-test('retains a cleared label with cleared_seq instead of deleting it', () => {
+test('a LabelCleared by value hard-removes the label instead of tombstoning it (D27)', () => {
   const clearByValue: Event = {
     seq: 3,
     at: '2027-01-01T00:00:02Z',
@@ -55,12 +55,12 @@ test('retains a cleared label with cleared_seq instead of deleting it', () => {
     payload: { entity_id: 'fam_1', key: 'needs', value: 'quiet-room' },
   }
   const world = derive([...events, clearByValue])
-  const cleared = world.labels.find(
-    (label) => label.key === 'needs' && label.value === 'quiet-room',
+  expect(world.labels.some((label) => label.key === 'needs' && label.value === 'quiet-room')).toBe(
+    false,
   )
-  expect(cleared?.cleared_seq).toBe(3)
-  expect(cleared?.value_type).toBe('string')
-  expect(world.labels_by_entity.fam_1).not.toContainEqual(cleared)
+  expect(world.labels_by_entity.fam_1).not.toContainEqual(
+    expect.objectContaining({ key: 'needs' }),
+  )
   expect(world.labels_by_key.needs).toBeUndefined()
   expect(world.constraints).toEqual([])
 })
@@ -89,9 +89,40 @@ test('clears every value for a key when LabelCleared carries a null value', () =
   }
   const world = derive([...events, secondNeed, clearAll], config)
   expect(world.labels_by_key.needs).toBeUndefined()
-  expect(
-    world.labels.filter((label) => label.key === 'needs' && label.cleared_seq === 4),
-  ).toHaveLength(2)
+  expect(world.labels.filter((label) => label.key === 'needs')).toHaveLength(0)
+})
+
+test('PersonWithdrawn hard-removes the person and their labels instead of tombstoning them (D27)', () => {
+  const personAdded: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'PersonAdded',
+    payload: {
+      person_id: 'per_1',
+      family_id: 'fam_1',
+      given_name: 'Peter',
+      family_name: 'A',
+      birthdate: null,
+      role: 'adult',
+    },
+  }
+  const withdrawn: Event = {
+    seq: 4,
+    at: '2027-01-01T00:00:03Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'PersonWithdrawn',
+    payload: { person_id: 'per_1', reason: 'moved away' },
+  }
+  const before = derive([...events, personAdded])
+  expect(before.persons.map((person) => person.id)).toContain('per_1')
+  const after = derive([...events, personAdded, withdrawn])
+  expect(after.persons.map((person) => person.id)).not.toContain('per_1')
+  expect((after.entities_by_kind.person ?? []).some((person) => person.id === 'per_1')).toBe(false)
+  expect(after.labels.some((label) => label.entity_id === 'per_1')).toBe(false)
+  expect(diff(before, after)).toContainEqual({ kind: 'entity-retired', subject_id: 'per_1' })
 })
 
 test('rejects LabelSet/LabelCleared on setup-owned kernel keys', () => {
@@ -146,7 +177,7 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
   const capability: ModuleFoldCapability = {
     createEntity: (kind, id, seq) => {
       calls.push(`createEntity:${kind}:${id}:${seq}`)
-      return { id, kind, sort_key: seq, created_seq: seq, retired_seq: null }
+      return { id, kind, sort_key: seq, created_seq: seq }
     },
     setLabel: (entityId, key) => {
       calls.push(`setLabel:${entityId}:${key}`)

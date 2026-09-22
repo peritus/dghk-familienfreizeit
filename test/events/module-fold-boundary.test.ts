@@ -110,7 +110,7 @@ describe('module fold boundary', () => {
       profile.validation_view,
     )
     expect(world.entities_by_kind.widget).toEqual([
-      { id: 'wg_1', kind: 'widget', sort_key: 1, created_seq: 1, retired_seq: null },
+      { id: 'wg_1', kind: 'widget', sort_key: 1, created_seq: 1 },
     ])
     expect(world.labels_by_entity.wg_1).toMatchObject([{ key: 'widget-color', value: 'red' }])
   })
@@ -139,7 +139,7 @@ describe('module fold boundary', () => {
     ).toThrow(/did not declare label key: undeclared-key/)
   })
 
-  test('an id reused under another kind is rejected', () => {
+  test('cross-kind id collision is impossible by construction: id must match the creating kind’s declared prefix (D27)', () => {
     const profile = defineOccasionProfile({
       meta,
       traits: {
@@ -158,6 +158,17 @@ describe('module fold boundary', () => {
       } as Event,
       event({ type: 'ColliderCreated', payload: { id: 'fam_1' }, seq: 2 }),
     ]
-    expect(() => derive(events, profile.validation_view)).toThrow(/id reused under another kind/)
+    expect(() => derive(events, profile.validation_view)).toThrow(
+      /id for kind collider must start with its declared prefix/,
+    )
+  })
+
+  test('a duplicate active id under the same kind is rejected', () => {
+    const profile = defineOccasionProfile({ meta, traits: {}, modules: [idCollision({})] })
+    const events: Event[] = [
+      event({ type: 'ColliderCreated', payload: { id: 'co_1' }, seq: 1 }),
+      event({ type: 'ColliderCreated', payload: { id: 'co_1' }, seq: 2 }),
+    ]
+    expect(() => derive(events, profile.validation_view)).toThrow(/entity already exists: co_1/)
   })
 })
