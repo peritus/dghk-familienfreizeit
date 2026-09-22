@@ -35,7 +35,7 @@ they do not assign those later capabilities to M7.
 - [M8](../../roadmap.md#m8--family-authentication-and-preference-controls) owns
   profile-driven family controls, [M9](../../roadmap.md#m9--workshop-programme-and-live-participation)
   owns workshop participation, [M12](../../roadmap.md#m12--release-control-and-communication)
-  owns communicated scope status, and [M14](../../roadmap.md#m14--notifications-and-operational-email)
+  owns communicated scope status, and [M14](../../roadmap.md#m14--authentication-delivery-and-operational-email)
   owns invitation and reminder delivery.
 
 ## Recommendation

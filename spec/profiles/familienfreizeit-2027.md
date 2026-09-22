@@ -15,7 +15,8 @@ M12, after every active module contribution exists.
 This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.example.ts); this document
 explains the choices behind it. It selects and configures generic modules; it does
-not define a separate application architecture.
+not define a separate application architecture. Accepted contracts outside this
+composition remain in [deferred scope](../deferred-ideas/README.md).
 
 ## 1. Selected modules
 
@@ -32,9 +33,6 @@ The profile selects these modules ([modules](../modules/contract.md) §5):
 | [`workshop-rankings`](../modules/workshop-rankings.md) | ordered per-person workshop rankings |
 | [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, and fairness |
 | [`family-preferences`](../modules/family-preferences.md) | the family preferences page |
-
-Food preferences, materials, call-for-papers, self-organized sessions, and
-change-notifications are deferred under [M16](../roadmap.md#m16--deferred-sleeping-modules-and-features).
 
 ## 2. Room inventory
 
@@ -183,12 +181,7 @@ Keep-apart relations are never visible to families, which is why `apart-from` is
 both organiser-only and restricted. Cross-family co-rooming belongs to the
 separate sleeping-parties module.
 
-## 5. Deferred food preferences
-
-The food-preferences contract remains specified, but this active profile does not
-select it and therefore defines no diet or allergy traits.
-
-## 6. Room policy
+## 5. Room policy
 
 | Module | Parameter | Value | Why |
 |---|---|---|---|
@@ -201,7 +194,7 @@ select it and therefore defines no diet or allergy traits.
 Trait weights and penalties (§3) and these parameters are starting values; changing
 them is a deployment, reviewed through the plan diff before communicating.
 
-## 7. Workshop policy
+## 6. Workshop policy
 
 | Module | Parameter | Value |
 |---|---|---|
@@ -235,12 +228,7 @@ and permitted participation stay live. Draft programme details do not
 change family admission before communication. This profile enables all three scope
 kinds through its selected modules; release policy is not executable runtime config.
 
-## 8. Deferred materials
-
-The materials contract remains specified, but this active profile does not select
-it. Material requests, commitments, and workshop-linked coordination are deferred.
-
-## 9. Metadata, copy, and notifications
+## 7. Metadata, copy, and notifications
 
 The occasion runs from `2027-04-30` through `2027-05-02`, inclusive; family-facing
 German dates are 30.04.2027 to 02.05.2027. Ages are computed at `2027-04-30`.
@@ -254,14 +242,13 @@ not change automatically.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../ui/german-translation-guidelines.md). The
-preferences page has three active sections: who is coming, room wishes, and
-workshops. Cross-family sharing wishes belong to the separate sleeping-parties module.
+preferences page has three sections: who is coming, room wishes, and workshops.
+Cross-family sharing wishes belong to the separate sleeping-parties module.
 
-Authentication emails remain active for magic-link access. Arrangement-change and
-communication emails are deferred with `change-notifications`; release control
-still owns visibility and recipient previews independently of delivery.
+Authentication invitations and reminders use the release-independent family login
+workflow. Communication and change emails remain deferred.
 
-## 10. First-deployment boundary
+## 8. First-deployment boundary
 
 The profile is deployed separately with its own database and operational
 configuration. It does not introduce runtime tenancy or require unused room or

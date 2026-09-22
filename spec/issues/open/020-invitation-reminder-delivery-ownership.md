@@ -26,7 +26,7 @@ boundary, or duplicating M14 delivery work.
 
 - [M8](../../roadmap.md#m8--family-authentication-and-preference-controls) includes
   invitation and reminder messages with the family login path.
-- [M14](../../roadmap.md#m14--notifications-and-operational-email) again includes
+- [M14](../../roadmap.md#m14--authentication-delivery-and-operational-email) again includes
   invitation and reminder messages, then
   adds delivery claims, retries, `email_log`, provider configuration, and delivery
   status.

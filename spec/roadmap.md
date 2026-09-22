@@ -188,6 +188,24 @@ Acceptance: all active reports render from derived state, respect configured
 resolution and privacy, and produce the required paper output without downloads
 or export paths.
 
+## M14 — Authentication delivery and operational email
+
+Specification coverage: [authentication](application/authentication.md) §2,
+[deployment](engineering/deployment.md) §§5–6, and the operational email portions
+of the [release control](application/release-control.md) contract.
+
+- Implement invitation and reminder messages for the family login workflow.
+- Implement recipient preview, delivery claims, retries, suppression, unknown-send
+  handling, and idempotency for authentication email.
+- Implement operational `email_log`, provider configuration, and delivery status
+  separate from domain visibility.
+- Keep communication and change emails deferred under
+  [change notifications](deferred-ideas/change-notifications.md).
+
+Acceptance: invitation and reminder delivery is reliable and idempotent, delivery
+failure never changes domain visibility, and the active profile remains free of
+deferred notification contributions.
+
 ## M15 — Deployment, security, and launch hardening
 
 Specification coverage: [deployment](engineering/deployment.md), [authentication](application/authentication.md),
@@ -204,24 +222,23 @@ Acceptance: deployment is reproducible from one revision, recovery and identity
 mismatch procedures are documented, and the active profile passes all repository
 and operational gates.
 
-<a id="m14--notifications-and-operational-email"></a>
-## M16 — Deferred sleeping modules and features
+## Deferred scope
 
-This is a conditional plan, not approved implementation scope. Promotion requires
-an explicit user scope decision and review of affected binding decisions.
+Accepted requirements outside the active roadmap are canonical under
+[deferred ideas](deferred-ideas/README.md). They are not active implementation
+scope. Promotion requires explicit user scope approval, review of affected
+binding decisions, and reinsertion into an active roadmap milestone.
 
-Deferred features:
-
-- `food-preferences`, including food profile sections, controls, and reports;
-- `materials`, including workshop-linked requests and fulfilment surfaces;
-- `call-for-papers`, including proposal intake, review, and candidate-source workflow;
-- `self-organized-sessions`, including proposer placement and organiser override;
-- `change-notifications` and non-authentication operational email.
-
-The call-for-papers module may later add a proposal source to the existing
-official-workshop boundary. Self-organized sessions remain independent and must
-not be reintroduced as a hidden scheduling dependency. Sleeping parties and
-child rooms remain deferred under D5 and are not changed here.
+- [Call for papers](deferred-ideas/call-for-papers.md)
+- [Change notifications](deferred-ideas/change-notifications.md)
+- [Food preferences](deferred-ideas/food-preferences.md)
+- [Materials](deferred-ideas/materials.md)
+- [Self-organized sessions](deferred-ideas/self-organized-sessions.md)
+- [Sleeping parties](deferred-ideas/sleeping-parties.md)
+- [Child rooms](deferred-ideas/child-rooms.md)
+- [Party review](deferred-ideas/party-review.md)
+- [Room adjacency](deferred-ideas/room-adjacency.md)
+- [Caching](deferred-ideas/re-introduce-caching.md)
 
 ## Cross-cutting acceptance and cut lines
 
