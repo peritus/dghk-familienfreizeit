@@ -275,11 +275,12 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
       (module) => module.contributions.events?.map(({ type }) => `event:${type}`) ?? [],
     ),
   ])
-  duplicate(
-    modules.flatMap(
+  duplicate([
+    ...Object.values(kernelEntityKindPrefixes).map((prefix) => `prefix:${prefix}`),
+    ...modules.flatMap(
       (module) => module.contributions.entity_kinds?.map(({ prefix }) => `prefix:${prefix}`) ?? [],
     ),
-  )
+  ])
   duplicate(
     modules.flatMap(
       (module) => module.contributions.routes?.map(({ route }) => `route:${route}`) ?? [],
@@ -293,6 +294,9 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
 }
 
 const kernelEntityKinds = ['family', 'person']
+
+/** Reserved kernel entity-kind id prefixes; see D27 and `src/events/fold.ts`. */
+const kernelEntityKindPrefixes: Readonly<Record<string, string>> = { family: 'fam_', person: 'per_' }
 
 function validationView(
   traits: Record<string, Trait>,
@@ -343,6 +347,9 @@ function validationView(
       )
     }
   }
+  const entityKindPrefixes: Record<string, string> = { ...kernelEntityKindPrefixes }
+  for (const module of modules)
+    for (const { id, prefix } of module.contributions.entity_kinds ?? []) entityKindPrefixes[id] = prefix
   return {
     label_schemas: schemas,
     aliases,
@@ -352,6 +359,7 @@ function validationView(
     world_checks: modules.flatMap((module) => module.contributions.world_checks ?? []),
     event_payload_schemas: eventPayloadSchemas,
     event_fold_dispatch: eventFoldDispatch,
+    entity_kind_prefixes: entityKindPrefixes,
   }
 }
 

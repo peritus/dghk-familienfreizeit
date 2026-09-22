@@ -27,6 +27,14 @@ const kernelSetupOwnedLabelKeys = new Set([
   'role',
 ])
 
+/**
+ * Kernel-reserved id prefixes (D27). Every entity id must start with its own
+ * kind's declared prefix, kernel or module; this is what prevents two
+ * different kinds from ever colliding on the same id, so no permanent
+ * cross-kind id ledger is kept.
+ */
+const kernelEntityKindPrefixes: Readonly<Record<string, string>> = { family: 'fam_', person: 'per_' }
+
 export type EntityKind = 'family' | 'person' | (string & {})
 
 export type Entity = {
@@ -34,7 +42,6 @@ export type Entity = {
   kind: EntityKind
   sort_key: number
   created_seq: number
-  retired_seq: number | null
 }
 
 export type Label = {
@@ -45,7 +52,6 @@ export type Label = {
   strength: 'required' | 'preferred' | null
   note: string | null
   set_seq: number
-  cleared_seq: number | null
   sensitivity: 'normal' | 'restricted'
 }
 
@@ -53,7 +59,6 @@ export type KernelWorld = {
   families: Entity[]
   persons: Entity[]
   labels: Label[]
-  withdrawn_person_ids: string[]
   head_seq: number
   labels_by_entity: Readonly<Record<string, readonly Label[]>>
   labels_by_key: Readonly<Record<string, readonly Label[]>>
@@ -61,7 +66,7 @@ export type KernelWorld = {
   capabilities: readonly ResolvedCapability[]
   diagnostics: readonly Diagnostic[]
   summaries: Readonly<Record<string, unknown>>
-  /** One sorted collection per entity kind, kernel and module-owned alike. */
+  /** One sorted collection per entity kind, kernel and module-owned alike. Retired/withdrawn entities are absent (D27). */
   entities_by_kind: Readonly<Record<string, readonly Entity[]>>
 }
 
@@ -145,6 +150,8 @@ export type WorldCheck = (world: KernelWorld) => readonly Diagnostic[]
 
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
+  /** Declared id prefix per entity kind, kernel and module alike; enforced at creation (D27). */
+  entity_kind_prefixes?: Readonly<Record<string, string>>
   label_schemas?: readonly LabelSchema[]
   aliases?: Readonly<Record<string, string>>
   resolver_descriptors?: readonly ResolverDescriptor[]
@@ -162,11 +169,10 @@ type MutableWorld = {
   persons: Map<string, Entity>
   labels: Map<string, Label>
   emails: Map<string, string>
-  withdrawn: Set<string>
   head_seq: number
   /** Module-owned entities, keyed by id. */
   module_entities: Map<string, Entity>
-  /** Every created entity, kernel and module alike, keyed by id — enforces id reuse across kinds. */
+  /** Currently live entities, kernel and module alike, keyed by id. Retirement removes the entry (D27). */
   entities_by_id: Map<string, Entity>
 }
 
@@ -178,21 +184,19 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
     (a, b) =>
       a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),
   )
-  const activeLabels = labels.filter((label) => label.cleared_seq === null)
   const entities = [
     ...state.families.values(),
     ...state.persons.values(),
     ...state.module_entities.values(),
   ].sort(sortEntities)
-  const resolved = resolve(activeLabels, entities, config)
+  const resolved = resolve(labels, entities, config)
   const world: KernelWorld = {
     families: [...state.families.values()].sort(sortEntities),
     persons: [...state.persons.values()].sort(sortEntities),
     labels,
-    withdrawn_person_ids: [...state.withdrawn].sort(),
     head_seq: state.head_seq,
-    labels_by_entity: indexLabels(activeLabels, (label) => label.entity_id),
-    labels_by_key: indexLabels(activeLabels, (label) => label.key),
+    labels_by_entity: indexLabels(labels, (label) => label.entity_id),
+    labels_by_key: indexLabels(labels, (label) => label.key),
     constraints: resolved.constraints,
     capabilities: resolved.capabilities,
     diagnostics: resolved.diagnostics,
@@ -247,7 +251,6 @@ function createMutableWorld(): MutableWorld {
     persons: new Map(),
     labels: new Map(),
     emails: new Map(),
-    withdrawn: new Set(),
     head_seq: 0,
     module_entities: new Map(),
     entities_by_id: new Map(),
@@ -274,7 +277,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       const normalizedEmail = canonicalEmail(email)
       if (state.emails.has(normalizedEmail))
         throw new Error(`email already belongs to a family: ${normalizedEmail}`)
-      state.families.set(familyId, registerEntity(state, 'family', familyId, event.seq))
+      state.families.set(familyId, registerEntity(state, config, 'family', familyId, event.seq))
       state.emails.set(normalizedEmail, familyId)
       setLabel(state, event, familyId, 'display-name', displayName, null, null)
       setLabel(state, event, familyId, 'email', normalizedEmail, null, null)
@@ -296,12 +299,12 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         throw new Error(`email already belongs to a family: ${newEmail}`)
       state.emails.delete(oldEmail)
       state.emails.set(newEmail, familyId)
-      replaceLabels(state, familyId, 'email', event.seq)
+      replaceLabels(state, familyId, 'email')
       setLabel(state, event, familyId, 'email', newEmail, null, null)
       break
     }
     case 'PersonAdded':
-      addPerson(state, event as Extract<Event, { type: 'PersonAdded' }>)
+      addPerson(state, config, event as Extract<Event, { type: 'PersonAdded' }>)
       break
     case 'PersonUpdated':
       updatePerson(state, event as Extract<Event, { type: 'PersonUpdated' }>)
@@ -309,8 +312,9 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
     case 'PersonWithdrawn': {
       const { person_id: personId } = (event as unknown as PersonWithdrawn).payload
       requireEntity(state.persons, personId, 'person')
-      state.withdrawn.add(personId)
-      state.persons.get(personId)!.retired_seq = event.seq
+      state.persons.delete(personId)
+      state.entities_by_id.delete(personId)
+      removeLabelsForEntity(state, personId)
       break
     }
     case 'LabelSet': {
@@ -329,13 +333,8 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       const { entity_id: entityId, key, value } = (event as unknown as LabelCleared).payload
       requireKnownEntity(state, entityId)
       const clearKey = configuredLabelKey(config, key)
-      if (value === null) {
-        const prefix = `${entityId}|${clearKey}|`
-        for (const mapKey of state.labels.keys())
-          if (mapKey.startsWith(prefix)) clearLabel(state, mapKey, event.seq)
-      } else {
-        clearLabel(state, labelKey(entityId, clearKey, value), event.seq)
-      }
+      if (value === null) replaceLabels(state, entityId, clearKey)
+      else state.labels.delete(labelKey(entityId, clearKey, value))
       break
     }
     default: {
@@ -343,7 +342,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       if (!fold) throw new Error(`unknown event type: ${event.type}`)
       const capability: ModuleFoldCapability = {
         createEntity: (kind, id, seq) => {
-          const created = registerEntity(state, kind, id, seq)
+          const created = registerEntity(state, config, kind, id, seq)
           state.module_entities.set(id, created)
           return created
         },
@@ -356,20 +355,37 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
   state.head_seq = event.seq
 }
 
-function registerEntity(state: MutableWorld, kind: EntityKind, id: string, seq: number): Entity {
-  const existing = state.entities_by_id.get(id)
-  if (existing && existing.kind !== kind)
-    throw new Error(`id reused under another kind: ${id} (${existing.kind} vs ${kind})`)
+/**
+ * Creates and registers a live entity. Cross-kind id collisions are prevented
+ * structurally — the id must start with its own kind's declared prefix
+ * (kernel-reserved for family/person, module-declared otherwise) — so no
+ * permanent ledger of retired ids is needed (D27).
+ */
+function registerEntity(
+  state: MutableWorld,
+  config: KernelConfig,
+  kind: EntityKind,
+  id: string,
+  seq: number,
+): Entity {
+  const prefix = kernelEntityKindPrefixes[kind] ?? config.entity_kind_prefixes?.[kind]
+  if (!prefix || !id.startsWith(prefix))
+    throw new Error(`id for kind ${kind} must start with its declared prefix: ${id}`)
+  if (state.entities_by_id.has(id)) throw new Error(`entity already exists: ${id}`)
   const created = entity(id, kind, seq)
   state.entities_by_id.set(id, created)
   return created
 }
 
-function addPerson(state: MutableWorld, event: Extract<Event, { type: 'PersonAdded' }>): void {
+function addPerson(
+  state: MutableWorld,
+  config: KernelConfig,
+  event: Extract<Event, { type: 'PersonAdded' }>,
+): void {
   const { person_id: personId, family_id: familyId } = event.payload
   requireEntity(state.families, familyId, 'family')
   if (state.persons.has(personId)) throw new Error(`person already exists: ${personId}`)
-  state.persons.set(personId, registerEntity(state, 'person', personId, event.seq))
+  state.persons.set(personId, registerEntity(state, config, 'person', personId, event.seq))
   writePersonLabels(state, event)
 }
 
@@ -377,7 +393,7 @@ function updatePerson(state: MutableWorld, event: Extract<Event, { type: 'Person
   requireEntity(state.persons, event.payload.person_id, 'person')
   requireEntity(state.families, event.payload.family_id, 'family')
   for (const key of ['member-of', 'given-name', 'family-name', 'birthdate', 'role'])
-    replaceLabels(state, event.payload.person_id, key, event.seq)
+    replaceLabels(state, event.payload.person_id, key)
   writePersonLabels(state, event)
 }
 
@@ -418,14 +434,8 @@ function setLabel(
     strength,
     note,
     set_seq: event.seq,
-    cleared_seq: null,
     sensitivity,
   })
-}
-
-function clearLabel(state: MutableWorld, key: string, seq: number): void {
-  const label = state.labels.get(key)
-  if (label && label.cleared_seq === null) state.labels.set(key, { ...label, cleared_seq: seq })
 }
 
 function jsonValueType(value: JsonValue): Label['value_type'] {
@@ -457,8 +467,7 @@ function setConfiguredLabel(
     throw new Error(`derived capability cannot be assigned: ${value}`)
   if (schema?.scopes && target && !schema.scopes.includes(target.kind))
     throw new Error(`label ${canonicalKey} is not valid for ${target.kind}`)
-  if (schema?.cardinality !== 'zero-or-more')
-    replaceLabels(state, entityId, canonicalKey, event.seq)
+  if (schema?.cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
   setLabel(
@@ -494,10 +503,16 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
   return canonicalKey
 }
 
-function replaceLabels(state: MutableWorld, entityId: string, key: string, seq: number): void {
+/** Removes every live label under `key` for `entityId` (a restatement or an explicit clear-all). */
+function replaceLabels(state: MutableWorld, entityId: string, key: string): void {
   const prefix = `${entityId}|${key}|`
-  for (const keyValue of state.labels.keys())
-    if (keyValue.startsWith(prefix)) clearLabel(state, keyValue, seq)
+  for (const mapKey of state.labels.keys()) if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
+}
+
+/** Removes every live label belonging to `entityId`, regardless of key (entity retirement). */
+function removeLabelsForEntity(state: MutableWorld, entityId: string): void {
+  const prefix = `${entityId}|`
+  for (const mapKey of state.labels.keys()) if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
 }
 
 function labelKey(entityId: string, key: string, value: JsonValue): string {
@@ -513,7 +528,7 @@ function requireEntity(map: Map<string, Entity>, id: string, kind: EntityKind): 
 }
 
 function entity(id: string, kind: EntityKind, seq: number): Entity {
-  return { id, kind, sort_key: seq, created_seq: seq, retired_seq: null }
+  return { id, kind, sort_key: seq, created_seq: seq }
 }
 
 function sortEntities(a: Entity, b: Entity): number {
