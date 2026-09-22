@@ -199,6 +199,10 @@ array must not become a back door for material or programme-only data into Plan.
 
 Each selected module adds its own arrays with a declared sort key; for example
 [room inventory](../modules/room-inventory.md) §7 adds `buildings`, `rooms`, and `places`.
+Issue 025 modules additionally exchange typed derived contributions: official and
+self-organised sessions provide scheduleable-session input, ranking provides a
+pre-schedule demand summary, scheduling provides offerings, and attendance reads
+both rankings and offerings. No stage reads another module's raw event payloads.
 
 `SolverLabel` omits the display-only note from the derived `Label` shape. Free-form
 organiser values resolve through the same fixed mechanisms as profile vocabulary;
@@ -244,6 +248,20 @@ solve(input, config):
   assert assignment uniqueness declared by the selected modules
   return { meta, preflight: findings, sections, trace }
 ```
+
+For an official workshop profile, the selected stage order is:
+
+```text
+workshop-ranking.demand
+  → workshop-scheduling.place
+  → workshop-assignment.assign
+```
+
+The demand stage summarizes eligible ranked demand and never assigns a person.
+Scheduling places selected programme sessions into configured slots and spaces,
+then attendance assigns people to the resulting offerings. A self-organised
+session may contribute a proposer-selected placement without entering the ranking
+or attendance stages.
 
 Preflight runs before any stage, over the solver input alone. Its value is timing: it
 says "19 beds required, 14 available" in week two, before a single placement runs.
@@ -335,5 +353,6 @@ stored configuration, so an organiser who disagrees can point at the term rather
 the outcome.
 
 Plan sections are specified by their selected modules: [room assignment](../modules/room-assignment.md) §10,
-[workshop assignment](../modules/workshop-assignment.md) §10. Food and materials contribute
+[workshop scheduling](../modules/workshop-scheduling.md), and
+[workshop attendance](../modules/workshop-assignment.md). Food and materials contribute
 world summaries, not solver sections.
