@@ -1,7 +1,7 @@
 ---
 id: "025"
 title: Workshop proposals and rankings are coupled to a preassigned schedule
-status: needs-decision
+status: resolved
 severity: contract-contradiction
 category: module:workshops
 source: user workflow review
@@ -203,6 +203,27 @@ leaving the slot-scoped `ordered-choice` operator, `WorkshopAdded.slot_id`,
 preassigned `room_id`, and assignment stage unchanged. That would permit an
 invalid intermediate shape without defining which entity owns the schedule or
 which solver stage produces it.
+
+## Resolution
+
+Issue 025 is resolved by separating programme-session identity, call review,
+official workshop facts, self-organised sessions, scheduling, ranking, and
+attendance into cooperating modules. The event log, generic labels, resolver,
+pure solver, deterministic fairness, and release-control boundaries remain
+unchanged.
+
+Official proposals are reviewed and selected into immutable candidate rounds.
+Eligible people rank programme sessions before a schedule exists. A demand
+summary informs deterministic scheduling into configured slots and workshop
+spaces. Attendance then assigns people to scheduled offerings from the unchanged
+rankings. Selected sessions that cannot be placed remain explicit blocking
+outcomes. Self-organised sessions publish immediately, may use proposer-selected
+placements with organiser override, and do not enter ranking or solver attendance
+allocation.
+
+The binding changes are recorded in revised D13 and new D27. The dependent module,
+solver, release, UI, profile, roadmap, and testing contracts are updated in the
+same specification change.
 
 ## Open questions
 
