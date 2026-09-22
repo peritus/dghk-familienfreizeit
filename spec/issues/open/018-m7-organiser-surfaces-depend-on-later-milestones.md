@@ -6,6 +6,7 @@ severity: contract-contradiction
 category: process
 source: milestone-feasibility-review
 related_decisions: [D14, D16, D24]
+related_milestones: [M7, M8, M9, M12, M14]
 opened: 2026-09-21
 ---
 
@@ -16,27 +17,34 @@ opened: 2026-09-21
 M7 is scheduled before family preferences (M8), workshops (M9), release control
 (M12), and notifications (M14), but its organiser-screen contracts require all
 four. The M7 acceptance cannot therefore establish the screens as specified
-without delivering later-milestone behavior early.
+without delivering later-milestone behavior early. The current organiser-view
+and family-preferences contracts make the dependency explicit by requiring
+family-detail controls and workshop self-service to be available to organisers;
+they do not assign those later capabilities to M7.
 
 ## Evidence
 
-- [M7](../../roadmap.md) requires the dashboard and family detail. The
-  [organiser view](../../application/organiser-view.md) requires family detail to
-  render the same editable preferences and workshop self-service controls as the
-  family view.
+- [M7](../../roadmap.md#m7--organiser-application-and-family-identity-surfaces)
+  requires the dashboard and family detail. The [organiser view](../../application/organiser-view.md)
+  and [family preferences](../../modules/family-preferences.md) require family
+  detail to render the same editable preferences and workshop self-service
+  controls as the family view.
 - The [dashboard](../../ui/screens/organiser-dashboard.md) requires shared release
   status, workshop warnings, and reminder sending. Release status is owned by M12,
   workshop data by M9, and operational reminder delivery by M14.
-- [M8](../../roadmap.md) owns profile-driven family controls, [M9](../../roadmap.md)
-  owns workshop participation, [M12](../../roadmap.md) owns communicated scope
-  status, and [M14](../../roadmap.md) owns invitation and reminder delivery.
+- [M8](../../roadmap.md#m8--family-authentication-and-preference-controls) owns
+  profile-driven family controls, [M9](../../roadmap.md#m9--workshop-programme-and-live-participation)
+  owns workshop participation, [M12](../../roadmap.md#m12--release-control-and-communication)
+  owns communicated scope status, and [M14](../../roadmap.md#m14--notifications-and-operational-email)
+  owns invitation and reminder delivery.
 
 ## Recommendation
 
 Split M7 into an organiser foundation: navigation, identity management, event
-history, pending batches, generic decisions, and inventory. Deliver feature cards
-and family-detail controls with their owning modules, or move M7 after the latest
-capability it must show.
+history, pending batches, generic decisions, and inventory. Mount later module
+contributions only when their owning milestones are delivered, or move M7 after
+the latest capability it must show. The choice must preserve D24's organiser
+equivalence without making M7 claim behavior it cannot yet implement.
 
 ## Open questions
 
