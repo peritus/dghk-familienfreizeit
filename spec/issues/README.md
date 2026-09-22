@@ -27,6 +27,7 @@ severity: gap           # build-blocking | privacy | contract-contradiction | ga
 category: <kernel | module:<name> | ui | process | tooling>
 source: <review/report this came from>
 related_decisions: [D4]          # decision IDs from decisions.md; omit/empty if none
+related_milestones: [M12]        # roadmap milestone IDs; omit/empty if none
 opened: YYYY-MM-DD
 ---
 

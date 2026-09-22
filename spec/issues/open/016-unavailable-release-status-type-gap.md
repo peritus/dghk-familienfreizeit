@@ -6,6 +6,7 @@ severity: gap
 category: module:release-control
 source: issue-2-unavailable-release-status (pre-existing)
 related_decisions: [D16]
+related_milestones: [M8, M12, M13, M14, M15]
 opened: 2026-09-19
 ---
 
@@ -49,9 +50,16 @@ not a member of the status union. This permits contradictory values such as
 status: 'communicated' together with unavailable: { ... }, and leaves every
 consumer to decide independently which field wins.
 
-The same gap appears in the diff, report, UI, notification, and recovery
-contracts. The prose knows what to do, but the API boundary does not provide one
-canonical state machine for doing it.
+The release-control prose now describes the intended unavailable behavior across
+the diff, recovery, reports, UI, notifications, and deployment impact. The typed
+API boundary still does not provide one canonical state machine for doing it:
+the status union omits `unavailable`, the reason remains an open string, and the
+invariants separating an unavailable historical view from a recovery preview
+are not represented in the shared types.
+
+This is a narrower and more precise gap than the original prose-only finding.
+The remaining issue is the contract and consumer type boundary, not the absence
+of unavailable guidance in every affected document.
 
 ## What the user-facing behavior is meant to achieve
 
@@ -108,21 +116,24 @@ that no reliable before-image exists. That current proposal is not a valid
 ScopeDiff.after value. It should be carried by a separate organiser-only recovery
 preview, not by the historical diff type.
 
-### 3. Organiser UI recognizes the state but does not define it
+### 3. Organiser UI recognizes the state but does not type it
 
 The organiser UI asks for revision-mismatch rows, text, glyphs, and history views,
-but defines badges only for communicated, changed, and never communicated. It also
-requires mismatch rows to remain visible even when the outstanding-change report
-would otherwise be empty.
+and now describes the recovery presentation. Its shared status consumer still
+receives a three-member status type, while the report contract separately names
+unavailable/revision-mismatch rows. It also requires mismatch rows to remain
+visible even when the outstanding-change report would otherwise be empty.
 
 The missing contract is the exact status badge, row action, selection behavior,
 review behavior, and relationship between the old communication and a recovery
 communication.
 
-### 4. Family UI recognizes the state but does not define its presentation
+### 4. Family UI recognizes the state but depends on an untyped presentation
 
-The family assignment screen explicitly requires revision-mismatch unavailable
-states, but its shared badge vocabulary has only the three ordinary states.
+The family assignment and family-view contracts explicitly require
+revision-mismatch unavailable states and a neutral contact presentation, but the
+shared family projection still carries `unavailable` as an auxiliary object
+instead of a typed state with a closed reason and invariant.
 
 The family contract must explicitly say that an affected historical arrangement is
 not shown as current and that current draft content is not exposed as a substitute.
@@ -133,10 +144,10 @@ Admissions and ranking controls that require an unavailable communicated program
 must be disabled. Own responses remain readable, and the permitted self-service
 clear operation remains available.
 
-### 5. Reports consume unavailable state without rendering rules
+### 5. Reports consume unavailable state with prose rules but no shared type
 
-Reports correctly consume the shared scope view and the organiser readiness report
-must list unavailable scopes. The missing rules are:
+Reports now correctly consume the shared scope view and the organiser readiness
+report must list unavailable scopes. The remaining type-level rules are:
 
 - organiser reports show the mismatch and recovery-needed state;
 - family and shared reports show a neutral warning and omit unavailable held
@@ -147,12 +158,12 @@ must list unavailable scopes. The missing rules are:
 
 The report itself should remain available when only one scope is unavailable.
 
-### 6. Notification previews do not define unavailable handling
+### 6. Notification previews inherit unavailable handling without a typed result
 
 Notification rendering correctly consumes the family-projected scope view and does
-not reconstruct diffs itself. The retry contract pauses reconstruction after build
-or compatibility mismatch, but the preview contract does not say that a normal
-change email requires a reliable before-image.
+not reconstruct diffs itself. The current release-control and notification prose
+now says that a normal change email requires a reliable before-image, but the
+preview/result boundary still has no typed unavailable/recovery variant.
 
 The missing rules are:
 
@@ -342,4 +353,3 @@ system has no current data.”
 - [ui/frontend.md](../../ui/frontend.md)
 - [engineering/deployment.md](../../engineering/deployment.md)
 - [ui/german-translation-guidelines.md](../../ui/german-translation-guidelines.md)
-

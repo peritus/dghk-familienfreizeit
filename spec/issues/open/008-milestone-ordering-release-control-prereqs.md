@@ -6,6 +6,7 @@ severity: gap
 category: process
 source: spec-review-2026-09-19
 related_decisions: [D16]
+related_milestones: [M8, M9, M12]
 opened: 2026-09-19
 ---
 
@@ -13,18 +14,21 @@ opened: 2026-09-19
 
 ## Problem
 
-M8/M9 ([`roadmap.md:156`](../../roadmap.md)) require communicated views and programme
-admission, but the release-control machinery that makes those views safe to
-show only appears in M12. These milestones cannot safely expose draft state
-in the meantime — building them as currently ordered risks a window where
-family-facing screens show data release control hasn't cleared yet.
+M8/M9 ([`roadmap.md`](../../roadmap.md#m8--family-authentication-and-preference-controls)) require
+families to see communicated arrangements and use the effective communicated
+programme for admission, but the release-control machinery that makes those
+views safe to show is delivered in M12. The roadmap now names the release
+dependency in M9 and lists historical composition in M12, but it still does not
+say which M8/M9 work is private development-only and which family-facing
+behavior is deferred until the M12 boundary exists. Building the milestones as
+currently ordered risks a window where family-facing screens show draft state.
 
 ## Recommendation
 
-Move the minimal release-aware read/write prerequisites earlier in the
-roadmap, or explicitly split M8/M9 into a private-development-surface phase
-and a post-M12 acceptance phase. Review the ordering before M8; do not
-bypass D16 to satisfy an earlier screen-completion gate.
+Move the minimal release-aware read/write prerequisites earlier in the roadmap,
+or explicitly split M8/M9 into a private-development-surface phase and a
+post-M12 acceptance phase. Review the ordering before M8; do not bypass D16 to
+satisfy an earlier screen-completion gate.
 
 ## Open questions
 

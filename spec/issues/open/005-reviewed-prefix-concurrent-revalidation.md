@@ -1,11 +1,12 @@
 ---
 id: "005"
-title: Reviewed-prefix confirmation has no concurrent-live-state contract
+title: Reviewed-prefix confirmation lacks concurrent-live-state revalidation
 status: needs-decision
 severity: contract-contradiction
 category: module:release-control
 source: spec-review-2026-09-19
-related_decisions: []
+related_decisions: [D16]
+related_milestones: [M9, M12, M14]
 opened: 2026-09-19
 ---
 
@@ -22,21 +23,28 @@ before confirmation. Validation only at the reviewed prefix misses the new,
 now-incompatible live label.
 
 A second framing of the same gap: "concurrent communication has contradictory
-validation requirements" — confirmation validates the reviewed sequence, but
-release consistency also depends on current participation. Example: an
-organiser previews switching a workshop from sign-up to assigned; someone
-signs up before confirmation. Accepting the old preview would retain an
-incompatible label.
+validation requirements" — the current contract explicitly permits confirmation
+of the reviewed prefix after a concurrent append, while §5 also requires
+prospective validation against live participation. The contract does not say
+whether that validation is evaluated against the reviewed prefix, the current
+head, or both, nor how the append-time check atomically prevents an invalid
+combination. Example: an organiser previews switching a workshop from sign-up
+to assigned; someone signs up before confirmation. Accepting the old preview
+without a current-head check would retain an incompatible label.
+
+The latest release-control text therefore resolves the question of whether every
+head change invalidates a review: it says that unrelated concurrent appends do
+not refresh the held diff. It does not resolve the remaining live-state race or
+define the notification recipient result for that race.
 
 ## Recommendation
 
-Preserve the reviewed held content, but atomically revalidate its
-composition with current live participation at append time and reject new
-conflicts. Alternatives are invalidating every review on any head change, or
-blocking relevant live writes during review. Select and document the
-concurrency rule before M9/M12; include a race fixture and
-notification-recipient semantics. This requires release-contract review, not
-an implicit implementation choice.
+Preserve the reviewed held content, but atomically revalidate its composition
+with current live participation at append time and reject new conflicts. The
+alternatives are invalidating every review on any head change or blocking
+relevant live writes during review. Select and document the concurrency rule
+before M9/M12; include a race fixture and notification-recipient semantics.
+This requires release-contract review, not an implicit implementation choice.
 
 ## Open questions
 
