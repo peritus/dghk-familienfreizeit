@@ -128,6 +128,8 @@ test/fixtures/event-logs/
   conflicted.kdl         constraints that contradict after a change
   constraint-heavy.kdl   many relations and organiser decisions
   infeasible.kdl         trips room-assignment.requirement-arithmetic
+  workshop-spaces.kdl    workshop-space add/update/retire and capability facts
+  workshop-spaces-invalid.kdl  invalid capacity and overlapping windows
 ```
 
 The parser reports file and line locations, rejects duplicate properties, and
@@ -291,6 +293,16 @@ magic-link, rate-limit, and delivery records use the same canonical value.
 
 Each module additionally ships contract tests and names the fixtures a profile
 selecting it must supply (module specification §12).
+
+The `workshop-space` contract tests cover add/update/retire replay, negative
+capacity, reversed and overlapping or touching availability windows, exclusion
+of retired spaces from `WorkshopSpaceInput`, resolver-backed capability output,
+and shuffle-invariant `sort_key`/id ordering. Profile composition tests cover a
+`workshop-space` + `workshops` occasion without `room-inventory`, an
+`room-inventory` + `room-assignment` occasion without workshops, and the full
+Familienfreizeit profile with both independent inventories. A schedule consumer
+fixture rejects an unknown or retired space reference; scheduling itself remains
+out of scope until Issue 025.
 
 ---
 

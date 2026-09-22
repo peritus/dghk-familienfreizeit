@@ -25,6 +25,7 @@ The profile selects these modules ([modules](../modules/contract.md) §5):
 |---|---|
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
 | [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, and the board |
+| [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
 | [`workshops`](../modules/workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
 | [`workshop-rankings`](../modules/workshop-rankings.md) | ordered per-person workshop rankings |
 | [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, and fairness |
@@ -132,7 +133,30 @@ At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
 103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
 not a booking or billing rule.
 
-## 3. People and room vocabulary
+## 3. Workshop-space inventory
+
+Workshop spaces are independent occasion data. The profile selects
+[`workshop-space`](../modules/workshop-space.md) alongside `workshops`, while
+[`room-inventory`](../modules/room-inventory.md) remains solely the selected
+accommodation inventory. A workshop space is not a room, bed, place, or
+building, and no workshop event names an accommodation room.
+
+The organiser records each space's display name, location description, physical
+capacity, event-backed availability windows, and deterministic order. Generic
+resolver labels may describe capabilities such as `accessible` or `outdoor`
+without adding a profile-specific capability vocabulary. The active profile
+does not yet expose these physical facts to families: the schedule and release
+contract remains an Issue 025 responsibility.
+
+The profile composition contract includes these independent fixtures:
+
+| Fixture | Selected modules | Purpose |
+|---|---|---|
+| `workshop-spaces-only` | `workshop-space`, `workshops` | Workshop spaces and programme facts without accommodation inventory |
+| `accommodation-only` | `room-inventory`, `room-assignment` | Accommodation remains valid without workshops or workshop spaces |
+| `familienfreizeit-2027` | Both inventories plus the selected workshop modules | Full occasion composition with independent physical boundaries |
+
+## 4. People and room vocabulary
 
 | Trait | Builder | Scope | Semantics |
 |---|---|---|---|
@@ -157,7 +181,7 @@ Keep-apart relations are never visible to families, which is why `apart-from` is
 both organiser-only and restricted. Cross-family co-rooming belongs to the
 separate sleeping-parties module.
 
-## 4. Food preferences
+## 5. Food preferences
 
 Food data is per person ([food preferences](../modules/food-preferences.md)): every
 person has exactly one `diet` and may have one `allergies-text`.
@@ -173,7 +197,7 @@ and wording from the source data, for example `1 x Eier` or
 names, so this profile records the model and vocabulary without inventing person or
 family assignments.
 
-## 5. Room policy
+## 6. Room policy
 
 | Module | Parameter | Value | Why |
 |---|---|---|---|
@@ -186,7 +210,7 @@ family assignments.
 Trait weights and penalties (§3) and these parameters are starting values; changing
 them is a deployment, reviewed through the plan diff before communicating.
 
-## 6. Workshop policy
+## 7. Workshop policy
 
 | Module | Parameter | Value |
 |---|---|---|
@@ -220,7 +244,7 @@ and permitted materials/participation stay live. Draft programme details do not
 change family admission before communication. This profile enables all three scope
 kinds through its selected modules; release policy is not executable runtime config.
 
-## 7. Materials
+## 8. Materials
 
 [Materials](../modules/materials.md) categories:
 
@@ -243,7 +267,7 @@ workshop supplies such as paint or textile markers. The supplied examples do not
 contain a complete family or person mapping, so they define data shape rather than
 invented records.
 
-## 8. Metadata, copy, and notifications
+## 9. Metadata, copy, and notifications
 
 The occasion runs from `2027-04-30` through `2027-05-02`, inclusive; family-facing
 German dates are 30.04.2027 to 02.05.2027. Ages are computed at `2027-04-30`.
@@ -265,7 +289,7 @@ programme-only changes. The notification profile configures subjects and include
 arrangements in the body; it does not supply a list that can omit relevant scope
 changes ([change notifications](../modules/change-notifications.md)).
 
-## 9. First-deployment boundary
+## 10. First-deployment boundary
 
 The profile is deployed separately with its own database and operational
 configuration. It does not introduce runtime tenancy or require unused room or

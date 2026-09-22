@@ -32,6 +32,7 @@ import { roomAssignment } from '../../src/modules/room-assignment'
 import { roomInventory } from '../../src/modules/room-inventory'
 import { workshopAssignment } from '../../src/modules/workshop-assignment'
 import { workshopRankings } from '../../src/modules/workshop-rankings'
+import { workshopSpace } from '../../src/modules/workshop-space'
 import { workshops } from '../../src/modules/workshops'
 
 export default defineOccasionProfile({
@@ -376,7 +377,7 @@ export default defineOccasionProfile({
 
     'organiser-note': note({
       title: { de: 'Notiz des Organisationsteams', en: 'Organiser note' },
-      scopes: ['family', 'person', 'room', 'workshop'],
+      scopes: ['family', 'person', 'room', 'workshop', 'workshop-space'],
       value: text({ max_length: 4000 }),
       organiser_only: true,
       sensitivity: 'restricted',
@@ -421,6 +422,8 @@ export default defineOccasionProfile({
       scarce_capabilities: { 'accessible': -3 },
       max_repair_passes: 5,
     }),
+
+    workshopSpace(),
 
     workshops({
       audience_trait: 'workshop-audience',
