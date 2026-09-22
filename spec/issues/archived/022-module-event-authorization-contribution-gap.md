@@ -1,7 +1,7 @@
 ---
 id: "022"
 title: Module events have no authorization contribution path
-status: open
+status: resolved
 severity: gap
 category: kernel
 source: M4 readiness assessment
@@ -76,6 +76,33 @@ synthetic one.
    like `fold`), or a small closed vocabulary (`organiser-only`,
    `family-owns-entity`, …) the kernel interprets, matching how
    `LabelSchema.family_writable` works for labels today?
+
+## Resolution
+
+Implemented the pure-predicate option: `ModuleContributions.events` now
+requires `authorize: (principal, payload, world) => boolean` per event
+(`src/config/define.ts`), typed against a structural `ModuleEventPrincipal`
+kept independent of the auth module's I/O-adjacent `Principal` type
+(`src/events/fold.ts`). `defineOccasionProfile`'s `validationView` composes a
+single-owner `event_authorize_dispatch` map from selected modules' declared
+rules, the same way `event_fold_dispatch` already worked.
+
+`canAppendEvent` (`src/auth/authorization.ts`) now recognizes exactly the
+kernel's own five entity-touching event types
+(`PersonAdded`/`PersonUpdated`/`PersonWithdrawn`/`LabelSet`/`LabelCleared`)
+and dispatches every other event type to `config.event_authorize_dispatch`,
+fixing the broken payload cast described above. A module event with no
+declared rule now **fails closed** (denied) rather than accidentally denying
+or, worse, silently permitting once a payload shape happens to line up with
+`LabelSet`/`LabelCleared`'s fields. An organiser still bypasses per-event
+authorization entirely, unchanged from before — nothing in this issue asked
+for that to become per-module configurable.
+
+Proven in `test/config/authorization.test.ts`: a module event with no
+declared rule denies a family principal; a module event dispatches to its own
+declared predicate (both allow and deny); an organiser is unaffected by a
+module's declared rule. `test/events/module-fold-boundary.test.ts`'s fixture
+modules all now declare `authorize`, required by the type.
 
 ## Related files
 
