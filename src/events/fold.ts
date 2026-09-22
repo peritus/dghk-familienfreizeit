@@ -33,7 +33,10 @@ const kernelSetupOwnedLabelKeys = new Set([
  * different kinds from ever colliding on the same id, so no permanent
  * cross-kind id ledger is kept.
  */
-const kernelEntityKindPrefixes: Readonly<Record<string, string>> = { family: 'fam_', person: 'per_' }
+const kernelEntityKindPrefixes: Readonly<Record<string, string>> = {
+  family: 'fam_',
+  person: 'per_',
+}
 
 export type EntityKind = 'family' | 'person' | (string & {})
 
@@ -394,7 +397,8 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         setLabel: (entityId, key, value, strength, note) =>
           setConfiguredLabel(state, event, config, entityId, key, value, strength, note),
         replaceLabels: (entityId, values) => {
-          for (const { key } of values) replaceLabels(state, entityId, configuredLabelKey(config, key))
+          for (const { key } of values)
+            replaceLabels(state, entityId, configuredLabelKey(config, key))
           for (const { key, value, strength, note } of values)
             setConfiguredLabel(state, event, config, entityId, key, value, strength, note)
         },
@@ -557,13 +561,15 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
 /** Removes every live label under `key` for `entityId` (a restatement or an explicit clear-all). */
 function replaceLabels(state: MutableWorld, entityId: string, key: string): void {
   const prefix = `${entityId}|${key}|`
-  for (const mapKey of state.labels.keys()) if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
+  for (const mapKey of state.labels.keys())
+    if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
 }
 
 /** Removes every live label belonging to `entityId`, regardless of key (entity retirement). */
 function removeLabelsForEntity(state: MutableWorld, entityId: string): void {
   const prefix = `${entityId}|`
-  for (const mapKey of state.labels.keys()) if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
+  for (const mapKey of state.labels.keys())
+    if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
 }
 
 function labelKey(entityId: string, key: string, value: JsonValue): string {

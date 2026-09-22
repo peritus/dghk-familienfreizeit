@@ -308,7 +308,10 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
 const kernelEntityKinds = ['family', 'person']
 
 /** Reserved kernel entity-kind id prefixes; see D27 and `src/events/fold.ts`. */
-const kernelEntityKindPrefixes: Readonly<Record<string, string>> = { family: 'fam_', person: 'per_' }
+const kernelEntityKindPrefixes: Readonly<Record<string, string>> = {
+  family: 'fam_',
+  person: 'per_',
+}
 
 function validationView(
   traits: Record<string, Trait>,
@@ -363,7 +366,8 @@ function validationView(
   }
   const entityKindPrefixes: Record<string, string> = { ...kernelEntityKindPrefixes }
   for (const module of modules)
-    for (const { id, prefix } of module.contributions.entity_kinds ?? []) entityKindPrefixes[id] = prefix
+    for (const { id, prefix } of module.contributions.entity_kinds ?? [])
+      entityKindPrefixes[id] = prefix
   return {
     label_schemas: schemas,
     aliases,

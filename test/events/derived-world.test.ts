@@ -58,9 +58,7 @@ test('a LabelCleared by value hard-removes the label instead of tombstoning it (
   expect(world.labels.some((label) => label.key === 'needs' && label.value === 'quiet-room')).toBe(
     false,
   )
-  expect(world.labels_by_entity.fam_1).not.toContainEqual(
-    expect.objectContaining({ key: 'needs' }),
-  )
+  expect(world.labels_by_entity.fam_1).not.toContainEqual(expect.objectContaining({ key: 'needs' }))
   expect(world.labels_by_key.needs).toBeUndefined()
   expect(world.constraints).toEqual([])
 })
@@ -211,9 +209,14 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
     /did not declare entity kind: gadget/,
   )
 
-  const undeclaredRetireKind = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
-    cap.retireEntity('gadget', 'gd_1')
-  })
+  const undeclaredRetireKind = guardModuleFold(
+    'fixture-widgets',
+    allowedKinds,
+    allowedKeys,
+    (cap) => {
+      cap.retireEntity('gadget', 'gd_1')
+    },
+  )
   expect(() =>
     undeclaredRetireKind(capability, { type: 'WidgetAdded', payload: {}, seq: 1 }),
   ).toThrow(/did not declare entity kind: gadget/)
@@ -225,9 +228,14 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
     /did not declare label key: widget-price/,
   )
 
-  const undeclaredReplaceKey = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
-    cap.replaceLabels('wg_1', [{ key: 'widget-price', value: 3, strength: null, note: null }])
-  })
+  const undeclaredReplaceKey = guardModuleFold(
+    'fixture-widgets',
+    allowedKinds,
+    allowedKeys,
+    (cap) => {
+      cap.replaceLabels('wg_1', [{ key: 'widget-price', value: 3, strength: null, note: null }])
+    },
+  )
   expect(() =>
     undeclaredReplaceKey(capability, { type: 'WidgetAdded', payload: {}, seq: 1 }),
   ).toThrow(/did not declare label key: widget-price/)
