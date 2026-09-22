@@ -103,7 +103,6 @@ Module-owned keys and parameters:
 | `room-type` | `standard`, `apartment`, `bungalow`, `schlaffass` |
 | `floor` | `ground`, `first`, `second`; none for bungalow and Schlaffass rooms |
 | `bed-type` | `single`, `double` |
-| `designation` | `general`, `staff`, `blocked` |
 
 Profile room traits:
 

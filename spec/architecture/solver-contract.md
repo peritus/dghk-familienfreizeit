@@ -216,8 +216,8 @@ source labels; it is never silently bypassed. Preferred decisions retain the
 mechanism's configured soft behavior, and do not become forced placements.
 
 Withdrawn people are excluded when the solver input is built, not filtered later, and
-each module excludes what its specification says it excludes, such as blocked rooms.
-No stage sees data it must remember to ignore.
+each module excludes what its specification says it excludes. No stage sees data it
+must remember to ignore.
 
 ```ts
 type SolverConfig = Readonly<{

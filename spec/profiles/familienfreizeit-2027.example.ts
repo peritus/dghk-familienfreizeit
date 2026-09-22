@@ -388,7 +388,6 @@ export default defineOccasionProfile({
       floors: ['ground', 'first', 'second'],
       room_types: ['standard', 'apartment', 'bungalow', 'schlaffass'],
       bed_types: ['single', 'double'],
-      designations: ['general', 'staff', 'blocked'],
       copy: {
         floors: {
           'ground': { de: 'Erdgeschoss', en: 'Ground floor' },
@@ -404,11 +403,6 @@ export default defineOccasionProfile({
         bed_types: {
           'single': { de: 'Einzelbett', en: 'Single bed' },
           'double': { de: 'Doppelbett', en: 'Double bed' },
-        },
-        designations: {
-          'general': { de: 'Familienzimmer', en: 'General' },
-          'staff': { de: 'Organisationsteam', en: 'Staff' },
-          'blocked': { de: 'Gesperrt', en: 'Blocked' },
         },
       },
     }),

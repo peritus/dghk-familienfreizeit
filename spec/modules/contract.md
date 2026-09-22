@@ -200,7 +200,7 @@ migration ([deployment](../engineering/deployment.md) §2).
 
 | Module | Owns | Requires | Enhances |
 |---|---|---|---|
-| [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; designations; capacity | — | — |
+| [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshops`](workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
 | [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |

@@ -28,7 +28,7 @@ for them.
 ## Evidence
 
 The M4 roadmap entry ([`roadmap.md`](../../roadmap.md)) requires "buildings,
-rooms, beds, places, designations, capacity, retirement, room labels, **and
+rooms, beds, places, capacity, retirement, room labels, **and
 inventory world summaries**" and "the organiser inventory screen and
 inventory report contribution." `world_summaries` and `screens` are both
 outside the six kinds that currently compose into anything — `reports`
