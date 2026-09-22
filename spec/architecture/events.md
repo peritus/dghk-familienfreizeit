@@ -189,6 +189,7 @@ authorisation are specified in the module documents.
 | Module | Event types |
 |---|---|
 | [room inventory](../modules/room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `RoomAdded`, `RoomUpdated`, `RoomDesignationChanged`, `BedAdded`, `BedUpdated`, `BedRemoved` |
+| [workshop space](../modules/workshop-space.md) §5 | `WorkshopSpaceAdded`, `WorkshopSpaceUpdated`, `WorkshopSpaceRetired` |
 | [workshops](../modules/workshops.md) §5 | `SlotAdded`, `SlotUpdated`, `WorkshopAdded`, `WorkshopUpdated`, `WorkshopCancelled`, `WorkshopReinstated` |
 | [materials](../modules/materials.md) §5 | `MaterialRequested`, `MaterialRequestUpdated`, `MaterialRequestCancelled`, `MaterialCommitted`, `MaterialCommitmentUpdated`, `MaterialCommitmentWithdrawn`, `MaterialFulfilmentAdded`, `MaterialFulfilmentRemoved` |
 

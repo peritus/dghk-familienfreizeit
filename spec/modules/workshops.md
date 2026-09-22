@@ -19,8 +19,10 @@ leadership, and manual cancellation.
 
 ## 2. Dependencies
 
-Requires: none. Enhances: [`room-inventory`](room-inventory.md) —
-when selected, a workshop may be held in a room.
+Requires: none. Enhances: none. Workshop proposals and programme facts are
+independent of accommodation inventory. The future schedule stage may consume
+[`workshop-space`](workshop-space.md), but that dependency and its offering
+lifecycle belong to Issue 025 rather than this programme module.
 
 ## 3. Parameters
 
@@ -76,20 +78,18 @@ Slots are processed in `sort_key`, then `id` order, which must be chronological.
   capacity: number | null,
   min_age: number | null,
   max_age: number | null,
-  room_id: string | null,
   sort_key: number
 }
 ```
 
 Mapping: `workshop_id` is identity-only; `slot_id` maps to `offered-in`, `title`
 to `title`, `description` to `description`, `participation` to `participation`,
-`capacity` to `capacity`, `min_age` to `min-age`, `max_age` to `max-age`, and
-non-null `room_id` to `held-in`. Null mapped fields are absent. *Invariants:*
+`capacity` to `capacity`, `min_age` to `min-age`, and `max_age` to `max-age`.
+Null mapped fields are absent. *Invariants:*
 `assigned` requires
 integer capacity ≥ 0; `sign-up` permits null (unlimited) or integer capacity ≥ 0;
 `interest` requires null capacity.
-`min_age ≤ max_age` when both are set; `room_id` is
-null unless `room-inventory` is selected, and otherwise names a live room.
+`min_age ≤ max_age` when both are set.
 
 ### `WorkshopCancelled`
 
@@ -121,7 +121,7 @@ and slot transitions follow [release control](../application/release-control.md)
 
 ```kdl
 SlotAdded slot_id=slot_sat-morning label="Samstag Vormittag" starts_at="2027-05-01T08:00:00Z" ends_at="2027-05-01T10:30:00Z" sort_key=1
-WorkshopAdded workshop_id=ws_toepfern slot_id=slot_sat-morning title="Töpfern" description=#null participation=assigned capacity=12 min_age=8 max_age=#null room_id=#null sort_key=1
+WorkshopAdded workshop_id=ws_toepfern slot_id=slot_sat-morning title="Töpfern" description=#null participation=assigned capacity=12 min_age=8 max_age=#null sort_key=1
 LabelSet entity_id=ws_toepfern key=workshop-audience value=children strength=#null
 LabelSet entity_id=per_anna key=leads-workshop value=ws_toepfern strength=#null
 ```
@@ -130,7 +130,7 @@ LabelSet entity_id=per_anna key=leads-workshop value=ws_toepfern strength=#null
 
 Module-owned label keys, each owned for the entity kind named beside it:
 `label`, `starts-at`, `ends-at` on `slot`; `offered-in`, `title`, `description`,
-`participation`, `capacity`, `min-age`, `max-age`, `held-in`, and `cancelled-reason`
+`participation`, `capacity`, `min-age`, `max-age`, and `cancelled-reason`
 on `workshop`. All are set only by the module's events, and the same key stays
 free on entity kinds this module does not own ([modules](contract.md) §3.1).
 
@@ -215,7 +215,6 @@ type WorkshopsInput = {
     max_age: number | null
     audience: string | null
     leader_ids: readonly string[]    // sorted
-    room_id: string | null
     sort_key: number
   }[]                                // sort: slot order, sort_key, id
   reserved_slots: readonly { person_id: string, slot_id: string }[]
@@ -240,7 +239,6 @@ None in the solver. World-level diagnostics:
 |---|---|---|
 | `workshops.missing-leader` | warning | `require_leader` is set and a workshop has no leader |
 | `workshops.leader-clash` | error | a person leads two workshops in one slot |
-| `workshops.room-clash` | error | two workshops in overlapping slots are held in one room |
 | `workshops.age-band-without-eligible` | warning | no person's age at the occasion start falls within a workshop's bounds |
 | `workshops.sign-up-over-capacity` | warning | effective occupancy exceeds a communicated finite sign-up capacity |
 | `workshops.participation-ineligible` | warning | an existing participant no longer meets effective eligibility |
@@ -278,7 +276,6 @@ appear in organiser coordination views, not as release backlog.
 
 - Invariants on capacity, ages, and slot times, at append and replay.
 - Leaders never count as participants unless `leaders_consume_capacity`.
-- A room reference fails when `room-inventory` is not selected.
 - Fixture contract: two slots, one children's and one adults' workshop, one child
   leader, plus assigned/sign-up/interest workshops, a finite last-place admission
   race, and a communicated capacity reduction.
