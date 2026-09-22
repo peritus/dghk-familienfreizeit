@@ -13,6 +13,7 @@ sketches live under
 | `/organiser/families` | Families | Table, import, invite, chase list |
 | `/organiser/families/:id` | Family detail | People (add, edit, withdraw), full editable preferences, event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
+| `/organiser/workshop-spaces` | Workshop spaces | Physical workshop-space inventory, capacity, availability, ordering, capabilities |
 | `/organiser/board` | The board | Whole-family room placement |
 | `/organiser/plans` | Plans | Derived plan investigation and comparison |
 | `/organiser/releases` | Release control | Outstanding scopes, detailed preview, communicate |
@@ -55,6 +56,13 @@ family view, with the organiser as actor and the family or person as
 subject — there is no separate out-of-band marker; the event history below is
 the record. Inventory shows buildings, rooms, beds, capacity, and room
 capabilities.
+
+Workshop spaces have a separate maintenance surface at
+`/organiser/workshop-spaces`. It shows live and retired typed spaces, display
+and location descriptions, physical capacity, event-backed availability
+windows, deterministic order, and resolver-backed capabilities. It does not
+show scheduled offerings or communicate a location; schedule review belongs to
+the later Issue 025 contract.
 
 ## 4. Whole-family assignment board
 
