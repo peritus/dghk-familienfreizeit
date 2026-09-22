@@ -221,7 +221,7 @@ outcomes. Self-organised sessions publish immediately, may use proposer-selected
 placements with organiser override, and do not enter ranking or solver attendance
 allocation.
 
-The binding changes are recorded in revised D13 and new D27. The dependent module,
+The binding changes are recorded in revised D13 and new D28. The dependent module,
 solver, release, UI, profile, roadmap, and testing contracts are updated in the
 same specification change.
 
