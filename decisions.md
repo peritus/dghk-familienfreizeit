@@ -650,21 +650,24 @@ consumed it). `world.entities_by_kind` and `world.labels` only ever contain
 what is live at `head_seq`. A module's fold capability gets a `retireEntity`
 operation with these same hard-removal semantics, not a soft-retire.
 
-## D28 — Programme sessions are split from calls, scheduling, and attendance
+## D28 — Programme sessions have independent sources, scheduling, and attendance
 
 *Chosen.* Issue 025 uses cooperating modules with one owner per durable identity
 and mechanism. `programme-core` owns the common programme-session identity and
-typed scheduleable-session boundary. `call-for-papers` owns submissions, review,
-selection, and immutable candidate rounds. `official-workshops` owns official
-workshop facts; `self-organized-sessions` owns immediate self-organised sessions
-and proposer-selected placements. `workshop-scheduling` owns scheduled offerings
-and placement, while `workshop-ranking` and `workshop-attendance` own ranking and
-final attendance allocation respectively.
+typed scheduleable-session boundary. `official-workshops` owns official
+workshop facts and may initially create organiser-authored sessions directly.
+`call-for-papers` is an optional later source that owns submissions, review,
+selection, and immutable candidate rounds. `self-organized-sessions` owns
+immediate self-organised sessions and proposer-selected placements.
+`workshop-scheduling` owns scheduled offerings and placement, while
+`workshop-ranking` and `workshop-attendance` own ranking and final attendance
+allocation respectively.
 
-Official sessions follow proposal, review, selection, ranking, demand summary,
-scheduling, and attendance. Self-organised sessions are published without ranking
-or solver attendance allocation. Both paths use the common scheduling boundary,
-and module contributions are typed; no module reads another module's raw event
-payloads. This split preserves the event-log, pure-solver, resolver, and release
-boundaries while keeping each module's entity kinds, events, labels, routes, and
-reports uniquely owned.
+An organiser-authored official session follows publication, ranking, demand
+summary, scheduling, and attendance; a later proposal source may publish the
+same official boundary without changing its owner. Self-organised sessions are
+published without ranking or solver attendance allocation. Both paths use the
+common scheduling boundary, and module contributions are typed; no module reads
+another module's raw event payloads. This split preserves the event-log,
+pure-solver, resolver, and release boundaries while keeping each module's entity
+kinds, events, labels, routes, and reports uniquely owned.
