@@ -216,7 +216,7 @@ newly reviewed and published plan.
 ## 4. Emails
 
 Invitation and reminder emails are kernel. Communication and change messages are
-rendered by [change notifications](../modules/change-notifications.md). The recipient
+deferred under [change notifications](../deferred-ideas/change-notifications.md). The recipient
 selection and preview contract belongs to [release control](release-control.md)
 §8; email does not determine whether arrangements are visible.
 

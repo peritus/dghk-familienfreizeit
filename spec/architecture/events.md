@@ -191,7 +191,6 @@ authorisation are specified in the module documents.
 | [room inventory](../modules/room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `RoomAdded`, `RoomUpdated`, `BedAdded`, `BedUpdated`, `BedRemoved` |
 | [workshop space](../modules/workshop-space.md) §5 | `WorkshopSpaceAdded`, `WorkshopSpaceUpdated`, `WorkshopSpaceRetired` |
 | [official workshops](../modules/official-workshops.md) | Official session content, eligibility, cancellation, and leader facts |
-| [materials](../modules/materials.md) §5 | `MaterialRequested`, `MaterialRequestUpdated`, `MaterialRequestCancelled`, `MaterialCommitted`, `MaterialCommitmentUpdated`, `MaterialCommitmentWithdrawn`, `MaterialFulfilmentAdded`, `MaterialFulfilmentRemoved` |
 
 Workshop rankings, food preferences, and organiser decisions add no event types;
 they are `LabelSet` and `LabelCleared` events.

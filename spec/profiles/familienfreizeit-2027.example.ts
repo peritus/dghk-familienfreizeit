@@ -5,8 +5,8 @@
 // Occasion profile for DGHK Familienfreizeit 2027.
 //
 // The rationale for these values is in spec/profiles/familienfreizeit-2027.md. The profile
-// contract is in spec/profiles/contract.md and every module parameter is specified in its
-// module document, spec/modules/<module-id>.md. Naming follows D18: snake_case fields,
+// contract is in spec/profiles/contract.md and every active module parameter is specified
+// in its module document, spec/modules/<module-id>.md. Naming follows D18: snake_case fields,
 // camelCase code, kebab-case vocabulary.
 
 import {

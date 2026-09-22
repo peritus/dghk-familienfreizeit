@@ -278,8 +278,8 @@ exactly what selected scopes will make visible. Apply saves domain edits;
 wait for that action.
 
 Release control owns semantic scope comparison, history verification and recipient
-selection (§8). [Change notifications](../modules/change-notifications.md) owns message
-construction and operational delivery after the event succeeds. The request still
+selection (§8). Change-notification construction and delivery remain deferred;
+authentication invitations and reminders are operational kernel email. The request still
 uses the ordinary authenticate/validate/authorise/append/respond lifecycle.
 
 ## Source layout

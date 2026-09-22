@@ -51,9 +51,13 @@ clean fresh working copy, and the mandatory collaborator export.
 - Organize by topic, with matching `docs/` and `spec/` paths where useful. Create
   directories as needed, use kebab-case filenames without ordering prefixes, and
   define reading order in indexes. Preserve decision IDs and UI screen IDs.
-- `spec/deferred-ideas/` is not approved implementation scope. Promoting an idea
-  requires an explicit user scope decision, review of affected binding decisions,
-  and updates to the active specification and roadmap.
+- Active implementation scope belongs in roadmap milestones. Anything accepted
+  for later consideration but outside those milestones belongs in
+  `spec/deferred-ideas/`, which is the sole canonical home for deferred scope.
+  A deferred contract may be accepted without being active work; that status is
+  distinct from a module simply not being selected by a particular profile.
+  Promotion requires explicit user scope approval, review of affected binding
+  decisions, and reinsertion into the active roadmap before implementation.
 - Illustrative TypeScript belongs in `spec/` as `*.example.ts`, marked with its
   missing dependencies and runtime/typecheck status. Keep relevant lint coverage.
   When implemented and verified, move runtime configuration into `profiles/` (or

@@ -38,7 +38,7 @@ is kept in [`spec/deferred-ideas/party-review.md`](../deferred-ideas/party-revie
 
 Two organiser routes in [organiser view](../application/organiser-view.md) §1 have no screen
 spec yet: `/organiser/materials` and `/organiser/reports`. Their content is
-specified by [materials](../modules/materials.md) §11 and [reports](../application/reports.md);
+specified by [reports](../application/reports.md);
 they follow UI-00 until a spec is written.
 
 ## Screen-spec format

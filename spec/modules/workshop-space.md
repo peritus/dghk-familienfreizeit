@@ -22,7 +22,8 @@ relationship engine.
 
 Requires: none. Enhances: none.
 
-`official-workshops` and `self-organized-sessions` are independently selectable.
+`official-workshops` is independently selectable. Self-organized sessions remain
+deferred.
 The [workshop scheduling](workshop-scheduling.md) module consumes this module's
 input and owns scheduled offerings; workshop-space does not depend on proposal,
 ranking, scheduling, or attendance policy.

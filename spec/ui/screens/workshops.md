@@ -6,8 +6,7 @@ Organisers review calls and proposals, publish candidate rounds, inspect demand,
 edit session details and participation mode, review scheduled offerings and
 conflicts, and inspect assigned-mode capacity, rankings and fairness.
 Route: `/organiser/workshops`, hosted by [official workshops](../../modules/official-workshops.md).
-[Call for papers](../../modules/call-for-papers.md) contributes review and candidate
-rounds, [workshop scheduling](../../modules/workshop-scheduling.md) contributes
+[workshop scheduling](../../modules/workshop-scheduling.md) contributes
 placements and conflicts, [workshop rankings](../../modules/workshop-rankings.md)
 contributes demand and the preference heatmap, and [workshop attendance](../../modules/workshop-assignment.md)
 contributes intake, fill, cancellations, and fairness data.

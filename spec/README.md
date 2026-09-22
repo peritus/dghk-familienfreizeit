@@ -27,9 +27,13 @@ contracts. The active profile's source inventory reconciles to 38 rooms and
 162 beds: 100 at the lower price and 62 at the higher price, totaling 15,236.
 Runtime event-derived inventory fixtures and counts remain M4 work.
 
-[Deferred ideas](deferred-ideas/README.md) are not approved implementation scope.
-Promoting one requires an explicit scope decision and review of any affected
-binding decisions. Move only its accepted requirements into the active topic.
+[Active implementation scope belongs in the roadmap milestones.](roadmap.md)
+Accepted work that is outside those milestones belongs in
+[deferred scope](deferred-ideas/README.md), the sole canonical mechanism for
+out-of-roadmap requirements. Promotion requires explicit user scope approval,
+review of affected binding decisions, and reinsertion into the roadmap. A
+deferred contract is distinct from a module that is merely not selected by a
+particular profile.
 
 ## Reading order
 
@@ -56,13 +60,13 @@ binding decisions. Move only its accepted requirements into the active topic.
 | 19 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
 | 20 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
 | 21 | [Programme core](modules/programme-core.md) | Shared programme-session identity and typed module boundary |
-| 22 | [Call for papers](modules/call-for-papers.md) | Official proposal review, selection, and candidate rounds |
+| 22 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred official proposal review, selection, and candidate rounds |
 | 23 | [Official workshops](modules/official-workshops.md) | Official workshop facts and eligibility |
-| 24 | [Self-organized sessions](modules/self-organized-sessions.md) | Immediate self-organised sessions and proposer placement |
+| 24 | [Self-organized sessions](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred immediate self-organised sessions and proposer placement |
 | 25 | [Workshop scheduling](modules/workshop-scheduling.md) | Offerings, placement, conflicts, and schedule release |
 | 26 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered pre-schedule choices |
 | 27 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
-| 28 | [Food preferences](modules/food-preferences.md) | Per-person diet and allergy text |
-| 29 | [Materials](modules/materials.md) | Requests, commitments, and fulfilment |
+| 28 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred per-person diet and allergy text |
+| 29 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
 | 30 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
-| 31 | [Change notifications](modules/change-notifications.md) | Communication and change emails |
+| 31 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |

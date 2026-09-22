@@ -25,13 +25,13 @@ opened: 2026-09-19
 - [`modules/workshops.md:82-87`](../../modules/workshops.md) maps:
   - `slot_id → offered-in`
   - `room_id → held-in`
-- [`modules/materials.md:109-115`](../../modules/materials.md) says fields use kebab-case, while its declared labels use semantic mappings:
+- [`deferred-ideas/materials.md:109-115`](../../deferred-ideas/materials.md) says fields use kebab-case, while its declared labels use semantic mappings:
   - `requested_by → requested-by`
   - `contributed_by → contributed-by`
   - `workshop_id → workshop`
   - `concerns_person_id → concerns-person`
   - `fulfills → fulfills`
-  at [`modules/materials.md:128-133`](../../modules/materials.md).
+  at [`deferred-ideas/materials.md:128-133`](../../deferred-ideas/materials.md).
 
 The documents therefore contain two rules without precedence:
 
@@ -49,14 +49,14 @@ The documents therefore contain two rules without precedence:
 - `PersonUpdated` is described only as a “full restatement” at [`architecture/events.md:143-146`](../../architecture/events.md); its complete schema and exact replacement behavior are unspecified.
 - `PersonWithdrawn.reason` is defined at [`architecture/events.md:148-152`](../../architecture/events.md), but no `withdrawn-reason` label or lifecycle-label rule is stated.
 - `WorkshopCancelled.reason` is defined at [`modules/workshops.md:89-96`](../../modules/workshops.md), while `cancelled-reason` is declared as a module-owned label at [`modules/workshops.md:120-124`](../../modules/workshops.md); the folding statement is missing.
-- `MaterialRequestCancelled.reason` and `MaterialCommitmentWithdrawn.reason` are defined at [`modules/materials.md:73-77`](../../modules/materials.md) and `103-110`, and corresponding `cancelled-reason`/`withdrawn-reason` labels are declared at [`modules/materials.md:128-133`](../../modules/materials.md), but the event-to-label mapping is not explicit.
+- `MaterialRequestCancelled.reason` and `MaterialCommitmentWithdrawn.reason` are defined at [`deferred-ideas/materials.md:73-77`](../../deferred-ideas/materials.md) and `103-110`, and corresponding `cancelled-reason`/`withdrawn-reason` labels are declared at [`deferred-ideas/materials.md:128-133`](../../deferred-ideas/materials.md), but the event-to-label mapping is not explicit.
 
 ### Null and omission semantics
 
 The specs use nullable fields extensively:
 
 - `room_id: string | null` in [`modules/workshops.md:67-79`](../../modules/workshops.md)
-- `workshop_id` and `concerns_person_id` in [`modules/materials.md:60-70`](../../modules/materials.md)
+- `workshop_id` and `concerns_person_id` in [`deferred-ideas/materials.md:60-70`](../../deferred-ideas/materials.md)
 - nullable descriptive fields throughout the modules
 
 The documents do not state whether a null payload field means:
@@ -125,8 +125,8 @@ Module-specific:
 
 - [`modules/room-inventory.md:78-135, 156-177`](../../modules/room-inventory.md)
 - [`modules/workshops.md:54-124`](../../modules/workshops.md)
-- [`modules/materials.md:56-138`](../../modules/materials.md)
-- [`modules/food-preferences.md:39-47`](../../modules/food-preferences.md)
+- [`deferred-ideas/materials.md:56-138`](../../deferred-ideas/materials.md)
+- [`deferred-ideas/food-preferences.md:39-47`](../../deferred-ideas/food-preferences.md)
 - [`modules/workshop-rankings.md:46-78`](../../modules/workshop-rankings.md)
 - [`profiles/familienfreizeit-2027.md:78-106, 123-140, 171-224`](../../profiles/familienfreizeit-2027.md)
 - [`profiles/familienfreizeit-2027.example.ts:48-375`](../../profiles/familienfreizeit-2027.example.ts)
@@ -217,4 +217,4 @@ M1 and later module milestones.
 - [engineering/testing.md](../../engineering/testing.md)
 - [modules/room-inventory.md](../../modules/room-inventory.md)
 - [modules/workshops.md](../../modules/workshops.md)
-- [modules/materials.md](../../modules/materials.md)
+- [deferred-ideas/materials.md](../../deferred-ideas/materials.md)

@@ -21,7 +21,6 @@ sketches live under
 | `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
 | `/organiser/workshops` | Workshops | Calls, proposals, candidate rounds, demand, schedule, capacity, fill, rankings |
 | `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
-| `/organiser/materials` | Materials | Requests, commitments, and fulfilment |
 | `/organiser/reports` | Reports | Printable operational reports |
 
 Every screen renders the organiser application's derived world. The browser holds

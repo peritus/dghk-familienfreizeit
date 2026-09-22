@@ -290,7 +290,7 @@ The following documents and contracts need coordinated updates:
 - [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md) and [application/family-view.md](../../application/family-view.md): unavailable card, control
   behavior, and privacy boundaries;
 - [application/reports.md](../../application/reports.md): organiser, family, shared, and change-notice rendering;
-- [modules/change-notifications.md](../../modules/change-notifications.md): unavailable previews, recovery messages, and
+- [deferred-ideas/change-notifications.md](../../deferred-ideas/change-notifications.md): unavailable previews, recovery messages, and
   retry rules;
 - [ui/frontend.md](../../ui/frontend.md): projected API shape and shared renderer behavior;
 - [engineering/deployment.md](../../engineering/deployment.md): deployment-impact and recovery runbook wording;
@@ -349,7 +349,7 @@ system has no current data.”
 - [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md)
 - [application/family-view.md](../../application/family-view.md)
 - [application/reports.md](../../application/reports.md)
-- [modules/change-notifications.md](../../modules/change-notifications.md)
+- [deferred-ideas/change-notifications.md](../../deferred-ideas/change-notifications.md)
 - [ui/frontend.md](../../ui/frontend.md)
 - [engineering/deployment.md](../../engineering/deployment.md)
 - [ui/german-translation-guidelines.md](../../ui/german-translation-guidelines.md)

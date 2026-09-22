@@ -50,7 +50,7 @@ outcome. But it is an accident of the payload shape not matching
 `LabelSet | LabelCleared`, not a designed rule: nothing in
 `ModuleContributions.events` lets a module say "organiser-only" or "family
 may append this for entities it owns" the way kernel events do. The
-[materials](../../modules/materials.md) catalogue entry ("Material requests,
+[materials](../../deferred-ideas/materials.md) catalogue entry ("Material requests,
 commitments, and fulfilment") strongly implies at least some future module
 event types are meant to be family-authored, at which point this fallback
 would need to positively authorize a family principal it currently has no

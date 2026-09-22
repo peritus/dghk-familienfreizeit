@@ -49,9 +49,12 @@ No requirement, acceptance criterion, unresolved question or binding decision ma
 be dropped or silently resolved by relocation. If an architectural decision needs
 to change, follow its separate user-review gate before changing dependent text.
 
-Deferred ideas are not approved scope. Obtain an explicit user scope decision
-before promoting one, and review affected decisions. Move only the accepted
-requirements into an active topic and update the roadmap.
+Active implementation belongs in roadmap milestones. Accepted requirements that
+are outside the roadmap belong in [`spec/deferred-ideas/`](../../spec/deferred-ideas/README.md),
+the sole canonical deferred-scope mechanism. A deferred contract is distinct
+from a module not selected by a particular profile. Promotion requires explicit
+user scope approval, review of affected binding decisions, and reinsertion into
+an active roadmap milestone before implementation.
 
 ## Local link checks
 

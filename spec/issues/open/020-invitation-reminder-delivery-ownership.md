@@ -30,7 +30,7 @@ boundary, or duplicating M14 delivery work.
   invitation and reminder messages, then
   adds delivery claims, retries, `email_log`, provider configuration, and delivery
   status.
-- [Change notifications](../../modules/change-notifications.md) assigns transport,
+- [Change notifications](../../deferred-ideas/change-notifications.md) assigns transport,
   `email_log`, invitations, and reminders to the kernel, while its own module
   contribution renders communication and change messages. This separates runtime
   ownership but does not assign the milestone at which each boundary becomes
@@ -49,6 +49,6 @@ operational email delivery.
 ## Related files
 
 - [roadmap.md](../../roadmap.md)
-- [change notifications](../../modules/change-notifications.md)
+- [change notifications](../../deferred-ideas/change-notifications.md)
 - [authentication](../../application/authentication.md)
 - [implemented authentication](../../../docs/application/authentication.md)

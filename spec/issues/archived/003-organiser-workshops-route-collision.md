@@ -35,9 +35,9 @@ rule to describe the exception explicitly.
 Chose the second option (a route owner with declared contributors), because
 this was a wording bug, not a missing mechanism. Investigation found the
 composition mechanism this issue asked for already exists and is already
-used correctly by three other modules: [`materials.md:192`](../../modules/materials.md),
-[`food-preferences.md:95`](../../modules/food-preferences.md), and
-[`change-notifications.md:87`](../../modules/change-notifications.md) all describe their
+used correctly by three other module contracts: [`materials.md:192`](../../deferred-ideas/materials.md),
+[`food-preferences.md:95`](../../deferred-ideas/food-preferences.md), and
+[`change-notifications.md:87`](../../deferred-ideas/change-notifications.md) all describe their
 contributed content by its *host screen's identity in prose*, without
 re-declaring a route — only a module that actually owns a distinct
 top-level route (`workshops`, `room-assignment` → `/organiser/board`,
