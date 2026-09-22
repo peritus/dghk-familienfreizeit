@@ -27,6 +27,7 @@ experimentation.
 | UI-06 | [Families and import](screens/families.md) | `/organiser/families` |
 | UI-07 | [Family detail](screens/family-detail.md) | `/organiser/families/:id` |
 | UI-08 | [Inventory](screens/inventory.md) | `/organiser/inventory` |
+| UI-14 | [Workshop spaces](screens/workshop-spaces.md) | `/organiser/workshop-spaces` |
 | UI-10 | [Assignment board](screens/assignment-board.md) | `/organiser/board` |
 | UI-11 | [Release control](screens/release-control.md) | `/organiser/releases` |
 | UI-12 | [Workshops](screens/workshops.md) | `/organiser/workshops` |
