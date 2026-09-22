@@ -9,8 +9,9 @@ Proposed module id `child-rooms` · factory `childRooms`
 
 ## 1. Purpose and boundary
 
-Child rooms lets children sleep together in rooms designated `child`, without their
-families. Children name a *child group*; a child room provides one. The module places
+Child rooms lets children sleep together in rooms that provide a child-group
+capability, without their families. Children name a *child group*; a child room
+provides one. The module places
 children into child rooms **before** parties form, and returns any child it cannot
 place to their family's party.
 
@@ -29,7 +30,8 @@ group. Adult supervision, if needed, is modelled separately with ordinary relati
 Requires: [`sleeping-parties`](sleeping-parties.md), and through it
 [`room-inventory`](../modules/room-inventory.md). Enhances: none.
 
-Adopting it would add a `child` designation to `room-inventory`.
+Adopting it would use ordinary room capabilities from `room-inventory`; it would
+not add a room category.
 
 ## 3. Parameters
 
@@ -84,7 +86,6 @@ All child-group events are organiser-only.
 
 ```kdl
 ChildGroupAdded child_group_id=cg_jungs-8-11 name="Jungs 8–11" description=#null sort_key=1
-RoomDesignationChanged room_id=rm_02 designation=child reason=#null
 LabelSet entity_id=rm_02 key=provides-child-group value=cg_jungs-8-11 strength=#null
 LabelSet entity_id=per_jonas key=needs-child-group value=cg_jungs-8-11 strength=required
 ```
@@ -97,7 +98,7 @@ or one), both set only by the module's events.
 | Role | Parameter | Required trait shape |
 |---|---|---|
 | Child-group need | `needs_group_trait` | `requirement`, scope `person`, value `ref('child-group')`, strengths `required` and `preferred`, cardinality zero or one, `valid_for` the person's `role` equals `child_role` |
-| Child-group provision | `provides_group_trait` | `capability`, scope `room`, value `ref('child-group')`, assigned (not derived), `valid_for` the room's `designation` is `child` |
+| Child-group provision | `provides_group_trait` | `capability`, scope `room`, value `ref('child-group')`, assigned (not derived) |
 
 ## 7. Solver input and stages
 
@@ -124,7 +125,7 @@ sort eligible by:
   3. family_id ascending
   4. person_id ascending
 
-child_rooms = rooms where designation = child, sorted by (sort_key, id)
+child_rooms = rooms with a child-group capability, sorted by (sort_key, id)
 
 for each room in child_rooms:
     candidates = eligible, not yet placed, whose needs_group_trait value
@@ -174,7 +175,7 @@ None. Child-room placement is ordered, not scored.
 
 | Id | Severity | Fires when |
 |---|---|---|
-| `child-rooms.invalid-scope` | warning | a need is held by a person whose role is not `child_role`, or a provision is on a room not designated `child` |
+| `child-rooms.invalid-scope` | warning | a need is held by a person whose role is not `child_role`, or a child-group provision is invalid |
 | `child-rooms.group-without-room` | error | a child group is needed at `required` and no child room provides it |
 | `child-rooms.group-demand-exceeds-places` | warning | required demand for a group exceeds the places of the rooms providing it |
 | `child-rooms.retired-group` | error | a live label names a retired child group |
@@ -202,21 +203,22 @@ child, attributed to the child's family.
 - A room below `min_occupants` releases everyone it took.
 - Eligibility order is total and independent of input order.
 - A `valid_for` failure is rejected at append and reported by preflight when the
-  role or designation later changes.
+  person's role later changes.
 - Fixture contract: one child room, one child group, one child released for
   capacity, and one child ineligible by role.
 
 ## 13. When not selected
 
-No child groups exist; the `child` designation is invalid; the child-group traits
-cannot be defined; party formation starts from whole families.
+No child groups exist; the child-group traits cannot be defined; party formation
+starts from whole families.
 
 ## Integration points
 
 Adopting the idea would require, beyond this module:
 
-- **Room inventory:** a `child` designation, available only to children's-room
-  placement and rejected by `hard.designation` for ordinary parties.
+- **Room inventory:** ordinary rooms may carry a child-group capability for
+  children's-room placement; ordinary parties continue to consider every live
+  room subject to their own rules.
 - **Sleeping parties:** an `enhances: ['child-rooms']` hook so formation starts
   from the people `child-rooms.place` did not place, and an ordering constraint
   `after: ['child-rooms.place']`.
