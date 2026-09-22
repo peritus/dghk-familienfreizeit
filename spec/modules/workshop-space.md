@@ -85,9 +85,9 @@ must be ordered by start and must not overlap or touch. These checks run both
 when appending and when replaying.
 
 ```kdl
-WorkshopSpaceAdded workshop_space_id=wsp-hall name="Main hall" location_description="Ground floor, east wing" capacity=24 availability_windows=[{"starts_at":"2027-05-01T08:00:00Z","ends_at":"2027-05-01T18:00:00Z"}] sort_key=1
-WorkshopSpaceUpdated workshop_space_id=wsp-hall name="Main hall" location_description="Ground floor, east wing" capacity=24 availability_windows=[] sort_key=1
-WorkshopSpaceRetired workshop_space_id=wsp-old reason="Building closed" 
+WorkshopSpaceAdded workshop_space_id=wsp_hall name="Main hall" location_description="Ground floor, east wing" capacity=24 availability_windows=[{"starts_at":"2027-05-01T08:00:00Z","ends_at":"2027-05-01T18:00:00Z"}] sort_key=1
+WorkshopSpaceUpdated workshop_space_id=wsp_hall name="Main hall" location_description="Ground floor, east wing" capacity=24 availability_windows=[] sort_key=1
+WorkshopSpaceRetired workshop_space_id=wsp_old reason="Building closed"
 ```
 
 The compact KDL example uses the repository's structured-value notation for
@@ -189,4 +189,3 @@ not show a scheduled programme or imply a communicated location.
 No workshop-space kind, events, input, screen, or physical-space report exists.
 Accommodation `room` entities remain owned solely by `room-inventory`, and
 `workshops` remains independently selectable.
-

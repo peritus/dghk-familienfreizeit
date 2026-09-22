@@ -1,7 +1,7 @@
 ---
 id: "026"
 title: Workshop locations need a separate workshop-space module
-status: open
+status: resolved
 severity: gap
 category: module:workshops
 source: approved design review
@@ -214,9 +214,19 @@ continues to provide accommodation normally.
    belong in module/profile code; concrete matching values remain labels under
    the existing resolver boundary.
 
+## Resolution
+
+Workshop spaces are now separate typed `workshop-space` entities with stable
+`wsp_` identities, event-backed facts, capacity, availability, and resolver
+capabilities. Accommodation rooms are no longer workshop locations, and the
+workshops module has no room-inventory enhancement or room-clash behavior.
+Workshop-space facts remain derived from the event log. Proposal/ranking
+lifecycle, schedule solving and assignment, and schedule release remain the
+responsibility of [Issue 025](../open/025-workshop-ranking-scheduling-lifecycle.md).
+
 ## Related files
 
-- [issue 025: workshop ranking and scheduling lifecycle](025-workshop-ranking-scheduling-lifecycle.md)
+- [issue 025: workshop ranking and scheduling lifecycle](../open/025-workshop-ranking-scheduling-lifecycle.md)
 - [room-inventory.md](../../modules/room-inventory.md)
 - [workshops.md](../../modules/workshops.md)
 - [room-assignment.md](../../modules/room-assignment.md)
