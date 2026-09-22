@@ -9,6 +9,15 @@ import type {
 } from '../events/types.js'
 import type { Principal } from './principal.js'
 
+/** Kernel event types with their own entity-ownership check below; every other type is a module event dispatched to its own declared rule. */
+const kernelEntityEventTypes = new Set([
+  'PersonAdded',
+  'PersonUpdated',
+  'PersonWithdrawn',
+  'LabelSet',
+  'LabelCleared',
+])
+
 export function canAppendEvent(
   principal: Principal,
   event: Event,
@@ -20,6 +29,10 @@ export function canAppendEvent(
   if (event.type === 'LabelSet' || event.type === 'LabelCleared')
     if (!isFamilyWritable(config, (event as unknown as LabelSet | LabelCleared).payload.key))
       return false
+  if (!kernelEntityEventTypes.has(event.type)) {
+    const authorize = config.event_authorize_dispatch?.[event.type]
+    return authorize ? authorize(principal, event.payload, world) : false
+  }
   const entityId =
     event.type === 'PersonAdded' || event.type === 'PersonUpdated'
       ? (event as unknown as PersonAdded | PersonUpdated).payload.family_id
