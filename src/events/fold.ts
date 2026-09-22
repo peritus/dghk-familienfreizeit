@@ -77,8 +77,18 @@ export type KernelWorld = {
  * function so every call here is checked against that module's own declared
  * entity kinds and label keys before it reaches the real world state.
  */
+export type LabelWrite = {
+  key: string
+  value: JsonValue
+  strength: 'required' | 'preferred' | null
+  note: string | null
+}
+
 export type ModuleFoldCapability = {
-  createEntity(kind: string, id: string, seq: number): Entity
+  /** `sortKey` defaults to `seq` (creation order) when omitted; pass the event's own source ordering key otherwise. */
+  createEntity(kind: string, id: string, seq: number, sortKey?: number): Entity
+  /** Hard-removes the entity and every label it holds (D27); rejects a kind the module did not declare. */
+  retireEntity(kind: string, id: string): void
   setLabel(
     entityId: string,
     key: string,
@@ -86,6 +96,8 @@ export type ModuleFoldCapability = {
     strength: 'required' | 'preferred' | null,
     note: string | null,
   ): void
+  /** Atomically clears every live label under each write's key on `entityId`, then sets its new value — for full-restatement events. */
+  replaceLabels(entityId: string, values: readonly LabelWrite[]): void
 }
 
 export type ModuleEventFold = (
@@ -100,17 +112,31 @@ export function guardModuleFold(
   allowedLabelKeys: ReadonlySet<string>,
   rawFold: ModuleEventFold,
 ): ModuleEventFold {
+  const requireKind = (kind: string): void => {
+    if (!allowedKinds.has(kind))
+      throw new Error(`module ${moduleId} did not declare entity kind: ${kind}`)
+  }
+  const requireKey = (key: string): void => {
+    if (!allowedLabelKeys.has(key))
+      throw new Error(`module ${moduleId} did not declare label key: ${key}`)
+  }
   return (capability, event) => {
     const guarded: ModuleFoldCapability = {
-      createEntity(kind, id, seq) {
-        if (!allowedKinds.has(kind))
-          throw new Error(`module ${moduleId} did not declare entity kind: ${kind}`)
-        return capability.createEntity(kind, id, seq)
+      createEntity(kind, id, seq, sortKey) {
+        requireKind(kind)
+        return capability.createEntity(kind, id, seq, sortKey)
+      },
+      retireEntity(kind, id) {
+        requireKind(kind)
+        capability.retireEntity(kind, id)
       },
       setLabel(entityId, key, value, strength, note) {
-        if (!allowedLabelKeys.has(key))
-          throw new Error(`module ${moduleId} did not declare label key: ${key}`)
+        requireKey(key)
         capability.setLabel(entityId, key, value, strength, note)
+      },
+      replaceLabels(entityId, values) {
+        for (const { key } of values) requireKey(key)
+        capability.replaceLabels(entityId, values)
       },
     }
     rawFold(guarded, event)
@@ -341,13 +367,25 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       const fold = config.event_fold_dispatch?.[event.type]
       if (!fold) throw new Error(`unknown event type: ${event.type}`)
       const capability: ModuleFoldCapability = {
-        createEntity: (kind, id, seq) => {
-          const created = registerEntity(state, config, kind, id, seq)
+        createEntity: (kind, id, seq, sortKey) => {
+          const created = registerEntity(state, config, kind, id, seq, sortKey)
           state.module_entities.set(id, created)
           return created
         },
+        retireEntity: (kind, id) => {
+          const target = state.entities_by_id.get(id)
+          if (!target || target.kind !== kind) throw new Error(`unknown ${kind}: ${id}`)
+          state.module_entities.delete(id)
+          state.entities_by_id.delete(id)
+          removeLabelsForEntity(state, id)
+        },
         setLabel: (entityId, key, value, strength, note) =>
           setConfiguredLabel(state, event, config, entityId, key, value, strength, note),
+        replaceLabels: (entityId, values) => {
+          for (const { key } of values) replaceLabels(state, entityId, configuredLabelKey(config, key))
+          for (const { key, value, strength, note } of values)
+            setConfiguredLabel(state, event, config, entityId, key, value, strength, note)
+        },
       }
       fold(capability, { type: event.type, payload: event.payload, seq: event.seq })
     }
@@ -367,12 +405,13 @@ function registerEntity(
   kind: EntityKind,
   id: string,
   seq: number,
+  sortKey?: number,
 ): Entity {
   const prefix = kernelEntityKindPrefixes[kind] ?? config.entity_kind_prefixes?.[kind]
   if (!prefix || !id.startsWith(prefix))
     throw new Error(`id for kind ${kind} must start with its declared prefix: ${id}`)
   if (state.entities_by_id.has(id)) throw new Error(`entity already exists: ${id}`)
-  const created = entity(id, kind, seq)
+  const created = entity(id, kind, seq, sortKey)
   state.entities_by_id.set(id, created)
   return created
 }
@@ -527,8 +566,8 @@ function requireEntity(map: Map<string, Entity>, id: string, kind: EntityKind): 
   if (!map.has(id)) throw new Error(`unknown ${kind}: ${id}`)
 }
 
-function entity(id: string, kind: EntityKind, seq: number): Entity {
-  return { id, kind, sort_key: seq, created_seq: seq }
+function entity(id: string, kind: EntityKind, seq: number, sortKey?: number): Entity {
+  return { id, kind, sort_key: sortKey ?? seq, created_seq: seq }
 }
 
 function sortEntities(a: Entity, b: Entity): number {

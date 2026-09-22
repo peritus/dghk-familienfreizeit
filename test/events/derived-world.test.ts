@@ -175,12 +175,18 @@ test('enforces configured label scopes and replacement cardinality', () => {
 test('guardModuleFold rejects capability calls outside a module’s own declared kinds and keys', () => {
   const calls: string[] = []
   const capability: ModuleFoldCapability = {
-    createEntity: (kind, id, seq) => {
-      calls.push(`createEntity:${kind}:${id}:${seq}`)
-      return { id, kind, sort_key: seq, created_seq: seq }
+    createEntity: (kind, id, seq, sortKey) => {
+      calls.push(`createEntity:${kind}:${id}:${seq}:${sortKey}`)
+      return { id, kind, sort_key: sortKey ?? seq, created_seq: seq }
+    },
+    retireEntity: (kind, id) => {
+      calls.push(`retireEntity:${kind}:${id}`)
     },
     setLabel: (entityId, key) => {
       calls.push(`setLabel:${entityId}:${key}`)
+    },
+    replaceLabels: (entityId, values) => {
+      calls.push(`replaceLabels:${entityId}:${values.map((v) => v.key).join(',')}`)
     },
   }
   const allowedKinds = new Set(['widget'])
@@ -196,7 +202,7 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
     },
   )
   wellBehaved(capability, { type: 'WidgetAdded', payload: {}, seq: 1 })
-  expect(calls).toEqual(['createEntity:widget:wg_1:1', 'setLabel:wg_1:widget-color'])
+  expect(calls).toEqual(['createEntity:widget:wg_1:1:undefined', 'setLabel:wg_1:widget-color'])
 
   const undeclaredKind = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
     cap.createEntity('gadget', 'gd_1', 1)
@@ -205,12 +211,26 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
     /did not declare entity kind: gadget/,
   )
 
+  const undeclaredRetireKind = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
+    cap.retireEntity('gadget', 'gd_1')
+  })
+  expect(() =>
+    undeclaredRetireKind(capability, { type: 'WidgetAdded', payload: {}, seq: 1 }),
+  ).toThrow(/did not declare entity kind: gadget/)
+
   const undeclaredKey = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
     cap.setLabel('wg_1', 'widget-price', 3, null, null)
   })
   expect(() => undeclaredKey(capability, { type: 'WidgetAdded', payload: {}, seq: 1 })).toThrow(
     /did not declare label key: widget-price/,
   )
+
+  const undeclaredReplaceKey = guardModuleFold('fixture-widgets', allowedKinds, allowedKeys, (cap) => {
+    cap.replaceLabels('wg_1', [{ key: 'widget-price', value: 3, strength: null, note: null }])
+  })
+  expect(() =>
+    undeclaredReplaceKey(capability, { type: 'WidgetAdded', payload: {}, seq: 1 }),
+  ).toThrow(/did not declare label key: widget-price/)
 })
 
 test('compiles resolver diagnostics and preserves restricted facts only for their family', () => {
