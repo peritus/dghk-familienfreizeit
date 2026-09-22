@@ -24,16 +24,11 @@ import {
   requirement,
   text,
 } from '../../src/config/define'
-import { changeNotifications } from '../../src/modules/change-notifications'
-import { callForPapers } from '../../src/modules/call-for-papers'
 import { familyPreferences } from '../../src/modules/family-preferences'
-import { foodPreferences } from '../../src/modules/food-preferences'
-import { materials } from '../../src/modules/materials'
 import { roomAssignment } from '../../src/modules/room-assignment'
 import { roomInventory } from '../../src/modules/room-inventory'
 import { officialWorkshops } from '../../src/modules/official-workshops'
 import { programmeCore } from '../../src/modules/programme-core'
-import { selfOrganizedSessions } from '../../src/modules/self-organized-sessions'
 import { workshopAssignment } from '../../src/modules/workshop-assignment'
 import { workshopRankings } from '../../src/modules/workshop-rankings'
 import { workshopScheduling } from '../../src/modules/workshop-scheduling'
@@ -320,48 +315,6 @@ export default defineOccasionProfile({
       },
     }),
 
-    // ── Food ──────────────────────────────────────────────────────────────────
-
-    'diet': property({
-      title: { de: 'Ernährung', en: 'Diet' },
-      scopes: ['person'],
-      value: enumOf(['vegetarian', 'vegan', 'carnivore', 'pesco-vegetarian']),
-      cardinality: 'exactly-one',
-      copy: {
-        'vegetarian': { de: 'vegetarisch', en: 'vegetarian' },
-        'vegan': { de: 'vegan', en: 'vegan' },
-        'carnivore': { de: 'mit Fleisch', en: 'with meat' },
-        'pesco-vegetarian': { de: 'pescetarisch', en: 'pescatarian' },
-      },
-      family_facing: {
-        control: 'choice',
-        title: { de: 'Ernährung', en: 'Diet' },
-        help: null,
-        scope: 'person',
-        strengths: null,
-        invert: false,
-      },
-    }),
-
-    'allergies-text': property({
-      title: { de: 'Allergien und Unverträglichkeiten', en: 'Allergies and intolerances' },
-      scopes: ['person'],
-      value: text({ max_length: 2000 }),
-      cardinality: 'zero-or-one',
-      sensitivity: 'restricted',
-      family_facing: {
-        control: 'free-text',
-        title: { de: 'Allergien und Unverträglichkeiten', en: 'Allergies and intolerances' },
-        help: {
-          de: 'Bitte so genau wie möglich, zum Beispiel „2x Beifuß (sehr starke Allergie)“.',
-          en: 'As precisely as possible, for example “mugwort (severe allergy)”.',
-        },
-        scope: 'person',
-        strengths: null,
-        invert: false,
-      },
-    }),
-
     // ── Notes ─────────────────────────────────────────────────────────────────
 
     'family-note': property({
@@ -425,8 +378,6 @@ export default defineOccasionProfile({
 
     programmeCore(),
 
-    callForPapers(),
-
     officialWorkshops({
       audience_trait: 'workshop-audience',
       leader_trait: 'leads-workshop',
@@ -438,8 +389,6 @@ export default defineOccasionProfile({
         'adults': ['adult'],
       },
     }),
-
-    selfOrganizedSessions(),
 
     workshopScheduling(),
 
@@ -454,28 +403,6 @@ export default defineOccasionProfile({
       top_n: 2,
       rank_weights: [3, 2, 1],
       fill_unassigned: true,
-    }),
-
-    foodPreferences({
-      diet_trait: 'diet',
-      allergies_trait: 'allergies-text',
-      count_by_day: true,
-    }),
-
-    materials({
-      categories: ['snacks', 'games', 'material'],
-      requester_kinds: ['family', 'person', 'programme-session'],
-      contributor_kinds: ['family', 'person'],
-      workshop_links: true,
-      person_links: true,
-      commitment_fulfills_many: false,
-      copy: {
-        categories: {
-          'snacks': { de: 'Snacks und Getränke', en: 'Snacks and drinks' },
-          'games': { de: 'Spiele', en: 'Games' },
-          'material': { de: 'Material', en: 'Equipment and supplies' },
-        },
-      },
     }),
 
     familyPreferences({
@@ -500,13 +427,6 @@ export default defineOccasionProfile({
           intro: null,
           traits: ['prefers-workshop', 'workshop-with'],
           deadline_scope: 'workshops',
-        },
-        {
-          key: 'food',
-          title: { de: 'Essen', en: 'Food' },
-          intro: null,
-          traits: ['diet', 'allergies-text'],
-          deadline_scope: null,
         },
       ],
       module_controls: [
@@ -533,12 +453,5 @@ export default defineOccasionProfile({
       },
     }),
 
-    changeNotifications({
-      include_arrangements_in_body: true,
-      copy: {
-        communication_subject: { de: 'Informationen zu Deinen Zimmern und Workshops', en: 'Room and workshop information' },
-        change_subject: { de: 'Änderungen zu Deinen Zimmern und Workshops', en: 'Changes to your rooms and workshops' },
-      },
-    }),
   ],
 })

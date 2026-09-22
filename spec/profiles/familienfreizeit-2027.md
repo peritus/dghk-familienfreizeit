@@ -10,7 +10,7 @@ outstanding requirements here.
 
 M2 uses a kernel-only executable fixture while module contributions are introduced.
 This complete selected-module profile becomes an executable integration fixture in
-M14, after every selected module contribution exists.
+M12, after every active module contribution exists.
 
 This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.example.ts); this document
@@ -26,13 +26,15 @@ The profile selects these modules ([modules](../modules/contract.md) §5):
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
 | [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, and the board |
 | [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
-| [`workshops`](../modules/workshops.md) | slots, workshops, audience, and person-to-workshop leadership |
+| [`programme-core`](../modules/programme-core.md) | shared programme-session identity and scheduleable-session boundary |
+| [`official-workshops`](../modules/official-workshops.md) | organiser-authored official workshops, audience, and person-to-workshop leadership |
+| [`workshop-scheduling`](../modules/workshop-scheduling.md) | configured slots, offerings, placement, and schedule release |
 | [`workshop-rankings`](../modules/workshop-rankings.md) | ordered per-person workshop rankings |
 | [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, and fairness |
-| [`food-preferences`](../modules/food-preferences.md) | one diet per person and optional allergy text |
-| [`materials`](../modules/materials.md) | materials contributed by families and linked to workshops |
 | [`family-preferences`](../modules/family-preferences.md) | the family preferences page |
-| [`change-notifications`](../modules/change-notifications.md) | communication and change emails |
+
+Food preferences, materials, call-for-papers, self-organized sessions, and
+change-notifications are deferred under [M16](../roadmap.md#m16--deferred-sleeping-modules-and-features).
 
 ## 2. Room inventory
 
@@ -135,7 +137,8 @@ not a booking or billing rule.
 ## 3. Workshop-space inventory
 
 Workshop spaces are independent occasion data. The profile selects
-[`workshop-space`](../modules/workshop-space.md) alongside `workshops`, while
+[`workshop-space`](../modules/workshop-space.md) alongside `programme-core`,
+`official-workshops`, and `workshop-scheduling`, while
 [`room-inventory`](../modules/room-inventory.md) remains solely the selected
 accommodation inventory. A workshop space is not a room, bed, place, or
 building, and no workshop event names an accommodation room.
@@ -151,7 +154,7 @@ The profile composition contract includes these independent fixtures:
 
 | Fixture | Selected modules | Purpose |
 |---|---|---|
-| `workshop-spaces-only` | `workshop-space`, `workshops` | Workshop spaces and programme facts without accommodation inventory |
+| `workshop-spaces-only` | `workshop-space`, `programme-core`, `official-workshops`, `workshop-scheduling` | Workshop spaces and programme facts without accommodation inventory |
 | `accommodation-only` | `room-inventory`, `room-assignment` | Accommodation remains valid without workshops or workshop spaces |
 | `familienfreizeit-2027` | Both inventories plus the selected workshop modules | Full occasion composition with independent physical boundaries |
 
@@ -180,21 +183,10 @@ Keep-apart relations are never visible to families, which is why `apart-from` is
 both organiser-only and restricted. Cross-family co-rooming belongs to the
 separate sleeping-parties module.
 
-## 5. Food preferences
+## 5. Deferred food preferences
 
-Food data is per person ([food preferences](../modules/food-preferences.md)): every
-person has exactly one `diet` and may have one `allergies-text`.
-
-| Trait | Values or format | Cardinality |
-|---|---|---|
-| `diet` | `vegetarian`, `vegan`, `carnivore`, `pesco-vegetarian` | exactly one |
-| `allergies-text` | free text, retained as entered; restricted | zero or one |
-
-`pesco-vegetarian` is an explicit occasion value. Allergy text preserves quantities
-and wording from the source data, for example `1 x Eier` or
-`2x Beifuß (sehr starke Allergie)`. The supplied source rows do not include family
-names, so this profile records the model and vocabulary without inventing person or
-family assignments.
+The food-preferences contract remains specified, but this active profile does not
+select it and therefore defines no diet or allergy traits.
 
 ## 6. Room policy
 
@@ -213,7 +205,7 @@ them is a deployment, reviewed through the plan diff before communicating.
 
 | Module | Parameter | Value |
 |---|---|---|
-| `workshops` | `audience_trait` | `workshop-audience` (`children`, `adults`; organiser-only) |
+| `official-workshops` | `audience_trait` | `workshop-audience` (`children`, `adults`; organiser-only) |
 | | `leader_trait` | `leads-workshop` (zero or more workshops per person) |
 | | `leaders_consume_capacity` | `false` |
 | | `require_leader` | `false` |
@@ -239,32 +231,14 @@ appropriate.
 
 The active kernel [release-control contract](../application/release-control.md) governs
 accommodation, per-workshop details and per-slot solver allocations. Family inputs
-and permitted materials/participation stay live. Draft programme details do not
+and permitted participation stay live. Draft programme details do not
 change family admission before communication. This profile enables all three scope
 kinds through its selected modules; release policy is not executable runtime config.
 
-## 8. Materials
+## 8. Deferred materials
 
-[Materials](../modules/materials.md) categories:
-
-| Category | Meaning |
-|---|---|
-| `snacks` | food and drinks brought for shared use |
-| `games` | games and play materials |
-| `material` | other equipment or workshop supplies |
-
-Families, persons, and workshops may request materials; families and persons may
-commit to bringing them. Records may be linked to a workshop, and a workshop-linked
-request may identify the child it concerns (`workshop_links` and `person_links`).
-One commitment fulfils at most one request. The current `MaterialsSummary` feeds
-coordination views and never contributes a solver plan section or release backlog.
-
-Quantities stay free text, preserving entries such as `2-3 Packs`, `5 Liter`, and
-`4x`. The profile can represent snacks, apple juice, napkins, reusable or disposable
-tableware, an espresso machine with its safety inspection note and accessories, and
-workshop supplies such as paint or textile markers. The supplied examples do not
-contain a complete family or person mapping, so they define data shape rather than
-invented records.
+The materials contract remains specified, but this active profile does not select
+it. Material requests, commitments, and workshop-linked coordination are deferred.
 
 ## 9. Metadata, copy, and notifications
 
@@ -280,13 +254,12 @@ not change automatically.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../ui/german-translation-guidelines.md). The
-preferences page has four sections: who is coming, room wishes, workshops, and
-food. Cross-family sharing wishes belong to the separate sleeping-parties module.
+preferences page has three active sections: who is coming, room wishes, and
+workshops. Cross-family sharing wishes belong to the separate sleeping-parties module.
 
-Optional communication emails use the release-control recipient preview, including
-programme-only changes. The notification profile configures subjects and includes
-arrangements in the body; it does not supply a list that can omit relevant scope
-changes ([change notifications](../modules/change-notifications.md)).
+Authentication emails remain active for magic-link access. Arrangement-change and
+communication emails are deferred with `change-notifications`; release control
+still owns visibility and recipient previews independently of delivery.
 
 ## 10. First-deployment boundary
 

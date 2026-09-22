@@ -103,7 +103,8 @@ published candidate round before its sessions have a schedule. Schedule release
 precedes attendance allocation release.
 
 Only selected modules contribute scopes. `room-assignment` contributes accommodation;
-`call-for-papers` contributes candidate rounds; `programme-core` and source modules
+`programme-core` and the selected official-workshop source contribute candidate
+rounds; `call-for-papers` may contribute a later proposal source; source modules
 contribute programme scopes; `workshop-scheduling` contributes schedule scopes;
 `workshop-assignment` contributes slot allocations. A slot allocation may be empty,
 including when clearing an existing allocation after a mode or slot change. A
@@ -200,8 +201,9 @@ head immediately before append (`Communicated.seq - 1`); this permits communicat
 of exactly the content the organiser reviewed despite concurrent events. Scopes are
 non-empty, unique, supported by selected modules, and sorted by kind then referenced
 id. Module references resolve
-through the configured resolver. `notify`
-requires `change-notifications` to be selected.
+through the configured resolver. `notify` is unavailable while
+`change-notifications` is not selected; authentication email remains a separate
+kernel capability.
 
 Organisers apply pending events before confirming communication. Preview requests
 are read-only. The confirmation submits the reviewed `input_seq`, scopes,
