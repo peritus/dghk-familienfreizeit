@@ -612,3 +612,40 @@ the Worker production bundle or pure domain layer.
 tested contract. Keeping it outside the fold preserves deterministic browser and
 Worker execution without importing I/O, framework, or adapter code into the
 domain core.
+
+## D27 — Entities and labels are hard-removed on retirement/clear; history is re-derived, not tombstoned
+
+*Chosen.* `BedRemoved`, `PersonWithdrawn`, `LabelCleared`, and any module fold's
+equivalent retirement operation remove their target from the derived world's
+live collections (`entities_by_kind`, `families`, `persons`, `labels`, and the
+indexes built from them) instead of marking a `retired_seq`/`cleared_seq`
+tombstone that every read site must then filter out. Cross-kind id collisions
+are prevented structurally instead of by remembering retired ids: every entity
+id must start with its kind's declared prefix (kernel-reserved `fam_`/`per_`;
+module prefixes are already validated globally unique at profile build), so a
+retired id can never be picked up by an unrelated kind. No permanent id ledger
+is kept for this.
+
+*Rejected alternative:* soft-delete tombstones (`retired_seq`/`cleared_seq`
+fields kept forever on otherwise-removed entities/labels, filtered at every
+read site). Easy to reason about locally ("was this ever set") but pushes the
+same filter into the resolver, `diff`, and every future module's fold, and
+duplicates what re-derivation already gives for free.
+
+*Why:* historical and reviewed views already work by re-deriving `derive()`
+over a truncated event slice at a specific `seq`
+([release control](spec/application/release-control.md) — confirmation
+"submits the reviewed `input_seq`" and later access is "ordinary derivation at
+the reviewed `input_seq`, using the same Plan type"). Nothing needs the
+*current* world to remember what used to be true; that question is answered by
+re-deriving at the seq in question, not by keeping a tombstone around forever.
+Removing entries at fold time instead of tombstoning them means the resolver,
+`diff`, and every module's fold only ever see what is currently live — no
+`retired_seq !== null` / `cleared_seq === null` checks scattered through
+read-side code.
+
+*Consequence:* `Entity` drops `retired_seq`; `Label` drops `cleared_seq`;
+`KernelWorld` drops `withdrawn_person_ids` (nothing outside the fold itself
+consumed it). `world.entities_by_kind` and `world.labels` only ever contain
+what is live at `head_seq`. A module's fold capability gets a `retireEntity`
+operation with these same hard-removal semantics, not a soft-retire.
