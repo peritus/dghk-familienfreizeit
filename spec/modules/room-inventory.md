@@ -6,7 +6,7 @@ Module id `room-inventory` · factory `roomInventory`
 
 Room inventory records the physical sleeping accommodation of an occasion:
 buildings, rooms, beds, and the places a bed provides. It owns identity, location,
-designation, and capacity. It does not decide who sleeps where; that is the job of
+and capacity. It does not decide who sleeps where; that is the job of
 [room assignment](room-assignment.md). Sleeping-party placement belongs to a
 separate module boundary.
 
@@ -16,7 +16,7 @@ the room. Capabilities the solver matches against are derived from those labels 
 assigned directly ([labels and constraints](../architecture/labels-and-constraints.md) §3).
 
 This document is the authoritative description of inventory events, place
-generation, designations, and room capacity.
+generation, and room capacity.
 
 ## 2. Dependencies
 
@@ -33,16 +33,12 @@ type RoomInventoryParams = {
   floors: readonly string[]          // allowed floor values, in display order
   room_types: readonly string[]      // allowed room types, in display order
   bed_types: readonly string[]       // allowed bed types, in display order
-  designations: readonly Designation[]
   copy: {
     floors: Readonly<Record<string, LocalizedText>>
     room_types: Readonly<Record<string, LocalizedText>>
     bed_types: Readonly<Record<string, LocalizedText>>
-    designations: Readonly<Partial<Record<Designation, LocalizedText>>>
   }
 }
-
-type Designation = 'general' | 'staff' | 'blocked'
 ```
 
 | Parameter | Default | Validation |
@@ -50,16 +46,7 @@ type Designation = 'general' | 'staff' | 'blocked'
 | `floors` | `['ground']` | non-empty, unique, kebab-case |
 | `room_types` | `['standard']` | non-empty, unique, kebab-case |
 | `bed_types` | `['single', 'double']` | non-empty, unique, kebab-case |
-| `designations` | `['general', 'blocked']` | must contain `general` and `blocked` |
 | `copy` | English identifiers | every listed value has copy in the profile locale |
-
-Designation meanings are fixed by the module, not by the profile:
-
-| Designation | Meaning |
-|---|---|
-| `general` | Available to any family |
-| `staff` | Held back for staff; excluded from family placement, still counted in inventory reports |
-| `blocked` | Unavailable; requires a reason; excluded from all placement |
 
 ## 4. Entity kinds
 
@@ -109,18 +96,6 @@ Mapping: `room_id` is identity-only; `building_id` maps to `located-in`,
 retired; `number` is unique within the building; `floor` and `room_type` are in the
 module parameters.
 
-### `RoomDesignationChanged`
-
-```ts
-{ room_id: string, designation: Designation, reason: string | null }
-```
-
-Mapping: `room_id` is identity-only; `designation` maps to `designation` and
-`reason` maps to `designation-reason` when non-null. A room with no designation event is
-`general`. *Invariants:* `designation` is in the module parameters; `blocked`
-requires a non-empty reason. Any compensating constraints stay visible in the event
-history and are cleared explicitly.
-
 ### `BedAdded` / `BedUpdated`
 
 ```ts
@@ -156,7 +131,6 @@ BuildingAdded building_id=bld_haupthaus name="Haupthaus" sort_key=1
 RoomAdded room_id=rm_08 building_id=bld_haupthaus number="8" floor="first" room_type=standard sort_key=8
 BedAdded bed_id=bed_08-a room_id=rm_08 label="8-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_08-b room_id=rm_08 label="8-B" bed_type=single sleeps=1 sort_key=2
-RoomDesignationChanged room_id=rm_08 designation=staff reason=#null
 ```
 
 ## 6. Labels and trait roles
@@ -172,8 +146,6 @@ on other kinds ([modules](contract.md) §3.1).
 | `number` | room | text | exactly one | `RoomAdded`, `RoomUpdated` |
 | `floor` | room | one of `floors` | zero or one | `RoomAdded`, `RoomUpdated` |
 | `room-type` | room | one of `room_types` | exactly one | `RoomAdded`, `RoomUpdated` |
-| `designation` | room | `Designation` | zero or one; absent means `general` | `RoomDesignationChanged` |
-| `designation-reason` | room | text | zero or one | `RoomDesignationChanged` |
 | `label` | bed | text | exactly one | `BedAdded`, `BedUpdated` |
 | `bed-type` | bed | one of `bed_types` | exactly one | `BedAdded`, `BedUpdated` |
 | `sleeps` | bed | `1` or `2` | exactly one | `BedAdded`, `BedUpdated` |
@@ -204,7 +176,6 @@ type InventoryInput = {
 type InventoryRoom = {
   id: string
   building_id: string
-  designation: Designation
   place_count: number
   sort_key: number
 }
@@ -212,25 +183,23 @@ type InventoryRoom = {
 type InventoryPlace = { id: string, bed_id: string, room_id: string, index: number }
 ```
 
-Rooms designated `blocked` and retired beds and places are excluded when the solver
-input is built, so no stage has to remember to ignore them. `staff` rooms are
-included with their designation so that reports can count them; placement
-modules exclude them.
+Every live room contributes to solver input. Retired beds and places are excluded
+when the solver input is built; room assignment applies capacity and the resolved
+requirements, exclusions, separations, and decisions to every remaining room.
 
 Stages: none. Inventory is input, not a decision.
 
 ## 8. Rules and scoring
 
-None. Capacity and designation rules belong to the placement modules that apply
-them.
+None. Capacity and placement rules belong to the placement modules that apply them.
 
 ## 9. Preflight checks
 
 | Id | Severity | Fires when |
 |---|---|---|
-| `room-inventory.room-without-places` | warning | a `general` room has no live places |
-| `room-inventory.retired-place-constrained` | error | an active constraint names a retired place or a place in a blocked room |
-| `room-inventory.no-general-capacity` | error | people exist and no `general` room has places |
+| `room-inventory.room-without-places` | warning | a live room has no live places |
+| `room-inventory.retired-place-constrained` | error | an active constraint names a retired place |
+| `room-inventory.no-capacity` | error | people exist and no live room has places |
 
 ## 10. Output and diff
 
@@ -244,8 +213,8 @@ The derived world exposes `world.buildings`, `world.rooms`, `world.beds`, and
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/inventory` — buildings, rooms, beds, designations, and room traits ([UI-08](../ui/screens/inventory.md)) |
-| Report | *Capacity and accommodation cost overview*, inventory part: places by building, designation, and room type; cost when the profile defines a price trait ([reports](../application/reports.md) §3.3) |
+| Screen | `/organiser/inventory` — buildings, rooms, beds, and room traits ([UI-08](../ui/screens/inventory.md)) |
+| Report | *Capacity and accommodation cost overview*, inventory part: places by building and room type; cost when the profile defines a price trait ([reports](../application/reports.md) §3.3) |
 | Controls | none |
 | Emails | none |
 
@@ -253,7 +222,6 @@ The derived world exposes `world.buildings`, `world.rooms`, `world.beds`, and
 
 - Place ids are stable across `BedUpdated` restatements and replay.
 - `sleeps` 2 → 1 retires exactly the second place at that `seq`.
-- `blocked` without a reason is rejected at append and at replay.
 - A `LabelSet` on a module-owned key is rejected.
 - `floor`, `room_type`, and `bed_type` outside the parameters are rejected.
 - Shuffle invariance covers `buildings`, `rooms`, and `places`.

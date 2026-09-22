@@ -106,7 +106,7 @@ does not occupy a generated place.
 
 Seed placements from the `before` plan supplied by
 [`deriveTransition`](../architecture/solver-contract.md) when the family, room,
-capacity, designation, requirements, exclusions, and keep-apart relations remain
+capacity, requirements, exclusions, and keep-apart relations remain
 valid. New or invalidated families are left unplaced. These retained placements
 are provisional: a feasible required placement decision supersedes a retained
 placement for the same family and releases its previous capacity. A first
@@ -119,7 +119,7 @@ For each active required positive placement decision that resolves to a particul
 room or place, in source event sequence, entity id, key, and canonical value order:
 
 1. Resolve the named family or person to its family placement unit.
-2. Check capacity, designation, all required needs, exclusions, and separation
+2. Check capacity, all required needs, exclusions, and separation
    against the family and target. If any fails, record a conflict, skip, and trace.
 3. Otherwise place the family and mark it placed. Later decisions for an already
    placed family either agree or produce a conflict, never a second assignment.
@@ -177,7 +177,6 @@ Hard rules prune a room. They are not worth points.
 | Rule id | Fails when |
 |---|---|
 | `hard.capacity` | free places < `family.bed_demand` |
-| `hard.designation` | the room is not `general` |
 | `hard.trait-requirements` | a required family requirement is not satisfied |
 | `hard.keep-apart` | the room holds a family the candidate is kept apart from at `required` |
 | `hard.resolver-decisions` | the resolver rejects the room or place for a required decision |
