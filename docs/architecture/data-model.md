@@ -69,7 +69,6 @@ type Entity = {
   kind: EntityKind          // kernel: 'family' | 'person'; modules: any other string
   sort_key: number
   created_seq: number
-  retired_seq: number | null
 }
 ```
 
@@ -79,14 +78,47 @@ other kind through `ModuleContributions.entity_kinds`
 composes the selected modules' kinds and event fold functions into
 `derive`'s dispatch, and `guardModuleFold` (`src/events/fold.ts`) rejects a
 module fold call that creates an entity of a kind it didn't itself declare.
-An id is rejected if reused under a different kind, kernel or module alike —
-one shared `entities_by_id` map backs this check across all entities.
 `world.entities_by_kind` exposes one sorted collection per kind this way,
 generically, for every kind including `family`/`person`; see
 [outstanding data model](../../spec/architecture/data-model.md) §1 for the
 still-aspirational named per-kind accessors (`world.rooms`, …) this doesn't
-yet provide. Proven against a synthetic test module, not yet against a real
-one — see [issue 021](../../spec/issues/archived/021-module-owned-entity-fold-boundary.md).
+yet provide.
+
+Retirement is hard removal, not a tombstone
+([D27](../../decisions.md#d27--entities-and-labels-are-hard-removed-on-retirementclear-history-is-re-derived-not-tombstoned)):
+`PersonWithdrawn`, `LabelCleared`, and a module fold's `retireEntity`/
+`replaceLabels` remove their target from the live `Entity`/`Label` collections
+instead of flagging a `retired_seq`/`cleared_seq` field for every read site to
+filter. A cross-kind id collision is rejected because it is structurally
+impossible, not because a permanent ledger of past ids is kept: every id must
+start with its own kind's declared prefix (kernel-reserved `fam_`/`per_`;
+module prefixes are validated globally unique at profile build), enforced in
+`registerEntity` against `KernelConfig.entity_kind_prefixes`. What a piece of
+state used to be, or that it used to exist, is answered by re-deriving
+`derive()` over a truncated event slice at the `seq` in question — release
+control's reviewed-`input_seq` views already work this way — not by keeping
+old state around in the live world.
+
+The module fold capability
+(`ModuleFoldCapability`, `src/events/fold.ts`) has four guarded operations: `createEntity`
+(with an optional source `sortKey` distinct from creation `seq`, so a module's
+own ordering survives instead of always collapsing to creation order),
+`retireEntity`, `setLabel`, and `replaceLabels` (an atomic full-label
+restatement: clears every live label under each write's key, then sets its
+new value, so a fold can never clear without setting). Every call is checked
+against that module's own declared entity kinds and label keys before it
+reaches real world state. A module event's authorization rule is a separate,
+required contribution — `ModuleContributions.events[].authorize(principal,
+payload, world) => boolean` — composed into `KernelConfig.event_authorize_dispatch`
+and consulted by `canAppendEvent` (`src/auth/authorization.ts`) for any event
+type outside the kernel's own five entity-touching types; a module event with
+no declared rule is denied, not accidentally allowed or denied by a payload
+shape coincidence.
+
+Proven against synthetic test modules, not yet against a real one — see
+[issue 021](../../spec/issues/archived/021-module-owned-entity-fold-boundary.md),
+[issue 022](../../spec/issues/archived/022-module-event-authorization-contribution-gap.md),
+and [issue 024](../../spec/issues/archived/024-module-fold-lifecycle-gap.md).
 
 ## Operational tables
 
