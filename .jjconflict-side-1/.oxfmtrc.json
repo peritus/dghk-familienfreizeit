@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "docs/**",
+    "spec/**",
+    "migrations/**",
+    "decisions.md",
+    "README.md",
+    "THIRD_PARTY.md",
+    "worker-configuration.d.ts"
+  ]
+}

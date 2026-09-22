@@ -90,7 +90,7 @@ It shows descriptions, quantities, open/fulfilled status, and the contributing
 family or person where that identity is useful for coordination. It is the
 canonical shared coordination report for materials; it is not organiser-only.
 
-**Workshop programme** shows dates, times, workshops, rooms, leaders, audience,
+**Workshop programme** shows dates, times, workshops, scheduled locations, leaders, audience,
 and cancellations. Its workshop rows use communicated programme content for family readers. Live
 participation is a separate view; interest never exposes shared names.
 
@@ -149,6 +149,13 @@ what families can see.
 **Capacity and accommodation cost overview** shows room and bed use, free
 capacity, workshop fill, and the configured accommodation cost estimate. It is a
 planning calculation, not an invoice or billing record.
+
+**Workshop-space inventory** is an organiser-only physical inventory report. It
+lists live and retired workshop spaces, physical capacity, availability windows,
+deterministic order, and resolved capabilities. It does not claim that a space
+is assigned to a workshop and never substitutes for the later communicated
+programme location. Scheduled locations and their family-visible release are
+owned by the Issue 025 schedule/release contract.
 
 ## 4. Safety and responsibility
 

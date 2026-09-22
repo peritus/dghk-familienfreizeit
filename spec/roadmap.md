@@ -109,12 +109,17 @@ see communicated arrangements, and never receive organiser-only or hidden conten
 
 ## M9 — Workshop programme and live participation
 
-Specification coverage: [workshops](modules/workshops.md), workshop portions of
+Specification coverage: [workshop space](modules/workshop-space.md), [workshops](modules/workshops.md), workshop portions of
 [release control](application/release-control.md) §5, [UI-12](ui/screens/workshops.md), and
 the workshop parts of [reports](application/reports.md).
 
+- Complete the Issue 026 workshop-space foundation: typed physical spaces,
+  event-backed capacity and availability, resolver capabilities, deterministic
+  input, organiser maintenance, and physical-space inventory reporting. This
+  foundation is independent of accommodation `room-inventory`.
 - Implement slots, workshops, programme modes, capacity, age bounds, leaders,
-  locations, cancellation, reinstatement, and programme history.
+  cancellation, reinstatement, and programme history. Communicated locations
+  are not established by workshop setup events.
 - Implement communicated-programme admission, sign-up and interest labels,
   capacity races, slot reservations, mode transitions, and eligibility checks.
 - Implement the organiser workshop screen and family participation controls.
@@ -131,6 +136,10 @@ Specification coverage: [workshop rankings](modules/workshop-rankings.md), [work
 assignment](modules/workshop-assignment.md), workshop solver sections of [solver
 contract](architecture/solver-contract.md), and workshop tests in [testing](engineering/testing.md).
 
+- Issue 025 follows Issue 026 and owns the schedule stage that consumes
+  `WorkshopSpaceInput`: proposal/offering identity, pre-schedule rankings,
+  space assignment, conflicts, and schedule release. None of those decisions
+  are added to `workshop-space` here.
 - Implement structured ordered-choice rankings, no-preference values, rank
   validation, and communicated-programme rules.
 - Implement eligibility, reservations, fixed resolver

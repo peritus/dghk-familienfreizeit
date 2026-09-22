@@ -51,12 +51,13 @@ binding decisions. Move only its accepted requirements into the active topic.
 | 14 | [German translation guidelines](ui/german-translation-guidelines.md) | Family-facing terminology and translation rules |
 | 15 | [Reports](application/reports.md) | Report catalogue, audience scopes, responsive behavior, and print stylesheets |
 | 16 | [Modules](modules/contract.md) | Module contract, composition, and catalogue |
-| 17 | [Room inventory](modules/room-inventory.md) | Buildings, rooms, beds, places, designations, and capacity |
+| 17 | [Room inventory](modules/room-inventory.md) | Buildings, rooms, beds, places, and capacity |
 | 18 | [Room assignment](modules/room-assignment.md) | Deterministic placement, room scoring, and the board |
 | 19 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
-| 20 | [Workshop rankings](modules/workshop-rankings.md) | Ordered per-person workshop choices |
-| 21 | [Workshop assignment](modules/workshop-assignment.md) | Fair workshop assignment |
-| 22 | [Food preferences](modules/food-preferences.md) | Per-person diet and allergy text |
-| 23 | [Materials](modules/materials.md) | Requests, commitments, and fulfilment |
-| 24 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
-| 25 | [Change notifications](modules/change-notifications.md) | Communication and change emails |
+| 20 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
+| 21 | [Workshop rankings](modules/workshop-rankings.md) | Ordered per-person workshop choices |
+| 22 | [Workshop assignment](modules/workshop-assignment.md) | Fair workshop assignment |
+| 23 | [Food preferences](modules/food-preferences.md) | Per-person diet and allergy text |
+| 24 | [Materials](modules/materials.md) | Requests, commitments, and fulfilment |
+| 25 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
+| 26 | [Change notifications](modules/change-notifications.md) | Communication and change emails |

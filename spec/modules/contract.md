@@ -202,7 +202,8 @@ migration ([deployment](../engineering/deployment.md) §2).
 |---|---|---|---|
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
-| [`workshops`](workshops.md) | Slots, workshops, audience, leadership, cancellation | — | `room-inventory` |
+| [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
+| [`workshops`](workshops.md) | Slots, workshops, audience, leadership, cancellation | — | — |
 | [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop assignment | `workshop-rankings` | — |
 | [`food-preferences`](food-preferences.md) | Per-person diet and allergy text | — | — |
