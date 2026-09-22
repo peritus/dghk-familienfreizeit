@@ -141,7 +141,7 @@ Acceptance: official sessions can be ranked before scheduling, selected sessions
 are placed or reported as blocking outcomes, each person receives at most one
 assignment per overlapping period, and every allocation decision is traced.
 
-<a id="m12--release-control-and-communication"></a>
+<a id="m11--release-control-and-communicated-arrangements"></a>
 ## M11 — Release control and communicated arrangements
 
 Specification coverage: [release control](application/release-control.md), [D16](../decisions.md#d16--release-control-determines-which-arrangements-families-see),

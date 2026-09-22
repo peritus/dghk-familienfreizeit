@@ -6,7 +6,7 @@ severity: gap
 category: module:release-control
 source: issue-2-unavailable-release-status (pre-existing)
 related_decisions: [D16]
-related_milestones: [M8, M12, M13, M14, M15]
+related_milestones: [M8, M11, M13, M14, M15]
 opened: 2026-09-19
 ---
 

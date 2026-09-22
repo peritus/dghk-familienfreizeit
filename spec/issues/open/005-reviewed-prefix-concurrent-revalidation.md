@@ -6,7 +6,7 @@ severity: contract-contradiction
 category: module:release-control
 source: spec-review-2026-09-19
 related_decisions: [D16]
-related_milestones: [M9, M12, M14]
+related_milestones: [M9, M11, M14]
 opened: 2026-09-19
 ---
 
@@ -43,7 +43,7 @@ Preserve the reviewed held content, but atomically revalidate its composition
 with current live participation at append time and reject new conflicts. The
 alternatives are invalidating every review on any head change or blocking
 relevant live writes during review. Select and document the concurrency rule
-before M9/M12; include a race fixture and notification-recipient semantics.
+before M9/M11; include a race fixture and notification-recipient semantics.
 This requires release-contract review, not an implicit implementation choice.
 
 ## Open questions
