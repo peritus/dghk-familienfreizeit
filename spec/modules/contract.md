@@ -209,18 +209,21 @@ migration ([deployment](../engineering/deployment.md) §2).
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
 | [`workshop-scheduling`](workshop-scheduling.md) | Scheduled offerings, placement, conflicts, and schedule release | `programme-core`, `workshop-space` | `official-workshops`, `self-organized-sessions` |
-| [`workshops`](workshops.md) | Slots, workshops, audience, leadership, cancellation | — | — |
-| [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `workshops` | — |
+| [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `programme-core`, `call-for-papers`, `official-workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`food-preferences`](food-preferences.md) | Per-person diet and allergy text | — | — |
-| [`materials`](materials.md) | Material requests, commitments, and fulfilment | — | `workshops` |
+| [`materials`](materials.md) | Material requests, commitments, and fulfilment | — | `official-workshops` |
 | [`family-preferences`](family-preferences.md) | The profile-driven preferences page | — | — |
 | [`change-notifications`](change-notifications.md) | Communication and change emails | — | — |
 
 `requires` is transitive. A room-only occasion selects `room-inventory` and
 `room-assignment`; it places whole families and has no child rooms. A
-workshop-only occasion selects `workshops`, `workshop-rankings`, and
-`workshop-assignment` and has no room entities or board.
+An official-workshop occasion selects `programme-core`, `call-for-papers`,
+`official-workshops`, `workshop-rankings`, `workshop-scheduling`, and
+`workshop-assignment`; a self-organised-only occasion can select the core,
+self-organised, space, and scheduling modules without ranking or attendance.
+Neither has room entities or the accommodation board unless those modules are
+selected separately.
 
 Sleeping parties and child rooms are not selectable modules in the current
 catalogue. They are specified under [`deferred-ideas/`](../deferred-ideas) and must

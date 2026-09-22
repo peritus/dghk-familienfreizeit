@@ -40,18 +40,18 @@ edit.
 The authoritative ranking module defines a ranking as a person → slot → ordered
 list and requires the `ordered-choice` trait to be `per: 'slot'`:
 [`workshop-rankings.md`](../../modules/workshop-rankings.md#1-purpose-and-boundary)
-and [its trait role](../../modules/workshop-rankings.md#6-labels-and-trait-roles).
+and [its validation role](../../modules/workshop-rankings.md#4-validation-and-visibility).
 Its value type repeats the same coupling: `{ slot, workshop, rank }`, with a
 separate null value for “no preference”
-([value shape](../../modules/workshop-rankings.md#6-labels-and-trait-roles)).
+([value shape](../../modules/workshop-rankings.md#3-events-and-value-shape)).
 The concrete event example therefore stores a slot while the person is still
 ranking:
-[`workshop-rankings.md`](../../modules/workshop-rankings.md#5-events).
+[`workshop-rankings.md`](../../modules/workshop-rankings.md#3-events-and-value-shape).
 
 Validation makes the ordering dependency explicit. A ranking is accepted only
 when its slot exists and its workshop is offered in that slot; family writes
 also require a communicated assigned workshop
-([validation rules](../../modules/workshop-rankings.md#6-labels-and-trait-roles)).
+([validation rules](../../modules/workshop-rankings.md#4-validation-and-visibility)).
 That contradicts ranking a proposal before the solver has selected a day, time,
 or room. The family view repeats the same assumption by offering rankings only
 for communicated assigned workshops and hiding uncommunicated programme
@@ -66,10 +66,10 @@ per time slot” and `per: 'slot'`
 `WorkshopAdded` requires a `slot_id`, and its `room_id` is a direct workshop
 field. The module therefore models the proposed activity and its scheduled
 offering as one object:
-[`workshops.md`](../../modules/workshops.md#5-events).
+[`official-workshops.md`](../../modules/official-workshops.md).
 The module's input likewise exposes only workshops that already have
 `slot_id` and `room_id`, and says that slots are already processed in
-chronological order ([solver input](../../modules/workshops.md#7-solver-input-and-stages)).
+chronological order ([solver boundary](../../modules/official-workshops.md#2-schedule-boundary)).
 There is no proposal state or “selected for ranking” state in the documented
 entity, event, or label model.
 
@@ -77,7 +77,7 @@ The current workshop module does distinguish `assigned`, `sign-up`, and
 `interest` participation modes, but that is a participation mode, not a
 proposal/ranking/scheduling lifecycle. Interest labels are live participation
 facts and can be set on several workshops in one existing slot
-([live participation](../../modules/workshops.md#6-labels-and-trait-roles)).
+([live participation](../../modules/official-workshops.md#1-dependencies-and-ownership)).
 They do not provide the selected candidate set or a solver input representing
 the interest groups that must be separated.
 
@@ -86,13 +86,12 @@ the interest groups that must be separated.
 The assignment module reads assigned-only workshops, effective rankings, and
 already-resolved workshop decisions. Its stage loops over existing slots and
 assigns a person to one workshop in each slot
-([assignment input](../../modules/workshop-assignment.md#7-solver-input-and-stages)
-and [assignment stage](../../modules/workshop-assignment.md#stage-workshop-assignmentassign)).
+([assignment input and stage](../../modules/workshop-assignment.md#4-assignment-policy)).
 It can enforce participant eligibility, capacity, exclusions, and separation
 while choosing people, but it never chooses a workshop's slot, day, or room.
 The workshop module reports `room-clash` as a world diagnostic when two already
 scheduled workshops overlap in one room; this is detection, not solver
-placement ([workshop diagnostics](../../modules/workshops.md#9-preflight-checks)).
+placement ([schedule diagnostics](../../modules/workshop-scheduling.md#2-stages)).
 
 The release model also assumes that slot and room facts are already programme
 content and that allocation is subsequently released per slot

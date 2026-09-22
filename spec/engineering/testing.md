@@ -130,6 +130,8 @@ test/fixtures/event-logs/
   infeasible.kdl         trips room-assignment.requirement-arithmetic
   workshop-spaces.kdl    workshop-space add/update/retire and capability facts
   workshop-spaces-invalid.kdl  invalid capacity and overlapping windows
+  workshop-lifecycle.kdl proposals, candidate rounds, rankings, offerings, and attendance
+  workshop-lifecycle-conflicted.kdl unscheduled sessions, fixed placements, and separation conflicts
 ```
 
 The parser reports file and line locations, rejects duplicate properties, and
@@ -221,10 +223,13 @@ const invariants = [
   ['preferred constraints affect configured soft terms and remain traceable',
     (p, s) => /* no preferred decision becomes a forced placement */],
 
-  ['no person is in two workshops in one slot',
-    p => /* group by (person, slot) */],
+  ['no person is in two offerings in one overlapping period',
+    p => /* group by (person, overlapping period) */],
 
-  ['no solver-assigned workshop exceeds capacity',
+  ['no scheduled offering exceeds capacity',
+    (p, s) => /* … */],
+
+  ['every selected session is placed or has a blocking unscheduled outcome',
     (p, s) => /* … */],
 
   ['every label key names a fixed resolver, profile trait, or selected module key, or is reported',
@@ -297,12 +302,14 @@ selecting it must supply (module specification §12).
 The `workshop-space` contract tests cover add/update/retire replay, negative
 capacity, reversed and overlapping or touching availability windows, exclusion
 of retired spaces from `WorkshopSpaceInput`, resolver-backed capability output,
-and shuffle-invariant `sort_key`/id ordering. Profile composition tests cover a
-`workshop-space` + `workshops` occasion without `room-inventory`, an
-`room-inventory` + `room-assignment` occasion without workshops, and the full
-Familienfreizeit profile with both independent inventories. A schedule consumer
-fixture rejects an unknown or retired space reference; scheduling itself remains
-out of scope until Issue 025.
+and shuffle-invariant `sort_key`/id ordering. Programme module contract tests cover
+family and organiser submissions, immutable candidate rounds, eligibility-filtered
+ranking before scheduling, deterministic demand summaries, proposer-selected
+self-organised placement, schedule offerings, fixed decisions, separation,
+unscheduled blocking outcomes, and attendance recomputation after a schedule
+change. Profile composition tests cover independent self-organised scheduling,
+the official call/ranking/scheduling/attendance pipeline, and the full
+Familienfreizeit profile with workshop spaces.
 
 ---
 
@@ -335,8 +342,11 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
 - Separation uses stable entities and resolver scope. Sleeping grouping is outside
   the active fixture contract;
   workshop groups never merge room placement units.
-- Workshop decisions preserve eligibility, capacity, and per-slot uniqueness
+- Workshop decisions preserve eligibility, capacity, and per-period uniqueness
   through manual cancellation and fill. Cancelled required targets are reported.
+- A ranking can be written before any schedule exists; demand contains no person
+  assignments, scheduling returns offerings or blocking unscheduled outcomes, and
+  attendance consumes offerings without rewriting ranking facts.
 - Clear removes the selected label's effect from the current plan; replay before
   the clear reproduces its prior effect. Pending undo removes a whole action's
   events, including both halves of a needs/provides pair.

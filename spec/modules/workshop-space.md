@@ -22,10 +22,10 @@ relationship engine.
 
 Requires: none. Enhances: none.
 
-`workshops` is independently selectable. Issue 025 will define how a schedule
-stage consumes this module's input and how scheduled offerings reference a
-space; this module does not depend on the proposal, ranking, scheduling, or
-attendance lifecycle.
+`official-workshops` and `self-organized-sessions` are independently selectable.
+The [workshop scheduling](workshop-scheduling.md) module consumes this module's
+input and owns scheduled offerings; workshop-space does not depend on proposal,
+ranking, scheduling, or attendance policy.
 
 ## 3. Parameters
 
@@ -155,7 +155,7 @@ The derived world exposes live and historical `workshop-spaces`, ordered as in
 §7. `diff` reports `workshop-space-added`, `workshop-space-changed`, and
 `workshop-space-retired` facts for organiser review. No family-facing location
 output is contributed. Release and location communication remain part of the
-schedule/release contract that Issue 025 will define.
+schedule/release contract owned by [workshop scheduling](workshop-scheduling.md).
 
 ## 11. Screens, controls, reports, and emails
 

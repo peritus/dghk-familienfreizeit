@@ -66,14 +66,14 @@ has no workshop-location stage ([room inventory solver input](../../modules/room
 ### Workshops currently depend on accommodation rooms
 
 The current module contract says that `workshops` enhances `room-inventory` when
-a workshop may be held in a room ([workshop dependencies](../../modules/workshops.md#2-dependencies)).
+a workshop may be held in a room ([workshop dependencies](../../modules/official-workshops.md#1-dependencies-and-ownership)).
 `WorkshopAdded` and `WorkshopUpdated` carry `room_id`, and the field maps to the
 workshop's `held-in` label. The invariant requires a live room when
-`room-inventory` is selected ([workshop events](../../modules/workshops.md#5-events)).
+`room-inventory` is selected ([workshop events](../../modules/official-workshops.md#1-dependencies-and-ownership)).
 
 The workshop solver input repeats this coupling with `room_id` on each workshop,
 while the module contributes no scheduling stage of its own
-([workshop solver input](../../modules/workshops.md#7-solver-input-and-stages)).
+([workshop solver input](../../modules/official-workshops.md#2-schedule-boundary)).
 The result is a direct programme property, not an assignment produced by a
 workshop scheduling solver.
 
@@ -222,11 +222,11 @@ capabilities. Accommodation rooms are no longer workshop locations, and the
 workshops module has no room-inventory enhancement or room-clash behavior.
 Workshop-space facts remain derived from the event log. Proposal/ranking
 lifecycle, schedule solving and assignment, and schedule release remain the
-responsibility of [Issue 025](../open/025-workshop-ranking-scheduling-lifecycle.md).
+responsibility of [Issue 025](025-workshop-ranking-scheduling-lifecycle.md).
 
 ## Related files
 
-- [issue 025: workshop ranking and scheduling lifecycle](../open/025-workshop-ranking-scheduling-lifecycle.md)
+- [issue 025: workshop ranking and scheduling lifecycle](025-workshop-ranking-scheduling-lifecycle.md)
 - [room-inventory.md](../../modules/room-inventory.md)
 - [workshops.md](../../modules/workshops.md)
 - [room-assignment.md](../../modules/room-assignment.md)
