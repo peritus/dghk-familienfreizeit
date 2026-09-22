@@ -3,6 +3,7 @@ import {
   guardModuleFold,
   type KernelConfig,
   type LabelSchema,
+  type ModuleEventAuthorize,
   type ModuleEventFold,
   type ResolverDescriptor,
   type WorldCheck,
@@ -103,8 +104,19 @@ export type ProfileModule = {
 }
 
 export type ModuleContributions = {
-  entity_kinds?: readonly { id: string; prefix: string }[]
-  events?: readonly { type: string; payload: ZodType<JsonValue>; fold: ModuleEventFold }[]
+  entity_kinds?: readonly {
+    id: string
+    prefix: string
+    /** Whether the event payload names the id directly, or the fold computes it (modules/contract.md §3.1). Defaults to 'caller-generated'. */
+    identity?: 'caller-generated' | 'derived'
+  }[]
+  events?: readonly {
+    type: string
+    payload: ZodType<JsonValue>
+    fold: ModuleEventFold
+    /** Who may append this event type; the module's own authorization rule (modules/contract.md §3.1). */
+    authorize: ModuleEventAuthorize
+  }[]
   label_keys?: readonly {
     key: string
     scopes: readonly string[]
@@ -334,6 +346,7 @@ function validationView(
   )
   const eventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
   const eventFoldDispatch: Record<string, ModuleEventFold> = {}
+  const eventAuthorizeDispatch: Record<string, ModuleEventAuthorize> = {}
   for (const module of modules) {
     const allowedKinds = new Set(module.contributions.entity_kinds?.map(({ id }) => id) ?? [])
     const allowedLabelKeys = new Set(module.contributions.label_keys?.map(({ key }) => key) ?? [])
@@ -345,6 +358,7 @@ function validationView(
         allowedLabelKeys,
         event.fold,
       )
+      eventAuthorizeDispatch[event.type] = event.authorize
     }
   }
   const entityKindPrefixes: Record<string, string> = { ...kernelEntityKindPrefixes }
@@ -359,6 +373,7 @@ function validationView(
     world_checks: modules.flatMap((module) => module.contributions.world_checks ?? []),
     event_payload_schemas: eventPayloadSchemas,
     event_fold_dispatch: eventFoldDispatch,
+    event_authorize_dispatch: eventAuthorizeDispatch,
     entity_kind_prefixes: entityKindPrefixes,
   }
 }

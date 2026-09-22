@@ -174,6 +174,16 @@ export type WorldSummaryDefinition = { id: string; summarize: (world: KernelWorl
 
 export type WorldCheck = (world: KernelWorld) => readonly Diagnostic[]
 
+/** Structural subset of `auth.Principal` the kernel needs for event authorization, kept free of the auth module's I/O-adjacent types. */
+export type ModuleEventPrincipal = { kind: 'organiser' } | { kind: 'family'; family_id: string }
+
+/** A module's own authorization rule for one of its event types (modules/contract.md §3.1). */
+export type ModuleEventAuthorize = (
+  principal: ModuleEventPrincipal,
+  payload: JsonValue,
+  world: KernelWorld,
+) => boolean
+
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
   /** Declared id prefix per entity kind, kernel and module alike; enforced at creation (D27). */
@@ -189,6 +199,8 @@ export type KernelConfig = {
   event_payload_schemas?: EventPayloadSchemas
   /** Single-owner event type -> (module) fold dispatch; see `defineOccasionProfile`. */
   event_fold_dispatch?: Readonly<Record<string, ModuleEventFold>>
+  /** Single-owner event type -> (module) authorization dispatch; see `defineOccasionProfile` and `canAppendEvent`. */
+  event_authorize_dispatch?: Readonly<Record<string, ModuleEventAuthorize>>
 }
 type MutableWorld = {
   families: Map<string, Entity>
