@@ -25,7 +25,7 @@ and [testing](../docs/engineering/testing.md); those checks do not demonstrate
 domain behavior, runtime inventory fixtures, or the future module/profile
 contracts. The active profile's source inventory reconciles to 38 rooms and
 162 beds: 100 at the lower price and 62 at the higher price, totaling 15,236.
-Runtime event-derived inventory fixtures and counts remain M4 work.
+Runtime event-derived inventory fixtures and counts remain M6 work.
 
 [Active implementation scope belongs in the roadmap milestones.](roadmap.md)
 Accepted work that is outside those milestones belongs in

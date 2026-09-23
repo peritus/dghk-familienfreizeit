@@ -24,7 +24,7 @@ they do not assign those later capabilities to M7.
 
 ## Evidence
 
-- [M7](../../roadmap.md#m7--organiser-application-and-family-identity-surfaces)
+- [M7](../../roadmap.md#m7--deterministic-room-assignment)
   requires the dashboard and family detail. The [organiser view](../../application/organiser-view.md)
   and [family preferences](../../modules/family-preferences.md) require family
   detail to render the same editable preferences and workshop self-service

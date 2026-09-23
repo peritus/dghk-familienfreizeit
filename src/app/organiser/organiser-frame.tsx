@@ -18,10 +18,16 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
             <h1 className="text-2xl">Organisationsteam</h1>
           </div>
           <nav aria-label="Organisationsteam" className="flex flex-wrap gap-2">
-            <Link href="/organiser" className="rounded border-2 border-black bg-white px-3 py-2 font-bold">
+            <Link
+              href="/organiser"
+              className="rounded border-2 border-black bg-white px-3 py-2 font-bold"
+            >
               Dashboard
             </Link>
-            <Link href="/organiser/families" className="rounded border-2 border-black bg-white px-3 py-2 font-bold">
+            <Link
+              href="/organiser/families"
+              className="rounded border-2 border-black bg-white px-3 py-2 font-bold"
+            >
               Familien
             </Link>
           </nav>
@@ -37,16 +43,29 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
       <footer className="sticky bottom-0 border-2 border-black bg-[#fffaf0] p-3 shadow-[4px_4px_0_0_#000]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p aria-live="polite">
-            {count === 0 ? 'Keine offenen Änderungen' : `${count} offene Änderung${count === 1 ? '' : 'en'}`}
+            {count === 0
+              ? 'Keine offenen Änderungen'
+              : `${count} offene Änderung${count === 1 ? '' : 'en'}`}
           </p>
           <div className="flex flex-wrap gap-2">
-            <Button variant="neutral" disabled={count === 0} onClick={() => dispatch({ type: 'undo' })}>
+            <Button
+              variant="neutral"
+              disabled={count === 0}
+              onClick={() => dispatch({ type: 'undo' })}
+            >
               Rückgängig
             </Button>
-            <Button variant="neutral" disabled={count === 0} onClick={() => dispatch({ type: 'discard' })}>
+            <Button
+              variant="neutral"
+              disabled={count === 0}
+              onClick={() => dispatch({ type: 'discard' })}
+            >
               Verwerfen
             </Button>
-            <Button disabled={count === 0 || state.status === 'applying'} onClick={() => void apply()}>
+            <Button
+              disabled={count === 0 || state.status === 'applying'}
+              onClick={() => void apply()}
+            >
               {state.status === 'applying' ? 'Wird angewendet …' : 'Anwenden'}
             </Button>
           </div>

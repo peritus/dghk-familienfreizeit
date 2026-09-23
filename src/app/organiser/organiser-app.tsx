@@ -3,6 +3,7 @@ import { Route, Switch } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
 import { NotFound, RouteLoading } from '../components/route-states'
+import { Button } from '../components/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
 import { OrganiserFrame } from './organiser-frame.js'
@@ -132,7 +133,15 @@ export default function OrganiserApp() {
   if (state.status === 'loading') return <RouteLoading />
   if (state.status === 'unauthorized' || state.status === 'stale_build')
     return <p role="alert">{state.error}</p>
-  if (!derivation.world) return <p role="alert">{derivation.error ?? state.error}</p>
+  if (!derivation.world)
+    return (
+      <div className="space-y-4" role="alert">
+        <p>{derivation.error ?? state.error}</p>
+        <Button variant="neutral" onClick={() => dispatch({ type: 'discard' })}>
+          Offene Änderungen verwerfen
+        </Button>
+      </div>
+    )
 
   return (
     <OrganiserContext.Provider value={{ state, world: derivation.world, dispatch, apply }}>

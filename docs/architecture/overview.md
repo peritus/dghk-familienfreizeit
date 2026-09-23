@@ -1,10 +1,10 @@
 # Implemented architecture
 
 The repository contains a Vite/Cloudflare Worker runtime, the M1 event and
-authentication foundation, M2 profile composition, and M3's generic labels,
-fixed resolver operators, and `derive(events, config)`. World summaries, world
-checks, `diff`, the pending-event path, and the solver remain future
-milestones.
+authentication foundation, M2 profile composition, M3's generic labels, fixed
+resolver operators and `derive(events, config)`, and the M4 organiser host with
+kernel family surfaces. Inventory, assignment, reports, family-facing controls,
+and workshop modules remain future work.
 
 ## Runtime and build
 
@@ -39,7 +39,7 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 | `migrations/` | Append-only event and operational D1 schema |
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/family-view/` | Public welcome placeholder |
-| `src/app/organiser/` | Lazy public organiser placeholder |
+| `src/app/organiser/` | Lazy authenticated organiser host, pending reducer and kernel family screens |
 | `src/app/components/ui/` | Copied UI primitives |
 | `scripts/bundle-graph.ts` | Build import-graph metadata |
 | `test/app/`, `test/worker/`, `test/build/` | App, Worker and emitted-output checks |

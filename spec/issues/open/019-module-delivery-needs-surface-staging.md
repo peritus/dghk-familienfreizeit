@@ -6,7 +6,7 @@ severity: gap
 category: process
 source: milestone-feasibility-review
 related_decisions: []
-related_milestones: [M4, M5, M6, M7, M8, M9, M10, M11, M13]
+related_milestones: [M5, M6, M7, M8, M9, M10, M11, M13]
 opened: 2026-09-21
 ---
 
@@ -23,7 +23,7 @@ not become a second delivery plan.
 
 ## Evidence
 
-- [M4](../../roadmap.md#m4--organiser-application-shell) previously included the organiser inventory screen and
+- [organiser host](../../../docs/application/organiser-view.md) provides the shared shell; the inventory screen and
   inventory report contribution, while organiser application work was M7 and
   report routes and printing were M13.
 - [Room inventory](../../modules/room-inventory.md) declares both the inventory

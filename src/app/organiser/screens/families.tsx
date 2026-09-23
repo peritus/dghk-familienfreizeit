@@ -8,13 +8,41 @@ import { familyRows } from '../family-data.js'
 
 type ImportRow = { display_name: string; email: string; locale: 'de' | 'en' }
 
+function parseCsvRecords(text: string): string[][] {
+  const records: string[][] = []
+  let record: string[] = []
+  let field = ''
+  let quoted = false
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index]
+    if (character === '"') {
+      if (quoted && text[index + 1] === '"') {
+        field += '"'
+        index += 1
+      } else {
+        quoted = !quoted
+      }
+    } else if (character === ',' && !quoted) {
+      record.push(field.trim())
+      field = ''
+    } else if (character === '\n' && !quoted) {
+      record.push(field.trim())
+      if (record.some(Boolean)) records.push(record)
+      record = []
+      field = ''
+    } else if (character !== '\r') {
+      field += character
+    }
+  }
+  record.push(field.trim())
+  if (record.some(Boolean)) records.push(record)
+  return records
+}
+
 function csvRows(text: string): { valid: ImportRow[]; errors: string[] } {
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-  if (lines.length === 0) return { valid: [], errors: [] }
-  const headers = lines[0]!.split(',').map((value) => value.trim())
+  const records = parseCsvRecords(text)
+  if (records.length === 0) return { valid: [], errors: [] }
+  const headers = records[0]!
   const indexes = {
     display_name: headers.indexOf('display_name'),
     email: headers.indexOf('email'),
@@ -24,15 +52,20 @@ function csvRows(text: string): { valid: ImportRow[]; errors: string[] } {
     return { valid: [], errors: ['Die Spalten display_name und email werden benötigt.'] }
   const valid: ImportRow[] = []
   const errors: string[] = []
-  for (const [offset, line] of lines.slice(1).entries()) {
-    const values = line.split(',').map((value) => value.trim())
+  const emails = new Set<string>()
+  for (const [offset, values] of records.slice(1).entries()) {
     const displayName = values[indexes.display_name] ?? ''
-    const email = values[indexes.email] ?? ''
+    const email = (values[indexes.email] ?? '').toLowerCase()
     const localeValue = values[indexes.locale] ?? 'de'
     if (!displayName || !email.includes('@') || !['de', 'en'].includes(localeValue)) {
       errors.push(`Zeile ${offset + 2}: Name, E-Mail oder Sprache ist ungültig.`)
       continue
     }
+    if (emails.has(email)) {
+      errors.push(`Zeile ${offset + 2}: E-Mail-Adresse ist doppelt.`)
+      continue
+    }
+    emails.add(email)
     valid.push({
       display_name: displayName,
       email: email.toLowerCase(),

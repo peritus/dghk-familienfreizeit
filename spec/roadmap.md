@@ -10,25 +10,6 @@ The milestones below cover outstanding work; a feature milestone is complete
 only when its domain behavior, derived views, UI, report contribution, fixtures,
 tests, and operational requirements listed here are complete.
 
-<a id="m7--organiser-application-and-family-identity-surfaces"></a>
-## M4 — Organiser application shell
-
-Specification coverage: [organiser view](application/organiser-view.md),
-[frontend](ui/frontend.md), [UI-00](ui/design-system.md), [UI-05](ui/screens/organiser-dashboard.md),
-[UI-06](ui/screens/families.md), and [UI-07](ui/screens/family-detail.md).
-
-- Implement the organiser shell, navigation, dashboard, family table, and family detail route.
-- Implement one reducer-owned pending event list, local derivation, apply/discard,
-  undo, compare-and-swap, stale-head responses, and organiser authorisation.
-- Establish the selected-profile screen registry and the host API used by all
-  later feature slices.
-- Add keyboard, touch, privacy, accessibility, and pending-state fixtures.
-
-Acceptance: an organiser can open the application, inspect the kernel-derived
-family world, stage an authorised event batch, understand its local result, and
-apply it atomically. No feature milestone may register a screen without a
-selected-profile route rendering it through this shell.
-
 ## M5 — Reports and browser-printing host
 
 Specification coverage: [reports](application/reports.md), [D21](../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets),

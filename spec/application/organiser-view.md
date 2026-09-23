@@ -5,13 +5,15 @@ review and child-room assignment are outside the active module set; their design
 sketches live under
 [`deferred-ideas/`](../deferred-ideas).
 
+The implemented organiser host and kernel family surfaces are documented in
+[`docs/application/organiser-view.md`](../../docs/application/organiser-view.md).
+This specification retains the outstanding module and solver surfaces that use
+that host.
+
 ## 1. Screen inventory
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/organiser` | Dashboard | Status, staleness, preflight findings, attention |
-| `/organiser/families` | Families | Table, import, invite, chase list |
-| `/organiser/families/:id` | Family detail | People (add, edit, withdraw), full editable preferences, event history |
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
 | `/organiser/workshop-spaces` | Workshop spaces | Physical workshop-space inventory, capacity, availability, ordering, capabilities |
 | `/organiser/board` | The board | Whole-family room placement |
@@ -23,47 +25,15 @@ sketches live under
 | `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
 | `/organiser/reports` | Reports | Printable operational reports |
 
-Every screen renders the organiser application's derived world. The browser holds
-pending events; applying appends them in one validated batch, and discarding them
-leaves no trace.
+Every outstanding screen renders the organiser application's derived world. The
+browser holds pending events; applying appends them in one validated batch, and
+discarding them leaves no trace.
 
 Release reporting and confirmation follow [release control](release-control.md)
 and [UI-11](../ui/screens/release-control.md). Live coordination findings remain separate
 from held arrangements.
 
-## 2. Dashboard
-
-The dashboard shows outstanding release scopes, affected families,
-preflight findings, constraint conflicts, unplaced families, workshop warnings, and
-the chase list. Quality counters exclude co-room and party metrics that are outside
-the active module set.
-
-Example findings:
-
-> ⚠ `needs-private-sanitary`: 19 beds required, 14 available.
->
-> ⚠ 1 family cannot be placed — Braun ×5 requires ensuite; none free.
-
-## 3. Families and inventory
-
-Families is a sortable, filterable table with import and invitation state.
-Family detail renders the same trait-driven control union as the family view
-([family preferences](../modules/family-preferences.md) §6), editable, plus
-person management and workshop self-service controls, for organisers taking a
-request by phone or email (D24). Saves write the identical event types as the
-family view, with the organiser as actor and the family or person as
-subject — there is no separate out-of-band marker; the event history below is
-the record. Inventory shows buildings, rooms, beds, capacity, and room
-capabilities.
-
-Workshop spaces have a separate maintenance surface at
-`/organiser/workshop-spaces`. It shows live and retired typed spaces, display
-and location descriptions, physical capacity, event-backed availability
-windows, deterministic order, and resolver-backed capabilities. The workshop
-screen consumes these facts to show scheduled offerings, placement conflicts,
-and unscheduled selected sessions.
-
-## 4. Whole-family assignment board
+## 2. Whole-family assignment board
 
 The board is the only active screen with substantial interaction design. It has a
 searchable unplaced-family rail and room cards grouped by building and floor.
@@ -90,7 +60,7 @@ Keyboard users can search families, move through the unplaced list, open a room
 picker, add a room decision, undo the last pending action, and clear selection.
 Touch users get the same room picker through a drawer instead of drag-and-drop.
 
-## 5. Organiser decisions and reports
+## 3. Organiser decisions and reports
 
 The constraints screen exposes fixed resolver mechanisms: needs/provides, exclusions,
 and separation. Organisers may enter a new matching value under a mechanism, such as

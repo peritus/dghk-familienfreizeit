@@ -6,7 +6,7 @@ severity: gap
 category: kernel
 source: M4 readiness assessment
 related_decisions: []
-related_milestones: [M2, M4, M5, M7, M8, M9, M10, M11, M12, M13]
+related_milestones: [M2, M5, M7, M8, M9, M10, M11, M12, M13]
 opened: 2026-09-21
 ---
 

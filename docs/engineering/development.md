@@ -42,13 +42,12 @@ the task process; the Vite configuration reads them directly. No machine-specifi
 hostname or port is committed.
 
 `wrangler.jsonc` uses a local-only placeholder D1 id with `remote: false`. It needs
-no account or hosted secrets to run the M0/M1 local foundation. `/api/health`
+no account or hosted secrets to run the local foundation and organiser tests.
+`/api/health`
 checks the actual local D1 binding, returning `200 {"status":"ok"}` or a
-sanitized `503`. The Worker now provides M1 login, magic-link, principal, family,
-and organiser boundaries; remaining unimplemented API routes return JSON 404,
-including top-level navigations. `/`, `/login`, `/family` and `/organiser` still
-contain honest UI placeholders. The organiser placeholder is public and contains
-no private data.
+sanitized `503`. The Worker provides login, magic-link, principal, and
+organiser log/apply boundaries. `/`, `/login`, and `/family` remain public
+foundation placeholders; organiser routes require an organiser session.
 
 Hosted preview/prod deployment requires separate real D1 bindings, environment
 configuration and secrets under [deployment](../../spec/engineering/deployment.md). There is no
@@ -62,10 +61,10 @@ limits. Run `npm run check:docs` to validate local Markdown links and anchors;
 
 ## Implemented scope
 
-M0 delivered build/runtime wiring, a shared German shell, lazy organiser routing,
-copied design-system primitives, CI and a runnable preview task definition. M1
-adds the event kernel, local D1 schema, KDL fixtures, magic-link authentication
-and request authorization. Profiles, solver, release control, email delivery
-and domain screens remain future work. Open findings against this scope are not
-silently resolved by the scaffolding; see
+The implemented foundation includes build/runtime wiring, a shared German shell,
+lazy organiser routing, the event kernel, local D1 schema, KDL fixtures,
+magic-link authentication, request authorization, and the M4 organiser host.
+Inventory, solver, release control, email delivery, and later domain screens
+remain future work. Open findings against this scope are not silently resolved;
+see
 [the issue catalog](../../spec/issues/README.md).

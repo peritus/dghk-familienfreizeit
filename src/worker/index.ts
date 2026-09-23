@@ -151,18 +151,9 @@ app.post('/api/organiser/apply', async (context) => {
       409,
     )
 
-  const now = new Date().toISOString()
-  const drafts = body.events.map((candidate) => {
-    const item = candidate as { type?: unknown; subject?: unknown; payload?: unknown }
-    return {
-      at: now,
-      actor: principal.email,
-      subject: item.subject === undefined ? null : (item.subject as string | null),
-      type: item.type as string,
-      payload: item.payload as JsonValue,
-    } satisfies EventDraft
-  })
   try {
+    const now = new Date().toISOString()
+    const drafts = body.events.map((candidate) => eventDraft(candidate, principal.email, now))
     const events = prepareEventBatch(existing, drafts, activeProfile.validation_view)
     if (
       events.some(
@@ -228,14 +219,8 @@ app.post('/api/events', async (context) => {
   const existing = await readEvents(context.env.DB)
   const world = derive(existing, activeProfile.validation_view)
   const now = new Date().toISOString()
-  const drafts = body.events.map((draft) => ({
-    at: now,
-    actor: principal.email,
-    subject: draft.subject ?? null,
-    type: draft.type,
-    payload: draft.payload as JsonValue,
-  }))
   try {
+    const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
     const schemas = eventSchemas()
     const events = drafts.map((draft, index) =>
       parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
@@ -290,4 +275,19 @@ async function principalFromContext(
 
 function eventSchemas() {
   return { ...kernelPayloadSchemas, ...activeProfile.validation_view.event_payload_schemas }
+}
+
+function eventDraft(candidate: unknown, actor: string, at: string): EventDraft {
+  if (!candidate || typeof candidate !== 'object') throw new Error('invalid event draft')
+  const item = candidate as { type?: unknown; subject?: unknown; payload?: unknown }
+  if (typeof item.type !== 'string') throw new Error('invalid event draft')
+  if (item.subject !== undefined && item.subject !== null && typeof item.subject !== 'string')
+    throw new Error('invalid event draft')
+  return {
+    at,
+    actor,
+    subject: item.subject === undefined ? null : item.subject,
+    type: item.type,
+    payload: item.payload as JsonValue,
+  }
 }

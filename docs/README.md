@@ -11,6 +11,7 @@ are separate claims and require separate evidence.
 - [Derived world](architecture/derived-world.md): in-memory labels, resolver, diagnostics, projections and diffs.
 - [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
 - [Authentication](application/authentication.md): magic links, sessions and request principals.
+- [Organiser view](application/organiser-view.md): authenticated organiser host, family surfaces and pending events.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.
 - [Design system](ui/design-system.md): copied primitives and shell styling.
 - [Development](engineering/development.md): installation, CI and local preview.

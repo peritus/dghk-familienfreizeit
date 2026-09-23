@@ -99,9 +99,9 @@ test('organiser apply validates the prospective batch and returns its world', as
     env,
   )
   expect(invalid.status).toBe(400)
-  expect(await env.DB.prepare('SELECT COUNT(*) AS count FROM event').first<{ count: number }>()).toEqual(
-    { count: 2 },
-  )
+  expect(
+    await env.DB.prepare('SELECT COUNT(*) AS count FROM event').first<{ count: number }>(),
+  ).toEqual({ count: 2 })
 })
 
 test('organiser apply reports intervening events for a stale head', async () => {
