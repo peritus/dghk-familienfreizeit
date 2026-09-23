@@ -1,4 +1,11 @@
-import { canonicalJson, parseEvent, type Event, type JsonValue } from './types.js'
+import {
+  canonicalJson,
+  kernelPayloadSchemas,
+  parseEvent,
+  type Event,
+  type EventPayloadSchemas,
+  type JsonValue,
+} from './types.js'
 
 export type EventDraft = Omit<Event, 'seq'>
 
@@ -52,12 +59,13 @@ export async function appendEvents(
   db: D1Database,
   expectedHead: number,
   drafts: readonly EventDraft[],
+  schemas: EventPayloadSchemas = kernelPayloadSchemas,
 ): Promise<Event[]> {
   if (drafts.length === 0) return []
   const actual = await eventHead(db)
   if (actual !== expectedHead) throw new StaleHeadError(expectedHead, actual)
   const events = drafts.map((draft, index) =>
-    parseEvent({ ...draft, seq: expectedHead + index + 1 }),
+    parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
   )
   const statements = events.map((event) =>
     db
