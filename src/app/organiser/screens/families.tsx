@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
+import { organiserPaths } from '../../../organiser/routes.js'
 
 type ImportRow = { display_name: string; email: string; locale: 'de' | 'en' }
 
@@ -75,9 +76,9 @@ function csvRows(text: string): { valid: ImportRow[]; errors: string[] } {
   return { valid, errors }
 }
 
-function id(prefix: string, value: string): string {
+function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-  return `${prefix}${random.replaceAll('-', '').slice(0, 16)}-${value}`
+  return `${prefix}${random.replaceAll('-', '').slice(0, 16)}`
 }
 
 export function Families() {
@@ -109,7 +110,7 @@ export function Families() {
         subject: null,
         type: 'FamilyInvited',
         payload: {
-          family_id: id('fam_', email),
+          family_id: id('fam_'),
           email,
           display_name: displayName.trim(),
           locale: 'de',
@@ -128,7 +129,7 @@ export function Families() {
         actor: state.principal_email!,
         subject: null,
         type: 'FamilyInvited',
-        payload: { family_id: id('fam_', row.email), ...row },
+        payload: { family_id: id('fam_'), ...row },
       })),
     )
     setCsv('')
@@ -233,7 +234,7 @@ export function Families() {
             {rows.map((row) => (
               <tr key={row.family.id} className="border-b border-black last:border-b-0">
                 <th scope="row" className="p-3 font-bold">
-                  <Link href={`/organiser/families/${row.family.id}`} className="underline">
+                  <Link href={organiserPaths.family_detail(row.family.id)} className="underline">
                     {row.display_name}
                   </Link>
                 </th>

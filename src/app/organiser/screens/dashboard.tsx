@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
 import { pendingEventCount } from '../state.js'
+import { organiserPaths } from '../../../organiser/routes.js'
 
 export function Dashboard() {
   const { state, world } = useOrganiser()
@@ -22,7 +23,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl">{families.length}</p>
-            <Link href="/organiser/families" className="underline">
+            <Link href={organiserPaths.families()} className="underline">
               Familien öffnen
             </Link>
           </CardContent>

@@ -1,26 +1,13 @@
 import type { ScreenDescriptor } from './protocol.js'
+import { organiserRouteDefinitions } from './routes.js'
 
 /** Kernel-owned host screens. Selected modules append to this registry later. */
-export const organiserScreenRegistry: readonly ScreenDescriptor[] = [
-  {
-    id: 'organiser-dashboard',
-    route: '/organiser',
-    label: 'Dashboard',
+export const organiserScreenRegistry: readonly ScreenDescriptor[] = organiserRouteDefinitions.map(
+  ({ id, absolute_path: route, label }) => ({
+    id,
+    route,
+    label,
     audience: 'organiser',
     host: 'kernel',
-  },
-  {
-    id: 'organiser-families',
-    route: '/organiser/families',
-    label: 'Familien',
-    audience: 'organiser',
-    host: 'kernel',
-  },
-  {
-    id: 'organiser-family-detail',
-    route: '/organiser/families/:id',
-    label: 'Familie',
-    audience: 'organiser',
-    host: 'kernel',
-  },
-]
+  }),
+)

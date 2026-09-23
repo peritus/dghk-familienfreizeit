@@ -8,13 +8,13 @@ import {
 } from '../../src/organiser/routes.js'
 
 test('organiser route definitions have unique relative and absolute paths', () => {
-  expect(new Set(organiserRouteDefinitions.map(({ relativePath }) => relativePath)).size).toBe(
+  expect(new Set(organiserRouteDefinitions.map(({ relative_path }) => relative_path)).size).toBe(
     organiserRouteDefinitions.length,
   )
-  expect(new Set(organiserRouteDefinitions.map(({ absolutePath }) => absolutePath)).size).toBe(
+  expect(new Set(organiserRouteDefinitions.map(({ absolute_path }) => absolute_path)).size).toBe(
     organiserRouteDefinitions.length,
   )
-  expect(organiserRouteDefinitions.map(({ absolutePath }) => absolutePath)).toEqual([
+  expect(organiserRouteDefinitions.map(({ absolute_path }) => absolute_path)).toEqual([
     '/organiser',
     '/organiser/families',
     '/organiser/families/:id',
@@ -33,8 +33,8 @@ test('family route IDs are opaque, URL-safe, and reversible', () => {
   const segment = familyRouteSegment(familyId)
 
   expect(segment).toBe('6b4b44137d724c1e')
-  expect(organiserPaths.familyDetail(familyId)).toBe('/organiser/families/6b4b44137d724c1e')
-  expect(organiserUrls.familyDetail(familyId)).toBe('/organiser/families/6b4b44137d724c1e')
+  expect(organiserPaths.family_detail(familyId)).toBe('/families/6b4b44137d724c1e')
+  expect(organiserUrls.family_detail(familyId)).toBe('/organiser/families/6b4b44137d724c1e')
   expect(familyIdFromRouteSegment(segment)).toBe(familyId)
   expect(segment).not.toContain('@')
 })

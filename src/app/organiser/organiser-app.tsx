@@ -16,6 +16,7 @@ import {
 import { Dashboard } from './screens/dashboard.js'
 import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
+import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
 
 export default function OrganiserApp() {
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
@@ -147,13 +148,21 @@ export default function OrganiserApp() {
     <OrganiserContext.Provider value={{ state, world: derivation.world, dispatch, apply }}>
       <OrganiserFrame>
         <Switch>
-          <Route path="/">
+          <Route path={organiserRoutePaths.dashboard}>
             <Dashboard />
           </Route>
-          <Route path="/families">
+          <Route path={organiserRoutePaths.families}>
             <Families />
           </Route>
-          <Route path="/families/:id">{(params) => <FamilyDetail family_id={params.id} />}</Route>
+          <Route path={organiserRoutePaths.family_detail}>
+            {(params) => {
+              try {
+                return <FamilyDetail family_id={familyIdFromRouteSegment(params.id)} />
+              } catch {
+                return <NotFound />
+              }
+            }}
+          </Route>
           <Route>
             <NotFound />
           </Route>

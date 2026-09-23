@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
 import { findFamily, labelValue } from '../family-data.js'
+import { organiserPaths } from '../../../organiser/routes.js'
 
 function makePersonId(givenName: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${globalThis.performance?.now() ?? 0}`
@@ -143,7 +144,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
   return (
     <div className="space-y-6">
       <p>
-        <Link href="/organiser/families" className="underline">
+        <Link href={organiserPaths.families()} className="underline">
           ← Familien
         </Link>
       </p>

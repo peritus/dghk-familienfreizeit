@@ -4,6 +4,7 @@ import { useOrganiser } from './context.js'
 import { pendingEventCount } from './state.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
 import { Button } from '../components/ui/button'
+import { organiserPaths } from '../../organiser/routes.js'
 
 export function OrganiserFrame({ children }: { children: ReactNode }) {
   const { state, dispatch, apply } = useOrganiser()
@@ -19,13 +20,13 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
           </div>
           <nav aria-label="Organisationsteam" className="flex flex-wrap gap-2">
             <Link
-              href="/organiser"
+              href={organiserPaths.dashboard()}
               className="rounded border-2 border-black bg-white px-3 py-2 font-bold"
             >
               Dashboard
             </Link>
             <Link
-              href="/organiser/families"
+              href={organiserPaths.families()}
               className="rounded border-2 border-black bg-white px-3 py-2 font-bold"
             >
               Familien

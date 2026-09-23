@@ -3,26 +3,26 @@ export const organiserBasePath = '/organiser'
 export const organiserRoutePaths = {
   dashboard: '/',
   families: '/families',
-  familyDetail: '/families/:id',
+  family_detail: '/families/:id',
 } as const
 
 export const organiserRouteDefinitions = [
   {
     id: 'organiser-dashboard',
-    relativePath: organiserRoutePaths.dashboard,
-    absolutePath: organiserBasePath,
+    relative_path: organiserRoutePaths.dashboard,
+    absolute_path: organiserBasePath,
     label: 'Dashboard',
   },
   {
     id: 'organiser-families',
-    relativePath: organiserRoutePaths.families,
-    absolutePath: `${organiserBasePath}${organiserRoutePaths.families}`,
+    relative_path: organiserRoutePaths.families,
+    absolute_path: `${organiserBasePath}${organiserRoutePaths.families}`,
     label: 'Familien',
   },
   {
     id: 'organiser-family-detail',
-    relativePath: organiserRoutePaths.familyDetail,
-    absolutePath: `${organiserBasePath}${organiserRoutePaths.familyDetail}`,
+    relative_path: organiserRoutePaths.family_detail,
+    absolute_path: `${organiserBasePath}${organiserRoutePaths.family_detail}`,
     label: 'Familie',
   },
 ] as const
@@ -52,12 +52,13 @@ export function familyIdFromRouteSegment(segment: string): string {
 export const organiserPaths = {
   dashboard: (): string => organiserRoutePaths.dashboard,
   families: (): string => organiserRoutePaths.families,
-  familyDetail: (familyId: string): string =>
-    `${organiserBasePath}${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`,
+  family_detail: (familyId: string): string =>
+    `${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`,
 } as const
 
 export const organiserUrls = {
   dashboard: (): string => organiserBasePath,
   families: (): string => `${organiserBasePath}${organiserRoutePaths.families}`,
-  familyDetail: (familyId: string): string => organiserPaths.familyDetail(familyId),
+  family_detail: (familyId: string): string =>
+    `${organiserBasePath}${organiserPaths.family_detail(familyId)}`,
 } as const
