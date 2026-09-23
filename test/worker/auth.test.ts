@@ -1,10 +1,41 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { env } from 'cloudflare:workers'
 import app from '../../src/worker/index.js'
 import { currentPrincipal } from '../../src/auth/principal.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 
 describe('authentication boundary', () => {
+  test('local login mode prints a magic link and redeems it to the organiser host', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const localEnv = {
+      ...env,
+      DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
+    }
+    try {
+      const response = await app.request(
+        'https://example.invalid/api/login',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email: 'organiser@example.test' }),
+        },
+        localEnv,
+      )
+      expect(response.status).toBe(200)
+      const output = String(log.mock.calls[0]?.[0])
+      expect(output).toMatch(
+        /^\[DANGEROUS DEBUG\] magic link for organiser@example\.test: https:\/\/example\.invalid\/auth\//,
+      )
+
+      const link = new URL(output.slice(output.indexOf('https://')))
+      const redeemed = await app.request(link.pathname, {}, localEnv)
+      expect(redeemed.status).toBe(302)
+      expect(redeemed.headers.get('location')).toBe('/organiser')
+    } finally {
+      log.mockRestore()
+    }
+  })
+
   test('magic links are single-use and sessions resolve by email', async () => {
     await env.DB.prepare(
       'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (1, ?1, ?2, ?3, NULL, ?4)',

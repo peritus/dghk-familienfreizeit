@@ -37,13 +37,17 @@ app.post('/api/login', async (context) => {
   const events = await readEvents(context.env.DB)
   const world = derive(events, activeProfile.validation_view)
   const familyExists = familyForEmail(world, email) !== null
-  await issueMagicLink(
+  const result = await issueMagicLink(
     context.env.DB,
     email,
     context.req.header('CF-Connecting-IP') ?? null,
     familyExists,
     { isOrganiser },
   )
+  if (result.token && shouldShowMagicLinkOnConsole(context)) {
+    const magicLink = new URL(`/auth/${result.token}`, context.req.url)
+    console.log(`[DANGEROUS DEBUG] magic link for ${email}: ${magicLink}`)
+  }
   return context.json({ accepted: true })
 })
 
@@ -62,7 +66,7 @@ app.get('/auth/:token', async (context) => {
     path: '/',
     maxAge: isOrganiser(result.email) ? 7 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
   })
-  return context.redirect('/', 302)
+  return context.redirect(isOrganiser(result.email) ? '/organiser' : '/', 302)
 })
 
 app.get('/api/health', async (context) => {
@@ -275,6 +279,17 @@ async function principalFromContext(
 
 function eventSchemas() {
   return { ...kernelPayloadSchemas, ...activeProfile.validation_view.event_payload_schemas }
+}
+
+function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): boolean {
+  const hostname = new URL(context.req.url).hostname
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '::1' ||
+    hostname === '[::1]' ||
+    context.env.DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE === 'true'
+  )
 }
 
 function eventDraft(candidate: unknown, actor: string, at: string): EventDraft {
