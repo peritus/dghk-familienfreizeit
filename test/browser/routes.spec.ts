@@ -37,15 +37,13 @@ async function mockOrganiserApi(page: Page): Promise<void> {
         head_seq: 1,
         build_revision: 'development',
         compatibility_revision: 1,
-        screen_registry: organiserRouteDefinitions.map(
-          ({ id, absolute_path: route, label }) => ({
-            id,
-            route,
-            label,
-            audience: 'organiser',
-            host: 'kernel',
-          }),
-        ),
+        screen_registry: organiserRouteDefinitions.map(({ id, absolute_path: route, label }) => ({
+          id,
+          route,
+          label,
+          audience: 'organiser',
+          host: 'kernel',
+        })),
       }),
     }),
   )
@@ -64,10 +62,14 @@ test('direct navigation reaches every implemented organiser route', async ({ pag
   }
 })
 
-test('dashboard, families, and family detail form one working navigation chain', async ({ page }) => {
+test('dashboard, families, and family detail form one working navigation chain', async ({
+  page,
+}) => {
   await page.goto('/organiser')
   await expect(page).toHaveURL(/\/organiser$/)
-  await expect(page.getByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+  ).toBeVisible()
 
   const dashboardFamiliesLink = page.getByRole('link', { name: 'Familien öffnen' })
   await expect(dashboardFamiliesLink).toHaveAttribute('href', '/organiser/families')
@@ -88,17 +90,21 @@ test('dashboard, families, and family detail form one working navigation chain',
   await expect(page).toHaveURL(/\/organiser\/families$/)
 })
 
-test('rendered organiser links are canonical and never duplicate the route base', async ({ page }) => {
+test('rendered organiser links are canonical and never duplicate the route base', async ({
+  page,
+}) => {
   const paths = ['/organiser', '/organiser/families', familyRoute]
   const canonicalRoute = /^\/organiser(?:\/families(?:\/[A-Za-z0-9_-]+)?)?$/
 
   for (const path of paths) {
     await page.goto(path)
-    const hrefs = await page.locator('a[href]').evaluateAll((links) =>
-      links
-        .map((link) => link.getAttribute('href'))
-        .filter((href): href is string => href?.startsWith('/organiser') ?? false),
-    )
+    const hrefs = await page
+      .locator('a[href]')
+      .evaluateAll((links) =>
+        links
+          .map((link) => link.getAttribute('href'))
+          .filter((href): href is string => href?.startsWith('/organiser') ?? false),
+      )
     for (const href of hrefs) {
       expect(href).toMatch(canonicalRoute)
       expect(href).not.toContain('/organiser/organiser')

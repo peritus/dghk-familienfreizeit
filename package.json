@@ -17,7 +17,9 @@
     "format:check": "oxfmt --check",
     "test": "vitest run",
     "test:build": "node --test test/build/*.test.mjs",
-    "ci": "npm run format:check && npm run test:docs && npm run typecheck && npm run lint && npm test && npm run build && npm run test:build",
+    "test:browser": "playwright test",
+    "test:browser:headed": "playwright test --headed",
+    "ci": "npm run format:check && npm run test:docs && npm run typecheck && npm run lint && npm test && npm run build && npm run test:build && npm run test:browser",
     "check:docs": "node scripts/check-doc-links.mjs",
     "test:docs": "node --test test/docs/*.test.mjs && npm run check:docs"
   },
@@ -37,6 +39,7 @@
     "@cloudflare/vite-plugin": "1.56.0",
     "@cloudflare/vitest-plugin": "1.1.13",
     "@eslint/js": "^10",
+    "@playwright/test": "^1.63.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@tailwindcss/vite": "4.3.3",
     "@testing-library/react": "^16",
