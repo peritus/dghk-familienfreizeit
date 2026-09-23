@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import type { EventDraft } from '../../src/events/store.js'
+import type { EventDraft } from '../../src/events/types.js'
 import {
   deriveOrganiserWorld,
   initialOrganiserState,

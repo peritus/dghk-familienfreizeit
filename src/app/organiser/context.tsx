@@ -1,6 +1,6 @@
 import { createContext, useContext, type Dispatch } from 'react'
 import type { KernelWorld } from '../../events/fold.js'
-import type { EventDraft } from '../../events/store.js'
+import type { EventDraft } from '../../events/types.js'
 import type { OrganiserAction, OrganiserState } from './state.js'
 
 export type OrganiserContextValue = {
@@ -18,9 +18,6 @@ export function useOrganiser(): OrganiserContextValue {
   return value
 }
 
-export function stageEvent(
-  dispatch: Dispatch<OrganiserAction>,
-  event: EventDraft,
-): void {
+export function stageEvent(dispatch: Dispatch<OrganiserAction>, event: EventDraft): void {
   dispatch({ type: 'stage', events: [event] })
 }

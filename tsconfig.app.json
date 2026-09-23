@@ -7,5 +7,15 @@
     "baseUrl": ".",
     "paths": { "@/*": ["./src/app/*"] }
   },
-  "include": ["src/app/**/*.ts", "src/app/**/*.tsx", "src/config/build.ts", "test/app/**/*.tsx"]
+  "include": [
+    "src/app/**/*.ts",
+    "src/app/**/*.tsx",
+    "src/config/**/*.ts",
+    "src/events/fold.ts",
+    "src/events/resolver.ts",
+    "src/events/types.ts",
+    "src/events/world.ts",
+    "src/organiser/**/*.ts",
+    "test/app/**/*.tsx"
+  ]
 }

@@ -64,7 +64,8 @@ export default function OrganiserApp() {
         if (cancelled) return
         dispatch({
           type: 'failed',
-          status: error instanceof OrganiserApiError && error.status === 401 ? 'unauthorized' : 'error',
+          status:
+            error instanceof OrganiserApiError && error.status === 401 ? 'unauthorized' : 'error',
           error:
             error instanceof OrganiserApiError && error.status === 401
               ? 'Bitte melde Dich als Organisationsteam an.'
@@ -143,9 +144,7 @@ export default function OrganiserApp() {
           <Route path="/families">
             <Families />
           </Route>
-          <Route path="/families/:id">
-            {(params) => <FamilyDetail familyId={params.id} />}
-          </Route>
+          <Route path="/families/:id">{(params) => <FamilyDetail family_id={params.id} />}</Route>
           <Route>
             <NotFound />
           </Route>

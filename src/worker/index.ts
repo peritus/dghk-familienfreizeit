@@ -4,7 +4,12 @@ import { derive } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendEvents, readEvents, StaleHeadError, type EventDraft } from '../events/store.js'
-import { kernelPayloadSchemas, canonicalEmail, type JsonValue } from '../events/types.js'
+import {
+  kernelPayloadSchemas,
+  canonicalEmail,
+  parseEvent,
+  type JsonValue,
+} from '../events/types.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
 import { canAppendEvent } from '../auth/authorization.js'
@@ -125,7 +130,11 @@ app.post('/api/organiser/apply', async (context) => {
     body.compatibility_revision !== compatibilityRevision
   )
     return context.json(
-      { error: 'stale_build', build_revision: buildRevision, compatibility_revision: compatibilityRevision },
+      {
+        error: 'stale_build',
+        build_revision: buildRevision,
+        compatibility_revision: compatibilityRevision,
+      },
       409,
     )
 
@@ -157,7 +166,13 @@ app.post('/api/organiser/apply', async (context) => {
     const events = prepareEventBatch(existing, drafts, activeProfile.validation_view)
     if (
       events.some(
-        (event) => !canAppendEvent(principal, event, derive(existing, activeProfile.validation_view), activeProfile.validation_view),
+        (event) =>
+          !canAppendEvent(
+            principal,
+            event,
+            derive(existing, activeProfile.validation_view),
+            activeProfile.validation_view,
+          ),
       )
     )
       return context.json({ error: 'forbidden' }, 403)
@@ -221,9 +236,17 @@ app.post('/api/events', async (context) => {
     payload: draft.payload as JsonValue,
   }))
   try {
-    const events = prepareEventBatch(existing, drafts, activeProfile.validation_view)
-    if (events.some((event) => !canAppendEvent(principal, event, world, activeProfile.validation_view)))
+    const schemas = eventSchemas()
+    const events = drafts.map((draft, index) =>
+      parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
+    )
+    if (
+      events.some(
+        (event) => !canAppendEvent(principal, event, world, activeProfile.validation_view),
+      )
+    )
       throw new Error('forbidden')
+    derive([...existing, ...events], activeProfile.validation_view)
     await appendEvents(
       context.env.DB,
       expectedHead,

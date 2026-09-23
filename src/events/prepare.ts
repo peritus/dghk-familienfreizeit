@@ -1,6 +1,6 @@
 import { derive, type KernelConfig } from './fold.js'
 import { parseEvent, kernelPayloadSchemas, type Event } from './types.js'
-import type { EventDraft } from './store.js'
+import type { EventDraft } from './types.js'
 
 /**
  * Parses and replays a complete prospective batch before it can reach storage.

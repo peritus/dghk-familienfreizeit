@@ -100,6 +100,8 @@ export type Event = (KernelEvent | { type: string; payload: JsonValue }) & {
   subject: string | null
 }
 
+export type EventDraft = Omit<Event, 'seq'>
+
 export type EventPayloadSchemas = Readonly<Record<string, z.ZodType<JsonValue>>>
 
 export const kernelPayloadSchemas: {

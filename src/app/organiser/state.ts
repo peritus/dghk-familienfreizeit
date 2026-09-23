@@ -1,6 +1,6 @@
-import { derivePending, type KernelConfig } from '../../events/world.js'
-import type { EventDraft } from '../../events/store.js'
-import type { Event } from '../../events/types.js'
+import { derivePending } from '../../events/world.js'
+import type { KernelConfig } from '../../events/fold.js'
+import type { Event, EventDraft } from '../../events/types.js'
 
 export type PendingAction = {
   events: readonly EventDraft[]
@@ -51,12 +51,13 @@ export type OrganiserAction =
   | { type: 'applying' }
   | { type: 'applied'; events: readonly Event[] }
   | { type: 'rebased'; events: readonly Event[] }
-  | { type: 'failed'; status: Exclude<OrganiserStatus, 'loading' | 'ready' | 'applying'>; error: string }
+  | {
+      type: 'failed'
+      status: Exclude<OrganiserStatus, 'loading' | 'ready' | 'applying'>
+      error: string
+    }
 
-export function organiserReducer(
-  state: OrganiserState,
-  action: OrganiserAction,
-): OrganiserState {
+export function organiserReducer(state: OrganiserState, action: OrganiserAction): OrganiserState {
   switch (action.type) {
     case 'loaded':
       return {
@@ -101,10 +102,12 @@ export function organiserReducer(
 }
 
 export function materializePendingEvents(state: OrganiserState): Event[] {
-  return state.pending.flatMap((action) => action.events).map((event, index) => ({
-    ...event,
-    seq: state.head_seq + index + 1,
-  }))
+  return state.pending
+    .flatMap((action) => action.events)
+    .map((event, index) => ({
+      ...event,
+      seq: state.head_seq + index + 1,
+    }))
 }
 
 export function deriveOrganiserWorld(state: OrganiserState, config: KernelConfig = {}) {

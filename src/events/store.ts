@@ -3,11 +3,12 @@ import {
   kernelPayloadSchemas,
   parseEvent,
   type Event,
+  type EventDraft,
   type EventPayloadSchemas,
   type JsonValue,
 } from './types.js'
 
-export type EventDraft = Omit<Event, 'seq'>
+export type { EventDraft } from './types.js'
 
 export class StaleHeadError extends Error {
   constructor(
