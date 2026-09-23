@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { Shell } from './components/shell'
 import { NotFound, RouteBoundary, RouteLoading } from './components/route-states'
+import { Login } from './auth/login'
 import { Welcome } from './family-view/welcome'
 
 const OrganiserApp = lazy(() => import('./organiser/organiser-app'))
@@ -20,7 +21,7 @@ export function App() {
             <Welcome />
           </Route>
           <Route path="/login">
-            <Welcome />
+            <Login />
           </Route>
           <Route path="/family">
             <Welcome />
