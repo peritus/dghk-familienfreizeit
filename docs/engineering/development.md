@@ -10,10 +10,15 @@ discoverable by `station task list`:
 | `ci` | Installs the lockfile, checks types and lint, runs tests, builds both runtimes, verifies shipped assets and bundle boundaries |
 | `dev-preview` | Installs the lockfile, starts Vite with the local Worker, local D1 and browser hot reload |
 
-Both use `nix shell nixpkgs#nodejs_22`. With Node 22.12+ (22.x) already available,
-the equivalent commands are `npm ci && npm run ci` and `npm ci && npm run dev`.
+Both use the repository's `nix develop` shell. With Node 22.12+ (22.x) already
+available, the equivalent commands are `npm ci && npm run ci` and
+`npm ci && npm run dev`.
 Do not run both tasks concurrently in the same directory: each installs dependencies.
-The npm lockfile is committed; Nix supplies Node, not application dependencies.
+The npm lockfile is committed; Nix supplies Node and npm, not application dependencies.
+
+For a direct shell, run `nix develop`, then `npm ci`. The flake lock file pins the
+Nix package set, and `nix flake check` verifies that the development shell
+evaluates on supported systems.
 
 The [GitHub workflow](../../.github/workflows/ci.yml) runs the same `npm run ci` target
 on pushes, pull requests and manual dispatch. It requires no Cloudflare credentials
@@ -47,7 +52,15 @@ no account or hosted secrets to run the local foundation and organiser tests.
 checks the actual local D1 binding, returning `200 {"status":"ok"}` or a
 sanitized `503`. The Worker provides login, magic-link, principal, and
 organiser log/apply boundaries. `/`, `/login`, and `/family` remain public
-foundation placeholders; organiser routes require an organiser session.
+foundation routes; organiser routes require an organiser session.
+
+To exercise the organiser browser locally, run the preview and open
+`http://127.0.0.1:5173/login`. Submit `organiser@example.test`, watch the Worker
+terminal for the clearly marked dangerous-debug magic link, and open it in the
+browser. Loopback links are printed automatically; no `.dev.vars` setup is
+needed. If a non-loopback preview must use the same flow, explicitly set
+`DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true` in that preview's
+environment and remove it immediately afterward.
 
 Hosted preview/prod deployment requires separate real D1 bindings, environment
 configuration and secrets under [deployment](../../spec/engineering/deployment.md). There is no

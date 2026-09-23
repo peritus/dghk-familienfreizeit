@@ -72,7 +72,7 @@ test('the login form requests a magic link and explains local delivery', async (
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
 
-  expect(await screen.findByRole('heading', { name: 'Magic Link angefordert' })).toBeTruthy()
+  expect(await screen.findByText('Magic Link angefordert')).toBeTruthy()
   expect(fetchMock).toHaveBeenCalledWith(
     '/api/login',
     expect.objectContaining({

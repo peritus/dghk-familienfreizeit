@@ -6,11 +6,18 @@ sessions, and rate-limit buckets.
 
 ## Login and redemption
 
-`POST /api/login` canonicalizes the submitted email, applies address and IP
-limits, checks the family-derived world or the code-level organiser allowlist,
-and creates a 15-minute single-use magic link for known identities. The response
-is uniform and does not reveal whether an address is invited. Delivery is a
-separate operational adapter; M1 does not send email.
+The `/login` form submits to `POST /api/login`. The Worker canonicalizes the
+submitted email, applies address and IP limits, checks the family-derived world
+or the code-level organiser allowlist, and creates a 15-minute single-use magic
+link for known identities. The response is uniform and does not reveal whether
+an address is invited.
+
+During local development, requests served on `localhost`, `127.0.0.1`, or
+`::1` print the link to the Worker terminal. A deliberate non-loopback override
+is available only through the alarming binding
+`DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true`; it must never be
+enabled on a shared or production deployment. Real email delivery remains a
+separate deployment concern.
 
 `GET /auth/:token` atomically deletes an unexpired token with `DELETE … RETURNING`,
 creates a hashed session, and redirects to the application. Reusing or expiring a
