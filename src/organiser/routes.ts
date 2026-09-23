@@ -11,18 +11,21 @@ export const organiserRouteDefinitions = [
     id: 'organiser-dashboard',
     relative_path: organiserRoutePaths.dashboard,
     absolute_path: organiserBasePath,
+    test_path: organiserBasePath,
     label: 'Dashboard',
   },
   {
     id: 'organiser-families',
     relative_path: organiserRoutePaths.families,
     absolute_path: `${organiserBasePath}${organiserRoutePaths.families}`,
+    test_path: `${organiserBasePath}${organiserRoutePaths.families}`,
     label: 'Familien',
   },
   {
     id: 'organiser-family-detail',
     relative_path: organiserRoutePaths.family_detail,
     absolute_path: `${organiserBasePath}${organiserRoutePaths.family_detail}`,
+    test_path: `${organiserBasePath}${organiserRoutePaths.families}/6b4b44137d724c1e`,
     label: 'Familie',
   },
 ] as const
@@ -62,3 +65,15 @@ export const organiserUrls = {
   family_detail: (familyId: string): string =>
     `${organiserBasePath}${organiserPaths.family_detail(familyId)}`,
 } as const
+
+export function isKnownOrganiserPath(pathname: string): boolean {
+  if (pathname.length > 1 && pathname.endsWith('/')) return false
+  const actual = pathname.split('/').filter(Boolean)
+  return organiserRouteDefinitions.some(({ absolute_path: absolutePath }) => {
+    const expected = absolutePath.split('/').filter(Boolean)
+    return (
+      actual.length === expected.length &&
+      expected.every((segment, index) => segment.startsWith(':') || segment === actual[index])
+    )
+  })
+}

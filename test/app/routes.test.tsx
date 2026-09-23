@@ -2,6 +2,7 @@ import { expect, test } from 'vitest'
 import {
   familyIdFromRouteSegment,
   familyRouteSegment,
+  isKnownOrganiserPath,
   organiserPaths,
   organiserRouteDefinitions,
   organiserUrls,
@@ -46,4 +47,12 @@ test('invalid family IDs cannot leak labels into route URLs', () => {
   expect(() => familyIdFromRouteSegment('6b4b44137d724c1e-foo%40example.com')).toThrow(
     'family route segment is invalid',
   )
+})
+
+test('known organiser path matching is driven by the route catalog', () => {
+  expect(isKnownOrganiserPath('/organiser')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/families')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/families/6b4b44137d724c1e')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/organiser/families')).toBe(false)
+  expect(isKnownOrganiserPath('/organiser/families/')).toBe(false)
 })

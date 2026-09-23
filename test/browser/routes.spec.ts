@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { organiserRouteDefinitions } from '../../src/organiser/routes.js'
+import { isKnownOrganiserPath, organiserRouteDefinitions } from '../../src/organiser/routes.js'
 
 const familyId = 'fam_6b4b44137d724c1e'
 const familyRoute = '/organiser/families/6b4b44137d724c1e'
@@ -55,8 +55,7 @@ test.beforeEach(async ({ page }) => {
 
 test('direct navigation reaches every implemented organiser route', async ({ page }) => {
   for (const route of organiserRouteDefinitions) {
-    const path = route.absolute_path.replace(':id', familyId.slice('fam_'.length))
-    await page.goto(path)
+    await page.goto(route.test_path)
     await expect(page.getByRole('heading', { name: 'Diese Seite gibt es nicht' })).toHaveCount(0)
     await expect(page.locator('main')).toBeVisible()
   }
@@ -94,8 +93,6 @@ test('rendered organiser links are canonical and never duplicate the route base'
   page,
 }) => {
   const paths = ['/organiser', '/organiser/families', familyRoute]
-  const canonicalRoute = /^\/organiser(?:\/families(?:\/[A-Za-z0-9_-]+)?)?$/
-
   for (const path of paths) {
     await page.goto(path)
     const hrefs = await page
@@ -106,7 +103,7 @@ test('rendered organiser links are canonical and never duplicate the route base'
           .filter((href): href is string => href?.startsWith('/organiser') ?? false),
       )
     for (const href of hrefs) {
-      expect(href).toMatch(canonicalRoute)
+      expect(isKnownOrganiserPath(href)).toBe(true)
       expect(href).not.toContain('/organiser/organiser')
       expect(href).not.toContain('@')
     }
