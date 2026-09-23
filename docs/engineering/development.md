@@ -12,13 +12,15 @@ discoverable by `station task list`:
 
 Both use the repository's `nix develop` shell. With Node 22.12+ (22.x) already
 available, the equivalent commands are `npm ci && npm run ci` and
-`npm ci && npm run dev`.
+`npm ci && npm run dev`. The dev script applies unapplied local D1 migrations
+before starting Vite.
 Do not run both tasks concurrently in the same directory: each installs dependencies.
 The npm lockfile is committed; Nix supplies Node and npm, not application dependencies.
 
 For a direct shell, run `nix develop`, then `npm ci`. The flake lock file pins the
 Nix package set, and `nix flake check` verifies that the development shell
-evaluates on supported systems.
+evaluates on supported systems. To initialize or repair the local database
+without starting Vite, run `npm run db:migrate:local`.
 
 The [GitHub workflow](../../.github/workflows/ci.yml) runs the same `npm run ci` target
 on pushes, pull requests and manual dispatch. It requires no Cloudflare credentials
@@ -48,6 +50,8 @@ hostname or port is committed.
 
 `wrangler.jsonc` uses a local-only placeholder D1 id with `remote: false`. It needs
 no account or hosted secrets to run the local foundation and organiser tests.
+`npm run dev` applies `migrations/` to that local database before serving the app,
+so a new checkout does not fail with `D1_ERROR: no such table: event`.
 `/api/health`
 checks the actual local D1 binding, returning `200 {"status":"ok"}` or a
 sanitized `503`. The Worker provides login, magic-link, principal, and
