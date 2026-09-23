@@ -48,3 +48,22 @@ test('undo removes one grouped action and discard clears all pending work', () =
   expect(pendingEventCount(organiserReducer(two, { type: 'undo' }))).toBe(1)
   expect(pendingEventCount(organiserReducer(two, { type: 'discard' }))).toBe(0)
 })
+
+test('an apply error keeps pending events in the derived organiser world', () => {
+  const loaded = organiserReducer(initialOrganiserState, {
+    type: 'loaded',
+    events: [],
+    build_revision: 'development',
+    compatibility_revision: 1,
+    principal_email: 'organiser@example.test',
+  })
+  const pending = organiserReducer(loaded, { type: 'stage', events: [family] })
+  const failed = organiserReducer(pending, {
+    type: 'failed',
+    status: 'error',
+    error: 'Die Änderungen konnten nicht angewendet werden.',
+  })
+
+  expect(deriveOrganiserWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
+  expect(pendingEventCount(failed)).toBe(1)
+})

@@ -80,7 +80,7 @@ export default function OrganiserApp() {
   }, [])
 
   const derivation = useMemo(() => {
-    if (state.status === 'loading' || state.status === 'unauthorized' || state.status === 'error')
+    if (state.status === 'loading' || state.status === 'unauthorized')
       return { world: null, error: null }
     try {
       return { world: deriveOrganiserWorld(state, activeProfile.validation_view), error: null }
