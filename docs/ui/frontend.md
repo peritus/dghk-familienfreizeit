@@ -19,7 +19,10 @@ On navigation the app focuses the main content region. A skip link provides
 keyboard access to that region. Lazy loading renders a skeleton and live status;
 the route error boundary renders a sanitized recovery message and reload button.
 The boundary resets when the route changes. These semantics are covered in
-[app tests](../../test/app/shell.test.tsx), using jsdom rather than a real browser.
+[app tests](../../test/app/shell.test.tsx), while real organiser navigation and
+link targets are covered by the [browser route suite](../../test/browser/routes.spec.ts).
+The shared [route contract](../../src/organiser/routes.ts) keeps nested organiser
+links separate from their public `/organiser/...` URLs.
 
 See the [design system](design-system.md) for primitives and styling, the
 [implemented organiser view](../application/organiser-view.md), and the

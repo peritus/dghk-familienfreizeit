@@ -22,6 +22,13 @@ Nix package set, and `nix flake check` verifies that the development shell
 evaluates on supported systems. To initialize or repair the local database
 without starting Vite, run `npm run db:migrate:local`.
 
+To run the full browser route suite locally, use
+`nix develop --command npm run test:browser`. It starts the local Vite/Worker
+preview on port 5173, waits for `/api/health`, and runs the Chromium tests in
+parallel. Use `npm run test:browser:headed` for interactive debugging. Do not
+run this command concurrently with `dev-preview` in the same directory unless
+the existing server is the intended target.
+
 The [GitHub workflow](../../.github/workflows/ci.yml) runs the same `npm run ci` target
 on pushes, pull requests and manual dispatch. It requires no Cloudflare credentials
 and does not deploy. Its first GitHub execution is left to the repository owner.

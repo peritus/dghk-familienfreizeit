@@ -12,6 +12,8 @@
     "decisions.md",
     "README.md",
     "THIRD_PARTY.md",
-    "worker-configuration.d.ts"
+    "worker-configuration.d.ts",
+    "test-results/**",
+    "playwright-report/**"
   ]
 }

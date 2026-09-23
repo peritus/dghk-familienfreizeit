@@ -14,6 +14,8 @@
 5. One Vite build producing `dist/client` and `dist/dghk_familienfreizeit`.
 6. Tests of the emitted Worker, D1, SPA navigation and assets in Miniflare;
    negative lint-rule tests; emitted chunk-graph isolation and gzip budgets.
+7. A Playwright Chromium route and link suite against the local Vite/Worker
+   preview.
 
 The browser entry's **entire static import closure**, including shared chunks,
 must exclude organiser, solver, derive and Worker code. The Worker must exclude
@@ -40,8 +42,29 @@ and [Miniflare source](https://github.com/cloudflare/workers-sdk/tree/main/packa
 Registry component source lives in `src/app/components/ui`; the registry and
 aliases are configured in `components.json`. Attribution is in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). M0 checks semantic focus/error/loading behavior
-in jsdom, not pixel appearance or real-browser keyboard layout. No visual/E2E
-browser gate, formatter policy, or other sibling-repository house rule is adopted.
+in jsdom, not pixel appearance or real-browser keyboard layout.
+
+## Browser route and link gate
+
+`npm run test:browser` runs the Playwright Chromium suite against a local
+`npm run dev` server. The runner waits for `/api/health`, reuses an existing
+local server outside CI, and runs independent tests in parallel. Use
+`npm run test:browser:headed` when diagnosing a navigation failure. CI installs
+only Chromium and runs this suite as part of `npm run ci`; the Nix development
+shell also provides a matching Chromium runtime for NixOS.
+
+The route suite uses deterministic organiser API fixtures so link and client
+navigation failures do not depend on magic-link delivery or database timing. A
+small direct-navigation matrix still exercises Vite's SPA fallback and the
+Worker-backed dev server. The pure route contract lives in
+`src/organiser/routes.ts`, and every organiser link must use its builders. Tests
+cover the registered route matrix, dashboard → families → family detail,
+back/forward navigation, not-found recovery, duplicated `/organiser` segments,
+and email-shaped family identifiers in URLs.
+
+When adding an organiser route, add its definition and route builder first, use
+the builder from the screen, and add the direct and linked navigation cases to
+the browser route suite in the same change.
 
 
 ## Lint coverage
