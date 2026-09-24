@@ -12,7 +12,7 @@ path before persistence.
 |---|---|
 | `/organiser` | Dashboard with family/person counts, event-head status, diagnostics, and pending-change status |
 | `/organiser/families` | Derived family table, search, and manual invitation staging |
-| `/organiser/families/:id` | Derived family detail, person add/edit/withdraw staging, and committed or pending event history |
+| `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or pending event history |
 
 The host exposes these kernel-owned screens through the selected-profile screen
 registry. Later module screens must register through the same host; no inventory,

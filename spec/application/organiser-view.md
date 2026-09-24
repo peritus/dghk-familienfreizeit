@@ -33,11 +33,11 @@ session's commit policy. No screen owns a second pending list or persistence pat
 
 The header exposes **Änderungen sammeln**. Immediate mode is the session default and
 automatically applies each locally staged group. Collecting mode defers the same apply
-command until **Anwenden**. The `📐` control contains the numeric pending event count,
-including zero, and the inline review panel remains expanded while collecting mode is
-active. **Alle Änderungen verwerfen** clears local pending events, and **Anwenden**
-submits the current ordered batch. A failed automatic apply keeps its events, opens the
-panel, and activates collecting mode.
+command until **Anwenden**. The collecting control uses an inline SVG ruler and
+contains the numeric pending event count, including zero; the connected local-changes
+section remains expanded while collecting mode is active. **Alle Änderungen verwerfen**
+clears local pending events, and **Anwenden** submits the current ordered batch. A
+failed automatic apply keeps its events, opens the panel, and activates collecting mode.
 
 Release reporting and confirmation follow [release control](release-control.md)
 and [UI-11](../ui/screens/release-control.md). Live coordination findings remain separate

@@ -85,7 +85,7 @@ function PersonEditor({
         </select>
       </label>
       <Button type="submit" variant="neutral">
-        Ändern vormerken
+        Save
       </Button>
     </form>
   )
@@ -192,7 +192,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                 <option value="infant">Baby</option>
               </select>
             </label>
-            <Button type="submit">Vormerken</Button>
+            <Button type="submit">Add</Button>
           </form>
         </CardContent>
       </Card>
@@ -241,7 +241,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                         ])
                       }
                     >
-                      Rücknahme vormerken
+                      Delete
                     </Button>
                   </li>
                 )

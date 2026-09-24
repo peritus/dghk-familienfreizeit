@@ -157,7 +157,7 @@ test('family history includes staged events before they are applied', async () =
   fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
   fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Lokale' } })
   fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Vormerken' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Add' }))
 
   expect(await screen.findByText('Noch nicht angewendet')).toBeTruthy()
   expect(screen.getByText('Person hinzugefügt')).toBeTruthy()
@@ -217,6 +217,8 @@ test('family links use an opaque route ID and open the matching detail view', as
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
   expect(screen.getByText('Erwachsene(r)', { selector: 'span' })).toBeTruthy()
   expect(screen.getByText('Familie eingeladen')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Delete' })).toBeTruthy()
 })
 
 test('families keeps manual invitation without a bulk-import surface', async () => {
