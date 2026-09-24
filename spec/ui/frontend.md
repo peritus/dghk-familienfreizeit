@@ -264,11 +264,13 @@ preserves local events; an automatic failure enters collecting mode and opens th
 review panel. Discard removes local drafts without contacting the Worker.
 
 The header toolbar exposes **Änderungen sammeln**. It is off by default for each
-browser session, survives route navigation, and resets after reload. Its `📐` control
-contains a numeric count of event records, not action groups, increments by the number
-of events created by a click, and flashes by that delta. The inline review panel
-contains **Alle Änderungen verwerfen** and **Anwenden**. Turning collecting mode off
-is blocked while the pending buffer is non-empty.
+browser session, survives route navigation, and resets after reload. Its inline SVG
+ruler control contains a numeric count of event records, not action groups, increments
+by the number of events created by a click, and flashes by that delta. While active,
+the connected **Local changes in this browser** section explains that the pending
+drafts are collected only in this browser and are not visible to other organisers
+until applied. The section contains **Alle Änderungen verwerfen** and **Anwenden**.
+Turning collecting mode off is blocked while the pending buffer is non-empty.
 
 The server's plan is authoritative. The server checks the event head,
 `build_revision`, and `compatibility_revision` supplied with the request, then derives

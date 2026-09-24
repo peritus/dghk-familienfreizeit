@@ -21,10 +21,12 @@ draft state.
 
 The header toolbar exposes **Änderungen sammeln** with a numeric pending-event count
 inside the control, including zero. Immediate mode is the session default. Collecting
-mode defers the same apply command and keeps the shared review panel expanded inline
-below the header. The control remains active but cannot leave collecting mode while
-drafts exist. Local events added during an in-flight request remain queued after the
-submitted prefix.
+mode defers the same apply command and keeps a labelled **Local changes in this
+browser** section expanded below the header. The section explains that its drafts are
+actively collected only in this browser and are not visible to other organisers until
+applied. The control remains pressed but cannot leave collecting mode while drafts
+exist. Local events added during an in-flight request remain queued after the submitted
+prefix.
 
 On navigation the app focuses the main content region. A skip link provides
 keyboard access to that region. Lazy loading renders a skeleton and live status;

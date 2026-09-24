@@ -56,7 +56,7 @@ searchable unplaced-family rail and room cards grouped by building and floor.
 │ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
 │ Lang ×1         │ Room 14 · 6 places · open                             │
 ├─────────────────┴────────────────────────────────────────────────────────┤
-│ [Änderungen sammeln: aus]                       [📐 3]                 │
+│ [Änderungen sammeln: aus]                   [ruler icon · 3]            │
 │ 3 pending decisions · Braun → Room 14 · [Discard] [Apply]              │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
