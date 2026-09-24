@@ -17,12 +17,14 @@ export function Families() {
   const [search, setSearch] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const normalizedSearch = search.trim().toLowerCase()
   const rows = useMemo(
     () =>
       familyRows(world!).filter((row) =>
-        `${row.display_name} ${row.email}`.toLowerCase().includes(search.toLowerCase()),
+        `${row.display_name} ${row.email}`.toLowerCase().includes(normalizedSearch),
       ),
-    [world, search],
+    [world, normalizedSearch],
   )
   function stage(events: readonly EventDraft[]) {
     stageEvents(events)
@@ -30,7 +32,18 @@ export function Families() {
 
   function invite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!state.principal_email || !displayName.trim() || !email.includes('@')) return
+    const trimmedName = displayName.trim()
+    const trimmedEmail = email.trim()
+    if (!state.principal_email) return
+    if (!trimmedName) {
+      setInviteError('Bitte gib einen Familiennamen ein.')
+      return
+    }
+    if (!trimmedEmail.includes('@')) {
+      setInviteError('Bitte gib eine gültige E-Mail-Adresse ein.')
+      return
+    }
+    setInviteError(null)
     stage([
       {
         at: new Date().toISOString(),
@@ -39,8 +52,8 @@ export function Families() {
         type: 'FamilyInvited',
         payload: {
           family_id: id('fam_'),
-          email,
-          display_name: displayName.trim(),
+          email: trimmedEmail,
+          display_name: trimmedName,
           locale: 'de',
         },
       },
@@ -71,13 +84,20 @@ export function Families() {
           <h3 className="text-xl">Familie einladen</h3>
         </CardHeader>
         <CardContent>
-          <form onSubmit={invite} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <form
+            noValidate
+            onSubmit={invite}
+            className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+          >
             <label className="grid gap-1">
               Name
               <input
                 required
                 value={displayName}
-                onChange={(event) => setDisplayName(event.target.value)}
+                onChange={(event) => {
+                  setDisplayName(event.target.value)
+                  setInviteError(null)
+                }}
                 className="min-h-11 rounded border-2 border-black px-3"
               />
             </label>
@@ -87,12 +107,22 @@ export function Families() {
                 required
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                aria-invalid={inviteError ? true : undefined}
+                aria-describedby={inviteError ? 'invite-error' : undefined}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  setInviteError(null)
+                }}
                 className="min-h-11 rounded border-2 border-black px-3"
               />
             </label>
             <Button type="submit">Zur offenen Liste</Button>
           </form>
+          {inviteError ? (
+            <p id="invite-error" role="alert" className="mt-3">
+              {inviteError}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
       <div className="overflow-x-auto rounded border-2 border-black bg-white">
@@ -125,7 +155,13 @@ export function Families() {
             ))}
           </tbody>
         </table>
-        {rows.length === 0 ? <p className="p-4">Keine Familien gefunden.</p> : null}
+        {rows.length === 0 ? (
+          <p role="status" className="p-4">
+            {normalizedSearch
+              ? `Keine Familien für „${search.trim()}“ gefunden.`
+              : 'Noch keine Familien erfasst.'}
+          </p>
+        ) : null}
       </div>
     </div>
   )

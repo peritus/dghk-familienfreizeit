@@ -207,6 +207,19 @@ test('families keeps manual invitation without a bulk-import surface', async () 
   expect(screen.queryByRole('textbox', { name: 'CSV-Daten' })).toBeNull()
 })
 
+test('families explain empty searches and invalid invitations', async () => {
+  open('/organiser/families')
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+
+  fireEvent.change(screen.getByLabelText('Familien suchen'), { target: { value: 'unbekannt' } })
+  expect(screen.getByRole('status').textContent).toContain('Keine Familien für „unbekannt“ gefunden.')
+
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
+  fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'ungültig' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  expect(screen.getByRole('alert').textContent).toBe('Bitte gib eine gültige E-Mail-Adresse ein.')
+})
+
 test.each(['/unknown', '/organiser/unknown'])(
   '%s has a recoverable not-found state',
   async (path) => {
