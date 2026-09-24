@@ -1,13 +1,13 @@
-# UI-06 — Families and import
+# UI-06 — Families
 
 ## Audience, purpose, and route
 
-Organisers inspect invitation progress, filter missing information, and import
-families. Route: `/organiser/families`. Governing spec: [organiser view](../../application/organiser-view.md) §3.
+Organisers inspect invitation progress, filter missing information, and invite
+families manually. Route: `/organiser/families`. Governing spec: [organiser view](../../application/organiser-view.md) §3.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Families · 55                                      [Import] [Invite family]│
+│ Families · 55                                             [Invite family]│
 │ [Search…] [No login] [No room preference] [Incomplete workshops]           │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Family             Email              People  Room  Workshops  Last seen  │
@@ -17,23 +17,18 @@ families. Route: `/organiser/families`. Governing spec: [organiser view](../../a
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Import opens a dialog with file upload or paste, expected columns, validation,
-and a preview. The preview reports “52 ready, 2 problems” and names duplicate
-addresses and malformed dates by row. Problem rows are excluded from the import;
-the valid rows are appended in one batch, so a bad row costs that row, not the
-import ([events](../../architecture/events.md), `FamilyInvited`). The empty table offers import
-and manual invite actions.
+The invitation form stages one `FamilyInvited` event at a time. The empty table
+offers the same manual invitation action. There is no bulk import, file upload,
+paste flow, CSV parser, or import API; CSV import is not part of the application
+contract.
 
 ## Accessibility and responsive behavior
 
 The table has a caption, sortable headers, row links, and a non-color status
-label. On narrow screens, filters wrap and each family becomes a labeled card;
-the import preview may scroll horizontally inside its own region.
+label. On narrow screens, filters wrap and each family becomes a labeled card.
 
 ## Neobrutalist redesign and components
 
-Use `Sidebar`, `Input`, `Badge`, `Button`, and `Table` for the main view. Import
-is a `Dialog` containing `Tabs` for upload/paste, `Textarea` for pasted CSV,
-and a preview `Table`. The final import action uses `AlertDialog` with
-`AlertDialogTitle` naming the number of families to be invited and
-`AlertDialogDescription` naming the rows that will be skipped.
+Use `Sidebar`, `Input`, `Badge`, `Button`, and `Table` for the main view. Manual
+invitation uses the ordinary organiser form and stages the resulting event
+through the shared pending-event workflow.

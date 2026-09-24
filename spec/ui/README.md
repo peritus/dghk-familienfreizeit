@@ -24,7 +24,7 @@ experimentation.
 | UI-03 | [Family preferences](screens/family-preferences.md) | `/family` current information |
 | UI-04 | [Family assignment](screens/family-assignment.md) | `/family` communicated arrangements |
 | UI-05 | [Organiser dashboard](screens/organiser-dashboard.md) | `/organiser` |
-| UI-06 | [Families and import](screens/families.md) | `/organiser/families` |
+| UI-06 | [Families](screens/families.md) | `/organiser/families` |
 | UI-07 | [Family detail](screens/family-detail.md) | `/organiser/families/:id` |
 | UI-08 | [Inventory](screens/inventory.md) | `/organiser/inventory` |
 | UI-14 | [Workshop spaces](screens/workshop-spaces.md) | `/organiser/workshop-spaces` |

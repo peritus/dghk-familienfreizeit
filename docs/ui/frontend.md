@@ -7,7 +7,7 @@ The route table is:
 |---|---|
 | `/`, `/login`, `/family` | Public foundation welcome placeholder |
 | `/organiser` | Lazy authenticated organiser dashboard |
-| `/organiser/families` | Derived family table, search, invitation and CSV staging |
+| `/organiser/families` | Derived family table, search, and manual invitation staging |
 | `/organiser/families/:id` | Family detail, person lifecycle staging and event history |
 | Other paths | Not-found message and a link back to the start |
 

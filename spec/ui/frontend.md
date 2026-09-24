@@ -165,10 +165,10 @@ The outstanding screens require the following component inventory.
 | Component | Used for |
 |---|---|
 | Button, Card, Badge, Alert | everywhere |
-| Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms, CSV paste |
+| Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms |
 | Combobox, Popover, Command | person picker, room picker, family search |
-| Dialog, Alert Dialog | import, organiser decisions, communicate confirmation, discard pending |
-| Table, ScrollArea | families, CSV preview, plans, constraints, workshop fill |
+| Dialog, Alert Dialog | organiser decisions, communicate confirmation, discard pending |
+| Table, ScrollArea | families, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after communication in the family view |
 | Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
 | Sidebar, Sheet, Drawer, Breadcrumb | organiser navigation, mobile pickers |
@@ -267,7 +267,6 @@ and locked when implemented:
 | Dependency | Outstanding use |
 |---|---|
 | `zod` | Shared event and request schemas |
-| `papaparse`, `@types/papaparse` | Browser CSV import with quoted commas |
 | `@atlaskit/pragmatic-drag-and-drop` | Assignment board drag and drop |
 | `tsx` | Node execution of offline weight tuning |
 | Additional registry primitives | Planned controls in the component inventory |

@@ -10,7 +10,7 @@ principal, keeps unapplied events in one reducer, and renders
 | Route | Behavior |
 |---|---|
 | `/organiser` | Dashboard with family/person counts, event-head status, diagnostics, and pending-change status |
-| `/organiser/families` | Derived family table, search, manual invitation staging, and CSV preview/import staging |
+| `/organiser/families` | Derived family table, search, and manual invitation staging |
 | `/organiser/families/:id` | Derived family detail, person add/edit/withdraw staging, and event history |
 
 The host exposes these kernel-owned screens through the selected-profile screen
