@@ -125,15 +125,13 @@ canonical form rather than silently changing their identity.
 ```ts
 { family_id: string, email: string, display_name: string, locale: 'de' | 'en' }
 ```
-Emitted by an organiser, once per family, during import or manual add. Creates the
+Emitted by an organiser, once per family, during manual invitation. Creates the
 family. Does not send the email — that is an operational side effect performed
 after the append succeeds.
 
 *Invariant:* email must be unique case-insensitively across all families and
 must not be an allowlisted organiser address. Checked against the derived world
-before append; the `seq` guard makes the check and the append atomic. The import
-preview reports a duplicate as a row-level error rather than aborting the whole
-import.
+before append; the `seq` guard makes the check and the append atomic.
 
 ### `FamilyEmailChanged`
 ```ts

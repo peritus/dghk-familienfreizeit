@@ -298,7 +298,6 @@ src/
   app/
     family-view/          implemented placeholders gain real controls/views
     organiser/            log loading, pending reducer and domain screens
-    csv.ts                browser CSV import and preview validation
   events/types.ts         discriminated union and zod schemas, shared by both runtimes
   derive/                 pure index.ts composition, fold.ts and diff.ts; no I/O
   modules/<module-id>/    pure stages/rules, separate app/worker contributions

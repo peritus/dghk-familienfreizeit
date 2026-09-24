@@ -402,10 +402,10 @@ Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
 
 ```ts
-test('the full loop: import → constraints → solve → plan → communicate', async () => {
+test('the full loop: invite → constraints → solve → plan → communicate', async () => {
   const db = await freshDb()
 
-  await importFamilies(db, csvFixture)           // 55 families
+  await inviteFamilies(db, familyFixture)        // 55 families
   await setLabels(db, labelFixture)              // LabelSet events
   const plan1 = await computePlan(db)
 
