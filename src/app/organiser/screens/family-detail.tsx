@@ -119,21 +119,21 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
     event.preventDefault()
     if (!givenName.trim() || !familyName.trim()) return
     stage([
-        {
-          at: new Date().toISOString(),
-          actor: state.principal_email!,
-          subject: selectedFamilyId,
-          type: 'PersonAdded',
-          payload: {
-            person_id: makePersonId(givenName),
-            family_id: selectedFamilyId,
-            given_name: givenName.trim(),
-            family_name: familyName.trim(),
-            birthdate: null,
-            role,
-          },
+      {
+        at: new Date().toISOString(),
+        actor: state.principal_email!,
+        subject: selectedFamilyId,
+        type: 'PersonAdded',
+        payload: {
+          person_id: makePersonId(givenName),
+          family_id: selectedFamilyId,
+          given_name: givenName.trim(),
+          family_name: familyName.trim(),
+          birthdate: null,
+          role,
         },
-      ])
+      },
+    ])
     setGivenName('')
     setFamilyName('')
   }
@@ -228,14 +228,14 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       variant="neutral"
                       onClick={() =>
                         stage([
-                            {
-                              at: new Date().toISOString(),
-                              actor: state.principal_email!,
-                              subject: person.id,
-                              type: 'PersonWithdrawn',
-                              payload: { person_id: person.id, reason: null },
-                            },
-                          ])
+                          {
+                            at: new Date().toISOString(),
+                            actor: state.principal_email!,
+                            subject: person.id,
+                            type: 'PersonWithdrawn',
+                            payload: { person_id: person.id, reason: null },
+                          },
+                        ])
                       }
                     >
                       Rücknahme vormerken

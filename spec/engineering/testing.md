@@ -322,6 +322,28 @@ an organiser acts on.
 
 ## Organiser decision cases
 
+### Local-first commit timing
+
+The organiser application must test the shared command pipeline, not separate
+immediate and collecting implementations:
+
+- A click stages ordinary event drafts, derives `committed ++ pending` locally, and
+  increments/flashes the pending badge by the number of event records created.
+- Immediate mode invokes the ordinary apply endpoint automatically; collecting mode
+  leaves the same events pending until explicit Apply.
+- Undo removes one action group while the badge counts event records.
+- An apply acknowledgement removes only the submitted pending prefix, preserving
+  later clicks made while the request was in flight.
+- A stale-head response incorporates intervening committed events and preserves the
+  local pending buffer.
+- An automatic apply failure enters collecting mode, opens review, and retains the
+  failed events for retry or discard.
+- Discard never sends a write request and leaves no event-log trace.
+- Toggling collecting mode off is blocked while pending events exist; route changes
+  preserve the policy and reload resets it to immediate mode.
+- Family responses never contain pending events, the organiser event log, or the full
+  organiser world.
+
 Use the ordinary KDL fixtures and module/integration tests for these cases:
 
 - `fam_42 needs=naehe_zum_eingang` and `rm_07 provides=naehe_zum_eingang`

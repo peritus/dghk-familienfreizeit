@@ -12,38 +12,49 @@ afterEach(() => {
 })
 
 function open(path: string, events: readonly Event[] = []) {
+  let fetchMock: ReturnType<typeof vi.fn> | undefined
   if (path.startsWith('/organiser')) {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((input: RequestInfo | URL) => {
-        const url = String(input)
-        if (url.endsWith('/api/me'))
-          return Promise.resolve(
-            new Response(
-              JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
-              {
-                status: 200,
-                headers: { 'content-type': 'application/json' },
-              },
-            ),
-          )
+    fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.endsWith('/api/me'))
         return Promise.resolve(
           new Response(
-            JSON.stringify({
-              events,
-              head_seq: events.length,
-              build_revision: buildRevision,
-              compatibility_revision: compatibilityRevision,
-              screen_registry: [],
-            }),
-            { status: 200, headers: { 'content-type': 'application/json' } },
+            JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+            {
+              status: 200,
+              headers: { 'content-type': 'application/json' },
+            },
           ),
         )
-      }),
-    )
+      if (url.endsWith('/api/organiser/apply')) {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          events?: readonly Record<string, unknown>[]
+        }
+        const applied = (body.events ?? []).map((event, index) => ({ ...event, seq: index + 1 }))
+        return Promise.resolve(
+          new Response(JSON.stringify({ events: applied }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+        )
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            events,
+            head_seq: events.length,
+            build_revision: buildRevision,
+            compatibility_revision: compatibilityRevision,
+            screen_registry: [],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        ),
+      )
+    })
+    vi.stubGlobal('fetch', fetchMock)
   }
   window.history.replaceState({}, '', path)
-  return render(<App />)
+  return { fetchMock, view: render(<App />) }
 }
 
 test.each(['/', '/family'])(
@@ -94,6 +105,43 @@ test('organiser links stay within the nested route base', async () => {
   open('/organiser')
   const familiesLink = await screen.findByRole('link', { name: 'Familien öffnen' })
   expect(familiesLink.getAttribute('href')).toBe('/organiser/families')
+})
+
+test('organiser changes can be collected and reviewed from the toolbar badge', async () => {
+  open('/organiser/families')
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  expect(screen.getByRole('button', { name: 'Änderungen sammeln: an' })).toBeTruthy()
+
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
+  fireEvent.change(screen.getByLabelText('E-Mail'), {
+    target: { value: 'neu@example.test' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+
+  const badge = await screen.findByRole('button', { name: '1 offene Änderung anzeigen' })
+  fireEvent.click(badge)
+  expect(screen.getByRole('button', { name: 'Anwenden' })).toBeTruthy()
+  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+})
+
+test('immediate mode sends the same staged event through apply automatically', async () => {
+  const { fetchMock } = open('/organiser/families')
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Sofort Familie' } })
+  fireEvent.change(screen.getByLabelText('E-Mail'), {
+    target: { value: 'sofort@example.test' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+
+  expect(await screen.findByRole('link', { name: 'Sofort Familie' })).toBeTruthy()
+  expect(fetchMock).toHaveBeenCalledWith(
+    '/api/organiser/apply',
+    expect.objectContaining({ method: 'POST' }),
+  )
+  expect(screen.queryByRole('button', { name: /offene Änderung anzeigen/ })).toBeNull()
 })
 
 test('family links use an opaque route ID and open the matching detail view', async () => {
