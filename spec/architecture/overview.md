@@ -82,7 +82,7 @@ The pending buffer is used by one command pipeline with two commit-timing polici
 | Step | Immediate mode | Collecting mode |
 |---|---|---|
 | Create drafts and update the local world | immediate | immediate |
-| Pending badge | increments and flashes by the event count | increments and flashes by the event count |
+| Collecting control | increments and flashes by the event count | increments and flashes by the event count |
 | Invoke `POST /api/organiser/apply` | automatically | only after **Anwenden** |
 | Worker validation, authorization, replay, and atomic append | identical | identical |
 | Server-side draft state | never | never |

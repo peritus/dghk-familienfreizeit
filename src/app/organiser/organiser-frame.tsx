@@ -69,16 +69,9 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
                 <Button
                   variant="neutral"
                   disabled={count === 0 || state.status === 'applying'}
-                  onClick={() => dispatch({ type: 'undo' })}
-                >
-                  Rückgängig
-                </Button>
-                <Button
-                  variant="neutral"
-                  disabled={count === 0 || state.status === 'applying'}
                   onClick={() => dispatch({ type: 'discard' })}
                 >
-                  Verwerfen
+                  Alle Änderungen verwerfen
                 </Button>
                 <Button
                   disabled={count === 0 || state.status === 'applying'}

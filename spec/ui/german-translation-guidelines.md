@@ -56,8 +56,7 @@ emails, notifications, and help text.
 | collecting mode active | **Sammelmodus aktiv** | State text for the enabled local commit-timing policy |
 | immediate mode | **Änderungen werden sofort angewendet** | Explanation for the default policy |
 | open changes | **Offene Änderungen** | Title/status for the shared review panel |
-| undo | **Rückgängig** | Removes the latest grouped action from the local buffer |
-| discard | **Verwerfen** | Removes local pending events without contacting the server |
+| discard | **Alle Änderungen verwerfen** | Removes all local pending events without contacting the server |
 | apply | **Anwenden** | Starts the ordinary Worker append for the current pending batch |
 | uncommunicated | **Noch nicht an Familien kommuniziert** | Applied changes not yet made visible to families through Communicate |
 | organiser | **organisierende Person** | One person acting on behalf of the organisation team |

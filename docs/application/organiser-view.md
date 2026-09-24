@@ -22,7 +22,7 @@ solver, workshop, or report screen is registered by the kernel-only profile.
 
 Screen actions add grouped ordinary event drafts to the shared pending reducer. The
 host derives the prospective world immediately, increments and briefly flashes the
-header badge by the number of event records created, and then applies the session's
+collecting-control count by the number of event records created, and then applies the session's
 commit policy:
 
 - Immediate mode is the default for a session and invokes the ordinary apply request
@@ -56,7 +56,7 @@ The active profile currently contains only the kernel `role` trait. Inventory,
 assignment, reports, family-facing controls, and module-contributed screens are
 specified separately and remain outstanding.
 
-The verified tests cover reducer grouping, local derivation, immediate and collecting
-commit timing, badge review, apply-prefix acknowledgement, organiser log/apply
+The verified tests cover local derivation, immediate and collecting commit timing,
+the inline draft review, apply-prefix acknowledgement, organiser log/apply
 authorization, prospective replay rejection, stale-head responses, route loading, and
 the public/private route boundary.

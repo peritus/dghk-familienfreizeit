@@ -42,7 +42,7 @@ held in the organiser's browser, never on the server. Every organiser screen der
 from `committed ++ pending`.
 
 **Pending buffer** — the ordered client-side collection of pending event groups. It is
-application state used for local derivation, undo, discard, retry, and apply-prefix
+application state used for local derivation, discard, retry, and apply-prefix
 acknowledgement; it is not persisted domain state.
 
 **Immediate mode** — the organiser UI policy that invokes the ordinary apply command

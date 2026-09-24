@@ -120,10 +120,10 @@ creates one or more ordinary event drafts; it does not choose whether to save th
 The callback appends the grouped drafts to the pending buffer, derives locally, and
 then follows the session's commit policy. Immediate mode invokes the ordinary Apply
 request automatically. Collecting mode leaves the drafts in the buffer until the
-organiser chooses **Anwenden**. Undo removes the most recent group, while the badge
-counts individual pending event records. Action grouping is client bookkeeping; only
-the ordinary event list is sent to `derive` and append. There is no second state
-manager, API, or event type for collecting mode.
+organiser chooses **Anwenden**. The collecting control counts individual pending event
+records, including zero, and the inline review remains expanded while collecting mode
+is active. Only the ordinary event list is sent to `derive` and append. There is no
+second state manager, API, or event type for collecting mode.
 
 Release badges and inline diffs are derived through the canonical
 `CommunicationScopeView` contract in [release control](../application/release-control.md).
@@ -264,11 +264,11 @@ preserves local events; an automatic failure enters collecting mode and opens th
 review panel. Discard removes local drafts without contacting the Worker.
 
 The header toolbar exposes **Änderungen sammeln**. It is off by default for each
-browser session, survives route navigation, and resets after reload. Its numeric badge
-counts event records, not action groups, increments by the number of events created by
-a click, and flashes by that delta. Clicking the badge expands the shared review
-panel containing **Rückgängig**, **Verwerfen**, and **Anwenden**. Turning collecting
-mode off is blocked while the pending buffer is non-empty.
+browser session, survives route navigation, and resets after reload. Its `📐` control
+contains a numeric count of event records, not action groups, increments by the number
+of events created by a click, and flashes by that delta. The inline review panel
+contains **Alle Änderungen verwerfen** and **Anwenden**. Turning collecting mode off
+is blocked while the pending buffer is non-empty.
 
 The server's plan is authoritative. The server checks the event head,
 `build_revision`, and `compatibility_revision` supplied with the request, then derives

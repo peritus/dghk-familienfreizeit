@@ -17,7 +17,7 @@ Organisers make room-placement decisions and review consequences. Route:
 │ │ ⚠ no fit    │ │ │ Morgan ×2 ✓ │ │ │ open       │ │ │ Rivera ×3 ✓ │          │
 │ └─────────────┘ │ └─────────────┘ └─────────────┘ └─────────────┘          │
 ├─────────────────┴──────────────────────────────────────────────────────────┤
-│ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]           │
+│ 3 pending decisions · Braun → Room 14 · [Discard] [Apply]                 │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -27,14 +27,14 @@ family the change moved. Immediate mode applies automatically; collecting mode w
 for the shared Apply control. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
 picker and consequence summary. Apply confirms the pending batch; Discard
-requires confirmation. Undo removes all pending events belonging to the last action
-together. An optional note belongs to the label, not to a separate decision record.
+requires confirmation and clears the complete local pending batch. An optional note
+belongs to the label, not to a separate decision record.
 
 ## Narrow fallback
 
 The board becomes a searchable unplaced list followed by a room list. Each family
 has an “Add room decision” action; do not require drag-and-drop on touch devices. The
-shared toolbar badge and expandable review panel remain usable without covering the
+shared collecting control and inline review panel remain usable without covering the
 final control.
 
 ## Neobrutalist redesign and components

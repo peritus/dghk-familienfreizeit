@@ -51,7 +51,6 @@ export type OrganiserAction =
     }
   | { type: 'stage'; events: readonly EventDraft[] }
   | { type: 'toggle_collecting' }
-  | { type: 'undo' }
   | { type: 'discard' }
   | { type: 'applying' }
   | { type: 'applied'; count: number; events: readonly Event[] }
@@ -81,13 +80,9 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       return { ...state, pending: [...state.pending, { events: action.events }], error: null }
     case 'toggle_collecting':
       if (state.commit_mode === 'collecting') {
-        return pendingEventCount(state) === 0
-          ? { ...state, commit_mode: 'immediate' }
-          : state
+        return pendingEventCount(state) === 0 ? { ...state, commit_mode: 'immediate' } : state
       }
       return { ...state, commit_mode: 'collecting' }
-    case 'undo':
-      return { ...state, pending: state.pending.slice(0, -1), error: null }
     case 'discard':
       return { ...state, pending: [], error: null }
     case 'applying':

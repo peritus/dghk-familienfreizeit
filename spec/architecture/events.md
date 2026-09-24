@@ -261,8 +261,8 @@ Organiser judgement uses the same label mechanism as family preferences. A board
 drag or other organiser action creates one or more ordinary event drafts, adds them
 to the shared local pending buffer, and derives the resulting world immediately.
 Immediate mode invokes the ordinary apply command automatically; collecting mode
-waits for explicit **Anwenden**. Undo removes that action's events from the local
-buffer. After successful application, clearing a label appends `LabelCleared` through
+waits for explicit **Anwenden**. Discard clears the complete local pending batch
+without contacting the Worker. After successful application, clearing a label appends `LabelCleared` through
 the same append path. Organiser decisions are ordinary event-log inputs and the
 solver derives the resulting assignment.
 

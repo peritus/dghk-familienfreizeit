@@ -45,12 +45,14 @@ test('pending actions materialize contiguous events and derive locally', () => {
   expect(deriveOrganiserWorld(state).families.map(({ id }) => id)).toEqual(['fam_state'])
 })
 
-test('undo removes one grouped action and discard clears all pending work', () => {
+test('discard clears all pending work and keeps collecting mode active', () => {
   const loaded = loadedState()
   const one = organiserReducer(loaded, { type: 'stage', events: [family] })
   const two = organiserReducer(one, { type: 'stage', events: [family] })
-  expect(pendingEventCount(organiserReducer(two, { type: 'undo' }))).toBe(1)
-  expect(pendingEventCount(organiserReducer(two, { type: 'discard' }))).toBe(0)
+  const collecting = organiserReducer(two, { type: 'toggle_collecting' })
+  const discarded = organiserReducer(collecting, { type: 'discard' })
+  expect(pendingEventCount(discarded)).toBe(0)
+  expect(discarded.commit_mode).toBe('collecting')
 })
 
 test('an apply error keeps pending events in the derived organiser world', () => {

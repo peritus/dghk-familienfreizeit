@@ -328,16 +328,17 @@ The organiser application must test the shared command pipeline, not separate
 immediate and collecting implementations:
 
 - A click stages ordinary event drafts, derives `committed ++ pending` locally, and
-  increments/flashes the pending badge by the number of event records created.
+  increments/flashes the collecting-control count by the number of event records created.
 - Immediate mode invokes the ordinary apply endpoint automatically; collecting mode
   leaves the same events pending until explicit Apply.
-- Undo removes one action group while the badge counts event records.
+- The collecting control shows the event-record count, including zero, and the inline
+  review remains expanded while collecting mode is active.
 - An apply acknowledgement removes only the submitted pending prefix, preserving
   later clicks made while the request was in flight.
 - A stale-head response incorporates intervening committed events and preserves the
   local pending buffer.
-- An automatic apply failure enters collecting mode, opens review, and retains the
-  failed events for retry or discard.
+- An automatic apply failure enters collecting mode, keeps review expanded, and
+  retains the failed events for retry or discard.
 - Discard never sends a write request and leaves no event-log trace.
 - Toggling collecting mode off is blocked while pending events exist; route changes
   preserve the policy and reload resets it to immediate mode.
@@ -370,8 +371,8 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
   assignments, scheduling returns offerings or blocking unscheduled outcomes, and
   attendance consumes offerings without rewriting ranking facts.
 - Clear removes the selected label's effect from the current plan; replay before
-  the clear reproduces its prior effect. Pending undo removes a whole action's
-  events, including both halves of a needs/provides pair.
+  the clear reproduces its prior effect. Discard removes the complete local pending
+  batch, including both halves of a needs/provides pair.
 - Omitting a note equals `null`. Varying only note text with the event envelope
   and other inputs held fixed changes organiser display but not solver input,
   assignment, scores, or canonical solver-output hash. Appending any event still

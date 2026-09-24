@@ -33,11 +33,11 @@ session's commit policy. No screen owns a second pending list or persistence pat
 
 The header exposes **Änderungen sammeln**. Immediate mode is the session default and
 automatically applies each locally staged group. Collecting mode defers the same apply
-command until **Anwenden**. The numeric badge counts pending event records, flashes by
-the number added by the latest click, and opens the shared review panel. **Rückgängig**
-still removes the latest action group, **Verwerfen** clears local pending events, and
-**Anwenden** submits the current ordered batch. A failed automatic apply keeps its
-events, opens the panel, and activates collecting mode.
+command until **Anwenden**. The `📐` control contains the numeric pending event count,
+including zero, and the inline review panel remains expanded while collecting mode is
+active. **Alle Änderungen verwerfen** clears local pending events, and **Anwenden**
+submits the current ordered batch. A failed automatic apply keeps its events, opens the
+panel, and activates collecting mode.
 
 Release reporting and confirmation follow [release control](release-control.md)
 and [UI-11](../ui/screens/release-control.md). Live coordination findings remain separate
@@ -56,8 +56,8 @@ searchable unplaced-family rail and room cards grouped by building and floor.
 │ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
 │ Lang ×1         │ Room 14 · 6 places · open                             │
 ├─────────────────┴────────────────────────────────────────────────────────┤
-│ [Änderungen sammeln: aus]                         [3]                 │
-│ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]       │
+│ [Änderungen sammeln: aus]                       [📐 3]                 │
+│ 3 pending decisions · Braun → Room 14 · [Discard] [Apply]              │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -70,7 +70,7 @@ hard-constraint status, and soft penalties. A drop never splits a family or merg
 two families.
 
 Keyboard users can search families, move through the unplaced list, open a room
-picker, add a room decision, undo the last pending action, and clear selection.
+picker, add a room decision, discard the pending batch, and clear selection.
 Touch users get the same room picker through a drawer instead of drag-and-drop.
 
 ## 3. Organiser decisions and reports

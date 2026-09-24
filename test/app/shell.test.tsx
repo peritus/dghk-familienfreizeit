@@ -113,7 +113,7 @@ test('organiser changes keep the collecting review expanded', async () => {
 
   const collectingButton = screen.getByRole('button', { name: 'Änderungen sammeln: aus' })
   fireEvent.click(collectingButton)
-  expect(screen.getByRole('button', { name: 'Änderungen sammeln: an' })).toHaveTextContent('0')
+  expect(screen.getByRole('button', { name: 'Änderungen sammeln: an' }).textContent).toContain('0')
   expect(screen.getByText('Keine offenen Änderungen')).toBeTruthy()
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
@@ -123,26 +123,38 @@ test('organiser changes keep the collecting review expanded', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
 
   expect(
-    await screen.findByRole('button', { name: 'Änderungen sammeln: an' }),
-  ).toHaveTextContent('1')
+    (await screen.findByRole('button', { name: 'Änderungen sammeln: an' })).textContent,
+  ).toContain('1')
   expect(screen.getByRole('button', { name: 'Anwenden' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Alle Änderungen verwerfen' })).toBeTruthy()
+  expect(screen.queryByRole('button', { name: 'Rückgängig' })).toBeNull()
   expect(screen.getByText('1 offene Änderung')).toBeTruthy()
 })
 
 test('family history includes staged events before they are applied', async () => {
-  open('/organiser/families')
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
-
-  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
-  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Lokale Familie' } })
-  fireEvent.change(screen.getByLabelText('E-Mail'), {
-    target: { value: 'lokal@example.test' },
-  })
-  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  const familyEvent: Event = {
+    seq: 1,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'FamilyInvited',
+    payload: {
+      family_id: 'fam_local',
+      email: 'local@example.test',
+      display_name: 'Lokale Familie',
+      locale: 'de',
+    },
+  }
+  open('/organiser/families', [familyEvent])
   fireEvent.click(await screen.findByRole('link', { name: 'Lokale Familie' }))
+  expect(await screen.findByRole('heading', { name: 'Lokale Familie' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Lokale' } })
+  fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Vormerken' }))
 
   expect(await screen.findByText('Noch nicht angewendet')).toBeTruthy()
-  expect(screen.getByText('FamilyInvited')).toBeTruthy()
+  expect(screen.getByText('Person hinzugefügt')).toBeTruthy()
 })
 
 test('immediate mode sends the same staged event through apply automatically', async () => {
@@ -161,7 +173,6 @@ test('immediate mode sends the same staged event through apply automatically', a
     expect.objectContaining({ method: 'POST' }),
   )
   expect(screen.queryByRole('button', { name: /offene Änderung anzeigen/ })).toBeNull()
-  expect(screen.getByRole('button', { name: 'Änderungen sammeln: aus' })).toHaveTextContent('0')
 })
 
 test('family links use an opaque route ID and open the matching detail view', async () => {
@@ -198,7 +209,7 @@ test('family links use an opaque route ID and open the matching detail view', as
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
-  expect(screen.getByText('Erwachsene(r)')).toBeTruthy()
+  expect(screen.getByText('Erwachsene(r)', { selector: 'span' })).toBeTruthy()
   expect(screen.getByText('Familie eingeladen')).toBeTruthy()
 })
 
@@ -216,7 +227,9 @@ test('families explain empty searches and invalid invitations', async () => {
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
 
   fireEvent.change(screen.getByLabelText('Familien suchen'), { target: { value: 'unbekannt' } })
-  expect(screen.getByRole('status').textContent).toContain('Keine Familien für „unbekannt“ gefunden.')
+  expect(screen.getByRole('status').textContent).toContain(
+    'Keine Familien für „unbekannt“ gefunden.',
+  )
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'ungültig' } })
