@@ -174,11 +174,28 @@ test('family links use an opaque route ID and open the matching detail view', as
       locale: 'de',
     },
   }
-  open('/organiser/families', [familyEvent])
+  const personEvent: Event = {
+    seq: 2,
+    at: '2027-01-01T00:01:00Z',
+    actor: 'organiser@example.test',
+    subject: 'fam_6b4b44137d724c1e',
+    type: 'PersonAdded',
+    payload: {
+      person_id: 'per_1',
+      family_id: 'fam_6b4b44137d724c1e',
+      given_name: 'Ada',
+      family_name: 'Beispiel',
+      birthdate: null,
+      role: 'adult',
+    },
+  }
+  open('/organiser/families', [familyEvent, personEvent])
   const familyLink = await screen.findByRole('link', { name: 'Foo Familie' })
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
+  expect(screen.getByText('Erwachsene(r)')).toBeTruthy()
+  expect(screen.getByText('Familie eingeladen')).toBeTruthy()
 })
 
 test('families keeps manual invitation without a bulk-import surface', async () => {

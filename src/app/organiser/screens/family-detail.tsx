@@ -5,7 +5,7 @@ import { materializePendingEvents } from '../state.js'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
-import { findFamily, labelValue } from '../family-data.js'
+import { eventTypeLabel, findFamily, labelValue, roleLabel } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 
 function makePersonId(givenName: string): string {
@@ -215,7 +215,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                         {labelValue(personLabels, 'family-name')}
                       </strong>
                       <span className="ml-3">
-                        {labelValue(personLabels, 'role') ?? 'ohne Rolle'}
+                        {roleLabel(labelValue(personLabels, 'role') ?? 'ohne Rolle')}
                       </span>
                     </p>
                     <PersonEditor
@@ -261,7 +261,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
             <ol className="space-y-3">
               {history.map((event) => (
                 <li key={event.seq} className="border-l-4 border-black pl-3">
-                  <p className="font-bold">{event.type}</p>
+                  <p className="font-bold">{eventTypeLabel(event.type)}</p>
                   {pendingSeqs.has(event.seq) ? (
                     <p className="text-sm font-bold">Noch nicht angewendet</p>
                   ) : null}

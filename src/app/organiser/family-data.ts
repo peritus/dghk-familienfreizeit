@@ -12,6 +12,27 @@ export function labelValue(labels: readonly Label[], key: string): string | null
   return typeof value === 'string' ? value : null
 }
 
+const roleLabels: Record<string, string> = {
+  adult: 'Erwachsene(r)',
+  child: 'Kind',
+  infant: 'Baby',
+}
+
+const eventTypeLabels: Record<string, string> = {
+  FamilyInvited: 'Familie eingeladen',
+  PersonAdded: 'Person hinzugefügt',
+  PersonUpdated: 'Person geändert',
+  PersonWithdrawn: 'Person zurückgenommen',
+}
+
+export function roleLabel(role: string): string {
+  return roleLabels[role] ?? role
+}
+
+export function eventTypeLabel(type: string): string {
+  return eventTypeLabels[type] ?? type
+}
+
 export function familyRows(world: KernelWorld): FamilyRow[] {
   return world.families.map((family) => {
     const labels = world.labels_by_entity[family.id] ?? []
