@@ -234,9 +234,13 @@ trait that reuses an existing control needs no family view code. See
 ## D15 — Derivation is a named primitive, and the client may call it
 
 *Chosen.* `derive(events, config) → World` and `diff(World, World)` are the read
-side of the application. The organiser application holds a list of pending events and
-renders every screen from `derive(committed ++ pending)`, deriving locally as the
-organiser works and appending only when they apply. This local derivation is an
+side of the application. Every organiser action follows one local-first pipeline:
+the client creates ordinary event drafts, adds them to its pending buffer, and renders
+every screen from `derive(committed ++ pending)` before any network response. The
+pending buffer is then sent through the one ordinary apply command. Immediate mode
+invokes that command automatically; collecting mode waits for the organiser to choose
+**Anwenden**. These are commit-timing policies over the same event path, not separate
+event types, read models, APIs, or server-side draft state. This local derivation is an
 organiser-only capability: the organiser browser may receive the committed event log,
 pending events and the full organiser `World`.
 
@@ -256,9 +260,16 @@ allowed to disagree with the real one, and a round trip per experiment.
 same reason, so both run in a browser unchanged. Naming the primitive also means
 staleness, plan diffs, and change emails need no machinery of their own — they are all the same two calls.
 
-*Consequence:* experiments stay out of the log. An organiser who tries four
-arrangements appends the events for the one they chose, so constraints in the log
-are decisions rather than sediment.
+*Consequence:* experiments stay out of the log when collecting mode is active. An
+organiser who tries four arrangements can inspect them locally and append only the
+events for the one they chose. In immediate mode, each click still takes the same
+local-first path and is automatically submitted as the organiser's decision.
+
+The pending buffer is ordered application state, not domain state. It may be briefly
+non-empty during an immediate-mode request. Further clicks append after the submitted
+prefix; a response acknowledges only the events in its own request. Successful append,
+stale-head recovery, validation failure, undo, discard, and explicit apply therefore
+all operate on the same buffer without dropping later local work.
 
 *Cost:* the organiser chunk carries the derivation core, and two runtimes execute one
 algorithm. The first is dependency-free TypeScript and is budgeted in

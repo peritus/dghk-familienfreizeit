@@ -68,19 +68,36 @@ and communication review; ordinary live-world changes are not automatically held
 does not care where the list came from. That is what makes the next section
 possible.
 
-## Pending events
+## Local-first organiser commands
 
-An organiser working in the organiser application holds a list of **pending events**:
-ordinary events, in the existing vocabulary, that have not been appended to the
-log. Every organiser screen — the board, dashboard, plan diffs —
-renders `derive(committed ++ pending)`.
+An organiser action always creates ordinary event drafts first. The shared organiser
+application adds the drafts to its ordered **pending buffer**, then immediately
+renders `derive(committed ++ pending)`. This is local-first: the organiser sees the
+real fold and solver over the proposed events before the Worker responds. Pending
+events are ordinary events in shape and meaning; they have not crossed the append
+boundary yet.
 
-Usually `pending` is empty and every screen shows the same world the server has.
-When an organiser drags a family to a room, the action appends decision labels to
-`pending` and the application re-derives locally — no request, no approximation, the real solver over the real
-constraints. Applying flushes `pending` to the log in one append; discarding drops
-it. An empty pending list is not a special case, so there is no second code path
-and no mode to be in.
+The pending buffer is used by one command pipeline with two commit-timing policies:
+
+| Step | Immediate mode | Collecting mode |
+|---|---|---|
+| Create drafts and update the local world | immediate | immediate |
+| Pending badge | increments and flashes by the event count | increments and flashes by the event count |
+| Invoke `POST /api/organiser/apply` | automatically | only after **Anwenden** |
+| Worker validation, authorization, replay, and atomic append | identical | identical |
+| Server-side draft state | never | never |
+
+Immediate mode is the default for an organiser session. Collecting mode is a UI
+policy for reviewing several clicks before committing them; it is not a second
+domain mode or a second derivation path. Switching it off is allowed only after the
+pending buffer is empty. A failed immediate apply keeps the events, opens review, and
+puts the client into collecting mode so the organiser can retry or discard them.
+
+While an apply request is in flight, later clicks remain in the local buffer after the
+submitted prefix. A successful response removes only the acknowledged prefix. A stale
+head incorporates the intervening committed events and preserves local pending work;
+other failures preserve the affected events for review. Discard removes only local
+drafts and never writes an event.
 
 This is the difference between recording a decision and recording the search for
 one. An organiser who tries four arrangements before choosing appends the events for
@@ -98,7 +115,8 @@ either way.
 
 Pending events live in the organiser's browser for as long as that tab is open. They are
 never stored on the server, never shared between organisers, and never visible to
-families.
+families. The collecting policy is session-local: route navigation preserves it and a
+reload returns to immediate mode after loading the committed log.
 
 ## Planning and family reads
 

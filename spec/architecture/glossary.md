@@ -36,12 +36,25 @@ the basis sequence and selected scopes; email notification is optional and separ
 plan, diagnostics and release references. Produced by `derive(events, config)` and
 never stored. Audience responses select permitted content under release control.
 
-**Pending events** — events an organiser has created in the organiser application and not
-yet applied. Held in their browser, never on the server. Every organiser screen derives
+**Pending events** — ordinary events an organiser has created in the organiser
+application but whose append has not yet been acknowledged by the Worker. They are
+held in the organiser's browser, never on the server. Every organiser screen derives
 from `committed ++ pending`.
 
-**Sandbox** — the organiser application with a non-empty pending list. Not a mode: an empty pending
-list is the ordinary case and needs no separate code path.
+**Pending buffer** — the ordered client-side collection of pending event groups. It is
+application state used for local derivation, undo, discard, retry, and apply-prefix
+acknowledgement; it is not persisted domain state.
+
+**Immediate mode** — the organiser UI policy that invokes the ordinary apply command
+automatically after local staging.
+
+**Collecting mode** — the organiser UI policy that leaves locally staged events in the
+pending buffer until the organiser explicitly chooses **Anwenden**. It is not a second
+domain model or server-side sandbox.
+
+**Sandbox** — an informal description of an organiser view with pending events. It is
+not an architectural state model; use **pending buffer** and **collecting mode** when
+the distinction matters.
 
 **Trace** — the human-readable record of why the solver did what it did. One line
 per decision, including the alternatives it rejected. Not a debug log; a
