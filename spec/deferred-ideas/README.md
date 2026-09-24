@@ -21,6 +21,7 @@ active module path.
 
 ## Other deferred designs
 
+- [CSV export](csv-export.md)
 - [Sleeping parties](sleeping-parties.md)
 - [Child rooms](child-rooms.md)
 - [Party review](party-review.md)
