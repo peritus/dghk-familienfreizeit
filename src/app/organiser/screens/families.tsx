@@ -7,75 +7,6 @@ import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 
-type ImportRow = { display_name: string; email: string; locale: 'de' | 'en' }
-
-function parseCsvRecords(text: string): string[][] {
-  const records: string[][] = []
-  let record: string[] = []
-  let field = ''
-  let quoted = false
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index]
-    if (character === '"') {
-      if (quoted && text[index + 1] === '"') {
-        field += '"'
-        index += 1
-      } else {
-        quoted = !quoted
-      }
-    } else if (character === ',' && !quoted) {
-      record.push(field.trim())
-      field = ''
-    } else if (character === '\n' && !quoted) {
-      record.push(field.trim())
-      if (record.some(Boolean)) records.push(record)
-      record = []
-      field = ''
-    } else if (character !== '\r') {
-      field += character
-    }
-  }
-  record.push(field.trim())
-  if (record.some(Boolean)) records.push(record)
-  return records
-}
-
-function csvRows(text: string): { valid: ImportRow[]; errors: string[] } {
-  const records = parseCsvRecords(text)
-  if (records.length === 0) return { valid: [], errors: [] }
-  const headers = records[0]!
-  const indexes = {
-    display_name: headers.indexOf('display_name'),
-    email: headers.indexOf('email'),
-    locale: headers.indexOf('locale'),
-  }
-  if (indexes.display_name < 0 || indexes.email < 0)
-    return { valid: [], errors: ['Die Spalten display_name und email werden benötigt.'] }
-  const valid: ImportRow[] = []
-  const errors: string[] = []
-  const emails = new Set<string>()
-  for (const [offset, values] of records.slice(1).entries()) {
-    const displayName = values[indexes.display_name] ?? ''
-    const email = (values[indexes.email] ?? '').toLowerCase()
-    const localeValue = values[indexes.locale] ?? 'de'
-    if (!displayName || !email.includes('@') || !['de', 'en'].includes(localeValue)) {
-      errors.push(`Zeile ${offset + 2}: Name, E-Mail oder Sprache ist ungültig.`)
-      continue
-    }
-    if (emails.has(email)) {
-      errors.push(`Zeile ${offset + 2}: E-Mail-Adresse ist doppelt.`)
-      continue
-    }
-    emails.add(email)
-    valid.push({
-      display_name: displayName,
-      email: email.toLowerCase(),
-      locale: localeValue as 'de' | 'en',
-    })
-  }
-  return { valid, errors }
-}
-
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
   return `${prefix}${random.replaceAll('-', '').slice(0, 16)}`
@@ -84,7 +15,6 @@ function id(prefix: string): string {
 export function Families() {
   const { world, state, dispatch } = useOrganiser()
   const [search, setSearch] = useState('')
-  const [csv, setCsv] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const rows = useMemo(
@@ -94,8 +24,6 @@ export function Families() {
       ),
     [world, search],
   )
-  const preview = useMemo(() => csvRows(csv), [csv])
-
   function stage(events: readonly EventDraft[]) {
     dispatch({ type: 'stage', events })
   }
@@ -119,20 +47,6 @@ export function Families() {
     ])
     setDisplayName('')
     setEmail('')
-  }
-
-  function importRows() {
-    if (!state.principal_email) return
-    stage(
-      preview.valid.map((row) => ({
-        at: new Date().toISOString(),
-        actor: state.principal_email!,
-        subject: null,
-        type: 'FamilyInvited',
-        payload: { family_id: id('fam_'), ...row },
-      })),
-    )
-    setCsv('')
   }
 
   return (
@@ -179,39 +93,6 @@ export function Families() {
             </label>
             <Button type="submit">Zur offenen Liste</Button>
           </form>
-        </CardContent>
-      </Card>
-      <Card className="bg-white">
-        <CardHeader>
-          <h3 className="text-xl">Import</h3>
-          <p>CSV-Spalten: display_name, email, locale</p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <label className="grid gap-1">
-            CSV-Daten
-            <textarea
-              value={csv}
-              onChange={(event) => setCsv(event.target.value)}
-              rows={4}
-              className="rounded border-2 border-black p-3 font-mono"
-              placeholder="display_name,email,locale"
-            />
-          </label>
-          {csv ? (
-            <p aria-live="polite">
-              {preview.valid.length} bereit, {preview.errors.length} Probleme
-            </p>
-          ) : null}
-          {preview.errors.length > 0 ? (
-            <ul className="list-disc pl-5">
-              {preview.errors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
-          ) : null}
-          <Button disabled={preview.valid.length === 0} onClick={importRows}>
-            Gültige Zeilen vormerken
-          </Button>
         </CardContent>
       </Card>
       <div className="overflow-x-auto rounded border-2 border-black bg-white">
