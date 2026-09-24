@@ -47,9 +47,18 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
                 }
                 onClick={() => dispatch({ type: 'toggle_collecting' })}
               >
-                <span aria-hidden="true" className="text-lg leading-none">
-                  📐
-                </span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m4 16 12-12a2.1 2.1 0 0 1 3 3L7 19l-4 1z" />
+                  <path d="m13 7 4 4M10 10l4 4M7 13l4 4" />
+                </svg>
                 <span key={count} aria-hidden="true" className="motion-safe:animate-pulse">
                   {count}
                 </span>
