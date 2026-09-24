@@ -126,6 +126,22 @@ test('organiser changes can be collected and reviewed from the toolbar badge', a
   expect(screen.getByText('1 offene Änderung')).toBeTruthy()
 })
 
+test('family history includes staged events before they are applied', async () => {
+  open('/organiser/families')
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Lokale Familie' } })
+  fireEvent.change(screen.getByLabelText('E-Mail'), {
+    target: { value: 'lokal@example.test' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  fireEvent.click(await screen.findByRole('link', { name: 'Lokale Familie' }))
+
+  expect(await screen.findByText('Noch nicht angewendet')).toBeTruthy()
+  expect(screen.getByText('FamilyInvited')).toBeTruthy()
+})
+
 test('immediate mode sends the same staged event through apply automatically', async () => {
   const { fetchMock } = open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()

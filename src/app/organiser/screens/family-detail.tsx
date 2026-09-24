@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'wouter'
 import type { EventDraft } from '../../../events/types.js'
+import { materializePendingEvents } from '../state.js'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
@@ -111,7 +112,9 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
     familyEventSeqs.add(person.created_seq)
     for (const label of world!.labels_by_entity[person.id] ?? []) familyEventSeqs.add(label.set_seq)
   }
-  const history = state.committed
+  const pendingEvents = materializePendingEvents(state)
+  const pendingSeqs = new Set(pendingEvents.map((event) => event.seq))
+  const history = [...state.committed, ...pendingEvents]
     .filter((event) => event.subject === family.family.id || familyEventSeqs.has(event.seq))
     .sort((a, b) => b.seq - a.seq)
 
@@ -259,6 +262,9 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
               {history.map((event) => (
                 <li key={event.seq} className="border-l-4 border-black pl-3">
                   <p className="font-bold">{event.type}</p>
+                  {pendingSeqs.has(event.seq) ? (
+                    <p className="text-sm font-bold">Noch nicht angewendet</p>
+                  ) : null}
                   <p className="text-sm">
                     #{event.seq} · {event.actor} · {event.at}
                   </p>

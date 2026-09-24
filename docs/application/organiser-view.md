@@ -12,7 +12,7 @@ path before persistence.
 |---|---|
 | `/organiser` | Dashboard with family/person counts, event-head status, diagnostics, and pending-change status |
 | `/organiser/families` | Derived family table, search, and manual invitation staging |
-| `/organiser/families/:id` | Derived family detail, person add/edit/withdraw staging, and event history |
+| `/organiser/families/:id` | Derived family detail, person add/edit/withdraw staging, and committed or pending event history |
 
 The host exposes these kernel-owned screens through the selected-profile screen
 registry. Later module screens must register through the same host; no inventory,
@@ -28,12 +28,13 @@ commit policy:
 - Immediate mode is the default for a session and invokes the ordinary apply request
   automatically after local staging.
 - Collecting mode is enabled by **Änderungen sammeln**. It keeps the same drafts in
-  the browser until the organiser opens the badge and chooses **Anwenden**.
+  the browser until the organiser opens the review panel and chooses **Anwenden**.
 
 The toolbar badge counts event records, while **Rückgängig** removes the most recent
 group. The expanded review panel provides **Rückgängig**, **Verwerfen**, and
 **Anwenden**. Discarding removes only browser-local drafts. Route navigation preserves
-the collecting policy; a reload resets it to immediate mode.
+the collecting policy; a reload resets it to immediate mode. Family history includes
+pending events and marks them as **Noch nicht angewendet** until persistence succeeds.
 
 Clicks made while an apply request is in flight stay after the submitted prefix. A
 successful response acknowledges only its own prefix. A stale head or other failure
