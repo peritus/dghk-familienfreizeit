@@ -25,9 +25,19 @@ that host.
 | `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
 | `/organiser/reports` | Reports | Printable operational reports |
 
-Every outstanding screen renders the organiser application's derived world. The
-browser holds pending events; applying appends them in one validated batch, and
-discarding them leaves no trace.
+Every outstanding screen renders the organiser application's derived world. Screen
+actions use the shared local-first organiser pipeline: they create ordinary event
+groups, derive the proposed world locally, and then either invoke the ordinary apply
+command automatically or leave the group in the browser for review, according to the
+session's commit policy. No screen owns a second pending list or persistence path.
+
+The header exposes **Änderungen sammeln**. Immediate mode is the session default and
+automatically applies each locally staged group. Collecting mode defers the same apply
+command until **Anwenden**. The numeric badge counts pending event records, flashes by
+the number added by the latest click, and opens the shared review panel. **Rückgängig**
+still removes the latest action group, **Verwerfen** clears local pending events, and
+**Anwenden** submits the current ordered batch. A failed automatic apply keeps its
+events, opens the panel, and activates collecting mode.
 
 Release reporting and confirmation follow [release control](release-control.md)
 and [UI-11](../ui/screens/release-control.md). Live coordination findings remain separate
@@ -46,12 +56,15 @@ searchable unplaced-family rail and room cards grouped by building and floor.
 │ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
 │ Lang ×1         │ Room 14 · 6 places · open                             │
 ├─────────────────┴────────────────────────────────────────────────────────┤
-│ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]         │
+│ [Änderungen sammeln: aus]                         [3]                 │
+│ 3 pending decisions · Braun → Room 14 · [Undo] [Discard] [Apply]       │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a family to a room appends organiser decision labels, re-derives locally,
-and explains infeasible drops. The solver remains the only producer of assignments.
+Dragging a family to a room creates organiser decision labels through the shared
+local-first pipeline, re-derives locally, and explains infeasible drops. In immediate
+mode the resulting batch is submitted automatically; collecting mode waits for Apply.
+The solver remains the only producer of assignments.
 Room cards show capacity, sanitary arrangement, accessibility, occupants by family,
 hard-constraint status, and soft penalties. A drop never splits a family or merges
 two families.

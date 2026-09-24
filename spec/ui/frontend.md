@@ -101,23 +101,29 @@ src/app/
 [organiser view](../application/organiser-view.md) and the family view. `/organiser/**` is a lazy
 chunk, so a family's phone never downloads the organiser screens or the solver.
 
-**Organiser state** is one reducer:
+**Organiser state** is one reducer and one local-first command pipeline:
 
 ```tsx
 function OrganiserApp() {
   const { committed, build_revision, compatibility_revision } = useLog() // GET /api/organiser/log, once
-  const [pending, dispatch] = useReducer(pendingReducer, [])
-  const world = useMemo(() => derive([...committed, ...pending], config), [committed, pending])
+  const [organiser, dispatch] = useReducer(organiserReducer, initialOrganiserState)
+  const world = useMemo(
+    () => derive([...organiser.committed, ...organiser.pending], config),
+    [organiser.committed, organiser.pending],
+  )
   …
 }
 ```
 
-Every screen receives `world` and `dispatch`. Actions append one or more pending
-events, remove the last action's events together for undo, clear the list for
-discard, or apply. Action boundaries are local UI bookkeeping; only the ordinary
-event list is sent to `derive` and append. There is no state manager and no
-data-fetching library: the organiser application makes three kinds of request — load
-the log, apply pending events, and trigger emails.
+Every screen receives the derived `world` and a shared staging callback. A screen
+creates one or more ordinary event drafts; it does not choose whether to save them.
+The callback appends the grouped drafts to the pending buffer, derives locally, and
+then follows the session's commit policy. Immediate mode invokes the ordinary Apply
+request automatically. Collecting mode leaves the drafts in the buffer until the
+organiser chooses **Anwenden**. Undo removes the most recent group, while the badge
+counts individual pending event records. Action grouping is client bookkeeping; only
+the ordinary event list is sent to `derive` and append. There is no second state
+manager, API, or event type for collecting mode.
 
 Release badges and inline diffs are derived through the canonical
 `CommunicationScopeView` contract in [release control](../application/release-control.md).
@@ -223,27 +229,46 @@ this constraint is appended, so an infeasible room is dimmed because it is
 infeasible — with the constraints and exclusions all present —
 rather than because a cheap approximation guessed so.
 
-### Mutation cycle
+### Local-first mutation cycle
 
 ```
-1. dispatch the event onto the pending list
-2. world = derive(committed ++ pending, config)
-3. React renders the board from world
-4. if more than this family moved → flash them, show the summary
+1. user clicks a screen action
+2. create one grouped EventDraft collection
+3. enqueue it in the shared pending buffer
+4. world = derive(committed ++ pending, config)
+5. React renders the updated screen immediately
+6. increment and briefly flash the pending badge by the event count
+7. immediate mode starts Apply automatically
+8. collecting mode waits for explicit Apply
 ```
 
-No network, and no reconcile step, because there is nothing to reconcile: the world
-on screen was computed the same way the server would compute it.
+The local world is computed the same way the server computes it. Immediate mode does
+not bypass local derivation; it only starts the ordinary persistence request after
+the local update. Collecting mode is therefore a commit-timing policy, not a second
+world or sandbox implementation.
 
-Applying is the only write the organiser application makes:
+The Worker append endpoint is the only persistence path the organiser application
+makes:
 
 ```
 POST /api/organiser/apply
      { input_seq, events[], build_revision, compatibility_revision }
 
   409 → the log moved; response carries the new events, the application re-derives on them
-  200 → applied; response carries the resulting derived world
+  200 → applied; response acknowledges the submitted pending prefix
 ```
+
+Further clicks made while an apply request is in flight remain after the submitted
+prefix and are not lost when the response arrives. A stale-head or other apply error
+preserves local events; an automatic failure enters collecting mode and opens the
+review panel. Discard removes local drafts without contacting the Worker.
+
+The header toolbar exposes **Änderungen sammeln**. It is off by default for each
+browser session, survives route navigation, and resets after reload. Its numeric badge
+counts event records, not action groups, increments by the number of events created by
+a click, and flashes by that delta. Clicking the badge expands the shared review
+panel containing **Rückgängig**, **Verwerfen**, and **Anwenden**. Turning collecting
+mode off is blocked while the pending buffer is non-empty.
 
 The server's plan is authoritative. The server checks the event head,
 `build_revision`, and `compatibility_revision` supplied with the request, then derives
