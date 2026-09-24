@@ -7,6 +7,7 @@ export type OrganiserContextValue = {
   state: OrganiserState
   world: KernelWorld | null
   dispatch: Dispatch<OrganiserAction>
+  stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>
 }
 
@@ -18,6 +19,9 @@ export function useOrganiser(): OrganiserContextValue {
   return value
 }
 
-export function stageEvent(dispatch: Dispatch<OrganiserAction>, event: EventDraft): void {
-  dispatch({ type: 'stage', events: [event] })
+export function stageEvent(
+  stage: (events: readonly EventDraft[]) => void,
+  event: EventDraft,
+): void {
+  stage([event])
 }

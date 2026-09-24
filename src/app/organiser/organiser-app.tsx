@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { Route, Switch } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
+import type { EventDraft } from '../../events/types.js'
 import { NotFound, RouteLoading } from '../components/route-states'
 import { Button } from '../components/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
@@ -20,6 +21,10 @@ import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/r
 
 export default function OrganiserApp() {
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
+
+  const stage = useCallback((events: readonly EventDraft[]) => {
+    dispatch({ type: 'stage', events })
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -94,11 +99,13 @@ export default function OrganiserApp() {
 
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
+    const pending = materializePendingEvents(state)
+    if (pending.length === 0 || state.status === 'applying') return
     dispatch({ type: 'applying' })
     try {
       const result = await applyOrganiserEvents({
         input_seq: state.head_seq,
-        events: materializePendingEvents(state).map(({ type, subject, payload }) => ({
+        events: pending.map(({ type, subject, payload }) => ({
           type,
           subject,
           payload,
@@ -106,7 +113,7 @@ export default function OrganiserApp() {
         build_revision: state.build_revision,
         compatibility_revision: state.compatibility_revision,
       })
-      dispatch({ type: 'applied', events: result.events })
+      dispatch({ type: 'applied', count: pending.length, events: result.events })
     } catch (error: unknown) {
       if (error instanceof OrganiserApiError) {
         const stale = staleResponse(error)
@@ -131,6 +138,16 @@ export default function OrganiserApp() {
     }
   }, [state])
 
+  useEffect(() => {
+    if (
+      state.commit_mode === 'immediate' &&
+      state.status !== 'applying' &&
+      state.pending.length > 0
+    ) {
+      void apply()
+    }
+  }, [apply, state.commit_mode, state.pending.length, state.status])
+
   if (state.status === 'loading') return <RouteLoading />
   if (state.status === 'unauthorized' || state.status === 'stale_build')
     return <p role="alert">{state.error}</p>
@@ -145,7 +162,7 @@ export default function OrganiserApp() {
     )
 
   return (
-    <OrganiserContext.Provider value={{ state, world: derivation.world, dispatch, apply }}>
+    <OrganiserContext.Provider value={{ state, world: derivation.world, dispatch, stage, apply }}>
       <OrganiserFrame>
         <Switch>
           <Route path={organiserRoutePaths.dashboard}>

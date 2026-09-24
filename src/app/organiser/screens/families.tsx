@@ -13,7 +13,7 @@ function id(prefix: string): string {
 }
 
 export function Families() {
-  const { world, state, dispatch } = useOrganiser()
+  const { world, state, stage: stageEvents } = useOrganiser()
   const [search, setSearch] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
@@ -25,7 +25,7 @@ export function Families() {
     [world, search],
   )
   function stage(events: readonly EventDraft[]) {
-    dispatch({ type: 'stage', events })
+    stageEvents(events)
   }
 
   function invite(event: FormEvent<HTMLFormElement>) {

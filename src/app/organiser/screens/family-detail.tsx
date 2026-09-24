@@ -91,7 +91,7 @@ function PersonEditor({
 }
 
 export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
-  const { state, world, dispatch } = useOrganiser()
+  const { state, world, stage } = useOrganiser()
   const family = familyId ? findFamily(world!, familyId) : null
   const [givenName, setGivenName] = useState('')
   const [familyName, setFamilyName] = useState('')
@@ -118,9 +118,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
   function addPerson(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!givenName.trim() || !familyName.trim()) return
-    dispatch({
-      type: 'stage',
-      events: [
+    stage([
         {
           at: new Date().toISOString(),
           actor: state.principal_email!,
@@ -135,8 +133,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
             role,
           },
         },
-      ],
-    })
+      ])
     setGivenName('')
     setFamilyName('')
   }
@@ -225,14 +222,12 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       initial_given_name={labelValue(personLabels, 'given-name') ?? ''}
                       initial_family_name={labelValue(personLabels, 'family-name') ?? ''}
                       initial_role={labelValue(personLabels, 'role') ?? 'adult'}
-                      onStage={(event) => dispatch({ type: 'stage', events: [event] })}
+                      onStage={(event) => stage([event])}
                     />
                     <Button
                       variant="neutral"
                       onClick={() =>
-                        dispatch({
-                          type: 'stage',
-                          events: [
+                        stage([
                             {
                               at: new Date().toISOString(),
                               actor: state.principal_email!,
@@ -240,8 +235,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                               type: 'PersonWithdrawn',
                               payload: { person_id: person.id, reason: null },
                             },
-                          ],
-                        })
+                          ])
                       }
                     >
                       Rücknahme vormerken

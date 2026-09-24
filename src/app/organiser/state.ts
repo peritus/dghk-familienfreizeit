@@ -6,6 +6,8 @@ export type PendingAction = {
   events: readonly EventDraft[]
 }
 
+export type OrganiserCommitMode = 'immediate' | 'collecting'
+
 export type OrganiserStatus =
   | 'loading'
   | 'ready'
@@ -18,6 +20,8 @@ export type OrganiserStatus =
 export type OrganiserState = {
   committed: readonly Event[]
   pending: readonly PendingAction[]
+  commit_mode: OrganiserCommitMode
+  review_open: boolean
   head_seq: number
   build_revision: string | null
   compatibility_revision: number | null
@@ -29,6 +33,8 @@ export type OrganiserState = {
 export const initialOrganiserState: OrganiserState = {
   committed: [],
   pending: [],
+  commit_mode: 'immediate',
+  review_open: false,
   head_seq: 0,
   build_revision: null,
   compatibility_revision: null,
@@ -46,10 +52,12 @@ export type OrganiserAction =
       principal_email: string
     }
   | { type: 'stage'; events: readonly EventDraft[] }
+  | { type: 'toggle_collecting' }
+  | { type: 'toggle_review' }
   | { type: 'undo' }
   | { type: 'discard' }
   | { type: 'applying' }
-  | { type: 'applied'; events: readonly Event[] }
+  | { type: 'applied'; count: number; events: readonly Event[] }
   | { type: 'rebased'; events: readonly Event[] }
   | {
       type: 'failed'
@@ -64,6 +72,8 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         ...state,
         committed: action.events,
         pending: [],
+        commit_mode: 'immediate',
+        review_open: false,
         head_seq: action.events.length,
         build_revision: action.build_revision,
         compatibility_revision: action.compatibility_revision,
@@ -73,31 +83,51 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       }
     case 'stage':
       return { ...state, pending: [...state.pending, { events: action.events }], error: null }
+    case 'toggle_collecting':
+      if (state.commit_mode === 'collecting') {
+        return pendingEventCount(state) === 0
+          ? { ...state, commit_mode: 'immediate', review_open: false }
+          : state
+      }
+      return { ...state, commit_mode: 'collecting' }
+    case 'toggle_review':
+      return { ...state, review_open: !state.review_open }
     case 'undo':
       return { ...state, pending: state.pending.slice(0, -1), error: null }
     case 'discard':
-      return { ...state, pending: [], error: null }
+      return { ...state, pending: [], review_open: false, error: null }
     case 'applying':
       return { ...state, status: 'applying', error: null }
-    case 'applied':
+    case 'applied': {
+      const pending = removePendingEvents(state.pending, action.count)
       return {
         ...state,
         committed: [...state.committed, ...action.events],
-        pending: [],
+        pending,
         head_seq: state.head_seq + action.events.length,
         status: 'ready',
+        review_open: pendingEventCount({ ...state, pending }) > 0,
         error: null,
       }
+    }
     case 'rebased':
       return {
         ...state,
         committed: [...state.committed, ...action.events],
         head_seq: state.head_seq + action.events.length,
+        commit_mode: 'collecting',
+        review_open: true,
         status: 'stale_head',
         error: 'Der Ereignisstand hat sich geändert. Prüfe Deine offenen Änderungen.',
       }
     case 'failed':
-      return { ...state, status: action.status, error: action.error }
+      return {
+        ...state,
+        commit_mode: 'collecting',
+        review_open: true,
+        status: action.status,
+        error: action.error,
+      }
   }
 }
 
@@ -116,4 +146,25 @@ export function deriveOrganiserWorld(state: OrganiserState, config: KernelConfig
 
 export function pendingEventCount(state: OrganiserState): number {
   return state.pending.reduce((count, action) => count + action.events.length, 0)
+}
+
+function removePendingEvents(
+  pending: readonly PendingAction[],
+  count: number,
+): readonly PendingAction[] {
+  let remaining = count
+  const result: PendingAction[] = []
+  for (const action of pending) {
+    if (remaining <= 0) {
+      result.push(action)
+      continue
+    }
+    if (action.events.length <= remaining) {
+      remaining -= action.events.length
+      continue
+    }
+    result.push({ events: action.events.slice(remaining) })
+    remaining = 0
+  }
+  return result
 }
