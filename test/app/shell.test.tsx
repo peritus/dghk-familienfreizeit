@@ -117,6 +117,15 @@ test('family links use an opaque route ID and open the matching detail view', as
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
 })
 
+test('families keeps manual invitation without a bulk-import surface', async () => {
+  open('/organiser/families')
+
+  expect(await screen.findByRole('heading', { name: 'Familie einladen' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Zur offenen Liste' })).toBeTruthy()
+  expect(screen.queryByRole('heading', { name: 'Import' })).toBeNull()
+  expect(screen.queryByRole('textbox', { name: 'CSV-Daten' })).toBeNull()
+})
+
 test.each(['/unknown', '/organiser/unknown'])(
   '%s has a recoverable not-found state',
   async (path) => {

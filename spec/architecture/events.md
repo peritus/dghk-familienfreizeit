@@ -69,8 +69,8 @@ discover the problem in the solver.
 ## Rules for payloads
 
 1. **Payloads carry values, not references to mutable state.** `PersonAdded`
-   carries the birthdate. It does not carry "look up the birthdate from the
-   import file". Replaying the log must not require anything but the log.
+   carries the birthdate. It does not carry "look up the birthdate from an
+   external file". Replaying the log must not require anything but the log.
 
 2. **Payloads are complete, not deltas.** `PersonUpdated` and ranked-preference
    events carry complete restatements. Deltas mean the
