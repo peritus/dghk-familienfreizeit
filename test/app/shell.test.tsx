@@ -113,7 +113,13 @@ test('organiser changes keep the collecting review expanded', async () => {
 
   const collectingButton = screen.getByRole('button', { name: 'Änderungen sammeln: aus' })
   fireEvent.click(collectingButton)
-  expect(screen.getByRole('button', { name: 'Änderungen sammeln: an' }).textContent).toContain('0')
+  const activeCollectingButton = screen.getByRole('button', { name: 'Änderungen sammeln: an' })
+  expect(activeCollectingButton.textContent).toContain('0')
+  expect(activeCollectingButton.querySelector('svg')).toBeTruthy()
+  expect(activeCollectingButton.className).not.toContain('hover:translate-x-boxShadowX')
+  expect(screen.getByRole('heading', { name: 'Local changes in this browser' })).toBeTruthy()
+  expect(screen.getByText('Actively collected here until you apply them.')).toBeTruthy()
+  expect(document.querySelector('header footer')).toBeNull()
   expect(screen.getByText('Keine offenen Änderungen')).toBeTruthy()
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
