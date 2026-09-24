@@ -19,11 +19,12 @@ drafts for explicit review according to the session's collecting policy. The Wor
 remains the only persistence boundary; there is no separate collecting API or server
 draft state.
 
-The header toolbar exposes **Änderungen sammeln** and a numeric pending-event badge.
-Immediate mode is the session default. Collecting mode defers the same apply command;
-the badge opens the shared review panel. The badge counts event records, while Undo
-retains action-group semantics. Local events added during an in-flight request remain
-queued after the submitted prefix.
+The header toolbar exposes **Änderungen sammeln** with a numeric pending-event count
+inside the control, including zero. Immediate mode is the session default. Collecting
+mode defers the same apply command and keeps the shared review panel expanded inline
+below the header. The control remains active but cannot leave collecting mode while
+drafts exist. Local events added during an in-flight request remain queued after the
+submitted prefix.
 
 On navigation the app focuses the main content region. A skip link provides
 keyboard access to that region. Lazy loading renders a skeleton and live status;

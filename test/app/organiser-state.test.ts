@@ -65,7 +65,6 @@ test('an apply error keeps pending events in the derived organiser world', () =>
   expect(deriveOrganiserWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
   expect(pendingEventCount(failed)).toBe(1)
   expect(failed.commit_mode).toBe('collecting')
-  expect(failed.review_open).toBe(true)
 })
 
 test('collecting mode cannot be disabled while events are pending', () => {

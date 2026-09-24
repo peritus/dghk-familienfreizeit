@@ -28,13 +28,15 @@ commit policy:
 - Immediate mode is the default for a session and invokes the ordinary apply request
   automatically after local staging.
 - Collecting mode is enabled by **Änderungen sammeln**. It keeps the same drafts in
-  the browser until the organiser opens the review panel and chooses **Anwenden**.
+  the browser until the organiser chooses **Anwenden** in the review panel, which
+  stays expanded inline below the organiser header while collecting mode is active.
 
-The toolbar badge counts event records, while **Rückgängig** removes the most recent
-group. The expanded review panel provides **Rückgängig**, **Verwerfen**, and
-**Anwenden**. Discarding removes only browser-local drafts. Route navigation preserves
-the collecting policy; a reload resets it to immediate mode. Family history includes
-pending events and marks them as **Noch nicht angewendet** until persistence succeeds.
+The collecting control uses a measuring-square icon and contains the numeric event
+count, including zero. The control remains active while drafts exist; clicking it
+cannot leave collecting mode until the drafts are applied or discarded. Discarding
+removes only browser-local drafts. Route navigation preserves the collecting policy; a
+reload resets it to immediate mode. Family history includes pending events and marks
+them as **Noch nicht angewendet** until persistence succeeds.
 
 Clicks made while an apply request is in flight stay after the submitted prefix. A
 successful response acknowledges only its own prefix. A stale head or other failure

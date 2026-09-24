@@ -107,12 +107,14 @@ test('organiser links stay within the nested route base', async () => {
   expect(familiesLink.getAttribute('href')).toBe('/organiser/families')
 })
 
-test('organiser changes can be collected and reviewed from the toolbar badge', async () => {
+test('organiser changes keep the collecting review expanded', async () => {
   open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
-  expect(screen.getByRole('button', { name: 'Änderungen sammeln: an' })).toBeTruthy()
+  const collectingButton = screen.getByRole('button', { name: 'Änderungen sammeln: aus' })
+  fireEvent.click(collectingButton)
+  expect(screen.getByRole('button', { name: 'Änderungen sammeln: an' })).toHaveTextContent('0')
+  expect(screen.getByText('Keine offenen Änderungen')).toBeTruthy()
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), {
@@ -120,8 +122,9 @@ test('organiser changes can be collected and reviewed from the toolbar badge', a
   })
   fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
 
-  const badge = await screen.findByRole('button', { name: '1 offene Änderung anzeigen' })
-  fireEvent.click(badge)
+  expect(
+    await screen.findByRole('button', { name: 'Änderungen sammeln: an' }),
+  ).toHaveTextContent('1')
   expect(screen.getByRole('button', { name: 'Anwenden' })).toBeTruthy()
   expect(screen.getByText('1 offene Änderung')).toBeTruthy()
 })
@@ -158,6 +161,7 @@ test('immediate mode sends the same staged event through apply automatically', a
     expect.objectContaining({ method: 'POST' }),
   )
   expect(screen.queryByRole('button', { name: /offene Änderung anzeigen/ })).toBeNull()
+  expect(screen.getByRole('button', { name: 'Änderungen sammeln: aus' })).toHaveTextContent('0')
 })
 
 test('family links use an opaque route ID and open the matching detail view', async () => {

@@ -21,7 +21,6 @@ export type OrganiserState = {
   committed: readonly Event[]
   pending: readonly PendingAction[]
   commit_mode: OrganiserCommitMode
-  review_open: boolean
   head_seq: number
   build_revision: string | null
   compatibility_revision: number | null
@@ -34,7 +33,6 @@ export const initialOrganiserState: OrganiserState = {
   committed: [],
   pending: [],
   commit_mode: 'immediate',
-  review_open: false,
   head_seq: 0,
   build_revision: null,
   compatibility_revision: null,
@@ -53,7 +51,6 @@ export type OrganiserAction =
     }
   | { type: 'stage'; events: readonly EventDraft[] }
   | { type: 'toggle_collecting' }
-  | { type: 'toggle_review' }
   | { type: 'undo' }
   | { type: 'discard' }
   | { type: 'applying' }
@@ -73,7 +70,6 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         committed: action.events,
         pending: [],
         commit_mode: 'immediate',
-        review_open: false,
         head_seq: action.events.length,
         build_revision: action.build_revision,
         compatibility_revision: action.compatibility_revision,
@@ -86,16 +82,14 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
     case 'toggle_collecting':
       if (state.commit_mode === 'collecting') {
         return pendingEventCount(state) === 0
-          ? { ...state, commit_mode: 'immediate', review_open: false }
+          ? { ...state, commit_mode: 'immediate' }
           : state
       }
       return { ...state, commit_mode: 'collecting' }
-    case 'toggle_review':
-      return { ...state, review_open: !state.review_open }
     case 'undo':
       return { ...state, pending: state.pending.slice(0, -1), error: null }
     case 'discard':
-      return { ...state, pending: [], review_open: false, error: null }
+      return { ...state, pending: [], error: null }
     case 'applying':
       return { ...state, status: 'applying', error: null }
     case 'applied': {
@@ -106,7 +100,6 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         pending,
         head_seq: state.head_seq + action.events.length,
         status: 'ready',
-        review_open: pendingEventCount({ ...state, pending }) > 0,
         error: null,
       }
     }
@@ -116,7 +109,6 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         committed: [...state.committed, ...action.events],
         head_seq: state.head_seq + action.events.length,
         commit_mode: 'collecting',
-        review_open: true,
         status: 'stale_head',
         error: 'Der Ereignisstand hat sich geändert. Prüfe Deine offenen Änderungen.',
       }
@@ -124,7 +116,6 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       return {
         ...state,
         commit_mode: 'collecting',
-        review_open: true,
         status: action.status,
         error: action.error,
       }
