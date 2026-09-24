@@ -10,6 +10,10 @@ utilities. The copied orange theme uses a warm paper background, white cards,
 black text and borders, offset shadows and slightly rounded corners. Base text
 is 16px with relaxed line height. Links and buttons have visible keyboard focus.
 
+The public family welcome view uses a responsive hero card with a clear
+registration status and a small inline drafting-compass illustration. The
+illustration is also used for the organiser's local-change collection control.
+
 The component registry and aliases live in [components.json](../../components.json).
 The implemented primitives are Button, Card, Alert and Skeleton in
 [`src/app/components/ui/`](../../src/app/components/ui/). Copied source and its

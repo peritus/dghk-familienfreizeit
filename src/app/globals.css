@@ -47,4 +47,7 @@
   button:focus-visible {
     @apply outline-2 outline-offset-4 outline-black;
   }
+  main:focus {
+    outline: none;
+  }
 }

@@ -5,6 +5,7 @@ import { pendingEventCount } from './state.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
 import { Button } from '../components/ui/button'
 import { organiserPaths } from '../../organiser/routes.js'
+import { DraftingCompassIcon } from '../components/drafting-compass-icon'
 
 export function OrganiserFrame({ children }: { children: ReactNode }) {
   const { state, dispatch, apply } = useOrganiser()
@@ -54,18 +55,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
                 }
                 onClick={() => dispatch({ type: 'toggle_collecting' })}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="m4 16 12-12a2.1 2.1 0 0 1 3 3L7 19l-4 1z" />
-                  <path d="m13 7 4 4M10 10l4 4M7 13l4 4" />
-                </svg>
+                <DraftingCompassIcon />
                 <span key={count} aria-hidden="true" className="motion-safe:animate-pulse">
                   {count}
                 </span>

@@ -64,6 +64,7 @@ test.each(['/', '/family'])(
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
       'Willkommen zur Familienfreizeit',
     )
+    expect(screen.getByText('Anmeldung noch nicht freigeschaltet')).toBeTruthy()
     expect(screen.getByRole('main').id).toBe('content')
     expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')
     expect(screen.queryByRole('link', { name: /Organisationsteam/ })).toBeNull()
