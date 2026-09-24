@@ -12,8 +12,18 @@ The route table is:
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
-one pending-event reducer shared by all current organiser routes and renders the
-prospective world locally. The Worker remains the only persistence boundary.
+one pending-event reducer and one local-first command pipeline shared by all current
+organiser routes. A click stages ordinary event drafts, renders the prospective world
+locally, and then either invokes the Worker apply request automatically or leaves the
+drafts for explicit review according to the session's collecting policy. The Worker
+remains the only persistence boundary; there is no separate collecting API or server
+draft state.
+
+The header toolbar exposes **Änderungen sammeln** and a numeric pending-event badge.
+Immediate mode is the session default. Collecting mode defers the same apply command;
+the badge opens the shared review panel. The badge counts event records, while Undo
+retains action-group semantics. Local events added during an in-flight request remain
+queued after the submitted prefix.
 
 On navigation the app focuses the main content region. A skip link provides
 keyboard access to that region. Lazy loading renders a skeleton and live status;

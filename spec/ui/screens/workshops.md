@@ -36,7 +36,8 @@ distinct.
 An Add organiser decision action opens the shared [decision form](constraints.md)
 with the selected session and placement context. It can add matching, exclusion,
 separation, eligibility, or fixed-placement labels through the fixed resolver. It uses
-the existing pending/apply flow and offers one optional note; applied labels show
+the shared local-first event pipeline and offers one optional note; immediate mode
+applies automatically, collecting mode waits for the shared Apply control; applied labels show
 the existing event author and timestamp. The derived assignment and findings
 update through the ordinary solver.
 
@@ -53,7 +54,7 @@ official assigned mode offers rankings/fairness before scheduling; sign-up mode 
 live list and optional capacity; interest mode shows organiser headcounts without
 shared names. Hide irrelevant ranking/solver columns for self-organised workshops.
 
-Setup changes use pending/Apply. Show draft versus effective communicated details
+Setup changes use the shared local-first pipeline. Show draft versus effective communicated details
 when they differ, including capacity and slot. Family admission uses the effective
 programme, so a draft capacity edit must not suggest places have already changed.
 Over-capacity preserves existing names and blocks new admission; warnings link to

@@ -27,7 +27,9 @@ and deterministic order. Capability labels use the existing resolver
 requires confirmation and a reason; history remains visible while the space is
 removed from future scheduler input.
 
-Pending changes use the ordinary organiser Apply/discard flow. Invalid capacity,
+Changes use the ordinary local-first organiser pipeline; immediate mode applies them
+automatically and collecting mode exposes them through the shared Apply/discard flow.
+Invalid capacity,
 timestamps, ordering, overlap, and touching windows are shown inline and block
 the event batch. The screen does not add a schedule assignment, choose a
 workshop, or edit attendance.

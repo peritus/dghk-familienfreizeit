@@ -66,6 +66,16 @@ When adding an organiser route, add its definition and route builder first, use
 the builder from the screen, and add the direct and linked navigation cases to
 the browser route suite in the same change.
 
+## Organiser local-first coverage
+
+The organiser state and shell tests verify the shared event pipeline. They cover
+collecting-mode activation, blocked deactivation with pending events, numeric badge
+review, local derivation before persistence, automatic immediate-mode apply, apply
+prefix acknowledgement when later clicks arrive in flight, preserved pending events
+after failure, and promotion of an automatic failure into collecting mode. These tests
+verify commit timing only; event schemas, authorization, replay, and atomic append
+remain Worker responsibilities.
+
 
 ## Lint coverage
 

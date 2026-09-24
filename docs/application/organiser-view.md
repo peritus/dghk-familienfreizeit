@@ -3,7 +3,8 @@
 The organiser application is an authenticated React host over the derived event
 world. The browser receives the committed event log only for an organiser
 principal, keeps unapplied events in one reducer, and renders
-`derive(committed + pending)` locally.
+`derive(committed + pending)` locally. Every organiser click follows this local-first
+path before persistence.
 
 ## Delivered routes
 
@@ -17,12 +18,27 @@ The host exposes these kernel-owned screens through the selected-profile screen
 registry. Later module screens must register through the same host; no inventory,
 solver, workshop, or report screen is registered by the kernel-only profile.
 
-## Pending event workflow
+## Local-first event workflow
 
-Screen actions add grouped event drafts to the shared pending reducer. The host
-derives the prospective world immediately. `Rückgängig` removes the most recent
-group, `Verwerfen` clears all pending drafts, and `Anwenden` sends the complete
-batch to the Worker.
+Screen actions add grouped ordinary event drafts to the shared pending reducer. The
+host derives the prospective world immediately, increments and briefly flashes the
+header badge by the number of event records created, and then applies the session's
+commit policy:
+
+- Immediate mode is the default for a session and invokes the ordinary apply request
+  automatically after local staging.
+- Collecting mode is enabled by **Änderungen sammeln**. It keeps the same drafts in
+  the browser until the organiser opens the badge and chooses **Anwenden**.
+
+The toolbar badge counts event records, while **Rückgängig** removes the most recent
+group. The expanded review panel provides **Rückgängig**, **Verwerfen**, and
+**Anwenden**. Discarding removes only browser-local drafts. Route navigation preserves
+the collecting policy; a reload resets it to immediate mode.
+
+Clicks made while an apply request is in flight stay after the submitted prefix. A
+successful response acknowledges only its own prefix. A stale head or other failure
+preserves local work; an automatic failure opens the review panel and switches to
+collecting mode.
 
 The Worker exposes `GET /api/organiser/log` and
 `POST /api/organiser/apply`. Apply checks the build and compatibility identities,
@@ -37,6 +53,7 @@ The active profile currently contains only the kernel `role` trait. Inventory,
 assignment, reports, family-facing controls, and module-contributed screens are
 specified separately and remain outstanding.
 
-The verified tests cover reducer grouping, local derivation, organiser log/apply
-authorization, prospective replay rejection, stale-head responses, route
-loading, and the public/private route boundary.
+The verified tests cover reducer grouping, local derivation, immediate and collecting
+commit timing, badge review, apply-prefix acknowledgement, organiser log/apply
+authorization, prospective replay rejection, stale-head responses, route loading, and
+the public/private route boundary.

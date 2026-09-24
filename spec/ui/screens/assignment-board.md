@@ -21,8 +21,10 @@ Organisers make room-placement decisions and review consequences. Route:
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a family to a room appends one or more organiser decision label events,
-re-derives locally, and shows every other family the change moved. Infeasible rooms lose drop affordance and explain why; soft
+Dragging a family to a room creates one or more organiser decision label events
+through the shared local-first pipeline, re-derives locally, and shows every other
+family the change moved. Immediate mode applies automatically; collecting mode waits
+for the shared Apply control. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
 picker and consequence summary. Apply confirms the pending batch; Discard
 requires confirmation. Undo removes all pending events belonging to the last action
@@ -32,7 +34,8 @@ together. An optional note belongs to the label, not to a separate decision reco
 
 The board becomes a searchable unplaced list followed by a room list. Each family
 has an “Add room decision” action; do not require drag-and-drop on touch devices. The
-pending bar remains sticky at the bottom without covering the final control.
+shared toolbar badge and expandable review panel remain usable without covering the
+final control.
 
 ## Neobrutalist redesign and components
 
