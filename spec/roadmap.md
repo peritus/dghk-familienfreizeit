@@ -6,44 +6,29 @@ in the documents linked from each milestone.
 
 The prerequisite runtime foundation is documented in [implemented architecture](../docs/architecture/overview.md),
 [development](../docs/engineering/development.md), and [testing](../docs/engineering/testing.md).
-The milestones below cover outstanding work; a feature milestone is complete
-only when its domain behavior, derived views, UI, report contribution, fixtures,
-tests, and operational requirements listed here are complete.
+The milestones below cover outstanding work. Each feature milestone is a complete
+vertical slice for its intended audience: domain behavior, derived views,
+authorisation, UI, fixtures, and tests are delivered together. Family access and
+reports are separate audience and presentation slices; an organiser milestone
+does not claim family behavior, and a domain milestone does not require reports
+before the report host exists.
 
-## M5 — Reports and browser-printing host
+## M5 — Accommodation inventory
 
-Specification coverage: [reports](application/reports.md), [D21](../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets),
-and report portions of [UI-00](ui/design-system.md).
-
-- Implement shared, family, and organiser report routes, audience projections,
-  report contribution registration, and the first host-rendered report.
-- Implement responsive report layout primitives, print stylesheets, repeated
-  headings, page breaks, greyscale status, and confidentiality labels.
-- Keep reports derived in memory; provide no download, export, or print button.
-- Add empty, restricted, mobile, and browser-print fixtures.
-
-Acceptance: a selected module's report contribution renders through a real
-browser route and prints correctly. Later feature slices own their report data
-and acceptance fixtures; this milestone owns the shared host.
-
-## M6 — Accommodation inventory
-
-Specification coverage: [room inventory](modules/room-inventory.md), inventory
-parts of [reports](application/reports.md), [profile configuration](profiles/familienfreizeit-2027.md),
-and [UI-08](ui/screens/inventory.md).
+Specification coverage: [room inventory](modules/room-inventory.md),
+[profile configuration](profiles/familienfreizeit-2027.md), and [UI-08](ui/screens/inventory.md).
 
 - Implement buildings, rooms, beds, places, capacity, retirement, room labels,
   inventory events, authorisation, and world summaries.
 - Enter and validate the 38-room, 162-bed occasion inventory as KDL fixtures.
-- Deliver the organiser inventory screen and capacity/cost report through the
-  M4/M5 hosts.
-- Add capacity, cost, retired-place, invalid-reference, replay, and print tests.
+- Deliver the organiser inventory screen and its capacity and cost summaries.
+- Add capacity, cost, retired-place, invalid-reference, and replay fixtures.
 
 Acceptance: the real inventory replays from KDL, generates stable places, makes
-every live room available to family placement subject to hard rules, and is
-usable from both the organiser route and report route.
+every live room available to organiser planning subject to hard rules, and is
+usable from the organiser route. No family route or report route is required.
 
-## M7 — Deterministic room assignment
+## M6 — Deterministic room assignment
 
 Specification coverage: [solver contract](architecture/solver-contract.md),
 [room assignment](modules/room-assignment.md), room-related [labels and constraints](architecture/labels-and-constraints.md),
@@ -53,56 +38,50 @@ and D5–D7.
   integer scoring, canonical plan identity, traces, and diagnostics.
 - Implement whole-family placement, bed demand, requirements, capabilities,
   exclusions, separation, organiser decisions, bounded repair, and board UI.
-- Deliver assignment, unplaced-family, and diagnostic reports through the report host.
 - Add real-inventory, infeasible, decision, moved-assignment, trace, shuffle,
   and golden-plan fixtures.
 
 Acceptance: whole-family placement is deterministic, hard constraints are
 enforced, organiser actions remain event-backed, the board is usable, and every
-assignment decision has an explanatory trace.
+assignment decision has an explanatory trace. No family route or report route is
+required.
 
-<a id="m8--family-authentication-and-preference-controls"></a>
-## M8 — Family authentication and preferences
+## M7 — Organiser controls
 
-Specification coverage: [authentication](application/authentication.md), [family view](application/family-view.md),
-[family preferences](modules/family-preferences.md), [UI-01](ui/screens/login.md),
-[UI-02](ui/screens/login-link-invalid.md), [UI-03](ui/screens/family-preferences.md),
-[UI-04](ui/screens/family-assignment.md), and D14/D24.
+Specification coverage: [family preferences](modules/family-preferences.md),
+[organiser view](application/organiser-view.md), and [UI-03](ui/screens/family-preferences.md).
 
-- Implement invite-only family magic-link authentication and real email delivery,
-  including single-use tokens, canonical identities, sessions, rate limits, and
-  privacy projections.
-- Implement profile-driven preference sections, organiser-equivalent family
-  controls, save-on-change responses, deadline notices, and assignment cards.
-- Deliver family information and accommodation reports through the M5 host.
-- Add German copy, English fallback, responsive/print behavior, privacy, and
-  cross-runtime agreement tests.
+- Implement profile-driven preference/control definitions and expose the same
+  controls to organisers through family detail and related organiser surfaces.
+- Use the ordinary event-draft, local derivation, authorisation, and append path;
+  include save-on-change behavior, deadlines, validation, and fixtures.
+- Keep family login, family sessions, family routes, and family-facing responses
+  out of this milestone.
 
-Acceptance: a family can request and redeem a real login email, inspect its own
-derived information, save permitted controls, and never receive organiser-only
-or hidden content.
+Acceptance: organisers can inspect and edit every control that families will
+later receive, with the same event-backed semantics and derived results. This is
+an organiser-complete slice, not a family-access slice.
 
-<a id="m9--workshop-programme-and-live-participation"></a>
-## M9 — Organiser-authored workshop programme
+## M8 — Organiser-authored workshop programme
 
 Specification coverage: [programme core](modules/programme-core.md), [official workshops](modules/official-workshops.md),
 [workshop space](modules/workshop-space.md), [workshops](modules/workshops.md),
-[UI-12](ui/screens/workshops.md), and programme report portions of [reports](application/reports.md).
+[UI-12](ui/screens/workshops.md), and programme behavior that remains organiser-only
+until M10.
 
 - Implement workshop spaces, slots, official workshop facts, organiser-authored
-  sessions, publication/cancellation, audience and age eligibility, leaders,
-  and programme history.
-- Implement the organiser workshop surface, live family participation controls,
-  programme diagnostics, and programme/roster report inputs.
+  sessions, publication, cancellation, audience and age eligibility, and leaders.
+- Implement the organiser workshop surface and programme diagnostics.
 - Keep physical-space inventory independent from accommodation inventory.
 - Add replay-at-event-cut, capacity race, cancellation, slot-change, and
   eligibility fixtures.
 
 Acceptance: organisers can create and publish an official workshop without
-call-for-papers, families can see and use the effective communicated programme,
-and draft changes cannot alter admission.
+call-for-papers, review its effective programme state, and prove through replay
+and fixtures that draft changes remain organiser-only.
 
-## M10 — Workshop scheduling and attendance
+<a id="m9--workshop-scheduling-and-attendance"></a>
+## M9 — Workshop scheduling and attendance
 
 Specification coverage: [workshop scheduling](modules/workshop-scheduling.md),
 [workshop rankings](modules/workshop-rankings.md), [workshop attendance](modules/workshop-assignment.md),
@@ -113,32 +92,55 @@ workshop solver sections, and workshop tests.
   and schedule release.
 - Implement attendance eligibility, reservations, previous-plan retention,
   balanced allocation, manual cancellation, fill, and attendance release.
-- Deliver ranking, schedule, heatmap, roster, finding, allocation-diff, and
-  family assignment surfaces through the established hosts.
+- Deliver organiser ranking, schedule, heatmap, roster, finding, and allocation
+  review surfaces.
 - Add ranking-before-schedule, fairness, capacity, separation, age,
   cancellation, unscheduled, deterministic, and lifecycle fixtures.
 
 Acceptance: official sessions can be ranked before scheduling, selected sessions
 are placed or reported as blocking outcomes, each person receives at most one
 assignment per overlapping period, and every allocation decision is traced.
+Families cannot log in during this milestone.
 
-<a id="m11--release-control-and-communicated-arrangements"></a>
-## M11 — Release control and communicated arrangements
+<a id="m10--family-access-and-release-control"></a>
+## M10 — Family access and release control
 
-Specification coverage: [release control](application/release-control.md), [D16](../decisions.md#d16--release-control-determines-which-arrangements-families-see),
-[UI-11](ui/screens/release-control.md), and release acceptance scenarios.
+Specification coverage: [authentication](application/authentication.md), [family view](application/family-view.md),
+[family preferences](modules/family-preferences.md), [release control](application/release-control.md),
+[UI-01](ui/screens/login.md), [UI-02](ui/screens/login-link-invalid.md), [UI-03](ui/screens/family-preferences.md),
+[UI-04](ui/screens/family-assignment.md), [UI-11](ui/screens/release-control.md), and D14/D16/D24.
 
-- Implement accommodation, programme, and per-slot allocation scopes.
-- Implement semantic accessors, outstanding-change reports, detailed preview,
-  reviewed-input/build/compatibility guards, blocking findings, and atomic
-  `Communicated` append.
-- Implement historical scope composition, reproducibility mismatch handling,
-  current privacy projection, and family/shared responses.
-- Add concurrent confirmation, reverted-change, dependency, cancellation, and
-  revision-mismatch fixtures.
+- Implement invite-only family magic-link authentication, single-use tokens,
+  canonical identities, sessions, rate limits, and privacy projections.
+- Render the M7 controls for families through the same profile-driven definitions
+  and ordinary event path, including deadline notices and assignment cards.
+- Implement accommodation, programme, and per-slot allocation scopes, semantic
+  accessors, previews, reviewed-input/build/compatibility guards, blocking
+  findings, historical composition, and atomic `Communicated` append.
+- Add concurrent-confirmation, reverted-change, dependency, cancellation,
+  revision-mismatch, privacy, and family-projection fixtures.
 
-Acceptance: only selected coherent scopes become visible; previews and family
-views agree; hidden or unreproducible historical content is never guessed.
+Acceptance: after M9, a family can request and redeem a real login email, inspect
+its permitted derived information, save permitted controls, and see only coherent
+communicated arrangements. Organisers can preview and atomically communicate
+selected scopes without exposing drafts.
+
+## M11 — Reports and browser-printing host
+
+Specification coverage: [reports](application/reports.md), [D21](../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets),
+report portions of [UI-00](ui/design-system.md), and the selected modules' report contracts.
+
+- Implement shared, family, and organiser report routes, audience projections,
+  report contribution registration, and the first host-rendered reports over the
+  projections established by M10.
+- Implement responsive report layout primitives, print stylesheets, repeated
+  headings, page breaks, greyscale status, and confidentiality labels.
+- Keep reports derived in memory; provide no download, export, or print button.
+- Add empty, restricted, mobile, browser-print, changed-data, and privacy fixtures.
+
+Acceptance: a selected module's report contribution renders through a real
+browser route and prints correctly from the released audience projection. Later
+feature slices own their report data; this milestone owns the shared host.
 
 ## M12 — Active-profile integration and operational readiness
 
