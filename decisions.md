@@ -160,7 +160,8 @@ exactly the components chosen so that nobody has to debug them.
 
 *Consequence:* the family view requires JavaScript. The family view bundle excludes the
 organiser screens and the solver, and saves on change with ordinary requests. See
-[frontend](spec/ui/frontend.md).
+[frontend](spec/ui/frontend.md). Implemented frontend lifecycle and navigation
+invariants are maintained in [the frontend handbook](docs/ui/frontend.md).
 
 ## D9 — Vite with the Cloudflare plugin
 

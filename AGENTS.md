@@ -35,6 +35,9 @@ the workspace-init and jj-vcs skills; use the development workflow for
 non-trivial changes. Modified-file runs must be finalized with a bookmark, a
 clean fresh working copy, and the mandatory collaborator export.
 
+For frontend work, follow the binding lifecycle and navigation rules in
+[docs/ui/frontend.md](docs/ui/frontend.md).
+
 ## Documentation and specification
 
 - `docs/` describes behavior present and verified in this repository, including
