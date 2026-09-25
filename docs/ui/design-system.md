@@ -21,6 +21,13 @@ adaptations are attributed in [THIRD_PARTY.md](../../THIRD_PARTY.md).
 The Button uses Base UI's `render` composition API, supports variants and sizes,
 and includes reduced-motion handling. Components are editable application source.
 
+Editable organiser data uses the inline table pattern described in the [UI
+specification](../../spec/ui/design-system.md#editable-table-and-card-pattern).
+The families view puts the invitation controls in the first table row, and the
+family-detail people view uses a semantic editable table with a first-row
+creation action and same-row save/delete controls. At narrow widths, these
+tables become labeled stacked cards while preserving field and action order.
+
 Accessibility checks exercise semantic route/loading/error behavior in jsdom.
 They do not establish contrast, 360px visual layout, or real-browser keyboard
 behavior. Those checks and the additional domain controls remain requirements in
