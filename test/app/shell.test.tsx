@@ -119,6 +119,13 @@ test('a direct organiser URL loads the lazy route', async () => {
   ).toBeTruthy()
 })
 
+test('the organiser nav is labelled for assistive tech and the inventory page sets its own title', async () => {
+  open('/organiser/inventory')
+  expect(await screen.findByRole('heading', { name: 'Unterkunft' })).toBeTruthy()
+  expect(screen.getByRole('navigation', { name: 'Hauptnavigation' })).toBeTruthy()
+  expect(document.title).toBe('Unterkunft · Familienfreizeit')
+})
+
 test('a failed organiser log load shows a load error, not a save error', async () => {
   const fetchMock = vi.fn((input: RequestInfo | URL) => {
     const url = String(input)
@@ -141,7 +148,7 @@ test('a failed organiser log load shows a load error, not a save error', async (
   expect(screen.getByText('Die Familiendaten konnten nicht geladen werden.', { exact: false })).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Neu laden' })).toBeTruthy()
   // No organiser nav or save-status control renders for a whole-app load failure.
-  expect(screen.queryByRole('navigation', { name: 'Organisationsteam' })).toBeNull()
+  expect(screen.queryByRole('navigation')).toBeNull()
   expect(screen.queryByText(/Speichern fehlgeschlagen/)).toBeNull()
 })
 

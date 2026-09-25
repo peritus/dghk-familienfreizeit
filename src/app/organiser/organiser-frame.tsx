@@ -58,7 +58,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
             <p className="text-sm text-muted">Organisationsteam</p>
           </div>
           <div className="order-last w-full sm:order-none sm:w-auto">
-            <nav aria-label="Organisationsteam" className="flex flex-wrap gap-2">
+            <nav aria-label="Hauptnavigation" className="flex flex-wrap gap-2">
               {navItems.map((item) => {
                 const active =
                   item.match === organiserRoutePaths.dashboard

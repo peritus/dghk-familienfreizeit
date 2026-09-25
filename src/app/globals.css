@@ -52,7 +52,9 @@
     @apply font-heading;
   }
   a:focus-visible,
-  button:focus-visible {
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
     @apply outline-2 outline-offset-4 outline-black;
   }
   main:focus {
