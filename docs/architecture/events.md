@@ -23,10 +23,12 @@ M1 implements `FamilyInvited`, `FamilyEmailChanged`, `PersonAdded`,
 map their complete payloads to generic labels. Email identity is NFC-normalized,
 trimmed, lowercased, and checked for uniqueness during replay.
 
-The fold rejects sequence gaps, duplicate identities, unknown references,
-duplicate family email addresses, invalid payloads, and invalid update history.
-Withdrawn people retain their identity and historical labels while being marked
-retired for future derivation.
+The fold rejects sequence gaps, duplicate identities, duplicate family email
+addresses, invalid payloads, and invalid update history. Resolver diagnostics
+currently identify unknown references in the derived world; append-time rejection
+of those diagnostics remains an outstanding [contract gap](../../spec/issues/open/029-dangling-reference-append-validation.md).
+Withdrawn people are hard-removed from the live world; historical views are
+reconstructed by re-deriving a truncated event slice.
 
 ## Development event source
 

@@ -34,11 +34,13 @@ the code-level allowlist on every request. Family status is resolved from the
 current folded event world, so a family email change invalidates the old address
 without session cleanup.
 
-`/api/family/view` requires a family principal. Organiser routes return JSON 404
-to non-organisers. `/api/me` exposes only the current principal kind and identity
-needed by the shell. `POST /api/events` sets the verified actor server-side,
-rejects stale heads, and permits family principals only to append events about
-their own family or people; organiser principals may append setup events.
+`/api/family/view` requires a family principal. Organiser API subroutes return
+JSON 401 to unauthenticated or non-organiser requests; the base `/api/organiser`
+route intentionally returns JSON 404 to conceal the organiser surface. `/api/me`
+exposes only the current principal kind and identity needed by the shell.
+`POST /api/events` sets the verified actor server-side, rejects stale heads, and
+permits family principals only to append events about their own family or people;
+organiser principals may append setup events.
 
 ## Limits
 

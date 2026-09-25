@@ -1,10 +1,10 @@
 # DGHK Familienfreizeit
 
 A family-event planning application under development. The repository implements
-a React application shell, a Cloudflare Worker health endpoint backed by local D1,
-and a verified build and test foundation. The family and organiser routes show
-foundation placeholders. Authentication, event persistence, domain modules,
-profiles, allocation, release control, and email are not implemented.
+a React/Cloudflare Worker runtime with the M1 event and authentication foundation,
+M2 profile composition, M3 generic labels and derivation, and the M4 organiser
+host with kernel family surfaces. Inventory, allocation, release control, family
+access, email delivery, and later domain modules remain future work.
 
 - [Implemented documentation](docs/README.md): current behavior and development procedures.
 - [Development](docs/engineering/development.md): CI and local preview commands.
