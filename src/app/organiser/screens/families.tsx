@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link } from 'wouter'
 import type { EventDraft } from '../../../events/types.js'
 import { Button } from '../../components/ui/button'
@@ -14,18 +14,10 @@ function id(prefix: string): string {
 
 export function Families() {
   const { world, state, stage: stageEvents } = useOrganiser()
-  const [search, setSearch] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [inviteError, setInviteError] = useState<string | null>(null)
-  const normalizedSearch = search.trim().toLowerCase()
-  const rows = useMemo(
-    () =>
-      familyRows(world!).filter((row) =>
-        `${row.display_name} ${row.email}`.toLowerCase().includes(normalizedSearch),
-      ),
-    [world, normalizedSearch],
-  )
+  const rows = familyRows(world!)
   function stage(events: readonly EventDraft[]) {
     stageEvents(events)
   }
@@ -69,15 +61,6 @@ export function Families() {
           <p className="text-sm font-bold uppercase tracking-wide">Kernel</p>
           <h2 className="text-3xl">Familien · {rows.length}</h2>
         </div>
-        <label className="grid gap-1">
-          Suche
-          <input
-            aria-label="Familien suchen"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="min-h-11 rounded border-2 border-black px-3"
-          />
-        </label>
       </div>
       <Card className="bg-white">
         <CardHeader>
@@ -157,9 +140,7 @@ export function Families() {
         </table>
         {rows.length === 0 ? (
           <p role="status" className="p-4">
-            {normalizedSearch
-              ? `Keine Familien für „${search.trim()}“ gefunden.`
-              : 'Noch keine Familien erfasst.'}
+            Noch keine Familien erfasst.
           </p>
         ) : null}
       </div>

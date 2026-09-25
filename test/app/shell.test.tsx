@@ -286,6 +286,7 @@ test('family links use an opaque route ID and open the matching detail view', as
   }
   open('/organiser/families', [familyEvent, personEvent])
   const familyLink = await screen.findByRole('link', { name: 'Foo Familie' })
+  expect(screen.queryByLabelText('Familien suchen')).toBeNull()
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
@@ -304,14 +305,10 @@ test('families keeps manual invitation without a bulk-import surface', async () 
   expect(screen.queryByRole('textbox', { name: 'CSV-Daten' })).toBeNull()
 })
 
-test('families explain empty searches and invalid invitations', async () => {
+test('families validate invitations', async () => {
   open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
-
-  fireEvent.change(screen.getByLabelText('Familien suchen'), { target: { value: 'unbekannt' } })
-  expect(screen.getByRole('status').textContent).toContain(
-    'Keine Familien für „unbekannt“ gefunden.',
-  )
+  expect(screen.queryByLabelText('Familien suchen')).toBeNull()
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'ungültig' } })
