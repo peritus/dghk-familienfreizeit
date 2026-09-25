@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { decimal, defineOccasionProfile, property } from '../../src/config/define.js'
 import { derive } from '../../src/events/fold.js'
@@ -192,5 +193,24 @@ describe('room inventory', () => {
       profile.validation_view,
     )
     expect(inventoryWorld(derive(events, profile.validation_view)).capacity).toBe(1)
+  })
+
+  test('replays the 38-room occasion fixture with 162 places and the documented cost', () => {
+    const text = readFileSync(
+      new URL('../fixtures/m5/familienfreizeit-2027.kdl', import.meta.url),
+      'utf8',
+    )
+    const events = loadKdl(text, profile.validation_view)
+    const summary = inventoryWorld(derive(events, profile.validation_view))
+    expect(summary.rooms).toHaveLength(38)
+    expect(summary.places).toHaveLength(162)
+    expect(summary.cost_eur).toBe(15236)
+    expect(summary.buildings.map(({ name }) => name)).toEqual([
+      'Haupthaus',
+      'Gartenhaus',
+      'Blockhaus',
+      'Bungalow',
+      'Schlaffass',
+    ])
   })
 })
