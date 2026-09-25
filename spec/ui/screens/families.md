@@ -6,15 +6,16 @@ Organisers inspect invitation progress, filter missing information, and invite
 families manually. Route: `/organiser/families`. Governing spec: [organiser view](../../application/organiser-view.md) §3.
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│ Families · 55                                             [Invite family]│
-│ [No login] [No room preference] [Incomplete workshops]                    │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Family             Email              People  Room  Workshops  Last seen  │
-│ Morgan             alex@example.com       4     ✓       ✓       14 Sep     │
-│ Taylor             taylor@example.com     3     —       ⚠       never      │
-│ Rivera             rivera@example.com     2     ✓       —       12 Sep     │
-└──────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│ Familien · 55                                                       │
+├──────────────────┬──────────────────────┬──────────┬────────────────┤
+│ Familie          │ E-Mail               │ Personen │ Aktion         │
+├──────────────────┼──────────────────────┼──────────┼────────────────┤
+│ [Neue Familie  ] │ [                  ] │    —     │[Familie         │
+│                  │                      │          │ einladen]       │
+├──────────────────┼──────────────────────┼──────────┼────────────────┤
+│ Morgan           │ alex@example.com     │    4     │ Öffnen         │
+└──────────────────┴──────────────────────┴──────────┴────────────────┘
 ```
 
 The invitation form stages one `FamilyInvited` event at a time. The empty table
@@ -24,11 +25,13 @@ contract.
 
 ## Accessibility and responsive behavior
 
-The table has a caption, sortable headers, row links, and a non-color status
-label. On narrow screens, filters wrap and each family becomes a labeled card.
+The table has a caption, column headers, row links, and a non-color status
+label. The first row is the inline invitation form and its action is explicitly
+labelled **Familie einladen**. On narrow screens, the table becomes labeled
+family cards; the invitation card remains first.
 
 ## Neobrutalist redesign and components
 
 Use `Sidebar`, `Input`, `Badge`, `Button`, and `Table` for the main view. Manual
-invitation uses the ordinary organiser form and stages the resulting event
+invitation uses the shared inline-table pattern and stages the resulting event
 through the shared draft-change workflow.

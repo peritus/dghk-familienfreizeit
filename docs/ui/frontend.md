@@ -7,8 +7,8 @@ The route table is:
 |---|---|
 | `/`, `/login`, `/family` | Public foundation welcome placeholder |
 | `/organiser` | Lazy authenticated organiser dashboard |
-| `/organiser/families` | Derived family table and manual invitation staging |
-| `/organiser/families/:id` | Family detail, person lifecycle staging and event history |
+| `/organiser/families` | Derived family table with first-row invitation staging |
+| `/organiser/families/:id` | Responsive editable people table, lifecycle staging and event history |
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
@@ -25,14 +25,20 @@ labelled **Änderungsentwürfe in diesem Browser** workspace inside the header. 
 the draft count and explains that these drafts remain local until applied. Discarding
 drafts exits drafting mode; applying successful drafts exits it when no drafts remain.
 Local events added during an in-flight request remain queued after the submitted prefix.
+The family invitation and people-management controls are integrated into their
+tables on wider screens. Each editable table puts its creation row first; the
+people table keeps **Speichern** and **Löschen** together in one action cell. At
+narrow widths the tables switch to labeled cards rather than requiring horizontal
+scrolling. These controls still stage the same ordinary event drafts through the
+shared local-first pipeline.
 
 ## Frontend navigation and state invariants
 
 Internal route changes use wouter's client-side navigation and must not reload
 the document. The organiser state owner remains mounted while moving between
 the dashboard, family list, family detail, and browser history entries. Pending
-event drafts, the derived local world, collecting mode, and the local-change
-review panel therefore survive those transitions. Screen-local inputs such as
+event drafts, the derived local world, drafting mode, and the draft workspace
+therefore survive those transitions. Screen-local inputs such as
 search text and partially completed forms may reset when their screen unmounts.
 
 Leaving `/organiser` creates a new organiser application when the route is
