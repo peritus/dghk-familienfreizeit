@@ -55,13 +55,13 @@ test('discard clears all drafts and exits drafting mode', () => {
   expect(discarded.change_mode).toBe('immediate')
 })
 
-test('an apply error keeps pending events in the derived organiser world', () => {
+test('an apply error keeps draft events in the derived organiser world', () => {
   const loaded = loadedState()
-  const pending = organiserReducer(loaded, { type: 'stage', events: [family] })
-  const failed = organiserReducer(pending, {
+  const drafting = organiserReducer(loaded, { type: 'stage', events: [family] })
+  const failed = organiserReducer(drafting, {
     type: 'failed',
     status: 'error',
-    error: 'Die Änderungen konnten nicht angewendet werden.',
+    error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
   })
 
   expect(deriveOrganiserWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
@@ -70,7 +70,7 @@ test('an apply error keeps pending events in the derived organiser world', () =>
 })
 
 test('drafting mode cannot be disabled while drafts exist', () => {
-  const collecting = organiserReducer(
+  const drafting = organiserReducer(
     organiserReducer(loadedState(), { type: 'toggle_drafting' }),
     {
       type: 'stage',
@@ -78,14 +78,14 @@ test('drafting mode cannot be disabled while drafts exist', () => {
     },
   )
 
-  const stillDrafting = organiserReducer(collecting, { type: 'toggle_drafting' })
+  const stillDrafting = organiserReducer(drafting, { type: 'toggle_drafting' })
   expect(stillDrafting.change_mode).toBe('drafting')
 
   const immediate = organiserReducer(stillDrafting, { type: 'discard' })
   expect(immediate.change_mode).toBe('immediate')
 })
 
-test('applying acknowledges only the submitted pending prefix', () => {
+test('applying acknowledges only the submitted draft prefix', () => {
   const first = { ...family, payload: { ...family.payload, family_id: 'fam_first' } }
   const second = { ...family, payload: { ...family.payload, family_id: 'fam_second' } }
   const staged = organiserReducer(
@@ -101,4 +101,13 @@ test('applying acknowledges only the submitted pending prefix', () => {
   expect(draftCount(applied)).toBe(1)
   expect(materializeDraftEvents(applied)[0]?.payload).toEqual(second.payload)
   expect(applied.committed).toHaveLength(1)
+  expect(applied.change_mode).toBe('drafting')
+
+  const completed = organiserReducer(applied, {
+    type: 'applied',
+    count: 1,
+    events: [{ ...second, seq: 2 }],
+  })
+  expect(draftCount(completed)).toBe(0)
+  expect(completed.change_mode).toBe('immediate')
 })
