@@ -159,6 +159,27 @@ describe('room inventory', () => {
     expect(inventoryWorld(derive(inventoryEvents, profile.validation_view)).places).toHaveLength(2)
   })
 
+  test('full room restatement clears an optional floor when it becomes null', () => {
+    const updated = [
+      ...inventoryEvents.slice(0, 2),
+      event(
+        'RoomUpdated',
+        {
+          room_id: 'rm_1',
+          building_id: 'bld_main',
+          number: '1',
+          floor: null,
+          room_type: 'standard',
+          sort_key: 1,
+        },
+        3,
+      ),
+      ...inventoryEvents.slice(2).map((item) => ({ ...item, seq: item.seq + 1 })),
+    ]
+    const summary = inventoryWorld(derive(updated, profile.validation_view))
+    expect(summary.rooms[0]?.floor).toBeNull()
+  })
+
   test('rejects invalid parents, duplicate room numbers, and writes to setup labels', () => {
     expect(() =>
       derive(

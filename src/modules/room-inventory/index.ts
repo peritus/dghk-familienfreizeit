@@ -239,12 +239,10 @@ function setupLabels(
   entityId: string,
   values: readonly { key: string; value: JsonValue }[],
 ): void {
-  capability.replaceLabels(
-    entityId,
-    values
-      .filter(({ value }) => value !== null)
-      .map(({ key, value }) => ({ key, value, strength: null, note: null })),
-  )
+  for (const { key, value } of values) {
+    if (value === null) capability.clearLabel(entityId, key)
+    else capability.replaceLabels(entityId, [{ key, value, strength: null, note: null }])
+  }
 }
 
 function inventorySummary(world: KernelWorld, priceTrait: string | null = null): InventorySummary {

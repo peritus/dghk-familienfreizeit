@@ -100,6 +100,8 @@ export type ModuleFoldCapability = {
   createEntity(kind: string, id: string, seq: number, sortKey?: number): Entity
   /** Hard-removes the entity and every label it holds (D27); rejects a kind the module did not declare. */
   retireEntity(kind: string, id: string): void
+  /** Clears every live label under one module-owned key on an entity. */
+  clearLabel(entityId: string, key: string): void
   setLabel(
     entityId: string,
     key: string,
@@ -155,6 +157,10 @@ export function guardModuleFold(
       retireEntity(kind, id) {
         requireKind(kind)
         capability.retireEntity(kind, id)
+      },
+      clearLabel(entityId, key) {
+        requireKey(key)
+        capability.clearLabel(entityId, key)
       },
       setLabel(entityId, key, value, strength, note) {
         requireKey(key)
@@ -468,6 +474,15 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
           state.module_entities.delete(id)
           state.entities_by_id.delete(id)
           removeLabelsForEntity(state, id)
+        },
+        clearLabel: (entityId, key) => {
+          const target = state.entities_by_id.get(entityId)
+          if (!target) throw new Error(`unknown entity: ${entityId}`)
+          const canonicalKey = configuredLabelKey(config, key)
+          const schema = config.label_schemas?.find((candidate) => candidate.key === canonicalKey)
+          if (schema?.scopes && !schema.scopes.includes(target.kind))
+            throw new Error(`label ${canonicalKey} is not valid for ${target.kind}`)
+          replaceLabels(state, entityId, canonicalKey)
         },
         setLabel: (entityId, key, value, strength, note) =>
           setConfiguredLabel(state, event, config, entityId, key, value, strength, note, true),

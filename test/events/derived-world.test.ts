@@ -186,6 +186,9 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
     retireEntity: (kind, id) => {
       calls.push(`retireEntity:${kind}:${id}`)
     },
+    clearLabel: (entityId, key) => {
+      calls.push(`clearLabel:${entityId}:${key}`)
+    },
     setLabel: (entityId, key) => {
       calls.push(`setLabel:${entityId}:${key}`)
     },
