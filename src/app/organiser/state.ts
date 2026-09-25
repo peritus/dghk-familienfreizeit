@@ -135,6 +135,29 @@ export function draftCount(state: OrganiserState): number {
   return state.drafts.reduce((count, action) => count + action.events.length, 0)
 }
 
+export type SaveStatusView =
+  | { kind: 'saved' }
+  | { kind: 'draft-empty' }
+  | { kind: 'draft-pending'; count: number }
+  | { kind: 'failed' }
+
+/**
+ * The save-status button has no reachable "offline" look yet: nothing in
+ * `OrganiserStatus` currently detects a lost connection (see spec/ui/
+ * design-system.md#save-status-pattern and the organiser-handoff's own open
+ * "offline queue" TODO). `unauthorized` and `stale_build` never reach this
+ * view either — OrganiserApp short-circuits to a plain alert for those
+ * before the frame (and this button) mounts.
+ */
+export function saveStatusView(state: OrganiserState): SaveStatusView {
+  if (state.status === 'error' || state.status === 'stale_head') return { kind: 'failed' }
+  if (state.change_mode === 'drafting') {
+    const count = draftCount(state)
+    return count > 0 ? { kind: 'draft-pending', count } : { kind: 'draft-empty' }
+  }
+  return { kind: 'saved' }
+}
+
 function removeDraftEvents(drafts: readonly DraftBatch[], count: number): readonly DraftBatch[] {
   let remaining = count
   const result: DraftBatch[] = []

@@ -2,52 +2,88 @@
 
 ## Audience, purpose, and route
 
-Organisers open this screen to answer “what needs attention today?” Route:
+Organisers open this screen to answer "what needs attention today?" Route:
 `/organiser`. Governing spec: [organiser view](../../application/organiser-view.md) §2.
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│ Organiser · Familienfreizeit   Dashboard  Families  Board  Plans  [Sign out]  │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Dashboard                                      Last derived 14:22          │
-│                                                                          │
-│ RELEASE CONTROL                                                          │
-│ Accommodation communicated · 3 days ago                                 │
-│ 3 scopes outstanding · 6 people affected       [Review changes →]  │
-│                                                                          │
-│ NEEDS ATTENTION                                                          │
-│ ⚠ 19 ensuite beds required, 14 available                 [See families] │
-│ ⚠ 2 constraint conflicts                                  [Inspect]      │
-│ ⚠ 1 family cannot be placed                                [Open board]   │
-│                                                                          │
-│ CHASE LIST                                                               │
-│ 8 families have not opened their invitation              [Send reminders]│
-│ 5 families have not stated room preferences                             │
-│                                                                          │
-│ 11 active constraints                                                       │
-└──────────────────────────────────────────────────────────────────────────┘
+┌ App bar (white, border-b) ──────────────────────────────────────────────┐
+│ Familienfreizeit        [Dashboard] Familien              [✓ Gespeichert ▾] │
+│ Organisationsteam                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+  H1  Was braucht heute Aufmerksamkeit?
+
+  Hinweise  (list, or the positive "Alles im Griff" empty state)
+
+  H2  Überblick
+  ┌ Familien (link, pressable) ┐  ┌ Personen (flat) ┐
+  │ 2                          │  │ 2               │
+  │ Familien                   │  │ Personen        │
+  │ Alle Familien ansehen      │  │ angemeldet      │
+  └─────────────────────────────┘  └─────────────────┘
 ```
 
-Warnings use text and glyphs as well as color. The empty state says “Nothing
-needs attention” and still shows outstanding release status and quality numbers.
+The content column and the app bar's inner content share one width and one
+left edge — no independent alignment per region.
 
-The release-control card uses the shared communication badges and links to the authoritative outstanding-change overview in
-[UI-11](release-control.md). Show initial scopes, changed scopes and revision
-mismatches distinctly. Programme-only changes count even when nobody moves. Live
-material requests and over-capacity sign-ups appear in the attention region, not
-as held arrangements. Compare content rather than counting events since an action.
+## App bar
+
+One app bar for every `/organiser*` route: brand plus role label
+("Organisationsteam"), navigation (`Dashboard`, `Familien`; the active item
+is a black fill with white text and `aria-current="page"`; inactive items
+show a border on hover; navigation links carry no shadow, per
+[UI-00](../design-system.md#pressable-elements-and-hit-areas)), and the
+save-status control right-aligned. On mobile the brand and the status
+control share the first row, and navigation wraps to a full-width second
+row. There is exactly one `<header>` landmark and one `<main>` landmark for
+the organiser section — do not nest a page-local header or a second `<main>`
+inside it.
+
+## Headline and Hinweise
+
+The page states its own question as the single `<h1>`: **Was braucht heute
+Aufmerksamkeit?** Hinweise answers it directly, so it sits immediately below
+the headline, before any overview numbers.
+
+**With hints:** a heading naming the count, then a single card containing
+one row per hint. Each row names the affected family, states what is
+missing or open as a full sentence, and links to where it can be resolved
+(a deep link into the family detail screen, not just the family list).
+
+**Empty:** a positive, short empty state — a heading such as **Alles im
+Griff** plus one calm line of explanation. Never repeat the same empty-state
+message in more than one place on the page.
+
+## Überblick
+
+An overview section below Hinweise, with one card per top-level count.
+Card structure is consistent: the number first (large, tight leading), then
+a label, then a one-line description. A card that leads to another screen
+is the whole card as a link and is pressable (shadow on hover per
+[UI-00](../design-system.md#pressable-elements-and-hit-areas)); a
+count-only card with nowhere to go is flat — border only, no shadow.
+
+This screen does not surface event-log internals (a raw sequence number, a
+"last derived" timestamp) as a card of its own. If a family count needs a
+qualifier, describe it in organiser-facing terms ("angemeldet"), not in
+storage terms.
+
+Release-control and reminder-chasing summaries (outstanding scopes, families
+that haven't responded) are out of scope for this screen spec; they belong
+to [UI-11](release-control.md) under **M10 — Family access and release
+control** and will get their own dashboard entry point once that milestone
+is built, rather than being designed here ahead of the underlying feature.
 
 ## Interaction and accessibility
 
-Cards link to the exact affected screen. Reminder sending requires confirmation
-and reports a result. Keyboard users reach urgent items before quality numbers;
-the heading for the attention region is read by assistive technology when new findings appear.
+Hinweise rows and Überblick link-cards are keyboard-reachable in document
+order; a card that is a link exposes its full text as the link's accessible
+name, not just a trailing caption. The save-status control's states,
+popover, and confirmations are specified in
+[UI-00](../design-system.md#save-status-control-and-provisional-state-pattern), not
+repeated here.
 
 ## Neobrutalist redesign and components
 
-Use a `Sidebar` for organiser navigation, `Card` for plan status and each urgent
-group, the shared `Badge`/inline-diff component for release status, and `Alert` for findings. Reminder sending
-uses the canonical `AlertDialog` composition: `AlertDialogTrigger` + `Button`,
-`AlertDialogContent`, `AlertDialogHeader`, `AlertDialogTitle`,
-`AlertDialogDescription`, `AlertDialogFooter`, `AlertDialogCancel`, and
-`AlertDialogAction`. The action description names the number of recipients.
+Use `Card`/`CardHeader`/`CardContent` for the Hinweise and Überblick cards,
+with the pressable variant only on the Familien link-card. Use the shared
+save-status control (app bar) rather than a page-local drafts panel.

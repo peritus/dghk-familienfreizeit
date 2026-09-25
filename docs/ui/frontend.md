@@ -19,12 +19,21 @@ draft changes for explicit review according to the session's drafting policy. Th
 remains the only persistence boundary; there is no separate drafting API or server
 draft state.
 
-The header toolbar exposes an upload-cloud control for starting **Entwurfsmodus**.
-Immediate mode is the session default. Drafting mode replaces that control with a
-labelled **Änderungsentwürfe in diesem Browser** workspace inside the header. It shows
-the draft count and explains that these drafts remain local until applied. Discarding
-drafts exits drafting mode; applying successful drafts exits it when no drafts remain.
-Local events added during an in-flight request remain queued after the submitted prefix.
+One app bar (brand, role, navigation, and the save-status control) covers every
+`/organiser*` route; there is no separate site shell header or boxed page header
+there. The save-status control is a single persistent button in the app bar with a
+popover, not a toggle that disappears: it shows one of **Gespeichert**,
+**Entwurfsmodus** (empty or with a pending count), or **Speichern fehlgeschlagen** at
+a glance, and opens a popover with the same state, a draft-mode switch, and the
+save/discard actions. See [design system](design-system.md#save-status-control) for
+the states, icons, and the provisional-state (blueprint) marking.
+
+Immediate mode is the session default; the draft-mode switch inside the popover turns
+on **Entwurfsmodus**, which collects changes as browser-local drafts until the person
+saves them. Discarding drafts, or saving every pending draft, both exit drafting mode
+back to immediate mode -- there is no state where drafts are at zero and drafting mode
+stays on. Local events added during an in-flight request remain queued after the
+submitted prefix.
 The family invitation and people-management controls are integrated into their
 tables on wider screens. Each editable table puts its creation row first; the
 people table keeps **Speichern** and **Löschen** together in one action cell. At

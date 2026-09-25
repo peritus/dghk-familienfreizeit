@@ -57,7 +57,7 @@ emails, notifications, and help text.
 | immediate mode | **Änderungen werden sofort angewendet** | Explanation for the default policy |
 | draft workspace | **Entwurfsbereich** | The shared organiser area for browser-local draft changes |
 | discard drafts | **Entwürfe verwerfen** | Removes all local draft events without contacting the server |
-| apply drafts | **Entwürfe anwenden** | Starts the ordinary Worker append for the current draft batch |
+| apply drafts | **Änderungen speichern** | Starts the ordinary Worker append for the current draft batch; use "speichern" everywhere in the flow (button, confirmation, status, screen-reader announcements) rather than "anwenden," which reads as developer language |
 | uncommunicated | **Noch nicht an Familien kommuniziert** | Applied changes not yet made visible to families through Communicate |
 | organiser | **organisierende Person** | One person acting on behalf of the organisation team |
 | organisation team | **Organisationsteam** | The collective group responsible for organising the occasion |
@@ -98,6 +98,11 @@ Angabe in the event log.
 - Use the German decimal comma and a non-breaking space before currency:
   **103,00 €**.
 - Keep names, room names, workshop titles, and user-entered text unchanged.
+- Get the singular right: a count-driven sentence must read "1 Änderung", not
+  "1 Änderungen". Use `Intl.PluralRules('de')` (or an equivalent small
+  helper) rather than hand-rolled `count === 1` checks scattered across
+  components, and apply the same fix to any `aria-label` that repeats the
+  count.
 
 ## 5. Preferred examples
 

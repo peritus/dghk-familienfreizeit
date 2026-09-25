@@ -15,6 +15,19 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+function saveStatusTrigger(): HTMLElement {
+  const trigger = screen
+    .getAllByRole('button')
+    .find((button) => /anzeigen$/.test(button.getAttribute('aria-label') ?? ''))
+  if (!trigger) throw new Error('save-status trigger not found')
+  return trigger
+}
+
+async function enableDraftMode() {
+  fireEvent.click(saveStatusTrigger())
+  fireEvent.click(await screen.findByRole('switch', { name: 'Entwurfsmodus' }))
+}
+
 function open(path: string, events: readonly Event[] = []) {
   let fetchMock: ReturnType<typeof vi.fn> | undefined
   if (path.startsWith('/organiser')) {
@@ -108,7 +121,7 @@ test('a direct organiser URL loads the lazy route', async () => {
 
 test('organiser links stay within the nested route base', async () => {
   open('/organiser')
-  const familiesLink = await screen.findByRole('link', { name: 'Familien öffnen' })
+  const familiesLink = await screen.findByRole('link', { name: /Alle Familien ansehen/ })
   expect(familiesLink.getAttribute('href')).toBe('/organiser/families')
 })
 
@@ -131,34 +144,34 @@ test('organiser state survives client-side route and history navigation', async 
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
-  fireEvent.click(screen.getByRole('link', { name: 'Familien öffnen' }))
+  await enableDraftMode()
+  fireEvent.click(screen.getByRole('link', { name: /Alle Familien ansehen/ }))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'neu@example.test' } })
   fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
-  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: 'Bestehende Familie' }))
   expect(await screen.findByRole('heading', { name: 'Bestehende Familie' })).toBeTruthy()
-  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: '← Familien' }))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Neue Familie' })).toBeTruthy()
-  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: 'Dashboard' }))
   expect(
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
-  expect(screen.getByText('1 Änderungsentwürfe warten auf Anwendung.')).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   window.history.pushState({}, '', '/organiser/families')
   fireEvent(window, new PopStateEvent('popstate'))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
-  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
   expect(
     fetchMock?.mock.calls.filter(([input]) => String(input).endsWith('/api/organiser/log')),
   ).toHaveLength(1)
@@ -180,22 +193,22 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
   expect(
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Entwurfsmodus starten' })).toBeTruthy()
-  expect(screen.queryByRole('heading', { name: 'Local changes in this browser' })).toBeNull()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toBe(
+    'Alles gespeichert. Speicheroptionen anzeigen',
+  )
 })
 
 test('organiser draft mode replaces the upload control with its workspace', async () => {
   open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
-  expect(screen.queryByRole('button', { name: 'Entwurfsmodus starten' })).toBeNull()
-  expect(screen.getByRole('heading', { name: 'Änderungsentwürfe in diesem Browser' })).toBeTruthy()
-  expect(screen.getByText('Diese Entwürfe bleiben hier, bis Du sie anwendest.')).toBeTruthy()
-  expect(screen.getByText('Keine Änderungsentwürfe')).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Entwürfe verwerfen' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Entwürfe anwenden' }).hasAttribute('disabled')).toBe(
-    true,
+  await enableDraftMode()
+  expect(screen.getByRole('heading', { name: 'Noch keine Entwürfe' })).toBeTruthy()
+  expect(
+    screen.getByText('Neue Änderungen bleiben in diesem Browser, bis du sie speicherst.'),
+  ).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toBe(
+    'Entwurfsmodus aktiv, keine Entwürfe. Details anzeigen',
   )
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
@@ -204,14 +217,23 @@ test('organiser draft mode replaces the upload control with its workspace', asyn
   })
   fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
 
-  expect(await screen.findByText('1 Änderungsentwurf')).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Entwürfe anwenden' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Entwürfe verwerfen' })).toBeTruthy()
-  expect(screen.queryByRole('button', { name: 'Rückgängig' })).toBeNull()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
+  fireEvent.click(saveStatusTrigger())
+  expect(
+    await screen.findByRole('heading', { name: '1 Änderung nur in diesem Browser' }),
+  ).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Änderungen speichern' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Verwerfen …' })).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Entwürfe verwerfen' }))
-  expect(await screen.findByRole('button', { name: 'Entwurfsmodus starten' })).toBeTruthy()
-  expect(screen.queryByRole('heading', { name: 'Änderungsentwürfe in diesem Browser' })).toBeNull()
+  fireEvent.click(screen.getByRole('button', { name: 'Verwerfen …' }))
+  expect(await screen.findByRole('heading', { name: '1 Änderung verwerfen?' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Ja, verwerfen' }))
+
+  expect(
+    await screen.findByRole('button', {
+      name: 'Alles gespeichert. Speicheroptionen anzeigen',
+    }),
+  ).toBeTruthy()
 })
 
 test('family history includes staged events before they are applied', async () => {
@@ -231,7 +253,7 @@ test('family history includes staged events before they are applied', async () =
   open('/organiser/families', [familyEvent])
   fireEvent.click(await screen.findByRole('link', { name: 'Lokale Familie' }))
   expect(await screen.findByRole('heading', { name: 'Lokale Familie' })).toBeTruthy()
-  fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
+  await enableDraftMode()
   fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Lokale' } })
   fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
   fireEvent.click(screen.getByRole('button', { name: 'Neue Person hinzufügen' }))

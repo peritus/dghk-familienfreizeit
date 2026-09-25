@@ -7,7 +7,7 @@ import { NotFound, RouteLoading } from '../components/route-states'
 import { Button } from '../components/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
-import { OrganiserFrame } from './organiser-frame.js'
+import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveOrganiserWorld,
   initialOrganiserState,
@@ -148,17 +148,28 @@ export default function OrganiserApp() {
     }
   }, [apply, state.change_mode, state.drafts.length, state.status])
 
-  if (state.status === 'loading') return <RouteLoading />
+  if (state.status === 'loading')
+    return (
+      <OrganiserMinimalFrame>
+        <RouteLoading />
+      </OrganiserMinimalFrame>
+    )
   if (state.status === 'unauthorized' || state.status === 'stale_build')
-    return <p role="alert">{state.error}</p>
+    return (
+      <OrganiserMinimalFrame>
+        <p role="alert">{state.error}</p>
+      </OrganiserMinimalFrame>
+    )
   if (!derivation.world)
     return (
-      <div className="space-y-4" role="alert">
-        <p>{derivation.error ?? state.error}</p>
-        <Button variant="neutral" onClick={() => dispatch({ type: 'discard' })}>
-          Änderungsentwürfe verwerfen
-        </Button>
-      </div>
+      <OrganiserMinimalFrame>
+        <div className="space-y-4" role="alert">
+          <p>{derivation.error ?? state.error}</p>
+          <Button variant="neutral" onClick={() => dispatch({ type: 'discard' })}>
+            Änderungsentwürfe verwerfen
+          </Button>
+        </div>
+      </OrganiserMinimalFrame>
     )
 
   return (

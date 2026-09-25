@@ -1,116 +1,94 @@
 import type { ReactNode } from 'react'
-import { Cloud, CloudUpload, Pause } from 'lucide-react'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { useOrganiser } from './context.js'
-import { draftCount } from './state.js'
+import { SaveStatus } from './save-status.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
-import { Button } from '../components/ui/button'
-import { organiserPaths } from '../../organiser/routes.js'
+import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
+import { cn } from '../lib/utils.js'
 
-function DraftingIcon() {
+const navItems = [
+  { href: organiserPaths.dashboard(), match: organiserRoutePaths.dashboard, label: 'Dashboard' },
+  { href: organiserPaths.families(), match: organiserRoutePaths.families, label: 'Familien' },
+]
+
+/**
+ * A brand-only header/main pair for the loading, unauthorized, stale-build,
+ * and invalid-derivation states in OrganiserApp -- those run before
+ * OrganiserContext exists, so the full OrganiserFrame (nav, save-status)
+ * isn't available yet. Keeping one header/main landmark pair here too,
+ * rather than leaving these states unwrapped, is what avoids reintroducing
+ * the missing-`<main>` regression the single-app-bar merge is meant to fix.
+ */
+export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
   return (
-    <span className="relative inline-flex size-5 items-center justify-center" aria-hidden="true">
-      <Cloud className="absolute size-5" />
-      <Pause className="absolute size-2.5 fill-current stroke-[3]" />
-    </span>
+    <div className="min-h-dvh">
+      <header className="border-b-2 border-black bg-white px-4 py-3 sm:px-8">
+        <div className="mx-auto max-w-5xl">
+          <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
+            Familienfreizeit
+          </Link>
+        </div>
+      </header>
+      <main id="content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+        {children}
+      </main>
+    </div>
   )
 }
 
 export function OrganiserFrame({ children }: { children: ReactNode }) {
-  const { state, dispatch, apply } = useOrganiser()
-  const count = draftCount(state)
-  const drafting = state.change_mode === 'drafting'
+  const { state } = useOrganiser()
+  const [location] = useLocation()
 
   return (
-    <div className="space-y-6">
-      <header
-        className={`border-x-2 border-t-2 border-black px-3 pt-3 ${
-          drafting ? 'border-b-0 pb-0' : 'border-b-2 pb-4'
-        }`}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="min-h-dvh">
+      <header className="border-b-2 border-black bg-white px-4 py-3 sm:px-8">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide">Familienfreizeit</p>
-            <h1 className="text-2xl">Organisationsteam</h1>
+            <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
+              Familienfreizeit
+            </Link>
+            <p className="text-sm text-muted">Organisationsteam</p>
           </div>
-          <nav aria-label="Organisationsteam" className="flex flex-wrap gap-2">
-            <Link
-              href={organiserPaths.dashboard()}
-              className="rounded border-2 border-black bg-white px-3 py-2 font-bold"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href={organiserPaths.families()}
-              className="rounded border-2 border-black bg-white px-3 py-2 font-bold"
-            >
-              Familien
-            </Link>
-            {!drafting ? (
-              <Button
-                size="icon"
-                variant="neutral"
-                className="hover:translate-x-0 hover:translate-y-0 hover:shadow-shadow"
-                aria-label="Entwurfsmodus starten"
-                title="Entwurfsmodus starten"
-                onClick={() => dispatch({ type: 'toggle_drafting' })}
-              >
-                <CloudUpload />
-              </Button>
-            ) : null}
-          </nav>
+          <div className="order-last w-full sm:order-none sm:w-auto">
+            <nav aria-label="Organisationsteam" className="flex flex-wrap gap-2">
+              {navItems.map((item) => {
+                const active =
+                  item.match === organiserRoutePaths.dashboard
+                    ? location === item.match
+                    : location === item.match || location.startsWith(`${item.match}/`)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'min-h-11 rounded-base border-2 px-4 py-2 font-bold',
+                      active
+                        ? 'border-black bg-black text-white'
+                        : 'border-transparent hover:border-black',
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+          <div className="ml-auto">
+            <SaveStatus />
+          </div>
         </div>
-        {drafting ? (
-          <section
-            aria-labelledby="draft-changes-title"
-            className="-mx-3 mt-3 border-2 border-black bg-[#fffaf0] p-3 shadow-[4px_4px_0_0_#000]"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-2">
-                <DraftingIcon />
-                <div>
-                  <h2 id="draft-changes-title" className="text-xl">
-                    Änderungsentwürfe in diesem Browser
-                  </h2>
-                  <p>Diese Entwürfe bleiben hier, bis Du sie anwendest.</p>
-                </div>
-              </div>
-              <p aria-live="polite" className="flex items-center gap-2">
-                <span key={count} aria-hidden="true" className="motion-safe:animate-pulse">
-                  {count}
-                </span>
-                <span>
-                  {count === 0
-                    ? 'Keine Änderungsentwürfe'
-                    : `${count} Änderungsentwurf${count === 1 ? '' : 'e'}`}
-                </span>
-              </p>
-            </div>
-            <div className="mt-3 flex flex-wrap justify-end gap-2">
-              <Button
-                variant="neutral"
-                disabled={state.status === 'applying'}
-                onClick={() => dispatch({ type: 'discard' })}
-              >
-                Entwürfe verwerfen
-              </Button>
-              <Button
-                disabled={count === 0 || state.status === 'applying'}
-                onClick={() => void apply()}
-              >
-                {state.status === 'applying' ? 'Entwürfe werden angewendet …' : 'Entwürfe anwenden'}
-              </Button>
-            </div>
-          </section>
-        ) : null}
       </header>
       {state.error && state.status !== 'ready' && state.status !== 'applying' ? (
-        <Alert role="alert" className="bg-white">
+        <Alert role="alert" className="mx-auto mt-6 max-w-5xl bg-white">
           <AlertTitle>Änderungsstand prüfen</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       ) : null}
-      <main>{children}</main>
+      <main id="content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+        {children}
+      </main>
     </div>
   )
 }

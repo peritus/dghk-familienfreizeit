@@ -70,7 +70,7 @@ test('dashboard, families, and family detail form one working navigation chain',
     page.getByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeVisible()
 
-  const dashboardFamiliesLink = page.getByRole('link', { name: 'Familien öffnen' })
+  const dashboardFamiliesLink = page.getByRole('link', { name: /Alle Familien ansehen/ })
   await expect(dashboardFamiliesLink).toHaveAttribute('href', '/organiser/families')
   await dashboardFamiliesLink.click()
   await expect(page).toHaveURL(/\/organiser\/families$/)

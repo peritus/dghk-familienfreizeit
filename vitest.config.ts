@@ -18,7 +18,12 @@ export default mergeConfig(
         },
         {
           extends: true,
-          test: { name: 'app', environment: 'jsdom', include: ['test/app/**/*.test.tsx'] },
+          test: {
+            name: 'app',
+            environment: 'jsdom',
+            include: ['test/app/**/*.test.tsx'],
+            setupFiles: ['./test/app/setup.ts'],
+          },
         },
         {
           extends: true,

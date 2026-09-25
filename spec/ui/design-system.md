@@ -88,6 +88,67 @@ element to render in place of the primitive's default and merges the primitive's
 props and accessible semantics into it. Every interactive control follows this
 API and keeps those semantics intact.
 
+## Pressable elements and hit areas
+
+**Implemented** as the `pressable`/`blueprint`/`blueprint-on-main` utilities and the
+base-layer `cursor: pointer` rule in [globals.css](../../src/app/globals.css); see
+[design system](../../docs/ui/design-system.md) for the rule ("a hard shadow means
+pressable") and the `Button`/`Card` components that use it.
+
+**Outstanding:** the `rounded-base` (5px, not the smaller default `rounded`) radius
+rule is enforced in the organiser app bar and dashboard, but not yet swept across the
+rest of the app (family/organiser tables, form inputs elsewhere still use `rounded` in
+places) — a follow-up pass, not part of this change.
+
+## Disabled state (outstanding)
+
+Avoid disabled buttons where possible: hide an action that doesn't apply
+rather than showing it disabled, or keep it enabled and explain the
+constraint on use. When a control must be disabled, it must not read as a
+washed-out version of the primary/accent button — that looks like a pale
+brand button, not an unavailable action, and tends to fail contrast. Use a
+white background, a dashed border (the one place a dashed border is
+allowed, because a disabled control has no shadow to clash with), muted
+text, no shadow, and `cursor: not-allowed`.
+
+Not yet built: the shared `Button` still uses the generic
+`disabled:opacity-50` from its base classes. This dedicated disabled style is
+scoped to whichever control needs it next, not applied speculatively.
+
+## Save-status control and provisional-state pattern
+
+**Implemented** as the organiser app bar's save-status control; see [Save-status
+control](../../docs/ui/design-system.md#save-status-control) for the built states,
+icons, popover mechanics, and confirmation flows, and
+[D15](../../decisions.md#d15--derivation-is-a-named-primitive-and-the-client-may-call-it)
+for the underlying immediate/drafting commit-timing policy this control presents
+(unchanged by it). The provisional (engineering-grid) pattern and the new `--paper`,
+`--danger`, `--offline`, `--muted`, `--grid-minor`/`--grid-major` tokens are
+implemented in [globals.css](../../src/app/globals.css) and documented alongside it.
+
+**Outstanding:**
+
+- No offline look is wired up: `OrganiserStatus` has no case for a lost connection,
+  so the grey "offline" state has no trigger yet (`navigator.onLine` detection and an
+  offline-in-auto-mode queue are still open).
+- The popover doesn't itemize individual drafts or the specific refused change per
+  family ("Familie Weber: Telefonnummer geändert") — it shows the count only. Building
+  that needs a change-description mapping over `EventDraft`/`Event` that doesn't exist
+  yet; the count-only view is the deliberate interim.
+- `--muted` text contrast on `--background` (the cream page background, not just
+  white) is not verified.
+- No `beforeunload` warning yet for pending drafts.
+- The blueprint pattern is not yet applied to other surfaces (e.g. a family card
+  holding unsaved changes) beyond the save-status control itself.
+
+## Dashboard structure
+
+**Implemented** for `/organiser` (UI-05): the headline-first principle — the page's
+single `<h1>` states the question it answers, with the Hinweise list (including its
+positive empty state) directly below, before the overview section — plus the merged
+single app bar. See [UI-05](screens/organiser-dashboard.md) and
+[Frontend](../../docs/ui/frontend.md).
+
 ## Editable table and card pattern
 
 For every current or future screen that creates or edits records in a table:

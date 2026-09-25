@@ -10,11 +10,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none',
+        default: 'text-main-foreground bg-main border-2 border-border pressable',
         noShadow: 'text-main-foreground bg-main border-2 border-border',
-        neutral:
-          'bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none',
+        neutral: 'bg-secondary-background text-foreground border-2 border-border pressable',
+        danger: 'text-foreground bg-danger border-2 border-border pressable',
         reverse:
           'text-main-foreground bg-main border-2 border-border hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow',
       },
