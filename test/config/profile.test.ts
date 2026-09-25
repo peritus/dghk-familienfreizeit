@@ -172,4 +172,40 @@ describe('occasion profile', () => {
       }),
     ).toThrow(/duplicate contribution/)
   })
+  test('validates module label ownership per entity scope', () => {
+    const module = (id: string) =>
+      defineModule({
+        id,
+        params: z.object({}),
+        contribute: () => ({ label_keys: [{ key: 'module-label', scopes: ['room'] }] }),
+      })
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits: {},
+        modules: [module('one')({}), module('two')({})],
+      }),
+    ).toThrow(/duplicate module label ownership/)
+
+    const inventory = module('inventory')
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits: {
+          'module-label': property({ title: 'Label', scopes: ['room'], value: enumOf(['yes']) }),
+        },
+        modules: [inventory({})],
+      }),
+    ).toThrow(/profile trait module-label overlaps module label ownership/)
+
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits: {
+          'module-label': property({ title: 'Label', scopes: ['family'], value: enumOf(['yes']) }),
+        },
+        modules: [inventory({})],
+      }),
+    ).not.toThrow()
+  })
 })

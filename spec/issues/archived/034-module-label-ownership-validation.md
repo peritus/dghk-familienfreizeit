@@ -1,7 +1,7 @@
 ---
 id: "034"
 title: Module composition does not validate label ownership collisions
-status: open
+status: resolved
 severity: gap
 category: kernel
 source: semantic-coherence-sweep-after-fix
@@ -46,9 +46,17 @@ and scope overlap a module-owned key. Preserve same-key use on unrelated entity
 kinds when the contract permits it, and add focused composition tests for both
 valid and invalid combinations.
 
-## Open questions
+## Resolution
 
-None; the ownership rule is already stated by the module contract.
+Profile composition now builds a per-(label key, entity scope) ownership index.
+It rejects duplicate module ownership and rejects profile traits that overlap a
+module-owned key on the same entity kind, while allowing the same key on an
+unrelated scope. The validation runs before module schemas are appended to the
+kernel validation view.
+
+`test/config/profile.test.ts` proves duplicate module ownership, profile/module
+overlap, and valid unrelated-scope reuse. This closes the composition gap needed
+before M5 introduces its scoped inventory labels.
 
 ## Related files
 

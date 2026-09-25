@@ -13,7 +13,7 @@ import { kernelEventTypes, type JsonValue } from '../events/types.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
-export type EntityScope = 'family' | 'person'
+export type EntityScope = 'family' | 'person' | (string & {})
 
 export type Cardinality = 'zero-or-one' | 'exactly-one' | 'zero-or-more'
 
@@ -273,6 +273,29 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
         (role.operator && trait.kind === 'relation' && trait.operator !== role.operator)
       )
         throw new Error(`module ${module.id} role ${role.parameter} has wrong trait shape`)
+    }
+  }
+  const labelOwners = new Map<string, string>()
+  for (const module of modules) {
+    for (const label of module.contributions.label_keys ?? []) {
+      for (const scope of label.scopes) {
+        const ownership = `${label.key}\u0000${scope}`
+        const owner = labelOwners.get(ownership)
+        if (owner)
+          throw new Error(
+            `duplicate module label ownership: ${label.key} on ${scope} (${owner}, ${module.id})`,
+          )
+        labelOwners.set(ownership, module.id)
+      }
+    }
+  }
+  for (const [key, trait] of Object.entries(traits)) {
+    for (const scope of trait.scopes) {
+      const owner = labelOwners.get(`${key}\u0000${scope}`)
+      if (owner)
+        throw new Error(
+          `profile trait ${key} overlaps module label ownership on ${scope} (${owner})`,
+        )
     }
   }
   duplicate([
