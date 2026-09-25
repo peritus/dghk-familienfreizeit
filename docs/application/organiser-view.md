@@ -11,7 +11,7 @@ path before persistence.
 | Route | Behavior |
 |---|---|
 | `/organiser` | Dashboard with family/person counts, event-head status, diagnostics, and pending-change status |
-| `/organiser/families` | Derived family table, search, and manual invitation staging |
+| `/organiser/families` | Derived family table and manual invitation staging |
 | `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or pending event history |
 
 The host exposes these kernel-owned screens through the selected-profile screen
