@@ -1,12 +1,12 @@
 import {
   canonicalJson,
-  kernelPayloadSchemas,
+  eventPayloadSchemas,
   parseEvent,
   type Event,
   type EventDraft,
-  type EventPayloadSchemas,
   type JsonValue,
 } from './types.js'
+import type { KernelConfig } from './fold.js'
 
 export type { EventDraft } from './types.js'
 
@@ -28,7 +28,12 @@ type EventRow = {
   payload: string
 }
 
-export async function readEvents(db: D1Database, untilSeq?: number): Promise<Event[]> {
+export async function readEvents(
+  db: D1Database,
+  config: KernelConfig,
+  untilSeq?: number,
+): Promise<Event[]> {
+  const schemas = eventPayloadSchemas(config)
   const query =
     untilSeq === undefined
       ? 'SELECT seq, at, actor, type, subject, payload FROM event ORDER BY seq'
@@ -38,14 +43,17 @@ export async function readEvents(db: D1Database, untilSeq?: number): Promise<Eve
       ? await db.prepare(query).all<EventRow>()
       : await db.prepare(query).bind(untilSeq).all<EventRow>()
   return result.results.map((row) =>
-    parseEvent({
-      seq: row.seq,
-      at: row.at,
-      actor: row.actor,
-      type: row.type,
-      subject: row.subject,
-      payload: JSON.parse(row.payload),
-    }),
+    parseEvent(
+      {
+        seq: row.seq,
+        at: row.at,
+        actor: row.actor,
+        type: row.type,
+        subject: row.subject,
+        payload: JSON.parse(row.payload),
+      },
+      schemas,
+    ),
   )
 }
 
@@ -60,11 +68,12 @@ export async function appendEvents(
   db: D1Database,
   expectedHead: number,
   drafts: readonly EventDraft[],
-  schemas: EventPayloadSchemas = kernelPayloadSchemas,
+  config: KernelConfig,
 ): Promise<Event[]> {
   if (drafts.length === 0) return []
   const actual = await eventHead(db)
   if (actual !== expectedHead) throw new StaleHeadError(expectedHead, actual)
+  const schemas = eventPayloadSchemas(config)
   const events = drafts.map((draft, index) =>
     parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
   )
