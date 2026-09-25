@@ -278,7 +278,8 @@ export function validateEventStream(events: readonly Event[], config: KernelConf
 export function assertAppendableWorld(world: KernelWorld): void {
   const dangling = world.diagnostics.find(
     (diagnostic) =>
-      diagnostic.id === 'kernel.dangling-reference' && diagnostic.severity === 'error',
+      ['kernel.dangling-reference', 'kernel.cardinality'].includes(diagnostic.id) &&
+      diagnostic.severity === 'error',
   )
   if (dangling)
     throw new Error(

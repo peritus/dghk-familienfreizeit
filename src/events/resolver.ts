@@ -137,6 +137,24 @@ export function resolve(
     }
   }
   for (const entity of entities)
+    for (const schema of schemas.values()) {
+      if (!schema.scopes?.includes(entity.kind) || schema.cardinality === undefined) continue
+      const count =
+        labelsByEntity.get(entity.id)?.filter((label) => label.key === schema.key).length ?? 0
+      const invalid =
+        (schema.cardinality === 'exactly-one' && count !== 1) ||
+        (schema.cardinality === 'zero-or-one' && count > 1)
+      if (invalid)
+        diagnostics.push(
+          diagnostic(
+            'kernel.cardinality',
+            'error',
+            entity.id,
+            `label ${schema.key} requires ${schema.cardinality}, found ${count}`,
+          ),
+        )
+    }
+  for (const entity of entities)
     for (const descriptor of derived.values()) {
       if (
         !descriptor.scopes.includes(entity.kind) ||

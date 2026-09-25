@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { decimal, defineOccasionProfile, property } from '../../src/config/define.js'
 import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
-import { derive } from '../../src/events/fold.js'
+import { assertAppendableWorld, derive } from '../../src/events/fold.js'
 import { loadKdl } from '../../src/events/kdl.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
 import { inventoryWorld, roomInventory } from '../../src/modules/room-inventory/index.js'
@@ -25,6 +25,7 @@ const profile = defineOccasionProfile({
       title: { de: 'Preis', en: 'Price' },
       scopes: ['room'],
       value: decimal({ scale: 2 }),
+      cardinality: 'exactly-one',
       organiser_only: true,
     }),
   },
@@ -94,6 +95,18 @@ const inventoryEvents: Event[] = [
 ]
 
 describe('room inventory', () => {
+  test('reports and rejects a room that has no configured price label', () => {
+    const world = derive(inventoryEvents.slice(0, 3), profile.validation_view)
+    expect(world.diagnostics).toContainEqual(
+      expect.objectContaining({
+        id: 'kernel.cardinality',
+        subject_id: 'rm_1',
+        severity: 'error',
+      }),
+    )
+    expect(() => assertAppendableWorld(world)).toThrow(/append rejected: kernel\.cardinality/)
+  })
+
   test('requires copy for every configured vocabulary value', () => {
     expect(() =>
       roomInventory({
