@@ -15,7 +15,7 @@ export function App() {
 
   return (
     <Shell>
-      <RouteBoundary key={location}>
+      <RouteBoundary reset_key={location}>
         <Switch>
           <Route path="/">
             <Welcome />

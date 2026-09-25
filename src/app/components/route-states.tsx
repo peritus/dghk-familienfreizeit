@@ -26,8 +26,19 @@ export function NotFound() {
   )
 }
 
-export class RouteBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false }
+export class RouteBoundary extends Component<
+  { children: ReactNode; reset_key?: string },
+  { failed: boolean; reset_key: string | undefined }
+> {
+  state = { failed: false, reset_key: undefined }
+
+  static getDerivedStateFromProps(
+    props: { children: ReactNode; reset_key?: string },
+    state: { failed: boolean; reset_key: string | undefined },
+  ) {
+    if (props.reset_key !== state.reset_key) return { failed: false, reset_key: props.reset_key }
+    return null
+  }
 
   static getDerivedStateFromError() {
     return { failed: true }

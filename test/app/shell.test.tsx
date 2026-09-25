@@ -108,6 +108,79 @@ test('organiser links stay within the nested route base', async () => {
   expect(familiesLink.getAttribute('href')).toBe('/organiser/families')
 })
 
+test('organiser state survives client-side route and history navigation', async () => {
+  const familyEvent: Event = {
+    seq: 1,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'FamilyInvited',
+    payload: {
+      family_id: 'fam_existing',
+      email: 'existing@example.test',
+      display_name: 'Bestehende Familie',
+      locale: 'de',
+    },
+  }
+  const { fetchMock } = open('/organiser', [familyEvent])
+  expect(
+    await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+  ).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Familien öffnen' }))
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
+  fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'neu@example.test' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('link', { name: 'Bestehende Familie' }))
+  expect(await screen.findByRole('heading', { name: 'Bestehende Familie' })).toBeTruthy()
+  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('link', { name: '← Familien' }))
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Neue Familie' })).toBeTruthy()
+  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('link', { name: 'Dashboard' }))
+  expect(
+    await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+  ).toBeTruthy()
+  expect(screen.getByText('1 offene Änderungen warten auf Anwendung.')).toBeTruthy()
+
+  window.history.pushState({}, '', '/organiser/families')
+  fireEvent(window, new PopStateEvent('popstate'))
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+  expect(
+    fetchMock?.mock.calls.filter(([input]) => String(input).endsWith('/api/organiser/log')),
+  ).toHaveLength(1)
+})
+
+test('leaving and re-entering the organiser starts a fresh in-memory session', async () => {
+  open('/organiser')
+  expect(
+    await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+  ).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Familienfreizeit' }))
+  expect(
+    await screen.findByRole('heading', { name: 'Willkommen zur Familienfreizeit' }),
+  ).toBeTruthy()
+
+  window.history.pushState({}, '', '/organiser')
+  fireEvent(window, new PopStateEvent('popstate'))
+  expect(
+    await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+  ).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Änderungen sammeln: aus' })).toBeTruthy()
+  expect(screen.queryByRole('heading', { name: 'Local changes in this browser' })).toBeNull()
+})
+
 test('organiser changes keep the collecting review expanded', async () => {
   open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
@@ -277,4 +350,24 @@ test('a failed chunk/render offers recovery and does not display exception detai
   expect(screen.getByRole('alert').textContent).toContain('Die Ansicht konnte nicht geladen werden')
   expect(screen.getByRole('button', { name: 'Neu laden' })).toBeTruthy()
   expect(document.body.textContent).not.toContain('private exception')
+})
+
+test('a route change resets the error boundary without a child remount key', () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  function BrokenRoute(): never {
+    throw new Error('private exception')
+  }
+  const { rerender } = render(
+    <RouteBoundary reset_key="broken">
+      <BrokenRoute />
+    </RouteBoundary>,
+  )
+  expect(screen.getByRole('alert').textContent).toContain('Die Ansicht konnte nicht geladen werden')
+
+  rerender(
+    <RouteBoundary reset_key="recovered">
+      <p>Recovered route</p>
+    </RouteBoundary>,
+  )
+  expect(screen.getByText('Recovered route')).toBeTruthy()
 })
