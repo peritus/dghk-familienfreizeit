@@ -1,7 +1,7 @@
 ---
 id: "028"
 title: Cold lazy organiser route exceeds the app test timeout
-status: open
+status: resolved
 severity: gap
 category: tooling
 source: semantic-coherence-sweep-after-fix
@@ -44,6 +44,14 @@ suite remains reliable.
 ## Open questions
 
 None.
+
+## Resolution
+
+The app shell test now preloads the lazy organiser module in `beforeAll` before
+direct organiser navigation assertions. Production routing remains unchanged,
+and the dashboard heading remains the readiness assertion. The shell test passed
+18 tests in three consecutive runs, and the full suite passed 81 tests in two
+consecutive runs under the Nix development shell.
 
 ## Related files
 

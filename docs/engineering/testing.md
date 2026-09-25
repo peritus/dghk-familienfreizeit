@@ -62,6 +62,10 @@ cover the registered route matrix, dashboard → families → family detail,
 back/forward navigation, not-found recovery, duplicated `/organiser` segments,
 and email-shaped family identifiers in URLs.
 
+The app shell tests preload the lazy organiser module in test setup before
+asserting direct organiser navigation. The built browser route suite remains
+the check for real lazy-chunk navigation.
+
 When adding an organiser route, add its definition and route builder first, use
 the builder from the screen, and add the direct and linked navigation cases to
 the browser route suite in the same change.
