@@ -1,12 +1,12 @@
-import { derivePending } from '../../events/world.js'
+import { deriveDraftWorld } from '../../events/world.js'
 import type { KernelConfig } from '../../events/fold.js'
 import type { Event, EventDraft } from '../../events/types.js'
 
-export type PendingAction = {
+export type DraftBatch = {
   events: readonly EventDraft[]
 }
 
-export type OrganiserCommitMode = 'immediate' | 'collecting'
+export type OrganiserChangeMode = 'immediate' | 'drafting'
 
 export type OrganiserStatus =
   | 'loading'
@@ -19,8 +19,8 @@ export type OrganiserStatus =
 
 export type OrganiserState = {
   committed: readonly Event[]
-  pending: readonly PendingAction[]
-  commit_mode: OrganiserCommitMode
+  drafts: readonly DraftBatch[]
+  change_mode: OrganiserChangeMode
   head_seq: number
   build_revision: string | null
   compatibility_revision: number | null
@@ -31,8 +31,8 @@ export type OrganiserState = {
 
 export const initialOrganiserState: OrganiserState = {
   committed: [],
-  pending: [],
-  commit_mode: 'immediate',
+  drafts: [],
+  change_mode: 'immediate',
   head_seq: 0,
   build_revision: null,
   compatibility_revision: null,
@@ -50,7 +50,7 @@ export type OrganiserAction =
       principal_email: string
     }
   | { type: 'stage'; events: readonly EventDraft[] }
-  | { type: 'toggle_collecting' }
+  | { type: 'toggle_drafting' }
   | { type: 'discard' }
   | { type: 'applying' }
   | { type: 'applied'; count: number; events: readonly Event[] }
@@ -67,8 +67,8 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       return {
         ...state,
         committed: action.events,
-        pending: [],
-        commit_mode: 'immediate',
+        drafts: [],
+        change_mode: 'immediate',
         head_seq: action.events.length,
         build_revision: action.build_revision,
         compatibility_revision: action.compatibility_revision,
@@ -77,22 +77,23 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         error: null,
       }
     case 'stage':
-      return { ...state, pending: [...state.pending, { events: action.events }], error: null }
-    case 'toggle_collecting':
-      if (state.commit_mode === 'collecting') {
-        return pendingEventCount(state) === 0 ? { ...state, commit_mode: 'immediate' } : state
+      return { ...state, drafts: [...state.drafts, { events: action.events }], error: null }
+    case 'toggle_drafting':
+      if (state.change_mode === 'drafting') {
+        return draftCount(state) === 0 ? { ...state, change_mode: 'immediate' } : state
       }
-      return { ...state, commit_mode: 'collecting' }
+      return { ...state, change_mode: 'drafting' }
     case 'discard':
-      return { ...state, pending: [], error: null }
+      return { ...state, drafts: [], change_mode: 'immediate', error: null }
     case 'applying':
       return { ...state, status: 'applying', error: null }
     case 'applied': {
-      const pending = removePendingEvents(state.pending, action.count)
+      const drafts = removeDraftEvents(state.drafts, action.count)
       return {
         ...state,
         committed: [...state.committed, ...action.events],
-        pending,
+        drafts,
+        change_mode: drafts.length === 0 ? 'immediate' : 'drafting',
         head_seq: state.head_seq + action.events.length,
         status: 'ready',
         error: null,
@@ -103,22 +104,22 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         ...state,
         committed: [...state.committed, ...action.events],
         head_seq: state.head_seq + action.events.length,
-        commit_mode: 'collecting',
+        change_mode: 'drafting',
         status: 'stale_head',
-        error: 'Der Ereignisstand hat sich geändert. Prüfe Deine offenen Änderungen.',
+        error: 'Der Ereignisstand hat sich geändert. Prüfe Deine Änderungsentwürfe.',
       }
     case 'failed':
       return {
         ...state,
-        commit_mode: 'collecting',
+        change_mode: 'drafting',
         status: action.status,
         error: action.error,
       }
   }
 }
 
-export function materializePendingEvents(state: OrganiserState): Event[] {
-  return state.pending
+export function materializeDraftEvents(state: OrganiserState): Event[] {
+  return state.drafts
     .flatMap((action) => action.events)
     .map((event, index) => ({
       ...event,
@@ -127,20 +128,20 @@ export function materializePendingEvents(state: OrganiserState): Event[] {
 }
 
 export function deriveOrganiserWorld(state: OrganiserState, config: KernelConfig = {}) {
-  return derivePending(state.committed, materializePendingEvents(state), config)
+  return deriveDraftWorld(state.committed, materializeDraftEvents(state), config)
 }
 
-export function pendingEventCount(state: OrganiserState): number {
-  return state.pending.reduce((count, action) => count + action.events.length, 0)
+export function draftCount(state: OrganiserState): number {
+  return state.drafts.reduce((count, action) => count + action.events.length, 0)
 }
 
-function removePendingEvents(
-  pending: readonly PendingAction[],
+function removeDraftEvents(
+  drafts: readonly DraftBatch[],
   count: number,
-): readonly PendingAction[] {
+): readonly DraftBatch[] {
   let remaining = count
-  const result: PendingAction[] = []
-  for (const action of pending) {
+  const result: DraftBatch[] = []
+  for (const action of drafts) {
     if (remaining <= 0) {
       result.push(action)
       continue

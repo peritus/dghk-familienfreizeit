@@ -2,7 +2,7 @@ import { Link } from 'wouter'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
-import { pendingEventCount } from '../state.js'
+import { draftCount } from '../state.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 
 export function Dashboard() {
@@ -62,9 +62,9 @@ export function Dashboard() {
             <p>Keine Hinweise aus dem aktuellen Ereignisstand.</p>
           )}
           <p>
-            {pendingEventCount(state) === 0
-              ? 'Es gibt keine offenen Änderungen.'
-              : `${pendingEventCount(state)} offene Änderungen warten auf Anwendung.`}
+            {draftCount(state) === 0
+              ? 'Es gibt keine Änderungsentwürfe.'
+              : `${draftCount(state)} Änderungsentwürfe warten auf Anwendung.`}
           </p>
         </CardContent>
       </Card>

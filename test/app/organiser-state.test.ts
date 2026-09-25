@@ -3,9 +3,9 @@ import type { EventDraft } from '../../src/events/types.js'
 import {
   deriveOrganiserWorld,
   initialOrganiserState,
-  materializePendingEvents,
+  materializeDraftEvents,
   organiserReducer,
-  pendingEventCount,
+  draftCount,
 } from '../../src/app/organiser/state.js'
 
 const family: EventDraft = {
@@ -31,7 +31,7 @@ function loadedState() {
   })
 }
 
-test('pending actions materialize contiguous events and derive locally', () => {
+test('draft batches materialize contiguous events and derive locally', () => {
   const loaded = organiserReducer(initialOrganiserState, {
     type: 'loaded',
     events: [],
@@ -40,19 +40,19 @@ test('pending actions materialize contiguous events and derive locally', () => {
     principal_email: 'organiser@example.test',
   })
   const state = organiserReducer(loaded, { type: 'stage', events: [family] })
-  expect(pendingEventCount(state)).toBe(1)
-  expect(materializePendingEvents(state)[0]?.seq).toBe(1)
+  expect(draftCount(state)).toBe(1)
+  expect(materializeDraftEvents(state)[0]?.seq).toBe(1)
   expect(deriveOrganiserWorld(state).families.map(({ id }) => id)).toEqual(['fam_state'])
 })
 
-test('discard clears all pending work and keeps collecting mode active', () => {
+test('discard clears all drafts and exits drafting mode', () => {
   const loaded = loadedState()
   const one = organiserReducer(loaded, { type: 'stage', events: [family] })
   const two = organiserReducer(one, { type: 'stage', events: [family] })
-  const collecting = organiserReducer(two, { type: 'toggle_collecting' })
-  const discarded = organiserReducer(collecting, { type: 'discard' })
-  expect(pendingEventCount(discarded)).toBe(0)
-  expect(discarded.commit_mode).toBe('collecting')
+  const drafting = organiserReducer(two, { type: 'toggle_drafting' })
+  const discarded = organiserReducer(drafting, { type: 'discard' })
+  expect(draftCount(discarded)).toBe(0)
+  expect(discarded.change_mode).toBe('immediate')
 })
 
 test('an apply error keeps pending events in the derived organiser world', () => {
@@ -65,26 +65,24 @@ test('an apply error keeps pending events in the derived organiser world', () =>
   })
 
   expect(deriveOrganiserWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
-  expect(pendingEventCount(failed)).toBe(1)
-  expect(failed.commit_mode).toBe('collecting')
+  expect(draftCount(failed)).toBe(1)
+  expect(failed.change_mode).toBe('drafting')
 })
 
-test('collecting mode cannot be disabled while events are pending', () => {
+test('drafting mode cannot be disabled while drafts exist', () => {
   const collecting = organiserReducer(
-    organiserReducer(loadedState(), { type: 'toggle_collecting' }),
+    organiserReducer(loadedState(), { type: 'toggle_drafting' }),
     {
       type: 'stage',
       events: [family],
     },
   )
 
-  const stillCollecting = organiserReducer(collecting, { type: 'toggle_collecting' })
-  expect(stillCollecting.commit_mode).toBe('collecting')
+  const stillDrafting = organiserReducer(collecting, { type: 'toggle_drafting' })
+  expect(stillDrafting.change_mode).toBe('drafting')
 
-  const immediate = organiserReducer(organiserReducer(stillCollecting, { type: 'discard' }), {
-    type: 'toggle_collecting',
-  })
-  expect(immediate.commit_mode).toBe('immediate')
+  const immediate = organiserReducer(stillDrafting, { type: 'discard' })
+  expect(immediate.change_mode).toBe('immediate')
 })
 
 test('applying acknowledges only the submitted pending prefix', () => {
@@ -100,7 +98,7 @@ test('applying acknowledges only the submitted pending prefix', () => {
     count: 1,
     events: [{ ...first, seq: 1 }],
   })
-  expect(pendingEventCount(applied)).toBe(1)
-  expect(materializePendingEvents(applied)[0]?.payload).toEqual(second.payload)
+  expect(draftCount(applied)).toBe(1)
+  expect(materializeDraftEvents(applied)[0]?.payload).toEqual(second.payload)
   expect(applied.committed).toHaveLength(1)
 })

@@ -11,7 +11,7 @@ import { OrganiserFrame } from './organiser-frame.js'
 import {
   deriveOrganiserWorld,
   initialOrganiserState,
-  materializePendingEvents,
+  materializeDraftEvents,
   organiserReducer,
 } from './state.js'
 import { Dashboard } from './screens/dashboard.js'
@@ -92,20 +92,20 @@ export default function OrganiserApp() {
     } catch {
       return {
         world: null,
-        error: 'Die offenen Änderungen ergeben noch keinen gültigen Ereignisstand.',
+        error: 'Die Änderungsentwürfe ergeben noch keinen gültigen Ereignisstand.',
       }
     }
   }, [state])
 
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
-    const pending = materializePendingEvents(state)
-    if (pending.length === 0 || state.status === 'applying') return
+    const drafts = materializeDraftEvents(state)
+    if (drafts.length === 0 || state.status === 'applying') return
     dispatch({ type: 'applying' })
     try {
       const result = await applyOrganiserEvents({
         input_seq: state.head_seq,
-        events: pending.map(({ type, subject, payload }) => ({
+        events: drafts.map(({ type, subject, payload }) => ({
           type,
           subject,
           payload,
@@ -113,7 +113,7 @@ export default function OrganiserApp() {
         build_revision: state.build_revision,
         compatibility_revision: state.compatibility_revision,
       })
-      dispatch({ type: 'applied', count: pending.length, events: result.events })
+      dispatch({ type: 'applied', count: drafts.length, events: result.events })
     } catch (error: unknown) {
       if (error instanceof OrganiserApiError) {
         const stale = staleResponse(error)
@@ -133,20 +133,20 @@ export default function OrganiserApp() {
       dispatch({
         type: 'failed',
         status: 'error',
-        error: 'Die Änderungen konnten nicht angewendet werden.',
+        error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
       })
     }
   }, [state])
 
   useEffect(() => {
     if (
-      state.commit_mode === 'immediate' &&
+      state.change_mode === 'immediate' &&
       state.status !== 'applying' &&
-      state.pending.length > 0
+      state.drafts.length > 0
     ) {
       void apply()
     }
-  }, [apply, state.commit_mode, state.pending.length, state.status])
+  }, [apply, state.change_mode, state.drafts.length, state.status])
 
   if (state.status === 'loading') return <RouteLoading />
   if (state.status === 'unauthorized' || state.status === 'stale_build')
@@ -156,7 +156,7 @@ export default function OrganiserApp() {
       <div className="space-y-4" role="alert">
         <p>{derivation.error ?? state.error}</p>
         <Button variant="neutral" onClick={() => dispatch({ type: 'discard' })}>
-          Offene Änderungen verwerfen
+          Änderungsentwürfe verwerfen
         </Button>
       </div>
     )

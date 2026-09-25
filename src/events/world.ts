@@ -8,13 +8,13 @@ export type WorldChange = {
   value?: string
 }
 
-/** Derives the organiser's prospective world without persisting the local event list. */
-export function derivePending(
+/** Derives the organiser's prospective world without persisting the local draft list. */
+export function deriveDraftWorld(
   committed: readonly Event[],
-  pending: readonly Event[],
+  drafts: readonly Event[],
   config: KernelConfig = {},
 ): KernelWorld {
-  return derive([...committed, ...pending], config)
+  return derive([...committed, ...drafts], config)
 }
 
 /** Removes restricted labels from a shared view while retaining ordinary derived state. */
