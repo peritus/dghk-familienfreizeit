@@ -57,7 +57,7 @@ contributions; M1 validates and derives against the view without inspecting raw
 profile-builder or module-parameter objects.
 
 M2 begins with a kernel-only executable profile fixture. The full active profile
-is an integration fixture once every selected module contribution exists; M14
+is an integration fixture once every selected module contribution exists; M12
 validates that complete composition.
 
 ### Meta

@@ -6,7 +6,7 @@ severity: contract-contradiction
 category: module:release-control
 source: spec-review-2026-09-19
 related_decisions: [D16]
-related_milestones: [M9, M11, M14]
+related_milestones: [M9, M10, M14]
 opened: 2026-09-19
 ---
 

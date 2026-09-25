@@ -6,7 +6,7 @@ severity: contract-contradiction
 category: kernel
 source: milestone-feasibility-review
 related_decisions: [D10]
-related_milestones: [M8, M14]
+related_milestones: [M10, M14]
 opened: 2026-09-21
 ---
 
@@ -14,7 +14,8 @@ opened: 2026-09-21
 
 ## Problem
 
-The roadmap assigns invitation and reminder messages to both M8 and M14 without
+The roadmap assigns the family login workflow to M10 and hosted delivery to M14
+without
 stating which milestone owns message construction, a request to send, transport,
 delivery records, and provider configuration. The module contract now clarifies
 that transport, `email_log`, invitations, and reminders are kernel concerns,
@@ -24,9 +25,9 @@ boundary, or duplicating M14 delivery work.
 
 ## Evidence
 
-- [M8](../../roadmap.md#m8--family-authentication-and-preference-controls) includes
-  invitation and reminder messages with the family login path.
-- [M14](../../roadmap.md#m14--authentication-delivery-and-operational-email) again includes
+- [M10](../../roadmap.md#m10--family-access-and-release-control) includes the
+  family login path and its development-time message intent.
+- [M14](../../roadmap.md#m14--authentication-delivery-and-operational-email) owns
   invitation and reminder messages, then
   adds delivery claims, retries, `email_log`, provider configuration, and delivery
   status.

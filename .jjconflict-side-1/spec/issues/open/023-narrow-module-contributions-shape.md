@@ -6,7 +6,7 @@ severity: gap
 category: kernel
 source: M4 readiness assessment
 related_decisions: []
-related_milestones: [M2, M5, M7, M8, M9, M10, M11, M12, M13]
+related_milestones: [M2, M5, M6, M7, M8, M9, M10, M11, M12, M14]
 opened: 2026-09-21
 ---
 
@@ -37,11 +37,11 @@ contract-shape mismatch from the ten absent direct fields.
 
 The inventory slice requires "buildings,
 rooms, beds, places, capacity, retirement, room labels, **and
-inventory world summaries", the organiser inventory screen, and its report.
-The end-to-end rule in [issue 019](019-module-delivery-needs-surface-staging.md)
-now makes the first real screen/report consumer part of that slice rather than
-allowing registered-but-unconsumed surfaces. Other fields remain deferred until
-their first real caller exists.
+inventory world summaries", and the organiser inventory screen. Its report
+contribution is consumed by the report host in M11 rather than being an M5
+acceptance requirement. The end-to-end rule in [issue 019](../archived/019-module-delivery-needs-surface-staging.md)
+still requires each intended audience's surface to be usable in its owning
+milestone. Other fields remain deferred until their first real caller exists.
 
 This is the direct sibling of [issue 021](../archived/021-module-owned-entity-fold-boundary.md):
 that issue closed the gap for `entity_kinds`/`events` specifically because
