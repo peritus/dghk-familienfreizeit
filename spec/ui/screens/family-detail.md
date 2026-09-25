@@ -45,3 +45,23 @@ pattern: the first row adds a person, existing people are edited in place, and
 Save/Delete actions stay in the same row. At narrow widths the table becomes
 labeled person cards. History entries use a thick left border and actor
 `Badge`, not colored timeline dots alone.
+
+## Family identity
+
+Place an editable family identity block beside the family heading. It shows the
+current family `display-name` in a required text field with a clear save action.
+This is the organiser-facing family name used by family lists, headings, plans,
+and reports; it is distinct from the `family-name` field on each person.
+
+Saving a changed value stages one `FamilyDisplayNameChanged` event through the
+ordinary local-first draft, derivation, authorisation, and append path. Immediate
+mode applies it automatically; drafting mode keeps it with the other local
+drafts. The response and family history show the changed value only after the
+append succeeds, while a failed or stale apply preserves the unsaved edit and
+explains what happened. The event records the old value for readable history but
+never changes `family_id`, person identities, memberships, email routing, or
+relationship labels.
+
+The control is organiser-only on this screen. It must not be implemented as a
+generic `LabelSet`, because `display-name` is a kernel setup-owned label. Empty
+values are rejected, and a no-op save does not emit an event.

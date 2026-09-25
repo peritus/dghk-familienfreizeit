@@ -49,18 +49,26 @@ required.
 ## M7 — Organiser controls
 
 Specification coverage: [family preferences](modules/family-preferences.md),
-[organiser view](application/organiser-view.md), and [UI-03](ui/screens/family-preferences.md).
+[organiser view](application/organiser-view.md), [UI-03](ui/screens/family-preferences.md),
+and [UI-07](ui/screens/family-detail.md).
 
 - Implement profile-driven preference/control definitions and expose the same
   controls to organisers through family detail and related organiser surfaces.
+- Add an organiser-editable family identity control to family detail so an
+  organiser can rename the family's `display-name` without changing its
+  identity, people, memberships, or email routing. Emit the dedicated
+  `FamilyDisplayNameChanged` event through the ordinary draft, local derivation,
+  authorisation, and append path.
 - Use the ordinary event-draft, local derivation, authorisation, and append path;
   include save-on-change behavior, deadlines, validation, and fixtures.
 - Keep family login, family sessions, family routes, and family-facing responses
   out of this milestone.
 
 Acceptance: organisers can inspect and edit every control that families will
-later receive, with the same event-backed semantics and derived results. This is
-an organiser-complete slice, not a family-access slice.
+later receive, with the same event-backed semantics and derived results. They can
+also correct a family's display name while preserving the family and person
+identities, memberships, email routing, and event history. This is an
+organiser-complete slice, not a family-access slice.
 
 ## M8 — Organiser-authored workshop programme
 
