@@ -74,6 +74,27 @@ describe('occasion profile', () => {
         modules: [inventory({}), assignment({ room_trait: 'role' })],
       }),
     ).toThrow(/wrong trait shape/)
+
+    const roomScoped = defineModule({
+      id: 'room-scoped',
+      params: z.object({ trait: z.string() }),
+      contribute: () => ({
+        trait_roles: [{ parameter: 'trait', kind: 'property' as const, scopes: ['room'] }],
+      }),
+    })
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits: {
+          'family-trait': property({
+            title: 'Family',
+            scopes: ['family'],
+            value: enumOf(['yes']),
+          }),
+        },
+        modules: [roomScoped({ trait: 'family-trait' })],
+      }),
+    ).toThrow(/wrong trait shape/)
   })
   test('threads family_writable onto the validation view and rejects it with organiser_only', () => {
     const profile = defineOccasionProfile({

@@ -21,7 +21,7 @@ const meta = {
 const profile = defineOccasionProfile({
   meta,
   traits: {
-    'price-per-bed-eur': property({
+    'room-rate-eur': property({
       title: { de: 'Preis', en: 'Price' },
       scopes: ['room'],
       value: decimal({ scale: 2 }),
@@ -33,6 +33,7 @@ const profile = defineOccasionProfile({
       floors: ['ground', 'first'],
       room_types: ['standard', 'apartment'],
       bed_types: ['single', 'double'],
+      price_trait: 'room-rate-eur',
       copy: {
         floors: { ground: 'Erdgeschoss', first: 'Erste Etage' },
         room_types: { standard: 'Standard', apartment: 'Apartment' },
@@ -83,7 +84,7 @@ const inventoryEvents: Event[] = [
     'LabelSet',
     {
       entity_id: 'rm_1',
-      key: 'price-per-bed-eur',
+      key: 'room-rate-eur',
       value: 100,
       strength: null,
       note: null,
@@ -93,6 +94,22 @@ const inventoryEvents: Event[] = [
 ]
 
 describe('room inventory', () => {
+  test('requires copy for every configured vocabulary value', () => {
+    expect(() =>
+      roomInventory({
+        floors: ['ground', 'first'],
+        room_types: ['standard'],
+        bed_types: ['single'],
+        price_trait: null,
+        copy: {
+          floors: { ground: 'Ground' },
+          room_types: { standard: 'Standard' },
+          bed_types: { single: 'Single' },
+        },
+      }),
+    ).toThrow(/copy.*first|first.*copy/)
+  })
+
   test('folds buildings, rooms, beds, stable places, and typed cost summary', () => {
     const world = derive(inventoryEvents, profile.validation_view)
     const summary = inventoryWorld(world)
@@ -103,7 +120,7 @@ describe('room inventory', () => {
       id: 'rm_1',
       building_id: 'bld_main',
       place_count: 2,
-      traits: { 'price-per-bed-eur': 100 },
+      traits: { 'room-rate-eur': 100 },
     })
   })
 

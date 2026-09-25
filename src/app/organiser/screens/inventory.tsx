@@ -2,25 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { useOrganiser } from '../context.js'
-import { inventoryWorld } from '../../../modules/room-inventory/index.js'
+import { inventoryWorld, type RoomInventoryParams } from '../../../modules/room-inventory/index.js'
 import type { EventDraft } from '../../../events/types.js'
-
-const floors = [
-  { value: '', label: 'Keine Etage' },
-  { value: 'ground', label: 'Erdgeschoss' },
-  { value: 'first', label: '1. Etage' },
-  { value: 'second', label: '2. Etage' },
-]
-const roomTypes = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'apartment', label: 'Apartment' },
-  { value: 'bungalow', label: 'Bungalow' },
-  { value: 'schlaffass', label: 'Schlaffass' },
-]
-const bedTypes = [
-  { value: 'single', label: 'Einzelbett' },
-  { value: 'double', label: 'Doppelbett' },
-]
+import { activeProfile } from '../../../config/index.js'
 
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -33,15 +17,28 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
 
 export function Inventory() {
   const { world, state, stage } = useOrganiser()
+  const config = selectedInventoryConfig()
+  const floors = [
+    { value: '', label: 'Keine Etage' },
+    ...config.floors.map((value) => ({ value, label: config.copy.floors[value] ?? value })),
+  ]
+  const roomTypes = config.room_types.map((value) => ({
+    value,
+    label: config.copy.room_types[value] ?? value,
+  }))
+  const bedTypes = config.bed_types.map((value) => ({
+    value,
+    label: config.copy.bed_types[value] ?? value,
+  }))
   const summary = inventoryWorld(world!)
   const [buildingName, setBuildingName] = useState('')
   const [roomBuilding, setRoomBuilding] = useState(summary.buildings[0]?.id ?? '')
   const [roomNumber, setRoomNumber] = useState('')
   const [roomFloor, setRoomFloor] = useState('')
-  const [roomType, setRoomType] = useState('standard')
+  const [roomType, setRoomType] = useState(config.room_types[0] ?? '')
   const [bedRoom, setBedRoom] = useState(summary.rooms[0]?.id ?? '')
   const [bedLabel, setBedLabel] = useState('')
-  const [bedType, setBedType] = useState('single')
+  const [bedType, setBedType] = useState(config.bed_types[0] ?? '')
   const [sleeps, setSleeps] = useState('1')
   const [error, setError] = useState<string | null>(null)
 
@@ -251,8 +248,9 @@ export function Inventory() {
                         </td>
                         <td className="p-3 text-sm">
                           {room.traits.sanitary ? String(room.traits.sanitary) : '—'}
-                          {typeof room.traits['price-per-bed-eur'] === 'number'
-                            ? ` · ${formatEuro(room.traits['price-per-bed-eur'])}`
+                          {config.price_trait !== null &&
+                          typeof room.traits[config.price_trait] === 'number'
+                            ? ` · ${formatEuro(room.traits[config.price_trait] as number)}`
                             : ''}
                         </td>
                       </tr>
@@ -270,6 +268,12 @@ export function Inventory() {
       </div>
     </div>
   )
+}
+
+function selectedInventoryConfig(): RoomInventoryParams {
+  const module = activeProfile.modules.find((candidate) => candidate.id === 'room-inventory')
+  if (!module?.parameters) throw new Error('room-inventory is not selected in this profile')
+  return module.parameters as RoomInventoryParams
 }
 
 function SummaryValue({ value, label }: { value: number; label: string }) {

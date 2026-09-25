@@ -283,6 +283,7 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
       const trait = traits[key]
       if (
         trait.kind !== role.kind ||
+        (role.scopes?.some((scope) => !trait.scopes.includes(scope)) ?? false) ||
         (role.operator && trait.kind === 'relation' && trait.operator !== role.operator)
       )
         throw new Error(`module ${module.id} role ${role.parameter} has wrong trait shape`)

@@ -8,6 +8,7 @@ export type RoomInventoryParams = {
   floors: readonly string[]
   room_types: readonly string[]
   bed_types: readonly string[]
+  price_trait: string | null
   copy: {
     floors: Readonly<Record<string, string>>
     room_types: Readonly<Record<string, string>>
@@ -74,12 +75,35 @@ const copy = z.object({
   bed_types: z.record(z.string(), z.string()).default({}),
 })
 
-const paramsSchema = z.object({
-  floors: vocabulary.default(['ground']),
-  room_types: vocabulary.default(['standard']),
-  bed_types: vocabulary.default(['single', 'double']),
-  copy: copy.default({ floors: {}, room_types: {}, bed_types: {} }),
-})
+const defaultCopy = {
+  floors: { ground: 'Ground floor' },
+  room_types: { standard: 'Standard' },
+  bed_types: { single: 'Single', double: 'Double' },
+}
+
+const paramsSchema = z
+  .object({
+    floors: vocabulary.default(['ground']),
+    room_types: vocabulary.default(['standard']),
+    bed_types: vocabulary.default(['single', 'double']),
+    price_trait: kebab.nullable().default(null),
+    copy: copy.default(defaultCopy),
+  })
+  .superRefine((value, context) => {
+    for (const [category, values] of [
+      ['floors', value.floors],
+      ['room_types', value.room_types],
+      ['bed_types', value.bed_types],
+    ] as const) {
+      for (const item of values)
+        if (value.copy[category][item] === undefined)
+          context.addIssue({
+            code: 'custom',
+            path: ['copy', category, item],
+            message: `copy is required for ${category} value ${item}`,
+          })
+    }
+  })
 
 const buildingId = z.string().regex(/^bld_[a-zA-Z0-9_-]+$/)
 const roomId = z.string().regex(/^rm_[a-zA-Z0-9_-]+$/)
@@ -223,7 +247,7 @@ function setupLabels(
   )
 }
 
-function inventorySummary(world: KernelWorld): InventorySummary {
+function inventorySummary(world: KernelWorld, priceTrait: string | null = null): InventorySummary {
   const buildings = (world.entities_by_kind.building ?? []).map((item) => ({
     id: item.id,
     name: String(labelValue(world, item.id, 'name') ?? ''),
@@ -303,7 +327,7 @@ function inventorySummary(world: KernelWorld): InventorySummary {
     if (!building) continue
     building.room_count += 1
     building.place_count += room.place_count
-    const price = room.traits['price-per-bed-eur']
+    const price = priceTrait === null ? undefined : room.traits[priceTrait]
     if (typeof price === 'number') building.cost_eur += price * room.place_count
   }
   return {
@@ -510,7 +534,13 @@ export const roomInventory = defineModule({
         },
       },
     ],
-    world_summaries: [{ id: 'room-inventory', summarize: inventorySummary }],
+    trait_roles:
+      params.price_trait === null
+        ? []
+        : [{ parameter: 'price_trait', kind: 'property' as const, scopes: ['room'] }],
+    world_summaries: [
+      { id: 'room-inventory', summarize: (world) => inventorySummary(world, params.price_trait) },
+    ],
     world_checks: [inventoryDiagnostics],
     screens: [
       {

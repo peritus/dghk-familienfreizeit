@@ -116,6 +116,7 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       floors: ['ground', 'first', 'second'],
       room_types: ['standard', 'apartment', 'bungalow', 'schlaffass'],
       bed_types: ['single', 'double'],
+      price_trait: 'price-per-bed-eur',
       copy: {
         floors: { ground: 'Erdgeschoss', first: '1. Etage', second: '2. Etage' },
         room_types: {
