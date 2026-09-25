@@ -36,10 +36,10 @@ experimentation.
 The party-review screen belongs to the separate sleeping modules. Its design sketch
 is kept in [`spec/deferred-ideas/party-review.md`](../deferred-ideas/party-review.md).
 
-Two organiser routes in [organiser view](../application/organiser-view.md) §1 have no screen
-spec yet: `/organiser/materials` and `/organiser/reports`. Their content is
-specified by [reports](../application/reports.md);
-they follow UI-00 until a spec is written.
+The `/organiser/reports` route in [organiser view](../application/organiser-view.md) §1
+has no dedicated screen spec yet. Its content is specified by [reports](../application/reports.md);
+it follows UI-00 until a screen spec is written. Materials are accepted but deferred
+and are not part of the active organiser screen inventory.
 
 ## Screen-spec format
 
