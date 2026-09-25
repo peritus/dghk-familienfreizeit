@@ -69,6 +69,16 @@ For frontend work, follow the binding lifecycle and navigation rules in
 - Run `npm run test:docs` for documentation changes. CI must check local Markdown
   destinations and heading anchors; update links and tooling paths when moving
   files. Automated link checks do not prove implementation status.
+- When a code or specification change introduces behavior, constraints,
+  accessibility requirements, data conventions, or UI patterns that could apply
+  beyond the immediate task, identify it as a general-rule candidate during
+  planning. State the proposed rule, intended scope, canonical specification or
+  guideline location, and verification needed. Do not promote the candidate into
+  general guidance without explicit user approval. Approval of an implementation
+  plan explicitly naming the candidate counts as approval. If approved, update
+  the relevant specification or guideline in the same change. If the behavior is
+  implemented and verified, document the verified behavior in `docs/` as well. If
+  not approved, keep the decision local to the task and do not add a general rule.
 - Before reorganizing, inventory affected sections. Account for each as retained
   requirements, verified implemented documentation, or a duplicate consolidated
   into a named destination. Preserve acceptance criteria, unresolved questions and

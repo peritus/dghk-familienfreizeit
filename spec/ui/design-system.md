@@ -88,6 +88,34 @@ element to render in place of the primitive's default and merges the primitive's
 props and accessible semantics into it. Every interactive control follows this
 API and keeps those semantics intact.
 
+## Editable table and card pattern
+
+For every current or future screen that creates or edits records in a table:
+
+- use a semantic table on desktop and larger tablet layouts;
+- put the empty creation row first and distinguish it with a subtle surface
+  treatment, not an extra visual row label;
+- name the creation action explicitly, such as **Neue Person hinzufügen** or
+  **Familie einladen**;
+- keep existing record fields editable within their own row;
+- keep all row actions in a stable final action cell;
+- keep compact actions such as **Speichern** and **Löschen** on one line where
+  the available width allows it;
+- align input and button heights, baselines, padding, and action-cell spacing;
+- never let an action drift below or outside the record it affects;
+- switch completely to labeled stacked cards at narrow breakpoints instead of
+  compressing the table or relying on horizontal scrolling;
+- preserve equivalent field order, labels, focus order, and actions between
+  table and card presentations;
+- use valid form association when controls are distributed across table cells;
+- keep destructive actions text-labelled or otherwise accessible, and require
+  confirmation for consequential deletion.
+
+When an implementation introduces a potentially reusable pattern, follow the
+general-rule promotion process in [AGENTS.md](../../AGENTS.md): name the
+candidate in the plan, obtain explicit user approval, and update this section
+in the same change when it is approved.
+
 The description states the concrete consequence. `AlertDialogAction` is the
 high-contrast offset-shadow primary action; `AlertDialogCancel` is the quieter
 outlined alternative.

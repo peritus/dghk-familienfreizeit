@@ -12,7 +12,11 @@ event history for one family. Route: `/organiser/families/:id`. Governing spec:
 ├──────────────────────────────────────────────────────────────────────────┤
 │ alex@example.com · last seen 14 Sep                                      │
 │ PEOPLE                                                                    │
-│ Alex Morgan · adult · 38       Jamie Morgan · child · 9     [Edit people]│
+│ ┌──────────────┬──────────────┬───────────────┬────────────────────────┐ │
+│ │ Vorname      │ Nachname     │ Rolle         │ Aktionen               │ │
+│ │ [Vorname   ] │ [Nachname  ] │ [Rolle     ▼] │[Neue Person hinzufügen]│ │
+│ │ [Alex      ] │ [Morgan    ] │ [Erwachsene▼] │[Speichern] [Löschen]  │ │
+│ └──────────────┴──────────────┴───────────────┴────────────────────────┘ │
 │                                                                          │
 │ CURRENT PREFERENCES                                                       │
 │ Private bathroom · preferred     Accessible room · no preference          │
@@ -36,6 +40,8 @@ not raw JSON, and is keyboard-readable in chronological order.
 ## Neobrutalist redesign and components
 
 Compose the page from `Breadcrumb`, `Card`, `Badge`, and `Tabs` for people,
-preferences, and history. Use `Button` for editing and invite actions, with
-`Dialog` for the edit form. History entries use a thick left border and actor
+preferences, and history. The people section follows the shared editable-table
+pattern: the first row adds a person, existing people are edited in place, and
+Save/Delete actions stay in the same row. At narrow widths the table becomes
+labeled person cards. History entries use a thick left border and actor
 `Badge`, not colored timeline dots alone.
