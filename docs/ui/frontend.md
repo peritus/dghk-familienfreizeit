@@ -12,21 +12,19 @@ The route table is:
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
-one pending-event reducer and one local-first command pipeline shared by all current
+one draft-change reducer and one local-first command pipeline shared by all current
 organiser routes. A click stages ordinary event drafts, renders the prospective world
 locally, and then either invokes the Worker apply request automatically or leaves the
-drafts for explicit review according to the session's collecting policy. The Worker
-remains the only persistence boundary; there is no separate collecting API or server
+draft changes for explicit review according to the session's drafting policy. The Worker
+remains the only persistence boundary; there is no separate drafting API or server
 draft state.
 
-The header toolbar exposes **Änderungen sammeln** with a numeric pending-event count
-inside the control, including zero. Immediate mode is the session default. Collecting
-mode defers the same apply command and keeps a labelled **Local changes in this
-browser** section expanded below the header. The section explains that its drafts are
-actively collected only in this browser and are not visible to other organisers until
-applied. The control remains pressed but cannot leave collecting mode while drafts
-exist. Local events added during an in-flight request remain queued after the submitted
-prefix.
+The header toolbar exposes an upload-cloud control for starting **Entwurfsmodus**.
+Immediate mode is the session default. Drafting mode replaces that control with a
+labelled **Änderungsentwürfe in diesem Browser** workspace inside the header. It shows
+the draft count and explains that these drafts remain local until applied. Discarding
+drafts exits drafting mode; applying successful drafts exits it when no drafts remain.
+Local events added during an in-flight request remain queued after the submitted prefix.
 
 ## Frontend navigation and state invariants
 
