@@ -17,6 +17,7 @@ import {
 import { Dashboard } from './screens/dashboard.js'
 import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
+import { Inventory } from './screens/inventory.js'
 import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
 
 export default function OrganiserApp() {
@@ -190,6 +191,9 @@ export default function OrganiserApp() {
                 return <NotFound />
               }
             }}
+          </Route>
+          <Route path={organiserRoutePaths.inventory}>
+            <Inventory />
           </Route>
           <Route>
             <NotFound />

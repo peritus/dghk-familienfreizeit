@@ -19,14 +19,17 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser',
     '/organiser/families',
     '/organiser/families/:id',
+    '/organiser/inventory',
   ])
 })
 
 test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserPaths.dashboard()).toBe('/')
   expect(organiserPaths.families()).toBe('/families')
+  expect(organiserPaths.inventory()).toBe('/inventory')
   expect(organiserUrls.dashboard()).toBe('/organiser')
   expect(organiserUrls.families()).toBe('/organiser/families')
+  expect(organiserUrls.inventory()).toBe('/organiser/inventory')
 })
 
 test('family route IDs are opaque, URL-safe, and reversible', () => {
@@ -53,6 +56,7 @@ test('known organiser path matching is driven by the route catalog', () => {
   expect(isKnownOrganiserPath('/organiser')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/families')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/families/6b4b44137d724c1e')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/inventory')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/organiser/families')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/families/')).toBe(false)
 })

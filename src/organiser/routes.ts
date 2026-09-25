@@ -4,6 +4,7 @@ export const organiserRoutePaths = {
   dashboard: '/',
   families: '/families',
   family_detail: '/families/:id',
+  inventory: '/inventory',
 } as const
 
 export const organiserRouteDefinitions = [
@@ -27,6 +28,13 @@ export const organiserRouteDefinitions = [
     absolute_path: `${organiserBasePath}${organiserRoutePaths.family_detail}`,
     test_path: `${organiserBasePath}${organiserRoutePaths.families}/6b4b44137d724c1e`,
     label: 'Familie',
+  },
+  {
+    id: 'organiser-inventory',
+    relative_path: organiserRoutePaths.inventory,
+    absolute_path: `${organiserBasePath}${organiserRoutePaths.inventory}`,
+    test_path: `${organiserBasePath}${organiserRoutePaths.inventory}`,
+    label: 'Unterkunft',
   },
 ] as const
 
@@ -57,6 +65,7 @@ export const organiserPaths = {
   families: (): string => organiserRoutePaths.families,
   family_detail: (familyId: string): string =>
     `${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`,
+  inventory: (): string => organiserRoutePaths.inventory,
 } as const
 
 export const organiserUrls = {
@@ -64,6 +73,7 @@ export const organiserUrls = {
   families: (): string => `${organiserBasePath}${organiserRoutePaths.families}`,
   family_detail: (familyId: string): string =>
     `${organiserBasePath}${organiserPaths.family_detail(familyId)}`,
+  inventory: (): string => `${organiserBasePath}${organiserPaths.inventory()}`,
 } as const
 
 export function isKnownOrganiserPath(pathname: string): boolean {

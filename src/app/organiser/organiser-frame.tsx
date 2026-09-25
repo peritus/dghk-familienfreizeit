@@ -9,6 +9,7 @@ import { cn } from '../lib/utils.js'
 const navItems = [
   { href: organiserPaths.dashboard(), match: organiserRoutePaths.dashboard, label: 'Dashboard' },
   { href: organiserPaths.families(), match: organiserRoutePaths.families, label: 'Familien' },
+  { href: organiserPaths.inventory(), match: organiserRoutePaths.inventory, label: 'Unterkunft' },
 ]
 
 /**
