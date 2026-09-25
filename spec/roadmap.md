@@ -13,21 +13,6 @@ reports are separate audience and presentation slices; an organiser milestone
 does not claim family behavior, and a domain milestone does not require reports
 before the report host exists.
 
-## M5 — Accommodation inventory
-
-Specification coverage: [room inventory](modules/room-inventory.md),
-[profile configuration](profiles/familienfreizeit-2027.md), and [UI-08](ui/screens/inventory.md).
-
-- Implement buildings, rooms, beds, places, capacity, retirement, room labels,
-  inventory events, authorisation, and world summaries.
-- Enter and validate the 38-room, 162-bed occasion inventory as KDL fixtures.
-- Deliver the organiser inventory screen and its capacity and cost summaries.
-- Add capacity, cost, retired-place, invalid-reference, and replay fixtures.
-
-Acceptance: the real inventory replays from KDL, generates stable places, makes
-every live room available to organiser planning subject to hard rules, and is
-usable from the organiser route. No family route or report route is required.
-
 ## M6 — Deterministic room assignment
 
 Specification coverage: [solver contract](architecture/solver-contract.md),

@@ -53,11 +53,11 @@ The generic `Entity` shape, the kernel's `family`/`person` kinds, and the
 mechanism a selected module uses to contribute any other kind are implemented;
 see [implemented typed entity identity](../../docs/architecture/data-model.md).
 
-Not yet provided: named, typed per-kind accessors on the world (`world.rooms`,
-`world.beds`, …) — only the generic `world.entities_by_kind['room']`-style
-bucket exists today. A room-only occasion should eventually expose buildings,
-rooms, beds, and places this way; a workshop-only occasion, slots and
-workshops; without changing the core model.
+The generic kernel world intentionally keeps one `entities_by_kind` boundary.
+The selected room-inventory module currently exposes its typed ordered
+buildings/rooms/beds/places view through `inventoryWorld(world)`. A future
+generic per-kind accessor surface (`world.rooms`, …) remains a separate contract
+decision and must not add persisted property columns or relationship tables.
 
 ## 2. Labels
 

@@ -68,6 +68,20 @@ fields.
 
 None.
 
+## M5 progress
+
+The first real screen consumer is now implemented: `ModuleContributions.screens`
+registers the selected module's organiser route, the composition layer checks
+screen-route collisions, and the worker screen registry exposes the selected
+screen. State-aware event invariant validation is also available to module event
+contributions because the inventory fold needs parent and uniqueness checks.
+
+The issue remains open for the unused contribution kinds: solver input and stages,
+rules, preflight integration, release scopes, change kinds, family controls,
+reports, emails, fixtures as a typed composition contract, and the unresolved
+`event_mappings`/`typed_contributions` API decision. They should be added only with
+their first real consumers.
+
 ## Related files
 
 - [modules/contract.md](../../modules/contract.md)

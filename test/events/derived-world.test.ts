@@ -176,6 +176,9 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
     findEntity: () => undefined,
     entities: () => [],
     labels: () => [],
+    setSortKey: (kind, id, sortKey) => {
+      calls.push(`setSortKey:${kind}:${id}:${sortKey}`)
+    },
     createEntity: (kind, id, seq, sortKey) => {
       calls.push(`createEntity:${kind}:${id}:${seq}:${sortKey}`)
       return { id, kind, sort_key: sortKey ?? seq, created_seq: seq }

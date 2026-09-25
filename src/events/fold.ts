@@ -94,6 +94,8 @@ export type ModuleFoldCapability = {
   entities(kind: string): readonly Entity[]
   /** Read-only live labels for one entity. */
   labels(entityId: string): readonly Label[]
+  /** Restates the deterministic source ordering key without adding a domain label. */
+  setSortKey(kind: string, id: string, sortKey: number): void
   /** `sortKey` defaults to `seq` (creation order) when omitted; pass the event's own source ordering key otherwise. */
   createEntity(kind: string, id: string, seq: number, sortKey?: number): Entity
   /** Hard-removes the entity and every label it holds (D27); rejects a kind the module did not declare. */
@@ -141,6 +143,10 @@ export function guardModuleFold(
       },
       labels(entityId) {
         return capability.labels(entityId)
+      },
+      setSortKey(kind, id, sortKey) {
+        requireKind(kind)
+        capability.setSortKey(kind, id, sortKey)
       },
       createEntity(kind, id, seq, sortKey) {
         requireKind(kind)
@@ -438,6 +444,11 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
             .sort(sortEntities),
         labels: (entityId) =>
           [...state.labels.values()].filter((label) => label.entity_id === entityId),
+        setSortKey: (kind, id, sortKey) => {
+          const target = state.entities_by_id.get(id)
+          if (!target || target.kind !== kind) throw new Error(`unknown ${kind}: ${id}`)
+          target.sort_key = sortKey
+        },
         createEntity: (kind, id, seq, sortKey) => {
           const created = registerEntity(state, config, kind, id, seq, sortKey)
           state.module_entities.set(id, created)
@@ -451,12 +462,12 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
           removeLabelsForEntity(state, id)
         },
         setLabel: (entityId, key, value, strength, note) =>
-          setConfiguredLabel(state, event, config, entityId, key, value, strength, note),
+          setConfiguredLabel(state, event, config, entityId, key, value, strength, note, true),
         replaceLabels: (entityId, values) => {
           for (const { key } of values)
             replaceLabels(state, entityId, configuredLabelKey(config, key))
           for (const { key, value, strength, note } of values)
-            setConfiguredLabel(state, event, config, entityId, key, value, strength, note)
+            setConfiguredLabel(state, event, config, entityId, key, value, strength, note, true)
         },
       }
       fold(capability, { type: event.type, payload: event.payload, seq: event.seq })
@@ -564,6 +575,7 @@ function setConfiguredLabel(
   value: JsonValue,
   strength: 'required' | 'preferred' | null,
   note: string | null,
+  allowSetupOnly = false,
 ): void {
   const canonicalKey = configuredLabelKey(config, key)
   const schema = config.label_schemas?.find((candidate) => candidate.key === canonicalKey)
@@ -576,7 +588,7 @@ function setConfiguredLabel(
     )
   )
     throw new Error(`derived capability cannot be assigned: ${value}`)
-  if (schema?.setup_only)
+  if (schema?.setup_only && !allowSetupOnly)
     throw new Error(
       `label key is setup-owned and cannot be written via LabelSet/LabelCleared: ${canonicalKey}`,
     )

@@ -9,6 +9,7 @@ The route table is:
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with first-row invitation staging |
 | `/organiser/families/:id` | Responsive editable people table, lifecycle staging and event history |
+| `/organiser/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns

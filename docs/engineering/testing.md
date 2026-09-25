@@ -26,10 +26,11 @@ the family entry's shared dependencies without counting them twice.
 
 `worker-configuration.d.ts` is generated and committed. After changing Worker
 bindings or compatibility settings, run `npm run typegen`, review the diff and
-run CI. Application checks do not import the illustrative occasion profile:
-its builders and modules are absent. It remains linted for naming and purity,
-with negative tests covering the `spec/profiles/` location. Domain typechecking
-extensions are specified in the [frontend specification](../../spec/ui/frontend.md#2-build-extensions).
+run CI. Application checks load the executable room-inventory profile. The
+illustrative profile example remains outside the runtime build and is still
+linted for naming and purity, with negative tests covering the `spec/profiles/`
+location. Domain typechecking extensions are specified in the [frontend
+specification](../../spec/ui/frontend.md#2-build-extensions).
 
 Cloudflare's test integration is installed as `@cloudflare/vitest-plugin`, the
 maintained successor to the Workers pool package named in the design examples.
@@ -58,7 +59,7 @@ navigation failures do not depend on magic-link delivery or database timing. A
 small direct-navigation matrix still exercises Vite's SPA fallback and the
 Worker-backed dev server. The pure route contract lives in
 `src/organiser/routes.ts`, and every organiser link must use its builders. Tests
-cover the registered route matrix, dashboard → families → family detail,
+cover the registered route matrix, including inventory, dashboard → families → family detail,
 back/forward navigation, not-found recovery, duplicated `/organiser` segments,
 and email-shaped family identifiers in URLs.
 

@@ -79,10 +79,10 @@ composes the selected modules' kinds and event fold functions into
 `derive`'s dispatch, and `guardModuleFold` (`src/events/fold.ts`) rejects a
 module fold call that creates an entity of a kind it didn't itself declare.
 `world.entities_by_kind` exposes one sorted collection per kind this way,
-generically, for every kind including `family`/`person`; see
-[outstanding data model](../../spec/architecture/data-model.md) §1 for the
-still-aspirational named per-kind accessors (`world.rooms`, …) this doesn't
-yet provide.
+generically, for every kind including `family`/`person`. The selected
+room-inventory module exposes its typed ordered view through `inventoryWorld`;
+future modules add their own typed accessors without adding persisted property
+columns or relationship tables.
 
 Retirement is hard removal, not a tombstone
 ([D27](../../decisions.md#d27--entities-and-labels-are-hard-removed-on-retirementclear-history-is-re-derived-not-tombstoned)):

@@ -54,10 +54,10 @@ the schedule remains derived from the event log.
 The room inventory module defines its purpose as physical sleeping
 accommodation: buildings, rooms, beds, and sleeping places. It explicitly says
 that it does not decide who sleeps where, and that sleeping-party placement is a
-separate boundary ([room inventory purpose](../../modules/room-inventory.md#1-purpose-and-boundary)).
+separate boundary ([implemented room inventory](../../../docs/modules/room-inventory.md)).
 Its entity kinds and generated `place` identities are all accommodation-shaped:
 `building`, `room`, `bed`, and a `place` generated from a bed's `sleeps` value
-([room inventory entities](../../modules/room-inventory.md#4-entity-kinds)).
+([room inventory entities](../../../docs/modules/room-inventory.md)).
 
 The module's solver input is likewise sleeping inventory: buildings, rooms, and
 bed-derived places. It excludes blocked rooms and retired sleeping places, and

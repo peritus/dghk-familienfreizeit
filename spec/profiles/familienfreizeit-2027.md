@@ -1,16 +1,15 @@
 # Familienfreizeit 2027 occasion profile
 
-This is the outstanding occasion-profile specification. Its accompanying
-[TypeScript example](familienfreizeit-2027.example.ts) is illustrative: required
-builders and modules are not implemented, and the application neither loads nor
-typechecks it. Linting the example is not evidence of a working profile.
-When profile support works and is verified, put executable configuration in root
-`profiles/`, document its delivered behavior in `docs/profiles/`, and retain only
-outstanding requirements here.
+This document retains the outstanding occasion-profile requirements. The
+implemented M5 runtime profile is
+[`src/config/profiles/familienfreizeit-2027.ts`](../../src/config/profiles/familienfreizeit-2027.ts)
+and its delivered accommodation behavior is documented in
+[implemented room inventory](../../docs/modules/room-inventory.md). The
+accompanying TypeScript example remains illustrative for later modules.
 
-M2 uses a kernel-only executable fixture while module contributions are introduced.
-This complete selected-module profile becomes an executable integration fixture in
-M12, after every active module contribution exists.
+The executable profile currently selects the kernel plus `room-inventory`. The
+remaining selected-module composition becomes an integration scope for M12 after
+the later active module contributions exist.
 
 This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.example.ts); this document
@@ -20,118 +19,32 @@ composition remain in [deferred scope](../deferred-ideas/README.md).
 
 ## 1. Selected modules
 
-The profile selects these modules ([modules](../modules/contract.md) §5):
+The full occasion is intended to select these modules ([modules](../modules/contract.md) §5).
+The executable M5 profile selects only `room-inventory`; the other rows remain
+later integration scope:
 
 | Module | Used for |
 |---|---|
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
-| [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, and the board |
-| [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
-| [`programme-core`](../modules/programme-core.md) | shared programme-session identity and scheduleable-session boundary |
-| [`official-workshops`](../modules/official-workshops.md) | organiser-authored official workshops, audience, and person-to-workshop leadership |
-| [`workshop-scheduling`](../modules/workshop-scheduling.md) | configured slots, offerings, placement, and schedule release |
-| [`workshop-rankings`](../modules/workshop-rankings.md) | ordered per-person workshop rankings |
-| [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, and fairness |
-| [`family-preferences`](../modules/family-preferences.md) | the family preferences page |
+| [`room-assignment`](../modules/room-assignment.md) | later: deterministic placement, keep-apart relations, and the board |
+| [`workshop-space`](../modules/workshop-space.md) | later: physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
+| [`programme-core`](../modules/programme-core.md) | later: shared programme-session identity and scheduleable-session boundary |
+| [`official-workshops`](../modules/official-workshops.md) | later: organiser-authored official workshops, audience, and person-to-workshop leadership |
+| [`workshop-scheduling`](../modules/workshop-scheduling.md) | later: configured slots, offerings, placement, and schedule release |
+| [`workshop-rankings`](../modules/workshop-rankings.md) | later: ordered per-person workshop rankings |
+| [`workshop-assignment`](../modules/workshop-assignment.md) | later: eligibility, capacity, cancellation, and fairness |
+| [`family-preferences`](../modules/family-preferences.md) | later: the family preferences page |
 
 ## 2. Room inventory
 
-The occasion inventory contains 38 rooms and 162 beds. Prices below are per bed for
-both occasion days. `private` means sanitary facilities in the room or apartment;
-`shared-floor` means shared facilities on the floor; `remote-shared` means shared
-facilities in a neighbouring building.
+The M5 inventory portion is implemented and documented in
+[implemented room inventory](../../docs/modules/room-inventory.md). The active
+profile source is [familienfreizeit-2027.ts](../../src/config/profiles/familienfreizeit-2027.ts)
+and its canonical event fixture is
+[familienfreizeit-2027.kdl](../../test/fixtures/m5/familienfreizeit-2027.kdl).
 
-| Room(s) | Price/bed | Beds | Sanitary | Location / notes |
-|---|---:|---:|---|---|
-| 1 | 88.50 € | 5 | shared-floor | Haupthaus, 1st floor |
-| 2 | 88.50 € | 8 | shared-floor | Haupthaus, 1st floor |
-| 3 | 88.50 € | 8 | shared-floor | Haupthaus, 1st floor |
-| 4 | 88.50 € | 2 | shared-floor | Haupthaus, 1st floor |
-| 5 | 88.50 € | 2 | shared-floor | Haupthaus, 1st floor |
-| 6 | 88.50 € | 2 | shared-floor | Haupthaus, 1st floor |
-| 7 | 88.50 € | 6 | shared-floor | Haupthaus, 1st floor |
-| 8 | 103.00 € | 2 | private | Haupthaus, 1st floor |
-| 9 | 103.00 € | 2 | private | Haupthaus, 1st floor |
-| 10 | 88.50 € | 6 | shared-floor | Haupthaus, 1st floor |
-| 11 | 88.50 € | 7 | shared-floor | Haupthaus, 1st floor |
-| 12 | 88.50 € | 5 | shared-floor | Haupthaus, 2nd floor |
-| 14 | 88.50 € | 4 | shared-floor | Haupthaus, 2nd floor |
-| 15 | 88.50 € | 4 | shared-floor | Haupthaus, 2nd floor |
-| 16 | 88.50 € | 5 | shared-floor | Haupthaus, 2nd floor |
-| 17 | 103.00 € | 2 | private | Haupthaus, 2nd floor |
-| 18 | 103.00 € | 2 | private | Haupthaus, 2nd floor |
-| 19 | 88.50 € | 4 | shared-floor | Haupthaus, 2nd floor |
-| 20 | 88.50 € | 2 | shared-floor | Haupthaus, 2nd floor |
-| 31 | 103.00 € | 2 | private | Gartenhaus, ground floor |
-| 32 | 103.00 € | 4 | private | Gartenhaus, ground floor |
-| 33 | 103.00 € | 4 | private | Gartenhaus, ground floor |
-| 34 | 103.00 € | 4 | private | Gartenhaus, ground floor |
-| 35 | 103.00 € | 8 | private | Gartenhaus, 1st floor; source layout `2×4`; apartment with two sleeping rooms and common room; suitable for two friendly families |
-| 36 | 103.00 € | 4 | private | Gartenhaus, 1st floor; source layout `2×2`; apartment with two sleeping rooms and common room; suitable for two friendly families |
-| 37 | 103.00 € | 8 | private | Gartenhaus, 1st floor; source layout `2×4`; apartment with two sleeping rooms and common room; suitable for two friendly families |
-| 41 | 103.00 € | 6 | private | Blockhaus, ground floor |
-| 42 | 103.00 € | 6 | private | Blockhaus, ground floor |
-| 43 | 103.00 € | 4 | private | Blockhaus, ground floor |
-| 44 | 103.00 € | 4 | private | Blockhaus, ground floor |
-| 51 | 88.50 € | 4 | remote-shared | Bungalow |
-| 52 | 88.50 € | 2 | remote-shared | Bungalow |
-| 61 | 88.50 € | 4 | remote-shared | Schlaffass |
-| 62 | 88.50 € | 4 | remote-shared | Schlaffass |
-| 63 | 88.50 € | 4 | remote-shared | Schlaffass |
-| 64 | 88.50 € | 4 | remote-shared | Schlaffass |
-| 65 | 88.50 € | 4 | remote-shared | Schlaffass |
-| 66 | 88.50 € | 4 | remote-shared | Schlaffass |
-
-The source inventory intentionally has no room 13; room numbering is preserved
-as supplied. The source descriptors are retained in the normalized record:
-`Etagendusche`, `mit Sanitär`, `Sanitär im Nebengebäude`, `Haupthaus`,
-`Gartenhaus`, `Blockhaus`, `Bungalow`, and `Schlaffass`. Apartment capacities
-are normalized from `2×4` and `2×2` sleeping rooms to 8 and 4 beds respectively.
-
-### Inventory representation
-
-The inventory is event data entered through [room inventory](../modules/room-inventory.md)
-events, not profile configuration. Each source location is a building
-(`Haupthaus`, `Gartenhaus`, `Blockhaus`, `Bungalow`, `Schlaffass`); room numbers
-become `RoomAdded.number`; each bed carries the `sleeps` count the hostel lists,
-so a double bed provides two places. Rooms 35–37 are `apartment`
-rooms whose sleeping rooms are recorded as labels.
-
-Module-owned keys and parameters:
-
-| Key | Values in this profile |
-|---|---|
-| `room-type` | `standard`, `apartment`, `bungalow`, `schlaffass` |
-| `floor` | `ground`, `first`, `second`; none for bungalow and Schlaffass rooms |
-| `bed-type` | `single`, `double` |
-
-Profile room traits:
-
-| Trait | Builder | Values | Use |
-|---|---|---|---|
-| `sanitary` | property | `private`, `shared-floor`, `remote-shared` | sanitary arrangement |
-| `is-accessible` | property | boolean, default `false` | accessibility fact |
-| `price-per-bed-eur` | property | `88.50` or `103.00` | cost overview; organiser-only; never scored |
-| `sleeping-rooms` | property | `2` for rooms 35–37, default `1` | apartment layout |
-| `beds-per-sleeping-room` | property | `4` for rooms 35 and 37; `2` for room 36 | preserves the source `2×4` / `2×2` layout |
-| `has-common-room` | property | `true` for rooms 35–37 | apartment layout |
-| `suitable-for-two-families` | property | `true` for rooms 35–37 | descriptive; not a placement rule |
-
-Room capacity is the module's place count, not a trait.
-
-Derived capabilities are resolver projections, never assigned:
-
-| Capability | Derived from |
-|---|---|
-| `private-sanitary` | `sanitary = private` |
-| `ground-floor` | `floor = ground` |
-| `accessible` | `is-accessible = true` |
-| `multi-room-unit` | `sleeping-rooms > 1` |
-
-At full occupancy, the inventory represents 100 beds at 88.50 € and 62 beds at
-103.00 €, or 15,236.00 € total for both days. This is a capacity calculation,
-not a booking or billing rule.
-
+The remaining profile sections describe modules and controls that are not yet
+selected by the executable M5 profile and belong to later milestones.
 ## 3. Workshop-space inventory
 
 Workshop spaces are independent occasion data. The profile selects

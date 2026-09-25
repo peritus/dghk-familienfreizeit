@@ -13,10 +13,11 @@ path before persistence.
 | `/organiser` | Dashboard with family/person counts, event-head status, diagnostics, and draft-change status |
 | `/organiser/families` | Derived family table and manual invitation staging |
 | `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or draft event history |
+| `/organiser/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
 
-The host exposes these kernel-owned screens through the selected-profile screen
-registry. Later module screens must register through the same host; no inventory,
-solver, workshop, or report screen is registered by the kernel-only profile.
+The host exposes these kernel-owned and selected-module screens through one screen
+registry. The room-inventory module registers the inventory screen; solver, workshop,
+and report screens remain unselected.
 
 ## Local-first event workflow
 
@@ -53,9 +54,8 @@ work. Family principals receive no organiser log or apply access.
 
 ## Current limits
 
-The active profile currently contains only the kernel `role` trait. Inventory,
-assignment, reports, family-facing controls, and module-contributed screens are
-specified separately and remain outstanding.
+The active profile currently contains the kernel `role` trait and the room-inventory
+module. Assignment, reports, and family-facing controls remain outstanding.
 
 The verified tests cover local derivation, immediate and drafting commit timing,
 the inline draft workspace, apply-prefix acknowledgement, organiser log/apply

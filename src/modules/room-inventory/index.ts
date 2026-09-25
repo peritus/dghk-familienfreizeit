@@ -427,6 +427,7 @@ export const roomInventory = defineModule({
         authorize: (principal) => principal.kind === 'organiser',
         fold: (capability, event) => {
           const value = event.payload as z.infer<typeof buildingPayload>
+          capability.setSortKey('building', value.building_id, value.sort_key)
           setupLabels(capability, value.building_id, [{ key: 'name', value: value.name }])
         },
       },
@@ -453,6 +454,7 @@ export const roomInventory = defineModule({
         authorize: (principal) => principal.kind === 'organiser',
         fold: (capability, event) => {
           const value = event.payload as z.infer<typeof roomPayload>
+          capability.setSortKey('room', value.room_id, value.sort_key)
           setupLabels(capability, value.room_id, [
             { key: locationKey, value: value.building_id },
             { key: 'number', value: value.number },
@@ -486,6 +488,7 @@ export const roomInventory = defineModule({
         fold: (capability, event) => {
           const value = event.payload as z.infer<typeof bedPayload>
           placeEntities(capability, value.bed_id)
+          capability.setSortKey('bed', value.bed_id, value.sort_key)
           setupLabels(capability, value.bed_id, [
             { key: locationKey, value: value.room_id },
             { key: 'label', value: value.label },

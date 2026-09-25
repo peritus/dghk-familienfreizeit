@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { decimal, defineOccasionProfile, property } from '../../src/config/define.js'
+import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import { derive } from '../../src/events/fold.js'
 import { loadKdl } from '../../src/events/kdl.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
@@ -195,13 +196,102 @@ describe('room inventory', () => {
     expect(inventoryWorld(derive(events, profile.validation_view)).capacity).toBe(1)
   })
 
+  test('reports empty rooms and no capacity as derived diagnostics', () => {
+    const world = derive(
+      [
+        event('BuildingAdded', { building_id: 'bld_empty', name: 'Empty', sort_key: 1 }, 1),
+        event(
+          'RoomAdded',
+          {
+            room_id: 'rm_empty',
+            building_id: 'bld_empty',
+            number: '1',
+            floor: 'ground',
+            room_type: 'standard',
+            sort_key: 1,
+          },
+          2,
+        ),
+        event(
+          'FamilyInvited',
+          {
+            family_id: 'fam_empty',
+            email: 'empty@example.test',
+            display_name: 'Empty family',
+            locale: 'de',
+          },
+          3,
+        ),
+        event(
+          'PersonAdded',
+          {
+            person_id: 'per_empty',
+            family_id: 'fam_empty',
+            given_name: 'Empty',
+            family_name: 'Person',
+            birthdate: null,
+            role: 'adult',
+          },
+          4,
+        ),
+      ],
+      profile.validation_view,
+    )
+    expect(world.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'room-inventory.room-without-places', severity: 'warning' }),
+        expect.objectContaining({ id: 'room-inventory.no-capacity', severity: 'error' }),
+      ]),
+    )
+  })
+
+  test('reports a constraint that names a place removed by lifecycle', () => {
+    const world = derive(
+      [
+        ...inventoryEvents,
+        event(
+          'LabelSet',
+          {
+            entity_id: 'rm_1',
+            key: 'separates-from',
+            value: 'plc_1_2',
+            strength: 'required',
+            note: null,
+          },
+          5,
+        ),
+        event(
+          'BedUpdated',
+          {
+            bed_id: 'bed_1',
+            room_id: 'rm_1',
+            label: '1-A',
+            bed_type: 'double',
+            sleeps: 1,
+            sort_key: 1,
+          },
+          6,
+        ),
+      ],
+      profile.validation_view,
+    )
+    expect(world.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'room-inventory.retired-place-constrained',
+          severity: 'error',
+        }),
+      ]),
+    )
+  })
+
   test('replays the 38-room occasion fixture with 162 places and the documented cost', () => {
     const text = readFileSync(
       new URL('../fixtures/m5/familienfreizeit-2027.kdl', import.meta.url),
       'utf8',
     )
-    const events = loadKdl(text, profile.validation_view)
-    const summary = inventoryWorld(derive(events, profile.validation_view))
+    const events = loadKdl(text, familienfreizeit2027Profile.validation_view)
+    const summary = inventoryWorld(derive(events, familienfreizeit2027Profile.validation_view))
     expect(summary.rooms).toHaveLength(38)
     expect(summary.places).toHaveLength(162)
     expect(summary.cost_eur).toBe(15236)

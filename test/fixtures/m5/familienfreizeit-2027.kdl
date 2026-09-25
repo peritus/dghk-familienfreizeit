@@ -1,15 +1,15 @@
 BuildingAdded building_id=bld_haupthaus name="Haupthaus" sort_key=1
 RoomAdded room_id=rm_01 building_id=bld_haupthaus number="1" floor=first room_type=standard sort_key=1
-LabelSet entity_id=rm_01 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_01 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_01 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_01 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_1-a room_id=rm_01 label="1-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_1-b room_id=rm_01 label="1-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_1-c room_id=rm_01 label="1-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_1-d room_id=rm_01 label="1-D" bed_type=single sleeps=1 sort_key=4
 BedAdded bed_id=bed_1-e room_id=rm_01 label="1-E" bed_type=single sleeps=1 sort_key=5
 RoomAdded room_id=rm_02 building_id=bld_haupthaus number="2" floor=first room_type=standard sort_key=2
-LabelSet entity_id=rm_02 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_02 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_02 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_02 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_2-a room_id=rm_02 label="2-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_2-b room_id=rm_02 label="2-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_2-c room_id=rm_02 label="2-C" bed_type=single sleeps=1 sort_key=3
@@ -19,8 +19,8 @@ BedAdded bed_id=bed_2-f room_id=rm_02 label="2-F" bed_type=single sleeps=1 sort_
 BedAdded bed_id=bed_2-g room_id=rm_02 label="2-G" bed_type=single sleeps=1 sort_key=7
 BedAdded bed_id=bed_2-h room_id=rm_02 label="2-H" bed_type=single sleeps=1 sort_key=8
 RoomAdded room_id=rm_03 building_id=bld_haupthaus number="3" floor=first room_type=standard sort_key=3
-LabelSet entity_id=rm_03 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_03 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_03 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_03 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_3-a room_id=rm_03 label="3-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_3-b room_id=rm_03 label="3-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_3-c room_id=rm_03 label="3-C" bed_type=single sleeps=1 sort_key=3
@@ -30,23 +30,23 @@ BedAdded bed_id=bed_3-f room_id=rm_03 label="3-F" bed_type=single sleeps=1 sort_
 BedAdded bed_id=bed_3-g room_id=rm_03 label="3-G" bed_type=single sleeps=1 sort_key=7
 BedAdded bed_id=bed_3-h room_id=rm_03 label="3-H" bed_type=single sleeps=1 sort_key=8
 RoomAdded room_id=rm_04 building_id=bld_haupthaus number="4" floor=first room_type=standard sort_key=4
-LabelSet entity_id=rm_04 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_04 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_04 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_04 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_4-a room_id=rm_04 label="4-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_4-b room_id=rm_04 label="4-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_05 building_id=bld_haupthaus number="5" floor=first room_type=standard sort_key=5
-LabelSet entity_id=rm_05 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_05 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_05 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_05 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_5-a room_id=rm_05 label="5-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_5-b room_id=rm_05 label="5-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_06 building_id=bld_haupthaus number="6" floor=first room_type=standard sort_key=6
-LabelSet entity_id=rm_06 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_06 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_06 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_06 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_6-a room_id=rm_06 label="6-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_6-b room_id=rm_06 label="6-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_07 building_id=bld_haupthaus number="7" floor=first room_type=standard sort_key=7
-LabelSet entity_id=rm_07 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_07 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_07 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_07 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_7-a room_id=rm_07 label="7-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_7-b room_id=rm_07 label="7-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_7-c room_id=rm_07 label="7-C" bed_type=single sleeps=1 sort_key=3
@@ -54,18 +54,18 @@ BedAdded bed_id=bed_7-d room_id=rm_07 label="7-D" bed_type=single sleeps=1 sort_
 BedAdded bed_id=bed_7-e room_id=rm_07 label="7-E" bed_type=single sleeps=1 sort_key=5
 BedAdded bed_id=bed_7-f room_id=rm_07 label="7-F" bed_type=single sleeps=1 sort_key=6
 RoomAdded room_id=rm_08 building_id=bld_haupthaus number="8" floor=first room_type=standard sort_key=8
-LabelSet entity_id=rm_08 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_08 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_08 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_08 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_8-a room_id=rm_08 label="8-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_8-b room_id=rm_08 label="8-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_09 building_id=bld_haupthaus number="9" floor=first room_type=standard sort_key=9
-LabelSet entity_id=rm_09 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_09 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_09 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_09 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_9-a room_id=rm_09 label="9-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_9-b room_id=rm_09 label="9-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_10 building_id=bld_haupthaus number="10" floor=first room_type=standard sort_key=10
-LabelSet entity_id=rm_10 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_10 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_10 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_10 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_10-a room_id=rm_10 label="10-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_10-b room_id=rm_10 label="10-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_10-c room_id=rm_10 label="10-C" bed_type=single sleeps=1 sort_key=3
@@ -73,8 +73,8 @@ BedAdded bed_id=bed_10-d room_id=rm_10 label="10-D" bed_type=single sleeps=1 sor
 BedAdded bed_id=bed_10-e room_id=rm_10 label="10-E" bed_type=single sleeps=1 sort_key=5
 BedAdded bed_id=bed_10-f room_id=rm_10 label="10-F" bed_type=single sleeps=1 sort_key=6
 RoomAdded room_id=rm_11 building_id=bld_haupthaus number="11" floor=first room_type=standard sort_key=11
-LabelSet entity_id=rm_11 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_11 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_11 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_11 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_11-a room_id=rm_11 label="11-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_11-b room_id=rm_11 label="11-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_11-c room_id=rm_11 label="11-C" bed_type=single sleeps=1 sort_key=3
@@ -83,91 +83,91 @@ BedAdded bed_id=bed_11-e room_id=rm_11 label="11-E" bed_type=single sleeps=1 sor
 BedAdded bed_id=bed_11-f room_id=rm_11 label="11-F" bed_type=single sleeps=1 sort_key=6
 BedAdded bed_id=bed_11-g room_id=rm_11 label="11-G" bed_type=single sleeps=1 sort_key=7
 RoomAdded room_id=rm_12 building_id=bld_haupthaus number="12" floor=second room_type=standard sort_key=12
-LabelSet entity_id=rm_12 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_12 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_12 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_12 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_12-a room_id=rm_12 label="12-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_12-b room_id=rm_12 label="12-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_12-c room_id=rm_12 label="12-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_12-d room_id=rm_12 label="12-D" bed_type=single sleeps=1 sort_key=4
 BedAdded bed_id=bed_12-e room_id=rm_12 label="12-E" bed_type=single sleeps=1 sort_key=5
 RoomAdded room_id=rm_14 building_id=bld_haupthaus number="14" floor=second room_type=standard sort_key=14
-LabelSet entity_id=rm_14 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_14 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_14 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_14 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_14-a room_id=rm_14 label="14-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_14-b room_id=rm_14 label="14-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_14-c room_id=rm_14 label="14-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_14-d room_id=rm_14 label="14-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_15 building_id=bld_haupthaus number="15" floor=second room_type=standard sort_key=15
-LabelSet entity_id=rm_15 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_15 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_15 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_15 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_15-a room_id=rm_15 label="15-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_15-b room_id=rm_15 label="15-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_15-c room_id=rm_15 label="15-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_15-d room_id=rm_15 label="15-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_16 building_id=bld_haupthaus number="16" floor=second room_type=standard sort_key=16
-LabelSet entity_id=rm_16 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_16 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_16 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_16 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_16-a room_id=rm_16 label="16-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_16-b room_id=rm_16 label="16-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_16-c room_id=rm_16 label="16-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_16-d room_id=rm_16 label="16-D" bed_type=single sleeps=1 sort_key=4
 BedAdded bed_id=bed_16-e room_id=rm_16 label="16-E" bed_type=single sleeps=1 sort_key=5
 RoomAdded room_id=rm_17 building_id=bld_haupthaus number="17" floor=second room_type=standard sort_key=17
-LabelSet entity_id=rm_17 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_17 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_17 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_17 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_17-a room_id=rm_17 label="17-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_17-b room_id=rm_17 label="17-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_18 building_id=bld_haupthaus number="18" floor=second room_type=standard sort_key=18
-LabelSet entity_id=rm_18 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_18 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_18 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_18 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_18-a room_id=rm_18 label="18-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_18-b room_id=rm_18 label="18-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_19 building_id=bld_haupthaus number="19" floor=second room_type=standard sort_key=19
-LabelSet entity_id=rm_19 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_19 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_19 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_19 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_19-a room_id=rm_19 label="19-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_19-b room_id=rm_19 label="19-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_19-c room_id=rm_19 label="19-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_19-d room_id=rm_19 label="19-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_20 building_id=bld_haupthaus number="20" floor=second room_type=standard sort_key=20
-LabelSet entity_id=rm_20 key=sanitary value=shared-floor strength=null note=#null
-LabelSet entity_id=rm_20 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_20 key=sanitary value=shared-floor strength=#null note=#null
+LabelSet entity_id=rm_20 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_20-a room_id=rm_20 label="20-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_20-b room_id=rm_20 label="20-B" bed_type=single sleeps=1 sort_key=2
 BuildingAdded building_id=bld_gartenhaus name="Gartenhaus" sort_key=2
 RoomAdded room_id=rm_31 building_id=bld_gartenhaus number="31" floor=ground room_type=standard sort_key=31
-LabelSet entity_id=rm_31 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_31 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_31 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_31 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_31-a room_id=rm_31 label="31-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_31-b room_id=rm_31 label="31-B" bed_type=single sleeps=1 sort_key=2
 RoomAdded room_id=rm_32 building_id=bld_gartenhaus number="32" floor=ground room_type=standard sort_key=32
-LabelSet entity_id=rm_32 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_32 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_32 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_32 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_32-a room_id=rm_32 label="32-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_32-b room_id=rm_32 label="32-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_32-c room_id=rm_32 label="32-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_32-d room_id=rm_32 label="32-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_33 building_id=bld_gartenhaus number="33" floor=ground room_type=standard sort_key=33
-LabelSet entity_id=rm_33 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_33 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_33 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_33 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_33-a room_id=rm_33 label="33-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_33-b room_id=rm_33 label="33-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_33-c room_id=rm_33 label="33-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_33-d room_id=rm_33 label="33-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_34 building_id=bld_gartenhaus number="34" floor=ground room_type=standard sort_key=34
-LabelSet entity_id=rm_34 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_34 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_34 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_34 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_34-a room_id=rm_34 label="34-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_34-b room_id=rm_34 label="34-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_34-c room_id=rm_34 label="34-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_34-d room_id=rm_34 label="34-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_35 building_id=bld_gartenhaus number="35" floor=first room_type=apartment sort_key=35
-LabelSet entity_id=rm_35 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_35 key=price-per-bed-eur value=103 strength=null note=#null
-LabelSet entity_id=rm_35 key=sleeping-rooms value=2 strength=null note=#null
-LabelSet entity_id=rm_35 key=beds-per-sleeping-room value=4 strength=null note=#null
-LabelSet entity_id=rm_35 key=has-common-room value=true strength=null note=#null
-LabelSet entity_id=rm_35 key=suitable-for-two-families value=true strength=null note=#null
+LabelSet entity_id=rm_35 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_35 key=price-per-bed-eur value=103 strength=#null note=#null
+LabelSet entity_id=rm_35 key=sleeping-rooms value=2 strength=#null note=#null
+LabelSet entity_id=rm_35 key=beds-per-sleeping-room value=4 strength=#null note=#null
+LabelSet entity_id=rm_35 key=has-common-room value=#true strength=#null note=#null
+LabelSet entity_id=rm_35 key=suitable-for-two-families value=#true strength=#null note=#null
 BedAdded bed_id=bed_35-a room_id=rm_35 label="35-A" bed_type=double sleeps=2 sort_key=1
 BedAdded bed_id=bed_35-b room_id=rm_35 label="35-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_35-c room_id=rm_35 label="35-C" bed_type=single sleeps=1 sort_key=3
@@ -176,23 +176,23 @@ BedAdded bed_id=bed_35-e room_id=rm_35 label="35-E" bed_type=single sleeps=1 sor
 BedAdded bed_id=bed_35-f room_id=rm_35 label="35-F" bed_type=single sleeps=1 sort_key=6
 BedAdded bed_id=bed_35-g room_id=rm_35 label="35-G" bed_type=single sleeps=1 sort_key=7
 RoomAdded room_id=rm_36 building_id=bld_gartenhaus number="36" floor=first room_type=apartment sort_key=36
-LabelSet entity_id=rm_36 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_36 key=price-per-bed-eur value=103 strength=null note=#null
-LabelSet entity_id=rm_36 key=sleeping-rooms value=2 strength=null note=#null
-LabelSet entity_id=rm_36 key=beds-per-sleeping-room value=2 strength=null note=#null
-LabelSet entity_id=rm_36 key=has-common-room value=true strength=null note=#null
-LabelSet entity_id=rm_36 key=suitable-for-two-families value=true strength=null note=#null
+LabelSet entity_id=rm_36 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_36 key=price-per-bed-eur value=103 strength=#null note=#null
+LabelSet entity_id=rm_36 key=sleeping-rooms value=2 strength=#null note=#null
+LabelSet entity_id=rm_36 key=beds-per-sleeping-room value=2 strength=#null note=#null
+LabelSet entity_id=rm_36 key=has-common-room value=#true strength=#null note=#null
+LabelSet entity_id=rm_36 key=suitable-for-two-families value=#true strength=#null note=#null
 BedAdded bed_id=bed_36-a room_id=rm_36 label="36-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_36-b room_id=rm_36 label="36-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_36-c room_id=rm_36 label="36-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_36-d room_id=rm_36 label="36-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_37 building_id=bld_gartenhaus number="37" floor=first room_type=apartment sort_key=37
-LabelSet entity_id=rm_37 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_37 key=price-per-bed-eur value=103 strength=null note=#null
-LabelSet entity_id=rm_37 key=sleeping-rooms value=2 strength=null note=#null
-LabelSet entity_id=rm_37 key=beds-per-sleeping-room value=4 strength=null note=#null
-LabelSet entity_id=rm_37 key=has-common-room value=true strength=null note=#null
-LabelSet entity_id=rm_37 key=suitable-for-two-families value=true strength=null note=#null
+LabelSet entity_id=rm_37 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_37 key=price-per-bed-eur value=103 strength=#null note=#null
+LabelSet entity_id=rm_37 key=sleeping-rooms value=2 strength=#null note=#null
+LabelSet entity_id=rm_37 key=beds-per-sleeping-room value=4 strength=#null note=#null
+LabelSet entity_id=rm_37 key=has-common-room value=#true strength=#null note=#null
+LabelSet entity_id=rm_37 key=suitable-for-two-families value=#true strength=#null note=#null
 BedAdded bed_id=bed_37-a room_id=rm_37 label="37-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_37-b room_id=rm_37 label="37-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_37-c room_id=rm_37 label="37-C" bed_type=single sleeps=1 sort_key=3
@@ -203,8 +203,8 @@ BedAdded bed_id=bed_37-g room_id=rm_37 label="37-G" bed_type=single sleeps=1 sor
 BedAdded bed_id=bed_37-h room_id=rm_37 label="37-H" bed_type=single sleeps=1 sort_key=8
 BuildingAdded building_id=bld_blockhaus name="Blockhaus" sort_key=3
 RoomAdded room_id=rm_41 building_id=bld_blockhaus number="41" floor=ground room_type=standard sort_key=41
-LabelSet entity_id=rm_41 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_41 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_41 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_41 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_41-a room_id=rm_41 label="41-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_41-b room_id=rm_41 label="41-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_41-c room_id=rm_41 label="41-C" bed_type=single sleeps=1 sort_key=3
@@ -212,8 +212,8 @@ BedAdded bed_id=bed_41-d room_id=rm_41 label="41-D" bed_type=single sleeps=1 sor
 BedAdded bed_id=bed_41-e room_id=rm_41 label="41-E" bed_type=single sleeps=1 sort_key=5
 BedAdded bed_id=bed_41-f room_id=rm_41 label="41-F" bed_type=single sleeps=1 sort_key=6
 RoomAdded room_id=rm_42 building_id=bld_blockhaus number="42" floor=ground room_type=standard sort_key=42
-LabelSet entity_id=rm_42 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_42 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_42 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_42 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_42-a room_id=rm_42 label="42-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_42-b room_id=rm_42 label="42-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_42-c room_id=rm_42 label="42-C" bed_type=single sleeps=1 sort_key=3
@@ -221,71 +221,71 @@ BedAdded bed_id=bed_42-d room_id=rm_42 label="42-D" bed_type=single sleeps=1 sor
 BedAdded bed_id=bed_42-e room_id=rm_42 label="42-E" bed_type=single sleeps=1 sort_key=5
 BedAdded bed_id=bed_42-f room_id=rm_42 label="42-F" bed_type=single sleeps=1 sort_key=6
 RoomAdded room_id=rm_43 building_id=bld_blockhaus number="43" floor=ground room_type=standard sort_key=43
-LabelSet entity_id=rm_43 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_43 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_43 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_43 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_43-a room_id=rm_43 label="43-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_43-b room_id=rm_43 label="43-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_43-c room_id=rm_43 label="43-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_43-d room_id=rm_43 label="43-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_44 building_id=bld_blockhaus number="44" floor=ground room_type=standard sort_key=44
-LabelSet entity_id=rm_44 key=sanitary value=private strength=null note=#null
-LabelSet entity_id=rm_44 key=price-per-bed-eur value=103 strength=null note=#null
+LabelSet entity_id=rm_44 key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_44 key=price-per-bed-eur value=103 strength=#null note=#null
 BedAdded bed_id=bed_44-a room_id=rm_44 label="44-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_44-b room_id=rm_44 label="44-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_44-c room_id=rm_44 label="44-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_44-d room_id=rm_44 label="44-D" bed_type=single sleeps=1 sort_key=4
 BuildingAdded building_id=bld_bungalow name="Bungalow" sort_key=4
 RoomAdded room_id=rm_51 building_id=bld_bungalow number="51" floor=#null room_type=bungalow sort_key=51
-LabelSet entity_id=rm_51 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_51 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_51 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_51 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_51-a room_id=rm_51 label="51-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_51-b room_id=rm_51 label="51-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_51-c room_id=rm_51 label="51-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_51-d room_id=rm_51 label="51-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_52 building_id=bld_bungalow number="52" floor=#null room_type=bungalow sort_key=52
-LabelSet entity_id=rm_52 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_52 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_52 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_52 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_52-a room_id=rm_52 label="52-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_52-b room_id=rm_52 label="52-B" bed_type=single sleeps=1 sort_key=2
 BuildingAdded building_id=bld_schlaffass name="Schlaffass" sort_key=5
 RoomAdded room_id=rm_61 building_id=bld_schlaffass number="61" floor=#null room_type=schlaffass sort_key=61
-LabelSet entity_id=rm_61 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_61 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_61 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_61 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_61-a room_id=rm_61 label="61-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_61-b room_id=rm_61 label="61-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_61-c room_id=rm_61 label="61-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_61-d room_id=rm_61 label="61-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_62 building_id=bld_schlaffass number="62" floor=#null room_type=schlaffass sort_key=62
-LabelSet entity_id=rm_62 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_62 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_62 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_62 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_62-a room_id=rm_62 label="62-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_62-b room_id=rm_62 label="62-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_62-c room_id=rm_62 label="62-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_62-d room_id=rm_62 label="62-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_63 building_id=bld_schlaffass number="63" floor=#null room_type=schlaffass sort_key=63
-LabelSet entity_id=rm_63 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_63 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_63 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_63 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_63-a room_id=rm_63 label="63-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_63-b room_id=rm_63 label="63-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_63-c room_id=rm_63 label="63-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_63-d room_id=rm_63 label="63-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_64 building_id=bld_schlaffass number="64" floor=#null room_type=schlaffass sort_key=64
-LabelSet entity_id=rm_64 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_64 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_64 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_64 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_64-a room_id=rm_64 label="64-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_64-b room_id=rm_64 label="64-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_64-c room_id=rm_64 label="64-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_64-d room_id=rm_64 label="64-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_65 building_id=bld_schlaffass number="65" floor=#null room_type=schlaffass sort_key=65
-LabelSet entity_id=rm_65 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_65 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_65 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_65 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_65-a room_id=rm_65 label="65-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_65-b room_id=rm_65 label="65-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_65-c room_id=rm_65 label="65-C" bed_type=single sleeps=1 sort_key=3
 BedAdded bed_id=bed_65-d room_id=rm_65 label="65-D" bed_type=single sleeps=1 sort_key=4
 RoomAdded room_id=rm_66 building_id=bld_schlaffass number="66" floor=#null room_type=schlaffass sort_key=66
-LabelSet entity_id=rm_66 key=sanitary value=remote-shared strength=null note=#null
-LabelSet entity_id=rm_66 key=price-per-bed-eur value=88.5 strength=null note=#null
+LabelSet entity_id=rm_66 key=sanitary value=remote-shared strength=#null note=#null
+LabelSet entity_id=rm_66 key=price-per-bed-eur value=88.5 strength=#null note=#null
 BedAdded bed_id=bed_66-a room_id=rm_66 label="66-A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_66-b room_id=rm_66 label="66-B" bed_type=single sleeps=1 sort_key=2
 BedAdded bed_id=bed_66-c room_id=rm_66 label="66-C" bed_type=single sleeps=1 sort_key=3

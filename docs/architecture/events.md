@@ -44,12 +44,10 @@ boundary validation may use Zod as defined by [D26](../../decisions.md#d26--vali
 ## Limits
 
 `derive(events, config)` is implemented: it folds the kernel's seven event
-types into typed families/people and generic labels (`src/events/fold.ts`),
-and the fixed resolver operators validate label scope, value shape, and
-references (`src/events/resolver.ts`). A selected module may now contribute
-its own event types and entity kinds into this same replay path — see
-[implemented typed entity identity](data-model.md#typed-entity-identity) —
-though this is proven against a synthetic test module only; no real module
-selects it yet. The derived-world resolver, diagnostics, projections, draft
-derivation, and diff are documented in [derived world](derived-world.md).
+types and selected module event types into typed entities and generic labels
+(`src/events/fold.ts`), while the fixed resolver operators validate label scope,
+value shape, and references (`src/events/resolver.ts`). The room-inventory module
+is the first real selected module and exercises this replay path with its KDL
+fixture and lifecycle tests. The derived-world resolver, diagnostics, projections,
+draft derivation, and diff are documented in [derived world](derived-world.md).
 Solver stages remain outstanding.

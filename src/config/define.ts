@@ -341,6 +341,11 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
   )
   duplicate(
     modules.flatMap(
+      (module) => module.contributions.screens?.map(({ id }) => `screen-id:${id}`) ?? [],
+    ),
+  )
+  duplicate(
+    modules.flatMap(
       (module) => module.contributions.reports?.map(({ id }) => `report:${id}`) ?? [],
     ),
   )
