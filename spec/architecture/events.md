@@ -103,6 +103,7 @@ The kernel mappings are:
 | Event | Identity-only fields | Explicit label mappings | Other behavior |
 |---|---|---|---|
 | `FamilyInvited` | `family_id` | `display_name` → `display-name`; `email` → `email`; `locale` → `locale` | creates the family |
+| `FamilyDisplayNameChanged` | `family_id` | `new_display_name` → `display-name` | `old_display_name` is history-only; replaces the current display-name label |
 | `FamilyEmailChanged` | `family_id` | `new_email` → `email` | `old_email` is history-only; replaces the current email label |
 | `PersonAdded` | `person_id` | `family_id` → `member-of`; `given_name` → `given-name`; `family_name` → `family-name`; `birthdate` → `birthdate`; `role` → `role` | creates the person |
 | `PersonUpdated` | `person_id` | the same mappings as `PersonAdded` | full replacement of setup-owned person labels |
@@ -132,6 +133,17 @@ after the append succeeds.
 *Invariant:* email must be unique case-insensitively across all families and
 must not be an allowlisted organiser address. Checked against the derived world
 before append; the `seq` guard makes the check and the append atomic.
+
+### `FamilyDisplayNameChanged`
+```ts
+{ family_id: string, old_display_name: string, new_display_name: string }
+```
+An organiser may emit this for any family; a signed-in family may emit it only
+for its own `family_id`. It carries the old value so the history can describe
+the rename without replaying the log to the earlier point. `new_display_name`
+replaces the family's current `display-name` label; it does not change
+`family_id`, person identities, memberships, email routing, or any relationship
+labels.
 
 ### `FamilyEmailChanged`
 ```ts
