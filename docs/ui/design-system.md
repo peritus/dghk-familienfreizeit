@@ -57,6 +57,18 @@ family-detail people view uses a semantic editable table with a first-row
 creation action and same-row save/delete controls. At narrow widths, these
 tables become labeled stacked cards while preserving field and action order.
 
+The accommodation screen (`/organiser/inventory`,
+[`src/app/organiser/screens/inventory.tsx`](../../src/app/organiser/screens/inventory.tsx))
+implements a different table shape for a different need: rooms are a real
+`<table>` whose rows expand into a full-width detail row holding that room's
+beds, per the [expandable hierarchical tables
+pattern](../../spec/ui/design-system.md#expandable-hierarchical-tables).
+It's also the first screen with a flat stats-strip card and true/false room
+features rendered as tags rather than table columns. The organiser shell
+distinguishes a whole-app load failure from a save failure (`load_error` vs.
+`error` status) so a failed initial fetch never renders stats or forms
+against an empty, falsely-real world.
+
 Accessibility checks exercise semantic route/loading/error behavior in jsdom.
 They do not establish contrast, 360px visual layout, or real-browser keyboard
 behavior. Those checks and the additional domain controls remain requirements in

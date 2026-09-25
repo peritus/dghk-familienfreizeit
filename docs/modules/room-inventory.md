@@ -33,21 +33,28 @@ clear optional setup labels when their payload value is null.
 ## Active occasion fixture
 
 [`test/fixtures/m5/familienfreizeit-2027.kdl`](../../test/fixtures/m5/familienfreizeit-2027.kdl)
-contains the five buildings, 38 rooms, apartment descriptors for rooms 35–37, and
+contains the five buildings, 38 rooms (rooms 35–37 are apartment-type), and
 162 live sleeping places from the occasion inventory. The replay test verifies stable
 ordering and place IDs, the 162-place capacity, and the €15,236 cost summary.
 
 ## Organiser surface and limits
 
 `/organiser/inventory` is registered by the selected module and uses the shared
-organiser local-first event pipeline. It shows building cards, semantic room rows,
-bed details, capacity, profile-defined room traits, derived capabilities, and cost
-summaries. Organisers can add, edit, and remove buildings, rooms, and beds, with
-removal blocked until dependent entities are handled. New and edited rooms stage
-their required profile labels in the same event batch as the room event. No
-assignment board, free-place calculation against a plan, accommodation report
-route, family view, or solver stage is included; those remain M6/M11/M10 work
-respectively.
+organiser local-first event pipeline. It shows a stats strip, expandable building
+sections with real `<table>` room rows, bed details, capacity, profile-defined
+room traits shown as columns or tags, and cost summaries. Derived capabilities
+(e.g. `private-sanitary`) stay internal matching data and are never rendered;
+only the room's own traits and their configured copy reach the UI. Organisers
+can add, edit, and remove buildings, rooms, and beds, with removal blocked
+until dependent entities are handled (a blocked building delete explains why
+inline rather than disabling the button) and a confirmation step for deleting
+a room or bed. New and edited rooms stage their required profile labels in
+the same event batch as the room event. Bed capacity follows from `bed_type`
+alone (`single`/`double`/`bunk`) via `sleepsForBedType`; there is no separate
+capacity input. No assignment board, free-place calculation against a plan,
+accommodation report route, family view, apartment "Schlafraum" bed grouping,
+or solver stage is included; those remain M6/M11/M10 work respectively (the
+apartment grouping needs its own bed-schema decision beyond this UI pass).
 
 The module contributes world checks for rooms without places, no live capacity while
 people exist, and constraints that name a removed place. These diagnostics are kept

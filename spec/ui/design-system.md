@@ -88,6 +88,16 @@ element to render in place of the primitive's default and merges the primitive's
 props and accessible semantics into it. Every interactive control follows this
 API and keeps those semantics intact.
 
+**Outstanding:** `AlertDialog` itself is not built yet (no primitive exists in
+`src/app/components/ui/`) and no destructive action in the app uses it. The
+inventory screen's building/room delete confirmations
+(`docs/ui/design-system.md`) use a local, inline two-step pattern (the
+button's own row becomes "Behalten" / "Ja, entfernen") instead, since that
+was cheaper than introducing the primitive for a single screen. Building
+`AlertDialog` (Base UI `AlertDialog` + focus trap + portal) and migrating
+inventory's confirmations onto it is follow-up work, not silently treated as
+equivalent to this contract.
+
 ## Pressable elements and hit areas
 
 **Implemented** as the `pressable`/`blueprint`/`blueprint-on-main` utilities and the
@@ -96,9 +106,9 @@ base-layer `cursor: pointer` rule in [globals.css](../../src/app/globals.css); s
 pressable") and the `Button`/`Card` components that use it.
 
 **Outstanding:** the `rounded-base` (5px, not the smaller default `rounded`) radius
-rule is enforced in the organiser app bar and dashboard, but not yet swept across the
-rest of the app (family/organiser tables, form inputs elsewhere still use `rounded` in
-places) — a follow-up pass, not part of this change.
+rule is enforced in the organiser app bar, dashboard, and inventory screen, but not
+yet swept across the rest of the app (family screens, other organiser forms still
+use `rounded` in places) — a follow-up pass, not part of this change.
 
 ## Disabled state (outstanding)
 
@@ -180,6 +190,90 @@ in the same change when it is approved.
 The description states the concrete consequence. `AlertDialogAction` is the
 high-contrast offset-shadow primary action; `AlertDialogCancel` is the quieter
 outlined alternative.
+
+## Expandable hierarchical tables
+
+For a table whose rows have their own nested collection (rooms with beds,
+and any future case shaped like it — not the flat editable-row pattern
+above):
+
+- a real `<table>` with `<caption class="sr-only">` and the row's
+  identifying cell as `<th scope="row">`, not CSS-grid `<div>`s;
+- the first cell holds a `<button>` with a chevron (closed/open), plus
+  `aria-expanded` and `aria-controls` pointing at the detail row's `id`;
+- the detail row is a `<tr>` with one `<td colspan>` holding the nested
+  content, given the header row's `--paper` background;
+- multiple rows may be open at once; a newly created row opens
+  automatically so its own detail (and add-child form) is immediately
+  visible;
+- only show a column if it compares across rows — a boolean becomes a tag
+  (below), not a "Nein" line.
+
+**Implemented** for `/organiser/inventory` room rows
+(`src/app/organiser/screens/inventory.tsx`); **outstanding** everywhere
+else this shape could apply.
+
+## Tags and badges
+
+- **Tag** (a true property, shown only when true): cream `--background`
+  fill, no border, small bold text, tight padding.
+- **Badge — needs action**: `--main` fill, 2px black border, bold text.
+  Example: an inventory room with zero beds shows **Keine Betten**. Orange
+  stays reserved for "needs action."
+
+**Implemented** for inventory room tags/badges; **outstanding** as a shared
+component — each screen currently composes the utility classes itself.
+
+## Page states
+
+Every data screen defines four states explicitly, and never shows "0" or an
+empty list for data that failed to load (a load failure that looks like real
+empty data invites duplicate re-entry):
+
+| State | Shows |
+|---|---|
+| Loading | Skeleton or nothing; never zeros |
+| Load failed | One error block; no stats, lists, or forms for the data that failed |
+| Empty | Only the first useful action |
+| Loaded | Content first, then tools |
+
+**Implemented:** the organiser shell now distinguishes a load failure
+(`state.status === 'load_error'`, whole app, no nav/save-status) from a save
+failure (`state.status === 'error'`, save-status shows "Speichern
+fehlgeschlagen") — see [Frontend](../../docs/ui/frontend.md). Because the
+organiser app loads one shared event log rather than per-screen data, a load
+failure is necessarily whole-app; a screen-scoped notice for "this area's
+data failed, the rest of the page still works" has no current trigger and is
+not implemented.
+
+## Stats strip
+
+One flat card, equal cells divided by 2px lines (not separate tiles).
+Numbers large and bold with `leading-none`, label bold below. Include every
+level the screen manages. Never repeat a stat elsewhere on the same page.
+Mobile: a 2-column grid, never a 2+1 wrap.
+
+**Implemented** for `/organiser/inventory`; **outstanding** as a shared
+component.
+
+## Forms
+
+- Label above the field, bold. Mark an optional field with "(optional)" in
+  muted regular weight after the label — mark optional, not required, since
+  most fields in this app are required.
+- Placeholders are examples, not instructions, and start with "z. B."; never
+  use a placeholder instead of a label.
+- Money: a text input with `inputmode="decimal"`, accepting comma and dot,
+  with the € unit inside the field border — not `type="number"` (comma
+  handling for decimals differs between browsers). Counts use
+  `type="number"` with `min`.
+- Button order in a form footer: text button "Abbrechen", then the primary
+  action, named after the result ("Zimmer anlegen", not "Speichern").
+- Destructive actions never sit directly next to "Speichern"/the primary
+  save action.
+
+**Implemented** for the inventory forms; **outstanding** as a shared
+convention enforced elsewhere (other organiser forms predate this pass).
 
 ## Component inventory
 
