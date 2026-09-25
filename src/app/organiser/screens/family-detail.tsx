@@ -5,7 +5,7 @@ import { materializeDraftEvents } from '../state.js'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
-import { eventTypeLabel, findFamily, labelValue, roleLabel } from '../family-data.js'
+import { eventTypeLabel, findFamily, labelValue } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 
 function makePersonId(givenName: string): string {
@@ -21,6 +21,7 @@ function PersonEditor({
   initial_family_name: initialFamilyName,
   initial_role: initialRole,
   onStage,
+  onDelete,
 }: {
   person_id: string
   family_id: string
@@ -29,6 +30,7 @@ function PersonEditor({
   initial_family_name: string
   initial_role: string
   onStage: (event: EventDraft) => void
+  onDelete: () => void
 }) {
   const [givenName, setGivenName] = useState(initialGivenName)
   const [familyName, setFamilyName] = useState(initialFamilyName)
@@ -52,42 +54,64 @@ function PersonEditor({
     })
   }
 
+  const formId = `person-form-${personId}`
+
   return (
-    <form onSubmit={update} className="grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-      <label className="grid gap-1">
-        Vorname
-        <input
-          required
-          value={givenName}
-          onChange={(event) => setGivenName(event.target.value)}
-          className="min-h-10 rounded border-2 border-black px-2"
-        />
-      </label>
-      <label className="grid gap-1">
-        Nachname
-        <input
-          required
-          value={familyName}
-          onChange={(event) => setFamilyName(event.target.value)}
-          className="min-h-10 rounded border-2 border-black px-2"
-        />
-      </label>
-      <label className="grid gap-1">
-        Rolle
-        <select
-          value={role}
-          onChange={(event) => setRole(event.target.value)}
-          className="min-h-10 rounded border-2 border-black px-2"
-        >
-          <option value="adult">Erwachsene(r)</option>
-          <option value="child">Kind</option>
-          <option value="infant">Baby</option>
-        </select>
-      </label>
-      <Button type="submit" variant="neutral">
-        Save
-      </Button>
-    </form>
+    <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+      <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
+        <form id={formId} onSubmit={update} />
+        <label htmlFor={`${formId}-given-name`} className="grid gap-1">
+          <span className="md:sr-only">Vorname</span>
+          <input
+            id={`${formId}-given-name`}
+            form={formId}
+            required
+            value={givenName}
+            onChange={(event) => setGivenName(event.target.value)}
+            className="min-h-11 w-full rounded border-2 border-black px-3"
+          />
+        </label>
+      </th>
+      <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
+        <label htmlFor={`${formId}-family-name`} className="grid gap-1">
+          <span className="font-bold md:sr-only">Nachname</span>
+          <input
+            id={`${formId}-family-name`}
+            form={formId}
+            required
+            value={familyName}
+            onChange={(event) => setFamilyName(event.target.value)}
+            className="min-h-11 w-full rounded border-2 border-black px-3"
+          />
+        </label>
+      </td>
+      <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
+        <label htmlFor={`${formId}-role`} className="grid gap-1">
+          <span className="font-bold md:sr-only">Rolle</span>
+          <select
+            id={`${formId}-role`}
+            form={formId}
+            value={role}
+            onChange={(event) => setRole(event.target.value)}
+            className="min-h-11 w-full rounded border-2 border-black px-3"
+          >
+            <option value="adult">Erwachsene(r)</option>
+            <option value="child">Kind</option>
+            <option value="infant">Baby</option>
+          </select>
+        </label>
+      </td>
+      <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
+        <div className="flex flex-wrap gap-2">
+          <Button form={formId} type="submit" variant="neutral" size="sm">
+            Speichern
+          </Button>
+          <Button type="button" variant="neutral" size="sm" onClick={onDelete}>
+            Löschen
+          </Button>
+        </div>
+      </td>
+    </tr>
   )
 }
 
@@ -155,99 +179,111 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
       </div>
       <Card className="bg-white">
         <CardHeader>
-          <h3 className="text-xl">Person hinzufügen</h3>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={addPerson}
-            className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end"
-          >
-            <label className="grid gap-1">
-              Vorname
-              <input
-                required
-                value={givenName}
-                onChange={(event) => setGivenName(event.target.value)}
-                className="min-h-11 rounded border-2 border-black px-3"
-              />
-            </label>
-            <label className="grid gap-1">
-              Nachname
-              <input
-                required
-                value={familyName}
-                onChange={(event) => setFamilyName(event.target.value)}
-                className="min-h-11 rounded border-2 border-black px-3"
-              />
-            </label>
-            <label className="grid gap-1">
-              Rolle
-              <select
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-                className="min-h-11 rounded border-2 border-black px-3"
-              >
-                <option value="adult">Erwachsene(r)</option>
-                <option value="child">Kind</option>
-                <option value="infant">Baby</option>
-              </select>
-            </label>
-            <Button type="submit">Add</Button>
-          </form>
-        </CardContent>
-      </Card>
-      <Card className="bg-white">
-        <CardHeader>
           <h3 className="text-xl">Personen · {family.persons.length}</h3>
         </CardHeader>
         <CardContent>
-          {family.persons.length === 0 ? (
-            <p>Noch keine Personen erfasst.</p>
-          ) : (
-            <ul className="divide-y-2 divide-black">
+          <table className="w-full text-left max-md:block">
+            <caption className="sr-only">Personen dieser Familie</caption>
+            <thead className="border-y-2 border-black max-md:hidden">
+              <tr>
+                <th scope="col" className="p-3">
+                  Vorname
+                </th>
+                <th scope="col" className="p-3">
+                  Nachname
+                </th>
+                <th scope="col" className="p-3">
+                  Rolle
+                </th>
+                <th scope="col" className="p-3">
+                  Aktionen
+                </th>
+              </tr>
+            </thead>
+            <tbody className="max-md:block">
+              <tr className="border-b-2 border-black bg-main/15 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+                <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
+                  <form id="add-person-form" onSubmit={addPerson} />
+                  <label htmlFor="add-person-given-name" className="grid gap-1">
+                    <span className="md:sr-only">Vorname</span>
+                    <input
+                      id="add-person-given-name"
+                      form="add-person-form"
+                      required
+                      value={givenName}
+                      onChange={(event) => setGivenName(event.target.value)}
+                      className="min-h-11 w-full rounded border-2 border-black px-3"
+                    />
+                  </label>
+                </th>
+                <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
+                  <label htmlFor="add-person-family-name" className="grid gap-1">
+                    <span className="font-bold md:sr-only">Nachname</span>
+                    <input
+                      id="add-person-family-name"
+                      form="add-person-form"
+                      required
+                      value={familyName}
+                      onChange={(event) => setFamilyName(event.target.value)}
+                      className="min-h-11 w-full rounded border-2 border-black px-3"
+                    />
+                  </label>
+                </td>
+                <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
+                  <label htmlFor="add-person-role" className="grid gap-1">
+                    <span className="font-bold md:sr-only">Rolle der neuen Person</span>
+                    <select
+                      id="add-person-role"
+                      form="add-person-form"
+                      value={role}
+                      onChange={(event) => setRole(event.target.value)}
+                      className="min-h-11 w-full rounded border-2 border-black px-3"
+                    >
+                      <option value="adult">Erwachsene(r)</option>
+                      <option value="child">Kind</option>
+                      <option value="infant">Baby</option>
+                    </select>
+                  </label>
+                </td>
+                <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
+                  <Button form="add-person-form" type="submit" className="w-full md:w-auto">
+                    Neue Person hinzufügen
+                  </Button>
+                </td>
+              </tr>
               {family.persons.map((person) => {
                 const personLabels = world!.labels_by_entity[person.id] ?? []
                 return (
-                  <li key={person.id} className="space-y-3 py-3">
-                    <p>
-                      <strong>
-                        {labelValue(personLabels, 'given-name')}{' '}
-                        {labelValue(personLabels, 'family-name')}
-                      </strong>
-                      <span className="ml-3">
-                        {roleLabel(labelValue(personLabels, 'role') ?? 'ohne Rolle')}
-                      </span>
-                    </p>
-                    <PersonEditor
-                      person_id={person.id}
-                      family_id={selectedFamilyId}
-                      actor={state.principal_email!}
-                      initial_given_name={labelValue(personLabels, 'given-name') ?? ''}
-                      initial_family_name={labelValue(personLabels, 'family-name') ?? ''}
-                      initial_role={labelValue(personLabels, 'role') ?? 'adult'}
-                      onStage={(event) => stage([event])}
-                    />
-                    <Button
-                      variant="neutral"
-                      onClick={() =>
-                        stage([
-                          {
-                            at: new Date().toISOString(),
-                            actor: state.principal_email!,
-                            subject: person.id,
-                            type: 'PersonWithdrawn',
-                            payload: { person_id: person.id, reason: null },
-                          },
-                        ])
-                      }
-                    >
-                      Delete
-                    </Button>
-                  </li>
+                  <PersonEditor
+                    key={person.id}
+                    person_id={person.id}
+                    family_id={selectedFamilyId}
+                    actor={state.principal_email!}
+                    initial_given_name={labelValue(personLabels, 'given-name') ?? ''}
+                    initial_family_name={labelValue(personLabels, 'family-name') ?? ''}
+                    initial_role={labelValue(personLabels, 'role') ?? 'adult'}
+                    onStage={(event) => stage([event])}
+                    onDelete={() =>
+                      stage([
+                        {
+                          at: new Date().toISOString(),
+                          actor: state.principal_email!,
+                          subject: person.id,
+                          type: 'PersonWithdrawn',
+                          payload: { person_id: person.id, reason: null },
+                        },
+                      ])
+                    }
+                  />
                 )
               })}
-            </ul>
-          )}
+            </tbody>
+          </table>
+          {family.persons.length === 0 ? (
+            <p className="mt-3" role="status">
+              Noch keine Personen erfasst.
+            </p>
+          ) : null}
         </CardContent>
       </Card>
       <Card className="bg-white">

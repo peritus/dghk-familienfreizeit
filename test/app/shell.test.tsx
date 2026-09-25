@@ -135,7 +135,7 @@ test('organiser state survives client-side route and history navigation', async 
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'neu@example.test' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
   expect(screen.getByText('1 offene Änderung')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('link', { name: 'Bestehende Familie' }))
@@ -201,7 +201,7 @@ test('organiser draft mode replaces the upload control with its workspace', asyn
   fireEvent.change(screen.getByLabelText('E-Mail'), {
     target: { value: 'neu@example.test' },
   })
-  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
 
   expect(await screen.findByText('1 Änderungsentwurf')).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Entwürfe anwenden' })).toBeTruthy()
@@ -233,7 +233,7 @@ test('family history includes staged events before they are applied', async () =
   fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
   fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Lokale' } })
   fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Neue Person hinzufügen' }))
 
   expect(await screen.findByText('Noch nicht angewendet')).toBeTruthy()
   expect(screen.getByText('Person hinzugefügt')).toBeTruthy()
@@ -247,7 +247,7 @@ test('immediate mode sends the same staged event through apply automatically', a
   fireEvent.change(screen.getByLabelText('E-Mail'), {
     target: { value: 'sofort@example.test' },
   })
-  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
 
   expect(await screen.findByRole('link', { name: 'Sofort Familie' })).toBeTruthy()
   expect(fetchMock).toHaveBeenCalledWith(
@@ -292,17 +292,17 @@ test('family links use an opaque route ID and open the matching detail view', as
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
-  expect(screen.getByText('Erwachsene(r)', { selector: 'span' })).toBeTruthy()
+  expect(screen.getAllByRole('combobox')).toHaveLength(2)
+  expect((screen.getAllByRole('combobox')[1] as HTMLSelectElement).value).toBe('adult')
   expect(screen.getByText('Familie eingeladen')).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Delete' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Speichern' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Löschen' })).toBeTruthy()
 })
 
 test('families keeps manual invitation without a bulk-import surface', async () => {
   open('/organiser/families')
 
-  expect(await screen.findByRole('heading', { name: 'Familie einladen' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Zur offenen Liste' })).toBeTruthy()
+  expect(await screen.findByRole('button', { name: 'Familie einladen' })).toBeTruthy()
   expect(screen.queryByRole('heading', { name: 'Import' })).toBeNull()
   expect(screen.queryByRole('textbox', { name: 'CSV-Daten' })).toBeNull()
 })
@@ -314,7 +314,7 @@ test('families validate invitations', async () => {
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'ungültig' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
   expect(screen.getByRole('alert').textContent).toBe('Bitte gib eine gültige E-Mail-Adresse ein.')
 })
 
