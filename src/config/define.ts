@@ -5,6 +5,7 @@ import {
   type LabelSchema,
   type ModuleEventAuthorize,
   type ModuleEventFold,
+  type ModuleEventValidate,
   type ResolverDescriptor,
   type WorldCheck,
   type WorldSummaryDefinition,
@@ -114,6 +115,8 @@ export type ModuleContributions = {
     type: string
     payload: ZodType<JsonValue>
     fold: ModuleEventFold
+    /** State-aware invariant validation run before the event folds. */
+    validate?: ModuleEventValidate
     /** Who may append this event type; the module's own authorization rule (modules/contract.md §3.1). */
     authorize: ModuleEventAuthorize
   }[]
@@ -121,12 +124,22 @@ export type ModuleContributions = {
     key: string
     scopes: readonly string[]
     validate?: (value: JsonValue) => string | null
+    cardinality?: Cardinality
+    setup_only?: boolean
   }[]
   trait_roles?: readonly TraitRole[]
   routes?: readonly { route: string }[]
+  screens?: readonly ScreenDefinition[]
   reports?: readonly { id: string }[]
   world_summaries?: readonly WorldSummaryDefinition[]
   world_checks?: readonly WorldCheck[]
+}
+
+export type ScreenDefinition = {
+  id: string
+  route: string
+  label: string
+  audience: 'organiser'
 }
 
 export type TraitRole = {
@@ -323,6 +336,11 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
   )
   duplicate(
     modules.flatMap(
+      (module) => module.contributions.screens?.map(({ route }) => `screen:${route}`) ?? [],
+    ),
+  )
+  duplicate(
+    modules.flatMap(
       (module) => module.contributions.reports?.map(({ id }) => `report:${id}`) ?? [],
     ),
   )
@@ -373,6 +391,7 @@ function validationView(
   const eventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
   const eventFoldDispatch: Record<string, ModuleEventFold> = {}
   const eventAuthorizeDispatch: Record<string, ModuleEventAuthorize> = {}
+  const eventValidateDispatch: Record<string, ModuleEventValidate> = {}
   for (const module of modules) {
     const allowedKinds = new Set(module.contributions.entity_kinds?.map(({ id }) => id) ?? [])
     const allowedLabelKeys = new Set(module.contributions.label_keys?.map(({ key }) => key) ?? [])
@@ -385,6 +404,7 @@ function validationView(
         event.fold,
       )
       eventAuthorizeDispatch[event.type] = event.authorize
+      if (event.validate) eventValidateDispatch[event.type] = event.validate
     }
   }
   const entityKindPrefixes: Record<string, string> = { ...kernelEntityKindPrefixes }
@@ -401,6 +421,7 @@ function validationView(
     event_payload_schemas: eventPayloadSchemas,
     event_fold_dispatch: eventFoldDispatch,
     event_authorize_dispatch: eventAuthorizeDispatch,
+    event_validate_dispatch: eventValidateDispatch,
     entity_kind_prefixes: entityKindPrefixes,
   }
 }

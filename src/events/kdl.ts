@@ -1,11 +1,19 @@
 import { parse, type Node } from '@bgotink/kdl'
 import { derive, type KernelConfig } from './fold.js'
-import { isEventType, parsePayload, type Event, type EventType } from './types.js'
+import {
+  isEventType,
+  kernelPayloadSchemas,
+  parsePayload,
+  type Event,
+  type EventPayloadSchemas,
+  type EventType,
+} from './types.js'
 
 const fixedTimestamp = '2026-01-01T00:00:00.000Z'
 export function loadKdl(text: string, config: KernelConfig = {}): Event[] {
   const document = parse(text)
-  const events = document.nodes.map((node, index) => nodeToEvent(node, index + 1))
+  const schemas = { ...kernelPayloadSchemas, ...config.event_payload_schemas }
+  const events = document.nodes.map((node, index) => nodeToEvent(node, index + 1, schemas))
   derive(events, config)
   return events
 }
@@ -19,9 +27,10 @@ export class TextFileEventSource {
     return loadKdl(this.text, this.config)
   }
 }
-function nodeToEvent(node: Node, defaultSeq: number): Event {
+function nodeToEvent(node: Node, defaultSeq: number, schemas: EventPayloadSchemas): Event {
   const typeName = node.getName()
-  if (!isEventType(typeName)) throw new Error(`line ${defaultSeq}: unknown event type ${typeName}`)
+  if (!isEventType(typeName, schemas))
+    throw new Error(`line ${defaultSeq}: unknown event type ${typeName}`)
   if (node.children !== null) throw new Error(`line ${defaultSeq}: child blocks are not allowed`)
   const payload: Record<string, unknown> = {}
   let seq = defaultSeq
@@ -46,7 +55,7 @@ function nodeToEvent(node: Node, defaultSeq: number): Event {
     actor,
     subject,
     type: typeName as EventType,
-    payload: parsePayload(typeName as EventType, payload),
+    payload: parsePayload(typeName as EventType, payload, schemas),
   } as Event
 }
 

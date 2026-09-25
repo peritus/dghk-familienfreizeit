@@ -88,6 +88,12 @@ export type LabelWrite = {
 }
 
 export type ModuleFoldCapability = {
+  /** Read-only live entity lookup for module invariants and lifecycle restatements. */
+  findEntity(kind: string, id: string): Entity | undefined
+  /** Read-only live entities of one module-owned kind. */
+  entities(kind: string): readonly Entity[]
+  /** Read-only live labels for one entity. */
+  labels(entityId: string): readonly Label[]
   /** `sortKey` defaults to `seq` (creation order) when omitted; pass the event's own source ordering key otherwise. */
   createEntity(kind: string, id: string, seq: number, sortKey?: number): Entity
   /** Hard-removes the entity and every label it holds (D27); rejects a kind the module did not declare. */
@@ -125,6 +131,17 @@ export function guardModuleFold(
   }
   return (capability, event) => {
     const guarded: ModuleFoldCapability = {
+      findEntity(kind, id) {
+        requireKind(kind)
+        return capability.findEntity(kind, id)
+      },
+      entities(kind) {
+        requireKind(kind)
+        return capability.entities(kind)
+      },
+      labels(entityId) {
+        return capability.labels(entityId)
+      },
       createEntity(kind, id, seq, sortKey) {
         requireKind(kind)
         return capability.createEntity(kind, id, seq, sortKey)
@@ -152,6 +169,7 @@ export type LabelSchema = {
   validate?: (value: JsonValue) => string | null
   scopes?: readonly string[]
   cardinality?: 'zero-or-one' | 'exactly-one' | 'zero-or-more'
+  setup_only?: boolean
   sensitivity?: 'normal' | 'restricted'
   /**
    * Authorization-only precursor to the full `family_facing` control contract
@@ -187,6 +205,9 @@ export type ModuleEventAuthorize = (
   world: KernelWorld,
 ) => boolean
 
+/** Validates a module event against the live world immediately before it folds. */
+export type ModuleEventValidate = (payload: JsonValue, world: KernelWorld) => string | null
+
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
   /** Declared id prefix per entity kind, kernel and module alike; enforced at creation (D27). */
@@ -204,6 +225,8 @@ export type KernelConfig = {
   event_fold_dispatch?: Readonly<Record<string, ModuleEventFold>>
   /** Single-owner event type -> (module) authorization dispatch; see `defineOccasionProfile` and `canAppendEvent`. */
   event_authorize_dispatch?: Readonly<Record<string, ModuleEventAuthorize>>
+  /** Single-owner event type -> state-aware invariant validation. */
+  event_validate_dispatch?: Readonly<Record<string, ModuleEventValidate>>
 }
 type MutableWorld = {
   families: Map<string, Entity>
@@ -221,29 +244,7 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Ker
   const validatedEvents = normalizeEvents(events, config)
   const state = createMutableWorld()
   for (const event of validatedEvents) applyEvent(state, event, config)
-  const labels = [...state.labels.values()].sort(
-    (a, b) =>
-      a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),
-  )
-  const entities = [
-    ...state.families.values(),
-    ...state.persons.values(),
-    ...state.module_entities.values(),
-  ].sort(sortEntities)
-  const resolved = resolve(labels, entities, config)
-  const world: KernelWorld = {
-    families: [...state.families.values()].sort(sortEntities),
-    persons: [...state.persons.values()].sort(sortEntities),
-    labels,
-    head_seq: state.head_seq,
-    labels_by_entity: indexLabels(labels, (label) => label.entity_id),
-    labels_by_key: indexLabels(labels, (label) => label.key),
-    constraints: resolved.constraints,
-    capabilities: resolved.capabilities,
-    diagnostics: resolved.diagnostics,
-    summaries: {},
-    entities_by_kind: entitiesByKind(entities),
-  }
+  const world = worldFromState(state, config)
   const summaries = Object.fromEntries(
     (config.world_summaries ?? []).map((definition) => [
       definition.id,
@@ -294,7 +295,14 @@ function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[
     expectedSeq += 1
   }
   const state = createMutableWorld()
-  for (const event of validatedEvents) applyEvent(state, event, config)
+  for (const event of validatedEvents) {
+    const validator = config.event_validate_dispatch?.[event.type]
+    if (validator) {
+      const error = validator(event.payload, worldFromState(state, config))
+      if (error) throw new Error(error)
+    }
+    applyEvent(state, event, config)
+  }
   return validatedEvents
 }
 
@@ -307,6 +315,32 @@ function createMutableWorld(): MutableWorld {
     head_seq: 0,
     module_entities: new Map(),
     entities_by_id: new Map(),
+  }
+}
+
+function worldFromState(state: MutableWorld, config: KernelConfig): KernelWorld {
+  const labels = [...state.labels.values()].sort(
+    (a, b) =>
+      a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),
+  )
+  const entities = [
+    ...state.families.values(),
+    ...state.persons.values(),
+    ...state.module_entities.values(),
+  ].sort(sortEntities)
+  const resolved = resolve(labels, entities, config)
+  return {
+    families: [...state.families.values()].sort(sortEntities),
+    persons: [...state.persons.values()].sort(sortEntities),
+    labels,
+    head_seq: state.head_seq,
+    labels_by_entity: indexLabels(labels, (label) => label.entity_id),
+    labels_by_key: indexLabels(labels, (label) => label.key),
+    constraints: resolved.constraints,
+    capabilities: resolved.capabilities,
+    diagnostics: resolved.diagnostics,
+    summaries: {},
+    entities_by_kind: entitiesByKind(entities),
   }
 }
 
@@ -394,6 +428,16 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       const fold = config.event_fold_dispatch?.[event.type]
       if (!fold) throw new Error(`unknown event type: ${event.type}`)
       const capability: ModuleFoldCapability = {
+        findEntity: (kind, id) => {
+          const target = state.entities_by_id.get(id)
+          return target?.kind === kind ? target : undefined
+        },
+        entities: (kind) =>
+          [...state.entities_by_id.values()]
+            .filter((entity) => entity.kind === kind)
+            .sort(sortEntities),
+        labels: (entityId) =>
+          [...state.labels.values()].filter((label) => label.entity_id === entityId),
         createEntity: (kind, id, seq, sortKey) => {
           const created = registerEntity(state, config, kind, id, seq, sortKey)
           state.module_entities.set(id, created)
@@ -532,6 +576,10 @@ function setConfiguredLabel(
     )
   )
     throw new Error(`derived capability cannot be assigned: ${value}`)
+  if (schema?.setup_only)
+    throw new Error(
+      `label key is setup-owned and cannot be written via LabelSet/LabelCleared: ${canonicalKey}`,
+    )
   if (schema?.scopes && target && !schema.scopes.includes(target.kind))
     throw new Error(`label ${canonicalKey} is not valid for ${target.kind}`)
   if (schema?.cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)

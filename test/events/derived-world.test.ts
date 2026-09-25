@@ -173,6 +173,9 @@ test('enforces configured label scopes and replacement cardinality', () => {
 test('guardModuleFold rejects capability calls outside a module’s own declared kinds and keys', () => {
   const calls: string[] = []
   const capability: ModuleFoldCapability = {
+    findEntity: () => undefined,
+    entities: () => [],
+    labels: () => [],
     createEntity: (kind, id, seq, sortKey) => {
       calls.push(`createEntity:${kind}:${id}:${seq}:${sortKey}`)
       return { id, kind, sort_key: sortKey ?? seq, created_seq: seq }
