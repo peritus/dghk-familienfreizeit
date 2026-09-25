@@ -1,4 +1,4 @@
-import { derive, type KernelConfig } from './fold.js'
+import { assertAppendableWorld, derive, type KernelConfig } from './fold.js'
 import { parseEvent, kernelPayloadSchemas, type Event } from './types.js'
 import type { EventDraft } from './types.js'
 
@@ -17,6 +17,6 @@ export function prepareEventBatch(
   const events = drafts.map((draft, index) =>
     parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
   )
-  derive([...committed, ...events], config)
+  assertAppendableWorld(derive([...committed, ...events], config))
   return events
 }

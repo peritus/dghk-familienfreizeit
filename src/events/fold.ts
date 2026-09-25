@@ -267,6 +267,18 @@ export function validateEventStream(events: readonly Event[], config: KernelConf
   normalizeEvents(events, config)
 }
 
+/** Rejects only diagnostics that violate the append contract; other diagnostics remain visible. */
+export function assertAppendableWorld(world: KernelWorld): void {
+  const dangling = world.diagnostics.find(
+    (diagnostic) =>
+      diagnostic.id === 'kernel.dangling-reference' && diagnostic.severity === 'error',
+  )
+  if (dangling)
+    throw new Error(
+      `append rejected: ${dangling.id} for ${dangling.subject_id}: ${dangling.message}`,
+    )
+}
+
 function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[] {
   const schemas = { ...kernelPayloadSchemas, ...config.event_payload_schemas }
   const validatedEvents = events.map((event) => parseEvent(event, schemas))

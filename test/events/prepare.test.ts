@@ -51,3 +51,55 @@ test('rejects a batch whose prospective replay is invalid', () => {
     ),
   ).toThrow(/unknown family/)
 })
+
+test('rejects a batch that leaves a resolver reference dangling', () => {
+  expect(() =>
+    prepareEventBatch(
+      [],
+      [
+        draft('FamilyInvited', {
+          family_id: 'fam_1',
+          email: 'family@example.test',
+          display_name: 'Family One',
+          locale: 'de',
+        }),
+        draft('LabelSet', {
+          entity_id: 'fam_1',
+          key: 'separates-from',
+          value: 'fam_missing',
+          strength: 'required',
+          note: null,
+        }),
+      ],
+    ),
+  ).toThrow(/append rejected: kernel\.dangling-reference/)
+})
+
+test('accepts a same-batch-created resolver reference', () => {
+  expect(() =>
+    prepareEventBatch(
+      [],
+      [
+        draft('FamilyInvited', {
+          family_id: 'fam_1',
+          email: 'family@example.test',
+          display_name: 'Family One',
+          locale: 'de',
+        }),
+        draft('FamilyInvited', {
+          family_id: 'fam_2',
+          email: 'family-two@example.test',
+          display_name: 'Family Two',
+          locale: 'de',
+        }),
+        draft('LabelSet', {
+          entity_id: 'fam_1',
+          key: 'separates-from',
+          value: 'fam_2',
+          strength: 'required',
+          note: null,
+        }),
+      ],
+    ),
+  ).not.toThrow()
+})

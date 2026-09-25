@@ -1,6 +1,6 @@
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
-import { derive } from '../events/fold.js'
+import { assertAppendableWorld, derive } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendEvents, readEvents, StaleHeadError, type EventDraft } from '../events/store.js'
@@ -235,7 +235,7 @@ app.post('/api/events', async (context) => {
       )
     )
       throw new Error('forbidden')
-    derive([...existing, ...events], activeProfile.validation_view)
+    assertAppendableWorld(derive([...existing, ...events], activeProfile.validation_view))
     await appendEvents(
       context.env.DB,
       expectedHead,
