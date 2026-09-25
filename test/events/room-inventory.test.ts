@@ -214,6 +214,27 @@ describe('room inventory', () => {
     )
   })
 
+  test('removes beds, rooms, and buildings through validated maintenance events', () => {
+    const removed = [
+      ...inventoryEvents,
+      event('BedRemoved', { bed_id: 'bed_1', reason: 'reconfigured' }, 5),
+      event('RoomRemoved', { room_id: 'rm_1', reason: 'closed' }, 6),
+      event('BuildingRemoved', { building_id: 'bld_main', reason: 'closed' }, 7),
+    ]
+    const world = derive(removed, profile.validation_view)
+    expect(world.entities_by_kind.building ?? []).toEqual([])
+    expect(world.entities_by_kind.room ?? []).toEqual([])
+    expect(world.entities_by_kind.bed ?? []).toEqual([])
+    expect(world.entities_by_kind.place ?? []).toEqual([])
+
+    expect(() =>
+      derive(
+        [...inventoryEvents, event('RoomRemoved', { room_id: 'rm_1', reason: null }, 5)],
+        profile.validation_view,
+      ),
+    ).toThrow(/room has beds/)
+  })
+
   test('rejects invalid parents, duplicate room numbers, and writes to setup labels', () => {
     expect(() =>
       derive(

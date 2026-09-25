@@ -100,12 +100,13 @@ control's reviewed-`input_seq` views already work this way — not by keeping
 old state around in the live world.
 
 The module fold capability
-(`ModuleFoldCapability`, `src/events/fold.ts`) has four guarded operations: `createEntity`
+(`ModuleFoldCapability`, `src/events/fold.ts`) has guarded operations: `createEntity`
 (with an optional source `sortKey` distinct from creation `seq`, so a module's
 own ordering survives instead of always collapsing to creation order),
-`retireEntity`, `setLabel`, and `replaceLabels` (an atomic full-label
+`retireEntity`, `clearLabel`, `setLabel`, and `replaceLabels` (an atomic full-label
 restatement: clears every live label under each write's key, then sets its
-new value, so a fold can never clear without setting). Every call is checked
+new value). `clearLabel` is the explicit path for nullable full-restatement
+fields. Every call is checked
 against that module's own declared entity kinds and label keys before it
 reaches real world state. A module event's authorization rule is a separate,
 required contribution — `ModuleContributions.events[].authorize(principal,
@@ -115,10 +116,10 @@ type outside the kernel's own five entity-touching types; a module event with
 no declared rule is denied, not accidentally allowed or denied by a payload
 shape coincidence.
 
-Proven against synthetic test modules, not yet against a real one — see
-[issue 021](../../spec/issues/archived/021-module-owned-entity-fold-boundary.md),
-[issue 022](../../spec/issues/archived/022-module-event-authorization-contribution-gap.md),
-and [issue 024](../../spec/issues/archived/024-module-fold-lifecycle-gap.md).
+The selected room-inventory module exercises this boundary with real entity
+creation, guarded label writes and clears, full restatements, and retirement
+reconciliation; the focused module-boundary fixtures continue to cover rejection
+paths.
 
 ## Operational tables
 

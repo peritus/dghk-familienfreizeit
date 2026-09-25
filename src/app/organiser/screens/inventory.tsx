@@ -2,9 +2,27 @@ import { useState, type FormEvent } from 'react'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { useOrganiser } from '../context.js'
-import { inventoryWorld, type RoomInventoryParams } from '../../../modules/room-inventory/index.js'
+import {
+  inventoryWorld,
+  type InventoryBed,
+  type InventoryBuilding,
+  type InventoryRoom,
+  type RoomInventoryParams,
+} from '../../../modules/room-inventory/index.js'
 import type { EventDraft } from '../../../events/types.js'
+import type { Label } from '../../../events/fold.js'
 import { activeProfile } from '../../../config/index.js'
+import {
+  labelText,
+  roomPropertyDefinitions,
+  roomTraitDefaults,
+  roomTraitLabelChanges,
+  roomTraitValuesFromLabels,
+  traitOptions,
+  validateRoomTraitValues,
+  type RoomTraitValues,
+  type TraitInput,
+} from './inventory-events.js'
 
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -36,14 +54,22 @@ export function Inventory() {
   const [roomNumber, setRoomNumber] = useState('')
   const [roomFloor, setRoomFloor] = useState('')
   const [roomType, setRoomType] = useState(config.room_types[0] ?? '')
+  const [roomTraitValues, setRoomTraitValues] = useState<RoomTraitValues>(() => roomTraitDefaults())
   const [bedRoom, setBedRoom] = useState(summary.rooms[0]?.id ?? '')
   const [bedLabel, setBedLabel] = useState('')
   const [bedType, setBedType] = useState(config.bed_types[0] ?? '')
   const [sleeps, setSleeps] = useState('1')
   const [error, setError] = useState<string | null>(null)
 
-  function submit(event: FormEvent<HTMLFormElement>, events: readonly EventDraft[]) {
+  function submit(
+    event: FormEvent<HTMLFormElement>,
+    events: readonly Pick<EventDraft, 'type' | 'payload'>[],
+  ) {
     event.preventDefault()
+    stageInventoryEvents(events)
+  }
+
+  function stageInventoryEvents(events: readonly Pick<EventDraft, 'type' | 'payload'>[]): void {
     if (!state.principal_email) return
     stage(events.map(({ type, payload }) => draft(state.principal_email!, type, payload)))
     setError(null)
@@ -68,17 +94,22 @@ export function Inventory() {
     const number = roomNumber.trim()
     if (!roomBuilding || !number)
       return setError('Bitte wähle ein Gebäude und gib eine Zimmernummer ein.')
+    const traitError = validateRoomTraitValues(roomTraitValues)
+    if (traitError) return setError(traitError)
+    const roomId = id('rm_')
     submit(event, [
       draft(state.principal_email ?? '', 'RoomAdded', {
-        room_id: id('rm_'),
+        room_id: roomId,
         building_id: roomBuilding,
         number,
         floor: roomFloor || null,
         room_type: roomType,
         sort_key: summary.rooms.length + 1,
       }),
+      ...roomTraitLabelChanges(roomId, roomTraitValues),
     ])
     setRoomNumber('')
+    setRoomTraitValues(roomTraitDefaults())
   }
 
   function addBed(event: FormEvent<HTMLFormElement>) {
@@ -97,6 +128,56 @@ export function Inventory() {
       }),
     ])
     setBedLabel('')
+  }
+
+  function updateBuilding(buildingId: string, name: string, sortKey: number): void {
+    stageInventoryEvents([
+      {
+        type: 'BuildingUpdated',
+        payload: { building_id: buildingId, name, sort_key: sortKey },
+      },
+    ])
+  }
+
+  function removeBuilding(buildingId: string): void {
+    stageInventoryEvents([
+      { type: 'BuildingRemoved', payload: { building_id: buildingId, reason: null } },
+    ])
+  }
+
+  function updateRoom(
+    roomId: string,
+    payload: {
+      building_id: string
+      number: string
+      floor: string | null
+      room_type: string
+      sort_key: number
+    },
+    values: RoomTraitValues,
+    labels: Parameters<typeof roomTraitLabelChanges>[2],
+  ): void {
+    const traitError = validateRoomTraitValues(values)
+    if (traitError) return setError(traitError)
+    stageInventoryEvents([
+      { type: 'RoomUpdated', payload: { room_id: roomId, ...payload } },
+      ...roomTraitLabelChanges(roomId, values, labels),
+    ])
+  }
+
+  function removeRoom(roomId: string): void {
+    stageInventoryEvents([{ type: 'RoomRemoved', payload: { room_id: roomId, reason: null } }])
+  }
+
+  function updateBed(
+    bedId: string,
+    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
+  ): void {
+    stageInventoryEvents([{ type: 'BedUpdated', payload: { bed_id: bedId, ...payload } }])
+  }
+
+  function removeBed(bedId: string): void {
+    stageInventoryEvents([{ type: 'BedRemoved', payload: { bed_id: bedId, reason: null } }])
   }
 
   return (
@@ -154,6 +235,12 @@ export function Inventory() {
           </label>
           <Select label="Etage" value={roomFloor} onChange={setRoomFloor} options={floors} />
           <Select label="Zimmertyp" value={roomType} onChange={setRoomType} options={roomTypes} />
+          <TraitFields
+            values={roomTraitValues}
+            onChange={(key, value) =>
+              setRoomTraitValues((current) => ({ ...current, [key]: value }))
+            }
+          />
         </InventoryForm>
         <InventoryForm title="Bett hinzufügen" onSubmit={addBed} button="Bett hinzufügen">
           <Select
@@ -194,7 +281,14 @@ export function Inventory() {
         {summary.buildings.map((building) => (
           <Card key={building.id} className="bg-white p-0">
             <div className="flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-black p-5">
-              <h2 className="text-2xl font-heading">{building.name}</h2>
+              <div>
+                <h2 className="text-2xl font-heading">{building.name}</h2>
+                <BuildingEditor
+                  building={building}
+                  onSave={updateBuilding}
+                  onRemove={removeBuilding}
+                />
+              </div>
               <p className="text-muted">
                 {building.room_count} Zimmer · {building.place_count} Schlafplätze
               </p>
@@ -222,6 +316,9 @@ export function Inventory() {
                     <th scope="col" className="p-3">
                       Merkmale
                     </th>
+                    <th scope="col" className="p-3">
+                      Pflege
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,11 +344,36 @@ export function Inventory() {
                             .join(', ') || '—'}
                         </td>
                         <td className="p-3 text-sm">
-                          {room.traits.sanitary ? String(room.traits.sanitary) : '—'}
-                          {config.price_trait !== null &&
-                          typeof room.traits[config.price_trait] === 'number'
-                            ? ` · ${formatEuro(room.traits[config.price_trait] as number)}`
-                            : ''}
+                          <div className="space-y-1">
+                            {Object.entries(room.traits).map(([key, value]) => (
+                              <div key={key}>
+                                <span className="font-bold">{traitTitle(key)}:</span>{' '}
+                                {formatTrait(value)}
+                              </div>
+                            ))}
+                            {room.capabilities.map((capability) => (
+                              <div key={capability}>
+                                <span className="font-bold">Fähigkeit:</span> {capability}
+                              </div>
+                            ))}
+                            {Object.keys(room.traits).length === 0 && room.capabilities.length === 0
+                              ? '—'
+                              : null}
+                          </div>
+                        </td>
+                        <td className="p-3 align-top">
+                          <RoomEditor
+                            room={room}
+                            beds={summary.beds.filter((bed) => bed.room_id === room.id)}
+                            labels={world?.labels_by_entity[room.id] ?? []}
+                            floors={floors}
+                            room_types={roomTypes}
+                            bed_types={bedTypes}
+                            onSave={updateRoom}
+                            onRemove={removeRoom}
+                            onBedSave={updateBed}
+                            onBedRemove={removeBed}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -283,6 +405,285 @@ function SummaryValue({ value, label }: { value: number; label: string }) {
       <p className="text-sm text-muted">{label}</p>
     </div>
   )
+}
+
+function BuildingEditor({
+  building,
+  onSave,
+  onRemove,
+}: {
+  building: InventoryBuilding
+  onSave: (id: string, name: string, sortKey: number) => void
+  onRemove: (id: string) => void
+}) {
+  const [name, setName] = useState(building.name)
+  return (
+    <details className="mt-2 text-sm">
+      <summary className="cursor-pointer font-bold underline">Gebäude pflegen</summary>
+      <form
+        className="mt-2 flex flex-wrap items-end gap-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          const value = name.trim()
+          if (value) onSave(building.id, value, building.sort_key)
+        }}
+      >
+        <label className="grid gap-1">
+          <span className="font-bold">Name</span>
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="min-h-11 rounded border-2 border-black px-3"
+          />
+        </label>
+        <Button type="submit" variant="neutral">
+          Speichern
+        </Button>
+        <Button
+          type="button"
+          variant="neutral"
+          disabled={building.room_count > 0}
+          title={building.room_count > 0 ? 'Erst alle Zimmer entfernen.' : undefined}
+          onClick={() => onRemove(building.id)}
+        >
+          Gebäude entfernen
+        </Button>
+      </form>
+    </details>
+  )
+}
+
+function RoomEditor({
+  room,
+  beds,
+  labels,
+  floors,
+  room_types: roomTypes,
+  bed_types: bedTypes,
+  onSave,
+  onRemove,
+  onBedSave,
+  onBedRemove,
+}: {
+  room: InventoryRoom
+  beds: readonly InventoryBed[]
+  labels: readonly Label[]
+  floors: readonly { value: string; label: string }[]
+  room_types: readonly { value: string; label: string }[]
+  bed_types: readonly { value: string; label: string }[]
+  onSave: (
+    id: string,
+    payload: {
+      building_id: string
+      number: string
+      floor: string | null
+      room_type: string
+      sort_key: number
+    },
+    values: RoomTraitValues,
+    labels: readonly Label[],
+  ) => void
+  onRemove: (id: string) => void
+  onBedSave: (
+    id: string,
+    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
+  ) => void
+  onBedRemove: (id: string) => void
+}) {
+  const [number, setNumber] = useState(room.number)
+  const [floor, setFloor] = useState(room.floor ?? '')
+  const [roomType, setRoomType] = useState(room.room_type)
+  const [values, setValues] = useState<RoomTraitValues>(() => roomTraitValuesFromLabels(labels))
+  return (
+    <details>
+      <summary className="cursor-pointer font-bold underline">Zimmer pflegen</summary>
+      <div className="mt-3 min-w-72 space-y-3 rounded border-2 border-black bg-main/10 p-3">
+        <form
+          className="space-y-3"
+          onSubmit={(event) => {
+            event.preventDefault()
+            onSave(
+              room.id,
+              {
+                building_id: room.building_id,
+                number: number.trim(),
+                floor: floor || null,
+                room_type: roomType,
+                sort_key: room.sort_key,
+              },
+              values,
+              labels,
+            )
+          }}
+        >
+          <label className="grid gap-1">
+            <span className="font-bold">Nummer</span>
+            <input
+              value={number}
+              onChange={(event) => setNumber(event.target.value)}
+              className="min-h-11 rounded border-2 border-black px-3"
+            />
+          </label>
+          <Select label="Etage" value={floor} onChange={setFloor} options={floors} />
+          <Select label="Zimmertyp" value={roomType} onChange={setRoomType} options={roomTypes} />
+          <TraitFields
+            values={values}
+            onChange={(key, value) => setValues((current) => ({ ...current, [key]: value }))}
+          />
+          <Button type="submit" variant="neutral">
+            Zimmer speichern
+          </Button>
+        </form>
+        <Button
+          type="button"
+          variant="neutral"
+          disabled={beds.length > 0}
+          title={beds.length > 0 ? 'Erst alle Betten entfernen.' : undefined}
+          onClick={() => onRemove(room.id)}
+        >
+          Zimmer entfernen
+        </Button>
+        <div className="space-y-2 border-t-2 border-black pt-3">
+          <h3 className="font-heading text-lg">Betten pflegen</h3>
+          {beds.map((bed) => (
+            <BedEditor
+              key={bed.id}
+              bed={bed}
+              bed_types={bedTypes}
+              onSave={onBedSave}
+              onRemove={onBedRemove}
+            />
+          ))}
+          {beds.length === 0 ? <p className="text-sm text-muted">Keine Betten erfasst.</p> : null}
+        </div>
+      </div>
+    </details>
+  )
+}
+
+function BedEditor({
+  bed,
+  bed_types: bedTypes,
+  onSave,
+  onRemove,
+}: {
+  bed: InventoryBed
+  bed_types: readonly { value: string; label: string }[]
+  onSave: (
+    id: string,
+    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
+  ) => void
+  onRemove: (id: string) => void
+}) {
+  const [label, setLabel] = useState(bed.label)
+  const [bedType, setBedType] = useState(bed.bed_type)
+  const [sleeps, setSleeps] = useState(String(bed.sleeps))
+  return (
+    <form
+      className="space-y-2 rounded border border-black bg-white p-2"
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (!label.trim()) return
+        onSave(bed.id, {
+          room_id: bed.room_id,
+          label: label.trim(),
+          bed_type: bedType,
+          sleeps: sleeps === '2' ? 2 : 1,
+          sort_key: bed.sort_key,
+        })
+      }}
+    >
+      <p className="font-bold">{bed.label}</p>
+      <label className="grid gap-1">
+        <span className="font-bold">Bezeichnung</span>
+        <input
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          className="min-h-11 rounded border-2 border-black px-3"
+        />
+      </label>
+      <Select label="Bettart" value={bedType} onChange={setBedType} options={bedTypes} />
+      <Select
+        label="Schlafplätze"
+        value={sleeps}
+        onChange={setSleeps}
+        options={[
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+        ]}
+      />
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" variant="neutral">
+          Bett speichern
+        </Button>
+        <Button type="button" variant="neutral" onClick={() => onRemove(bed.id)}>
+          Bett entfernen
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+function TraitFields({
+  values,
+  onChange,
+}: {
+  values: RoomTraitValues
+  onChange: (key: string, value: TraitInput) => void
+}) {
+  return (
+    <fieldset className="space-y-3 border-t-2 border-black pt-3">
+      <legend className="font-heading text-lg">Raummerkmale</legend>
+      {roomPropertyDefinitions.map(({ key, trait }) => {
+        const options = traitOptions(trait)
+        const value = values[key]
+        if (trait.value.kind === 'bool')
+          return (
+            <label key={key} className="flex min-h-11 items-center gap-2 font-bold">
+              <input
+                type="checkbox"
+                checked={value === true}
+                onChange={(event) => onChange(key, event.target.checked)}
+              />
+              {labelText(trait.title)}
+            </label>
+          )
+        if (options)
+          return (
+            <Select
+              key={key}
+              label={labelText(trait.title)}
+              value={typeof value === 'string' ? value : ''}
+              onChange={(next) => onChange(key, next)}
+              options={[{ value: '', label: 'Bitte wählen' }, ...options]}
+            />
+          )
+        return (
+          <label key={key} className="grid gap-1">
+            <span className="font-bold">{labelText(trait.title)}</span>
+            <input
+              type={trait.value.kind === 'text' ? 'text' : 'number'}
+              step={trait.value.kind === 'decimal' ? '0.01' : '1'}
+              value={value === null || value === undefined ? '' : String(value)}
+              onChange={(event) => onChange(key, event.target.value)}
+              className="min-h-11 rounded border-2 border-black px-3"
+            />
+          </label>
+        )
+      })}
+    </fieldset>
+  )
+}
+
+function traitTitle(key: string): string {
+  const definition = roomPropertyDefinitions.find((candidate) => candidate.key === key)
+  return definition ? labelText(definition.trait.title) : key
+}
+
+function formatTrait(value: unknown): string {
+  if (typeof value === 'boolean') return value ? 'Ja' : 'Nein'
+  if (value === null || value === undefined) return '—'
+  return typeof value === 'object' ? JSON.stringify(value) : String(value)
 }
 
 function InventoryForm({

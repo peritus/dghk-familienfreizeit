@@ -34,6 +34,7 @@ export type InventoryRoom = {
   place_count: number
   sort_key: number
   traits: Readonly<Record<string, JsonValue>>
+  capabilities: readonly string[]
 }
 
 export type InventoryBed = {
@@ -115,6 +116,7 @@ const buildingPayload = z.object({
   name: nonEmpty,
   sort_key: z.number().int(),
 })
+const buildingRemovedPayload = z.object({ building_id: buildingId, reason: z.string().nullable() })
 const roomPayload = z.object({
   room_id: roomId,
   building_id: buildingId,
@@ -123,6 +125,7 @@ const roomPayload = z.object({
   room_type: nonEmpty,
   sort_key: z.number().int(),
 })
+const roomRemovedPayload = z.object({ room_id: roomId, reason: z.string().nullable() })
 const bedPayload = z.object({
   bed_id: bedId,
   room_id: roomId,
@@ -206,6 +209,24 @@ function validateRemovedBed(payload: JsonValue, world: KernelWorld): string | nu
   return entity(world, 'bed', value.bed_id) ? null : `unknown bed: ${value.bed_id}`
 }
 
+function validateRemovedBuilding(payload: JsonValue, world: KernelWorld): string | null {
+  const value = buildingRemovedPayload.parse(payload)
+  if (!entity(world, 'building', value.building_id)) return `unknown building: ${value.building_id}`
+  const hasRooms = (world.entities_by_kind.room ?? []).some(
+    (room) => labelValue(world, room.id, locationKey) === value.building_id,
+  )
+  return hasRooms ? `building has rooms: ${value.building_id}` : null
+}
+
+function validateRemovedRoom(payload: JsonValue, world: KernelWorld): string | null {
+  const value = roomRemovedPayload.parse(payload)
+  if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
+  const hasBeds = (world.entities_by_kind.bed ?? []).some(
+    (bed) => labelValue(world, bed.id, locationKey) === value.room_id,
+  )
+  return hasBeds ? `room has beds: ${value.room_id}` : null
+}
+
 function placeId(bedIdValue: string, index: number): string {
   return `plc_${bedIdValue.slice('bed_'.length)}_${index}`
 }
@@ -281,6 +302,9 @@ function inventorySummary(world: KernelWorld, priceTrait: string | null = null):
         place_count: placeCount,
         sort_key: item.sort_key,
         traits,
+        capabilities: world.capabilities
+          .filter((capability) => capability.entity_id === item.id)
+          .map(({ key }) => key),
       }
     })
     .sort(
@@ -456,6 +480,16 @@ export const roomInventory = defineModule({
         },
       },
       {
+        type: 'BuildingRemoved',
+        payload: buildingRemovedPayload,
+        validate: validateRemovedBuilding,
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: (capability, event) => {
+          const value = event.payload as z.infer<typeof buildingRemovedPayload>
+          capability.retireEntity('building', value.building_id)
+        },
+      },
+      {
         type: 'RoomAdded',
         payload: roomPayload,
         validate: (payload, world) => validateRoom(params, world, payload, false),
@@ -485,6 +519,16 @@ export const roomInventory = defineModule({
             { key: 'floor', value: value.floor },
             { key: 'room-type', value: value.room_type },
           ])
+        },
+      },
+      {
+        type: 'RoomRemoved',
+        payload: roomRemovedPayload,
+        validate: validateRemovedRoom,
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: (capability, event) => {
+          const value = event.payload as z.infer<typeof roomRemovedPayload>
+          capability.retireEntity('room', value.room_id)
         },
       },
       {
