@@ -4,12 +4,7 @@ import { assertAppendableWorld, derive } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendEvents, readEvents, StaleHeadError, type EventDraft } from '../events/store.js'
-import {
-  kernelPayloadSchemas,
-  canonicalEmail,
-  parseEvent,
-  type JsonValue,
-} from '../events/types.js'
+import { canonicalEmail, eventPayloadSchemas, parseEvent, type JsonValue } from '../events/types.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
 import { canAppendEvent } from '../auth/authorization.js'
@@ -34,7 +29,7 @@ app.post('/api/login', async (context) => {
     })
     .catch(() => null)
   if (!email) return context.json({ accepted: true })
-  const events = await readEvents(context.env.DB)
+  const events = await readEvents(context.env.DB, activeProfile.validation_view)
   const world = derive(events, activeProfile.validation_view)
   const familyExists = familyForEmail(world, email) !== null
   const result = await issueMagicLink(
@@ -97,7 +92,7 @@ app.get('/api/organiser/log', async (context) => {
   const principal = await principalFromContext(context)
   if (!principal || principal.kind !== 'organiser')
     return context.json({ error: 'unauthorized' }, 401)
-  const events = await readEvents(context.env.DB)
+  const events = await readEvents(context.env.DB, activeProfile.validation_view)
   return context.json({
     events,
     head_seq: events.length,
@@ -142,7 +137,7 @@ app.post('/api/organiser/apply', async (context) => {
       409,
     )
 
-  const existing = await readEvents(context.env.DB)
+  const existing = await readEvents(context.env.DB, activeProfile.validation_view)
   const inputSeq = body.input_seq as number
   if (inputSeq !== existing.length)
     return context.json(
@@ -175,7 +170,7 @@ app.post('/api/organiser/apply', async (context) => {
       context.env.DB,
       inputSeq,
       events.map(({ seq: _seq, ...event }) => event),
-      eventSchemas(),
+      activeProfile.validation_view,
     )
     const world = derive([...existing, ...appended], activeProfile.validation_view)
     return context.json({
@@ -187,7 +182,7 @@ app.post('/api/organiser/apply', async (context) => {
     })
   } catch (error) {
     if (error instanceof StaleHeadError) {
-      const current = await readEvents(context.env.DB)
+      const current = await readEvents(context.env.DB, activeProfile.validation_view)
       return context.json(
         {
           error: 'stale_head',
@@ -220,12 +215,12 @@ app.post('/api/events', async (context) => {
   )
     return context.json({ error: 'invalid_request' }, 400)
   const expectedHead: number = body.expected_head
-  const existing = await readEvents(context.env.DB)
+  const existing = await readEvents(context.env.DB, activeProfile.validation_view)
   const world = derive(existing, activeProfile.validation_view)
   const now = new Date().toISOString()
   try {
     const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
-    const schemas = eventSchemas()
+    const schemas = eventPayloadSchemas(activeProfile.validation_view)
     const events = drafts.map((draft, index) =>
       parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
     )
@@ -240,7 +235,7 @@ app.post('/api/events', async (context) => {
       context.env.DB,
       expectedHead,
       events.map(({ seq: _seq, ...event }) => event),
-      eventSchemas(),
+      activeProfile.validation_view,
     )
     return context.json({ head: expectedHead + events.length }, 201)
   } catch (error) {
@@ -274,11 +269,12 @@ export default app
 async function principalFromContext(
   context: Context<{ Bindings: Env }>,
 ): Promise<Principal | null> {
-  return currentPrincipal(context.env.DB, getCookie(context, 'sid'), { isOrganiser })
-}
-
-function eventSchemas() {
-  return { ...kernelPayloadSchemas, ...activeProfile.validation_view.event_payload_schemas }
+  return currentPrincipal(
+    context.env.DB,
+    getCookie(context, 'sid'),
+    { isOrganiser },
+    activeProfile.validation_view,
+  )
 }
 
 function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): boolean {

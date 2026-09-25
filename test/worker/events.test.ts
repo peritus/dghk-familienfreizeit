@@ -53,7 +53,9 @@ describe('D1 event source', () => {
       familienfreizeit2027Profile.validation_view,
     )
 
-    expect((await readEvents(env.DB, familienfreizeit2027Profile.validation_view))[0]).toMatchObject({
+    expect(
+      (await readEvents(env.DB, familienfreizeit2027Profile.validation_view))[0],
+    ).toMatchObject({
       type: 'BuildingAdded',
       payload: { building_id: 'bld_d1', name: 'D1 House', sort_key: 1 },
     })

@@ -1,4 +1,4 @@
-import { derive, type KernelWorld } from '../events/fold.js'
+import { derive, type KernelConfig, type KernelWorld } from '../events/fold.js'
 import { readEvents } from '../events/store.js'
 import { canonicalEmail } from '../events/types.js'
 import { hash } from './service.js'
@@ -13,6 +13,7 @@ export async function currentPrincipal(
   db: D1Database,
   raw: string | undefined,
   options: PrincipalOptions,
+  config: KernelConfig,
 ): Promise<Principal | null> {
   if (!raw) return null
   const now = (options.now ?? (() => new Date().toISOString()))()
@@ -26,7 +27,7 @@ export async function currentPrincipal(
     await refreshSession(db, raw, email, now, 7 * 24 * 60 * 60 * 1000)
     return { kind: 'organiser', email }
   }
-  const world = derive(await readEvents(db))
+  const world = derive(await readEvents(db, config), config)
   const familyId = familyForEmail(world, email)
   if (!familyId) return null
   await refreshSession(db, raw, email, now, 30 * 24 * 60 * 60 * 1000)

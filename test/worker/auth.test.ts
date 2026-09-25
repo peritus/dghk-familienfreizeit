@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 import { env } from 'cloudflare:workers'
+import { activeProfile } from '../../src/config/index.js'
 import app from '../../src/worker/index.js'
 import { currentPrincipal } from '../../src/auth/principal.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
@@ -52,6 +53,16 @@ describe('authentication boundary', () => {
         }),
       )
       .run()
+    await env.DB.prepare(
+      'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (2, ?1, ?2, ?3, NULL, ?4)',
+    )
+      .bind(
+        '2026-01-01T00:00:00.000Z',
+        'organiser@example.test',
+        'BuildingAdded',
+        JSON.stringify({ building_id: 'bld_auth', name: 'Auth House', sort_key: 1 }),
+      )
+      .run()
     const options = {
       now: () => '2026-01-01T00:00:00.000Z',
       isOrganiser: (email: string) => email === 'organiser@example.test',
@@ -67,7 +78,9 @@ describe('authentication boundary', () => {
     const session = await redeemMagicLink(env.DB, link.token!, options)
     expect(session?.email).toBe('family-auth@example.test')
     expect(await redeemMagicLink(env.DB, link.token!, options)).toBeNull()
-    expect(await currentPrincipal(env.DB, session?.session, options)).toMatchObject({
+    expect(
+      await currentPrincipal(env.DB, session?.session, options, activeProfile.validation_view),
+    ).toMatchObject({
       kind: 'family',
       family_id: 'fam_auth',
     })

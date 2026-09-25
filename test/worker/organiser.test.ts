@@ -104,6 +104,42 @@ test('organiser apply validates the prospective batch and returns its world', as
   ).toEqual({ count: 2 })
 })
 
+test('organiser log replays selected-profile module events', async () => {
+  const cookie = await organiserCookie()
+  const applied = await app.request(
+    '/api/organiser/apply',
+    {
+      method: 'POST',
+      headers: { cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        input_seq: 0,
+        build_revision: buildRevision,
+        compatibility_revision: compatibilityRevision,
+        events: [
+          {
+            type: 'BuildingAdded',
+            payload: { building_id: 'bld_log', name: 'Log House', sort_key: 1 },
+          },
+        ],
+      }),
+    },
+    env,
+  )
+  expect(applied.status).toBe(200)
+
+  const log = await app.request('/api/organiser/log', { headers: { cookie } }, env)
+  expect(log.status).toBe(200)
+  expect(await log.json()).toMatchObject({
+    head_seq: 1,
+    events: [
+      expect.objectContaining({
+        type: 'BuildingAdded',
+        payload: { building_id: 'bld_log', name: 'Log House', sort_key: 1 },
+      }),
+    ],
+  })
+})
+
 test('organiser apply reports intervening events for a stale head', async () => {
   const cookie = await organiserCookie()
   const first = await app.request(
