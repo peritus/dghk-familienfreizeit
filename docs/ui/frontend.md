@@ -28,10 +28,27 @@ applied. The control remains pressed but cannot leave collecting mode while draf
 exist. Local events added during an in-flight request remain queued after the submitted
 prefix.
 
+## Frontend navigation and state invariants
+
+Internal route changes use wouter's client-side navigation and must not reload
+the document. The organiser state owner remains mounted while moving between
+the dashboard, family list, family detail, and browser history entries. Pending
+event drafts, the derived local world, collecting mode, and the local-change
+review panel therefore survive those transitions. Screen-local inputs such as
+search text and partially completed forms may reset when their screen unmounts.
+
+Leaving `/organiser` creates a new organiser application when the route is
+entered again, and a hard reload always starts a fresh in-memory session from
+the committed event log. New internal routes and links must preserve these
+boundaries and include regression coverage for client-side navigation and
+pending-state retention. Do not key the organiser state owner, or its healthy
+route subtree, by location. Error boundaries may reset their error state on a
+route change without remounting healthy children.
+
 On navigation the app focuses the main content region. A skip link provides
 keyboard access to that region. Lazy loading renders a skeleton and live status;
 the route error boundary renders a sanitized recovery message and reload button.
-The boundary resets when the route changes. These semantics are covered in
+These semantics are covered in
 [app tests](../../test/app/shell.test.tsx), while real organiser navigation and
 link targets are covered by the [browser route suite](../../test/browser/routes.spec.ts).
 The shared [route contract](../../src/organiser/routes.ts) keeps nested organiser
