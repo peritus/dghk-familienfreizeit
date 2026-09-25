@@ -108,8 +108,6 @@ test('organiser links stay within the nested route base', async () => {
   expect(familiesLink.getAttribute('href')).toBe('/organiser/families')
 })
 
-<<<<<<< conflict 1 of 1
-+++++++ onqxzqzo 28ff8e58 "feat: redesign organiser draft controls" (rebase destination)
 test('organiser state survives client-side route and history navigation', async () => {
   const familyEvent: Event = {
     seq: 1,
@@ -129,34 +127,34 @@ test('organiser state survives client-side route and history navigation', async 
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
   fireEvent.click(screen.getByRole('link', { name: 'Familien öffnen' }))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'neu@example.test' } })
   fireEvent.click(screen.getByRole('button', { name: 'Familie einladen' }))
-  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('link', { name: 'Bestehende Familie' }))
   expect(await screen.findByRole('heading', { name: 'Bestehende Familie' })).toBeTruthy()
-  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('link', { name: '← Familien' }))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Neue Familie' })).toBeTruthy()
-  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('link', { name: 'Dashboard' }))
   expect(
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
-  expect(screen.getByText('1 offene Änderungen warten auf Anwendung.')).toBeTruthy()
+  expect(screen.getByText('1 Änderungsentwürfe warten auf Anwendung.')).toBeTruthy()
 
   window.history.pushState({}, '', '/organiser/families')
   fireEvent(window, new PopStateEvent('popstate'))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
-  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+  expect(screen.getByText('1 Änderungsentwurf')).toBeTruthy()
   expect(
     fetchMock?.mock.calls.filter(([input]) => String(input).endsWith('/api/organiser/log')),
   ).toHaveLength(1)
@@ -168,7 +166,6 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
   fireEvent.click(screen.getByRole('link', { name: 'Familienfreizeit' }))
   expect(
     await screen.findByRole('heading', { name: 'Willkommen zur Familienfreizeit' }),
@@ -179,7 +176,7 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
   expect(
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Änderungen sammeln: aus' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Entwurfsmodus starten' })).toBeTruthy()
   expect(screen.queryByRole('heading', { name: 'Local changes in this browser' })).toBeNull()
 })
 
