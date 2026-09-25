@@ -125,6 +125,9 @@ Specification coverage: [authentication](application/authentication.md), [family
   outcomes.
 - Render the M7 controls for families through the same profile-driven definitions
   and ordinary event path, including deadline notices and assignment cards.
+- Let an authenticated family correct its own `display-name` from the family
+  view through `FamilyDisplayNameChanged`; the family may address only its own
+  entity, while organisers retain the cross-family correction path from M7.
 - Implement accommodation, programme, and per-slot allocation scopes, semantic
   accessors, previews, reviewed-input/build/compatibility guards, blocking
   findings, historical composition, and atomic `Communicated` append.
@@ -133,9 +136,10 @@ Specification coverage: [authentication](application/authentication.md), [family
 
 Acceptance: after M9, a family can request and redeem a single-use login link
 through the M10 authentication workflow, inspect its permitted derived
-information, save permitted controls, and see only coherent communicated
-arrangements. Hosted invitation and reminder delivery begins in M14. Organisers
-can preview and atomically communicate selected scopes without exposing drafts.
+information, correct its own display name, save permitted controls, and see only
+coherent communicated arrangements. Hosted invitation and reminder delivery
+begins in M14. Organisers can preview and atomically communicate selected scopes
+without exposing drafts.
 
 ## M11 — Reports and browser-printing host
 

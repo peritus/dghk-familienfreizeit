@@ -80,6 +80,16 @@ withdraw a person on the family's behalf through the organiser family-detail
 screen, writing the identical events (D24;
 [events](../architecture/events.md) §"Setup and identity").
 
+The family can also correct its own family display name in the identity area at
+the top of the page. Saving the changed value emits one
+`FamilyDisplayNameChanged` event through the ordinary family request path. The
+server authorizes the event only when its `family_id` belongs to the signed-in
+family; an attempted cross-family write is rejected. The response is the truth:
+the corrected name is shown after the append succeeds, and a failed save
+restores the stored value with a plain-language error. Changing the display name
+does not change the family's identity, people, memberships, email routing, or
+relationship labels.
+
 ### Communicated arrangements
 
 Communicated accommodation and workshop results take the top as they become
