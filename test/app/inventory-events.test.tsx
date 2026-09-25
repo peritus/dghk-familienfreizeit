@@ -3,6 +3,7 @@ import {
   roomPropertyDefinitions,
   roomTraitDefaults,
   roomTraitLabelChanges,
+  sleepsForBedType,
   validateRoomTraitValues,
 } from '../../src/app/organiser/screens/inventory-events.js'
 
@@ -22,13 +23,12 @@ describe('inventory room trait events', () => {
   test('emits ordinary label events and explicit clears for editable room traits', () => {
     const values = roomTraitDefaults()
     values.sanitary = 'private'
-    values['price-per-bed-eur'] = 100
-    values['beds-per-sleeping-room'] = null
+    values['price-per-bed-eur'] = null
     const changes = roomTraitLabelChanges('rm_1', values, [
       {
         entity_id: 'rm_1',
-        key: 'beds-per-sleeping-room',
-        value: 2,
+        key: 'price-per-bed-eur',
+        value: 25,
         value_type: 'number',
         strength: null,
         note: null,
@@ -44,7 +44,13 @@ describe('inventory room trait events', () => {
     )
     expect(changes).toContainEqual({
       type: 'LabelCleared',
-      payload: { entity_id: 'rm_1', key: 'beds-per-sleeping-room', value: null },
+      payload: { entity_id: 'rm_1', key: 'price-per-bed-eur', value: null },
     })
+  })
+
+  test('places per bed follow from bed type alone (D18/D19)', () => {
+    expect(sleepsForBedType('single')).toBe(1)
+    expect(sleepsForBedType('double')).toBe(2)
+    expect(sleepsForBedType('bunk')).toBe(2)
   })
 })

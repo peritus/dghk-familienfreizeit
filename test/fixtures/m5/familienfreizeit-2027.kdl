@@ -164,8 +164,6 @@ BedAdded bed_id=bed_34-d room_id=rm_34 label="34-D" bed_type=single sleeps=1 sor
 RoomAdded room_id=rm_35 building_id=bld_gartenhaus number="35" floor=first room_type=apartment sort_key=35
 LabelSet entity_id=rm_35 key=sanitary value=private strength=#null note=#null
 LabelSet entity_id=rm_35 key=price-per-bed-eur value=103 strength=#null note=#null
-LabelSet entity_id=rm_35 key=sleeping-rooms value=2 strength=#null note=#null
-LabelSet entity_id=rm_35 key=beds-per-sleeping-room value=4 strength=#null note=#null
 LabelSet entity_id=rm_35 key=has-common-room value=#true strength=#null note=#null
 LabelSet entity_id=rm_35 key=suitable-for-two-families value=#true strength=#null note=#null
 BedAdded bed_id=bed_35-a room_id=rm_35 label="35-A" bed_type=double sleeps=2 sort_key=1
@@ -178,8 +176,6 @@ BedAdded bed_id=bed_35-g room_id=rm_35 label="35-G" bed_type=single sleeps=1 sor
 RoomAdded room_id=rm_36 building_id=bld_gartenhaus number="36" floor=first room_type=apartment sort_key=36
 LabelSet entity_id=rm_36 key=sanitary value=private strength=#null note=#null
 LabelSet entity_id=rm_36 key=price-per-bed-eur value=103 strength=#null note=#null
-LabelSet entity_id=rm_36 key=sleeping-rooms value=2 strength=#null note=#null
-LabelSet entity_id=rm_36 key=beds-per-sleeping-room value=2 strength=#null note=#null
 LabelSet entity_id=rm_36 key=has-common-room value=#true strength=#null note=#null
 LabelSet entity_id=rm_36 key=suitable-for-two-families value=#true strength=#null note=#null
 BedAdded bed_id=bed_36-a room_id=rm_36 label="36-A" bed_type=single sleeps=1 sort_key=1
@@ -189,8 +185,6 @@ BedAdded bed_id=bed_36-d room_id=rm_36 label="36-D" bed_type=single sleeps=1 sor
 RoomAdded room_id=rm_37 building_id=bld_gartenhaus number="37" floor=first room_type=apartment sort_key=37
 LabelSet entity_id=rm_37 key=sanitary value=private strength=#null note=#null
 LabelSet entity_id=rm_37 key=price-per-bed-eur value=103 strength=#null note=#null
-LabelSet entity_id=rm_37 key=sleeping-rooms value=2 strength=#null note=#null
-LabelSet entity_id=rm_37 key=beds-per-sleeping-room value=4 strength=#null note=#null
 LabelSet entity_id=rm_37 key=has-common-room value=#true strength=#null note=#null
 LabelSet entity_id=rm_37 key=suitable-for-two-families value=#true strength=#null note=#null
 BedAdded bed_id=bed_37-a room_id=rm_37 label="37-A" bed_type=single sleeps=1 sort_key=1

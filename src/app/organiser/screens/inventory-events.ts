@@ -96,3 +96,12 @@ export function traitOptions(
     label: trait.copy?.[value] ? labelText(trait.copy[value]) : value,
   }))
 }
+
+/**
+ * Places per bed follow from the bed type alone (D18/D19): 'single' sleeps
+ * one, 'double' and 'bunk' sleep two. There is no independent "Schlafplätze"
+ * input, so a bed can no longer claim a place count its type doesn't allow.
+ */
+export function sleepsForBedType(bedType: string): 1 | 2 {
+  return bedType === 'single' ? 1 : 2
+}

@@ -18,6 +18,7 @@ import {
   roomTraitDefaults,
   roomTraitLabelChanges,
   roomTraitValuesFromLabels,
+  sleepsForBedType,
   traitOptions,
   validateRoomTraitValues,
   type RoomTraitValues,
@@ -58,7 +59,6 @@ export function Inventory() {
   const [bedRoom, setBedRoom] = useState(summary.rooms[0]?.id ?? '')
   const [bedLabel, setBedLabel] = useState('')
   const [bedType, setBedType] = useState(config.bed_types[0] ?? '')
-  const [sleeps, setSleeps] = useState('1')
   const [error, setError] = useState<string | null>(null)
 
   function submit(
@@ -123,7 +123,7 @@ export function Inventory() {
         room_id: bedRoom,
         label,
         bed_type: bedType,
-        sleeps: sleeps === '2' ? 2 : 1,
+        sleeps: sleepsForBedType(bedType),
         sort_key: summary.beds.filter((bed) => bed.room_id === bedRoom).length + 1,
       }),
     ])
@@ -261,15 +261,6 @@ export function Inventory() {
             />
           </label>
           <Select label="Bettart" value={bedType} onChange={setBedType} options={bedTypes} />
-          <Select
-            label="Schlafplätze"
-            value={sleeps}
-            onChange={setSleeps}
-            options={[
-              { value: '1', label: '1' },
-              { value: '2', label: '2' },
-            ]}
-          />
         </InventoryForm>
       </div>
 
@@ -577,7 +568,6 @@ function BedEditor({
 }) {
   const [label, setLabel] = useState(bed.label)
   const [bedType, setBedType] = useState(bed.bed_type)
-  const [sleeps, setSleeps] = useState(String(bed.sleeps))
   return (
     <form
       className="space-y-2 rounded border border-black bg-white p-2"
@@ -588,7 +578,7 @@ function BedEditor({
           room_id: bed.room_id,
           label: label.trim(),
           bed_type: bedType,
-          sleeps: sleeps === '2' ? 2 : 1,
+          sleeps: sleepsForBedType(bedType),
           sort_key: bed.sort_key,
         })
       }}
@@ -603,15 +593,6 @@ function BedEditor({
         />
       </label>
       <Select label="Bettart" value={bedType} onChange={setBedType} options={bedTypes} />
-      <Select
-        label="Schlafplätze"
-        value={sleeps}
-        onChange={setSleeps}
-        options={[
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-        ]}
-      />
       <div className="flex flex-wrap gap-2">
         <Button type="submit" variant="neutral">
           Bett speichern

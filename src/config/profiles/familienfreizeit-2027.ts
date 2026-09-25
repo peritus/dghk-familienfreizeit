@@ -4,7 +4,6 @@ import {
   decimal,
   defineOccasionProfile,
   enumOf,
-  integer,
   property,
 } from '../define.js'
 import { roomInventory } from '../../modules/room-inventory/index.js'
@@ -56,19 +55,6 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       cardinality: 'exactly-one',
       organiser_only: true,
     }),
-    'sleeping-rooms': property({
-      title: { de: 'Schlafräume', en: 'Sleeping rooms' },
-      scopes: ['room'],
-      value: integer({ min: 1 }),
-      default: 1,
-      organiser_only: true,
-    }),
-    'beds-per-sleeping-room': property({
-      title: { de: 'Schlafplätze pro Schlafraum', en: 'Beds per sleeping room' },
-      scopes: ['room'],
-      value: integer({ min: 1 }),
-      organiser_only: true,
-    }),
     'has-common-room': property({
       title: { de: 'Gemeinschaftsraum', en: 'Common room' },
       scopes: ['room'],
@@ -101,31 +87,27 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       value: enumOf(['yes']),
       derive: (entity) => entity.label('is-accessible') === true,
     }),
-    'multi-room-unit': capability({
-      title: { de: 'Mehrere Schlafräume', en: 'Multi-room unit' },
-      scopes: ['room'],
-      value: enumOf(['yes']),
-      derive: (entity) => {
-        const value = entity.label('sleeping-rooms')
-        return typeof value === 'number' && value > 1
-      },
-    }),
   },
   modules: [
     roomInventory({
-      floors: ['ground', 'first', 'second'],
+      floors: ['ground', 'first', 'second', 'attic'],
       room_types: ['standard', 'apartment', 'bungalow', 'schlaffass'],
-      bed_types: ['single', 'double'],
+      bed_types: ['single', 'double', 'bunk'],
       price_trait: 'price-per-bed-eur',
       copy: {
-        floors: { ground: 'Erdgeschoss', first: '1. Etage', second: '2. Etage' },
+        floors: {
+          ground: 'Erdgeschoss',
+          first: '1. Obergeschoss',
+          second: '2. Obergeschoss',
+          attic: 'Dachgeschoss',
+        },
         room_types: {
-          standard: 'Standard',
+          standard: 'Standardzimmer',
           apartment: 'Apartment',
           bungalow: 'Bungalow',
           schlaffass: 'Schlaffass',
         },
-        bed_types: { single: 'Einzelbett', double: 'Doppelbett' },
+        bed_types: { single: 'Einzelbett', double: 'Doppelbett', bunk: 'Etagenbett' },
       },
     }),
   ],

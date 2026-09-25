@@ -39,12 +39,12 @@ const profile = defineOccasionProfile({
     roomInventory({
       floors: ['ground', 'first'],
       room_types: ['standard', 'apartment'],
-      bed_types: ['single', 'double'],
+      bed_types: ['single', 'double', 'bunk'],
       price_trait: 'room-rate-eur',
       copy: {
         floors: { ground: 'Erdgeschoss', first: 'Erste Etage' },
         room_types: { standard: 'Standard', apartment: 'Apartment' },
-        bed_types: { single: 'Einzelbett', double: 'Doppelbett' },
+        bed_types: { single: 'Einzelbett', double: 'Doppelbett', bunk: 'Etagenbett' },
       },
     }),
   ],
@@ -141,6 +141,30 @@ describe('room inventory', () => {
       place_count: 2,
       traits: { 'room-rate-eur': 100 },
     })
+  })
+
+  test('a bunk bed accepts the bunk vocabulary value and sleeps two, like a double', () => {
+    const updated = [
+      ...inventoryEvents,
+      event(
+        'BedAdded',
+        {
+          bed_id: 'bed_2',
+          room_id: 'rm_1',
+          label: '1-B',
+          bed_type: 'bunk',
+          sleeps: 2,
+          sort_key: 2,
+        },
+        5,
+      ),
+    ]
+    const summary = inventoryWorld(derive(updated, profile.validation_view))
+    expect(summary.beds.find(({ id }) => id === 'bed_2')).toMatchObject({
+      bed_type: 'bunk',
+      sleeps: 2,
+    })
+    expect(summary.places.filter(({ bed_id }) => bed_id === 'bed_2')).toHaveLength(2)
   })
 
   test('reducing sleeps hard-removes only the second place and preserves history by prefix replay', () => {
