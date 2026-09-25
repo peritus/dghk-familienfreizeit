@@ -1,7 +1,7 @@
 ---
 id: "032"
 title: Retirement specifications contradict D27 hard removal
-status: needs-decision
+status: resolved
 severity: contract-contradiction
 category: kernel
 source: semantic-coherence-sweep-after-fix
@@ -47,10 +47,18 @@ prefix derivation. If any module needs a historical retirement marker for a
 public view, propose a deliberate revision to D27 and update every dependent
 document together; do not reintroduce per-entity tombstone fields locally.
 
-## Open questions
+## Resolution
 
-1. Should any future module expose a separate derived historical-lifecycle view,
-   or is event-prefix re-derivation sufficient for all planned consumers?
+The room-inventory lifecycle contract now follows D27. `BedRemoved` hard-removes
+the bed and its live places, and reducing `sleeps` hard-removes the places that no
+longer exist. Historical inventory state is reconstructed by re-deriving the
+event-log prefix at the relevant sequence; the live world carries no retirement
+marker and no separate historical-lifecycle view is needed for the planned
+consumers. Preflight still reports constraints that name a place removed by an
+inventory lifecycle event.
+
+No decision was changed. The room-inventory specification was corrected before
+the module is implemented, so future M5 work has one lifecycle contract to follow.
 
 ## Related files
 

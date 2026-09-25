@@ -54,13 +54,15 @@ type RoomInventoryParams = {
 |---|---|---|---|
 | `building` | `bld_` | `BuildingAdded` | caller-generated |
 | `room` | `rm_` | `RoomAdded` | caller-generated |
-| `bed` | `bed_` | `BedAdded` | caller-generated; `BedRemoved` sets `retired_seq` |
+| `bed` | `bed_` | `BedAdded` | caller-generated; `BedRemoved` hard-removes the bed and its live places |
 | `place` | `plc_` | the fold, from a bed's `sleeps` | derived: `plc_<bed id without prefix>_<index>`, index from 1 |
 
 A place is one sleeping position: a single bed has one, a double bed two. Place ids
 are deterministic because constraints may target a place, and the id must survive
-re-derivation. A bed whose `sleeps` drops from 2 to 1 retires its second place at
-that event's `seq`.
+re-derivation. A bed whose `sleeps` drops from 2 to 1 hard-removes its second place
+from the live derived world at that event's `seq`; `BedRemoved` hard-removes the bed
+and all of its places. Historical inventory state is reconstructed by deriving the
+event-log prefix at the relevant `seq`, not by retaining retirement markers.
 
 ## 5. Events
 
@@ -92,9 +94,9 @@ Mapping: `building_id` is identity-only; `name` maps to `name`.
 
 Mapping: `room_id` is identity-only; `building_id` maps to `located-in`,
 `number` to `number`, `floor` to `floor`, and `room_type` to `room-type`.
-`RoomUpdated` is a full restatement. *Invariants:* the building exists and is not
-retired; `number` is unique within the building; `floor` and `room_type` are in the
-module parameters.
+`RoomUpdated` is a full restatement. *Invariants:* the building exists and is live;
+`number` is unique within the building; `floor` and `room_type` are in the module
+parameters.
 
 ### `BedAdded` / `BedUpdated`
 
@@ -120,9 +122,10 @@ bed's places. *Invariants:* the room exists; `label` is unique within the room;
 { bed_id: string, reason: string | null }
 ```
 
-Mapping: `bed_id` is identity-only; `reason` is history-only. The event retires
-the bed and its places. A constraint naming a retired place is reported by
-preflight rather than silently dropped.
+Mapping: `bed_id` is identity-only; `reason` is history-only. The event removes
+the bed and its places from the live derived world. A constraint naming a place
+removed by an inventory lifecycle event is reported by preflight rather than
+silently dropped.
 
 All inventory events are organiser-only.
 
@@ -198,7 +201,7 @@ None. Capacity and placement rules belong to the placement modules that apply th
 | Id | Severity | Fires when |
 |---|---|---|
 | `room-inventory.room-without-places` | warning | a live room has no live places |
-| `room-inventory.retired-place-constrained` | error | an active constraint names a retired place |
+| `room-inventory.retired-place-constrained` | error | an active constraint names a place removed by an inventory lifecycle event |
 | `room-inventory.no-capacity` | error | people exist and no live room has places |
 
 ## 10. Output and diff
@@ -221,7 +224,7 @@ The derived world exposes `world.buildings`, `world.rooms`, `world.beds`, and
 ## 12. Tests
 
 - Place ids are stable across `BedUpdated` restatements and replay.
-- `sleeps` 2 → 1 retires exactly the second place at that `seq`.
+- `sleeps` 2 → 1 hard-removes exactly the second place from the live world at that `seq`.
 - A `LabelSet` on a module-owned key is rejected.
 - `floor`, `room_type`, and `bed_type` outside the parameters are rejected.
 - Shuffle invariance covers `buildings`, `rooms`, and `places`.
