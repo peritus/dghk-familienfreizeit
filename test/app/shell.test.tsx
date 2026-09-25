@@ -1,9 +1,13 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 import { App } from '../../src/app/app'
 import { RouteBoundary, RouteLoading } from '../../src/app/components/route-states'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
 import type { Event } from '../../src/events/types.js'
+
+beforeAll(async () => {
+  await import('../../src/app/organiser/organiser-app')
+})
 
 afterEach(() => {
   cleanup()
