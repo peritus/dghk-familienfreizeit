@@ -11,7 +11,7 @@ route: `/organiser/parties`. Governing specs: [organiser view](../application/or
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Party review · 18 parties                     [Show warnings] [Pending 2] │
+│ Party review · 18 parties                     [Show warnings] [Drafts 2]  │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ P07 · 5 people · 4 beds                 [Split] [Merge]                  │
 │ Morgan — Alex (38), Jamie (9) · Taylor — Sam (41), Lee (36), Mia (0)     │
@@ -25,10 +25,10 @@ route: `/organiser/parties`. Governing specs: [organiser view](../application/or
 ```
 
 Merge and split dialogs explain the resulting organiser decision and add it to the
-shared pending list. Refused merges name the capacity or constraint reason.
+shared draft buffer. Refused merges name the capacity or constraint reason.
 
 The cards preserve provenance in reading order. Buttons have descriptive names;
-warnings are text plus glyph/border, and the pending count is read out after a
+warnings are text plus glyph/border, and the draft count is read out after a
 merge or split.
 
 ## Neobrutalist redesign and components
@@ -36,5 +36,5 @@ merge or split.
 Render each party as a `Card` with a doubled border when constrained and
 `Badge` chips for people, bed demand, and provenance. Use `Button` for Merge and
 Split; the resulting constraint preview appears in a `Dialog`. Refusing a
-merge uses `Alert`. Applying or discarding the shared pending list uses the
+merge uses `Alert`. Applying or discarding the shared draft buffer uses the
 canonical `AlertDialog` composition.

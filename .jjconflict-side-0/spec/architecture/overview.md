@@ -3,7 +3,7 @@
 ## The shape in one diagram
 
 ```
-      committed events                 pending events
+      committed events                 draft events
       the log, append-only             held by one organiser, not yet applied
               │                                │
               └────────────────┬───────────────┘
@@ -71,31 +71,31 @@ possible.
 ## Local-first organiser commands
 
 An organiser action always creates ordinary event drafts first. The shared organiser
-application adds the drafts to its ordered **pending buffer**, then immediately
-renders `derive(committed ++ pending)`. This is local-first: the organiser sees the
-real fold and solver over the proposed events before the Worker responds. Pending
+application adds the drafts to its ordered **draft buffer**, then immediately
+renders `derive(committed ++ drafts)`. This is local-first: the organiser sees the
+real fold and solver over the proposed events before the Worker responds. Draft
 events are ordinary events in shape and meaning; they have not crossed the append
 boundary yet.
 
-The pending buffer is used by one command pipeline with two commit-timing policies:
+The draft buffer is used by one command pipeline with two commit-timing policies:
 
-| Step | Immediate mode | Collecting mode |
+| Step | Immediate mode | Drafting mode |
 |---|---|---|
 | Create drafts and update the local world | immediate | immediate |
-| Collecting control | increments and flashes by the event count | increments and flashes by the event count |
-| Invoke `POST /api/organiser/apply` | automatically | only after **Anwenden** |
+| Draft control | upload icon | cloud-with-pause workspace |
+| Invoke `POST /api/organiser/apply` | automatically | only after **Entwürfe anwenden** |
 | Worker validation, authorization, replay, and atomic append | identical | identical |
 | Server-side draft state | never | never |
 
-Immediate mode is the default for an organiser session. Collecting mode is a UI
+Immediate mode is the default for an organiser session. Drafting mode is a UI
 policy for reviewing several clicks before committing them; it is not a second
 domain mode or a second derivation path. Switching it off is allowed only after the
-pending buffer is empty. A failed immediate apply keeps the events, opens review, and
-puts the client into collecting mode so the organiser can retry or discard them.
+draft buffer is empty. A failed immediate apply keeps the events, opens the draft
+workspace, and puts the client into drafting mode so the organiser can retry or discard them.
 
 While an apply request is in flight, later clicks remain in the local buffer after the
 submitted prefix. A successful response removes only the acknowledged prefix. A stale
-head incorporates the intervening committed events and preserves local pending work;
+head incorporates the intervening committed events and preserves local draft work;
 other failures preserve the affected events for review. Discard removes only local
 drafts and never writes an event.
 
@@ -113,14 +113,14 @@ same event head and configuration. Agreement is what the determinism contract
 guarantees; disagreement is a bug to report, and the server's world is authoritative
 either way.
 
-Pending events live in the organiser's browser for as long as that tab is open. They are
+Draft events live in the organiser's browser for as long as that tab is open. They are
 never stored on the server, never shared between organisers, and never visible to
-families. The collecting policy is session-local: route navigation preserves it and a
+families. The drafting policy is session-local: route navigation preserves it and a
 reload returns to immediate mode after loading the committed log.
 
 ## Planning and family reads
 
-The working organiser renders `derive(log ++ pending)`; other organisers render
+The working organiser renders `derive(log ++ drafts)`; other organisers render
 `derive(log)`. The family response combines permitted live information with the
 last communicated content of each release scope, under the authoritative
 [release-control contract](../application/release-control.md) §1–5. The Worker applies privacy
@@ -315,7 +315,7 @@ src/
     email.ts
   app/
     family-view/          implemented placeholders gain real controls/views
-    organiser/            log loading, pending reducer and domain screens
+    organiser/            log loading, draft reducer and domain screens
   events/types.ts         discriminated union and zod schemas, shared by both runtimes
   derive/                 pure index.ts composition, fold.ts and diff.ts; no I/O
   modules/<module-id>/    pure stages/rules, separate app/worker contributions

@@ -31,4 +31,4 @@ label. On narrow screens, filters wrap and each family becomes a labeled card.
 
 Use `Sidebar`, `Input`, `Badge`, `Button`, and `Table` for the main view. Manual
 invitation uses the ordinary organiser form and stages the resulting event
-through the shared pending-event workflow.
+through the shared draft-change workflow.

@@ -4,7 +4,7 @@ import { derive, guardModuleFold, type ModuleFoldCapability } from '../../src/ev
 import type { Event } from '../../src/events/types.js'
 import { loadKdl } from '../../src/events/kdl.js'
 import {
-  derivePending,
+  deriveDraftWorld,
   diff,
   projectFamilyWorld,
   projectSharedWorld,
@@ -274,8 +274,8 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
   ).toBe(true)
 })
 
-test('derives pending events and stable world changes without persistence', () => {
-  const pending: Event = {
+test('derives draft events and stable world changes without persistence', () => {
+  const draft: Event = {
     seq: 3,
     at: '2027-01-01T00:00:02Z',
     actor: 'org@test.invalid',
@@ -284,7 +284,7 @@ test('derives pending events and stable world changes without persistence', () =
     payload: { entity_id: 'fam_1', key: 'needs', value: 'garden', strength: null, note: null },
   }
   const before = derive(events)
-  const after = derivePending(events, [pending])
+  const after = deriveDraftWorld(events, [draft])
   expect(after.head_seq).toBe(3)
   expect(diff(before, after)).toEqual([
     { kind: 'label-cleared', subject_id: 'fam_1', key: 'needs', value: '"quiet-room"' },

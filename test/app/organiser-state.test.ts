@@ -70,13 +70,10 @@ test('an apply error keeps draft events in the derived organiser world', () => {
 })
 
 test('drafting mode cannot be disabled while drafts exist', () => {
-  const drafting = organiserReducer(
-    organiserReducer(loadedState(), { type: 'toggle_drafting' }),
-    {
-      type: 'stage',
-      events: [family],
-    },
-  )
+  const drafting = organiserReducer(organiserReducer(loadedState(), { type: 'toggle_drafting' }), {
+    type: 'stage',
+    events: [family],
+  })
 
   const stillDrafting = organiserReducer(drafting, { type: 'toggle_drafting' })
   expect(stillDrafting.change_mode).toBe('drafting')

@@ -17,24 +17,24 @@ Organisers make room-placement decisions and review consequences. Route:
 │ │ ⚠ no fit    │ │ │ Morgan ×2 ✓ │ │ │ open       │ │ │ Rivera ×3 ✓ │          │
 │ └─────────────┘ │ └─────────────┘ └─────────────┘ └─────────────┘          │
 ├─────────────────┴──────────────────────────────────────────────────────────┤
-│ 3 pending decisions · Braun → Room 14 · [Discard] [Apply]                 │
+│ 3 draft decisions · Braun → Room 14 · [Discard drafts] [Apply drafts]    │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Dragging a family to a room creates one or more organiser decision label events
 through the shared local-first pipeline, re-derives locally, and shows every other
-family the change moved. Immediate mode applies automatically; collecting mode waits
-for the shared Apply control. Infeasible rooms lose drop affordance and explain why; soft
+family the change moved. Immediate mode applies automatically; drafting mode waits
+for the shared draft workspace. Infeasible rooms lose drop affordance and explain why; soft
 penalties remain visible. Keyboard users get a move action with the same room
-picker and consequence summary. Apply confirms the pending batch; Discard
-requires confirmation and clears the complete local pending batch. An optional note
+picker and consequence summary. Apply confirms the draft batch; Discard
+requires confirmation and clears the complete local draft batch. An optional note
 belongs to the label, not to a separate decision record.
 
 ## Narrow fallback
 
 The board becomes an unplaced list followed by a room list. Each family
 has an “Add room decision” action; do not require drag-and-drop on touch devices. The
-shared collecting control and inline review panel remain usable without covering the
+shared draft control and inline workspace remain usable without covering the
 final control.
 
 ## Neobrutalist redesign and components

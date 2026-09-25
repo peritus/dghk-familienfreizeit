@@ -41,7 +41,7 @@ they do not assign those later capabilities to M7.
 ## Recommendation
 
 Split M7 into an organiser foundation: navigation, identity management, event
-history, pending batches, generic decisions, and inventory. Mount later module
+history, draft batches, generic decisions, and inventory. Mount later module
 contributions only when their owning milestones are delivered, or move M7 after
 the latest capability it must show. The choice must preserve D24's organiser
 equivalence without making M7 claim behavior it cannot yet implement.

@@ -192,7 +192,7 @@ reported by room assignment and attributed to the events that caused them.
 | Emails | none |
 
 Merge and split append ordinary `LabelSet` events for `groups-with` or
-`separates-from` to the pending list. Undo removes the action's pending events;
+`separates-from` to the draft buffer. Undo removes the action's draft events;
 clearing an applied label appends `LabelCleared`.
 
 ## 12. Tests

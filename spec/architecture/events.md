@@ -259,9 +259,9 @@ Workshop rankings are `LabelSet` and `LabelCleared` events with structured value
 
 Organiser judgement uses the same label mechanism as family preferences. A board
 drag or other organiser action creates one or more ordinary event drafts, adds them
-to the shared local pending buffer, and derives the resulting world immediately.
-Immediate mode invokes the ordinary apply command automatically; collecting mode
-waits for explicit **Anwenden**. Discard clears the complete local pending batch
+to the shared local draft buffer, and derives the resulting world immediately.
+Immediate mode invokes the ordinary apply command automatically; drafting mode
+waits for explicit **Entwürfe anwenden**. Discard clears the complete local draft batch
 without contacting the Worker. After successful application, clearing a label appends `LabelCleared` through
 the same append path. Organiser decisions are ordinary event-log inputs and the
 solver derives the resulting assignment.
@@ -269,9 +269,9 @@ solver derives the resulting assignment.
 ### Shared organiser context
 
 Applied decision labels, their optional notes, event authors, and timestamps are
-visible to every organiser in the event history and organiser views. Pending labels
+visible to every organiser in the event history and organiser views. Draft labels
 remain local to the organiser's browser until the Worker acknowledges their append,
-whether the request was automatic or explicitly started from the review panel.
+whether the request was automatic or explicitly started from the draft workspace.
 
 ---
 
@@ -298,7 +298,7 @@ Worth writing down, because the boundary blurs under pressure.
 | Entities and labels as read models | Derivation, not decision | nowhere |
 | Family placement units | Derivation | room-assignment plan section |
 | A plan, whether communicated or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
-| Pending events in an organiser's browser | Not yet committed; discarding one must leave no trace | that organiser's browser |
+| Draft events in an organiser's browser | Not yet committed; discarding one must leave no trace | that organiser's browser |
 
 The test is whether this records an authoritative domain fact or organiser decision,
 or merely a reproducible result. Family labels, material commitments and communication
@@ -307,9 +307,9 @@ summaries are derived results. Communication records its reviewed `input_seq`, s
 `build_revision` and `compatibility_revision` under [release control](../application/release-control.md), never a plan
 payload or an additional content hash.
 
-Pending events are the interesting case, because they are events in every respect
-except that nobody has committed to them. Immediate and collecting mode both apply
+Draft events are the interesting case, because they are events in every respect
+except that nobody has committed to them. Immediate and drafting mode both apply
 them through the ordinary path — validated, authorised, and written in one `batch()`
-so each submitted set lands whole or not at all. The client may continue collecting
+so each submitted set lands whole or not at all. The client may continue drafting
 later drafts while an earlier batch is in flight; acknowledgements remove only the
-submitted prefix. Discarding pending events does nothing at all, which is the point.
+submitted prefix. Discarding draft events does nothing at all, which is the point.

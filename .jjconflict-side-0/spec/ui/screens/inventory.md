@@ -21,9 +21,9 @@ Organisers maintain buildings, rooms, beds, capacities, and capabilities. Route:
 
 Add/edit dialogs validate room identity, capacity, and capabilities. Confirm
 changes that affect a derived plan through the shared local-first event pipeline.
-Show the pending-change count rather than inventing a screen-specific save path:
-immediate mode applies automatically, while collecting mode waits for the shared
-review panel.
+Show the draft-change count rather than inventing a screen-specific save path:
+immediate mode applies automatically, while drafting mode waits for the shared
+draft workspace.
 
 Use table semantics for dense rows, explicit labels for capabilities, and a
 At narrow widths, buildings become stacked sections and room rows become cards.

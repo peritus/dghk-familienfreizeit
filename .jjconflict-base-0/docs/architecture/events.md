@@ -47,6 +47,6 @@ references (`src/events/resolver.ts`). A selected module may now contribute
 its own event types and entity kinds into this same replay path — see
 [implemented typed entity identity](data-model.md#typed-entity-identity) —
 though this is proven against a synthetic test module only; no real module
-selects it yet. The derived-world resolver, diagnostics, projections, pending
+selects it yet. The derived-world resolver, diagnostics, projections, draft
 derivation, and diff are documented in [derived world](derived-world.md).
 Solver stages remain outstanding.

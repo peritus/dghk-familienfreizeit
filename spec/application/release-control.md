@@ -205,7 +205,7 @@ through the configured resolver. `notify` is unavailable while
 `change-notifications` is not selected; authentication email remains a separate
 kernel capability.
 
-Organisers apply pending events before confirming communication. Preview requests
+Organisers apply draft events before confirming communication. Preview requests
 are read-only. The confirmation submits the reviewed `input_seq`, scopes,
 `build_revision`, `compatibility_revision` and notification choice. The server:
 
@@ -375,7 +375,7 @@ their effect on held allocations can be. Count allocation movements separately f
 programme-only effects. Empty state: **Alles ist an Familien kommuniziert.** Revision
 mismatches remain visible and cannot be presented as an empty diff.
 
-Unselected changes stay listed. The organiser's pending world may be inspected as a
+Unselected changes stay listed. The organiser's draft world may be inspected as a
 planning preview, clearly marked not applied; final communication review requires
 committed data. The dashboard links to this report rather than using events-since-
 communication as a staleness measure. Reports work on mobile and print under

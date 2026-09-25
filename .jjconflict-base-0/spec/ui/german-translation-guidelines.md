@@ -51,13 +51,13 @@ emails, notifications, and help text.
 | communicate | **An Familien kommunizieren** | Open the selected-scope review; final action: Jetzt an Familien kommunizieren |
 | communicated | **An Familien kommuniziert** | Visible in family views; email delivery is separate |
 | release control | **Freigabesteuerung** | Technical mechanism; organiser navigation uses Kommunikation |
-| pending | **Noch nicht angewendet** | Local changes awaiting Apply; other organisers cannot yet see them |
-| collect changes | **Änderungen sammeln** | The organiser control for deferring the ordinary Apply command |
-| collecting mode active | **Sammelmodus aktiv** | State text for the enabled local commit-timing policy |
+| draft changes | **Änderungsentwürfe** | Browser-local changes awaiting application; other organisers cannot yet see them |
+| start drafting mode | **Entwurfsmodus starten** | The organiser control for deferring the ordinary Apply command |
+| drafting mode active | **Entwurfsmodus aktiv** | State text for the enabled local commit-timing policy |
 | immediate mode | **Änderungen werden sofort angewendet** | Explanation for the default policy |
-| open changes | **Offene Änderungen** | Title/status for the shared review panel |
-| discard | **Alle Änderungen verwerfen** | Removes all local pending events without contacting the server |
-| apply | **Anwenden** | Starts the ordinary Worker append for the current pending batch |
+| draft workspace | **Entwurfsbereich** | The shared organiser area for browser-local draft changes |
+| discard drafts | **Entwürfe verwerfen** | Removes all local draft events without contacting the server |
+| apply drafts | **Entwürfe anwenden** | Starts the ordinary Worker append for the current draft batch |
 | uncommunicated | **Noch nicht an Familien kommuniziert** | Applied changes not yet made visible to families through Communicate |
 | organiser | **organisierende Person** | One person acting on behalf of the organisation team |
 | organisation team | **Organisationsteam** | The collective group responsible for organising the occasion |

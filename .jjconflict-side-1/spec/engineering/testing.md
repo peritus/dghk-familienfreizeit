@@ -325,24 +325,24 @@ an organiser acts on.
 ### Local-first commit timing
 
 The organiser application must test the shared command pipeline, not separate
-immediate and collecting implementations:
+immediate and drafting implementations:
 
-- A click stages ordinary event drafts, derives `committed ++ pending` locally, and
-  increments/flashes the collecting-control count by the number of event records created.
-- Immediate mode invokes the ordinary apply endpoint automatically; collecting mode
-  leaves the same events pending until explicit Apply.
-- The collecting control shows the event-record count, including zero, and the inline
-  review remains expanded while collecting mode is active.
-- An apply acknowledgement removes only the submitted pending prefix, preserving
+- A click stages ordinary event drafts, derives `committed ++ drafts` locally, and
+  increments/flashes the draft-control count by the number of event records created.
+- Immediate mode invokes the ordinary apply endpoint automatically; drafting mode
+  leaves the same events in the draft buffer until explicit Apply.
+- The draft workspace shows the event-record count and remains expanded while drafting
+  mode is active.
+- An apply acknowledgement removes only the submitted draft prefix, preserving
   later clicks made while the request was in flight.
 - A stale-head response incorporates intervening committed events and preserves the
-  local pending buffer.
-- An automatic apply failure enters collecting mode, keeps review expanded, and
+  local draft buffer.
+- An automatic apply failure enters drafting mode, keeps the workspace expanded, and
   retains the failed events for retry or discard.
 - Discard never sends a write request and leaves no event-log trace.
-- Toggling collecting mode off is blocked while pending events exist; route changes
+- Toggling drafting mode off is blocked while drafts exist; route changes
   preserve the policy and reload resets it to immediate mode.
-- Family responses never contain pending events, the organiser event log, or the full
+- Family responses never contain draft events, the organiser event log, or the full
   organiser world.
 
 Use the ordinary KDL fixtures and module/integration tests for these cases:
@@ -371,14 +371,14 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
   assignments, scheduling returns offerings or blocking unscheduled outcomes, and
   attendance consumes offerings without rewriting ranking facts.
 - Clear removes the selected label's effect from the current plan; replay before
-  the clear reproduces its prior effect. Discard removes the complete local pending
+  the clear reproduces its prior effect. Discard removes the complete local draft
   batch, including both halves of a needs/provides pair.
 - Omitting a note equals `null`. Varying only note text with the event envelope
   and other inputs held fixed changes organiser display but not solver input,
   assignment, scores, or canonical solver-output hash. Appending any event still
   advances `input_seq`.
 - Applied tokens, optional notes, authors, and timestamps are visible to a second
-  organiser in existing views/history; pending events are local. Family payloads
+  organiser in existing views/history; draft events are local. Family payloads
   never expose internal tokens or organiser notes, and family attempts to write
   unrestricted decision labels fail authorisation.
 - Kernel/module setup-only keys remain protected, and a decision requiring an
@@ -471,7 +471,7 @@ Also covered:
   resolved; hard consistency gates cannot be bypassed.
 - **Privacy boundary**: the organiser bundle may derive the full world locally, while
   family responses, family diffs, reports and notification previews are derived and
-  projected by the Worker; event logs, pending events, full worlds and organiser-only
+  projected by the Worker; event logs, draft events, full worlds and organiser-only
   data never cross into the family bundle.
 - **Live coordination**: cover last-place races, over-capacity preservation, inactive
   rankings, sign-up fairness exclusion, interest privacy and immediate material saves

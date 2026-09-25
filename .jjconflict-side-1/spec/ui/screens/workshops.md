@@ -37,7 +37,7 @@ An Add organiser decision action opens the shared [decision form](constraints.md
 with the selected session and placement context. It can add matching, exclusion,
 separation, eligibility, or fixed-placement labels through the fixed resolver. It uses
 the shared local-first event pipeline and offers one optional note; immediate mode
-applies automatically, collecting mode waits for the shared Apply control; applied labels show
+applies automatically, drafting mode waits for the shared draft workspace; applied labels show
 the existing event author and timestamp. The derived assignment and findings
 update through the ordinary solver.
 

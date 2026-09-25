@@ -266,7 +266,7 @@ only `LabelSet` and `LabelCleared` enter the event log.
 Organisers cannot upload executable rules. New mechanisms belong in module code and
 the active profile; new facts and ordinary matching constraints do not.
 
-Dragging a family to a room adds ordinary decision labels to the pending list. A
+Dragging a family to a room adds ordinary decision labels to the draft buffer. A
 room choice may pair `needs` on the selected stable entities with `provides` on
 the target. It does not require creating vocabulary or additional decision
 metadata. A token offered by multiple rooms expresses a matching requirement,

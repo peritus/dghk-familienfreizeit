@@ -104,7 +104,7 @@ retains only constraints that do not change that unit, such as keep-apart.
 
 *Chosen.* Organiser decisions are event-backed inputs to the derived assignment.
 Choosing a room or making another planning decision adds one or more labels to the
-organiser's pending events. Every screen re-derives with those labels as ordinary
+organiser's draft events. Every screen re-derives with those labels as ordinary
 inputs, and applying appends them to the log, so stated preferences and organiser
 decisions share one path.
 
@@ -139,7 +139,7 @@ JSON API on the Worker.
 
 *Rejected alternative:* server-rendered `hono/jsx` pages with htmx for partial
 updates and a vanilla TypeScript island for the board. It looks smaller on a
-dependency list and is larger in code: the pending list is needed on the board,
+dependency list and is larger in code: the draft list is needed on the board,
 which has to re-render a derived world without losing
 selection or drag state, and comboboxes, dialogs, and toasts would all be written
 by hand. Every screen would also need its own route, form handlers, and
@@ -151,7 +151,7 @@ routing. This application renders nothing on the server and has a dozen client
 routes over one derived world.
 
 *Rejected alternative:* React on the board only, with server-rendered pages
-elsewhere. It keeps two rendering models and still strands the pending list on one
+elsewhere. It keeps two rendering models and still strands the draft list on one
 route.
 
 *Rejected alternative:* Preact. It is smaller, but Base UI and the neobrutalism
@@ -174,7 +174,7 @@ the Tailwind CLI. It lists two build packages instead of four, but it does not
 remove Vite: Vitest runs on it, so the project would carry two bundlers with two
 transform configurations — and the cross-runtime agreement test exists precisely
 because transforms can change behaviour. It also loses hot reload, so every edit to
-the board discards the pending list during development.
+the board discards the draft list during development.
 
 *Rejected alternative:* a meta-framework's build (see D8). It brings server
 rendering and routing conventions this application does not use.
@@ -236,23 +236,23 @@ trait that reuses an existing control needs no family view code. See
 
 *Chosen.* `derive(events, config) → World` and `diff(World, World)` are the read
 side of the application. Every organiser action follows one local-first pipeline:
-the client creates ordinary event drafts, adds them to its pending buffer, and renders
-every screen from `derive(committed ++ pending)` before any network response. The
-pending buffer is then sent through the one ordinary apply command. Immediate mode
-invokes that command automatically; collecting mode waits for the organiser to choose
-**Anwenden**. These are commit-timing policies over the same event path, not separate
+the client creates ordinary event drafts, adds them to its draft buffer, and renders
+every screen from `derive(committed ++ drafts)` before any network response. The
+draft buffer is then sent through the one ordinary apply command. Immediate mode
+invokes that command automatically; drafting mode waits for the organiser to choose
+**Entwürfe anwenden**. These are commit-timing policies over the same event path, not separate
 event types, read models, APIs, or server-side draft state. This local derivation is an
 organiser-only capability: the organiser browser may receive the committed event log,
-pending events and the full organiser `World`.
+draft events and the full organiser `World`.
 
-The family browser must never receive the event log, pending events, the full `World`,
+The family browser must never receive the event log, draft events, the full `World`,
 solver traces, organiser labels, organiser notes or other organiser-only metadata. The
 Worker derives and privacy-projects the family `World` server-side before returning
 `GET /api/family/view`. Family diffs, badges, reports and notification previews use
 that server-side family projection. They share diff semantics with organiser views,
 not the organiser's unfiltered data or execution environment.
 
-*Rejected alternative:* a sandbox mode on the board, where each drag
+*Rejected alternative:* a separate experiment mode on the board, where each drag
 posts a constraint, the server re-solves, and the board reconciles from the
 response. It needs a second derivation path, a client feasibility check that is
 allowed to disagree with the real one, and a round trip per experiment.
@@ -261,12 +261,12 @@ allowed to disagree with the real one, and a round trip per experiment.
 same reason, so both run in a browser unchanged. Naming the primitive also means
 staleness, plan diffs, and change emails need no machinery of their own — they are all the same two calls.
 
-*Consequence:* experiments stay out of the log when collecting mode is active. An
+*Consequence:* draft changes stay out of the log while drafting mode is active. An
 organiser who tries four arrangements can inspect them locally and append only the
 events for the one they chose. In immediate mode, each click still takes the same
 local-first path and is automatically submitted as the organiser's decision.
 
-The pending buffer is ordered application state, not domain state. It may be briefly
+The draft buffer is ordered application state, not domain state. It may be briefly
 non-empty during an immediate-mode request. Further clicks append after the submitted
 prefix; a response acknowledges only the events in its own request. Successful append,
 stale-head recovery, validation failure, undo, discard, and explicit apply therefore

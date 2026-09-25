@@ -34,8 +34,8 @@ Add creates ordinary `LabelSet` events; Clear creates `LabelCleared` for the
 selected application. A new value replaces an existing value only where the
 configured cardinality permits replacement. Both enter the shared local-first event
 pipeline across this organiser's screens. The local world updates immediately;
-immediate mode submits automatically and collecting mode keeps the events in the
-browser until the shared Apply control. Applied labels show the token, optional
+immediate mode submits automatically and drafting mode keeps the events in the
+browser until the shared draft workspace. Applied labels show the token, optional
 note, event author, and timestamp to every organiser. Fixed resolver mechanisms
 are inspectable but not editable. Findings name the rule, affected entities, and
 the next useful screen. Empty state: no decisions yet; Add remains available.

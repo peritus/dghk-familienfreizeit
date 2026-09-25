@@ -39,7 +39,7 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 | `migrations/` | Append-only event and operational D1 schema |
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/family-view/` | Public welcome placeholder |
-| `src/app/organiser/` | Lazy authenticated organiser host, pending reducer and kernel family screens |
+| `src/app/organiser/` | Lazy authenticated organiser host, draft reducer and kernel family screens |
 | `src/app/components/ui/` | Copied UI primitives |
 | `scripts/bundle-graph.ts` | Build import-graph metadata |
 | `test/app/`, `test/worker/`, `test/build/` | App, Worker and emitted-output checks |

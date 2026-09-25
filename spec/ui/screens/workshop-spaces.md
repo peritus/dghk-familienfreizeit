@@ -28,7 +28,7 @@ requires confirmation and a reason; history remains visible while the space is
 removed from future scheduler input.
 
 Changes use the ordinary local-first organiser pipeline; immediate mode applies them
-automatically and collecting mode exposes them through the shared Apply/discard flow.
+automatically and drafting mode exposes them through the shared draft apply/discard flow.
 Invalid capacity,
 timestamps, ordering, overlap, and touching windows are shown inline and block
 the event batch. The screen does not add a schedule assignment, choose a

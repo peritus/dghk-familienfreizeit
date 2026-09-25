@@ -36,25 +36,24 @@ the basis sequence and selected scopes; email notification is optional and separ
 plan, diagnostics and release references. Produced by `derive(events, config)` and
 never stored. Audience responses select permitted content under release control.
 
-**Pending events** — ordinary events an organiser has created in the organiser
+**Draft events** — ordinary events an organiser has created in the organiser
 application but whose append has not yet been acknowledged by the Worker. They are
 held in the organiser's browser, never on the server. Every organiser screen derives
-from `committed ++ pending`.
+from `committed ++ drafts`.
 
-**Pending buffer** — the ordered client-side collection of pending event groups. It is
+**Draft buffer** — the ordered client-side collection of draft event groups. It is
 application state used for local derivation, discard, retry, and apply-prefix
 acknowledgement; it is not persisted domain state.
 
 **Immediate mode** — the organiser UI policy that invokes the ordinary apply command
 automatically after local staging.
 
-**Collecting mode** — the organiser UI policy that leaves locally staged events in the
-pending buffer until the organiser explicitly chooses **Anwenden**. It is not a second
-domain model or server-side sandbox.
+**Drafting mode** — the organiser UI policy that leaves locally staged events in the
+draft buffer until the organiser explicitly chooses **Entwürfe anwenden**. It is not a
+second domain model or server-side workspace.
 
-**Sandbox** — an informal description of an organiser view with pending events. It is
-not an architectural state model; use **pending buffer** and **collecting mode** when
-the distinction matters.
+**Draft workspace** — the organiser UI area that presents draft changes and their
+apply/discard actions. It is a presentation surface, not a second state model.
 
 **Trace** — the human-readable record of why the solver did what it did. One line
 per decision, including the alternatives it rejected. Not a debug log; a

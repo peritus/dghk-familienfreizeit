@@ -135,10 +135,7 @@ export function draftCount(state: OrganiserState): number {
   return state.drafts.reduce((count, action) => count + action.events.length, 0)
 }
 
-function removeDraftEvents(
-  drafts: readonly DraftBatch[],
-  count: number,
-): readonly DraftBatch[] {
+function removeDraftEvents(drafts: readonly DraftBatch[], count: number): readonly DraftBatch[] {
   let remaining = count
   const result: DraftBatch[] = []
   for (const action of drafts) {
