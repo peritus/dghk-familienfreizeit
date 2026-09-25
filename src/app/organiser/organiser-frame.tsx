@@ -4,13 +4,19 @@ import { useOrganiser } from './context.js'
 import { SaveStatus } from './save-status.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
 import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
+import { organiserScreenRegistry } from '../../organiser/registry.js'
 import { cn } from '../lib/utils.js'
 
-const navItems = [
+const kernelNavItems = [
   { href: organiserPaths.dashboard(), match: organiserRoutePaths.dashboard, label: 'Dashboard' },
   { href: organiserPaths.families(), match: organiserRoutePaths.families, label: 'Familien' },
-  { href: organiserPaths.inventory(), match: organiserRoutePaths.inventory, label: 'Unterkunft' },
 ]
+
+const moduleNavItems = organiserScreenRegistry
+  .filter(({ host }) => host === 'module')
+  .map(({ route, label }) => ({ href: route, match: route.replace('/organiser', ''), label }))
+
+const navItems = [...kernelNavItems, ...moduleNavItems]
 
 /**
  * A brand-only header/main pair for the loading, unauthorized, stale-build,

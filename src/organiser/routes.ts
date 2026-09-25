@@ -1,3 +1,6 @@
+import type { ProfileModule } from '../config/define.js'
+import { activeProfile } from '../config/index.js'
+
 export const organiserBasePath = '/organiser'
 
 export const organiserRoutePaths = {
@@ -7,7 +10,7 @@ export const organiserRoutePaths = {
   inventory: '/inventory',
 } as const
 
-export const organiserRouteDefinitions = [
+export const kernelOrganiserRouteDefinitions = [
   {
     id: 'organiser-dashboard',
     relative_path: organiserRoutePaths.dashboard,
@@ -29,14 +32,43 @@ export const organiserRouteDefinitions = [
     test_path: `${organiserBasePath}${organiserRoutePaths.families}/6b4b44137d724c1e`,
     label: 'Familie',
   },
-  {
-    id: 'organiser-inventory',
-    relative_path: organiserRoutePaths.inventory,
-    absolute_path: `${organiserBasePath}${organiserRoutePaths.inventory}`,
-    test_path: `${organiserBasePath}${organiserRoutePaths.inventory}`,
-    label: 'Unterkunft',
-  },
 ] as const
+
+type OrganiserRouteDefinition = {
+  id: string
+  relative_path: string
+  absolute_path: string
+  test_path: string
+  label: string
+}
+
+export function composeOrganiserRouteDefinitions(
+  modules: readonly ProfileModule[],
+): readonly OrganiserRouteDefinition[] {
+  const moduleRoutes = modules.flatMap((module) =>
+    (module.contributions.screens ?? []).map((screen) => ({
+      id: screen.id,
+      relative_path: screen.route.replace(organiserBasePath, '') || '/',
+      absolute_path: screen.route,
+      test_path: screen.route,
+      label: screen.label,
+    })),
+  )
+  const routes = [...kernelOrganiserRouteDefinitions, ...moduleRoutes]
+  const ids = new Set<string>()
+  const paths = new Set<string>()
+  for (const route of routes) {
+    if (ids.has(route.id)) throw new Error(`duplicate organiser screen id: ${route.id}`)
+    if (paths.has(route.absolute_path))
+      throw new Error(`duplicate organiser screen route: ${route.absolute_path}`)
+    ids.add(route.id)
+    paths.add(route.absolute_path)
+  }
+  return routes
+}
+
+/** The route catalog for the statically selected occasion profile. */
+export const organiserRouteDefinitions = composeOrganiserRouteDefinitions(activeProfile.modules)
 
 const familyRouteIdPattern = /^[a-zA-Z0-9_-]+$/
 

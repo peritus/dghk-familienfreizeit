@@ -19,6 +19,7 @@ import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
 import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
+import { organiserScreenRegistry } from '../../organiser/registry.js'
 
 export default function OrganiserApp() {
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
@@ -192,9 +193,11 @@ export default function OrganiserApp() {
               }
             }}
           </Route>
-          <Route path={organiserRoutePaths.inventory}>
-            <Inventory />
-          </Route>
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-inventory') ? (
+            <Route path={organiserRoutePaths.inventory}>
+              <Inventory />
+            </Route>
+          ) : null}
           <Route>
             <NotFound />
           </Route>

@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import {
+  composeOrganiserRouteDefinitions,
   familyIdFromRouteSegment,
   familyRouteSegment,
   isKnownOrganiserPath,
@@ -7,6 +8,7 @@ import {
   organiserRouteDefinitions,
   organiserUrls,
 } from '../../src/organiser/routes.js'
+import { organiserScreenRegistry } from '../../src/organiser/registry.js'
 
 test('organiser route definitions have unique relative and absolute paths', () => {
   expect(new Set(organiserRouteDefinitions.map(({ relative_path }) => relative_path)).size).toBe(
@@ -21,6 +23,24 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/families/:id',
     '/organiser/inventory',
   ])
+})
+
+test('module screens are composed only when their module is selected', () => {
+  expect(composeOrganiserRouteDefinitions([]).map(({ id }) => id)).toEqual([
+    'organiser-dashboard',
+    'organiser-families',
+    'organiser-family-detail',
+  ])
+  expect(organiserRouteDefinitions.some(({ id }) => id === 'organiser-inventory')).toBe(true)
+  expect(organiserScreenRegistry.filter(({ id }) => id === 'organiser-inventory')).toEqual([
+    expect.objectContaining({ host: 'module', route: '/organiser/inventory' }),
+  ])
+  expect(new Set(organiserScreenRegistry.map(({ id }) => id)).size).toBe(
+    organiserScreenRegistry.length,
+  )
+  expect(new Set(organiserScreenRegistry.map(({ route }) => route)).size).toBe(
+    organiserScreenRegistry.length,
+  )
 })
 
 test('nested organiser paths and public URLs are kept distinct', () => {
