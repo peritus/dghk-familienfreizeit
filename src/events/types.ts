@@ -104,6 +104,10 @@ export type EventDraft = Omit<Event, 'seq'>
 
 export type EventPayloadSchemas = Readonly<Record<string, z.ZodType<JsonValue>>>
 
+export type EventSchemaConfig = {
+  event_payload_schemas?: EventPayloadSchemas
+}
+
 export const kernelPayloadSchemas: {
   [K in EventType]: z.ZodType<Extract<KernelEvent, { type: K }>['payload']>
 } = {
@@ -147,6 +151,10 @@ export const kernelPayloadSchemas: {
     key: labelKeySchema,
     value: jsonValueSchema.nullable(),
   }),
+}
+
+export function eventPayloadSchemas(config: EventSchemaConfig = {}): EventPayloadSchemas {
+  return { ...kernelPayloadSchemas, ...config.event_payload_schemas }
 }
 
 export const kernelEventTypes = Object.keys(kernelPayloadSchemas) as EventType[]

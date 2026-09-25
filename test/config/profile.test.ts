@@ -22,6 +22,30 @@ describe('occasion profile', () => {
     expect(kernelProfile.validation_view.label_schemas?.map(({ key }) => key)).toEqual(['role'])
     expect(() => derive([], kernelProfile.validation_view)).not.toThrow()
   })
+  test('validation views compose kernel and selected-module event schemas', () => {
+    const module = defineModule({
+      id: 'fixture-events',
+      params: z.object({}),
+      contribute: () => ({
+        events: [
+          {
+            type: 'FixtureAdded',
+            payload: z.object({ fixture_id: z.string() }),
+            authorize: () => true,
+            fold: () => {},
+          },
+        ],
+      }),
+    })
+    const profile = defineOccasionProfile({ meta, traits: {}, modules: [module({})] })
+
+    expect(profile.validation_view.event_payload_schemas).toEqual(
+      expect.objectContaining({
+        FamilyInvited: expect.anything(),
+        FixtureAdded: expect.anything(),
+      }),
+    )
+  })
   test('rejects invalid vocabulary and impure evaluators', () => {
     expect(() =>
       defineOccasionProfile({

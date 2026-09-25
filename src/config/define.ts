@@ -10,7 +10,7 @@ import {
   type WorldCheck,
   type WorldSummaryDefinition,
 } from '../events/fold.js'
-import { kernelEventTypes, type JsonValue } from '../events/types.js'
+import { kernelEventTypes, kernelPayloadSchemas, type JsonValue } from '../events/types.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -394,7 +394,7 @@ function validationView(
   const capabilityDescriptors = Object.entries(traits).flatMap(([key, trait]) =>
     trait.kind === 'capability' ? [{ key, scopes: trait.scopes, derive: trait.derive }] : [],
   )
-  const eventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
+  const moduleEventPayloadSchemas: Record<string, ZodType<JsonValue>> = {}
   const eventFoldDispatch: Record<string, ModuleEventFold> = {}
   const eventAuthorizeDispatch: Record<string, ModuleEventAuthorize> = {}
   const eventValidateDispatch: Record<string, ModuleEventValidate> = {}
@@ -402,7 +402,7 @@ function validationView(
     const allowedKinds = new Set(module.contributions.entity_kinds?.map(({ id }) => id) ?? [])
     const allowedLabelKeys = new Set(module.contributions.label_keys?.map(({ key }) => key) ?? [])
     for (const event of module.contributions.events ?? []) {
-      eventPayloadSchemas[event.type] = event.payload
+      moduleEventPayloadSchemas[event.type] = event.payload
       eventFoldDispatch[event.type] = guardModuleFold(
         module.id,
         allowedKinds,
@@ -424,7 +424,7 @@ function validationView(
     capability_descriptors: capabilityDescriptors,
     world_summaries: modules.flatMap((module) => module.contributions.world_summaries ?? []),
     world_checks: modules.flatMap((module) => module.contributions.world_checks ?? []),
-    event_payload_schemas: eventPayloadSchemas,
+    event_payload_schemas: { ...kernelPayloadSchemas, ...moduleEventPayloadSchemas },
     event_fold_dispatch: eventFoldDispatch,
     event_authorize_dispatch: eventAuthorizeDispatch,
     event_validate_dispatch: eventValidateDispatch,
