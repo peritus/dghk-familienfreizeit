@@ -4,6 +4,7 @@ import {
   roomTraitDefaults,
   roomTraitLabelChanges,
   sleepsForBedType,
+  traitOptions,
   validateRoomTraitValues,
 } from '../../src/app/organiser/screens/inventory-events.js'
 
@@ -13,7 +14,7 @@ describe('inventory room trait events', () => {
     expect(roomPropertyDefinitions.map(({ key }) => key)).toEqual(
       expect.arrayContaining(['sanitary', 'price-per-bed-eur', 'is-accessible']),
     )
-    expect(validateRoomTraitValues(values)).toMatch(/Sanitär|Preis/)
+    expect(validateRoomTraitValues(values)).toMatch(/Bad|Preis/)
 
     values.sanitary = 'private'
     values['price-per-bed-eur'] = 100
@@ -52,5 +53,18 @@ describe('inventory room trait events', () => {
     expect(sleepsForBedType('single')).toBe(1)
     expect(sleepsForBedType('double')).toBe(2)
     expect(sleepsForBedType('bunk')).toBe(2)
+  })
+
+  test('sanitary enum values never reach the UI raw (D25)', () => {
+    const sanitary = roomPropertyDefinitions.find(({ key }) => key === 'sanitary')
+    expect(sanitary).toBeDefined()
+    const options = traitOptions(sanitary!.trait)
+    expect(options).toEqual(
+      expect.arrayContaining([
+        { value: 'private', label: 'Eigenes Bad' },
+        { value: 'shared-floor', label: 'Bad auf der Etage' },
+        { value: 'remote-shared', label: 'Bad außerhalb' },
+      ]),
+    )
   })
 })

@@ -129,7 +129,7 @@ const roomRemovedPayload = z.object({ room_id: roomId, reason: z.string().nullab
 const bedPayload = z.object({
   bed_id: bedId,
   room_id: roomId,
-  label: nonEmpty,
+  label: z.string().trim(),
   bed_type: nonEmpty,
   sleeps: z.union([z.literal(1), z.literal(2)]),
   sort_key: z.number().int(),
@@ -194,13 +194,15 @@ function validateBed(
     return `${updating ? 'unknown' : 'duplicate'} bed: ${value.bed_id}`
   if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
   if (!params.bed_types.includes(value.bed_type)) return `invalid bed type: ${value.bed_type}`
-  const duplicate = (world.entities_by_kind.bed ?? []).some((bed) => {
-    if (bed.id === value.bed_id) return false
-    return (
-      labelValue(world, bed.id, locationKey) === value.room_id &&
-      labelValue(world, bed.id, 'label') === value.label
-    )
-  })
+  const duplicate =
+    value.label !== '' &&
+    (world.entities_by_kind.bed ?? []).some((bed) => {
+      if (bed.id === value.bed_id) return false
+      return (
+        labelValue(world, bed.id, locationKey) === value.room_id &&
+        labelValue(world, bed.id, 'label') === value.label
+      )
+    })
   return duplicate ? `bed label already exists in room: ${value.label}` : null
 }
 

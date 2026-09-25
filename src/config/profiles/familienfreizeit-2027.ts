@@ -35,11 +35,16 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       },
     }),
     sanitary: property({
-      title: { de: 'Sanitär', en: 'Sanitary arrangement' },
+      title: { de: 'Bad', en: 'Bathroom' },
       scopes: ['room'],
       value: enumOf(['private', 'shared-floor', 'remote-shared']),
       cardinality: 'exactly-one',
       organiser_only: true,
+      copy: {
+        private: { de: 'Eigenes Bad', en: 'Private bathroom' },
+        'shared-floor': { de: 'Bad auf der Etage', en: 'Shared bathroom on the floor' },
+        'remote-shared': { de: 'Bad außerhalb', en: 'Shared bathroom elsewhere' },
+      },
     }),
     'is-accessible': property({
       title: { de: 'Barrierearm', en: 'Accessible' },
