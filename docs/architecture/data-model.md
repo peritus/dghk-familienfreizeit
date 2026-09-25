@@ -21,10 +21,12 @@ CREATE INDEX event_type_idx ON event(type, seq);
 ```
 
 Migration `0001_m1_kernel.sql` creates this table on D1. `src/events/store.ts`
-implements the write side: `readEvents` selects rows in `seq` order (optionally
-bounded by `untilSeq`) and parses each through `parseEvent`, the same payload
-schemas used on append. `appendEvents` computes each new row's `seq` from a
-caller-supplied `expectedHead`, then submits one conditional `INSERT ... WHERE
+implements the write side: `readEvents(db, config, untilSeq?)` selects rows in
+`seq` order (optionally bounded by `untilSeq`) and parses each through
+`parseEvent` using the selected profile's composed payload schemas. The same
+`KernelConfig` is supplied to `appendEvents`, so reads and writes cannot silently
+disagree about selected module event types. `appendEvents` computes each new
+row's `seq` from a caller-supplied `expectedHead`, then submits one conditional `INSERT ... WHERE
 (SELECT MAX(seq) FROM event) = <prior seq>` per event in a single D1 batch. If
 the head moved between the caller's read and the append, the batch's
 `WHERE` clauses match no row, `changes !== 1` for at least one statement, and

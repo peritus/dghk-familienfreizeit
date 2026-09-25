@@ -7,14 +7,18 @@ events into typed family/person entities and generic labels.
 ## Storage
 
 Migration `0001_m1_kernel.sql` creates the append-only `event` table and the
-operational authentication tables. `readEvents` parses stored JSON through the
-same payload schemas used for writes. `appendEvents` assigns contiguous sequence
-numbers and uses a compare-and-swap predicate in one D1 batch. A stale or
-forward-moving head is rejected, and a failed batch does not partially append.
+operational authentication tables. `defineOccasionProfile` composes kernel and
+selected-module payload schemas into its validation view. `readEvents` and
+`appendEvents` receive that selected `KernelConfig`, so stored JSON and new
+drafts use the same profile-aware payload schemas. `appendEvents` assigns
+contiguous sequence numbers and uses a compare-and-swap predicate in one D1
+batch. A stale or forward-moving head is rejected, and a failed batch does not
+partially append.
 
-No folded domain state is stored. `derive(events)` reconstructs the current
-kernel world in memory; sessions, magic links, rate limits, and email records are
-not passed to it.
+No folded domain state is stored. `derive(events, config)` reconstructs the
+current profile world in memory; sessions, magic links, rate limits, and email
+records are not passed to it. Every Worker and authentication replay uses the
+same selected profile configuration for storage parsing and derivation.
 
 ## Kernel events
 
