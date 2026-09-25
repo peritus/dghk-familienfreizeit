@@ -45,12 +45,12 @@ from held arrangements.
 
 ## 2. Whole-family assignment board
 
-The board is the only active screen with substantial interaction design. It has a
-searchable unplaced-family rail and room cards grouped by building and floor.
+The board is the only active screen with substantial interaction design. It has an
+unplaced-family rail and room cards grouped by building and floor.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ [Search families…] Main House  Garden House  [Unplaced only]  seq 1482   │
+│ Main House  Garden House  [Unplaced only]  seq 1482                    │
 ├─────────────────┬────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                              │
 │ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
@@ -69,8 +69,8 @@ Room cards show capacity, sanitary arrangement, accessibility, occupants by fami
 hard-constraint status, and soft penalties. A drop never splits a family or merges
 two families.
 
-Keyboard users can search families, move through the unplaced list, open a room
-picker, add a room decision, discard the pending batch, and clear selection.
+Keyboard users can move through the unplaced list, open a room picker, add a room
+decision, discard the pending batch, and clear selection.
 Touch users get the same room picker through a drawer instead of drag-and-drop.
 
 ## 3. Organiser decisions and reports

@@ -8,7 +8,7 @@ Organisers make room-placement decisions and review consequences. Route:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ [Search families…] Main House  Garden House  [Unplaced only]  seq 1482     │
+│ Main House  Garden House  [Unplaced only]  seq 1482                       │
 ├─────────────────┬──────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                                │
 │ ┌─────────────┐ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
@@ -32,15 +32,15 @@ belongs to the label, not to a separate decision record.
 
 ## Narrow fallback
 
-The board becomes a searchable unplaced list followed by a room list. Each family
+The board becomes an unplaced list followed by a room list. Each family
 has an “Add room decision” action; do not require drag-and-drop on touch devices. The
 shared collecting control and inline review panel remain usable without covering the
 final control.
 
 ## Neobrutalist redesign and components
 
-Use `Sidebar`, `Input` or `Combobox` for family search, `Tabs` for buildings,
-`Card` for rooms and families, and `Badge` for capacity and constraint status.
+Use `Sidebar`, `Tabs` for buildings, `Card` for rooms and families, and `Badge`
+for capacity and constraint status.
 Room cards keep the thick outline and offset shadow; infeasible cards use an
 `Alert`-style border and explanatory text. Apply and Discard each use
 `AlertDialog` with the complete `AlertDialogTrigger`, `AlertDialogContent`,

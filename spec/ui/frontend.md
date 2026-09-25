@@ -172,7 +172,7 @@ The outstanding screens require the following component inventory.
 |---|---|
 | Button, Card, Badge, Alert | everywhere |
 | Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms |
-| Combobox, Popover, Command | person picker, room picker, family search |
+| Combobox, Popover, Command | person picker, room picker |
 | Dialog, Alert Dialog | organiser decisions, communicate confirmation, discard pending |
 | Table, ScrollArea | families, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after communication in the family view |
@@ -181,7 +181,7 @@ The outstanding screens require the following component inventory.
 | Skeleton, Tooltip | loading states and hints |
 
 This list and the inventory in [UI-00](design-system.md) are the same list.
-The families table sorts and filters 55 rows with `useMemo`; it does not need the
+The families table renders the derived rows directly; it does not need the
 registry's data-table wrapper or a table library. Adding a component to this list is
 a deliberate decision, the same as adding a dependency.
 
@@ -317,7 +317,7 @@ auditable by someone who does not know this stack. React never reaches into it.
 | A meta-framework (Next.js, Remix, TanStack Start) | No server rendering to organise; the Worker is an API |
 | A state manager | The state is a list of events and a pure function over it |
 | A data-fetching library | Three organiser requests and two family view requests |
-| A table library | 55 rows, sorted and filtered in `useMemo` |
+| A table library | 55 rows from the derived world |
 | tRPC | Shared zod schemas type both ends |
 | An ORM | Only the event log and operational tables are stored; see [data model](../architecture/data-model.md) |
 | An auth library | See [authentication](../application/authentication.md) |

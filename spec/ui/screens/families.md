@@ -8,7 +8,7 @@ families manually. Route: `/organiser/families`. Governing spec: [organiser view
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ Families · 55                                             [Invite family]│
-│ [Search…] [No login] [No room preference] [Incomplete workshops]           │
+│ [No login] [No room preference] [Incomplete workshops]                    │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Family             Email              People  Room  Workshops  Last seen  │
 │ Morgan             alex@example.com       4     ✓       ✓       14 Sep     │
