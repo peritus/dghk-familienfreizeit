@@ -29,15 +29,15 @@ Every outstanding screen renders the organiser application's derived world. Scre
 actions use the shared local-first organiser pipeline: they create ordinary event
 groups, derive the proposed world locally, and then either invoke the ordinary apply
 command automatically or leave the group in the browser for review, according to the
-session's commit policy. No screen owns a second pending list or persistence path.
+session's commit policy. No screen owns a second draft list or persistence path.
 
-The header exposes **Änderungen sammeln**. Immediate mode is the session default and
-automatically applies each locally staged group. Collecting mode defers the same apply
-command until **Anwenden**. The collecting control uses an inline SVG ruler and
-contains the numeric pending event count, including zero; the connected local-changes
-section remains expanded while collecting mode is active. **Alle Änderungen verwerfen**
-clears local pending events, and **Anwenden** submits the current ordered batch. A
-failed automatic apply keeps its events, opens the panel, and activates collecting mode.
+The header exposes **Entwurfsmodus starten**. Immediate mode is the session default and
+automatically applies each locally staged group. Drafting mode defers the same apply
+command until **Entwürfe anwenden**. The draft control uses a Lucide upload-cloud icon;
+the draft workspace uses a cloud-with-pause icon and shows the numeric draft count.
+**Entwürfe verwerfen** clears local draft events, and **Entwürfe anwenden** submits the
+current ordered batch. A failed automatic apply keeps its events, opens the workspace,
+and activates drafting mode.
 
 Release reporting and confirmation follow [release control](release-control.md)
 and [UI-11](../ui/screens/release-control.md). Live coordination findings remain separate
@@ -56,21 +56,21 @@ unplaced-family rail and room cards grouped by building and floor.
 │ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
 │ Lang ×1         │ Room 14 · 6 places · open                             │
 ├─────────────────┴────────────────────────────────────────────────────────┤
-│ [Änderungen sammeln: aus]                   [ruler icon · 3]            │
-│ 3 pending decisions · Braun → Room 14 · [Discard] [Apply]              │
+│ [Entwurfsmodus starten]                     [cloud-pause icon · 3]      │
+│ 3 Änderungsentwürfe · Braun → Room 14 · [Entwürfe verwerfen] [Entwürfe anwenden] │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
 Dragging a family to a room creates organiser decision labels through the shared
 local-first pipeline, re-derives locally, and explains infeasible drops. In immediate
-mode the resulting batch is submitted automatically; collecting mode waits for Apply.
+mode the resulting batch is submitted automatically; drafting mode waits for Entwürfe anwenden.
 The solver remains the only producer of assignments.
 Room cards show capacity, sanitary arrangement, accessibility, occupants by family,
 hard-constraint status, and soft penalties. A drop never splits a family or merges
 two families.
 
 Keyboard users can move through the unplaced list, open a room picker, add a room
-decision, discard the pending batch, and clear selection.
+decision, discard the draft batch, and clear selection.
 Touch users get the same room picker through a drawer instead of drag-and-drop.
 
 ## 3. Organiser decisions and reports

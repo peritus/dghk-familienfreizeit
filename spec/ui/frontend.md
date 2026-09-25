@@ -12,8 +12,8 @@ components, talking to a small JSON API.
 The derived world is the read side of the application
 ([architecture](../architecture/overview.md)), and must run in the organiser browser. The organiser
 screens are views over it: the dashboard, families, the board, plan
-diffs, workshops, and constraints all render `derive(committed ++ pending)`. The
-pending list is shared by every one of them: the constraints screen adds decision
+diffs, workshops, and constraints all render `derive(committed ++ drafts)`. The
+draft list is shared by every one of them: the constraints screen adds decision
 labels to it just as the board drags into it. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
 
@@ -22,7 +22,7 @@ to authentication, the event log, and side effects.
 
 What that buys, concretely:
 
-- **One pending list across screens.** It lives in one reducer at the root of the
+- **One draft list across screens.** It lives in one reducer at the root of the
   organiser application, so every screen sees the same unapplied work.
 - **No hand-written rendering engine for the board.** Re-deriving on every drag,
   keeping selection, focus, and drag state across renders, flashing moved cards —
@@ -92,7 +92,7 @@ src/app/
   main.tsx              router, session probe, lazy-loads the organiser application
   family-view/               login, preferences page, assignment page
   organiser/
-    OrganiserApp.tsx        loads the log, owns the pending reducer, derives the world
+    OrganiserApp.tsx        loads the log, owns the draft reducer, derives the world
     screens/            dashboard, families, inventory, board, plans, workshops, constraints, reports
   components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
@@ -108,8 +108,8 @@ function OrganiserApp() {
   const { committed, build_revision, compatibility_revision } = useLog() // GET /api/organiser/log, once
   const [organiser, dispatch] = useReducer(organiserReducer, initialOrganiserState)
   const world = useMemo(
-    () => derive([...organiser.committed, ...organiser.pending], config),
-    [organiser.committed, organiser.pending],
+    () => derive([...organiser.committed, ...organiser.drafts], config),
+    [organiser.committed, organiser.drafts],
   )
   …
 }
@@ -117,22 +117,22 @@ function OrganiserApp() {
 
 Every screen receives the derived `world` and a shared staging callback. A screen
 creates one or more ordinary event drafts; it does not choose whether to save them.
-The callback appends the grouped drafts to the pending buffer, derives locally, and
+The callback appends the grouped drafts to the draft buffer, derives locally, and
 then follows the session's commit policy. Immediate mode invokes the ordinary Apply
-request automatically. Collecting mode leaves the drafts in the buffer until the
-organiser chooses **Anwenden**. The collecting control counts individual pending event
-records, including zero, and the inline review remains expanded while collecting mode
-is active. Only the ordinary event list is sent to `derive` and append. There is no
-second state manager, API, or event type for collecting mode.
+request automatically. Drafting mode leaves the drafts in the buffer until the
+organiser chooses **Entwürfe anwenden**. The draft workspace counts individual draft
+event records and remains expanded while drafting mode is active. Only the ordinary
+event list is sent to `derive` and append. There is no second state manager, API, or
+event type for drafting mode.
 
 Release badges and inline diffs are derived through the canonical
 `CommunicationScopeView` contract in [release control](../application/release-control.md).
 The organiser application computes the organiser projection from its committed log,
-pending world, communication references and the shared scope-diff function; screens
+draft world, communication references and the shared scope-diff function; screens
 must not implement their own status or before/after comparison.
 
 This full-log/local-derivation path is restricted to the organiser application. The
-family bundle never downloads the event log, pending events, full organiser `World`,
+family bundle never downloads the event log, draft events, full organiser `World`,
 solver traces, organiser labels or notes. It receives only the Worker response after
 server-side derivation and family privacy projection.
 
@@ -173,7 +173,7 @@ The outstanding screens require the following component inventory.
 | Button, Card, Badge, Alert | everywhere |
 | Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms |
 | Combobox, Popover, Command | person picker, room picker |
-| Dialog, Alert Dialog | organiser decisions, communicate confirmation, discard pending |
+| Dialog, Alert Dialog | organiser decisions, communicate confirmation, discard drafts |
 | Table, ScrollArea | families, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after communication in the family view |
 | Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
@@ -220,8 +220,8 @@ core, attached to room cards and family cards from effects.
 draggable()   family cards become draggable
 dropTarget()  room cards accept drops, with a canDrop predicate
 monitor()     global drag state → dim infeasible rooms, show penalty ghosts
-reducer       selection, keyboard handling, pending list
-world         derive(committed ++ pending), memoised
+reducer       selection, keyboard handling, draft list
+world         derive(committed ++ drafts), memoised
 ```
 
 The feasibility predicate is the real one. `canDrop` asks `derive` what happens if
@@ -234,17 +234,17 @@ rather than because a cheap approximation guessed so.
 ```
 1. user clicks a screen action
 2. create one grouped EventDraft collection
-3. enqueue it in the shared pending buffer
-4. world = derive(committed ++ pending, config)
+3. enqueue it in the shared draft buffer
+4. world = derive(committed ++ drafts, config)
 5. React renders the updated screen immediately
-6. increment and briefly flash the pending badge by the event count
+6. increment and briefly flash the draft badge by the event count
 7. immediate mode starts Apply automatically
-8. collecting mode waits for explicit Apply
+8. drafting mode waits for explicit Apply
 ```
 
 The local world is computed the same way the server computes it. Immediate mode does
 not bypass local derivation; it only starts the ordinary persistence request after
-the local update. Collecting mode is therefore a commit-timing policy, not a second
+the local update. Drafting mode is therefore a commit-timing policy, not a second
 world or sandbox implementation.
 
 The Worker append endpoint is the only persistence path the organiser application
@@ -255,22 +255,21 @@ POST /api/organiser/apply
      { input_seq, events[], build_revision, compatibility_revision }
 
   409 → the log moved; response carries the new events, the application re-derives on them
-  200 → applied; response acknowledges the submitted pending prefix
+  200 → applied; response acknowledges the submitted draft prefix
 ```
 
 Further clicks made while an apply request is in flight remain after the submitted
 prefix and are not lost when the response arrives. A stale-head or other apply error
-preserves local events; an automatic failure enters collecting mode and opens the
-review panel. Discard removes local drafts without contacting the Worker.
+preserves local events; an automatic failure enters drafting mode and opens the
+draft workspace. Discard removes local drafts without contacting the Worker.
 
-The header toolbar exposes **Änderungen sammeln**. It is off by default for each
-browser session, survives route navigation, and resets after reload. Its inline SVG
-ruler control contains a numeric count of event records, not action groups, increments
-by the number of events created by a click, and flashes by that delta. While active,
-the connected **Local changes in this browser** section explains that the pending
-drafts are collected only in this browser and are not visible to other organisers
-until applied. The section contains **Alle Änderungen verwerfen** and **Anwenden**.
-Turning collecting mode off is blocked while the pending buffer is non-empty.
+The header toolbar exposes **Entwurfsmodus starten**. It is off by default for each
+browser session, survives route navigation, and resets after reload. Its Lucide
+upload-cloud control starts drafting mode. The connected **Änderungsentwürfe in diesem
+Browser** workspace uses a cloud-with-pause icon, shows the numeric draft count, and
+explains that the drafts remain local until applied. The workspace contains
+**Entwürfe verwerfen** and **Entwürfe anwenden**. Discard exits drafting mode;
+successful apply exits it when the draft buffer is empty.
 
 The server's plan is authoritative. The server checks the event head,
 `build_revision`, and `compatibility_revision` supplied with the request, then derives
