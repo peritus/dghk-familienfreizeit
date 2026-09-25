@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import { prepareEventBatch } from '../../src/events/prepare.js'
+import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import type { EventDraft } from '../../src/events/store.js'
 
 const draft = (type: string, payload: EventDraft['payload']): EventDraft => ({
@@ -32,6 +33,16 @@ test('prepares and validates a complete prospective event stream', () => {
   )
 
   expect(events.map(({ seq }) => seq)).toEqual([1, 2])
+})
+
+test('prepares a selected-profile module event through the composed schemas', () => {
+  expect(() =>
+    prepareEventBatch(
+      [],
+      [draft('BuildingAdded', { building_id: 'bld_test', name: 'Test', sort_key: 1 })],
+      familienfreizeit2027Profile.validation_view,
+    ),
+  ).not.toThrow()
 })
 
 test('rejects a batch whose prospective replay is invalid', () => {

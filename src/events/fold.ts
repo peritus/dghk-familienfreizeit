@@ -1,7 +1,7 @@
 import {
   canonicalEmail,
   canonicalJson,
-  kernelPayloadSchemas,
+  eventPayloadSchemas,
   parseEvent,
   type Event,
   type EventPayloadSchemas,
@@ -294,7 +294,7 @@ export function assertAppendableWorld(world: KernelWorld): void {
 }
 
 function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[] {
-  const schemas = { ...kernelPayloadSchemas, ...config.event_payload_schemas }
+  const schemas = eventPayloadSchemas(config)
   const validatedEvents = events.map((event) => parseEvent(event, schemas))
   let expectedSeq = 1
   for (const event of validatedEvents) {

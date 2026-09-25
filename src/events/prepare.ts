@@ -1,5 +1,5 @@
 import { assertAppendableWorld, derive, type KernelConfig } from './fold.js'
-import { parseEvent, kernelPayloadSchemas, type Event } from './types.js'
+import { eventPayloadSchemas, parseEvent, type Event } from './types.js'
 import type { EventDraft } from './types.js'
 
 /**
@@ -12,7 +12,7 @@ export function prepareEventBatch(
   drafts: readonly EventDraft[],
   config: KernelConfig = {},
 ): Event[] {
-  const schemas = { ...kernelPayloadSchemas, ...config.event_payload_schemas }
+  const schemas = eventPayloadSchemas(config)
   const expectedHead = committed.length
   const events = drafts.map((draft, index) =>
     parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),

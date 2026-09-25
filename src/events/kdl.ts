@@ -2,7 +2,7 @@ import { parse, type Node } from '@bgotink/kdl'
 import { derive, type KernelConfig } from './fold.js'
 import {
   isEventType,
-  kernelPayloadSchemas,
+  eventPayloadSchemas,
   parsePayload,
   type Event,
   type EventPayloadSchemas,
@@ -12,7 +12,7 @@ import {
 const fixedTimestamp = '2026-01-01T00:00:00.000Z'
 export function loadKdl(text: string, config: KernelConfig = {}): Event[] {
   const document = parse(text)
-  const schemas = { ...kernelPayloadSchemas, ...config.event_payload_schemas }
+  const schemas = eventPayloadSchemas(config)
   const events = document.nodes.map((node, index) => nodeToEvent(node, index + 1, schemas))
   derive(events, config)
   return events
