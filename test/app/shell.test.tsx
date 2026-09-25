@@ -108,6 +108,8 @@ test('organiser links stay within the nested route base', async () => {
   expect(familiesLink.getAttribute('href')).toBe('/organiser/families')
 })
 
+<<<<<<< conflict 1 of 1
++++++++ onqxzqzo 28ff8e58 "feat: redesign organiser draft controls" (rebase destination)
 test('organiser state survives client-side route and history navigation', async () => {
   const familyEvent: Event = {
     seq: 1,
@@ -181,20 +183,19 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
   expect(screen.queryByRole('heading', { name: 'Local changes in this browser' })).toBeNull()
 })
 
-test('organiser changes keep the collecting review expanded', async () => {
+test('organiser draft mode replaces the upload control with its workspace', async () => {
   open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
 
-  const collectingButton = screen.getByRole('button', { name: 'Änderungen sammeln: aus' })
-  fireEvent.click(collectingButton)
-  const activeCollectingButton = screen.getByRole('button', { name: 'Änderungen sammeln: an' })
-  expect(activeCollectingButton.textContent).toContain('0')
-  expect(activeCollectingButton.querySelector('svg')).toBeTruthy()
-  expect(activeCollectingButton.className).not.toContain('hover:translate-x-boxShadowX')
-  expect(screen.getByRole('heading', { name: 'Local changes in this browser' })).toBeTruthy()
-  expect(screen.getByText('Actively collected here until you apply them.')).toBeTruthy()
-  expect(document.querySelector('header footer')).toBeNull()
-  expect(screen.getByText('Keine offenen Änderungen')).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
+  expect(screen.queryByRole('button', { name: 'Entwurfsmodus starten' })).toBeNull()
+  expect(screen.getByRole('heading', { name: 'Änderungsentwürfe in diesem Browser' })).toBeTruthy()
+  expect(screen.getByText('Diese Entwürfe bleiben hier, bis Du sie anwendest.')).toBeTruthy()
+  expect(screen.getByText('Keine Änderungsentwürfe')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Entwürfe verwerfen' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Entwürfe anwenden' }).hasAttribute('disabled')).toBe(
+    true,
+  )
 
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Neue Familie' } })
   fireEvent.change(screen.getByLabelText('E-Mail'), {
@@ -202,13 +203,14 @@ test('organiser changes keep the collecting review expanded', async () => {
   })
   fireEvent.click(screen.getByRole('button', { name: 'Zur offenen Liste' }))
 
-  expect(
-    (await screen.findByRole('button', { name: 'Änderungen sammeln: an' })).textContent,
-  ).toContain('1')
-  expect(screen.getByRole('button', { name: 'Anwenden' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Alle Änderungen verwerfen' })).toBeTruthy()
+  expect(await screen.findByText('1 Änderungsentwurf')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Entwürfe anwenden' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Entwürfe verwerfen' })).toBeTruthy()
   expect(screen.queryByRole('button', { name: 'Rückgängig' })).toBeNull()
-  expect(screen.getByText('1 offene Änderung')).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Entwürfe verwerfen' }))
+  expect(await screen.findByRole('button', { name: 'Entwurfsmodus starten' })).toBeTruthy()
+  expect(screen.queryByRole('heading', { name: 'Änderungsentwürfe in diesem Browser' })).toBeNull()
 })
 
 test('family history includes staged events before they are applied', async () => {
@@ -228,7 +230,7 @@ test('family history includes staged events before they are applied', async () =
   open('/organiser/families', [familyEvent])
   fireEvent.click(await screen.findByRole('link', { name: 'Lokale Familie' }))
   expect(await screen.findByRole('heading', { name: 'Lokale Familie' })).toBeTruthy()
-  fireEvent.click(screen.getByRole('button', { name: 'Änderungen sammeln: aus' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Entwurfsmodus starten' }))
   fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Lokale' } })
   fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
   fireEvent.click(screen.getByRole('button', { name: 'Add' }))

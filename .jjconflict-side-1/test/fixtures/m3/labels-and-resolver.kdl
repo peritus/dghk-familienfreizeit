@@ -1,6 +1,0 @@
-FamilyInvited family_id=fam_1 email="one@example.test" display_name="One" locale=de
-FamilyInvited family_id=fam_2 email="two@example.test" display_name="Two" locale=de
-LabelSet entity_id=fam_1 key=needs value=quiet-room strength=required note=#null
-LabelSet entity_id=fam_1 key=groups-with value=fam_2 strength=required note=#null
-LabelSet entity_id=fam_1 key=separates-from value=fam_2 strength=required note=#null
-LabelSet entity_id=fam_1 key=private-note value="medical detail" strength=#null note=#null
