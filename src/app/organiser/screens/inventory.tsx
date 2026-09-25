@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
+import { pluralDe } from '../../lib/plural-de.js'
 import { useOrganiser } from '../context.js'
 import {
   inventoryWorld,
@@ -429,7 +430,8 @@ function BuildingSection({
         <div>
           <h2 className="text-2xl font-heading">{building.name}</h2>
           <p className="text-muted">
-            {pluralDe(rooms.length, 'Zimmer', 'Zimmer')}, {pluralDe(places, 'Schlafplatz', 'Schlafplätze')}
+            {rooms.length} {pluralDe(rooms.length, 'Zimmer', 'Zimmer')},{' '}
+            {places} {pluralDe(places, 'Schlafplatz', 'Schlafplätze')}
           </p>
           <BuildingEditor building={building} onSave={onUpdateBuilding} onRemove={onRemoveBuilding} />
         </div>
@@ -1159,10 +1161,6 @@ function Select({
       </select>
     </label>
   )
-}
-
-function pluralDe(count: number, singular: string, plural: string): string {
-  return `${count} ${count === 1 ? singular : plural}`
 }
 
 function formatEuro(value: number, decimals: 0 | 2): string {
