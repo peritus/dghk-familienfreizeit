@@ -6,9 +6,10 @@ import {
   materializeDraftEvents,
   organiserReducer,
   draftCount,
+  saveStatusView,
 } from '../../src/app/organiser/state.js'
 
-const family: EventDraft = {
+const family = {
   at: '2027-01-01T00:00:00Z',
   actor: 'organiser@example.test',
   subject: null,
@@ -19,7 +20,7 @@ const family: EventDraft = {
     display_name: 'State',
     locale: 'de',
   },
-}
+} satisfies EventDraft
 
 function loadedState() {
   return organiserReducer(initialOrganiserState, {
@@ -67,6 +68,22 @@ test('an apply error keeps draft events in the derived organiser world', () => {
   expect(deriveOrganiserWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
   expect(draftCount(failed)).toBe(1)
   expect(failed.change_mode).toBe('drafting')
+})
+
+test('save status reflects a save failure, never a load failure', () => {
+  const saveFailed = organiserReducer(loadedState(), {
+    type: 'failed',
+    status: 'error',
+    error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
+  })
+  expect(saveStatusView(saveFailed)).toEqual({ kind: 'failed' })
+
+  const loadFailed = organiserReducer(initialOrganiserState, {
+    type: 'failed',
+    status: 'load_error',
+    error: 'Die Familiendaten konnten nicht geladen werden.',
+  })
+  expect(saveStatusView(loadFailed)).not.toEqual({ kind: 'failed' })
 })
 
 test('drafting mode cannot be disabled while drafts exist', () => {

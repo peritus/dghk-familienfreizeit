@@ -4,6 +4,7 @@ import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
 import type { EventDraft } from '../../events/types.js'
 import { NotFound, RouteLoading } from '../components/route-states'
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
 import { Button } from '../components/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
@@ -74,7 +75,9 @@ export default function OrganiserApp() {
         dispatch({
           type: 'failed',
           status:
-            error instanceof OrganiserApiError && error.status === 401 ? 'unauthorized' : 'error',
+            error instanceof OrganiserApiError && error.status === 401
+              ? 'unauthorized'
+              : 'load_error',
           error:
             error instanceof OrganiserApiError && error.status === 401
               ? 'Bitte melde Dich als Organisationsteam an.'
@@ -87,7 +90,11 @@ export default function OrganiserApp() {
   }, [])
 
   const derivation = useMemo(() => {
-    if (state.status === 'loading' || state.status === 'unauthorized')
+    if (
+      state.status === 'loading' ||
+      state.status === 'unauthorized' ||
+      state.status === 'load_error'
+    )
       return { world: null, error: null }
     try {
       return { world: deriveOrganiserWorld(state, activeProfile.validation_view), error: null }
@@ -160,6 +167,20 @@ export default function OrganiserApp() {
     return (
       <OrganiserMinimalFrame>
         <p role="alert">{state.error}</p>
+      </OrganiserMinimalFrame>
+    )
+  if (state.status === 'load_error')
+    return (
+      <OrganiserMinimalFrame>
+        <Alert role="alert" className="bg-white">
+          <AlertTitle>Die Organisationsdaten konnten nicht geladen werden</AlertTitle>
+          <AlertDescription>
+            <p>{state.error} Solange die Daten fehlen, zeigt diese Ansicht keine Zahlen an.</p>
+            <Button className="mt-4" onClick={() => window.location.reload()}>
+              Neu laden
+            </Button>
+          </AlertDescription>
+        </Alert>
       </OrganiserMinimalFrame>
     )
   if (!derivation.world)

@@ -119,6 +119,32 @@ test('a direct organiser URL loads the lazy route', async () => {
   ).toBeTruthy()
 })
 
+test('a failed organiser log load shows a load error, not a save error', async () => {
+  const fetchMock = vi.fn((input: RequestInfo | URL) => {
+    const url = String(input)
+    if (url.endsWith('/api/me'))
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        ),
+      )
+    return Promise.resolve(new Response(JSON.stringify({ error: 'internal' }), { status: 500 }))
+  })
+  vi.stubGlobal('fetch', fetchMock)
+  window.history.replaceState({}, '', '/organiser')
+  render(<App />)
+
+  expect(
+    await screen.findByText('Die Organisationsdaten konnten nicht geladen werden'),
+  ).toBeTruthy()
+  expect(screen.getByText('Die Familiendaten konnten nicht geladen werden.', { exact: false })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Neu laden' })).toBeTruthy()
+  // No organiser nav or save-status control renders for a whole-app load failure.
+  expect(screen.queryByRole('navigation', { name: 'Organisationsteam' })).toBeNull()
+  expect(screen.queryByText(/Speichern fehlgeschlagen/)).toBeNull()
+})
+
 test('organiser links stay within the nested route base', async () => {
   open('/organiser')
   const familiesLink = await screen.findByRole('link', { name: /Alle Familien ansehen/ })

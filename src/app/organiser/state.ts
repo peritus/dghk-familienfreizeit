@@ -15,6 +15,7 @@ export type OrganiserStatus =
   | 'stale_head'
   | 'stale_build'
   | 'unauthorized'
+  | 'load_error'
   | 'error'
 
 export type OrganiserState = {
@@ -143,11 +144,11 @@ export type SaveStatusView =
 
 /**
  * The save-status button has no reachable "offline" look yet: nothing in
- * `OrganiserStatus` currently detects a lost connection (see spec/ui/
- * design-system.md#save-status-pattern and the organiser-handoff's own open
- * "offline queue" TODO). `unauthorized` and `stale_build` never reach this
- * view either — OrganiserApp short-circuits to a plain alert for those
- * before the frame (and this button) mounts.
+ * `OrganiserStatus` currently detects a lost connection. `unauthorized`,
+ * `stale_build`, and `load_error` never reach this view either — OrganiserApp
+ * short-circuits to a plain alert for those before the frame (and this
+ * button) mounts. `error` here means an apply/save failure specifically, so
+ * "failed" only ever reflects a save problem, never a load problem.
  */
 export function saveStatusView(state: OrganiserState): SaveStatusView {
   if (state.status === 'error' || state.status === 'stale_head') return { kind: 'failed' }
