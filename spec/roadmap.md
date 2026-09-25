@@ -111,7 +111,10 @@ Specification coverage: [authentication](application/authentication.md), [family
 [UI-04](ui/screens/family-assignment.md), [UI-11](ui/screens/release-control.md), and D14/D16/D24.
 
 - Implement invite-only family magic-link authentication, single-use tokens,
-  canonical identities, sessions, rate limits, and privacy projections.
+  canonical identities, sessions, rate limits, privacy projections, and the
+  authentication delivery intent. M10 may print the link in development, but
+  does not render hosted messages, call provider transport, or record delivery
+  outcomes.
 - Render the M7 controls for families through the same profile-driven definitions
   and ordinary event path, including deadline notices and assignment cards.
 - Implement accommodation, programme, and per-slot allocation scopes, semantic
@@ -120,10 +123,11 @@ Specification coverage: [authentication](application/authentication.md), [family
 - Add concurrent-confirmation, reverted-change, dependency, cancellation,
   revision-mismatch, privacy, and family-projection fixtures.
 
-Acceptance: after M9, a family can request and redeem a real login email, inspect
-its permitted derived information, save permitted controls, and see only coherent
-communicated arrangements. Organisers can preview and atomically communicate
-selected scopes without exposing drafts.
+Acceptance: after M9, a family can request and redeem a single-use login link
+through the M10 authentication workflow, inspect its permitted derived
+information, save permitted controls, and see only coherent communicated
+arrangements. Hosted invitation and reminder delivery begins in M14. Organisers
+can preview and atomically communicate selected scopes without exposing drafts.
 
 ## M11 — Reports and browser-printing host
 
@@ -177,11 +181,13 @@ Specification coverage: [authentication](application/authentication.md) §2,
 [deployment](engineering/deployment.md) §§5–6, and the operational email portions
 of the [release control](application/release-control.md) contract.
 
-- Implement invitation and reminder messages for the family login workflow.
-- Implement recipient preview, delivery claims, retries, suppression, unknown-send
-  handling, and idempotency for authentication email.
-- Implement operational `email_log`, provider configuration, and delivery status
-  separate from domain visibility.
+- Render invitation and reminder messages from M10 authentication delivery
+  intents, and own their hosted dispatch.
+- Implement provider transport and configuration, recipient preview, delivery
+  claims, retries, suppression, unknown-send handling, and idempotency for
+  authentication email.
+- Implement operational `email_log` and delivery status separate from domain
+  visibility.
 - Keep communication and change emails deferred under
   [change notifications](deferred-ideas/change-notifications.md).
 

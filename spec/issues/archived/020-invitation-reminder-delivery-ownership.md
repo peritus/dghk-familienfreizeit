@@ -1,7 +1,7 @@
 ---
 id: "020"
 title: Invitation and reminder delivery has two milestone owners
-status: open
+status: resolved
 severity: contract-contradiction
 category: kernel
 source: milestone-feasibility-review
@@ -46,6 +46,19 @@ message rendering, dispatch intent, provider transport, and operational delivery
 records. State the M8 development-only or non-delivery behavior and make M14 the
 first hosted-delivery acceptance gate, so the M8 acceptance claim cannot imply
 operational email delivery.
+
+## Resolution
+
+The roadmap now assigns the authentication workflow and delivery intent to M10.
+M10 may expose the link through development output, but it does not render hosted
+messages, call provider transport, or record delivery outcomes. M14 consumes those
+intents and owns invitation/reminder rendering, hosted dispatch, provider
+configuration, delivery records, retries, suppression, and idempotency; it is the
+first hosted-delivery acceptance gate.
+
+The current M8 milestone has no authentication or email acceptance, so no M8
+change is required. D10 remains unchanged, and deferred change notifications keep
+their separate module boundary.
 
 ## Related files
 
