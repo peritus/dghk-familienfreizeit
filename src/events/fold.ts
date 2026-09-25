@@ -426,6 +426,13 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       const { entity_id: entityId, key, value } = (event as unknown as LabelCleared).payload
       requireKnownEntity(state, entityId)
       const clearKey = configuredLabelKey(config, key)
+      assertConfiguredLabelMutation(
+        config,
+        entityId,
+        clearKey,
+        false,
+        state.entities_by_id.get(entityId),
+      )
       if (value === null) replaceLabels(state, entityId, clearKey)
       else state.labels.delete(labelKey(entityId, clearKey, value))
       break
@@ -588,12 +595,7 @@ function setConfiguredLabel(
     )
   )
     throw new Error(`derived capability cannot be assigned: ${value}`)
-  if (schema?.setup_only && !allowSetupOnly)
-    throw new Error(
-      `label key is setup-owned and cannot be written via LabelSet/LabelCleared: ${canonicalKey}`,
-    )
-  if (schema?.scopes && target && !schema.scopes.includes(target.kind))
-    throw new Error(`label ${canonicalKey} is not valid for ${target.kind}`)
+  assertConfiguredLabelMutation(config, entityId, canonicalKey, allowSetupOnly, target)
   if (schema?.cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
@@ -607,6 +609,23 @@ function setConfiguredLabel(
     note,
     schema?.sensitivity ?? 'normal',
   )
+}
+
+function assertConfiguredLabelMutation(
+  config: KernelConfig,
+  entityId: string,
+  canonicalKey: string,
+  allowSetupOnly: boolean,
+  target: Entity | undefined,
+): void {
+  const schema = config.label_schemas?.find((candidate) => candidate.key === canonicalKey)
+  if (schema?.setup_only && !allowSetupOnly)
+    throw new Error(
+      `label key is setup-owned and cannot be written via LabelSet/LabelCleared: ${canonicalKey}`,
+    )
+  if (schema?.scopes && target && !schema.scopes.includes(target.kind))
+    throw new Error(`label ${canonicalKey} is not valid for ${target.kind}`)
+  if (!target) throw new Error(`unknown entity: ${entityId}`)
 }
 
 function configuredLabelKey(config: KernelConfig, key: string): string {

@@ -184,6 +184,16 @@ describe('room inventory', () => {
         profile.validation_view,
       ),
     ).toThrow(/setup-owned/)
+
+    expect(() =>
+      derive(
+        [
+          ...inventoryEvents,
+          event('LabelCleared', { entity_id: 'rm_1', key: 'number', value: null }, 5),
+        ],
+        profile.validation_view,
+      ),
+    ).toThrow(/setup-owned/)
   })
 
   test('loads module event types from KDL through the selected profile schemas', () => {
