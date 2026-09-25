@@ -210,25 +210,27 @@ function placeId(bedIdValue: string, index: number): string {
   return `plc_${bedIdValue.slice('bed_'.length)}_${index}`
 }
 
-function placeEntities(capability: ModuleFoldCapability, bedIdValue: string): void {
-  for (const place of capability.entities('place')) {
-    if (
-      capability
-        .labels(place.id)
-        .some((label) => label.key === locationKey && label.value === bedIdValue)
-    )
-      capability.retireEntity('place', place.id)
-  }
-}
-
-function addPlaces(
+function syncPlaces(
   capability: ModuleFoldCapability,
   eventSeq: number,
   bedIdValue: string,
-  sleeps: 1 | 2,
+  sleeps: 0 | 1 | 2,
 ): void {
+  const current = capability
+    .entities('place')
+    .filter((place) =>
+      capability
+        .labels(place.id)
+        .some((label) => label.key === locationKey && label.value === bedIdValue),
+    )
+  const desired = new Set(
+    Array.from({ length: sleeps }, (_, index) => placeId(bedIdValue, index + 1)),
+  )
+  for (const place of current)
+    if (!desired.has(place.id)) capability.retireEntity('place', place.id)
   for (let index = 1; index <= sleeps; index += 1) {
     const id = placeId(bedIdValue, index)
+    if (capability.findEntity('place', id)) continue
     capability.createEntity('place', id, eventSeq, index)
     capability.setLabel(id, locationKey, bedIdValue, null, null)
   }
@@ -499,7 +501,7 @@ export const roomInventory = defineModule({
             { key: 'bed-type', value: value.bed_type },
             { key: 'sleeps', value: value.sleeps },
           ])
-          addPlaces(capability, event.seq, value.bed_id, value.sleeps)
+          syncPlaces(capability, event.seq, value.bed_id, value.sleeps)
         },
       },
       {
@@ -509,7 +511,6 @@ export const roomInventory = defineModule({
         authorize: (principal) => principal.kind === 'organiser',
         fold: (capability, event) => {
           const value = event.payload as z.infer<typeof bedPayload>
-          placeEntities(capability, value.bed_id)
           capability.setSortKey('bed', value.bed_id, value.sort_key)
           setupLabels(capability, value.bed_id, [
             { key: locationKey, value: value.room_id },
@@ -517,7 +518,7 @@ export const roomInventory = defineModule({
             { key: 'bed-type', value: value.bed_type },
             { key: 'sleeps', value: value.sleeps },
           ])
-          addPlaces(capability, event.seq, value.bed_id, value.sleeps)
+          syncPlaces(capability, event.seq, value.bed_id, value.sleeps)
         },
       },
       {
@@ -527,7 +528,7 @@ export const roomInventory = defineModule({
         authorize: (principal) => principal.kind === 'organiser',
         fold: (capability, event) => {
           const value = event.payload as z.infer<typeof bedRemovedPayload>
-          placeEntities(capability, value.bed_id)
+          syncPlaces(capability, event.seq, value.bed_id, 0)
           capability.retireEntity('bed', value.bed_id)
         },
       },

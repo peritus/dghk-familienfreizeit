@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
-import { decimal, defineOccasionProfile, property } from '../../src/config/define.js'
+import { decimal, defineOccasionProfile, enumOf, property } from '../../src/config/define.js'
 import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import { assertAppendableWorld, derive } from '../../src/events/fold.js'
 import { loadKdl } from '../../src/events/kdl.js'
@@ -26,6 +26,12 @@ const profile = defineOccasionProfile({
       scopes: ['room'],
       value: decimal({ scale: 2 }),
       cardinality: 'exactly-one',
+      organiser_only: true,
+    }),
+    'place-note': property({
+      title: { de: 'Platznotiz', en: 'Place note' },
+      scopes: ['place'],
+      value: enumOf(['window']),
       organiser_only: true,
     }),
   },
@@ -178,6 +184,34 @@ describe('room inventory', () => {
     ]
     const summary = inventoryWorld(derive(updated, profile.validation_view))
     expect(summary.rooms[0]?.floor).toBeNull()
+  })
+
+  test('bed updates preserve labels on surviving stable places', () => {
+    const labelled = [
+      ...inventoryEvents,
+      event(
+        'LabelSet',
+        { entity_id: 'plc_1_1', key: 'place-note', value: 'window', strength: null, note: null },
+        5,
+      ),
+    ]
+    const updated = event(
+      'BedUpdated',
+      {
+        bed_id: 'bed_1',
+        room_id: 'rm_1',
+        label: '1-A',
+        bed_type: 'double',
+        sleeps: 2,
+        sort_key: 1,
+      },
+      6,
+    )
+    const world = derive([...labelled, updated], profile.validation_view)
+    expect(world.entities_by_kind.place?.map(({ id }) => id)).toEqual(['plc_1_1', 'plc_1_2'])
+    expect(world.labels_by_entity.plc_1_1).toContainEqual(
+      expect.objectContaining({ key: 'place-note', value: 'window' }),
+    )
   })
 
   test('rejects invalid parents, duplicate room numbers, and writes to setup labels', () => {
