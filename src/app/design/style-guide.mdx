@@ -1,0 +1,54 @@
+import { Canvas, Meta, Stories, Title } from '@storybook/addon-docs/blocks'
+import * as AlertStories from '../components/ui/alert.stories'
+import * as ButtonStories from '../components/ui/button.stories'
+import * as CardStories from '../components/ui/card.stories'
+import * as DialogStories from '../components/ui/alert-dialog.stories'
+import * as SegmentStories from '../components/ui/segmented-control.stories'
+
+<Meta title="Foundations/Style guide" />
+
+<Title>Familienfreizeit UI style guide</Title>
+
+This is the local visual contract for the React application. Stories are the
+executable examples; this page records the usage decisions around them.
+
+## How to choose a primitive
+
+- Use `Button` for an explicit action and give the action a result-oriented label.
+- Use `Card` to group related information, not to replace page hierarchy.
+- Use `Alert` for status and recovery information; include text, not only color.
+- Use `AlertDialog` before destructive or consequential actions.
+- Use `SegmentedControl` for a small visible choice set, not as a general select replacement.
+
+## Primary and secondary actions
+
+<Canvas of={ButtonStories.Variants} />
+
+The primary action is normally orange with a pressable offset shadow. Neutral actions
+are safe secondary actions. Danger actions are reserved for consequences the person
+should understand before confirming.
+
+## Information grouping
+
+<Canvas of={CardStories.Complete} />
+
+<Canvas of={AlertStories.Informational} />
+
+Cards should have a clear heading and supporting text. Alerts should state what
+happened and what the person can do next.
+
+## Consequential actions
+
+<Canvas of={DialogStories.DestructiveConfirmation} />
+
+The safe action remains visible, the destructive action names the consequence, and
+focus returns to the trigger when the dialog closes.
+
+## Choice controls
+
+<Canvas of={SegmentStories.Interactive} />
+
+Use a segmented control only when the options are few enough to compare at a glance.
+On narrow screens the options stack and retain their labels.
+
+<Stories includePrimary={false} />

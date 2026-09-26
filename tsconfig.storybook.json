@@ -7,5 +7,17 @@
     "baseUrl": ".",
     "paths": { "@/*": ["./src/app/*"] }
   },
-  "include": [".storybook/**/*.ts", ".storybook/**/*.tsx", "src/**/*.stories.tsx"]
+  "include": [
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    "src/app/**/*.ts",
+    "src/app/**/*.tsx",
+    "src/config/**/*.ts",
+    "src/events/fold.ts",
+    "src/events/resolver.ts",
+    "src/events/types.ts",
+    "src/events/world.ts",
+    "src/modules/**/*.ts",
+    "src/organiser/**/*.ts"
+  ]
 }
