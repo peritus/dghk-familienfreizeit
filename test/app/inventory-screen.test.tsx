@@ -209,6 +209,37 @@ test('adding a bunk bed shows the age hint and the Oben/Unten slots, and updates
   expect(screen.queryByText('Keine Betten')).toBeNull()
 }, 20000)
 
+test('room rows carry mobile field labels (visible only under the max-md breakpoint)', async () => {
+  const buildingEvent: Event = {
+    seq: 1,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'BuildingAdded',
+    payload: { building_id: 'bld_1', name: 'Haupthaus', sort_key: 1 },
+  }
+  const roomEvent: Event = {
+    seq: 2,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'RoomAdded',
+    payload: {
+      room_id: 'rm_1',
+      building_id: 'bld_1',
+      number: '101',
+      floor: 'ground',
+      room_type: 'standard',
+      sort_key: 1,
+    },
+  }
+  open([buildingEvent, roomEvent])
+
+  await screen.findByRole('button', { name: /101/ })
+  for (const label of ['Etage:', 'Typ:', 'Bad:', 'Betten:', 'Plätze:', 'Preis/Platz:'])
+    expect(screen.getByText(label)).toBeTruthy()
+}, 20000)
+
 test('a building with rooms explains inline why it cannot be removed, instead of a disabled button', async () => {
   const buildingEvent: Event = {
     seq: 1,

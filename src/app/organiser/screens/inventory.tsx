@@ -486,9 +486,9 @@ function BuildingSection({
       ) : (
         <Card className="bg-white p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left max-md:block">
               <caption className="sr-only">Zimmer in {building.name}</caption>
-              <thead className="border-b-2 border-black bg-paper">
+              <thead className="border-b-2 border-black bg-paper max-md:hidden">
                 <tr>
                   <th scope="col" className="p-3 font-bold">
                     Zimmer
@@ -513,7 +513,7 @@ function BuildingSection({
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="max-md:block">
                 {rooms.map((room) => {
                   const roomBeds = beds.filter((bed) => bed.room_id === room.id)
                   const open = openRooms[room.id] ?? false
@@ -673,8 +673,8 @@ function RoomRow({
 
   return (
     <>
-      <tr className="border-b border-black last:border-b-0">
-        <th scope="row" className="p-3 align-top font-normal">
+      <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+        <th scope="row" className="p-3 align-top font-normal max-md:block max-md:p-0">
           <button
             type="button"
             aria-expanded={open}
@@ -698,15 +698,24 @@ function RoomRow({
             </div>
           ) : null}
         </th>
-        <td className="p-3 align-top">
+        <td className="p-3 align-top max-md:block max-md:p-0 max-md:pt-2">
+          <span className="mr-2 font-bold md:hidden">Etage:</span>
           {floorless ? '–' : (floors.find(({ value }) => value === room.floor)?.label ?? '–')}
         </td>
-        <td className="p-3 align-top">
+        <td className="p-3 align-top max-md:block max-md:p-0 max-md:pt-2">
+          <span className="mr-2 font-bold md:hidden">Typ:</span>
           {roomTypes.find(({ value }) => value === room.room_type)?.label ?? room.room_type}
         </td>
-        <td className="p-3 align-top">{formatTrait('sanitary', room.traits.sanitary)}</td>
-        <td className="p-3 align-top">{bedSummary(beds, bedTypes)}</td>
-        <td className="p-3 text-right align-top font-bold tabular-nums">
+        <td className="p-3 align-top max-md:block max-md:p-0 max-md:pt-2">
+          <span className="mr-2 font-bold md:hidden">Bad:</span>
+          {formatTrait('sanitary', room.traits.sanitary)}
+        </td>
+        <td className="p-3 align-top max-md:block max-md:p-0 max-md:pt-2">
+          <span className="mr-2 font-bold md:hidden">Betten:</span>
+          {bedSummary(beds, bedTypes)}
+        </td>
+        <td className="p-3 text-right align-top font-bold tabular-nums max-md:block max-md:p-0 max-md:pt-2 max-md:text-left">
+          <span className="mr-2 font-normal md:hidden">Plätze:</span>
           {room.place_count === 0 ? (
             <span className="rounded-base border-2 border-black bg-main px-[7px] py-[1px] text-xs font-bold">
               Keine Betten
@@ -715,13 +724,17 @@ function RoomRow({
             room.place_count
           )}
         </td>
-        <td className="p-3 text-right align-top tabular-nums">
+        <td className="p-3 text-right align-top tabular-nums max-md:block max-md:p-0 max-md:pt-2 max-md:text-left">
+          <span className="mr-2 font-bold md:hidden">Preis/Platz:</span>
           {typeof price === 'number' ? formatEuro(price, 2) : '–'}
         </td>
       </tr>
       {open ? (
-        <tr id={detailId} className="border-b-2 border-t-2 border-black bg-paper">
-          <td colSpan={7} className="space-y-4 p-5 pl-[54px]">
+        <tr
+          id={detailId}
+          className="border-b-2 border-t-2 border-black bg-paper max-md:mb-3 max-md:block max-md:border-2"
+        >
+          <td colSpan={7} className="space-y-4 p-5 max-md:pl-5 md:pl-[54px]">
             <RoomDetail
               room={room}
               beds={beds}
