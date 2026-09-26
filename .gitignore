@@ -9,4 +9,5 @@ dist/
 coverage/
 test-results/
 playwright-report/
+storybook-static/
 *.tsbuildinfo

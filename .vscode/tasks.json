@@ -20,6 +20,16 @@
       "isBackground": true,
       "problemMatcher": [],
       "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "storybook",
+      "type": "process",
+      "command": "nix",
+      "args": ["develop", "--command", "sh", "-c", "npm ci && exec npm run storybook"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
     }
   ]
 }

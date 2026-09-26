@@ -23,6 +23,21 @@ cards and navigation links stay flat.
 The public family welcome view uses a responsive hero card with a clear
 registration status and a small inline drafting-compass illustration.
 
+## Local visual contract
+
+The repository-local [UI contract](storybook.md) is the visual workbench for
+components and screens. `src/app/design/style-guide.mdx` explains when to use a
+primitive and composes the executable stories with Storybook `Canvas`; the
+stories themselves render production React components. The coverage registry
+and Playwright snapshots cover every current component, application composition,
+and screen without requiring a hosted design tool or service.
+
+Use `nix develop -c npm run storybook` while developing. Before implementation,
+add or adjust the story and its usage guidance, then use
+`nix develop -c npm run test:storybook` as the drift check. Intentional visual
+changes require the explicit `test:storybook:update` command and a review of
+the committed PNG baseline.
+
 ## Save-status control
 
 The organiser app bar's save-status button (`src/app/organiser/save-status.tsx`)
