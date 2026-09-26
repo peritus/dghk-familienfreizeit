@@ -34,7 +34,6 @@ export function PlanInspection({ view = planFixture }: { view?: PlanView }) {
         <CardContent className="space-y-6">
           <MetaLine
             items={[
-              { label: 'Ereignisstand', value: String(view.summary.sequence) },
               { label: 'Erstellt', value: view.summary.created_at },
               {
                 label: 'Belegung',
@@ -75,13 +74,6 @@ export function PlanInspection({ view = planFixture }: { view?: PlanView }) {
                   <Badge>{trace.step}</Badge>
                 </div>
                 <p>{trace.text}</p>
-                {trace.terms ? (
-                  <p className="text-sm text-muted">
-                    {trace.terms
-                      .map((term) => `${term.label} ${term.value > 0 ? '+' : ''}${term.value}`)
-                      .join(' · ')}
-                  </p>
-                ) : null}
               </CardContent>
             </Card>
           ))}
@@ -206,7 +198,6 @@ function PlanHeader({ plan, label }: { plan: PlanDiffView['before']; label: stri
         <StatusBadge status={plan.status} />
         <MetaLine
           items={[
-            { label: 'Stand', value: String(plan.sequence) },
             { label: 'Belegung', value: `${plan.placements} Familien` },
             { label: 'Offen', value: String(plan.unplaced) },
           ]}

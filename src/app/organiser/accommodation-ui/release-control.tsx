@@ -186,8 +186,6 @@ export function CommunicationReview({
         <CardContent className="space-y-6">
           <MetaLine
             items={[
-              { label: 'Geprüfter Stand', value: String(view.reviewed_sequence) },
-              { label: 'Profil', value: view.build_label },
               {
                 label: 'E-Mail',
                 value: notify ? `${view.notification_count} Empfänger` : 'Nicht ausgewählt',
@@ -289,7 +287,6 @@ export function CommunicationHistory({
                       {entry.communicated_at} · {entry.actor}
                     </p>
                   </div>
-                  <Badge>Stand {entry.sequence}</Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

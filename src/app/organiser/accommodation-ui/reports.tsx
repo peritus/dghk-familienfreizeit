@@ -29,7 +29,6 @@ export function AssignmentReports({ view = reportFixture }: { view?: AssignmentR
         <MetaLine
           items={[
             { label: 'Erstellt', value: view.generated_at },
-            { label: 'Ereignisstand', value: String(view.sequence) },
             { label: 'Geltungsbereich', value: 'Unterkunft' },
           ]}
         />

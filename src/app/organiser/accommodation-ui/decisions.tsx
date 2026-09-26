@@ -17,6 +17,12 @@ import { decisionFixture } from './fixtures.js'
 import { FindingCard, ScreenFrame, SectionHeading } from './components.js'
 import type { DecisionScreenView } from './types.js'
 
+const decisionKindLabel = {
+  requirement: 'Anforderung',
+  feature: 'Merkmal',
+  separation: 'Trennung',
+} as const
+
 export function OrganiserDecisions({ view = decisionFixture }: { view?: DecisionScreenView }) {
   const [filter, setFilter] = useState('all')
   const [addOpen, setAddOpen] = useState(false)
@@ -52,8 +58,8 @@ export function OrganiserDecisions({ view = decisionFixture }: { view?: Decision
 
       <section className="space-y-4">
         <SectionHeading
-          title="Resolver-Funde"
-          detail="Regeln bleiben fest; Werte und Entscheidungen sind prüfbar."
+          title="Hinweise zur Platzierung"
+          detail="Diese Punkte brauchen eine bewusste Entscheidung."
         />
         <Tabs
           label="Hinweise filtern"
@@ -103,7 +109,7 @@ export function OrganiserDecisions({ view = decisionFixture }: { view?: Decision
                     </Badge>
                   </div>
                   <p className="text-lg">
-                    {decision.direction} = <span className="font-bold">{decision.value}</span>
+                    {decisionKindLabel[decision.kind]}: <span className="font-bold">{decision.value}</span>
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -115,9 +121,6 @@ export function OrganiserDecisions({ view = decisionFixture }: { view?: Decision
                       {decision.author} · {decision.recorded_at}
                     </span>
                     <div className="flex gap-2">
-                      <Button variant="neutral" size="sm">
-                        Inspect
-                      </Button>
                       <Button variant="danger" size="sm" onClick={() => setClearId(decision.id)}>
                         Entscheidung löschen
                       </Button>
@@ -167,7 +170,7 @@ function DecisionDialog({ onClose }: { onClose: () => void }) {
               Neue Entscheidung
             </p>
             <h2 id="decision-dialog-title" className="mt-1 text-2xl">
-              Resolver-Wert hinzufügen
+              Neue Angabe hinzufügen
             </h2>
           </div>
           <Button variant="neutral" size="icon-sm" onClick={onClose} aria-label="Dialog schließen">
@@ -189,13 +192,14 @@ function DecisionDialog({ onClose }: { onClose: () => void }) {
             />
           </label>
           <label className="grid gap-1 font-bold">
-            Mechanismus
+            Art der Angabe
             <select
               className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
-              defaultValue="needs"
+              defaultValue="requirement"
             >
-              <option value="needs">needs / provides</option>
-              <option value="separates">separates-from</option>
+              <option value="requirement">Anforderung</option>
+              <option value="feature">Merkmal eines Raums</option>
+              <option value="separation">Trennung</option>
             </select>
           </label>
           <label className="grid gap-1 font-bold">

@@ -3,7 +3,6 @@ import { Button } from '../../components/ui/button.js'
 import { Tabs } from '../../components/ui/tabs.js'
 import { accommodationBoardFixture } from './fixtures.js'
 import {
-  DraftBar,
   FamilyCard,
   MetricsStrip,
   MoveRoomDialog,
@@ -17,13 +16,9 @@ import type { BoardView, FamilyView, RoomView } from './types.js'
 export function AssignmentBoard({
   view = accommodationBoardFixture,
   onMove,
-  onApply,
-  onDiscard,
 }: {
   view?: BoardView
   onMove?: (family: FamilyView, room: RoomView) => void
-  onApply?: () => void
-  onDiscard?: () => void
 }) {
   const [buildingId, setBuildingId] = useState(view.buildings[0]?.id ?? '')
   const [expandedRoom, setExpandedRoom] = useState<string | null>(null)
@@ -46,7 +41,6 @@ export function AssignmentBoard({
           { value: 5, label: 'Familien' },
           { value: 3, label: 'Platziert' },
           { value: 2, label: 'Offen', tone: 'attention' },
-          { value: view.sequence, label: 'Ereignisstand' },
         ]}
       />
 
@@ -126,13 +120,6 @@ export function AssignmentBoard({
           }}
         />
       ) : null}
-
-      <DraftBar
-        count={view.draft_changes.length}
-        changes={view.draft_changes}
-        onApply={onApply}
-        onDiscard={onDiscard}
-      />
     </ScreenFrame>
   )
 }

@@ -127,7 +127,6 @@ const findingRequirement: FindingView = {
 }
 
 export const accommodationBoardFixture: BoardView = {
-  sequence: 1482,
   buildings: [
     { id: 'building-main', name: 'Haupthaus', rooms: [room12, room14, room16] },
     { id: 'building-garden', name: 'Gartenhaus', rooms: [garden3] },
@@ -144,11 +143,6 @@ export const accommodationBoardFixture: BoardView = {
         step: 'Belegung behalten',
         subject: 'Familie Morgan',
         text: 'Zimmer 12 bleibt ein gültiger Platz.',
-        score: 18,
-        terms: [
-          { label: 'Exakter Fit', value: 10 },
-          { label: 'Eingangsnähe', value: 8 },
-        ],
       },
     ],
     'family-braun': [
@@ -164,11 +158,6 @@ export const accommodationBoardFixture: BoardView = {
       },
     ],
   },
-  draft_changes: [
-    { id: 'draft-1', summary: 'Braun → Zimmer 14', detail: 'Manuelle Platzierungsentscheidung' },
-    { id: 'draft-2', summary: 'Zimmer 14: Ruhezone', detail: 'Zusätzliche Entscheidung' },
-    { id: 'draft-3', summary: 'Lang → Prüfung', detail: 'Anforderung aktualisiert' },
-  ],
 }
 
 export const decisionFixture: DecisionScreenView = {
@@ -177,7 +166,7 @@ export const decisionFixture: DecisionScreenView = {
     {
       id: 'decision-1',
       holder: 'Familie Morgan',
-      direction: 'needs',
+      kind: 'requirement',
       value: 'Nähe zum Eingang',
       strength: 'required',
       note: 'Kurzer Weg für Jamie.',
@@ -187,7 +176,7 @@ export const decisionFixture: DecisionScreenView = {
     {
       id: 'decision-2',
       holder: 'Zimmer 12',
-      direction: 'provides',
+      kind: 'feature',
       value: 'Nähe zum Eingang',
       strength: 'required',
       author: 'Systemprofil',
@@ -196,7 +185,7 @@ export const decisionFixture: DecisionScreenView = {
     {
       id: 'decision-3',
       holder: 'Familie Rivera',
-      direction: 'separates',
+      kind: 'separation',
       value: 'Familie Morgan',
       strength: 'preferred',
       note: 'Wunsch der Familien, kein harter Ausschluss.',
@@ -209,7 +198,6 @@ export const decisionFixture: DecisionScreenView = {
 const currentPlan = {
   id: 'plan-current',
   label: 'Aktueller Belegungsplan',
-  sequence: 1482,
   created_at: 'Heute · 10:42',
   placements: 3,
   unplaced: 2,
@@ -221,7 +209,6 @@ const currentPlan = {
 const reviewPlan = {
   id: 'plan-review',
   label: 'Vorschlag nach Entscheidungen',
-  sequence: 1474,
   created_at: 'Heute · 09:18',
   placements: 4,
   unplaced: 1,
@@ -238,11 +225,6 @@ export const planFixture: PlanView = {
       step: 'Belegung behalten',
       subject: 'Familie Morgan',
       text: 'Die bisherige Belegung bleibt gültig und wird zuerst behalten.',
-      score: 18,
-      terms: [
-        { label: 'Exakter Fit', value: 10 },
-        { label: 'Eingangsnähe', value: 8 },
-      ],
     },
     {
       step: 'Nicht platziert',
@@ -289,7 +271,6 @@ export const planDiffFixture: PlanDiffView = {
 
 export const reportFixture: AssignmentReportView = {
   generated_at: 'Heute · 10:42',
-  sequence: 1482,
   total_families: 5,
   placed_families: 3,
   unplaced_families: 2,
@@ -380,8 +361,6 @@ export const communicationReviewFixture: CommunicationReviewView = {
   ],
   affected_families: ['Familie Morgan', 'Familie Braun', 'Familie Lang'],
   dependencies: [],
-  reviewed_sequence: 1482,
-  build_label: 'Profilstand · bestätigt',
   notification_count: 3,
 }
 
@@ -390,7 +369,6 @@ export const communicationHistoryFixture: readonly CommunicationEntryView[] = [
     id: 'communication-1',
     communicated_at: '12. April · 15:40',
     actor: 'Anna Keller',
-    sequence: 1398,
     scopes: ['Unterkunft'],
     note: 'Erste Unterkunftsmitteilung',
     differences: [
@@ -406,7 +384,6 @@ export const communicationHistoryFixture: readonly CommunicationEntryView[] = [
     id: 'communication-2',
     communicated_at: '10. April · 11:20',
     actor: 'Anna Keller',
-    sequence: 1371,
     scopes: ['Töpfern · Details'],
     differences: [{ label: 'Raum', before: 'Werkraum', after: 'Atelier 2', kind: 'changed' }],
   },

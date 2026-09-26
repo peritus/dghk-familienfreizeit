@@ -52,30 +52,20 @@ export type TraceView = {
   step: string
   subject: string
   text: string
-  score?: number
-  terms?: readonly { label: string; value: number }[]
   rejected?: readonly { room: string; reason: string }[]
 }
 
-export type DraftChangeView = {
-  id: string
-  summary: string
-  detail: string
-}
-
 export type BoardView = {
-  sequence: number
   buildings: readonly BuildingView[]
   unplaced: readonly FamilyView[]
   unplaced_reasons: Readonly<Record<string, string>>
   traces: Readonly<Record<string, readonly TraceView[]>>
-  draft_changes: readonly DraftChangeView[]
 }
 
 export type DecisionView = {
   id: string
   holder: string
-  direction: 'needs' | 'provides' | 'separates'
+  kind: 'requirement' | 'feature' | 'separation'
   value: string
   strength: 'required' | 'preferred'
   note?: string
@@ -91,7 +81,6 @@ export type DecisionScreenView = {
 export type PlanSummaryView = {
   id: string
   label: string
-  sequence: number
   created_at: string
   placements: number
   unplaced: number
@@ -135,7 +124,6 @@ export type ReportRoomView = {
 
 export type AssignmentReportView = {
   generated_at: string
-  sequence: number
   total_families: number
   placed_families: number
   unplaced_families: number
@@ -168,8 +156,6 @@ export type CommunicationReviewView = {
   differences: readonly CommunicationDiffView[]
   affected_families: readonly string[]
   dependencies: readonly FindingView[]
-  reviewed_sequence: number
-  build_label: string
   notification_count: number
 }
 
@@ -177,7 +163,6 @@ export type CommunicationEntryView = {
   id: string
   communicated_at: string
   actor: string
-  sequence: number
   scopes: readonly string[]
   note?: string
   differences: readonly CommunicationDiffView[]

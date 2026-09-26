@@ -276,16 +276,8 @@ export function TracePanel({ traces }: { traces: readonly TraceView[] }) {
         <div key={`${trace.subject}-${index}`} className="border-l-4 border-black pl-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="font-bold">{trace.step}</p>
-            {trace.score === undefined ? null : <Badge>Bewertung {trace.score}</Badge>}
           </div>
           <p>{trace.text}</p>
-          {trace.terms ? (
-            <p className="mt-1 text-sm text-muted">
-              {trace.terms
-                .map((term) => `${term.label} ${term.value > 0 ? '+' : ''}${term.value}`)
-                .join(' · ')}
-            </p>
-          ) : null}
           {trace.rejected ? (
             <ul className="mt-2 space-y-1 text-sm">
               {trace.rejected.map((item) => (
