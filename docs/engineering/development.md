@@ -9,6 +9,7 @@ discoverable by `station task list`:
 |---|---|
 | `ci` | Installs the lockfile, checks types and lint, runs tests, builds both runtimes, verifies shipped assets and bundle boundaries |
 | `dev-preview` | Installs the lockfile, starts Vite with the local Worker, local D1 and browser hot reload |
+| `storybook` | Installs the lockfile, starts the repository-local Storybook workbench on port 6006 |
 
 Both use the repository's `nix develop` shell. With Node 22.12+ (22.x) already
 available, the equivalent commands are `npm ci && npm run ci` and
@@ -43,6 +44,9 @@ Task definitions are provided without launching either Station task.
 ## Dev preview
 
 In VS Code, **Tasks: Run Task → dev-preview** defaults to `127.0.0.1:5173`.
+**Tasks: Run Task → storybook** starts the local visual workbench at
+`127.0.0.1:6006`; it is also discoverable by `station task list` and uses the
+same Nix-backed process definition.
 An occupied port fails instead of silently choosing another. A Station launch
 can allocate a port on the host's Tailscale IP and allow its exact DNS name:
 
