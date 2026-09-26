@@ -29,6 +29,12 @@ parallel. Use `npm run test:browser:headed` for interactive debugging. Do not
 run this command concurrently with `dev-preview` in the same directory unless
 the existing server is the intended target.
 
+To work on the local component and screen contract, use
+`nix develop --command npm run storybook`. It starts Storybook on port 6006 and
+reads only repository files. `npm run test:storybook` checks the coverage index
+and visual baselines; `npm run test:storybook:update` records an intentional
+visual change after review. No account, hosted service, or MCP server is needed.
+
 The [GitHub workflow](../../.github/workflows/ci.yml) runs the same `npm run ci` target
 on pushes, pull requests and manual dispatch. It requires no Cloudflare credentials
 and does not deploy. Its first GitHub execution is left to the repository owner.

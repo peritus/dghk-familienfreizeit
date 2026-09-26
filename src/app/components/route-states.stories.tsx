@@ -6,7 +6,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Route states give every navigation boundary a recoverable, accessible response. Loading must not look like empty data; errors must offer recovery without exposing exception details.',
+        component:
+          'Route states give every navigation boundary a recoverable, accessible response. Loading must not look like empty data; errors must offer recovery without exposing exception details.',
       },
     },
   },
@@ -16,5 +17,13 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Loading: Story = { render: () => <RouteLoading /> }
+
 export const NotFoundState: Story = { render: () => <NotFound /> }
-export const HealthyBoundary: Story = { render: () => <RouteBoundary reset_key="storybook"><p className="p-6">Geschützter Inhalt</p></RouteBoundary> }
+
+export const HealthyBoundary: Story = {
+  render: () => (
+    <RouteBoundary reset_key="storybook">
+      <p className="p-6">Geschützter Inhalt</p>
+    </RouteBoundary>
+  ),
+}

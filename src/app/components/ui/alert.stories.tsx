@@ -18,9 +18,19 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Informational: Story = {
-  render: () => <Alert><AlertTitle>Alles gespeichert</AlertTitle><AlertDescription>Die Änderung ist für das ganze Team sichtbar.</AlertDescription></Alert>,
+  render: () => (
+    <Alert>
+      <AlertTitle>Alles gespeichert</AlertTitle>
+      <AlertDescription>Die Änderung ist für das ganze Team sichtbar.</AlertDescription>
+    </Alert>
+  ),
 }
 
 export const Destructive: Story = {
-  render: () => <Alert variant="destructive"><AlertTitle>Speichern fehlgeschlagen</AlertTitle><AlertDescription>Prüfe die Verbindung und versuche es erneut.</AlertDescription></Alert>,
+  render: () => (
+    <Alert variant="destructive">
+      <AlertTitle>Speichern fehlgeschlagen</AlertTitle>
+      <AlertDescription>Prüfe die Verbindung und versuche es erneut.</AlertDescription>
+    </Alert>
+  ),
 }

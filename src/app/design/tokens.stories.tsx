@@ -16,13 +16,22 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-function TokenGroup({ group, tokens }: { group: string; tokens: readonly { name: string; cssVariable: string; use: string }[] }) {
+function TokenGroup({
+  group,
+  tokens,
+}: {
+  group: string
+  tokens: readonly { name: string; cssVariable: string; use: string }[]
+}) {
   return (
     <section className="space-y-3">
       <h2 className="text-xl font-heading capitalize">{group}</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {tokens.map((token) => (
-          <article key={token.name} className="rounded-base border-2 border-black bg-white p-4 shadow-shadow">
+          <article
+            key={token.name}
+            className="rounded-base border-2 border-black bg-white p-4 shadow-shadow"
+          >
             <div
               className="mb-3 h-16 rounded-base border-2 border-black"
               style={{
@@ -49,11 +58,14 @@ function TokenGroup({ group, tokens }: { group: string; tokens: readonly { name:
 export const Catalog: Story = {
   render: () => (
     <div className="space-y-8 bg-background p-6 text-foreground sm:p-10">
-      {(Object.entries(designTokens) as [string, readonly { name: string; cssVariable: string; use: string }[]][]).map(
-        ([group, tokens]) => (
-          <TokenGroup key={group} group={group} tokens={tokens} />
-        ),
-      )}
+      {(
+        Object.entries(designTokens) as [
+          string,
+          readonly { name: string; cssVariable: string; use: string }[],
+        ][]
+      ).map(([group, tokens]) => (
+        <TokenGroup key={group} group={group} tokens={tokens} />
+      ))}
     </div>
   ),
 }

@@ -8,7 +8,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Use SegmentedControl for four or fewer visible choices where comparing the options helps. It is not a general replacement for a select.',
+        component:
+          'Use SegmentedControl for four or fewer visible choices where comparing the options helps. It is not a general replacement for a select.',
       },
     },
   },
@@ -26,10 +27,35 @@ type Story = StoryObj<typeof meta>
 export const Interactive: Story = {
   render: function Render() {
     const [value, setValue] = useState('single')
-    return <div className="max-w-md bg-background p-6"><SegmentedControl label="Bettart" value={value} onChange={setValue} options={[{ value: 'single', label: 'Einzelbett' }, { value: 'double', label: 'Doppelbett' }, { value: 'bunk', label: 'Etagenbett' }]} /></div>
+    return (
+      <div className="max-w-md bg-background p-6">
+        <SegmentedControl
+          label="Bettart"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: 'single', label: 'Einzelbett' },
+            { value: 'double', label: 'Doppelbett' },
+            { value: 'bunk', label: 'Etagenbett' },
+          ]}
+        />
+      </div>
+    )
   },
 }
 
 export const Narrow: Story = {
-  render: () => <div className="max-w-xs bg-background p-6"><SegmentedControl label="Schlafraum" value="one" onChange={() => undefined} options={[{ value: 'one', label: 'Einer' }, { value: 'two', label: 'Zweiter' }]} /></div>,
+  render: () => (
+    <div className="max-w-xs bg-background p-6">
+      <SegmentedControl
+        label="Schlafraum"
+        value="one"
+        onChange={() => undefined}
+        options={[
+          { value: 'one', label: 'Einer' },
+          { value: 'two', label: 'Zweiter' },
+        ]}
+      />
+    </div>
+  ),
 }

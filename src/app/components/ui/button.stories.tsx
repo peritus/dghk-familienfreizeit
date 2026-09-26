@@ -13,8 +13,14 @@ const meta = {
     },
   },
   argTypes: {
-    variant: { control: 'select', options: ['default', 'noShadow', 'neutral', 'danger', 'reverse'] },
-    size: { control: 'select', options: ['default', 'xs', 'sm', 'lg', 'icon', 'icon-xs', 'icon-sm', 'icon-lg'] },
+    variant: {
+      control: 'select',
+      options: ['default', 'noShadow', 'neutral', 'danger', 'reverse'],
+    },
+    size: {
+      control: 'select',
+      options: ['default', 'xs', 'sm', 'lg', 'icon', 'icon-xs', 'icon-sm', 'icon-lg'],
+    },
   },
 } satisfies Meta<typeof Button>
 
@@ -41,8 +47,12 @@ export const Sizes: Story = {
       <Button size="xs">Klein</Button>
       <Button size="sm">Normal</Button>
       <Button size="lg">Groß</Button>
-      <Button size="icon" aria-label="Prüfen">✓</Button>
-      <Button size="icon-sm" aria-label="Mehr">⋯</Button>
+      <Button size="icon" aria-label="Prüfen">
+        ✓
+      </Button>
+      <Button size="icon-sm" aria-label="Mehr">
+        ⋯
+      </Button>
     </div>
   ),
 }

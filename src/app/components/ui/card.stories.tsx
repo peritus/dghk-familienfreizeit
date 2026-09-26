@@ -1,6 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './button'
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './card'
 
 const meta = {
   title: 'UI/Card',
@@ -25,15 +33,28 @@ export const Complete: Story = {
         <CardHeader>
           <CardTitle>Familie Weber</CardTitle>
           <CardDescription>Vier Personen · noch nicht veröffentlicht</CardDescription>
-          <CardAction><Button size="sm" variant="neutral">Öffnen</Button></CardAction>
+          <CardAction>
+            <Button size="sm" variant="neutral">
+              Öffnen
+            </Button>
+          </CardAction>
         </CardHeader>
-        <CardContent><p>Die Familie hat zwei Zimmerwünsche angegeben.</p></CardContent>
-        <CardFooter className="border-t-2 border-black"><span className="text-sm text-muted">Zuletzt geändert heute</span></CardFooter>
+        <CardContent>
+          <p>Die Familie hat zwei Zimmerwünsche angegeben.</p>
+        </CardContent>
+        <CardFooter className="border-t-2 border-black">
+          <span className="text-sm text-muted">Zuletzt geändert heute</span>
+        </CardFooter>
       </Card>
     </div>
   ),
 }
 
 export const Compact: Story = {
-  render: () => <Card size="sm" className="max-w-sm bg-white p-4"><CardTitle>Kleine Zusammenfassung</CardTitle><CardContent className="px-0 pt-3">Weniger Abstand für dichte Übersichten.</CardContent></Card>,
+  render: () => (
+    <Card size="sm" className="max-w-sm bg-white p-4">
+      <CardTitle>Kleine Zusammenfassung</CardTitle>
+      <CardContent className="px-0 pt-3">Weniger Abstand für dichte Übersichten.</CardContent>
+    </Card>
+  ),
 }

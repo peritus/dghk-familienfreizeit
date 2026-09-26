@@ -21,7 +21,9 @@
     "test:build": "node --test test/build/*.test.mjs",
     "test:browser": "playwright test",
     "test:browser:headed": "playwright test --headed",
-    "ci": "npm run format:check && npm run test:docs && npm run typecheck && npm run lint && npm test && npm run build && npm run test:build && npm run test:browser",
+    "test:storybook": "playwright test -c playwright.storybook.config.ts",
+    "test:storybook:update": "playwright test -c playwright.storybook.config.ts --update-snapshots",
+    "ci": "npm run format:check && npm run test:docs && npm run typecheck && npm run lint && npm test && npm run build && npm run storybook:build && npm run test:storybook && npm run test:build && npm run test:browser",
     "check:docs": "node scripts/check-doc-links.mjs",
     "test:docs": "node --test test/docs/*.test.mjs && npm run check:docs"
   },

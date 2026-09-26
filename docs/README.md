@@ -15,6 +15,7 @@ are separate claims and require separate evidence.
 - [Organiser view](application/organiser-view.md): authenticated organiser host, family surfaces and draft changes.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.
 - [Design system](ui/design-system.md): copied primitives and shell styling.
+- [Local UI contract](ui/storybook.md): Storybook, Markdown guidance, coverage, and visual baselines.
 - [Development](engineering/development.md): installation, CI and local preview.
 - [Testing](engineering/testing.md): checks and verification limits.
 - [Documentation workflow](engineering/documentation.md): maintaining this split.

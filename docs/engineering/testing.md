@@ -14,7 +14,9 @@
 5. One Vite build producing `dist/client` and `dist/dghk_familienfreizeit`.
 6. Tests of the emitted Worker, D1, SPA navigation and assets in Miniflare;
    negative lint-rule tests; emitted chunk-graph isolation and gzip budgets.
-7. A Playwright Chromium route and link suite against the local Vite/Worker
+7. A repository-local Storybook index and Playwright visual suite covering every
+   current component, application composition, and screen.
+8. A Playwright Chromium route and link suite against the local Vite/Worker
    preview.
 
 The browser entry's **entire static import closure**, including shared chunks,
@@ -70,6 +72,20 @@ the check for real lazy-chunk navigation.
 When adding an organiser route, add its definition and route builder first, use
 the builder from the screen, and add the direct and linked navigation cases to
 the browser route suite in the same change.
+
+## Storybook visual contract
+
+`npm run storybook:build` verifies that the local Storybook documentation and
+stories compile. `npm run test:storybook` starts Storybook locally and runs
+`test/storybook/style-guide.spec.ts`: it resolves every entry in
+`src/app/design/ui-coverage.ts` and compares every current component,
+application composition, and screen with its committed Playwright PNG. The
+Nix development shell supplies Chromium, so this gate remains local and needs
+no hosted visual-regression account or MCP service.
+
+Use `npm run test:storybook:update` only after reviewing an intentional visual
+change. The style-guide MDX page documents why/when decisions; the TypeScript
+stories and snapshots verify what the browser actually renders.
 
 ## Organiser local-first coverage
 

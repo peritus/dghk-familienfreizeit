@@ -7,7 +7,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Use the drafting compass as the family welcome illustration. It is decorative when paired with a visible heading.',
+        component:
+          'Use the drafting compass as the family welcome illustration. It is decorative when paired with a visible heading.',
       },
     },
   },
@@ -17,5 +18,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const WelcomeIllustration: Story = {
-  render: () => <div className="bg-background p-10"><DraftingCompassIcon aria-hidden="true" className="size-32 stroke-[1.5]" /></div>,
+  render: () => (
+    <div className="bg-background p-10">
+      <DraftingCompassIcon aria-hidden="true" className="size-32 stroke-[1.5]" />
+    </div>
+  ),
 }

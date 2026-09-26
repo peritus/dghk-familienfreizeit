@@ -31,5 +31,6 @@ export const designTokens = {
 
 export type DesignTokenGroup = keyof typeof designTokens
 
-export const tokenCssVariable = (variable: (typeof designTokens)[DesignTokenGroup][number]['cssVariable']) =>
-  `var(${variable})`
+export const tokenCssVariable = (
+  variable: (typeof designTokens)[DesignTokenGroup][number]['cssVariable'],
+) => `var(${variable})`
