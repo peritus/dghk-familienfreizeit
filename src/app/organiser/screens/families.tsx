@@ -64,7 +64,7 @@ export function Families() {
       <div className="rounded border-2 border-black bg-white shadow-shadow">
         <form id="invite-family-form" noValidate onSubmit={invite} />
         <table className="w-full text-left max-md:block">
-          <caption className="p-4 text-left font-bold">Familien im aktuellen Ereignisstand</caption>
+          <caption className="p-4 text-left font-bold">Alle Familien</caption>
           <thead className="border-y-2 border-black max-md:hidden">
             <tr>
               <th scope="col" className="p-3">

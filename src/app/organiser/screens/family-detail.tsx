@@ -3,9 +3,19 @@ import { Link } from 'wouter'
 import type { EventDraft } from '../../../events/types.js'
 import { materializeDraftEvents } from '../state.js'
 import { Button } from '../../components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog.js'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
-import { eventTypeLabel, findFamily, labelValue } from '../family-data.js'
+import { findFamily, labelValue } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 
 function makePersonId(givenName: string): string {
@@ -32,6 +42,8 @@ function PersonEditor({
   onStage: (event: EventDraft) => void
   onDelete: () => void
 }) {
+  const [editing, setEditing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [givenName, setGivenName] = useState(initialGivenName)
   const [familyName, setFamilyName] = useState(initialFamilyName)
   const [role, setRole] = useState(initialRole)
@@ -52,9 +64,56 @@ function PersonEditor({
         role,
       },
     })
+    setEditing(false)
   }
 
   const formId = `person-form-${personId}`
+
+  if (!editing) {
+    return (
+      <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+        <th scope="row" className="p-3 font-bold max-md:block max-md:p-0">
+          <span className="mr-2 md:hidden">Vorname:</span>
+          {givenName}
+        </th>
+        <td className="p-3 max-md:block max-md:p-0 max-md:pt-2">
+          <span className="mr-2 font-bold md:hidden">Nachname:</span>
+          {familyName}
+        </td>
+        <td className="p-3 max-md:block max-md:p-0 max-md:pt-2">
+          <span className="mr-2 font-bold md:hidden">Rolle:</span>
+          {role === 'child' ? 'Kind' : role === 'infant' ? 'Baby' : 'Erwachsene(r)'}
+        </td>
+        <td className="p-3 max-md:block max-md:p-0 max-md:pt-2">
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="neutral" size="sm" onClick={() => setEditing(true)}>
+              Bearbeiten
+            </Button>
+            <Button type="button" variant="neutral" size="sm" onClick={() => setConfirmDelete(true)}>
+              Entfernen
+            </Button>
+          </div>
+          <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {givenName} {familyName} entfernen?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Die Person wird aus dieser Familie entfernt. Diese Änderung lässt sich nicht über
+                  die Familienansicht rückgängig machen.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel autoFocus>Behalten</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>Ja, entfernen</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </td>
+      </tr>
+    )
+  }
 
   return (
     <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
@@ -103,11 +162,11 @@ function PersonEditor({
       </td>
       <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
         <div className="flex flex-wrap gap-2">
-          <Button form={formId} type="submit" variant="neutral" size="sm">
-            Speichern
+          <Button form={formId} type="submit" size="sm">
+            Person übernehmen
           </Button>
-          <Button type="button" variant="neutral" size="sm" onClick={onDelete}>
-            Löschen
+          <Button type="button" variant="neutral" size="sm" onClick={() => setEditing(false)}>
+            Abbrechen
           </Button>
         </div>
       </td>
@@ -288,22 +347,20 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
       </Card>
       <Card className="bg-white">
         <CardHeader>
-          <h3 className="text-xl">Ereignisverlauf</h3>
+          <h3 className="text-xl">Änderungen</h3>
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <p>Noch kein Verlauf verfügbar.</p>
+            <p>Noch keine Änderungen.</p>
           ) : (
             <ol className="space-y-3">
               {history.map((event) => (
                 <li key={event.seq} className="border-l-4 border-black pl-3">
-                  <p className="font-bold">{eventTypeLabel(event.type)}</p>
+                  <p className="font-bold">{changeSummary(event.type)}</p>
                   {draftSeqs.has(event.seq) ? (
-                    <p className="text-sm font-bold">Noch nicht angewendet</p>
+                    <p className="text-sm font-bold">Noch nicht gespeichert</p>
                   ) : null}
-                  <p className="text-sm">
-                    #{event.seq} · {event.actor} · {event.at}
-                  </p>
+                  <p className="text-sm">{event.actor} · {formatChangeDate(event.at)}</p>
                 </li>
               ))}
             </ol>
@@ -312,4 +369,25 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
       </Card>
     </div>
   )
+}
+
+function changeSummary(type: string): string {
+  switch (type) {
+    case 'FamilyInvited':
+      return 'Familie eingeladen'
+    case 'PersonAdded':
+      return 'Person hinzugefügt'
+    case 'PersonUpdated':
+      return 'Person geändert'
+    case 'PersonWithdrawn':
+      return 'Person entfernt'
+    default:
+      return 'Angabe geändert'
+  }
+}
+
+function formatChangeDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.valueOf())) return value
+  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
 }

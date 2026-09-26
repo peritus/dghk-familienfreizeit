@@ -101,7 +101,7 @@ export default function OrganiserApp() {
     } catch {
       return {
         world: null,
-        error: 'Die Änderungsentwürfe ergeben noch keinen gültigen Ereignisstand.',
+        error: 'Die geplanten Änderungen können so nicht geprüft werden.',
       }
     }
   }, [state])

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 import { App } from '../../src/app/app'
 import { RouteBoundary, RouteLoading } from '../../src/app/components/route-states'
@@ -123,7 +123,7 @@ test('the organiser nav is labelled for assistive tech and the inventory page se
   open('/organiser/inventory')
   expect(await screen.findByRole('heading', { name: 'Unterkunft' })).toBeTruthy()
   expect(screen.getByRole('navigation', { name: 'Hauptnavigation' })).toBeTruthy()
-  expect(document.title).toBe('Unterkunft · Familienfreizeit')
+  await waitFor(() => expect(document.title).toBe('Unterkunft · Familienfreizeit'))
 })
 
 test('a failed organiser log load shows a load error, not a save error', async () => {
@@ -293,7 +293,7 @@ test('family history includes staged events before they are applied', async () =
   fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
   fireEvent.click(screen.getByRole('button', { name: 'Neue Person hinzufügen' }))
 
-  expect(await screen.findByText('Noch nicht angewendet')).toBeTruthy()
+  expect(await screen.findByText('Noch nicht gespeichert')).toBeTruthy()
   expect(screen.getByText('Person hinzugefügt')).toBeTruthy()
 })
 
@@ -350,11 +350,14 @@ test('family links use an opaque route ID and open the matching detail view', as
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
+  expect(screen.getAllByRole('combobox')).toHaveLength(1)
+  expect(screen.getByText('Familie eingeladen')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Entfernen' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten' }))
   expect(screen.getAllByRole('combobox')).toHaveLength(2)
   expect((screen.getAllByRole('combobox')[1] as HTMLSelectElement).value).toBe('adult')
-  expect(screen.getByText('Familie eingeladen')).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Speichern' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Löschen' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Person übernehmen' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Abbrechen' })).toBeTruthy()
 })
 
 test('families keeps manual invitation without a bulk-import surface', async () => {

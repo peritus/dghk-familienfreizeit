@@ -107,7 +107,7 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         head_seq: state.head_seq + action.events.length,
         change_mode: 'drafting',
         status: 'stale_head',
-        error: 'Der Ereignisstand hat sich geändert. Prüfe Deine Änderungsentwürfe.',
+        error: 'Die gemeinsamen Daten haben sich geändert. Prüfe Deine Änderungsentwürfe.',
       }
     case 'failed':
       return {

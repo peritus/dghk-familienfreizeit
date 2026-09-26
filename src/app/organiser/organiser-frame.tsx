@@ -89,7 +89,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
       </header>
       {state.error && state.status !== 'ready' && state.status !== 'applying' ? (
         <Alert role="alert" className="mx-auto mt-6 max-w-5xl bg-white">
-          <AlertTitle>Änderungsstand prüfen</AlertTitle>
+          <AlertTitle>Änderungen prüfen</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       ) : null}
