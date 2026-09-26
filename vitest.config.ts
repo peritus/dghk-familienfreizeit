@@ -27,7 +27,10 @@ export default mergeConfig(
         },
         {
           extends: true,
-          test: { name: 'kernel', include: ['test/events/**/*.test.ts', 'test/solver/**/*.test.ts'] },
+          test: {
+            name: 'kernel',
+            include: ['test/events/**/*.test.ts', 'test/solver/**/*.test.ts'],
+          },
         },
         {
           extends: true,

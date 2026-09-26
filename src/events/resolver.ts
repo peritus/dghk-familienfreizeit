@@ -14,6 +14,19 @@ export type ResolvedConstraint = {
   set_seq: number
 }
 
+export type ResolvedRequirement = {
+  trait_key: string
+  holder_id: string
+  capability_key: string | null
+  kind: 'profile-requirement' | 'generic-needs' | 'relation' | 'structural'
+  structural: string | null
+  value: string | null
+  strength: 'required' | 'preferred' | null
+  weight: number | null
+  penalty: number | null
+  set_seq: number
+}
+
 export type ResolvedCapability = {
   entity_id: string
   key: string
@@ -42,6 +55,7 @@ export function resolve(
       labelsByEntity.set(label.entity_id, []).get(label.entity_id)!
     ).push(label)
   const constraints: ResolvedConstraint[] = []
+  const requirements: ResolvedRequirement[] = []
   const capabilities: ResolvedCapability[] = []
   const diagnostics: Diagnostic[] = []
   const descriptors = new Map<string, ResolverDescriptor>(
@@ -124,6 +138,47 @@ export function resolve(
             strength: label.strength,
             set_seq: label.set_seq,
           })
+        if (typeof label.value === 'string') {
+          if (descriptor?.kind === 'requirement')
+            requirements.push({
+              trait_key: label.key,
+              holder_id: label.entity_id,
+              capability_key: descriptor.satisfied_by ?? label.value,
+              kind: descriptor.structural ? 'structural' : 'profile-requirement',
+              structural: descriptor.structural ?? null,
+              value: label.value,
+              strength: label.strength,
+              weight: descriptor.weight ?? null,
+              penalty: descriptor.penalty ?? null,
+              set_seq: label.set_seq,
+            })
+          else if (label.key === 'needs')
+            requirements.push({
+              trait_key: label.key,
+              holder_id: label.entity_id,
+              capability_key: label.value,
+              kind: 'generic-needs',
+              structural: null,
+              value: label.value,
+              strength: label.strength,
+              weight: null,
+              penalty: null,
+              set_seq: label.set_seq,
+            })
+          else if (operator === 'groups-with' || operator === 'separates-from')
+            requirements.push({
+              trait_key: label.key,
+              holder_id: label.entity_id,
+              capability_key: null,
+              kind: 'relation',
+              structural: null,
+              value: label.value,
+              strength: label.strength,
+              weight: descriptor?.weight ?? null,
+              penalty: descriptor?.penalty ?? null,
+              set_seq: label.set_seq,
+            })
+        }
         if (referencesEntity(operator, label.key, label.value) && !entityById.has(label.value))
           diagnostics.push(
             diagnostic(
@@ -200,6 +255,13 @@ export function resolve(
         a.holder_id.localeCompare(b.holder_id) ||
         a.key.localeCompare(b.key) ||
         a.value.localeCompare(b.value),
+    ),
+    requirements: requirements.sort(
+      (a, b) =>
+        a.set_seq - b.set_seq ||
+        a.holder_id.localeCompare(b.holder_id) ||
+        a.trait_key.localeCompare(b.trait_key) ||
+        (a.value ?? '').localeCompare(b.value ?? ''),
     ),
     capabilities: capabilities.sort(
       (a, b) =>

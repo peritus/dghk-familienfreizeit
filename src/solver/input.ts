@@ -1,6 +1,7 @@
 import { canonicalJson, type JsonValue } from '../events/types.js'
 import type { KernelWorld } from '../events/fold.js'
 import type {
+  Plan,
   SolverContributions,
   SolverFamily,
   SolverInput,
@@ -11,6 +12,7 @@ import type {
 export function buildSolverInput(
   world: KernelWorld,
   contributions: SolverContributions = {},
+  previousPlan: Plan | null = null,
 ): SolverInput {
   const familyIds = new Set(world.families.map(({ id }) => id))
   const persons = world.persons
@@ -22,12 +24,15 @@ export function buildSolverInput(
     })
     .filter((person): person is SolverPerson => person !== null)
   const personsByFamily = new Map<string, string[]>()
-  for (const person of persons) (personsByFamily.get(person.family_id) ?? personsByFamily.set(person.family_id, []).get(person.family_id)!).push(person.id)
+  for (const person of persons)
+    (
+      personsByFamily.get(person.family_id) ??
+      personsByFamily.set(person.family_id, []).get(person.family_id)!
+    ).push(person.id)
   const families: SolverFamily[] = world.families.map((family) => ({
     ...family,
-    person_ids: freezeSorted(
-      personsByFamily.get(family.id) ?? [],
-      (left, right) => left.localeCompare(right),
+    person_ids: freezeSorted(personsByFamily.get(family.id) ?? [], (left, right) =>
+      left.localeCompare(right),
     ),
   }))
   const labels: SolverLabel[] = world.labels.map((label) => ({
@@ -52,8 +57,9 @@ export function buildSolverInput(
   return {
     input_seq: world.head_seq,
     families: freezeSorted(families, compareEntity),
-    persons: freezeSorted(persons, (left, right) =>
-      left.family_id.localeCompare(right.family_id) || compareEntity(left, right),
+    persons: freezeSorted(
+      persons,
+      (left, right) => left.family_id.localeCompare(right.family_id) || compareEntity(left, right),
     ),
     labels: freezeSorted(labels, compareLabel),
     capabilities,
@@ -65,7 +71,9 @@ export function buildSolverInput(
         left.key.localeCompare(right.key) ||
         left.value.localeCompare(right.value),
     ),
+    requirements: world.requirements.map((requirement) => ({ ...requirement })),
     module_inputs: Object.freeze(moduleInputs),
+    previous_plan: previousPlan,
   }
 }
 
@@ -73,7 +81,10 @@ function labelValue(world: KernelWorld, entityId: string, key: string): JsonValu
   return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
 }
 
-function compareEntity(left: { sort_key: number; id: string }, right: { sort_key: number; id: string }): number {
+function compareEntity(
+  left: { sort_key: number; id: string },
+  right: { sort_key: number; id: string },
+): number {
   return left.sort_key - right.sort_key || left.id.localeCompare(right.id)
 }
 
@@ -87,6 +98,9 @@ function compareLabel(left: SolverLabel, right: SolverLabel): number {
   )
 }
 
-function freezeSorted<T>(items: readonly T[], compare: (left: T, right: T) => number): readonly T[] {
+function freezeSorted<T>(
+  items: readonly T[],
+  compare: (left: T, right: T) => number,
+): readonly T[] {
   return Object.freeze(items.slice().sort(compare))
 }

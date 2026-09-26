@@ -12,7 +12,12 @@ import {
   type LabelSet,
   type PersonWithdrawn,
 } from './types.js'
-import { resolve, type Diagnostic, type ResolvedConstraint } from './resolver.js'
+import {
+  resolve,
+  type Diagnostic,
+  type ResolvedConstraint,
+  type ResolvedRequirement,
+} from './resolver.js'
 import type { ResolvedCapability } from './resolver.js'
 
 /** Written only by FamilyInvited/FamilyEmailChanged/PersonAdded/PersonUpdated; LabelSet/LabelCleared reject them. */
@@ -66,6 +71,7 @@ export type KernelWorld = {
   labels_by_entity: Readonly<Record<string, readonly Label[]>>
   labels_by_key: Readonly<Record<string, readonly Label[]>>
   constraints: readonly ResolvedConstraint[]
+  requirements: readonly ResolvedRequirement[]
   capabilities: readonly ResolvedCapability[]
   diagnostics: readonly Diagnostic[]
   summaries: Readonly<Record<string, unknown>>
@@ -195,7 +201,16 @@ export type LabelSchema = {
   }) => boolean | string | Readonly<Record<string, string>>
 }
 
-export type ResolverDescriptor = { key: string; operator: string; scopes: readonly EntityKind[] }
+export type ResolverDescriptor = {
+  key: string
+  operator: string
+  scopes: readonly EntityKind[]
+  kind?: 'requirement' | 'relation' | 'ordered-choice'
+  satisfied_by?: string
+  structural?: string
+  weight?: number
+  penalty?: number
+}
 
 export type CapabilityDescriptor = {
   key: string
@@ -350,6 +365,7 @@ function worldFromState(state: MutableWorld, config: KernelConfig): KernelWorld 
     labels_by_entity: indexLabels(labels, (label) => label.entity_id),
     labels_by_key: indexLabels(labels, (label) => label.key),
     constraints: resolved.constraints,
+    requirements: resolved.requirements,
     capabilities: resolved.capabilities,
     diagnostics: resolved.diagnostics,
     summaries: {},

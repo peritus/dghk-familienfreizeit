@@ -11,12 +11,7 @@ import {
   type WorldSummaryDefinition,
 } from '../events/fold.js'
 import { kernelEventTypes, kernelPayloadSchemas, type JsonValue } from '../events/types.js'
-import type {
-  PreflightCheck,
-  Rule,
-  SolverInputContribution,
-  SolverStage,
-} from '../solver/types.js'
+import type { PreflightCheck, Rule, SolverInputContribution, SolverStage } from '../solver/types.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -69,6 +64,7 @@ export type RequirementTrait = TraitBase & {
   structural?: string
   strengths?: readonly ('required' | 'preferred')[]
   weight?: number
+  penalty?: number
 }
 
 export type RelationTrait = TraitBase & {
@@ -76,6 +72,8 @@ export type RelationTrait = TraitBase & {
   operator: 'groups-with' | 'separates-from'
   target: readonly string[]
   strengths?: readonly ('required' | 'preferred')[]
+  weight?: number
+  penalty?: number
 }
 
 export type OrderedChoiceTrait = TraitBase & { kind: 'ordered-choice'; per: string; choice: string }
@@ -263,6 +261,15 @@ function validateTraits(traits: Record<string, Trait>, meta: ProfileMeta): void 
       if (trait.satisfied_by && traits[trait.satisfied_by]?.kind !== 'capability')
         throw new Error(`requirement ${key} needs a capability`)
     }
+    for (const [name, value] of [
+      ['weight', 'weight' in trait ? trait.weight : undefined],
+      ['penalty', 'penalty' in trait ? trait.penalty : undefined],
+    ] as const) {
+      if (value !== undefined && (!Number.isInteger(value) || (name === 'penalty' && value > 0)))
+        throw new Error(
+          `trait ${key} ${name} must be an integer${name === 'penalty' ? ' <= 0' : ''}`,
+        )
+    }
     if (trait.kind === 'property' && trait.copy && trait.value.kind !== 'enum')
       throw new Error(`trait ${key} copy requires enum value`)
     if (trait.organiser_only && trait.family_writable)
@@ -300,14 +307,10 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
     }
   }
   duplicate(
-    modules.flatMap(
-      (module) => module.contributions.stages?.map(({ id }) => `stage:${id}`) ?? [],
-    ),
+    modules.flatMap((module) => module.contributions.stages?.map(({ id }) => `stage:${id}`) ?? []),
   )
   duplicate(
-    modules.flatMap(
-      (module) => module.contributions.rules?.map(({ id }) => `rule:${id}`) ?? [],
-    ),
+    modules.flatMap((module) => module.contributions.rules?.map(({ id }) => `rule:${id}`) ?? []),
   )
   duplicate(
     modules.flatMap(
@@ -415,6 +418,14 @@ function validationView(
       key,
       operator: trait.kind === 'relation' ? trait.operator : trait.kind,
       scopes: trait.scopes,
+      kind:
+        trait.kind === 'requirement' || trait.kind === 'relation' || trait.kind === 'ordered-choice'
+          ? trait.kind
+          : undefined,
+      satisfied_by: trait.kind === 'requirement' ? trait.satisfied_by : undefined,
+      structural: trait.kind === 'requirement' ? trait.structural : undefined,
+      weight: 'weight' in trait ? trait.weight : undefined,
+      penalty: 'penalty' in trait ? trait.penalty : undefined,
     }))
   const capabilityDescriptors = Object.entries(traits).flatMap(([key, trait]) =>
     trait.kind === 'capability' ? [{ key, scopes: trait.scopes, derive: trait.derive }] : [],

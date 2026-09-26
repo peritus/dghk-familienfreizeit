@@ -42,11 +42,9 @@ test('orders dependencies, ignores missing optional references, and rejects cycl
     reads,
     run: () => ({ output: id, trace: [], diagnostics: [] }),
   })
-  expect(orderStages([make('b', ['a']), make('a'), make('c', ['missing'])]).map(({ id }) => id)).toEqual([
-    'a',
-    'b',
-    'c',
-  ])
+  expect(
+    orderStages([make('b', ['a']), make('a'), make('c', ['missing'])]).map(({ id }) => id),
+  ).toEqual(['a', 'b', 'c'])
   expect(() => orderStages([make('a', ['b']), make('b', ['a'])])).toThrow(/cycle/)
 })
 
@@ -64,16 +62,20 @@ test('runs preflight checks and stages in deterministic order', () => {
       ],
     }),
   }
-  const plan = solve(input(), {
-    preflight_checks: [
-      {
-        id: 'fixture.check',
-        severity: 'error',
-        run: () => [{ check: 'fixture.check', severity: 'error', subjects: ['z'], text: 'bad' }],
-      },
-    ],
-    stages: [stage],
-  }, config)
+  const plan = solve(
+    input(),
+    {
+      preflight_checks: [
+        {
+          id: 'fixture.check',
+          severity: 'error',
+          run: () => [{ check: 'fixture.check', severity: 'error', subjects: ['z'], text: 'bad' }],
+        },
+      ],
+      stages: [stage],
+    },
+    config,
+  )
   expect(plan.sections).toEqual({ fixture: { ok: true } })
   expect(plan.preflight.map(({ check }) => check)).toEqual(['fixture.check', 'fixture.stage'])
   expect(plan.trace[0]?.text).toBe('done')

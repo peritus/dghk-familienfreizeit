@@ -84,6 +84,9 @@ function project(
     constraints: world.constraints.filter((constraint) =>
       entities.some((entity) => entity.id === constraint.holder_id),
     ),
+    requirements: world.requirements.filter((requirement) =>
+      entities.some((entity) => entity.id === requirement.holder_id),
+    ),
     capabilities: world.capabilities.filter((capability) =>
       entities.some((entity) => entity.id === capability.entity_id),
     ),

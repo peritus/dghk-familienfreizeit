@@ -1,4 +1,5 @@
 import type { Entity, KernelWorld } from '../events/fold.js'
+import type { ResolvedRequirement } from '../events/resolver.js'
 import type { JsonValue } from '../events/types.js'
 
 export type SolverLabel = {
@@ -31,7 +32,9 @@ export type SolverInput = Readonly<{
     strength: 'required' | 'preferred' | null
     set_seq: number
   }[]
+  requirements: readonly ResolvedRequirement[]
   module_inputs: Readonly<Record<string, unknown>>
+  previous_plan?: Plan | null
 }>
 
 export type SolverConfig = Readonly<{
@@ -83,8 +86,8 @@ export type SolverStage<Output = unknown> = {
 
 export type Rule<Candidate = unknown, Target = unknown, Context = unknown> = {
   id: string
-  evaluate: (candidate: Candidate, target: Target, context: Context) => number | 'infeasible'
-  describe: (candidate: Candidate, target: Target, context: Context) => string | null
+  evaluate(candidate: Candidate, target: Target, context: Context): number | 'infeasible'
+  describe(candidate: Candidate, target: Target, context: Context): string | null
 }
 
 export type PreflightCheck = {
