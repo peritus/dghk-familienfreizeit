@@ -1,9 +1,10 @@
 import type { Entity, KernelWorld } from '../events/fold.js'
+import type { JsonValue } from '../events/types.js'
 
 export type SolverLabel = {
   entity_id: string
   key: string
-  value: unknown
+  value: JsonValue
   strength: 'required' | 'preferred' | null
   set_seq: number
 }

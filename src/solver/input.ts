@@ -1,0 +1,92 @@
+import { canonicalJson, type JsonValue } from '../events/types.js'
+import type { KernelWorld } from '../events/fold.js'
+import type {
+  SolverContributions,
+  SolverFamily,
+  SolverInput,
+  SolverLabel,
+  SolverPerson,
+} from './types.js'
+
+export function buildSolverInput(
+  world: KernelWorld,
+  contributions: SolverContributions = {},
+): SolverInput {
+  const familyIds = new Set(world.families.map(({ id }) => id))
+  const persons = world.persons
+    .map((person): SolverPerson | null => {
+      const familyId = labelValue(world, person.id, 'member-of')
+      return typeof familyId === 'string' && familyIds.has(familyId)
+        ? { ...person, family_id: familyId }
+        : null
+    })
+    .filter((person): person is SolverPerson => person !== null)
+  const personsByFamily = new Map<string, string[]>()
+  for (const person of persons) (personsByFamily.get(person.family_id) ?? personsByFamily.set(person.family_id, []).get(person.family_id)!).push(person.id)
+  const families: SolverFamily[] = world.families.map((family) => ({
+    ...family,
+    person_ids: freezeSorted(
+      personsByFamily.get(family.id) ?? [],
+      (left, right) => left.localeCompare(right),
+    ),
+  }))
+  const labels: SolverLabel[] = world.labels.map((label) => ({
+    entity_id: label.entity_id,
+    key: label.key,
+    value: label.value,
+    strength: label.strength,
+    set_seq: label.set_seq,
+  }))
+  const capabilities = new Map<string, ReadonlySet<string>>()
+  for (const capability of world.capabilities) {
+    const values = new Set(capabilities.get(capability.entity_id) ?? [])
+    values.add(capability.key)
+    capabilities.set(capability.entity_id, Object.freeze(values))
+  }
+  const moduleInputs = Object.fromEntries(
+    (contributions.solver_input ?? [])
+      .slice()
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .map((contribution) => [contribution.id, contribution.build(world)]),
+  )
+  return {
+    input_seq: world.head_seq,
+    families: freezeSorted(families, compareEntity),
+    persons: freezeSorted(persons, (left, right) =>
+      left.family_id.localeCompare(right.family_id) || compareEntity(left, right),
+    ),
+    labels: freezeSorted(labels, compareLabel),
+    capabilities,
+    constraints: freezeSorted(
+      world.constraints.map((constraint) => ({ ...constraint })),
+      (left, right) =>
+        left.set_seq - right.set_seq ||
+        left.holder_id.localeCompare(right.holder_id) ||
+        left.key.localeCompare(right.key) ||
+        left.value.localeCompare(right.value),
+    ),
+    module_inputs: Object.freeze(moduleInputs),
+  }
+}
+
+function labelValue(world: KernelWorld, entityId: string, key: string): JsonValue | undefined {
+  return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
+}
+
+function compareEntity(left: { sort_key: number; id: string }, right: { sort_key: number; id: string }): number {
+  return left.sort_key - right.sort_key || left.id.localeCompare(right.id)
+}
+
+function compareLabel(left: SolverLabel, right: SolverLabel): number {
+  return (
+    left.entity_id.localeCompare(right.entity_id) ||
+    left.key.localeCompare(right.key) ||
+    canonicalJson(left.value).localeCompare(canonicalJson(right.value)) ||
+    (left.strength ?? '').localeCompare(right.strength ?? '') ||
+    left.set_seq - right.set_seq
+  )
+}
+
+function freezeSorted<T>(items: readonly T[], compare: (left: T, right: T) => number): readonly T[] {
+  return Object.freeze(items.slice().sort(compare))
+}
