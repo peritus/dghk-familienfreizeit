@@ -8,7 +8,8 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'The decision screen makes resolver findings actionable while keeping mechanism, strength, note, author, and time visible to organisers.',
+        component:
+          'The decision screen makes resolver findings actionable while keeping mechanism, strength, note, author, and time visible to organisers.',
       },
     },
   },
@@ -21,7 +22,6 @@ export const FindingsAndDecisions: Story = {}
 
 export const AddDecision: Story = {
   play: async ({ canvas }) => {
-    await canvas.getByRole('button', { name: 'Entscheidung hinzufügen' }).first().click()
+    await canvas.getAllByRole('button', { name: 'Entscheidung hinzufügen' })[0]?.click()
   },
 }
-

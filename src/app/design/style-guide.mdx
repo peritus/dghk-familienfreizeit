@@ -4,6 +4,8 @@ import * as ButtonStories from '../components/ui/button.stories'
 import * as CardStories from '../components/ui/card.stories'
 import * as DialogStories from '../components/ui/alert-dialog.stories'
 import * as SegmentStories from '../components/ui/segmented-control.stories'
+import * as BadgeStories from '../components/ui/badge.stories'
+import * as TabsStories from '../components/ui/tabs.stories'
 
 <Meta title="Foundations/Style guide" />
 
@@ -47,6 +49,15 @@ focus returns to the trigger when the dialog closes.
 ## Choice controls
 
 <Canvas of={SegmentStories.Interactive} />
+
+## Status and context navigation
+
+Use a text badge for compact state labels and tabs for a small set of sibling
+views sharing one context. Text remains present when color changes.
+
+<Canvas of={BadgeStories.Statuses} />
+
+<Canvas of={TabsStories.Buildings} />
 
 Use a segmented control only when the options are few enough to compare at a glance.
 On narrow screens the options stack and retain their labels.

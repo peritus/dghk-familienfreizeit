@@ -2,15 +2,15 @@ import type { ReactNode } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert.js'
 import { Badge } from '../../components/ui/badge.js'
 import { Button } from '../../components/ui/button.js'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card.js'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card.js'
 import { cn } from '../../lib/utils.js'
-import type {
-  FamilyView,
-  FindingView,
-  RoomView,
-  StatusLabel,
-  TraceView,
-} from './types.js'
+import type { FamilyView, FindingView, RoomView, StatusLabel, TraceView } from './types.js'
 
 const severityTone = {
   error: 'danger',
@@ -41,7 +41,9 @@ export function ScreenFrame({
     <div className="space-y-8 pb-24">
       <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-black pb-6">
         <div className="max-w-3xl space-y-2">
-          {eyebrow ? <p className="text-sm font-bold uppercase tracking-[0.16em] text-muted">{eyebrow}</p> : null}
+          {eyebrow ? (
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-muted">{eyebrow}</p>
+          ) : null}
           <h1 className="text-3xl leading-tight sm:text-5xl">{title}</h1>
           {description ? <p className="max-w-2xl text-lg text-muted">{description}</p> : null}
         </div>
@@ -86,7 +88,9 @@ export function MetricsStrip({
       <div className="grid grid-cols-2 divide-y-2 divide-black sm:grid-cols-4 sm:divide-x-2 sm:divide-y-0">
         {items.map((item) => (
           <div key={item.label} className="p-4 text-center">
-            <p className={cn('text-4xl leading-none', item.tone === 'attention' && 'text-main')}>{item.value}</p>
+            <p className={cn('text-4xl leading-none', item.tone === 'attention' && 'text-main')}>
+              {item.value}
+            </p>
             <p className="mt-2 font-bold">{item.label}</p>
           </div>
         ))}
@@ -104,10 +108,16 @@ export function FindingCard({ finding }: { finding: FindingView }) {
           <h3 className="text-lg">{finding.title}</h3>
           <p className="mt-1 text-muted">{finding.description}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {finding.subjects.map((subject) => <Badge key={subject}>{subject}</Badge>)}
+            {finding.subjects.map((subject) => (
+              <Badge key={subject}>{subject}</Badge>
+            ))}
           </div>
         </div>
-        {finding.action ? <Button variant="neutral" size="sm">{finding.action}</Button> : null}
+        {finding.action ? (
+          <Button variant="neutral" size="sm">
+            {finding.action}
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   )
@@ -129,7 +139,11 @@ export function FindingsList({
           <AlertDescription>Für diesen Bereich ist aktuell nichts zu prüfen.</AlertDescription>
         </Alert>
       ) : (
-        <div className="grid gap-3">{findings.map((finding) => <FindingCard key={finding.id} finding={finding} />)}</div>
+        <div className="grid gap-3">
+          {findings.map((finding) => (
+            <FindingCard key={finding.id} finding={finding} />
+          ))}
+        </div>
       )}
     </section>
   )
@@ -150,15 +164,24 @@ export function FamilyCard({
     <Card className="bg-white">
       <CardHeader>
         <CardTitle className="text-xl">{family.name}</CardTitle>
-        <CardDescription>{family.people.length} {family.people.length === 1 ? 'Person' : 'Personen'} · {family.requirements.join(' · ')}</CardDescription>
+        <CardDescription>
+          {family.people.length} {family.people.length === 1 ? 'Person' : 'Personen'} ·{' '}
+          {family.requirements.join(' · ')}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-2">
           {family.status ? <StatusBadge status={family.status} /> : null}
-          {family.people.map((person) => <Badge key={person.id}>{person.name}</Badge>)}
+          {family.people.map((person) => (
+            <Badge key={person.id}>{person.name}</Badge>
+          ))}
         </div>
         {reason ? <p className="border-l-4 border-danger pl-3 text-sm">{reason}</p> : null}
-        {action && onAction ? <Button variant="neutral" size="sm" onClick={onAction}>{action}</Button> : null}
+        {action && onAction ? (
+          <Button variant="neutral" size="sm" onClick={onAction}>
+            {action}
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   )
@@ -177,35 +200,62 @@ export function RoomCard({
 }) {
   const free = room.capacity - room.occupied
   return (
-    <Card className={cn('bg-white p-0', room.state === 'infeasible' && 'border-danger bg-danger/10')}>
+    <Card
+      className={cn('bg-white p-0', room.state === 'infeasible' && 'border-danger bg-danger/10')}
+    >
       <CardHeader className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="text-xl">{room.name}</CardTitle>
-            <CardDescription>{room.floor} · {room.occupied} / {room.capacity} Plätze</CardDescription>
+            <CardDescription>
+              {room.floor} · {room.occupied} / {room.capacity} Plätze
+            </CardDescription>
           </div>
-          <Badge tone={room.state === 'infeasible' ? 'danger' : room.state === 'available' ? 'success' : 'neutral'}>
+          <Badge
+            tone={
+              room.state === 'infeasible'
+                ? 'danger'
+                : room.state === 'available'
+                  ? 'success'
+                  : 'neutral'
+            }
+          >
             {room.state === 'infeasible' ? 'Nicht möglich' : free === 0 ? 'Voll' : `${free} frei`}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 px-5 pb-5">
         <div className="flex flex-wrap gap-2">
-          {room.capabilities.map((capability) => <Badge key={capability}>{capability}</Badge>)}
+          {room.capabilities.map((capability) => (
+            <Badge key={capability}>{capability}</Badge>
+          ))}
         </div>
         {room.occupants.length > 0 ? (
           <div className="space-y-2">
             <p className="text-sm font-bold uppercase tracking-wide text-muted">Belegung</p>
             {room.occupants.map((family) => (
-              <div key={family.id} className="flex items-center justify-between gap-2 border-l-4 border-black pl-3">
+              <div
+                key={family.id}
+                className="flex items-center justify-between gap-2 border-l-4 border-black pl-3"
+              >
                 <span className="font-bold">{family.name}</span>
                 <span className="text-sm text-muted">{family.people.length} Personen</span>
               </div>
             ))}
           </div>
-        ) : <p className="text-muted">Noch keine Familie zugeordnet.</p>}
-        {room.reasons?.map((reason) => <p key={reason} className="border-l-4 border-danger pl-3 text-sm">{reason}</p>)}
-        {room.softNotes?.map((note) => <p key={note} className="text-sm text-muted">{note}</p>)}
+        ) : (
+          <p className="text-muted">Noch keine Familie zugeordnet.</p>
+        )}
+        {room.reasons?.map((reason) => (
+          <p key={reason} className="border-l-4 border-danger pl-3 text-sm">
+            {reason}
+          </p>
+        ))}
+        {room.soft_notes?.map((note) => (
+          <p key={note} className="text-sm text-muted">
+            {note}
+          </p>
+        ))}
         <div className="flex flex-wrap gap-2 border-t-2 border-black pt-4">
           <Button variant="neutral" size="sm" onClick={onToggle} aria-expanded={expanded}>
             {expanded ? 'Erklärung schließen' : 'Erklärung öffnen'}
@@ -229,10 +279,20 @@ export function TracePanel({ traces }: { traces: readonly TraceView[] }) {
             {trace.score === undefined ? null : <Badge>Bewertung {trace.score}</Badge>}
           </div>
           <p>{trace.text}</p>
-          {trace.terms ? <p className="mt-1 text-sm text-muted">{trace.terms.map((term) => `${term.label} ${term.value > 0 ? '+' : ''}${term.value}`).join(' · ')}</p> : null}
+          {trace.terms ? (
+            <p className="mt-1 text-sm text-muted">
+              {trace.terms
+                .map((term) => `${term.label} ${term.value > 0 ? '+' : ''}${term.value}`)
+                .join(' · ')}
+            </p>
+          ) : null}
           {trace.rejected ? (
             <ul className="mt-2 space-y-1 text-sm">
-              {trace.rejected.map((item) => <li key={item.room}><span className="font-bold">{item.room}:</span> {item.reason}</li>)}
+              {trace.rejected.map((item) => (
+                <li key={item.room}>
+                  <span className="font-bold">{item.room}:</span> {item.reason}
+                </li>
+              ))}
             </ul>
           ) : null}
         </div>
@@ -253,15 +313,24 @@ export function DraftBar({
   onApply?: () => void
 }) {
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-black bg-black p-3 text-white shadow-[0_-4px_0_0_var(--main)] sm:p-4" aria-label="Änderungsentwürfe">
+    <aside
+      className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-black bg-black p-3 text-white shadow-[0_-4px_0_0_var(--main)] sm:p-4"
+      aria-label="Änderungsentwürfe"
+    >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="font-bold">{count} Änderungsentwürfe</p>
-          <p className="truncate text-sm text-white/80">{changes.map((change) => change.summary).join(' · ')}</p>
+          <p className="truncate text-sm text-white/80">
+            {changes.map((change) => change.summary).join(' · ')}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="neutral" size="sm" onClick={onDiscard}>Entwürfe verwerfen</Button>
-          <Button size="sm" onClick={onApply}>Entwürfe anwenden</Button>
+          <Button variant="neutral" size="sm" onClick={onDiscard}>
+            Entwürfe verwerfen
+          </Button>
+          <Button size="sm" onClick={onApply}>
+            Entwürfe anwenden
+          </Button>
         </div>
       </div>
     </aside>
@@ -280,15 +349,28 @@ export function MoveRoomDialog({
   onConfirm: (room: RoomView) => void
 }) {
   return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/40 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="move-room-title">
+    <div
+      className="fixed inset-0 z-30 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="move-room-title"
+    >
       <div className="w-full max-w-xl rounded-base border-2 border-black bg-white p-6 shadow-shadow">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-muted">Familie verschieben</p>
-            <h2 id="move-room-title" className="mt-1 text-2xl">{family.name}</h2>
-            <p className="mt-1 text-muted">Wähle einen Raum. Unmögliche Räume bleiben sichtbar und erklären den Ausschluss.</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-muted">
+              Familie verschieben
+            </p>
+            <h2 id="move-room-title" className="mt-1 text-2xl">
+              {family.name}
+            </h2>
+            <p className="mt-1 text-muted">
+              Wähle einen Raum. Unmögliche Räume bleiben sichtbar und erklären den Ausschluss.
+            </p>
           </div>
-          <Button variant="neutral" size="icon-sm" onClick={onClose} aria-label="Dialog schließen">×</Button>
+          <Button variant="neutral" size="icon-sm" onClick={onClose} aria-label="Dialog schließen">
+            ×
+          </Button>
         </div>
         <div className="mt-6 grid gap-3">
           {rooms.map((room) => {
@@ -299,30 +381,37 @@ export function MoveRoomDialog({
                 type="button"
                 disabled={disabled}
                 onClick={() => onConfirm(room)}
-                className={cn('rounded-base border-2 border-black p-4 text-left', disabled ? 'cursor-not-allowed bg-secondary-background text-muted' : 'bg-white hover:bg-main')}
+                className={cn(
+                  'rounded-base border-2 border-black p-4 text-left',
+                  disabled
+                    ? 'cursor-not-allowed bg-secondary-background text-muted'
+                    : 'bg-white hover:bg-main',
+                )}
               >
                 <span className="flex items-center justify-between gap-3 font-bold">
                   <span>{room.name}</span>
-                  <span>{disabled ? 'Nicht möglich' : `${room.capacity - room.occupied} frei`}</span>
+                  <span>
+                    {disabled ? 'Nicht möglich' : `${room.capacity - room.occupied} frei`}
+                  </span>
                 </span>
-                <span className="mt-1 block text-sm">{disabled ? room.reasons?.join(' ') : room.capabilities.join(' · ')}</span>
+                <span className="mt-1 block text-sm">
+                  {disabled ? room.reasons?.join(' ') : room.capabilities.join(' · ')}
+                </span>
               </button>
             )
           })}
         </div>
         <div className="mt-6 flex justify-end">
-          <Button variant="neutral" onClick={onClose}>Abbrechen</Button>
+          <Button variant="neutral" onClick={onClose}>
+            Abbrechen
+          </Button>
         </div>
       </div>
     </div>
   )
 }
 
-export function MetaLine({
-  items,
-}: {
-  items: readonly { label: string; value: string }[]
-}) {
+export function MetaLine({ items }: { items: readonly { label: string; value: string }[] }) {
   return (
     <dl className="grid gap-3 sm:grid-cols-3">
       {items.map((item) => (
@@ -339,7 +428,12 @@ export function ComparisonTable({
   rows,
   caption = 'Vorher-Nachher-Vergleich',
 }: {
-  rows: readonly { label: string; before: string; after: string; kind?: 'changed' | 'added' | 'removed' }[]
+  rows: readonly {
+    label: string
+    before: string
+    after: string
+    kind?: 'changed' | 'added' | 'removed'
+  }[]
   caption?: string
 }) {
   return (
@@ -348,17 +442,33 @@ export function ComparisonTable({
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-black text-white">
           <tr>
-            <th scope="col" className="p-3">Feld</th>
-            <th scope="col" className="p-3">Vorher</th>
-            <th scope="col" className="p-3">Nachher</th>
+            <th scope="col" className="p-3">
+              Feld
+            </th>
+            <th scope="col" className="p-3">
+              Vorher
+            </th>
+            <th scope="col" className="p-3">
+              Nachher
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y-2 divide-black">
           {rows.map((row) => (
             <tr key={row.label}>
-              <th scope="row" className="p-3 font-bold">{row.label}</th>
+              <th scope="row" className="p-3 font-bold">
+                {row.label}
+              </th>
               <td className={cn('p-3', row.kind === 'removed' && 'bg-danger/20')}>{row.before}</td>
-              <td className={cn('p-3', row.kind === 'changed' && 'bg-main/20', row.kind === 'added' && 'bg-main/20')}>{row.after}</td>
+              <td
+                className={cn(
+                  'p-3',
+                  row.kind === 'changed' && 'bg-main/20',
+                  row.kind === 'added' && 'bg-main/20',
+                )}
+              >
+                {row.after}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -367,7 +477,15 @@ export function ComparisonTable({
   )
 }
 
-export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string
+  description: string
+  action?: ReactNode
+}) {
   return (
     <Card className="bg-white">
       <CardContent className="space-y-3 p-8 text-center">
@@ -376,5 +494,58 @@ export function EmptyState({ title, description, action }: { title: string; desc
         {action ? <div className="flex justify-center">{action}</div> : null}
       </CardContent>
     </Card>
+  )
+}
+
+export function WorkspaceShell({
+  active,
+  children,
+}: {
+  active: 'board' | 'decisions' | 'plans' | 'reports' | 'communication'
+  children: ReactNode
+}) {
+  const items = [
+    ['board', 'Belegungsboard'],
+    ['decisions', 'Entscheidungen'],
+    ['plans', 'Pläne'],
+    ['reports', 'Berichte'],
+    ['communication', 'Kommunikation'],
+  ] as const
+  return (
+    <div className="min-h-dvh bg-background lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
+      <aside className="border-b-2 border-black bg-black p-4 text-white lg:min-h-dvh lg:border-b-0 lg:border-r-2">
+        <div className="flex items-center justify-between gap-4 lg:block">
+          <div>
+            <p className="text-lg font-heading">Familienfreizeit</p>
+            <p className="text-sm text-white/70">Organisationsteam</p>
+          </div>
+          <Badge tone="draft">Entwurf 3</Badge>
+        </div>
+        <nav
+          aria-label="Unterkunftsbereich"
+          className="mt-6 flex gap-2 overflow-x-auto lg:grid lg:gap-1"
+        >
+          {items.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              aria-current={active === id ? 'page' : undefined}
+              className={cn(
+                'min-h-11 whitespace-nowrap rounded-base px-3 text-left font-bold',
+                active === id ? 'bg-main text-black' : 'text-white hover:bg-white/15',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="mt-8 hidden border-t-2 border-white/30 pt-4 text-sm text-white/70 lg:block">
+          <p>Aktueller Stand</p>
+          <p className="mt-1 font-bold text-white">Ereignis 1482</p>
+          <p>Heute · 10:42</p>
+        </div>
+      </aside>
+      <main className="min-w-0 px-4 py-8 sm:px-8 lg:px-12 lg:py-10">{children}</main>
+    </div>
   )
 }

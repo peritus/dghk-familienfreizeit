@@ -67,7 +67,7 @@ const room12: RoomView = {
   occupants: [morgan],
   capabilities: ['Eigenes Bad', 'Eingangsnähe'],
   state: 'occupied',
-  softNotes: ['Exakter Sitzplatz-Fit für Familie Morgan'],
+  soft_notes: ['Exakter Sitzplatz-Fit für Familie Morgan'],
 }
 
 const room14: RoomView = {
@@ -80,7 +80,7 @@ const room14: RoomView = {
   occupants: [],
   capabilities: ['Gemeinschaftsbad', 'Ruhiger Flur'],
   state: 'available',
-  softNotes: ['Zwei freie Plätze nach geplanter Belegung'],
+  soft_notes: ['Zwei freie Plätze nach geplanter Belegung'],
 }
 
 const room16: RoomView = {
@@ -133,8 +133,9 @@ export const accommodationBoardFixture: BoardView = {
     { id: 'building-garden', name: 'Gartenhaus', rooms: [garden3] },
   ],
   unplaced: [braun, lang],
-  unplacedReasons: {
-    'family-braun': '5 Plätze benötigt; kein Zimmer mit ausreichender Kapazität und passender Ruhezone.',
+  unplaced_reasons: {
+    'family-braun':
+      '5 Plätze benötigt; kein Zimmer mit ausreichender Kapazität und passender Ruhezone.',
     'family-lang': 'Einzelzimmer ist vorhanden, die gewünschte Nähe zum Eingang aber nicht.',
   },
   traces: {
@@ -163,7 +164,7 @@ export const accommodationBoardFixture: BoardView = {
       },
     ],
   },
-  draftChanges: [
+  draft_changes: [
     { id: 'draft-1', summary: 'Braun → Zimmer 14', detail: 'Manuelle Platzierungsentscheidung' },
     { id: 'draft-2', summary: 'Zimmer 14: Ruhezone', detail: 'Zusätzliche Entscheidung' },
     { id: 'draft-3', summary: 'Lang → Prüfung', detail: 'Anforderung aktualisiert' },
@@ -181,7 +182,7 @@ export const decisionFixture: DecisionScreenView = {
       strength: 'required',
       note: 'Kurzer Weg für Jamie.',
       author: 'Anna Keller',
-      recordedAt: '15. September · 09:12',
+      recorded_at: '15. September · 09:12',
     },
     {
       id: 'decision-2',
@@ -190,7 +191,7 @@ export const decisionFixture: DecisionScreenView = {
       value: 'Nähe zum Eingang',
       strength: 'required',
       author: 'Systemprofil',
-      recordedAt: '14. September · 16:40',
+      recorded_at: '14. September · 16:40',
     },
     {
       id: 'decision-3',
@@ -200,7 +201,7 @@ export const decisionFixture: DecisionScreenView = {
       strength: 'preferred',
       note: 'Wunsch der Familien, kein harter Ausschluss.',
       author: 'Anna Keller',
-      recordedAt: '14. September · 14:22',
+      recorded_at: '14. September · 14:22',
     },
   ],
 }
@@ -209,7 +210,7 @@ const currentPlan = {
   id: 'plan-current',
   label: 'Aktueller Belegungsplan',
   sequence: 1482,
-  createdAt: 'Heute · 10:42',
+  created_at: 'Heute · 10:42',
   placements: 3,
   unplaced: 2,
   findings: 2,
@@ -221,7 +222,7 @@ const reviewPlan = {
   id: 'plan-review',
   label: 'Vorschlag nach Entscheidungen',
   sequence: 1474,
-  createdAt: 'Heute · 09:18',
+  created_at: 'Heute · 09:18',
   placements: 4,
   unplaced: 1,
   findings: 1,
@@ -287,11 +288,11 @@ export const planDiffFixture: PlanDiffView = {
 }
 
 export const reportFixture: AssignmentReportView = {
-  generatedAt: 'Heute · 10:42',
+  generated_at: 'Heute · 10:42',
   sequence: 1482,
-  totalFamilies: 5,
-  placedFamilies: 3,
-  unplacedFamilies: 2,
+  total_families: 5,
+  placed_families: 3,
+  unplaced_families: 2,
   rooms: [
     {
       room: 'Zimmer 12',
@@ -319,7 +320,11 @@ export const reportFixture: AssignmentReportView = {
     },
   ],
   unplaced: [
-    { family: 'Familie Braun', people: '5 Personen', reason: 'Kein Zimmer mit ausreichender Kapazität und passender Ruhezone.' },
+    {
+      family: 'Familie Braun',
+      people: '5 Personen',
+      reason: 'Kein Zimmer mit ausreichender Kapazität und passender Ruhezone.',
+    },
     { family: 'Familie Lang', people: '1 Person', reason: 'Eingangsnähe ist nicht verfügbar.' },
   ],
   findings: [findingCapacity, findingRequirement],
@@ -331,17 +336,17 @@ export const releaseScopesFixture: readonly ReleaseScopeView[] = [
     title: 'Unterkunft',
     detail: 'Zimmer, Schlafplätze und nicht platzierte Familien',
     status: 'changed',
-    lastCommunicated: '12. April · 15:40',
-    affectedFamilies: 3,
-    changeSummary: '3 Familien bewegen sich; 1 Familie ist neu nicht platziert.',
+    last_communicated: '12. April · 15:40',
+    affected_families: 3,
+    change_summary: '3 Familien bewegen sich; 1 Familie ist neu nicht platziert.',
   },
   {
     id: 'scope-saturday',
     title: 'Samstagvormittag',
     detail: 'Workshop-Zeiten und Räume',
     status: 'never-communicated',
-    affectedFamilies: 0,
-    changeSummary: 'Erste Veröffentlichung steht aus.',
+    affected_families: 0,
+    change_summary: 'Erste Veröffentlichung steht aus.',
     blocking: 'Die Raumzuordnung für einen Workshop ist noch offen.',
   },
   {
@@ -349,48 +354,60 @@ export const releaseScopesFixture: readonly ReleaseScopeView[] = [
     title: 'Töpfern · Details',
     detail: 'Zeit, Raum und Beschreibung',
     status: 'communicated',
-    lastCommunicated: '10. April · 11:20',
-    affectedFamilies: 0,
-    changeSummary: 'Keine neuen Änderungen.',
+    last_communicated: '10. April · 11:20',
+    affected_families: 0,
+    change_summary: 'Keine neuen Änderungen.',
   },
 ]
 
 export const communicationReviewFixture: CommunicationReviewView = {
   scopes: releaseScopesFixture,
-  selectedScopeIds: ['scope-accommodation'],
+  selected_scope_ids: ['scope-accommodation'],
   differences: [
     { label: 'Familie Morgan · Zimmer', before: 'Zimmer 12', after: 'Zimmer 14', kind: 'changed' },
-    { label: 'Familie Braun · Unterkunft', before: 'Zimmer 14', after: 'Nicht platziert', kind: 'changed' },
-    { label: 'Jamie Morgan · Schlafplatz', before: 'Bett 12-B', after: 'Bett 14-A', kind: 'changed' },
+    {
+      label: 'Familie Braun · Unterkunft',
+      before: 'Zimmer 14',
+      after: 'Nicht platziert',
+      kind: 'changed',
+    },
+    {
+      label: 'Jamie Morgan · Schlafplatz',
+      before: 'Bett 12-B',
+      after: 'Bett 14-A',
+      kind: 'changed',
+    },
   ],
-  affectedFamilies: ['Familie Morgan', 'Familie Braun', 'Familie Lang'],
+  affected_families: ['Familie Morgan', 'Familie Braun', 'Familie Lang'],
   dependencies: [],
-  reviewedSequence: 1482,
-  buildLabel: 'Profilstand · bestätigt',
-  notificationCount: 3,
+  reviewed_sequence: 1482,
+  build_label: 'Profilstand · bestätigt',
+  notification_count: 3,
 }
 
 export const communicationHistoryFixture: readonly CommunicationEntryView[] = [
   {
     id: 'communication-1',
-    communicatedAt: '12. April · 15:40',
+    communicated_at: '12. April · 15:40',
     actor: 'Anna Keller',
     sequence: 1398,
     scopes: ['Unterkunft'],
     note: 'Erste Unterkunftsmitteilung',
     differences: [
-      { label: 'Familie Morgan · Zimmer', before: 'Nicht platziert', after: 'Zimmer 12', kind: 'changed' },
+      {
+        label: 'Familie Morgan · Zimmer',
+        before: 'Nicht platziert',
+        after: 'Zimmer 12',
+        kind: 'changed',
+      },
     ],
   },
   {
     id: 'communication-2',
-    communicatedAt: '10. April · 11:20',
+    communicated_at: '10. April · 11:20',
     actor: 'Anna Keller',
     sequence: 1371,
     scopes: ['Töpfern · Details'],
-    differences: [
-      { label: 'Raum', before: 'Werkraum', after: 'Atelier 2', kind: 'changed' },
-    ],
+    differences: [{ label: 'Raum', before: 'Werkraum', after: 'Atelier 2', kind: 'changed' }],
   },
 ]
-

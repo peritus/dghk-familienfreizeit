@@ -47,7 +47,16 @@ export function Tabs({
   )
 }
 
-export function TabPanel({ children, labelledBy }: { children: ReactNode; labelledBy: string }) {
-  return <div role="tabpanel" aria-labelledby={labelledBy}>{children}</div>
+export function TabPanel({
+  children,
+  labelled_by: labelledBy,
+}: {
+  children: ReactNode
+  labelled_by: string
+}) {
+  return (
+    <div role="tabpanel" aria-labelledby={labelledBy}>
+      {children}
+    </div>
+  )
 }
-

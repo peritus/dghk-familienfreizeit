@@ -8,7 +8,8 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'The board keeps open families visible beside grouped rooms. Every room can explain its placement outcome, and touch users receive the same room picker as keyboard users.',
+        component:
+          'The board keeps open families visible beside grouped rooms. Every room can explain its placement outcome, and touch users receive the same room picker as keyboard users.',
       },
     },
   },
@@ -20,9 +21,8 @@ type Story = StoryObj<typeof meta>
 export const Populated: Story = {}
 
 export const MobileDecisionFlow: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  parameters: { viewport: { ['defaultViewport']: 'mobile1' } },
   play: async ({ canvas }) => {
-    await canvas.getByRole('button', { name: 'Raum wählen' }).first().click()
+    await canvas.getAllByRole('button', { name: 'Raum wählen' })[0]?.click()
   },
 }
-

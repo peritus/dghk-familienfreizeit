@@ -1,10 +1,4 @@
-export type StatusTone =
-  | 'neutral'
-  | 'success'
-  | 'attention'
-  | 'danger'
-  | 'draft'
-  | 'held'
+export type StatusTone = 'neutral' | 'success' | 'attention' | 'danger' | 'draft' | 'held'
 
 export type StatusLabel = {
   label: string
@@ -36,7 +30,7 @@ export type RoomView = {
   capabilities: readonly string[]
   state: 'available' | 'occupied' | 'infeasible'
   reasons?: readonly string[]
-  softNotes?: readonly string[]
+  soft_notes?: readonly string[]
 }
 
 export type BuildingView = {
@@ -73,9 +67,9 @@ export type BoardView = {
   sequence: number
   buildings: readonly BuildingView[]
   unplaced: readonly FamilyView[]
-  unplacedReasons: Readonly<Record<string, string>>
+  unplaced_reasons: Readonly<Record<string, string>>
   traces: Readonly<Record<string, readonly TraceView[]>>
-  draftChanges: readonly DraftChangeView[]
+  draft_changes: readonly DraftChangeView[]
 }
 
 export type DecisionView = {
@@ -86,7 +80,7 @@ export type DecisionView = {
   strength: 'required' | 'preferred'
   note?: string
   author: string
-  recordedAt: string
+  recorded_at: string
 }
 
 export type DecisionScreenView = {
@@ -98,7 +92,7 @@ export type PlanSummaryView = {
   id: string
   label: string
   sequence: number
-  createdAt: string
+  created_at: string
   placements: number
   unplaced: number
   findings: number
@@ -127,7 +121,7 @@ export type PlanDiffView = {
   before: PlanSummaryView
   after: PlanSummaryView
   changes: readonly PlanChangeView[]
-  unavailableReason?: string
+  unavailable_reason?: string
 }
 
 export type ReportRoomView = {
@@ -140,11 +134,11 @@ export type ReportRoomView = {
 }
 
 export type AssignmentReportView = {
-  generatedAt: string
+  generated_at: string
   sequence: number
-  totalFamilies: number
-  placedFamilies: number
-  unplacedFamilies: number
+  total_families: number
+  placed_families: number
+  unplaced_families: number
   rooms: readonly ReportRoomView[]
   unplaced: readonly { family: string; people: string; reason: string }[]
   findings: readonly FindingView[]
@@ -155,9 +149,9 @@ export type ReleaseScopeView = {
   title: string
   detail: string
   status: 'communicated' | 'changed' | 'never-communicated'
-  lastCommunicated?: string
-  affectedFamilies: number
-  changeSummary: string
+  last_communicated?: string
+  affected_families: number
+  change_summary: string
   blocking?: string
 }
 
@@ -170,23 +164,22 @@ export type CommunicationDiffView = {
 
 export type CommunicationReviewView = {
   scopes: readonly ReleaseScopeView[]
-  selectedScopeIds: readonly string[]
+  selected_scope_ids: readonly string[]
   differences: readonly CommunicationDiffView[]
-  affectedFamilies: readonly string[]
+  affected_families: readonly string[]
   dependencies: readonly FindingView[]
-  reviewedSequence: number
-  buildLabel: string
-  notificationCount: number
+  reviewed_sequence: number
+  build_label: string
+  notification_count: number
 }
 
 export type CommunicationEntryView = {
   id: string
-  communicatedAt: string
+  communicated_at: string
   actor: string
   sequence: number
   scopes: readonly string[]
   note?: string
   differences: readonly CommunicationDiffView[]
-  unavailableReason?: string
+  unavailable_reason?: string
 }
-

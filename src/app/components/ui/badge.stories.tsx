@@ -7,7 +7,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Use text badges for compact state labels. Color supports the text; it never replaces it.',
+        component:
+          'Use text badges for compact state labels. Color supports the text; it never replaces it.',
       },
     },
   },
@@ -28,4 +29,3 @@ export const Statuses: Story = {
     </div>
   ),
 }
-

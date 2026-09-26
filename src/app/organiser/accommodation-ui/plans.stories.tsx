@@ -5,7 +5,12 @@ const meta = {
   title: 'Screens/Organiser/Plan review',
   parameters: {
     layout: 'fullscreen',
-    docs: { description: { component: 'Plan views make derived placement results inspectable without turning the UI into a second domain-state store.' } },
+    docs: {
+      description: {
+        component:
+          'Plan views make derived placement results inspectable without turning the UI into a second domain-state store.',
+      },
+    },
   },
 } satisfies Meta
 
@@ -13,5 +18,5 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const CurrentPlan: Story = { render: () => <PlanInspection /> }
-export const PlanComparison: Story = { render: () => <PlanComparison /> }
 
+export const Comparison: Story = { render: () => <PlanComparison /> }

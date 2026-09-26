@@ -5,10 +5,17 @@ import { Tabs } from './tabs.js'
 const meta = {
   title: 'UI/Tabs',
   component: Tabs,
+  args: {
+    label: 'Gebäude',
+    value: 'main',
+    options: [{ value: 'main', label: 'Haupthaus' }],
+    onChange: () => undefined,
+  },
   parameters: {
     docs: {
       description: {
-        component: 'Use tabs when a small set of views shares one context and only one view is visible at a time.',
+        component:
+          'Use tabs when a small set of views shares one context and only one view is visible at a time.',
       },
     },
   },
@@ -35,4 +42,3 @@ export const Buildings: Story = {
     )
   },
 }
-

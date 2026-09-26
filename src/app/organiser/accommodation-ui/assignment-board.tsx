@@ -54,7 +54,11 @@ export function AssignmentBoard({
         label="Gebäude"
         value={building?.id ?? ''}
         onChange={setBuildingId}
-        options={view.buildings.map((item) => ({ value: item.id, label: item.name, count: item.rooms.length }))}
+        options={view.buildings.map((item) => ({
+          value: item.id,
+          label: item.name,
+          count: item.rooms.length,
+        }))}
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(16rem,0.75fr)_minmax(0,2fr)]">
@@ -65,7 +69,7 @@ export function AssignmentBoard({
               <FamilyCard
                 key={family.id}
                 family={family}
-                reason={view.unplacedReasons[family.id]}
+                reason={view.unplaced_reasons[family.id]}
                 action="Raum wählen"
                 onAction={() => setSelectedFamily(family)}
               />
@@ -74,22 +78,37 @@ export function AssignmentBoard({
         </aside>
 
         <section className="space-y-8" aria-labelledby="rooms-title">
-          <SectionHeading title={building?.name ?? 'Gebäude'} detail={`${floors.length} Ebenen · Räume und Belegung`} />
+          <SectionHeading
+            title={building?.name ?? 'Gebäude'}
+            detail={`${floors.length} Ebenen · Räume und Belegung`}
+          />
           {floors.map((floor) => (
             <div key={floor} className="space-y-4">
               <h3 className="border-b-2 border-black pb-2 text-lg">{floor}</h3>
               <div className="grid gap-4 xl:grid-cols-2">
-                {(building?.rooms ?? []).filter((room) => room.floor === floor).map((room) => (
-                  <div key={room.id}>
-                    <RoomCard
-                      room={room}
-                      expanded={expandedRoom === room.id}
-                      onToggle={() => setExpandedRoom((current) => current === room.id ? null : room.id)}
-                      onMove={() => setSelectedFamily(view.unplaced[0] ?? null)}
-                    />
-                    {expandedRoom === room.id ? <TracePanel traces={view.traces[room.occupants[0]?.id ?? ''] ?? view.traces['family-braun'] ?? []} /> : null}
-                  </div>
-                ))}
+                {(building?.rooms ?? [])
+                  .filter((room) => room.floor === floor)
+                  .map((room) => (
+                    <div key={room.id}>
+                      <RoomCard
+                        room={room}
+                        expanded={expandedRoom === room.id}
+                        onToggle={() =>
+                          setExpandedRoom((current) => (current === room.id ? null : room.id))
+                        }
+                        onMove={() => setSelectedFamily(view.unplaced[0] ?? null)}
+                      />
+                      {expandedRoom === room.id ? (
+                        <TracePanel
+                          traces={
+                            view.traces[room.occupants[0]?.id ?? ''] ??
+                            view.traces['family-braun'] ??
+                            []
+                          }
+                        />
+                      ) : null}
+                    </div>
+                  ))}
               </div>
             </div>
           ))}
@@ -108,8 +127,12 @@ export function AssignmentBoard({
         />
       ) : null}
 
-      <DraftBar count={view.draftChanges.length} changes={view.draftChanges} onApply={onApply} onDiscard={onDiscard} />
+      <DraftBar
+        count={view.draft_changes.length}
+        changes={view.draft_changes}
+        onApply={onApply}
+        onDiscard={onDiscard}
+      />
     </ScreenFrame>
   )
 }
-
