@@ -256,6 +256,25 @@ Mobile: a 2-column grid, never a 2+1 wrap.
 **Implemented** for `/organiser/inventory`; **outstanding** as a shared
 component.
 
+## Segmented controls
+
+Use instead of a `<select>` when there are four or fewer options and seeing
+them helps (bed type, and any future case shaped like it — not room type or
+floor, which stay `<select>`s):
+
+- a bordered group (`role="group"`, `aria-label`) of `<button type="button">`
+  with `aria-pressed`;
+- selected: black fill, white text; unselected: white; dividers: 2px black
+  border between segments;
+- min height 44px; an option's icon uses `currentColor`, so it inverts when
+  selected;
+- mobile: equal-width stacked segments, icon above label, min height 56px.
+
+**Implemented** as `SegmentedControl`
+([`src/app/components/ui/segmented-control.tsx`](../../src/app/components/ui/segmented-control.tsx)),
+used for the inventory bed-type choice; **outstanding** for any other
+`<select>` that would qualify.
+
 ## Forms
 
 - Label above the field, bold. Mark an optional field with "(optional)" in

@@ -153,7 +153,7 @@ test('adding a bunk bed shows the age hint and the Oben/Unten slots, and updates
   expect(await screen.findByText('Keine Betten')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('button', { name: /101/ }))
-  fireEvent.change(screen.getByLabelText('Bettart'), { target: { value: 'bunk' } })
+  fireEvent.click(within(screen.getByRole('group', { name: 'Bettart' })).getByRole('button', { name: 'Etagenbett' }))
   expect(
     await screen.findByText(/Ein Etagenbett hat zwei Schlafplätze: oben und unten/),
   ).toBeTruthy()

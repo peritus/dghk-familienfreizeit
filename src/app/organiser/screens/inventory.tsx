@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { bedIconFor } from '../../components/bed-icons.js'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
+import { SegmentedControl } from '../../components/ui/segmented-control.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { pluralDe } from '../../lib/plural-de.js'
 import { useOrganiser } from '../context.js'
@@ -728,13 +730,30 @@ function roomTags(room: InventoryRoom): readonly string[] {
 function bedSummary(
   beds: readonly InventoryBed[],
   bedTypes: readonly { value: string; label: string }[],
-): string {
+) {
   if (beds.length === 0) return '–'
   const counts = new Map<string, number>()
   for (const bed of beds) counts.set(bed.bed_type, (counts.get(bed.bed_type) ?? 0) + 1)
-  return Array.from(counts.entries())
-    .map(([type, count]) => `${count}× ${bedTypes.find(({ value }) => value === type)?.label ?? type}`)
+  const entries = Array.from(counts.entries())
+  const label = entries
+    .map(
+      ([type, count]) =>
+        `${count} ${bedTypes.find(({ value }) => value === type)?.label ?? type}`,
+    )
     .join(', ')
+  return (
+    <span role="img" aria-label={label} className="flex flex-wrap items-center gap-2">
+      {entries.map(([type, count]) => {
+        const Icon = bedIconFor(type)
+        return (
+          <span key={type} className="inline-flex items-center gap-1">
+            <Icon aria-hidden="true" className="h-6 w-8" />
+            {count}×
+          </span>
+        )
+      })}
+    </span>
+  )
 }
 
 function RoomDetail({
@@ -895,7 +914,12 @@ function BedRow({
             className="min-h-11 rounded-base border-2 border-black px-3"
           />
         </label>
-        <Select label="Bettart" value={bedType} onChange={setBedType} options={bedTypes} />
+        <SegmentedControl
+          label="Bettart"
+          value={bedType}
+          onChange={setBedType}
+          options={bedTypes.map((option) => ({ ...option, icon: bedIconFor(option.value) }))}
+        />
         <div className="flex flex-wrap gap-2">
           <Button type="submit" variant="neutral">
             Bett speichern
@@ -907,22 +931,26 @@ function BedRow({
       </form>
     )
 
+  const Icon = bedIconFor(bed.bed_type)
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-3">
-      <div>
-        <p>
-          <span className="font-bold">{typeLabel}</span>
-          {bed.label ? <span className="text-muted"> · {bed.label}</span> : null}
-        </p>
-        <div className="mt-1 flex flex-wrap gap-1">
-          {slotLabels(bed).map((slot) => (
-            <span
-              key={slot}
-              className="min-h-7 rounded-base border-2 border-black bg-white px-2 text-sm font-bold"
-            >
-              {slot}
-            </span>
-          ))}
+      <div className="flex items-start gap-3">
+        <Icon aria-hidden="true" className="mt-0.5 h-6 w-8 shrink-0" />
+        <div>
+          <p>
+            <span className="font-bold">{typeLabel}</span>
+            {bed.label ? <span className="text-muted"> · {bed.label}</span> : null}
+          </p>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {slotLabels(bed).map((slot) => (
+              <span
+                key={slot}
+                className="min-h-7 rounded-base border-2 border-black bg-white px-2 text-sm font-bold"
+              >
+                {slot}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       <div className="flex gap-2">
@@ -968,7 +996,12 @@ function BedForm({
       }}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <Select label="Bettart" value={bedType} onChange={setBedType} options={bedTypes} />
+        <SegmentedControl
+          label="Bettart"
+          value={bedType}
+          onChange={setBedType}
+          options={bedTypes.map((option) => ({ ...option, icon: bedIconFor(option.value) }))}
+        />
         <label className="grid gap-1">
           <span className="font-bold">
             Bezeichnung <span className="font-normal text-muted">(optional)</span>
