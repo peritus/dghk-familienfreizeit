@@ -89,7 +89,12 @@ function PersonEditor({
             <Button type="button" variant="neutral" size="sm" onClick={() => setEditing(true)}>
               Bearbeiten
             </Button>
-            <Button type="button" variant="neutral" size="sm" onClick={() => setConfirmDelete(true)}>
+            <Button
+              type="button"
+              variant="neutral"
+              size="sm"
+              onClick={() => setConfirmDelete(true)}
+            >
               Entfernen
             </Button>
           </div>
@@ -360,7 +365,9 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                   {draftSeqs.has(event.seq) ? (
                     <p className="text-sm font-bold">Noch nicht gespeichert</p>
                   ) : null}
-                  <p className="text-sm">{event.actor} · {formatChangeDate(event.at)}</p>
+                  <p className="text-sm">
+                    {event.actor} · {formatChangeDate(event.at)}
+                  </p>
                 </li>
               ))}
             </ol>

@@ -89,6 +89,17 @@ The organiser shell distinguishes a whole-app load failure from a save
 failure (`load_error` vs. `error` status) so a failed initial fetch never
 renders stats or forms against an empty, falsely-real world.
 
+Editing is read-only by default: existing family people show their values as
+plain text with **Bearbeiten** and **Entfernen** actions. **Bearbeiten** opens
+the fields for that person, while **Entfernen** requires a confirmation. The
+save-status control remains the one shared persistence indicator across all
+organiser screens; domain screens do not add their own draft bars or technical
+state counters.
+
+The route loading state is a centered, calm preparation panel with a reduced-
+motion-safe spinner and the message **Ansicht wird vorbereitet …**. It does not
+use skeleton fragments for a short route transition.
+
 Accessibility checks exercise semantic route/loading/error behavior in jsdom.
 They do not establish contrast, 360px visual layout, or real-browser keyboard
 behavior. Those checks and the additional domain controls remain requirements in

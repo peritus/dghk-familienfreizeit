@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The board keeps open families visible beside grouped rooms. Every room can explain its placement outcome, and touch users receive the same room picker as keyboard users.',
+          'The board keeps open families visible beside grouped rooms. Every room can explain its placement outcome, and touch users receive the same accessible room picker as keyboard users.',
       },
     },
   },

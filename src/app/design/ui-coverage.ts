@@ -78,6 +78,12 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/ui/alert-dialog.tsx',
   },
   {
+    id: 'ui-dialog--selection',
+    area: 'component',
+    subject: 'Dialog selection',
+    source: 'src/app/components/ui/dialog.tsx',
+  },
+  {
     id: 'ui-segmentedcontrol--interactive',
     area: 'component',
     subject: 'SegmentedControl',

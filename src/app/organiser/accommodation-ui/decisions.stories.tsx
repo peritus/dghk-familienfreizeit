@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The decision screen makes resolver findings actionable while keeping mechanism, strength, note, author, and time visible to organisers.',
+          'The decision screen makes placement findings actionable while keeping the type, strength, note, author, and time visible to organisers.',
       },
     },
   },

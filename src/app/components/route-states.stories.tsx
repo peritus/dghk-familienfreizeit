@@ -6,8 +6,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-          component:
-            'Route states give every navigation boundary a recoverable, accessible response. Loading uses one calm preparation panel rather than pretending to know the shape of the next screen; errors offer recovery without exposing exception details.',
+        component:
+          'Route states give every navigation boundary a recoverable, accessible response. Loading uses one calm preparation panel rather than pretending to know the shape of the next screen; errors offer recovery without exposing exception details.',
       },
     },
   },

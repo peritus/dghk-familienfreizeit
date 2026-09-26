@@ -8,7 +8,7 @@ The route table is:
 | `/`, `/login`, `/family` | Public foundation welcome placeholder |
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with first-row invitation staging |
-| `/organiser/families/:id` | Responsive editable people table, lifecycle staging and event history |
+| `/organiser/families/:id` | Read-only-by-default people list, explicit editing, lifecycle staging and human-readable changes |
 | `/organiser/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | Other paths | Not-found message and a link back to the start |
 
@@ -60,7 +60,8 @@ route subtree, by location. Error boundaries may reset their error state on a
 route change without remounting healthy children.
 
 On navigation the app focuses the main content region. A skip link provides
-keyboard access to that region. Lazy loading renders a skeleton and live status;
+keyboard access to that region. Lazy loading renders a centered preparation panel
+with a live status;
 the route error boundary renders a sanitized recovery message and reload button.
 These semantics are covered in
 [app tests](../../test/app/shell.test.tsx), while real organiser navigation and

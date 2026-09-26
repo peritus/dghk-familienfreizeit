@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A focused workspace shell keeps the accommodation tools, current plan context, and draft state visible without changing the application navigation.',
+          'A focused workspace shell keeps the accommodation tools visible without duplicating the application save status or navigation.',
       },
     },
   },

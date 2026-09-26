@@ -96,7 +96,11 @@ export function MetricsStrip({
       <div
         className={cn(
           'grid grid-cols-2 divide-y-2 divide-black sm:divide-x-2 sm:divide-y-0',
-          items.length === 2 ? 'sm:grid-cols-2' : items.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-4',
+          items.length === 2
+            ? 'sm:grid-cols-2'
+            : items.length === 3
+              ? 'sm:grid-cols-3'
+              : 'sm:grid-cols-4',
         )}
       >
         {items.map((item) => (
@@ -321,7 +325,9 @@ export function MoveRoomDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <p className="text-sm font-bold uppercase tracking-wide text-muted">Familie verschieben</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-muted">
+            Familie verschieben
+          </p>
           <DialogTitle>{family.name}</DialogTitle>
           <DialogDescription>
             Wähle einen Raum. Unmögliche Räume bleiben sichtbar und erklären den Ausschluss.

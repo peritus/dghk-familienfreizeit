@@ -2,43 +2,41 @@
 
 ## Audience, purpose, and route
 
-Organisers add, inspect, and clear decision labels, and inspect current resolver
+Organisers add, review, and clear placement decisions, and review current
 findings. Route: `/organiser/constraints`. Governing specs: [labels and constraints](../../architecture/labels-and-constraints.md)
 and [organiser view](../../application/organiser-view.md) §5.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Organiser decisions                         [Add organiser decision]    │
-│ 11 active · 2 findings · [All] [Errors] [Warnings]                        │
+│ Entscheidungen des Organisationsteams       [Entscheidung hinzufügen]      │
+│ 11 aktiv · 2 Hinweise · [Alle] [Fehler] [Warnungen]                        │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ ⚠ needs-private-sanitary · 19 places required, 14 available [Affected →]  │
-│ ⚠ apart-from conflict · Morgan and Rivera both need Room 12 [Inspect →]   │
+│ ⚠ Anforderung ohne passenden Platz [Prüfen →]                             │
+│ ⚠ Familien sollen getrennt bleiben [Prüfen →]                             │
 │                                                                          │
 │ ACTIVE DECISIONS                                                        │
-│ Müller family · needs=naehe_zum_eingang · required                       │
-│ Room 07 · provides=naehe_zum_eingang                                     │
+│ Familie Müller · Anforderung: Nähe zum Eingang · erforderlich             │
+│ Zimmer 07 · Merkmal: Nähe zum Eingang                                     │
 │ Additional information: Nähe zum barrierefreien Eingang.                │
 │ Anna · 15 Sep 09:12                                    [Inspect] [Clear] │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Adding an organiser decision uses the affected entity, existing resolver key,
-value, and strength where applicable. The resolver key is fixed, but a matching
-value may be entered ad hoc, for example `provides=my-ad-hoc-thing`. One optional
-free-text note supplies context. There is no separate decision name:
-`naehe_zum_eingang` is the value shown on both sides of a needs/provides pair.
-Entity references and workshop-specific structured values use the resolver's
-existing input controls and validation.
+Adding a decision uses the affected entity, a human-facing type (Anforderung,
+Merkmal, or Trennung), a value, and strength where applicable. One optional
+free-text note supplies context. The implementation may resolve these values
+through configured constraints, but that mechanism is not part of the organiser
+interface.
 
-Add creates ordinary `LabelSet` events; Clear creates `LabelCleared` for the
+Add creates the corresponding domain change; Clear removes the
 selected application. A new value replaces an existing value only where the
 configured cardinality permits replacement. Both enter the shared local-first event
 pipeline across this organiser's screens. The local world updates immediately;
-immediate mode submits automatically and drafting mode keeps the events in the
-browser until the shared draft workspace. Applied labels show the token, optional
-note, event author, and timestamp to every organiser. Fixed resolver mechanisms
-are inspectable but not editable. Findings name the rule, affected entities, and
-the next useful screen. Empty state: no decisions yet; Add remains available.
+immediate mode submits automatically and drafting mode keeps the changes in the
+browser until the shared save-status control. Applied decisions show the value,
+optional note, author, and timestamp to every organiser. Findings name the
+affected entities and the next useful screen. Empty state: no decisions yet;
+Add remains available.
 
 German copy uses **Entscheidungen des Organisationsteams**, **Entscheidung
 hinzufügen**, and **Zusätzliche Informationen** (optional). Family-facing views
@@ -51,7 +49,7 @@ full-height dialog with grouped labels and keyboard-safe focus order.
 ## Neobrutalist redesign and components
 
 Use `Sidebar`, filter `Tabs`, finding `Alert` cards, decision `Card` rows, and
-textual `Badge` status. Create and inspect use `Dialog` with `Label`, `Input`,
+textual `Badge` status. Create and review use `Dialog` with `Label`, `Input`,
 `Textarea`, `Combobox`, and `Select`. Clearing a decision label or applying an
 organiser decision uses the full Alert Dialog recipe, with a consequence-focused
 `AlertDialogDescription` and explicit Cancel/Action buttons.

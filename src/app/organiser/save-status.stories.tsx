@@ -13,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Save status communicates whether the event log is saved, whether drafting is empty, or how many changes are waiting to apply. It never relies on color alone.',
+          'Save status communicates whether changes are saved, whether drafting is empty, or how many changes are waiting to apply. It never relies on color alone.',
       },
     },
   },

@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Family detail is the focused editing surface for people and event history. The family identity remains visible while person changes are staged from the same screen.',
+          'Family detail is the focused editing surface for people and human-readable changes. Existing people stay read-only until Bearbeiten is selected.',
       },
     },
   },

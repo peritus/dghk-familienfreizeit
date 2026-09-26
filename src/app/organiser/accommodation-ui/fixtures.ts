@@ -179,7 +179,7 @@ export const decisionFixture: DecisionScreenView = {
       kind: 'feature',
       value: 'Nähe zum Eingang',
       strength: 'required',
-      author: 'Systemprofil',
+      author: 'Organisationsteam',
       recorded_at: '14. September · 16:40',
     },
     {

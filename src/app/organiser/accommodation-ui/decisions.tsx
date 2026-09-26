@@ -117,7 +117,8 @@ export function OrganiserDecisions({ view = decisionFixture }: { view?: Decision
                     </Badge>
                   </div>
                   <p className="text-lg">
-                    {decisionKindLabel[decision.kind]}: <span className="font-bold">{decision.value}</span>
+                    {decisionKindLabel[decision.kind]}:{' '}
+                    <span className="font-bold">{decision.value}</span>
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">

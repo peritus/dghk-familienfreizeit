@@ -42,10 +42,7 @@ export function DialogFooter({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
-export function DialogTitle({
-  className,
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Title>) {
+export function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) {
   return <DialogPrimitive.Title className={cn('text-2xl font-heading', className)} {...props} />
 }
 
@@ -56,9 +53,6 @@ export function DialogDescription({
   return <DialogPrimitive.Description className={cn('text-muted', className)} {...props} />
 }
 
-export function DialogClose({
-  className,
-  ...props
-}: ComponentProps<typeof DialogPrimitive.Close>) {
+export function DialogClose({ className, ...props }: ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close className={cn(className)} {...props} />
 }

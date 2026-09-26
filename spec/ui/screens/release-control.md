@@ -6,7 +6,7 @@ Organisers and families inspect the same privacy-projected online diffs in conte
 Organisers can also use `/organiser/releases` for an outstanding-change overview and
 review, and
 `/organiser/releases/history` for communication history. Plan investigation remains
-at `/organiser/plans` and `/organiser/plans/:a/diff/:b`, with input sequences as
+at `/organiser/plans` and `/organiser/plans/:a/diff/:b`, with selected plans as
 parameters. It does not substitute for a release preview.
 
 The authoritative report, review, dependency and confirmation contracts are in
@@ -26,7 +26,7 @@ surface that shows release status ([workshops](workshops.md),
 | `—` | Never communicated |
 
 Badges have text labels and tooltips; colour is supplementary. The tooltip includes
-the last communication time and reviewed `input_seq` when one exists. Expanding a
+the last communication time when one exists. Expanding a
 badge opens the canonical before/after diff in place, without navigating to a
 separate release view. The diff shows added, removed and changed fields, allocation
 movements, and cancellation status appropriate to the viewer. A newer event shows a
@@ -100,9 +100,9 @@ All differences are reachable without truncation: full initial content, changed
 fields, removed/added participants, cancellation, and movements grouped by family.
 Family previews use the actual server privacy projection. Dependencies present an
 explicit selection action that refreshes the review; they are never silently added.
-Blocking issues disable confirmation with a reason. Show the reviewed `input_seq`,
-`build_revision`, and `compatibility_revision` in secondary
-review details, not in ordinary family flows. There is no communication-content hash.
+Blocking issues disable confirmation with a reason. Keep implementation and
+deployment metadata out of ordinary organiser and family flows. There is no
+communication-content hash.
 
 German final action: **Jetzt an Familien kommunizieren**. Consequence:
 **Diese Angaben sind anschließend in der Familienansicht sichtbar.** Email status is
@@ -110,14 +110,14 @@ separate: **E-Mail-Benachrichtigung: nicht ausgewählt** or the exact recipient 
 
 Changing selection or notification options refreshes the preview.
 Pending edits must be applied or discarded before final confirmation. If the server
-reports an unavailable reviewed sequence or deployment mismatch, retain the organiser's
+reports an unavailable reviewed plan or deployment mismatch, retain the organiser's
 selection, explain the unavailable review and require a new preview. A concurrent append
 does not invalidate the review. A rejected action changes no family visibility.
 Success returns the communicated scopes and separately shows email delivery outcomes.
 
 ## History and recovery
 
-History rows show actor, time, selected scopes and `input_seq`, with per-scope before/after
+History rows show actor, time, and selected scopes, with per-scope before/after
 views where reproducible. A revision mismatch shows full current proposed content and
 the explicit absence of a reliable before-image. It must not show a fabricated diff.
 Recovery uses the same review rather than an uncommunicate toggle.
