@@ -1,15 +1,29 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Link } from 'wouter'
+import { LoaderCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Button, buttonVariants } from './ui/button'
-import { Skeleton } from './ui/skeleton'
 
 export function RouteLoading() {
   return (
-    <section role="status" aria-live="polite" aria-busy="true" className="space-y-4">
-      <p>Die Ansicht wird geladen …</p>
-      <Skeleton aria-hidden="true" className="h-10 w-2/3" />
-      <Skeleton aria-hidden="true" className="h-40 w-full" />
+    <section
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="grid min-h-72 place-items-center"
+    >
+      <div className="w-full max-w-lg rounded-base border-2 border-black bg-white p-6 shadow-shadow">
+        <div className="flex items-start gap-4">
+          <LoaderCircle
+            aria-hidden="true"
+            className="mt-0.5 size-6 shrink-0 motion-safe:animate-spin motion-reduce:animate-none"
+          />
+          <div>
+            <p className="text-xl font-heading">Ansicht wird vorbereitet …</p>
+            <p className="mt-1 text-muted">Einen Moment, gleich geht es weiter.</p>
+          </div>
+        </div>
+      </div>
     </section>
   )
 }

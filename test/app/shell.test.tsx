@@ -391,7 +391,8 @@ test.each(['/unknown', '/organiser/unknown'])(
 test('route loading announces its state without exposing decorative skeletons', () => {
   render(<RouteLoading />)
   expect(screen.getByRole('status').getAttribute('aria-busy')).toBe('true')
-  expect(document.querySelectorAll('[data-slot="skeleton"][aria-hidden="true"]').length).toBe(2)
+  expect(screen.getByText('Ansicht wird vorbereitet …')).toBeTruthy()
+  expect(document.querySelectorAll('[data-slot="skeleton"]').length).toBe(0)
 })
 
 test('a failed chunk/render offers recovery and does not display exception details', () => {
