@@ -3,6 +3,7 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { cn } from '@/lib/utils'
 
 export const Dialog = DialogPrimitive.Root
+
 export const DialogTrigger = DialogPrimitive.Trigger
 
 export function DialogContent({

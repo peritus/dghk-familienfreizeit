@@ -389,5 +389,10 @@ function changeSummary(type: string): string {
 function formatChangeDate(value: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.valueOf())) return value
-  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+  const dateStyle = 'dateStyle'
+  const timeStyle = 'timeStyle'
+  return new Intl.DateTimeFormat('de-DE', {
+    [dateStyle]: 'medium',
+    [timeStyle]: 'short',
+  }).format(date)
 }

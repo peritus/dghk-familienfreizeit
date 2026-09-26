@@ -9,6 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card.js'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog.js'
 import { cn } from '../../lib/utils.js'
 import type { FamilyView, FindingView, RoomView, StatusLabel, TraceView } from './types.js'
 
@@ -85,7 +93,12 @@ export function MetricsStrip({
 }) {
   return (
     <Card className="bg-white p-0">
-      <div className="grid grid-cols-2 divide-y-2 divide-black sm:grid-cols-4 sm:divide-x-2 sm:divide-y-0">
+      <div
+        className={cn(
+          'grid grid-cols-2 divide-y-2 divide-black sm:divide-x-2 sm:divide-y-0',
+          items.length === 2 ? 'sm:grid-cols-2' : items.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-4',
+        )}
+      >
         {items.map((item) => (
           <div key={item.label} className="p-4 text-center">
             <p className={cn('text-4xl leading-none', item.tone === 'attention' && 'text-main')}>
@@ -293,42 +306,6 @@ export function TracePanel({ traces }: { traces: readonly TraceView[] }) {
   )
 }
 
-export function DraftBar({
-  count,
-  changes,
-  onDiscard,
-  onApply,
-}: {
-  count: number
-  changes: readonly { summary: string; detail: string }[]
-  onDiscard?: () => void
-  onApply?: () => void
-}) {
-  return (
-    <aside
-      className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-black bg-black p-3 text-white shadow-[0_-4px_0_0_var(--main)] sm:p-4"
-      aria-label="Änderungsentwürfe"
-    >
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-bold">{count} Änderungsentwürfe</p>
-          <p className="truncate text-sm text-white/80">
-            {changes.map((change) => change.summary).join(' · ')}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="neutral" size="sm" onClick={onDiscard}>
-            Entwürfe verwerfen
-          </Button>
-          <Button size="sm" onClick={onApply}>
-            Entwürfe anwenden
-          </Button>
-        </div>
-      </div>
-    </aside>
-  )
-}
-
 export function MoveRoomDialog({
   family,
   rooms,
@@ -341,29 +318,15 @@ export function MoveRoomDialog({
   onConfirm: (room: RoomView) => void
 }) {
   return (
-    <div
-      className="fixed inset-0 z-30 flex items-end justify-center bg-black/40 p-4 sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="move-room-title"
-    >
-      <div className="w-full max-w-xl rounded-base border-2 border-black bg-white p-6 shadow-shadow">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-muted">
-              Familie verschieben
-            </p>
-            <h2 id="move-room-title" className="mt-1 text-2xl">
-              {family.name}
-            </h2>
-            <p className="mt-1 text-muted">
-              Wähle einen Raum. Unmögliche Räume bleiben sichtbar und erklären den Ausschluss.
-            </p>
-          </div>
-          <Button variant="neutral" size="icon-sm" onClick={onClose} aria-label="Dialog schließen">
-            ×
-          </Button>
-        </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <p className="text-sm font-bold uppercase tracking-wide text-muted">Familie verschieben</p>
+          <DialogTitle>{family.name}</DialogTitle>
+          <DialogDescription>
+            Wähle einen Raum. Unmögliche Räume bleiben sichtbar und erklären den Ausschluss.
+          </DialogDescription>
+        </DialogHeader>
         <div className="mt-6 grid gap-3">
           {rooms.map((room) => {
             const disabled = room.state === 'infeasible'
@@ -393,13 +356,13 @@ export function MoveRoomDialog({
             )
           })}
         </div>
-        <div className="mt-6 flex justify-end">
+        <DialogFooter className="mt-6">
           <Button variant="neutral" onClick={onClose}>
             Abbrechen
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -511,7 +474,6 @@ export function WorkspaceShell({
             <p className="text-lg font-heading">Familienfreizeit</p>
             <p className="text-sm text-white/70">Organisationsteam</p>
           </div>
-          <Badge tone="draft">Entwurf 3</Badge>
         </div>
         <nav
           aria-label="Unterkunftsbereich"
@@ -531,11 +493,6 @@ export function WorkspaceShell({
             </button>
           ))}
         </nav>
-        <div className="mt-8 hidden border-t-2 border-white/30 pt-4 text-sm text-white/70 lg:block">
-          <p>Aktueller Stand</p>
-          <p className="mt-1 font-bold text-white">Ereignis 1482</p>
-          <p>Heute · 10:42</p>
-        </div>
       </aside>
       <main className="min-w-0 px-4 py-8 sm:px-8 lg:px-12 lg:py-10">{children}</main>
     </div>

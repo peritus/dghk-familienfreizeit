@@ -12,6 +12,14 @@ import {
 import { Badge } from '../../components/ui/badge.js'
 import { Button } from '../../components/ui/button.js'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card.js'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog.js'
 import { Tabs } from '../../components/ui/tabs.js'
 import { decisionFixture } from './fixtures.js'
 import { FindingCard, ScreenFrame, SectionHeading } from './components.js'
@@ -157,26 +165,15 @@ export function OrganiserDecisions({ view = decisionFixture }: { view?: Decision
 
 function DecisionDialog({ onClose }: { onClose: () => void }) {
   return (
-    <div
-      className="fixed inset-0 z-30 flex items-end justify-center bg-black/40 p-4 sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="decision-dialog-title"
-    >
-      <div className="w-full max-w-2xl rounded-base border-2 border-black bg-white p-6 shadow-shadow">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-muted">
-              Neue Entscheidung
-            </p>
-            <h2 id="decision-dialog-title" className="mt-1 text-2xl">
-              Neue Angabe hinzufügen
-            </h2>
-          </div>
-          <Button variant="neutral" size="icon-sm" onClick={onClose} aria-label="Dialog schließen">
-            ×
-          </Button>
-        </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <p className="text-sm font-bold uppercase tracking-wide text-muted">Neue Entscheidung</p>
+          <DialogTitle>Neue Angabe hinzufügen</DialogTitle>
+          <DialogDescription>
+            Halte eine Anforderung, ein Raummerkmal oder eine Trennung fest.
+          </DialogDescription>
+        </DialogHeader>
         <form
           className="mt-6 grid gap-4"
           onSubmit={(event) => {
@@ -213,14 +210,14 @@ function DecisionDialog({ onClose }: { onClose: () => void }) {
             Zusätzliche Informationen <span className="font-normal text-muted">(optional)</span>
             <textarea className="min-h-24 rounded-base border-2 border-black bg-white px-3 py-2 font-normal" />
           </label>
-          <div className="flex flex-wrap justify-end gap-2 border-t-2 border-black pt-4">
+          <DialogFooter>
             <Button type="button" variant="neutral" onClick={onClose}>
               Abbrechen
             </Button>
             <Button type="submit">Entscheidung hinzufügen</Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
