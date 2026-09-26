@@ -149,9 +149,13 @@ until not changed, or iterations > family count
 
 #### Phase 3 — sorted greedy
 
-Sort remaining families by required priority, feasible room count, `bed_demand`
-descending, lowest `family_id`, then the canonical family key. Score each feasible
-room and place the highest-scoring one, tracing the runners-up.
+For each remaining family, calculate its priority from the configured
+`priority_trait`. An active required priority contributes twice the trait's
+`weight`; an active preferred priority contributes the trait's `weight`. The
+highest priority wins. Ties are broken by fewest feasible rooms, larger
+`bed_demand`, lower family `sort_key`, and lower `family_id`, in that order.
+The family is then placed in the highest-scoring feasible room, tracing the
+runners-up.
 
 #### Phase 4 — bounded repair
 
@@ -184,10 +188,25 @@ Hard rules prune a room. They are not worth points.
 Requirements are satisfied by room capabilities or named structural checks. The
 module provides one structural check, `no-other-families`: the room holds no
 person of another family. At `required` it prunes; at `preferred` it contributes
-the trait's penalty when another family shares the room.
+the trait's configured penalty when another family shares the room.
 
-The scoring table uses exact fit, near fit, orphan-bed, priority, and scarce
-capability terms. Each trace line names the terms and weights that produced it.
+For a feasible candidate room, let `slack` be its free places minus the family's
+`bed_demand`. The total score is the sum of these integer terms:
+
+| Term | Contribution |
+|---|---|
+| `exact-fit` | `weights.exact_fit` when `slack === 0`, otherwise `0` |
+| `near-fit` | `weights.near_fit` when `0 < slack <= max(1, bed_demand)`, otherwise `0` |
+| `orphan-bed` | `weights.orphan_bed * slack` |
+| `preferred-requirement:<trait>` | the trait `weight` when satisfied, otherwise its `penalty` (default `0`) |
+| `preferred-relation:<trait>` | the trait `weight` when satisfied, otherwise its `penalty` (default `0`) |
+| `scarce-capability:<capability>` | the configured penalty when the room has the capability and the family has no active requirement for it |
+
+Required requirements, exclusions, separations, and structural rules are hard
+prunes and never score points. The configured `priority_trait` affects family
+ordering only; it is not added again to every candidate-room score. A room tie
+is resolved by the higher score, lower room `sort_key`, then lower room `id`.
+Each trace line names every non-zero term and the weights that produced it.
 
 ## 9. Preflight checks
 
