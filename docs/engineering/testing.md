@@ -2,6 +2,10 @@
 
 ## Checks and boundaries
 
+Test names, fixture filenames, and fixture directories are domain-oriented. Do
+not encode roadmap milestone IDs or historical implementation labels in them;
+use the domain concept instead.
+
 `npm run ci` executes:
 
 1. Local Markdown link/anchor checks and checker regression tests.

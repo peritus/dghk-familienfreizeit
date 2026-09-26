@@ -6,6 +6,11 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
+      coverage: {
+        provider: 'v8',
+        include: ['src/solver/**/*.ts', 'src/modules/room-assignment/index.ts'],
+        thresholds: { lines: 98, functions: 98, statements: 98, branches: 80 },
+      },
       projects: [
         {
           extends: true,

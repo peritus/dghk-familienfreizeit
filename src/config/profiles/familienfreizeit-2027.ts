@@ -1,5 +1,16 @@
-import { bool, capability, decimal, defineOccasionProfile, enumOf, property } from '../define.js'
+import {
+  bool,
+  capability,
+  decimal,
+  defineOccasionProfile,
+  enumOf,
+  property,
+  ref,
+  relation,
+  requirement,
+} from '../define.js'
 import { roomInventory } from '../../modules/room-inventory/index.js'
+import { roomAssignment } from '../../modules/room-assignment/index.js'
 
 export const familienfreizeit2027Profile = defineOccasionProfile({
   meta: {
@@ -85,6 +96,58 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       value: enumOf(['yes']),
       derive: (entity) => entity.label('is-accessible') === true,
     }),
+    'does-not-need-a-bed': property({
+      title: { de: 'Braucht kein eigenes Bett', en: 'Does not need a bed' },
+      scopes: ['person'],
+      value: bool(),
+      default: false,
+    }),
+    'needs-private-sanitary': requirement({
+      title: { de: 'Eigenes Bad', en: 'Private bathroom' },
+      scopes: ['family'],
+      value: enumOf(['private-sanitary']),
+      satisfied_by: 'private-sanitary',
+      strengths: ['required', 'preferred'],
+      weight: 6,
+      penalty: -2,
+    }),
+    'needs-accessible': requirement({
+      title: { de: 'Barrierearmes Zimmer', en: 'Accessible room' },
+      scopes: ['family', 'person'],
+      value: enumOf(['accessible']),
+      satisfied_by: 'accessible',
+      strengths: ['required', 'preferred'],
+      weight: 8,
+      penalty: -2,
+    }),
+    'needs-ground-floor': requirement({
+      title: { de: 'Erdgeschoss', en: 'Ground floor' },
+      scopes: ['family', 'person'],
+      value: enumOf(['ground-floor']),
+      satisfied_by: 'ground-floor',
+      strengths: ['required', 'preferred'],
+      weight: 4,
+      penalty: -2,
+      organiser_only: true,
+    }),
+    'sole-occupancy': requirement({
+      title: { de: 'Zimmer nicht teilen', en: 'Do not share the room' },
+      scopes: ['family'],
+      value: enumOf(['no-other-families']),
+      structural: 'no-other-families',
+      strengths: ['required', 'preferred'],
+      penalty: -12,
+    }),
+    'apart-from': relation({
+      title: { de: 'Getrennt von', en: 'Keep apart from' },
+      scopes: ['family', 'person'],
+      value: ref('family'),
+      target: ['family'],
+      operator: 'separates-from',
+      strengths: ['required', 'preferred'],
+      penalty: -20,
+      organiser_only: true,
+    }),
   },
   modules: [
     roomInventory({
@@ -107,6 +170,14 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
         },
         bed_types: { single: 'Einzelbett', double: 'Doppelbett', bunk: 'Etagenbett' },
       },
+    }),
+    roomAssignment({
+      weights: { exact_fit: 10, near_fit: 4, orphan_bed: -8 },
+      keep_apart_trait: 'apart-from',
+      no_bed_trait: 'does-not-need-a-bed',
+      priority_trait: 'needs-accessible',
+      scarce_capabilities: { accessible: -3 },
+      max_repair_passes: 5,
     }),
   ],
 })

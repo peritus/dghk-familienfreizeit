@@ -32,7 +32,7 @@ clear optional setup labels when their payload value is null.
 
 ## Active occasion fixture
 
-[`test/fixtures/m5/familienfreizeit-2027.kdl`](../../test/fixtures/m5/familienfreizeit-2027.kdl)
+[`test/fixtures/room-inventory/familienfreizeit-2027.kdl`](../../test/fixtures/room-inventory/familienfreizeit-2027.kdl)
 contains the five buildings, 38 rooms (rooms 35–37 are apartment-type), and
 162 live sleeping places from the occasion inventory. The replay test verifies stable
 ordering and place IDs, the 162-place capacity, and the €15,236 cost summary.
@@ -52,9 +52,11 @@ a room or bed. New and edited rooms stage their required profile labels in
 the same event batch as the room event. Bed capacity follows from `bed_type`
 alone (`single`/`double`/`bunk`) via `sleepsForBedType`; there is no separate
 capacity input. No assignment board, free-place calculation against a plan,
-accommodation report route, family view, apartment "Schlafraum" bed grouping,
-or solver stage is included; those remain M6/M11/M10 work respectively (the
-apartment grouping needs its own bed-schema decision beyond this UI pass).
+accommodation report route, family view, or apartment "Schlafraum" bed grouping
+is included. Assignment business logic is documented in
+[`room-assignment`](room-assignment.md); the board, reports, family view, and
+apartment grouping remain outside this slice. The apartment grouping needs its
+own bed-schema decision beyond this UI pass.
 
 The module contributes world checks for rooms without places, no live capacity while
 people exist, and constraints that name a removed place. These diagnostics are kept

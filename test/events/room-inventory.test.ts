@@ -494,7 +494,7 @@ describe('room inventory', () => {
 
   test('replays the 38-room occasion fixture with 162 places and the documented cost', () => {
     const text = readFileSync(
-      new URL('../fixtures/m5/familienfreizeit-2027.kdl', import.meta.url),
+      new URL('../fixtures/room-inventory/familienfreizeit-2027.kdl', import.meta.url),
       'utf8',
     )
     const events = loadKdl(text, familienfreizeit2027Profile.validation_view)

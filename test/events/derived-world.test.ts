@@ -258,7 +258,10 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
   }
   const world = derive(
     loadKdl(
-      readFileSync(new URL('../fixtures/m3/labels-and-resolver.kdl', import.meta.url), 'utf8'),
+      readFileSync(
+        new URL('../fixtures/derived-world/labels-and-resolver.kdl', import.meta.url),
+        'utf8',
+      ),
       config,
     ),
     config,

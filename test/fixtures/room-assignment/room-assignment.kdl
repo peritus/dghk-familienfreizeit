@@ -8,12 +8,14 @@ BedAdded bed_id=bed_access_b room_id=rm_access label="B" bed_type=single sleeps=
 RoomAdded room_id=rm_open building_id=bld_main number="2" floor=first room_type=standard sort_key=2
 LabelSet entity_id=rm_open key=sanitary value=shared-floor strength=#null note=#null
 LabelSet entity_id=rm_open key=price-per-bed-eur value=80 strength=#null note=#null
+LabelSet entity_id=rm_open key=room-needs-accessible value=accessible strength=required note=#null
 BedAdded bed_id=bed_open_a room_id=rm_open label="A" bed_type=single sleeps=1 sort_key=1
 BedAdded bed_id=bed_open_b room_id=rm_open label="B" bed_type=single sleeps=1 sort_key=2
 FamilyInvited family_id=fam_access email="access@example.test" display_name="Access" locale=de
 PersonAdded person_id=per_access_a family_id=fam_access given_name="Ada" family_name="Access" birthdate=#null role=adult
 PersonAdded person_id=per_access_b family_id=fam_access given_name="Al" family_name="Access" birthdate=#null role=adult
 LabelSet entity_id=fam_access key=needs-accessible value=accessible strength=preferred note=#null
+LabelSet entity_id=fam_access key=apart-from value=fam_open strength=preferred note=#null
 FamilyInvited family_id=fam_open email="open@example.test" display_name="Open" locale=de
 PersonAdded person_id=per_open_a family_id=fam_open given_name="Oda" family_name="Open" birthdate=#null role=adult
 PersonAdded person_id=per_open_b family_id=fam_open given_name="Otto" family_name="Open" birthdate=#null role=adult

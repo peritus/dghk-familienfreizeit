@@ -47,18 +47,18 @@ test('organiser apply validates the prospective batch and returns its world', as
           {
             type: 'FamilyInvited',
             payload: {
-              family_id: 'fam_m4',
-              email: 'm4@example.test',
-              display_name: 'M4',
+              family_id: 'fam_fixture',
+              email: 'organiser@example.test',
+              display_name: 'Organiser',
               locale: 'de',
             },
           },
           {
             type: 'PersonAdded',
             payload: {
-              person_id: 'per_m4',
-              family_id: 'fam_m4',
-              given_name: 'M4',
+              person_id: 'per_fixture',
+              family_id: 'fam_fixture',
+              given_name: 'Alex',
               family_name: 'Family',
               birthdate: null,
               role: 'adult',

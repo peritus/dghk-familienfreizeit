@@ -23,5 +23,5 @@ Family and shared projections are derived from the organiser world. Restricted l
 are omitted from shared output and from every family other than the entity owner's;
 the full world and draft events remain organiser-only.
 
-KDL fixtures in `test/fixtures/m3/` exercise replay, resolver, cardinality, privacy,
+KDL fixtures in `test/fixtures/derived-world/` exercise replay, resolver, cardinality, privacy,
 and shuffle-stable derivation. Run `npm test` for the domain suite.

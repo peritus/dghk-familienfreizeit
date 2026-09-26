@@ -19,12 +19,15 @@ Specification coverage: [solver contract](architecture/solver-contract.md),
 [room assignment](modules/room-assignment.md), room-related [labels and constraints](architecture/labels-and-constraints.md),
 and D5–D7.
 
-- Implement frozen/sorted solver input, deterministic stage ordering, preflight,
-  integer scoring, canonical plan identity, traces, and diagnostics.
-- Implement whole-family placement, bed demand, requirements, capabilities,
-  exclusions, separation, organiser decisions, bounded repair, and board UI.
-- Add real-inventory, infeasible, decision, moved-assignment, trace, shuffle,
-  and golden-plan fixtures.
+The verified business-logic foundation is documented in
+[`docs/modules/room-assignment.md`](../docs/modules/room-assignment.md). The
+remaining milestone scope is the organiser board, placement-decision controls,
+reports, plan diff, communications, and the outstanding integration fixtures.
+
+- Complete the organiser board, placement-decision controls, reports, plan diff,
+  and communications around the derived plan.
+- Add the remaining real-inventory, decision, moved-assignment, shuffle, and
+  golden-plan fixtures as those surfaces land.
 
 Acceptance: whole-family placement is deterministic, hard constraints are
 enforced, organiser actions remain event-backed, the board is usable, and every

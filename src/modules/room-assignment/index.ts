@@ -182,7 +182,9 @@ export function runRoomAssignment(
 } {
   const placements = new Map<string, string>()
   const trace: PlacementTrace[] = []
-  const families = input.families.slice().sort((left, right) => compareFamily(left, right, params))
+  const families = input.families
+    .slice()
+    .sort((left, right) => compareFamily(left, right, params, input))
   const place = (
     family: FamilyPlacementUnit,
     room: RoomCandidate,
@@ -237,24 +239,19 @@ export function runRoomAssignment(
   for (let pass = 0; pass < params.max_repair_passes; pass += 1) {
     let repaired = false
     for (const family of unplaced()) {
-      for (const occupant of families.filter(({ family_id: familyId }) => placements.has(familyId))) {
-        const oldRoom = placements.get(occupant.family_id)
-        if (!oldRoom) continue
-        const targetRoom = roomById(input.rooms, oldRoom)
-        if (!targetRoom) continue
+      for (const occupant of families.filter(({ family_id: familyId }) =>
+        placements.has(familyId),
+      )) {
+        const oldRoom = placements.get(occupant.family_id)!
+        const targetRoom = roomById(input.rooms, oldRoom)!
         placements.delete(occupant.family_id)
         const alternatives = scoredRooms(occupant, placements, input, params)
         const target = scoredRooms(family, placements, input, params).find(
           ({ room }) => room.id === oldRoom,
         )
         const alternative = alternatives.find(({ room }) => room.id !== oldRoom)
-        if (
-          target &&
-          alternative &&
-          target.score + alternative.score >
-            (scoreAt(family, targetRoom, placements, input, params) ?? -Infinity) +
-              (scoreAt(occupant, targetRoom, placements, input, params) ?? -Infinity)
-        ) {
+        const current = score(occupant, targetRoom, placements, input, params).score
+        if (target && alternative && target.score + alternative.score > current) {
           place(family, target.room, 'repair', target)
           place(occupant, alternative.room, 'repair', alternative)
           repaired = true
@@ -280,7 +277,7 @@ export function runRoomAssignment(
       family_id: family.family_id,
       text: family.reason,
     })
-  const assignments = assignPlaces(families, placements, input)
+  const assignments = assignRoomPlaces(families, placements, input)
   return {
     section: { assignments, unplaced: Object.freeze(unplacedFamilies) },
     trace: Object.freeze(trace.map(({ family_id: _familyId, ...entry }) => entry)),
@@ -312,7 +309,7 @@ function roomAssignmentStage(params: RoomAssignmentParams): SolverStage<RoomAssi
   }
 }
 
-function roomAssignmentRules(): readonly Rule<
+export function roomAssignmentRules(): readonly Rule<
   FamilyPlacementUnit,
   RoomCandidate,
   RoomAssignmentInput
@@ -338,7 +335,7 @@ function roomAssignmentRules(): readonly Rule<
   ]
 }
 
-function roomAssignmentPreflight(input: SolverInput) {
+export function roomAssignmentPreflight(input: SolverInput) {
   const roomInput = input.module_inputs['room-assignment'] as RoomAssignmentInput
   const findings: {
     check: string
@@ -381,11 +378,15 @@ function toRoomCandidate(
         .sort(),
     ),
     capacity: room.place_count,
-    capabilities: new Set([
-      ...room.capabilities,
-      ...world.capabilities.filter(({ entity_id: entityId }) => entityId === room.id).map(({ key }) => key),
-    ]),
-    room_type: room.traits['room-type'] as string,
+    capabilities: Object.freeze(
+      new Set([
+        ...room.capabilities,
+        ...world.capabilities
+          .filter(({ entity_id: entityId }) => entityId === room.id)
+          .map(({ key }) => key),
+      ]),
+    ),
+    room_type: room.room_type,
   }
 }
 
@@ -469,9 +470,14 @@ function score(
     const satisfied =
       requirement.kind === 'structural' && requirement.structural === 'no-other-families'
         ? roomFamilies(room.id, placements).every((id) => id === family.family_id)
-        : requirement.capability_key
-          ? room.capabilities.has(requirement.capability_key)
-          : true
+        : requirement.kind === 'relation'
+          ? !requirement.value ||
+            !roomFamilies(room.id, placements).some(
+              (id) => familyOfTarget(requirement.value!, input) === id,
+            )
+          : requirement.capability_key
+            ? room.capabilities.has(requirement.capability_key)
+            : true
     const value = satisfied ? (requirement.weight ?? 0) : (requirement.penalty ?? 0)
     if (value !== 0)
       terms.push([
@@ -488,7 +494,7 @@ function score(
   return { room, score: terms.reduce((total, [, value]) => total + value, 0), terms }
 }
 
-function assignPlaces(
+export function assignRoomPlaces(
   families: readonly FamilyPlacementUnit[],
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
@@ -534,18 +540,6 @@ function explainUnplaced(
     : `${family.family_id} unplaced`
 }
 
-function scoreAt(
-  family: FamilyPlacementUnit,
-  room: RoomCandidate,
-  placements: ReadonlyMap<string, string>,
-  input: RoomAssignmentInput,
-  params: RoomAssignmentParams,
-): number | null {
-  return feasible(family, room, placements, input, params).length === 0
-    ? score(family, room, placements, input, params).score
-    : null
-}
-
 function roomRemaining(
   room: RoomCandidate,
   placements: ReadonlyMap<string, string>,
@@ -564,7 +558,10 @@ function roomFamilies(roomId: string, placements: ReadonlyMap<string, string>): 
 }
 
 function previousRoom(previous: RoomAssignmentSection | null, familyId: string): string | null {
-  return previous?.assignments.find(({ family_id: previousFamilyId }) => previousFamilyId === familyId)?.room_id ?? null
+  return (
+    previous?.assignments.find(({ family_id: previousFamilyId }) => previousFamilyId === familyId)
+      ?.room_id ?? null
+  )
 }
 
 function roomById(rooms: readonly RoomCandidate[], id: string): RoomCandidate | undefined {
@@ -607,9 +604,14 @@ function compareFamily(
   left: FamilyPlacementUnit,
   right: FamilyPlacementUnit,
   params: RoomAssignmentParams,
+  input: RoomAssignmentInput,
 ): number {
+  const placements = new Map<string, string>()
   return (
     priority(right, params) - priority(left, params) ||
+    scoredRooms(left, placements, input, params).length -
+      scoredRooms(right, placements, input, params).length ||
+    right.bed_demand - left.bed_demand ||
     left.sort_key - right.sort_key ||
     left.family_id.localeCompare(right.family_id)
   )
@@ -618,7 +620,9 @@ function compareFamily(
 function priority(family: FamilyPlacementUnit, params: RoomAssignmentParams): number {
   return Math.max(
     ...family.requirements
-      .filter(({ trait_key: traitKey }) => !params.priority_trait || traitKey === params.priority_trait)
+      .filter(
+        ({ trait_key: traitKey }) => !params.priority_trait || traitKey === params.priority_trait,
+      )
       .map(({ strength, weight }) => (strength === 'required' ? 2 : 1) * (weight ?? 0)),
     0,
   )

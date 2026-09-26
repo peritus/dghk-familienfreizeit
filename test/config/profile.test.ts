@@ -17,7 +17,7 @@ const meta = {
 }
 
 describe('occasion profile', () => {
-  test('kernel-only fixture produces the M1 validation view without module surface', () => {
+  test('kernel-only fixture produces the validation view without module surface', () => {
     expect(kernelProfile.modules).toEqual([])
     expect(kernelProfile.validation_view.label_schemas?.map(({ key }) => key)).toEqual(['role'])
     expect(() => derive([], kernelProfile.validation_view)).not.toThrow()

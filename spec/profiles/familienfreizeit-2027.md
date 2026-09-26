@@ -1,15 +1,16 @@
 # Familienfreizeit 2027 occasion profile
 
 This document retains the outstanding occasion-profile requirements. The
-implemented M5 runtime profile is
+implemented runtime profile is
 [`src/config/profiles/familienfreizeit-2027.ts`](../../src/config/profiles/familienfreizeit-2027.ts)
 and its delivered accommodation behavior is documented in
-[implemented room inventory](../../docs/modules/room-inventory.md). The
+[implemented room inventory](../../docs/modules/room-inventory.md) and
+[implemented room assignment](../../docs/modules/room-assignment.md). The
 accompanying TypeScript example remains illustrative for later modules.
 
-The executable profile currently selects the kernel plus `room-inventory`. The
-remaining selected-module composition becomes an integration scope for M12 after
-the later active module contributions exist.
+The executable profile currently selects the kernel plus `room-inventory` and
+`room-assignment`. The remaining selected-module composition becomes an
+integration scope for later work after those module contributions exist.
 
 This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.example.ts); this document
@@ -20,13 +21,13 @@ composition remain in [deferred scope](../deferred-ideas/README.md).
 ## 1. Selected modules
 
 The full occasion is intended to select these modules ([modules](../modules/contract.md) §5).
-The executable M5 profile selects only `room-inventory`; the other rows remain
-later integration scope:
+The executable profile selects `room-inventory` and `room-assignment`; the other
+rows remain later integration scope:
 
 | Module | Used for |
 |---|---|
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
-| [`room-assignment`](../modules/room-assignment.md) | later: deterministic placement, keep-apart relations, and the board |
+| [`room-assignment`](../modules/room-assignment.md) | deterministic placement and keep-apart relations; the organiser board remains outstanding |
 | [`workshop-space`](../modules/workshop-space.md) | later: physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
 | [`programme-core`](../modules/programme-core.md) | later: shared programme-session identity and scheduleable-session boundary |
 | [`official-workshops`](../modules/official-workshops.md) | later: organiser-authored official workshops, audience, and person-to-workshop leadership |
@@ -37,14 +38,14 @@ later integration scope:
 
 ## 2. Room inventory
 
-The M5 inventory portion is implemented and documented in
+The inventory portion is implemented and documented in
 [implemented room inventory](../../docs/modules/room-inventory.md). The active
 profile source is [familienfreizeit-2027.ts](../../src/config/profiles/familienfreizeit-2027.ts)
 and its canonical event fixture is
-[familienfreizeit-2027.kdl](../../test/fixtures/m5/familienfreizeit-2027.kdl).
+[familienfreizeit-2027.kdl](../../test/fixtures/room-inventory/familienfreizeit-2027.kdl).
 
 The remaining profile sections describe modules and controls that are not yet
-selected by the executable M5 profile and belong to later milestones.
+selected by the executable profile and belong to later work.
 ## 3. Workshop-space inventory
 
 Workshop spaces are independent occasion data. The profile selects
