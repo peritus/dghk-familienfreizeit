@@ -41,14 +41,16 @@ changes, or discarding drafts, both require an explicit confirmation step inside
 same popover before anything is deleted or the mode changes.
 
 The component registry and aliases live in [components.json](../../components.json).
-The implemented primitives are Button, Card, Alert and Skeleton in
-[`src/app/components/ui/`](../../src/app/components/ui/). Copied source and its
-adaptations are attributed in [THIRD_PARTY.md](../../THIRD_PARTY.md).
-The Button uses Base UI's `render` composition API, supports variants (including a
-`danger` variant for destructive confirmations) and sizes, and includes
-reduced-motion handling. `Popover` and `Switch` are used directly from `@base-ui/react`
-(save-status control) rather than wrapped as our own components. Components are
-editable application source.
+The implemented primitives are Button, Card, Alert, Skeleton, SegmentedControl,
+and AlertDialog in [`src/app/components/ui/`](../../src/app/components/ui/).
+Copied source and its adaptations are attributed in
+[THIRD_PARTY.md](../../THIRD_PARTY.md). The Button uses Base UI's `render`
+composition API, supports variants (including a `danger` variant for
+destructive confirmations) and sizes, and includes reduced-motion handling.
+AlertDialog composes Base UI's `AlertDialog` (portal, backdrop, focus trap)
+with Button the same way. `Popover` and `Switch` are used directly from
+`@base-ui/react` (save-status control) rather than wrapped as our own
+components. Components are editable application source.
 
 Editable organiser data uses the inline table pattern described in the [UI
 specification](../../spec/ui/design-system.md#editable-table-and-card-pattern).

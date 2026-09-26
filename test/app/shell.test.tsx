@@ -145,7 +145,9 @@ test('a failed organiser log load shows a load error, not a save error', async (
   expect(
     await screen.findByText('Die Organisationsdaten konnten nicht geladen werden'),
   ).toBeTruthy()
-  expect(screen.getByText('Die Familiendaten konnten nicht geladen werden.', { exact: false })).toBeTruthy()
+  expect(
+    screen.getByText('Die Familiendaten konnten nicht geladen werden.', { exact: false }),
+  ).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Neu laden' })).toBeTruthy()
   // No organiser nav or save-status control renders for a whole-app load failure.
   expect(screen.queryByRole('navigation')).toBeNull()

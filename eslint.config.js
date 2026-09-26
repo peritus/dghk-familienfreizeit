@@ -30,7 +30,7 @@ const naming = [
     format: ['snake_case'],
     filter: {
       regex:
-        '^(Bindings|ASSETS|DB|[A-Z_]+|[0-9]+|className|onClick|tabIndex|aria-.*|data-.*|getDerivedStateFromError|componentDidCatch|children|nativeButton|defaultVariants|noShadow|FamilyInvited|FamilyEmailChanged|PersonAdded|PersonUpdated|PersonWithdrawn|LabelSet|LabelCleared|isOrganiser|httpOnly|sameSite|maxAge)$|^[a-z][a-z0-9]*(-[a-z0-9]+)+$',
+        '^(Bindings|ASSETS|DB|[A-Z_]+|[0-9]+|className|onClick|tabIndex|aria-.*|data-.*|getDerivedStateFromError|componentDidCatch|children|nativeButton|defaultVariants|noShadow|FamilyInvited|FamilyEmailChanged|PersonAdded|PersonUpdated|PersonWithdrawn|LabelSet|LabelCleared|isOrganiser|httpOnly|sameSite|maxAge|minimumFractionDigits|maximumFractionDigits)$|^[a-z][a-z0-9]*(-[a-z0-9]+)+$',
       match: false,
     },
   },

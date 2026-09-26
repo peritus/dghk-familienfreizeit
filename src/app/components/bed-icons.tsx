@@ -66,8 +66,16 @@ export function BunkBedIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function bedIconFor(bedType: string) {
-  if (bedType === 'double') return DoubleBedIcon
-  if (bedType === 'bunk') return BunkBedIcon
-  return SingleBedIcon
+/**
+ * A single stable component that switches internally, rather than handing
+ * callers a dynamically-selected component reference (which resets state
+ * on every render if assigned to a local variable and used as a JSX tag).
+ */
+export function BedIcon({
+  bed_type: bedType,
+  ...props
+}: { bed_type: string } & SVGProps<SVGSVGElement>) {
+  if (bedType === 'double') return <DoubleBedIcon {...props} />
+  if (bedType === 'bunk') return <BunkBedIcon {...props} />
+  return <SingleBedIcon {...props} />
 }

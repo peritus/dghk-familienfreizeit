@@ -1,11 +1,4 @@
-import {
-  bool,
-  capability,
-  decimal,
-  defineOccasionProfile,
-  enumOf,
-  property,
-} from '../define.js'
+import { bool, capability, decimal, defineOccasionProfile, enumOf, property } from '../define.js'
 import { roomInventory } from '../../modules/room-inventory/index.js'
 
 export const familienfreizeit2027Profile = defineOccasionProfile({

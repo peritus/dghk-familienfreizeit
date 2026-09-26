@@ -167,6 +167,73 @@ describe('room inventory', () => {
     expect(summary.places.filter(({ bed_id }) => bed_id === 'bed_2')).toHaveLength(2)
   })
 
+  test('apartment beds carry a sleeping_room grouping; other room types reject it', () => {
+    const apartmentEvents: Event[] = [
+      event('BuildingAdded', { building_id: 'bld_apt', name: 'Apartment House', sort_key: 1 }, 1),
+      event(
+        'RoomAdded',
+        {
+          room_id: 'rm_apt',
+          building_id: 'bld_apt',
+          number: '2',
+          floor: 'ground',
+          room_type: 'apartment',
+          sort_key: 1,
+        },
+        2,
+      ),
+      event(
+        'BedAdded',
+        {
+          bed_id: 'bed_apt_1',
+          room_id: 'rm_apt',
+          label: '',
+          bed_type: 'single',
+          sleeps: 1,
+          sort_key: 1,
+          sleeping_room: 1,
+        },
+        3,
+      ),
+      event(
+        'BedAdded',
+        {
+          bed_id: 'bed_apt_2',
+          room_id: 'rm_apt',
+          label: '',
+          bed_type: 'single',
+          sleeps: 1,
+          sort_key: 2,
+          sleeping_room: 2,
+        },
+        4,
+      ),
+    ]
+    const summary = inventoryWorld(derive(apartmentEvents, profile.validation_view))
+    expect(summary.beds.find(({ id }) => id === 'bed_apt_1')?.sleeping_room).toBe(1)
+    expect(summary.beds.find(({ id }) => id === 'bed_apt_2')?.sleeping_room).toBe(2)
+
+    const rejected = [
+      ...inventoryEvents,
+      event(
+        'BedAdded',
+        {
+          bed_id: 'bed_bad',
+          room_id: 'rm_1', // room_type 'standard', not 'apartment'
+          label: '',
+          bed_type: 'single',
+          sleeps: 1,
+          sort_key: 2,
+          sleeping_room: 1,
+        },
+        5,
+      ),
+    ]
+    expect(() => derive(rejected, profile.validation_view)).toThrow(
+      /sleeping_room only applies to apartment/,
+    )
+  })
+
   test('reducing sleeps hard-removes only the second place and preserves history by prefix replay', () => {
     const updated = [
       ...inventoryEvents,

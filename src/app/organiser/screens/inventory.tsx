@@ -1,5 +1,15 @@
 import { useState } from 'react'
-import { bedIconFor } from '../../components/bed-icons.js'
+import { BedIcon } from '../../components/bed-icons.js'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog.js'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { SegmentedControl } from '../../components/ui/segmented-control.js'
@@ -29,6 +39,17 @@ import {
   type TraitInput,
 } from './inventory-events.js'
 
+type NewBedPayload = { label: string; bed_type: string; sleeping_room: number | null }
+
+type BedUpdatePayload = {
+  room_id: string
+  label: string
+  bed_type: string
+  sleeps: 1 | 2
+  sort_key: number
+  sleeping_room: number | null
+}
+
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
   return `${prefix}${random.replaceAll('-', '').slice(0, 16)}`
@@ -39,13 +60,16 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
 }
 
 // Floors don't apply to a Bungalow or Schlaffass (D39/Q4).
-const FLOORLESS_ROOM_TYPES = new Set(['bungalow', 'schlaffass'])
+const floorlessRoomTypes = new Set(['bungalow', 'schlaffass'])
 
 export function Inventory() {
   useDocumentTitle('Unterkunft · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const config = selectedInventoryConfig()
-  const floors = config.floors.map((value) => ({ value, label: config.copy.floors[value] ?? value }))
+  const floors = config.floors.map((value) => ({
+    value,
+    label: config.copy.floors[value] ?? value,
+  }))
   const roomTypes = config.room_types.map((value) => ({
     value,
     label: config.copy.room_types[value] ?? value,
@@ -117,10 +141,7 @@ export function Inventory() {
     return null
   }
 
-  function addBed(
-    roomId: string,
-    payload: { label: string; bed_type: string },
-  ) {
+  function addBed(roomId: string, payload: NewBedPayload) {
     const label = payload.label.trim()
     stageInventoryEvents([
       draft(state.principal_email ?? '', 'BedAdded', {
@@ -130,6 +151,7 @@ export function Inventory() {
         bed_type: payload.bed_type,
         sleeps: sleepsForBedType(payload.bed_type),
         sort_key: summary.beds.filter((bed) => bed.room_id === roomId).length + 1,
+        sleeping_room: payload.sleeping_room,
       }),
     ])
   }
@@ -171,10 +193,7 @@ export function Inventory() {
     stageInventoryEvents([{ type: 'RoomRemoved', payload: { room_id: roomId, reason: null } }])
   }
 
-  function updateBed(
-    bedId: string,
-    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
-  ): void {
+  function updateBed(bedId: string, payload: BedUpdatePayload): void {
     stageInventoryEvents([{ type: 'BedUpdated', payload: { bed_id: bedId, ...payload } }])
   }
 
@@ -210,7 +229,7 @@ export function Inventory() {
           rooms={summary.rooms.length}
           beds={summary.beds.length}
           places={summary.capacity}
-          costPerNight={summary.cost_eur}
+          cost_per_night={summary.cost_eur}
         />
       ) : null}
 
@@ -238,16 +257,16 @@ export function Inventory() {
               beds={summary.beds}
               world={world}
               floors={floors}
-              roomTypes={roomTypes}
-              bedTypes={bedTypes}
-              roomFormOpen={openRoomForms[building.id] ?? false}
+              room_types={roomTypes}
+              bed_types={bedTypes}
+              room_form_open={openRoomForms[building.id] ?? false}
               onToggleRoomForm={() =>
                 setOpenRoomForms((current) => ({
                   ...current,
                   [building.id]: !current[building.id],
                 }))
               }
-              openRooms={openRooms}
+              open_rooms={openRooms}
               onToggleRoom={(roomId) =>
                 setOpenRooms((current) => ({ ...current, [roomId]: !current[roomId] }))
               }
@@ -278,13 +297,13 @@ function Stats({
   rooms,
   beds,
   places,
-  costPerNight,
+  cost_per_night: costPerNight,
 }: {
   buildings: number
   rooms: number
   beds: number
   places: number
-  costPerNight: number
+  cost_per_night: number
 }) {
   const cells = [
     { value: buildings, label: 'Gebäude' },
@@ -372,11 +391,11 @@ function BuildingSection({
   beds,
   world,
   floors,
-  roomTypes,
-  bedTypes,
-  roomFormOpen,
+  room_types: roomTypes,
+  bed_types: bedTypes,
+  room_form_open: roomFormOpen,
   onToggleRoomForm,
-  openRooms,
+  open_rooms: openRooms,
   onToggleRoom,
   onUpdateBuilding,
   onRemoveBuilding,
@@ -392,11 +411,11 @@ function BuildingSection({
   beds: readonly InventoryBed[]
   world: ReturnType<typeof useOrganiser>['world']
   floors: readonly { value: string; label: string }[]
-  roomTypes: readonly { value: string; label: string }[]
-  bedTypes: readonly { value: string; label: string }[]
-  roomFormOpen: boolean
+  room_types: readonly { value: string; label: string }[]
+  bed_types: readonly { value: string; label: string }[]
+  room_form_open: boolean
   onToggleRoomForm: () => void
-  openRooms: Record<string, boolean>
+  open_rooms: Record<string, boolean>
   onToggleRoom: (roomId: string) => void
   onUpdateBuilding: (id: string, name: string, sortKey: number) => void
   onRemoveBuilding: (id: string) => void
@@ -418,11 +437,8 @@ function BuildingSection({
     labels: readonly Label[],
   ) => string | null
   onRemoveRoom: (id: string) => void
-  onAddBed: (roomId: string, payload: { label: string; bed_type: string }) => void
-  onUpdateBed: (
-    id: string,
-    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
-  ) => void
+  onAddBed: (roomId: string, payload: NewBedPayload) => void
+  onUpdateBed: (id: string, payload: BedUpdatePayload) => void
   onRemoveBed: (id: string) => void
 }) {
   const places = rooms.reduce((sum, room) => sum + room.place_count, 0)
@@ -432,10 +448,14 @@ function BuildingSection({
         <div>
           <h2 className="text-2xl font-heading">{building.name}</h2>
           <p className="text-muted">
-            {rooms.length} {pluralDe(rooms.length, 'Zimmer', 'Zimmer')},{' '}
-            {places} {pluralDe(places, 'Schlafplatz', 'Schlafplätze')}
+            {rooms.length} {pluralDe(rooms.length, 'Zimmer', 'Zimmer')}, {places}{' '}
+            {pluralDe(places, 'Schlafplatz', 'Schlafplätze')}
           </p>
-          <BuildingEditor building={building} onSave={onUpdateBuilding} onRemove={onRemoveBuilding} />
+          <BuildingEditor
+            building={building}
+            onSave={onUpdateBuilding}
+            onRemove={onRemoveBuilding}
+          />
         </div>
         <Button variant="neutral" onClick={onToggleRoomForm}>
           + Zimmer hinzufügen
@@ -447,8 +467,8 @@ function BuildingSection({
           heading={`Neues Zimmer in ${building.name}`}
           intro="Die Schlafplätze ergeben sich aus den Betten, die du danach im Zimmer hinzufügst."
           floors={floors}
-          roomTypes={roomTypes}
-          submitLabel="Zimmer anlegen"
+          room_types={roomTypes}
+          submit_label="Zimmer anlegen"
           onCancel={onToggleRoomForm}
           onSubmit={(payload, values) => onAddRoom(building.id, payload, values)}
         />
@@ -504,8 +524,8 @@ function BuildingSection({
                       beds={roomBeds}
                       labels={world?.labels_by_entity[room.id] ?? []}
                       floors={floors}
-                      roomTypes={roomTypes}
-                      bedTypes={bedTypes}
+                      room_types={roomTypes}
+                      bed_types={bedTypes}
                       open={open}
                       onToggle={() => onToggleRoom(room.id)}
                       onSave={onUpdateRoom}
@@ -537,18 +557,25 @@ function BuildingEditor({
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(building.name)
   const [blockedReason, setBlockedReason] = useState<string | null>(null)
-  const [confirming, setConfirming] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   function handleRemoveClick() {
     if (building.room_count > 0) {
-      setBlockedReason('Ein Gebäude mit Zimmern kann nicht entfernt werden. Entferne zuerst die Zimmer.')
+      setBlockedReason(
+        'Ein Gebäude mit Zimmern kann nicht entfernt werden. Entferne zuerst die Zimmer.',
+      )
       return
     }
-    setConfirming(true)
+    setBlockedReason(null)
+    setConfirmOpen(true)
   }
 
   return (
-    <details className="mt-2 text-sm" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
+    <details
+      className="mt-2 text-sm"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
       <summary className="cursor-pointer font-bold underline">Gebäude bearbeiten</summary>
       <div className="mt-2 space-y-3 rounded-base border-2 border-black bg-paper p-3">
         <form
@@ -577,23 +604,22 @@ function BuildingEditor({
               {blockedReason}
             </p>
           ) : null}
-          {confirming ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <p>
-                Gebäude {building.name} entfernen?
-              </p>
-              <Button type="button" variant="neutral" autoFocus onClick={() => setConfirming(false)}>
-                Behalten
-              </Button>
-              <Button type="button" variant="danger" onClick={() => onRemove(building.id)}>
-                Ja, entfernen
-              </Button>
-            </div>
-          ) : (
-            <Button type="button" variant="neutral" onClick={handleRemoveClick}>
-              Gebäude entfernen
-            </Button>
-          )}
+          <Button type="button" variant="neutral" onClick={handleRemoveClick}>
+            Gebäude entfernen
+          </Button>
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Gebäude {building.name} entfernen?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel autoFocus>Behalten</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onRemove(building.id)}>
+                  Ja, entfernen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </details>
@@ -605,8 +631,8 @@ function RoomRow({
   beds,
   labels,
   floors,
-  roomTypes,
-  bedTypes,
+  room_types: roomTypes,
+  bed_types: bedTypes,
   open,
   onToggle,
   onSave,
@@ -619,8 +645,8 @@ function RoomRow({
   beds: readonly InventoryBed[]
   labels: readonly Label[]
   floors: readonly { value: string; label: string }[]
-  roomTypes: readonly { value: string; label: string }[]
-  bedTypes: readonly { value: string; label: string }[]
+  room_types: readonly { value: string; label: string }[]
+  bed_types: readonly { value: string; label: string }[]
   open: boolean
   onToggle: () => void
   onSave: (
@@ -636,16 +662,13 @@ function RoomRow({
     labels: readonly Label[],
   ) => string | null
   onRemove: (id: string) => void
-  onAddBed: (roomId: string, payload: { label: string; bed_type: string }) => void
-  onUpdateBed: (
-    id: string,
-    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
-  ) => void
+  onAddBed: (roomId: string, payload: NewBedPayload) => void
+  onUpdateBed: (id: string, payload: BedUpdatePayload) => void
   onRemoveBed: (id: string) => void
 }) {
   const detailId = `betten-${room.id}`
   const tags = roomTags(room)
-  const floorless = FLOORLESS_ROOM_TYPES.has(room.room_type)
+  const floorless = floorlessRoomTypes.has(room.room_type)
   const price = room.traits['price-per-bed-eur']
 
   return (
@@ -704,8 +727,8 @@ function RoomRow({
               beds={beds}
               labels={labels}
               floors={floors}
-              roomTypes={roomTypes}
-              bedTypes={bedTypes}
+              room_types={roomTypes}
+              bed_types={bedTypes}
               onSave={onSave}
               onRemove={onRemove}
               onAddBed={onAddBed}
@@ -737,17 +760,15 @@ function bedSummary(
   const entries = Array.from(counts.entries())
   const label = entries
     .map(
-      ([type, count]) =>
-        `${count} ${bedTypes.find(({ value }) => value === type)?.label ?? type}`,
+      ([type, count]) => `${count} ${bedTypes.find(({ value }) => value === type)?.label ?? type}`,
     )
     .join(', ')
   return (
     <span role="img" aria-label={label} className="flex flex-wrap items-center gap-2">
       {entries.map(([type, count]) => {
-        const Icon = bedIconFor(type)
         return (
           <span key={type} className="inline-flex items-center gap-1">
-            <Icon aria-hidden="true" className="h-6 w-8" />
+            <BedIcon bed_type={type} aria-hidden="true" className="h-6 w-8" />
             {count}×
           </span>
         )
@@ -761,8 +782,8 @@ function RoomDetail({
   beds,
   labels,
   floors,
-  roomTypes,
-  bedTypes,
+  room_types: roomTypes,
+  bed_types: bedTypes,
   onSave,
   onRemove,
   onAddBed,
@@ -773,8 +794,8 @@ function RoomDetail({
   beds: readonly InventoryBed[]
   labels: readonly Label[]
   floors: readonly { value: string; label: string }[]
-  roomTypes: readonly { value: string; label: string }[]
-  bedTypes: readonly { value: string; label: string }[]
+  room_types: readonly { value: string; label: string }[]
+  bed_types: readonly { value: string; label: string }[]
   onSave: (
     id: string,
     payload: {
@@ -788,15 +809,12 @@ function RoomDetail({
     labels: readonly Label[],
   ) => string | null
   onRemove: (id: string) => void
-  onAddBed: (roomId: string, payload: { label: string; bed_type: string }) => void
-  onUpdateBed: (
-    id: string,
-    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
-  ) => void
+  onAddBed: (roomId: string, payload: NewBedPayload) => void
+  onUpdateBed: (id: string, payload: BedUpdatePayload) => void
   onRemoveBed: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   return (
     <div className="space-y-4">
@@ -804,31 +822,32 @@ function RoomDetail({
         <Button type="button" variant="neutral" onClick={() => setEditing((value) => !value)}>
           Zimmer bearbeiten
         </Button>
-        {confirmingDelete ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <p>
-              Zimmer {room.number} entfernen?
-              {beds.length > 0 ? ` Die ${beds.length} Betten darin werden auch entfernt.` : ''}
-            </p>
-            <Button type="button" variant="neutral" autoFocus onClick={() => setConfirmingDelete(false)}>
-              Behalten
-            </Button>
-            <Button type="button" variant="danger" onClick={() => onRemove(room.id)}>
-              Ja, entfernen
-            </Button>
-          </div>
-        ) : (
-          <Button type="button" variant="neutral" onClick={() => setConfirmingDelete(true)}>
-            Zimmer entfernen
-          </Button>
-        )}
+        <Button type="button" variant="neutral" onClick={() => setConfirmOpen(true)}>
+          Zimmer entfernen
+        </Button>
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Zimmer {room.number} entfernen?</AlertDialogTitle>
+              {beds.length > 0 ? (
+                <AlertDialogDescription>
+                  Die {beds.length} Betten darin werden auch entfernt.
+                </AlertDialogDescription>
+              ) : null}
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel autoFocus>Behalten</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onRemove(room.id)}>Ja, entfernen</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {editing ? (
         <RoomForm
           floors={floors}
-          roomTypes={roomTypes}
-          submitLabel="Änderungen speichern"
+          room_types={roomTypes}
+          submit_label="Änderungen speichern"
           initial={{
             number: room.number,
             floor: room.floor ?? '',
@@ -853,36 +872,74 @@ function RoomDetail({
         {beds.length === 0 ? (
           <p>Noch keine Betten. Füg das erste Bett hinzu, dann hat das Zimmer Schlafplätze.</p>
         ) : (
-          <div className="divide-y-2 divide-black rounded-base border-2 border-black bg-white">
-            {beds.map((bed) => (
-              <BedRow
-                key={bed.id}
-                bed={bed}
-                bedTypes={bedTypes}
-                onSave={onUpdateBed}
-                onRemove={onRemoveBed}
-              />
-            ))}
-          </div>
+          bedGroups(beds, room.room_type === 'apartment').map((group) => (
+            <div key={group.heading ?? '_'}>
+              {group.heading ? (
+                <h3 className="mb-1 font-heading text-lg">{group.heading}</h3>
+              ) : null}
+              <div className="divide-y-2 divide-black rounded-base border-2 border-black bg-white">
+                {group.beds.map((bed) => (
+                  <BedRow
+                    key={bed.id}
+                    bed={bed}
+                    bed_types={bedTypes}
+                    onSave={onUpdateBed}
+                    onRemove={onRemoveBed}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
         )}
-        <BedForm bedTypes={bedTypes} onSubmit={(payload) => onAddBed(room.id, payload)} />
+        <BedForm
+          bed_types={bedTypes}
+          is_apartment={room.room_type === 'apartment'}
+          existing_schlafraeume={Array.from(
+            new Set(
+              beds
+                .map((bed) => bed.sleeping_room)
+                .filter((value): value is number => value !== null),
+            ),
+          ).sort((a, b) => a - b)}
+          onSubmit={(payload) => onAddBed(room.id, payload)}
+        />
       </div>
     </div>
   )
 }
 
+function bedGroups(
+  beds: readonly InventoryBed[],
+  isApartment: boolean,
+): readonly { heading: string | null; beds: readonly InventoryBed[] }[] {
+  if (!isApartment) return [{ heading: null, beds }]
+  const groups = new Map<number, InventoryBed[]>()
+  const ungrouped: InventoryBed[] = []
+  for (const bed of beds) {
+    if (bed.sleeping_room === null) {
+      ungrouped.push(bed)
+      continue
+    }
+    const list = groups.get(bed.sleeping_room) ?? []
+    list.push(bed)
+    groups.set(bed.sleeping_room, list)
+  }
+  const result: { heading: string | null; beds: InventoryBed[] }[] = Array.from(groups.keys())
+    .sort((a, b) => a - b)
+    .map((n) => ({ heading: `Schlafraum ${n}`, beds: groups.get(n)! }))
+  if (ungrouped.length > 0) result.push({ heading: null, beds: ungrouped })
+  return result
+}
+
 function BedRow({
   bed,
-  bedTypes,
+  bed_types: bedTypes,
   onSave,
   onRemove,
 }: {
   bed: InventoryBed
-  bedTypes: readonly { value: string; label: string }[]
-  onSave: (
-    id: string,
-    payload: { room_id: string; label: string; bed_type: string; sleeps: 1 | 2; sort_key: number },
-  ) => void
+  bed_types: readonly { value: string; label: string }[]
+  onSave: (id: string, payload: BedUpdatePayload) => void
   onRemove: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
@@ -902,6 +959,7 @@ function BedRow({
             bed_type: bedType,
             sleeps: sleepsForBedType(bedType),
             sort_key: bed.sort_key,
+            sleeping_room: bed.sleeping_room,
           })
           setEditing(false)
         }}
@@ -918,7 +976,8 @@ function BedRow({
           label="Bettart"
           value={bedType}
           onChange={setBedType}
-          options={bedTypes.map((option) => ({ ...option, icon: bedIconFor(option.value) }))}
+          options={bedTypes}
+          render_icon={(value) => <BedIcon bed_type={value} className="size-5" />}
         />
         <div className="flex flex-wrap gap-2">
           <Button type="submit" variant="neutral">
@@ -931,11 +990,10 @@ function BedRow({
       </form>
     )
 
-  const Icon = bedIconFor(bed.bed_type)
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-3">
       <div className="flex items-start gap-3">
-        <Icon aria-hidden="true" className="mt-0.5 h-6 w-8 shrink-0" />
+        <BedIcon bed_type={bed.bed_type} aria-hidden="true" className="mt-0.5 h-6 w-8 shrink-0" />
         <div>
           <p>
             <span className="font-bold">{typeLabel}</span>
@@ -978,20 +1036,26 @@ function slotLabels(bed: InventoryBed): readonly string[] {
 }
 
 function BedForm({
-  bedTypes,
+  bed_types: bedTypes,
+  is_apartment: isApartment,
+  existing_schlafraeume: existingSchlafraeume,
   onSubmit,
 }: {
-  bedTypes: readonly { value: string; label: string }[]
-  onSubmit: (payload: { label: string; bed_type: string }) => void
+  bed_types: readonly { value: string; label: string }[]
+  is_apartment: boolean
+  existing_schlafraeume: readonly number[]
+  onSubmit: (payload: NewBedPayload) => void
 }) {
   const [bedType, setBedType] = useState(bedTypes[0]?.value ?? '')
   const [label, setLabel] = useState('')
+  const [schlafraumCount, setSchlafraumCount] = useState(Math.max(1, ...existingSchlafraeume))
+  const [sleepingRoom, setSleepingRoom] = useState(existingSchlafraeume[0] ?? 1)
   return (
     <form
       className="space-y-3 border-t-2 border-black pt-4"
       onSubmit={(event) => {
         event.preventDefault()
-        onSubmit({ label, bed_type: bedType })
+        onSubmit({ label, bed_type: bedType, sleeping_room: isApartment ? sleepingRoom : null })
         setLabel('')
       }}
     >
@@ -1000,7 +1064,8 @@ function BedForm({
           label="Bettart"
           value={bedType}
           onChange={setBedType}
-          options={bedTypes.map((option) => ({ ...option, icon: bedIconFor(option.value) }))}
+          options={bedTypes}
+          render_icon={(value) => <BedIcon bed_type={value} className="size-5" />}
         />
         <label className="grid gap-1">
           <span className="font-bold">
@@ -1014,10 +1079,27 @@ function BedForm({
           />
         </label>
       </div>
-      {bedType === 'bunk' ? (
-        <p className="text-sm text-muted">
-          Ein Etagenbett hat zwei Schlafplätze: oben und unten. Oben erst ab 6 Jahren.
-        </p>
+      {isApartment ? (
+        <SegmentedControl
+          label="Schlafraum"
+          value={String(sleepingRoom)}
+          onChange={(next) => {
+            if (next === 'new') {
+              const created = schlafraumCount + 1
+              setSchlafraumCount(created)
+              setSleepingRoom(created)
+              return
+            }
+            setSleepingRoom(Number(next))
+          }}
+          options={[
+            ...Array.from({ length: schlafraumCount }, (_, index) => ({
+              value: String(index + 1),
+              label: `Schlafraum ${index + 1}`,
+            })),
+            { value: 'new', label: '+ Neuer Schlafraum' },
+          ]}
+        />
       ) : null}
       <Button type="submit">Bett hinzufügen</Button>
     </form>
@@ -1028,8 +1110,8 @@ function RoomForm({
   heading,
   intro,
   floors,
-  roomTypes,
-  submitLabel,
+  room_types: roomTypes,
+  submit_label: submitLabel,
   initial,
   onCancel,
   onSubmit,
@@ -1037,8 +1119,8 @@ function RoomForm({
   heading?: string
   intro?: string
   floors: readonly { value: string; label: string }[]
-  roomTypes: readonly { value: string; label: string }[]
-  submitLabel: string
+  room_types: readonly { value: string; label: string }[]
+  submit_label: string
   initial?: { number: string; floor: string; room_type: string; values: RoomTraitValues }
   onCancel: () => void
   onSubmit: (
@@ -1049,9 +1131,11 @@ function RoomForm({
   const [number, setNumber] = useState(initial?.number ?? '')
   const [floor, setFloor] = useState(initial?.floor ?? '')
   const [roomType, setRoomType] = useState(initial?.room_type ?? roomTypes[0]?.value ?? '')
-  const [values, setValues] = useState<RoomTraitValues>(() => initial?.values ?? roomTraitDefaults())
+  const [values, setValues] = useState<RoomTraitValues>(
+    () => initial?.values ?? roomTraitDefaults(),
+  )
   const [error, setError] = useState<string | null>(null)
-  const floorless = FLOORLESS_ROOM_TYPES.has(roomType)
+  const floorless = floorlessRoomTypes.has(roomType)
 
   return (
     <Card className="border-t-2 bg-paper">
@@ -1062,7 +1146,10 @@ function RoomForm({
           className={heading ? 'mt-4 space-y-3' : 'space-y-3'}
           onSubmit={(event) => {
             event.preventDefault()
-            const result = onSubmit({ number, floor: floorless ? null : floor || null, room_type: roomType }, values)
+            const result = onSubmit(
+              { number, floor: floorless ? null : floor || null, room_type: roomType },
+              values,
+            )
             if (result) return setError(result)
             setError(null)
           }}

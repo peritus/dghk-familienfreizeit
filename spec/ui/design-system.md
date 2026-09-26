@@ -88,15 +88,16 @@ element to render in place of the primitive's default and merges the primitive's
 props and accessible semantics into it. Every interactive control follows this
 API and keeps those semantics intact.
 
-**Outstanding:** `AlertDialog` itself is not built yet (no primitive exists in
-`src/app/components/ui/`) and no destructive action in the app uses it. The
-inventory screen's building/room delete confirmations
-(`docs/ui/design-system.md`) use a local, inline two-step pattern (the
-button's own row becomes "Behalten" / "Ja, entfernen") instead, since that
-was cheaper than introducing the primitive for a single screen. Building
-`AlertDialog` (Base UI `AlertDialog` + focus trap + portal) and migrating
-inventory's confirmations onto it is follow-up work, not silently treated as
-equivalent to this contract.
+**Implemented** as `AlertDialog`/`AlertDialogContent`/`AlertDialogHeader`/
+`AlertDialogFooter`/`AlertDialogTitle`/`AlertDialogDescription`/
+`AlertDialogCancel`/`AlertDialogAction`
+([`src/app/components/ui/alert-dialog.tsx`](../../src/app/components/ui/alert-dialog.tsx)),
+composing Base UI's `AlertDialog` (portal, backdrop, focus trap, Esc/
+outside-click handling) with `Button` through the `render` prop. The
+inventory screen's building and room delete confirmations use it; other
+destructive actions in the app (e.g. family-member delete,
+`family-detail.tsx`) still delete immediately with no confirmation of any
+kind and are candidates for migrating onto this same primitive.
 
 ## Pressable elements and hit areas
 

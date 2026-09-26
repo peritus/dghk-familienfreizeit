@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -5,18 +6,25 @@ import { cn } from '@/lib/utils'
  * spec/ui/design-system.md#forms (§5 of the inventory guideline additions):
  * use instead of a <select> when there are <=4 options and seeing them
  * helps (bed type, Schlafraum).
+ *
+ * `render_icon` is a render function, not a component reference: calling it
+ * inline avoids the "component created during render" pitfall a per-option
+ * component reference would hit if assigned to a local variable and used as
+ * a JSX tag.
  */
 export function SegmentedControl<T extends string>({
   label,
   value,
   onChange,
   options,
+  render_icon: renderIcon,
   className,
 }: {
   label: string
   value: T
   onChange: (value: T) => void
-  options: readonly { value: T; label: string; icon?: React.ComponentType<{ className?: string }> }[]
+  options: readonly { value: T; label: string }[]
+  render_icon?: (value: T) => ReactNode
   className?: string
 }) {
   return (
@@ -29,7 +37,6 @@ export function SegmentedControl<T extends string>({
       >
         {options.map((option, index) => {
           const selected = option.value === value
-          const Icon = option.icon
           return (
             <button
               key={option.value}
@@ -43,7 +50,7 @@ export function SegmentedControl<T extends string>({
                 selected ? 'bg-black text-white' : 'bg-white text-foreground',
               )}
             >
-              {Icon ? <Icon className="size-5" /> : null}
+              {renderIcon?.(option.value)}
               {option.label}
             </button>
           )

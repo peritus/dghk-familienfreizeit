@@ -102,6 +102,47 @@ test('adding a building, then a room with a duplicate number, is rejected', asyn
   expect(await screen.findByText('In Haupthaus gibt es schon ein Zimmer 101.')).toBeTruthy()
 }, 20000)
 
+test('apartment rooms group added beds by Schlafraum, with a "+ Neuer Schlafraum" control', async () => {
+  const buildingEvent: Event = {
+    seq: 1,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'BuildingAdded',
+    payload: { building_id: 'bld_1', name: 'Gartenhaus', sort_key: 1 },
+  }
+  const roomEvent: Event = {
+    seq: 2,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'RoomAdded',
+    payload: {
+      room_id: 'rm_1',
+      building_id: 'bld_1',
+      number: '35',
+      floor: null,
+      room_type: 'apartment',
+      sort_key: 1,
+    },
+  }
+  open([buildingEvent, roomEvent])
+
+  fireEvent.click(await screen.findByRole('button', { name: /35/ }))
+  // First bed: no Schlafraum exists yet, defaults to "Schlafraum 1".
+  fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
+  expect(await screen.findByRole('heading', { name: 'Schlafraum 1' })).toBeTruthy()
+
+  // Second bed: create a new Schlafraum via "+ Neuer Schlafraum".
+  fireEvent.click(
+    within(screen.getByRole('group', { name: 'Schlafraum' })).getByRole('button', {
+      name: '+ Neuer Schlafraum',
+    }),
+  )
+  fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
+  expect(await screen.findByRole('heading', { name: 'Schlafraum 2' })).toBeTruthy()
+}, 20000)
+
 test('adding a bunk bed shows the age hint and the Oben/Unten slots, and updates the Keine-Betten badge', async () => {
   const buildingEvent: Event = {
     seq: 1,
@@ -153,10 +194,14 @@ test('adding a bunk bed shows the age hint and the Oben/Unten slots, and updates
   expect(await screen.findByText('Keine Betten')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('button', { name: /101/ }))
-  fireEvent.click(within(screen.getByRole('group', { name: 'Bettart' })).getByRole('button', { name: 'Etagenbett' }))
-  expect(
-    await screen.findByText(/Ein Etagenbett hat zwei Schlafplätze: oben und unten/),
-  ).toBeTruthy()
+  fireEvent.click(
+    within(screen.getByRole('group', { name: 'Bettart' })).getByRole('button', {
+      name: 'Etagenbett',
+    }),
+  )
+  // D35: the "Oben erst ab 6 Jahren" age hint is deliberately not shown —
+  // no assignment logic exists yet to act on it.
+  expect(screen.queryByText(/Oben erst ab 6 Jahren/)).toBeNull()
   fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
 
   expect(await screen.findByText('Oben')).toBeTruthy()
@@ -199,6 +244,28 @@ test('a building with rooms explains inline why it cannot be removed, instead of
       'Ein Gebäude mit Zimmern kann nicht entfernt werden. Entferne zuerst die Zimmer.',
     ),
   ).toBeTruthy()
+}, 20000)
+
+test('deleting an empty building asks for confirmation via the AlertDialog', async () => {
+  const buildingEvent: Event = {
+    seq: 1,
+    at: '2027-01-01T00:00:00Z',
+    actor: 'organiser@example.test',
+    subject: null,
+    type: 'BuildingAdded',
+    payload: { building_id: 'bld_1', name: 'Haupthaus', sort_key: 1 },
+  }
+  open([buildingEvent])
+
+  fireEvent.click(await screen.findByText('Gebäude bearbeiten'))
+  fireEvent.click(screen.getByRole('button', { name: 'Gebäude entfernen' }))
+
+  const dialog = await screen.findByRole('alertdialog')
+  expect(within(dialog).getByText('Gebäude Haupthaus entfernen?')).toBeTruthy()
+  expect(within(dialog).getByRole('button', { name: 'Behalten' })).toBeTruthy()
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Ja, entfernen' }))
+  expect(screen.queryByRole('alertdialog')).toBeNull()
+  expect(await screen.findByText('Noch keine Unterkunft angelegt')).toBeTruthy()
 }, 20000)
 
 test('deleting a room with beds asks for confirmation and names the bed count', async () => {
@@ -245,7 +312,10 @@ test('deleting a room with beds asks for confirmation and names the bed count', 
   fireEvent.click(await screen.findByRole('button', { name: /101/ }))
   const detail = within(view.container.querySelector('#betten-rm_1') as HTMLElement)
   fireEvent.click(detail.getByRole('button', { name: 'Zimmer entfernen' }))
-  expect(await detail.findByText('Zimmer 101 entfernen? Die 1 Betten darin werden auch entfernt.')).toBeTruthy()
-  expect(detail.getByRole('button', { name: 'Behalten' })).toBeTruthy()
-  expect(detail.getByRole('button', { name: 'Ja, entfernen' })).toBeTruthy()
+  // The confirmation dialog renders in a portal, outside the detail row.
+  const dialog = await screen.findByRole('alertdialog')
+  expect(within(dialog).getByText('Zimmer 101 entfernen?')).toBeTruthy()
+  expect(within(dialog).getByText('Die 1 Betten darin werden auch entfernt.')).toBeTruthy()
+  expect(within(dialog).getByRole('button', { name: 'Behalten' })).toBeTruthy()
+  expect(within(dialog).getByRole('button', { name: 'Ja, entfernen' })).toBeTruthy()
 }, 20000)

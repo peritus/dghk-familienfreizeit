@@ -44,6 +44,8 @@ export type InventoryBed = {
   bed_type: string
   sleeps: 1 | 2
   sort_key: number
+  /** 1-based Schlafraum grouping, apartment rooms only (D19 apartment half). */
+  sleeping_room: number | null
 }
 
 export type InventoryPlace = {
@@ -133,6 +135,7 @@ const bedPayload = z.object({
   bed_type: nonEmpty,
   sleeps: z.union([z.literal(1), z.literal(2)]),
   sort_key: z.number().int(),
+  sleeping_room: z.number().int().min(1).nullable().optional(),
 })
 const bedRemovedPayload = z.object({ bed_id: bedId, reason: z.string().nullable() })
 
@@ -194,6 +197,9 @@ function validateBed(
     return `${updating ? 'unknown' : 'duplicate'} bed: ${value.bed_id}`
   if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
   if (!params.bed_types.includes(value.bed_type)) return `invalid bed type: ${value.bed_type}`
+  const roomType = labelValue(world, value.room_id, 'room-type')
+  if ((value.sleeping_room ?? null) !== null && roomType !== 'apartment')
+    return `sleeping_room only applies to apartment rooms: ${value.room_id}`
   const duplicate =
     value.label !== '' &&
     (world.entities_by_kind.bed ?? []).some((bed) => {
@@ -324,6 +330,8 @@ function inventorySummary(world: KernelWorld, priceTrait: string | null = null):
       label: String(labelValue(world, item.id, 'label') ?? ''),
       bed_type: String(labelValue(world, item.id, 'bed-type') ?? ''),
       sleeps: Number(labelValue(world, item.id, 'sleeps') ?? 0) as 1 | 2,
+      sleeping_room:
+        (labelValue(world, item.id, 'sleeping-room') as number | null | undefined) ?? null,
       sort_key: item.sort_key,
     }))
     .sort(
@@ -457,6 +465,16 @@ export const roomInventory = defineModule({
         setup_only: true,
         validate: (value) => (value === 1 || value === 2 ? null : 'sleeps must be 1 or 2'),
       },
+      {
+        key: 'sleeping-room',
+        scopes: ['bed'],
+        cardinality: 'zero-or-one',
+        setup_only: true,
+        validate: (value) =>
+          typeof value === 'number' && Number.isInteger(value) && value >= 1
+            ? null
+            : 'sleeping-room must be a positive integer',
+      },
     ],
     events: [
       {
@@ -546,6 +564,7 @@ export const roomInventory = defineModule({
             { key: 'label', value: value.label },
             { key: 'bed-type', value: value.bed_type },
             { key: 'sleeps', value: value.sleeps },
+            { key: 'sleeping-room', value: value.sleeping_room ?? null },
           ])
           syncPlaces(capability, event.seq, value.bed_id, value.sleeps)
         },
@@ -563,6 +582,7 @@ export const roomInventory = defineModule({
             { key: 'label', value: value.label },
             { key: 'bed-type', value: value.bed_type },
             { key: 'sleeps', value: value.sleeps },
+            { key: 'sleeping-room', value: value.sleeping_room ?? null },
           ])
           syncPlaces(capability, event.seq, value.bed_id, value.sleeps)
         },
