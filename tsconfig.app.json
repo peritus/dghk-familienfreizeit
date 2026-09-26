@@ -16,6 +16,7 @@
     "src/events/types.ts",
     "src/events/world.ts",
     "src/modules/**/*.ts",
+    "src/solver/**/*.ts",
     "src/organiser/**/*.ts",
     "test/app/**/*.tsx"
   ]

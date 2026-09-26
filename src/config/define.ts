@@ -11,6 +11,12 @@ import {
   type WorldSummaryDefinition,
 } from '../events/fold.js'
 import { kernelEventTypes, kernelPayloadSchemas, type JsonValue } from '../events/types.js'
+import type {
+  PreflightCheck,
+  Rule,
+  SolverInputContribution,
+  SolverStage,
+} from '../solver/types.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -133,6 +139,10 @@ export type ModuleContributions = {
   reports?: readonly { id: string }[]
   world_summaries?: readonly WorldSummaryDefinition[]
   world_checks?: readonly WorldCheck[]
+  solver_input?: readonly SolverInputContribution[]
+  stages?: readonly SolverStage[]
+  rules?: readonly Rule[]
+  preflight_checks?: readonly PreflightCheck[]
 }
 
 export type ScreenDefinition = {
@@ -289,6 +299,21 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
         throw new Error(`module ${module.id} role ${role.parameter} has wrong trait shape`)
     }
   }
+  duplicate(
+    modules.flatMap(
+      (module) => module.contributions.stages?.map(({ id }) => `stage:${id}`) ?? [],
+    ),
+  )
+  duplicate(
+    modules.flatMap(
+      (module) => module.contributions.rules?.map(({ id }) => `rule:${id}`) ?? [],
+    ),
+  )
+  duplicate(
+    modules.flatMap(
+      (module) => module.contributions.preflight_checks?.map(({ id }) => `preflight:${id}`) ?? [],
+    ),
+  )
   const labelOwners = new Map<string, string>()
   for (const module of modules) {
     for (const label of module.contributions.label_keys ?? []) {

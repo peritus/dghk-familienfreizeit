@@ -10,6 +10,7 @@
     "src/auth/**/*.ts",
     "src/config/**/*.ts",
     "src/modules/**/*.ts",
+    "src/solver/**/*.ts",
     "src/organiser/**/*.ts",
     "worker-configuration.d.ts",
     "test/worker/**/*.ts"

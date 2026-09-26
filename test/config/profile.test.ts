@@ -181,6 +181,36 @@ describe('occasion profile', () => {
       defineOccasionProfile({ meta, traits: {}, modules: [module('one'), module('two')] }),
     ).toThrow(/duplicate contribution/)
   })
+
+  test('composes solver contributions and rejects duplicate solver ids', () => {
+    const stage = {
+      id: 'fixture.stage',
+      after: [],
+      before: [],
+      reads: [],
+      run: () => ({ output: {}, trace: [], diagnostics: [] }),
+    }
+    const rule = {
+      id: 'hard.fixture',
+      evaluate: () => 0,
+      describe: () => null,
+    }
+    const check = { id: 'fixture.check', severity: 'warning' as const, run: () => [] }
+    const module = defineModule({
+      id: 'solver-fixture',
+      params: z.object({}),
+      contribute: () => ({
+        solver_input: [{ id: 'fixture-input', build: () => ({}) }],
+        stages: [stage],
+        rules: [rule],
+        preflight_checks: [check],
+      }),
+    })
+    expect(() => defineOccasionProfile({ meta, traits: {}, modules: [module({})] })).not.toThrow()
+    expect(() =>
+      defineOccasionProfile({ meta, traits: {}, modules: [module({}), module({})] }),
+    ).toThrow(/duplicate or invalid module/)
+  })
   test('rejects a module shadowing a kernel entity kind or event type', () => {
     const noopFold = (): void => {}
     const shadowsKind = defineModule({
