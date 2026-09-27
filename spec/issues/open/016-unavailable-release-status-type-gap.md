@@ -286,7 +286,7 @@ The following documents and contracts need coordinated updates:
 
 - [application/release-control.md](../../application/release-control.md): status union, unavailable reason, view invariants,
   recovery preview, and notification rules;
-- [ui/screens/release-control.md](../../ui/screens/release-control.md): organiser badge, rows, history, and recovery actions;
+- [deferred-ideas/release-control-ui.md](../../deferred-ideas/release-control-ui.md): organiser badge, rows, history, and recovery actions;
 - [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md) and [application/family-view.md](../../application/family-view.md): unavailable card, control
   behavior, and privacy boundaries;
 - [application/reports.md](../../application/reports.md): organiser, family, shared, and change-notice rendering;
@@ -345,7 +345,7 @@ system has no current data.”
 ## Related files
 
 - [application/release-control.md](../../application/release-control.md)
-- [ui/screens/release-control.md](../../ui/screens/release-control.md)
+- [deferred-ideas/release-control-ui.md](../../deferred-ideas/release-control-ui.md)
 - [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md)
 - [application/family-view.md](../../application/family-view.md)
 - [application/reports.md](../../application/reports.md)

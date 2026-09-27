@@ -310,7 +310,7 @@ The governing rule should be:
 - [`ui/screens/family-preferences.md`](../../ui/screens/family-preferences.md)
 - [`ui/screens/family-detail.md`](../../ui/screens/family-detail.md)
 - [`ui/screens/inventory.md`](../../ui/screens/inventory.md)
-- [`ui/screens/constraints.md`](../../ui/screens/constraints.md)
+- [`organiser-placement-overrides-ui.md`](../../deferred-ideas/organiser-placement-overrides-ui.md)
 - [`application/organiser-view.md`](../../application/organiser-view.md)
 
 The canonical example in [`decisions.md`](../../../decisions.md) must also remain aligned with the
@@ -400,4 +400,4 @@ model, so issue 017 is resolved.
 - [`ui/screens/family-preferences.md`](../../ui/screens/family-preferences.md)
 - [`ui/screens/family-detail.md`](../../ui/screens/family-detail.md)
 - [`ui/screens/inventory.md`](../../ui/screens/inventory.md)
-- [`ui/screens/constraints.md`](../../ui/screens/constraints.md)
+- [`organiser-placement-overrides-ui.md`](../../deferred-ideas/organiser-placement-overrides-ui.md)

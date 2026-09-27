@@ -15,17 +15,13 @@ opened: 2026-09-21
 ## Problem
 
 [`modules/contract.md`](../../modules/contract.md) defines the contribution
-surface a selected module may provide. Its `ModuleContributions` interface
-declares eighteen direct fields, while `src/config/define.ts`'s
-`ModuleContributions` type currently implements only eight:
-`entity_kinds`, `events`, `label_keys`, `trait_roles`, `routes`, `reports`,
-`world_summaries`, and `world_checks`.
+surface a selected module may provide. The first consumers now exist, but the
+contract and runtime still need to stay aligned as each new contribution kind is
+introduced.
 
-The ten direct fields declared by the contract but absent from the runtime type
-are `solver_input`, `stages`, `rules`, `preflight_checks`, `release_scopes`,
-`change_kinds`, `screens`, `family_controls`, `emails`, and `fixtures`. A module
-cannot contribute any of those through `defineOccasionProfile`, regardless of
-what its specification declares.
+The remaining direct fields absent from the runtime type are `release_scopes`,
+`change_kinds`, `family_controls`, `emails`, and `fixtures`. A module cannot
+contribute those through `defineOccasionProfile` until their real consumers exist.
 
 The contract's contribution-kind table also describes `event_mappings` and
 `typed_contributions`, but they are not fields on the interface at all. The
@@ -76,11 +72,17 @@ screen-route collisions, and the worker screen registry exposes the selected
 screen. State-aware event invariant validation is also available to module event
 contributions because the inventory fold needs parent and uniqueness checks.
 
-The issue remains open for the unused contribution kinds: solver input and stages,
-rules, preflight integration, release scopes, change kinds, family controls,
-reports, emails, fixtures as a typed composition contract, and the unresolved
+The issue remains open for the unused contribution kinds: release scopes, change
+kinds, family controls, emails, fixtures as a typed composition contract, and the unresolved
 `event_mappings`/`typed_contributions` API decision. They should be added only with
 their first real consumers.
+
+## M6 progress
+
+Room assignment now consumes the existing solver contribution fields and registers
+two organiser screens plus the first real module report identifier. The report is a
+module-owned current-state projection; the generic audience-aware report host and
+release contribution fields remain later consumers.
 
 ## Related files
 

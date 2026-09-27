@@ -89,7 +89,7 @@ from raw communication events.
 | Kind | Contribution |
 |---|---|
 | Emails | **Communication**: initial arrangements/programme details; **Change**: relevant before/after details, both with a family-view link |
-| Screen | Exact recipient/message previews and optional email checkbox in [UI-11](../ui/screens/release-control.md); delivery status separately from communication status |
+| Screen | Exact recipient/message previews and optional email checkbox in [UI-11](release-control-ui.md); delivery status separately from communication status |
 | Reports | Change notice, limited to the reader's permitted content ([reports](../application/reports.md)) |
 | Controls | none |
 

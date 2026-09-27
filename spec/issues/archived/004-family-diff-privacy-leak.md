@@ -15,7 +15,7 @@ opened: 2026-09-19
 
 This is the highest domain-privacy risk found across both review passes.
 
-[`ui/screens/release-control.md:18-24`](../../ui/screens/release-control.md) defines one badge vocabulary for every
+[`deferred-ideas/release-control-ui.md:18-24`](../../deferred-ideas/release-control-ui.md) defines one badge vocabulary for every
 surface: `✓` communicated, `?` changed since communication (confirmation
 needed), `—` never communicated. [`ui/screens/family-assignment.md:44-46`](../../ui/screens/family-assignment.md) puts that
 badge on family cards: "Every releasable room or workshop result carries the
@@ -87,7 +87,7 @@ Updated four consumer surfaces to match:
    of "the shared communication status."
 3. [`ui/screens/family-assignment.md`](../../ui/screens/family-assignment.md) now describes the family's two-state
    badge (`✓`/`—`, no `?`), expanding to the previous-communication diff.
-4. [`ui/screens/release-control.md`](../../ui/screens/release-control.md)'s badge section is now explicitly
+4. [`deferred-ideas/release-control-ui.md`](../../deferred-ideas/release-control-ui.md)'s badge section is now explicitly
    organiser-only (renamed "Organiser inline status and diff"), with a new
    paragraph describing the family's separate two-state badge and explaining
    why no "newer changes exist" indicator may appear on any family-facing
@@ -105,7 +105,7 @@ member in that issue's own pass without touching this fix.
 
 ## Related files
 
-- [ui/screens/release-control.md](../../ui/screens/release-control.md)
+- [deferred-ideas/release-control-ui.md](../../deferred-ideas/release-control-ui.md)
 - [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md)
 - [application/family-view.md](../../application/family-view.md)
 - [application/release-control.md](../../application/release-control.md)
