@@ -32,7 +32,7 @@ the existing server is the intended target.
 
 To work on the local component and screen contract, use
 `nix develop --command npm run storybook`. It starts Storybook on its local
-default (`127.0.0.1:6006`) and reads only repository files. `npm run test:storybook` checks the coverage index
+default (`127.0.0.1:6006`), does not open a browser automatically, and reads only repository files. `npm run test:storybook` checks the coverage index
 and visual baselines; `npm run test:storybook:update` records an intentional
 visual change after review. No account, hosted service, or MCP server is needed.
 

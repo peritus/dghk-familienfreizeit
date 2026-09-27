@@ -10,7 +10,7 @@
     "db:migrate:local": "wrangler d1 migrations apply dghk-familienfreizeit-local --local",
     "build": "vite build",
     "preview": "vite preview",
-    "storybook": "storybook dev",
+    "storybook": "storybook dev --no-open",
     "storybook:build": "storybook build",
     "typegen": "wrangler types",
     "typecheck": "tsc -b",

@@ -25,7 +25,13 @@
       "label": "storybook",
       "type": "process",
       "command": "nix",
-      "args": ["develop", "--command", "sh", "-c", "npm ci && exec npm run storybook -- --host \"${DGHK_STORYBOOK_HOSTNAME:-127.0.0.1}\" --port \"${DGHK_STORYBOOK_PORT:-6006}\""],
+      "args": [
+        "develop",
+        "--command",
+        "sh",
+        "-c",
+        "npm ci && exec npm run storybook -- --host \"${DGHK_STORYBOOK_HOSTNAME:-127.0.0.1}\" --port \"${DGHK_STORYBOOK_PORT:-6006}\""
+      ],
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "problemMatcher": [],
