@@ -1,15 +1,15 @@
 # Development
 
-## Two tasks
+## Tasks
 
-[`.vscode/tasks.json`](../../.vscode/tasks.json) defines exactly two tasks, also
+[`.vscode/tasks.json`](../../.vscode/tasks.json) defines three tasks, also
 discoverable by `station task list`:
 
 | Task | What it does |
 |---|---|
 | `ci` | Installs the lockfile, checks types and lint, runs tests, builds both runtimes, verifies shipped assets and bundle boundaries |
 | `dev-preview` | Installs the lockfile, starts Vite with the local Worker, local D1 and browser hot reload |
-| `storybook` | Installs the lockfile, starts the repository-local Storybook workbench on port 6006 |
+| `storybook` | Installs the lockfile, starts the repository-local Storybook workbench; Station can inject its host and port |
 
 Both use the repository's `nix develop` shell. With Node 22.12+ (22.x) already
 available, the equivalent commands are `npm ci && npm run ci` and
@@ -31,8 +31,8 @@ run this command concurrently with `dev-preview` in the same directory unless
 the existing server is the intended target.
 
 To work on the local component and screen contract, use
-`nix develop --command npm run storybook`. It starts Storybook on port 6006 and
-reads only repository files. `npm run test:storybook` checks the coverage index
+`nix develop --command npm run storybook`. It starts Storybook on its local
+default (`127.0.0.1:6006`) and reads only repository files. `npm run test:storybook` checks the coverage index
 and visual baselines; `npm run test:storybook:update` records an intentional
 visual change after review. No account, hosted service, or MCP server is needed.
 
@@ -45,8 +45,9 @@ Task definitions are provided without launching either Station task.
 
 In VS Code, **Tasks: Run Task → dev-preview** defaults to `127.0.0.1:5173`.
 **Tasks: Run Task → storybook** starts the local visual workbench at
-`127.0.0.1:6006`; it is also discoverable by `station task list` and uses the
-same Nix-backed process definition.
+`127.0.0.1:6006` by default; it is also discoverable by `station task list` and
+uses the same Nix-backed process definition. When Station variables are absent,
+the task falls back to that loopback host and port.
 An occupied port fails instead of silently choosing another. A Station launch
 can allocate a port on the host's Tailscale IP and allow its exact DNS name:
 
@@ -56,6 +57,17 @@ station task run dev-preview \
   --env "DGHK_PREVIEW_HOST=$(tailscale status --json | jq -r '.Self.DNSName | rtrimstr(".")')" \
   --port DGHK_PREVIEW_PORT:DGHK_PREVIEW_BIND \
   --expose-url 'http://${DGHK_PREVIEW_HOST}:${DGHK_PREVIEW_PORT}/'
+```
+
+For a Tailscale Storybook session, use the hostname for Storybook's host
+allowlist and the Tailscale IP only for Station's bind allocation:
+
+```sh
+station task run storybook \
+  --env "DGHK_STORYBOOK_BIND=$(tailscale ip -4)" \
+  --env "DGHK_STORYBOOK_HOSTNAME=$(tailscale status --json | jq -r '.Self.DNSName | rtrimstr(\".\")')" \
+  --port DGHK_STORYBOOK_PORT:DGHK_STORYBOOK_BIND \
+  --expose-url 'http://${DGHK_STORYBOOK_HOSTNAME}:${DGHK_STORYBOOK_PORT}/'
 ```
 
 Run from the intended Station session, or add `--target <repo>/<slug>`. Confirm
