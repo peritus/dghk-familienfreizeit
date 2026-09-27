@@ -1,7 +1,5 @@
-import { Button } from '../../components/ui/button.js'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card.js'
-import { Badge } from '../../components/ui/badge.js'
-import { reportFixture } from './fixtures.js'
+import { Card, CardContent, CardHeader, CardTitle } from '../../../app/components/ui/card.js'
+import { Badge } from '../../../app/components/ui/badge.js'
 import {
   EmptyState,
   FindingCard,
@@ -11,24 +9,22 @@ import {
   SectionHeading,
   StatusBadge,
 } from './components.js'
+import { useOrganiser } from '../../../app/organiser/context.js'
+import { deriveAssignmentReview } from './review.js'
 import type { AssignmentReportView } from './types.js'
 
-export function AssignmentReports({ view = reportFixture }: { view?: AssignmentReportView }) {
+export function AssignmentReports({ view }: { view: AssignmentReportView }) {
   return (
     <ScreenFrame
       eyebrow="Unterkunft · Bericht"
       title="Belegungsbericht"
-      description="Eine druckfreundliche Übersicht über Zimmer, Platzierungen, offene Familien und die Hinweise des aktuellen Plans."
-      actions={
-        <Button variant="neutral" onClick={() => window.print()}>
-          Drucken
-        </Button>
-      }
+      description="Eine druckfreundliche Übersicht über Zimmer, Platzierungen, offene Familien und Hinweise zum aktuellen Stand. Zum Drucken die Browserfunktion verwenden."
     >
       <div className="print:border-b-2 print:border-black print:pb-6">
         <MetaLine
           items={[
             { label: 'Erstellt', value: view.generated_at },
+            { label: 'Ereignisstand', value: String(view.sequence) },
             { label: 'Geltungsbereich', value: 'Unterkunft' },
           ]}
         />
@@ -47,8 +43,8 @@ export function AssignmentReports({ view = reportFixture }: { view?: AssignmentR
           title="Zimmerbelegung"
           detail="Belegung und Kapazität des aktuellen Vorschlags."
         />
-        <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
-          <table className="w-full min-w-[48rem] border-collapse text-left">
+        <div className="overflow-x-auto rounded-base border-2 border-black bg-white print:overflow-visible">
+          <table className="w-full min-w-[48rem] border-collapse text-left print:min-w-0">
             <caption className="sr-only">Zimmerbelegung</caption>
             <thead className="bg-black text-white">
               <tr>
@@ -98,7 +94,7 @@ export function AssignmentReports({ view = reportFixture }: { view?: AssignmentR
       <section className="space-y-4">
         <SectionHeading
           title="Nicht platzierte Familien"
-          detail="Diese Fälle brauchen eine Entscheidung, bevor die Unterkunft kommuniziert werden kann."
+          detail="Diese Fälle brauchen eine Prüfung der Familien- oder Raumkonfiguration."
         />
         {view.unplaced.length === 0 ? (
           <EmptyState
@@ -125,7 +121,7 @@ export function AssignmentReports({ view = reportFixture }: { view?: AssignmentR
       <section className="space-y-4">
         <SectionHeading
           title="Hinweise"
-          detail="Die vollständige Erklärung bleibt im Plan und auf dem Board verfügbar."
+          detail="Die vollständige Erklärung bleibt auf dem Belegungsboard verfügbar."
         />
         <div className="grid gap-3">
           {view.findings.map((finding) => (
@@ -135,4 +131,10 @@ export function AssignmentReports({ view = reportFixture }: { view?: AssignmentR
       </section>
     </ScreenFrame>
   )
+}
+
+export function AssignmentReportsScreen() {
+  const { world } = useOrganiser()
+  if (!world) return null
+  return <AssignmentReports view={deriveAssignmentReview(world).report} />
 }

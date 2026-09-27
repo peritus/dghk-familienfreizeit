@@ -1,23 +1,15 @@
 import type { ReactNode } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert.js'
-import { Badge } from '../../components/ui/badge.js'
-import { Button } from '../../components/ui/button.js'
+import { Alert, AlertDescription, AlertTitle } from '../../../app/components/ui/alert.js'
+import { Badge } from '../../../app/components/ui/badge.js'
+import { Button } from '../../../app/components/ui/button.js'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../../components/ui/card.js'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../components/ui/dialog.js'
-import { cn } from '../../lib/utils.js'
+} from '../../../app/components/ui/card.js'
+import { cn } from '../../../app/lib/utils.js'
 import type { FamilyView, FindingView, RoomView, StatusLabel, TraceView } from './types.js'
 
 const severityTone = {
@@ -93,16 +85,7 @@ export function MetricsStrip({
 }) {
   return (
     <Card className="bg-white p-0">
-      <div
-        className={cn(
-          'grid grid-cols-2 divide-y-2 divide-black sm:divide-x-2 sm:divide-y-0',
-          items.length === 2
-            ? 'sm:grid-cols-2'
-            : items.length === 3
-              ? 'sm:grid-cols-3'
-              : 'sm:grid-cols-4',
-        )}
-      >
+      <div className="grid grid-cols-2 divide-y-2 divide-black sm:grid-cols-4 sm:divide-x-2 sm:divide-y-0">
         {items.map((item) => (
           <div key={item.label} className="p-4 text-center">
             <p className={cn('text-4xl leading-none', item.tone === 'attention' && 'text-main')}>
@@ -208,12 +191,10 @@ export function RoomCard({
   room,
   expanded,
   onToggle,
-  onMove,
 }: {
   room: RoomView
   expanded: boolean
   onToggle: () => void
-  onMove: () => void
 }) {
   const free = room.capacity - room.occupied
   return (
@@ -277,9 +258,6 @@ export function RoomCard({
           <Button variant="neutral" size="sm" onClick={onToggle} aria-expanded={expanded}>
             {expanded ? 'Erklärung schließen' : 'Erklärung öffnen'}
           </Button>
-          <Button size="sm" onClick={onMove} disabled={room.state === 'infeasible'}>
-            Familie hier platzieren
-          </Button>
         </div>
       </CardContent>
     </Card>
@@ -293,8 +271,16 @@ export function TracePanel({ traces }: { traces: readonly TraceView[] }) {
         <div key={`${trace.subject}-${index}`} className="border-l-4 border-black pl-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="font-bold">{trace.step}</p>
+            {trace.score === undefined ? null : <Badge>Bewertung {trace.score}</Badge>}
           </div>
           <p>{trace.text}</p>
+          {trace.terms ? (
+            <p className="mt-1 text-sm text-muted">
+              {trace.terms
+                .map((term) => `${term.label} ${term.value > 0 ? '+' : ''}${term.value}`)
+                .join(' · ')}
+            </p>
+          ) : null}
           {trace.rejected ? (
             <ul className="mt-2 space-y-1 text-sm">
               {trace.rejected.map((item) => (
@@ -310,68 +296,6 @@ export function TracePanel({ traces }: { traces: readonly TraceView[] }) {
   )
 }
 
-export function MoveRoomDialog({
-  family,
-  rooms,
-  onClose,
-  onConfirm,
-}: {
-  family: FamilyView
-  rooms: readonly RoomView[]
-  onClose: () => void
-  onConfirm: (room: RoomView) => void
-}) {
-  return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <p className="text-sm font-bold uppercase tracking-wide text-muted">
-            Familie verschieben
-          </p>
-          <DialogTitle>{family.name}</DialogTitle>
-          <DialogDescription>
-            Wähle einen Raum. Unmögliche Räume bleiben sichtbar und erklären den Ausschluss.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="mt-6 grid gap-3">
-          {rooms.map((room) => {
-            const disabled = room.state === 'infeasible'
-            return (
-              <button
-                key={room.id}
-                type="button"
-                disabled={disabled}
-                onClick={() => onConfirm(room)}
-                className={cn(
-                  'rounded-base border-2 border-black p-4 text-left',
-                  disabled
-                    ? 'cursor-not-allowed bg-secondary-background text-muted'
-                    : 'bg-white hover:bg-main',
-                )}
-              >
-                <span className="flex items-center justify-between gap-3 font-bold">
-                  <span>{room.name}</span>
-                  <span>
-                    {disabled ? 'Nicht möglich' : `${room.capacity - room.occupied} frei`}
-                  </span>
-                </span>
-                <span className="mt-1 block text-sm">
-                  {disabled ? room.reasons?.join(' ') : room.capabilities.join(' · ')}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-        <DialogFooter className="mt-6">
-          <Button variant="neutral" onClick={onClose}>
-            Abbrechen
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 export function MetaLine({ items }: { items: readonly { label: string; value: string }[] }) {
   return (
     <dl className="grid gap-3 sm:grid-cols-3">
@@ -382,59 +306,6 @@ export function MetaLine({ items }: { items: readonly { label: string; value: st
         </div>
       ))}
     </dl>
-  )
-}
-
-export function ComparisonTable({
-  rows,
-  caption = 'Vorher-Nachher-Vergleich',
-}: {
-  rows: readonly {
-    label: string
-    before: string
-    after: string
-    kind?: 'changed' | 'added' | 'removed'
-  }[]
-  caption?: string
-}) {
-  return (
-    <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
-      <table className="w-full min-w-[38rem] border-collapse text-left">
-        <caption className="sr-only">{caption}</caption>
-        <thead className="bg-black text-white">
-          <tr>
-            <th scope="col" className="p-3">
-              Feld
-            </th>
-            <th scope="col" className="p-3">
-              Vorher
-            </th>
-            <th scope="col" className="p-3">
-              Nachher
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y-2 divide-black">
-          {rows.map((row) => (
-            <tr key={row.label}>
-              <th scope="row" className="p-3 font-bold">
-                {row.label}
-              </th>
-              <td className={cn('p-3', row.kind === 'removed' && 'bg-danger/20')}>{row.before}</td>
-              <td
-                className={cn(
-                  'p-3',
-                  row.kind === 'changed' && 'bg-main/20',
-                  row.kind === 'added' && 'bg-main/20',
-                )}
-              >
-                {row.after}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   )
 }
 
@@ -455,52 +326,5 @@ export function EmptyState({
         {action ? <div className="flex justify-center">{action}</div> : null}
       </CardContent>
     </Card>
-  )
-}
-
-export function WorkspaceShell({
-  active,
-  children,
-}: {
-  active: 'board' | 'decisions' | 'plans' | 'reports' | 'communication'
-  children: ReactNode
-}) {
-  const items = [
-    ['board', 'Belegungsboard'],
-    ['decisions', 'Entscheidungen'],
-    ['plans', 'Pläne'],
-    ['reports', 'Berichte'],
-    ['communication', 'Kommunikation'],
-  ] as const
-  return (
-    <div className="min-h-dvh bg-background lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
-      <aside className="border-b-2 border-black bg-black p-4 text-white lg:min-h-dvh lg:border-b-0 lg:border-r-2">
-        <div className="flex items-center justify-between gap-4 lg:block">
-          <div>
-            <p className="text-lg font-heading">Familienfreizeit</p>
-            <p className="text-sm text-white/70">Organisationsteam</p>
-          </div>
-        </div>
-        <nav
-          aria-label="Unterkunftsbereich"
-          className="mt-6 flex gap-2 overflow-x-auto lg:grid lg:gap-1"
-        >
-          {items.map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              aria-current={active === id ? 'page' : undefined}
-              className={cn(
-                'min-h-11 whitespace-nowrap rounded-base px-3 text-left font-bold',
-                active === id ? 'bg-main text-black' : 'text-white hover:bg-white/15',
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
-      </aside>
-      <main className="min-w-0 px-4 py-8 sm:px-8 lg:px-12 lg:py-10">{children}</main>
-    </div>
   )
 }

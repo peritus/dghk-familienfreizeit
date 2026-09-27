@@ -19,6 +19,8 @@ import { Dashboard } from './screens/dashboard.js'
 import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
+import { AssignmentBoardScreen } from '../../modules/room-assignment/app/assignment-board.js'
+import { AssignmentReportsScreen } from '../../modules/room-assignment/app/reports.js'
 import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
 
@@ -217,6 +219,16 @@ export default function OrganiserApp() {
           {organiserScreenRegistry.some(({ id }) => id === 'organiser-inventory') ? (
             <Route path={organiserRoutePaths.inventory}>
               <Inventory />
+            </Route>
+          ) : null}
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-board') ? (
+            <Route path={organiserRoutePaths.assignment_board}>
+              <AssignmentBoardScreen />
+            </Route>
+          ) : null}
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-report') ? (
+            <Route path={organiserRoutePaths.assignment_report}>
+              <AssignmentReportsScreen />
             </Route>
           ) : null}
           <Route>

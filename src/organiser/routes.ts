@@ -8,6 +8,8 @@ export const organiserRoutePaths = {
   families: '/families',
   family_detail: '/families/:id',
   inventory: '/inventory',
+  assignment_board: '/board',
+  assignment_report: '/reports',
 } as const
 
 export const kernelOrganiserRouteDefinitions = [
@@ -98,6 +100,8 @@ export const organiserPaths = {
   family_detail: (familyId: string): string =>
     `${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`,
   inventory: (): string => organiserRoutePaths.inventory,
+  assignment_board: (): string => organiserRoutePaths.assignment_board,
+  assignment_report: (): string => organiserRoutePaths.assignment_report,
 } as const
 
 export const organiserUrls = {
@@ -106,6 +110,8 @@ export const organiserUrls = {
   family_detail: (familyId: string): string =>
     `${organiserBasePath}${organiserPaths.family_detail(familyId)}`,
   inventory: (): string => `${organiserBasePath}${organiserPaths.inventory()}`,
+  assignment_board: (): string => `${organiserBasePath}${organiserPaths.assignment_board()}`,
+  assignment_report: (): string => `${organiserBasePath}${organiserPaths.assignment_report()}`,
 } as const
 
 export function isKnownOrganiserPath(pathname: string): boolean {

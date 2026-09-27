@@ -1,28 +1,20 @@
 import { useMemo, useState } from 'react'
-import { Button } from '../../components/ui/button.js'
-import { Tabs } from '../../components/ui/tabs.js'
-import { accommodationBoardFixture } from './fixtures.js'
+import { Tabs } from '../../../app/components/ui/tabs.js'
 import {
   FamilyCard,
   MetricsStrip,
-  MoveRoomDialog,
   RoomCard,
   ScreenFrame,
   SectionHeading,
   TracePanel,
 } from './components.js'
-import type { BoardView, FamilyView, RoomView } from './types.js'
+import { useOrganiser } from '../../../app/organiser/context.js'
+import { deriveAssignmentReview } from './review.js'
+import type { BoardView } from './types.js'
 
-export function AssignmentBoard({
-  view = accommodationBoardFixture,
-  onMove,
-}: {
-  view?: BoardView
-  onMove?: (family: FamilyView, room: RoomView) => void
-}) {
+export function AssignmentBoard({ view }: { view: BoardView }) {
   const [buildingId, setBuildingId] = useState(view.buildings[0]?.id ?? '')
   const [expandedRoom, setExpandedRoom] = useState<string | null>(null)
-  const [selectedFamily, setSelectedFamily] = useState<FamilyView | null>(null)
   const building = view.buildings.find((item) => item.id === buildingId) ?? view.buildings[0]
   const floors = useMemo(
     () => [...new Set((building?.rooms ?? []).map((room) => room.floor))],
@@ -33,14 +25,24 @@ export function AssignmentBoard({
     <ScreenFrame
       eyebrow="Unterkunft · Belegungsboard"
       title="Wer schläft wo?"
-      description="Prüfe den aktuellen Vorschlag, löse offene Platzierungen und sieh bei jeder Entscheidung, warum sie getroffen wurde."
-      actions={<Button variant="neutral">Plan neu berechnen</Button>}
+      description="Prüfe die vom Resolver erzeugte Belegung und erkenne auf einen Blick, wer wo untergebracht ist."
     >
       <MetricsStrip
         items={[
-          { value: 5, label: 'Familien' },
-          { value: 3, label: 'Platziert' },
-          { value: 2, label: 'Offen', tone: 'attention' },
+          {
+            value:
+              view.buildings.flatMap(({ rooms }) => rooms.flatMap(({ occupants }) => occupants))
+                .length + view.unplaced.length,
+            label: 'Familien',
+          },
+          {
+            value: view.buildings.flatMap(({ rooms }) =>
+              rooms.flatMap(({ occupants }) => occupants),
+            ).length,
+            label: 'Platziert',
+          },
+          { value: view.unplaced.length, label: 'Offen', tone: 'attention' },
+          { value: view.sequence, label: 'Ereignisstand' },
         ]}
       />
 
@@ -64,8 +66,6 @@ export function AssignmentBoard({
                 key={family.id}
                 family={family}
                 reason={view.unplaced_reasons[family.id]}
-                action="Raum wählen"
-                onAction={() => setSelectedFamily(family)}
               />
             ))}
           </div>
@@ -90,7 +90,6 @@ export function AssignmentBoard({
                         onToggle={() =>
                           setExpandedRoom((current) => (current === room.id ? null : room.id))
                         }
-                        onMove={() => setSelectedFamily(view.unplaced[0] ?? null)}
                       />
                       {expandedRoom === room.id ? (
                         <TracePanel
@@ -108,18 +107,12 @@ export function AssignmentBoard({
           ))}
         </section>
       </div>
-
-      {selectedFamily ? (
-        <MoveRoomDialog
-          family={selectedFamily}
-          rooms={view.buildings.flatMap((item) => item.rooms)}
-          onClose={() => setSelectedFamily(null)}
-          onConfirm={(room) => {
-            onMove?.(selectedFamily, room)
-            setSelectedFamily(null)
-          }}
-        />
-      ) : null}
     </ScreenFrame>
   )
+}
+
+export function AssignmentBoardScreen() {
+  const { world } = useOrganiser()
+  if (!world) return null
+  return <AssignmentBoard view={deriveAssignmentReview(world).board} />
 }

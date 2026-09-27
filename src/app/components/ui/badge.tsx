@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
-import type { StatusTone } from '../../organiser/accommodation-ui/types.js'
+import type { StatusTone } from '../../organiser/ui-types.js'
 
 const toneClasses: Record<StatusTone, string> = {
   neutral: 'bg-white text-foreground',

@@ -29,7 +29,7 @@ const navItems = [...kernelNavItems, ...moduleNavItems]
 export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
-      <header className="border-b-2 border-black bg-white px-4 py-3 sm:px-8">
+      <header className="border-b-2 border-black bg-white px-4 py-3 print:hidden sm:px-8">
         <div className="mx-auto max-w-5xl">
           <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
             Familienfreizeit

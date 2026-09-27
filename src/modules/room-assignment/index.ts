@@ -107,6 +107,21 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
         run: (input) => roomAssignmentPreflight(input),
       },
     ],
+    screens: [
+      {
+        id: 'organiser-assignment-board',
+        route: '/organiser/board',
+        label: 'Belegung',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-assignment-report',
+        route: '/organiser/reports',
+        label: 'Belegungsbericht',
+        audience: 'organiser',
+      },
+    ],
+    reports: [{ id: 'room-assignment.assignment-report' }],
   }),
 })
 
