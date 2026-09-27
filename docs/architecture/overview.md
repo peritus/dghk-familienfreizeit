@@ -4,7 +4,9 @@ The repository contains a Vite/Cloudflare Worker runtime, the event and
 authentication foundation, profile composition, generic labels, fixed resolver
 operators and `derive(events, config)`, the organiser host with kernel family
 surfaces, room inventory, and deterministic room-assignment business logic.
-Reports, family-facing controls, and workshop modules remain future work.
+The room-assignment board and current assignment report are implemented organiser
+projections. Generic reports, family-facing controls, release communication, and
+workshop modules remain future work.
 
 ## Runtime and build
 
@@ -39,7 +41,7 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 | `migrations/` | Append-only event and operational D1 schema |
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/family-view/` | Public welcome placeholder |
-| `src/app/organiser/` | Lazy authenticated organiser host, draft reducer and kernel family screens |
+| `src/app/organiser/` | Lazy authenticated organiser host, shared draft reducer, kernel family screens, and assignment review routes |
 | `src/app/components/ui/` | Copied UI primitives |
 | `scripts/bundle-graph.ts` | Build import-graph metadata |
 | `test/app/`, `test/worker/`, `test/build/` | App, Worker and emitted-output checks |

@@ -44,8 +44,15 @@ nix develop -c npm run test:room-assignment:coverage
 The gate currently reports 100% statements, functions, and lines, with the
 accepted branch threshold enforced in `vitest.config.ts`.
 
-## Remaining scope
+## Organiser review surface
 
-The organiser board, placement-decision controls, reports, plan diff, and
-communications are not part of this verified business-logic slice. They must
-continue to use event-backed labels and derived plans when implemented.
+The selected module contributes the read-only `/organiser/board` and
+`/organiser/reports` surfaces. Both consume the shared organiser prospective world
+and the deterministic `room-assignment` solver section; the report is a compact
+browser-printable projection of the board. Family and room configuration screens
+stage ordinary events through the shared organiser reducer, so unapplied drafts are
+visible to both review surfaces.
+
+Placement overrides, plan comparison, release control, and communication remain
+later scope. No placement result, report snapshot, or organiser decision record is
+persisted by this module.

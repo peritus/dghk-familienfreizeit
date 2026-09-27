@@ -14,10 +14,13 @@ path before persistence.
 | `/organiser/families` | Derived family table and manual invitation staging |
 | `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or draft event history |
 | `/organiser/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
+| `/organiser/board` | Read-only deterministic family-to-room assignment review |
+| `/organiser/reports` | Compact printable current assignment report |
 
 The host exposes these kernel-owned and selected-module screens through one screen
-registry. The room-inventory module registers the inventory screen; solver, workshop,
-and report screens remain unselected.
+registry. The room-inventory module registers the inventory screen and room-assignment
+registers the board/report screens. Generic report hosting, workshops, and release
+screens remain later scope.
 
 ## Local-first event workflow
 
@@ -54,8 +57,10 @@ work. Family principals receive no organiser log or apply access.
 
 ## Current limits
 
-The active profile currently contains the kernel `role` trait and the room-inventory
-module. Assignment, reports, and family-facing controls remain outstanding.
+The active profile currently contains the kernel `role` trait, room-inventory, and
+room-assignment modules. Assignment review is implemented; family-facing controls,
+manual placement, generic reports, plan comparison, release, and communication remain
+later scope.
 
 The verified tests cover local derivation, immediate and drafting commit timing,
 the inline draft workspace, apply-prefix acknowledgement, organiser log/apply

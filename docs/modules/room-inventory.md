@@ -51,13 +51,13 @@ inline rather than disabling the button) and a confirmation step for deleting
 a room or bed. New and edited rooms stage their required profile labels in
 the same event batch as the room event. Bed capacity follows from `bed_type`
 alone (`single`/`double`/`bunk`) via `sleepsForBedType`; there is no separate
-capacity input. No assignment board, free-place calculation against a plan,
-accommodation report route, family view, or apartment "Schlafraum" bed grouping
-is included. Assignment business logic is documented in
-[`room-assignment`](room-assignment.md); the board, reports, family view, and
-apartment grouping remain outside this slice. The apartment grouping needs its
-own bed-schema decision beyond this UI pass.
+capacity input. Room inventory does not own the assignment board or report route;
+those are provided by [`room-assignment`](room-assignment.md). The apartment
+"Schlafraum" bed grouping still needs its own bed-schema decision beyond this UI
+pass.
 
 The module contributes world checks for rooms without places, no live capacity while
 people exist, and constraints that name a removed place. These diagnostics are kept
-outside persisted state.
+outside persisted state. Assignment review and the printable assignment report are
+owned by `room-assignment`; inventory remains the editor and derived source for room
+capabilities and capacity.

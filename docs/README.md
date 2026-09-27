@@ -11,6 +11,7 @@ are separate claims and require separate evidence.
 - [Derived world](architecture/derived-world.md): in-memory labels, resolver, diagnostics, projections and diffs.
 - [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
 - [Room inventory](modules/room-inventory.md): implemented accommodation entities, fixture, summaries, and organiser surface.
+- [Room assignment](modules/room-assignment.md): deterministic assignment solver and organiser review/report surfaces.
 - [Authentication](application/authentication.md): magic links, sessions and request principals.
 - [Organiser view](application/organiser-view.md): authenticated organiser host, family surfaces and draft changes.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.

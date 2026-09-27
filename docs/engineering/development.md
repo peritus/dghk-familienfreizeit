@@ -98,7 +98,8 @@ limits. Run `npm run check:docs` to validate local Markdown links and anchors;
 The implemented foundation includes build/runtime wiring, a shared German shell,
 lazy organiser routing, the event kernel, local D1 schema, KDL fixtures,
 magic-link authentication, request authorization, and the M4 organiser host.
-Inventory, solver, release control, email delivery, and later domain screens
-remain future work. Open findings against this scope are not silently resolved;
+Inventory, room-assignment review, and the shared organiser draft pipeline are
+implemented. Generic reports, release control, email delivery, and later domain
+screens remain future work. Open findings against this scope are not silently resolved;
 see
 [the issue catalog](../../spec/issues/README.md).
