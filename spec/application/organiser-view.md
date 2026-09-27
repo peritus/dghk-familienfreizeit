@@ -47,7 +47,7 @@ grouped by building and floor.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Main House  Garden House  [Unplaced only]  seq 1482                    │
+│ ACCOMMODATIONS · ALL BUILDINGS                                      │
 ├─────────────────┬────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                              │
 │ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │

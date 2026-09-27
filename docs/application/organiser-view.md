@@ -10,7 +10,7 @@ path before persistence.
 
 | Route | Behavior |
 |---|---|
-| `/organiser` | Dashboard with family/person counts, event-head status, diagnostics, and draft-change status |
+| `/organiser` | Dashboard with family/person counts, diagnostics, and draft-change status |
 | `/organiser/families` | Derived family table and manual invitation staging |
 | `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or draft event history |
 | `/organiser/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |

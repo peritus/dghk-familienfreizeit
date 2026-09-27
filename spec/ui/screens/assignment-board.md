@@ -8,7 +8,7 @@ Organisers review the resolver's room placement and its consequences. Route:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ Main House  Garden House  [Unplaced only]  seq 1482                       │
+│ ACCOMMODATIONS · ALL BUILDINGS                                         │
 ├─────────────────┬──────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                                │
 │ ┌─────────────┐ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
@@ -17,13 +17,14 @@ Organisers review the resolver's room placement and its consequences. Route:
 │ │ ⚠ no fit    │ │ │ Morgan ×2 ✓ │ │ │ open       │ │ │ Rivera ×3 ✓ │          │
 │ └─────────────┘ │ └─────────────┘ └─────────────┘ └─────────────┘          │
 ├─────────────────┴──────────────────────────────────────────────────────────┤
-│ Current derived assignment · seq 1482 · review configuration when needed   │
+│ Current accommodation plan · review configuration when needed             │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
 The board is read-only. It renders the current derived world, including unapplied
 events from the shared organiser draft buffer, and the deterministic solver output.
-It shows hard failures, soft explanations, traces, and unplaced families. Organisers
+It shows every configured building and its rooms in one view; there is no building
+selector. It shows hard failures, soft explanations, traces, and unplaced families. Organisers
 correct family or room configuration in the corresponding editor; exceptional
 placement overrides remain deferred to [deferred scope](../../deferred-ideas/organiser-placement-overrides.md).
 
@@ -35,7 +36,7 @@ continues to show pending drafts without being duplicated inside the board.
 
 ## Neobrutalist redesign and components
 
-Use the shared organiser frame, `Tabs` for buildings, `Card` for rooms and families,
+Use the shared organiser frame, one section per building, `Card` for rooms and families,
 and `Badge` for capacity and constraint status.
 Room cards keep the thick outline and offset shadow; infeasible cards use an
 `Alert`-style border and explanatory text. Draft/apply/discard belongs to the
