@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '../../../app/components/ui/card.js'
 import { cn } from '../../../app/lib/utils.js'
-import type { FamilyView, FindingView, RoomView, StatusLabel, TraceView } from './types.js'
+import type { FamilyView, FindingView, RoomView, StatusLabel } from './types.js'
 
 const severityTone = {
   error: 'danger',
@@ -159,28 +159,25 @@ export function FamilyCard({
   reason,
   action,
   onAction,
+  expanded,
+  onToggle,
 }: {
   family: FamilyView
   reason?: string
   action?: string
   onAction?: () => void
+  expanded: boolean
+  onToggle: () => void
 }) {
   return (
     <Card className="bg-white">
       <CardHeader>
-        <CardTitle className="text-xl">{family.name}</CardTitle>
-        <CardDescription>
-          {family.people.length} {family.people.length === 1 ? 'Person' : 'Personen'} ·{' '}
-          {family.requirements.join(' · ')}
-        </CardDescription>
+        <FamilySummary family={family} expanded={expanded} onToggle={onToggle} />
+        {family.requirements.length > 0 ? (
+          <CardDescription>{family.requirements.join(' · ')}</CardDescription>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          {family.status ? <StatusBadge status={family.status} /> : null}
-          {family.people.map((person) => (
-            <Badge key={person.id}>{person.name}</Badge>
-          ))}
-        </div>
         {reason ? <p className="border-l-4 border-danger pl-3 text-sm">{reason}</p> : null}
         {action && onAction ? (
           <Button variant="neutral" size="sm" onClick={onAction}>
@@ -192,38 +189,69 @@ export function FamilyCard({
   )
 }
 
-export function RoomCard({
-  room,
+export function FamilySummary({
+  family,
   expanded,
   onToggle,
 }: {
-  room: RoomView
+  family: FamilyView
   expanded: boolean
   onToggle: () => void
 }) {
+  const peopleId = `family-people-${family.id}`
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-3 border-l-4 border-black pl-3 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        aria-controls={peopleId}
+        aria-label={`${family.name}: ${expanded ? 'Personen ausblenden' : 'Personen anzeigen'}`}
+      >
+        <span className="flex min-w-0 flex-wrap items-center gap-2">
+          {family.status ? <StatusBadge status={family.status} /> : null}
+          <span className="font-bold">{family.name}</span>
+        </span>
+        <span className="shrink-0 text-sm text-muted">
+          {family.people.length} {family.people.length === 1 ? 'Person' : 'Personen'}
+        </span>
+      </button>
+      {expanded ? (
+        <div id={peopleId} className="flex flex-wrap gap-2 border-t-2 border-black pt-2">
+          {family.people.map((person) => (
+            <Badge key={person.id}>{person.name}</Badge>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export function RoomCard({
+  room,
+  expandedFamilyIds,
+  onToggleFamily,
+}: {
+  room: RoomView
+  expandedFamilyIds: ReadonlySet<string>
+  onToggleFamily: (familyId: string) => void
+}) {
   const free = room.capacity - room.occupied
+  const isFull = free === 0
   return (
     <Card
-      className={cn('bg-white p-0', room.state === 'infeasible' && 'border-danger bg-danger/10')}
+      className={cn(
+        'p-0',
+        isFull ? 'bg-secondary-background' : 'bg-white',
+        room.state === 'infeasible' && 'border-danger bg-danger/10',
+      )}
     >
       <CardHeader className="p-5">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <CardTitle className="text-xl">{room.name}</CardTitle>
-            <CardDescription>
-              {room.floor} · {room.occupied} / {room.capacity} Plätze
-            </CardDescription>
-          </div>
-          <Badge
-            tone={
-              room.state === 'infeasible'
-                ? 'danger'
-                : room.state === 'available'
-                  ? 'success'
-                  : 'neutral'
-            }
-          >
-            {room.state === 'infeasible' ? 'Nicht möglich' : free === 0 ? 'Voll' : `${free} frei`}
+          <CardTitle className="text-xl">{room.name}</CardTitle>
+          <Badge tone={room.state === 'infeasible' ? 'danger' : isFull ? 'attention' : 'success'}>
+            {room.state === 'infeasible' ? 'Nicht möglich' : isFull ? 'Voll' : `${free} frei`}
           </Badge>
         </div>
       </CardHeader>
@@ -237,13 +265,12 @@ export function RoomCard({
           <div className="space-y-2">
             <p className="text-sm font-bold uppercase tracking-wide text-muted">Belegung</p>
             {room.occupants.map((family) => (
-              <div
+              <FamilySummary
                 key={family.id}
-                className="flex items-center justify-between gap-2 border-l-4 border-black pl-3"
-              >
-                <span className="font-bold">{family.name}</span>
-                <span className="text-sm text-muted">{family.people.length} Personen</span>
-              </div>
+                family={family}
+                expanded={expandedFamilyIds.has(family.id)}
+                onToggle={() => onToggleFamily(family.id)}
+              />
             ))}
           </div>
         ) : (
@@ -259,28 +286,8 @@ export function RoomCard({
             {note}
           </p>
         ))}
-        <div className="flex flex-wrap gap-2 border-t-2 border-black pt-4">
-          <Button variant="neutral" size="sm" onClick={onToggle} aria-expanded={expanded}>
-            {expanded ? 'Erklärung schließen' : 'Erklärung öffnen'}
-          </Button>
-        </div>
       </CardContent>
     </Card>
-  )
-}
-
-export function TracePanel({ traces }: { traces: readonly TraceView[] }) {
-  return (
-    <div className="space-y-3 border-t-2 border-black bg-paper p-4" aria-label="Belegungserklärung">
-      {traces.map((trace, index) => (
-        <div key={`${trace.subject}-${index}`} className="border-l-4 border-black pl-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="font-bold">{trace.step}</p>
-          </div>
-          <p>{trace.text}</p>
-        </div>
-      ))}
-    </div>
   )
 }
 

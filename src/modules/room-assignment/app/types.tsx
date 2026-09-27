@@ -45,17 +45,10 @@ export type FindingView = {
   action?: string
 }
 
-export type TraceView = {
-  step: string
-  subject: string
-  text: string
-}
-
 export type BoardView = {
   buildings: readonly BuildingView[]
   unplaced: readonly FamilyView[]
   unplaced_reasons: Readonly<Record<string, string>>
-  traces: Readonly<Record<string, readonly TraceView[]>>
 }
 
 export type ReportRoomView = {

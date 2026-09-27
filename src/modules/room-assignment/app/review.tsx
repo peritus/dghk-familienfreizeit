@@ -6,16 +6,9 @@ import {
   type RoomAssignment,
 } from '../../../modules/room-assignment/index.js'
 import { buildSolverInput, solve } from '../../../solver/index.js'
-import type { SolverContributions, TraceEntry } from '../../../solver/types.js'
+import type { SolverContributions } from '../../../solver/types.js'
 import { buildRevision, compatibilityRevision } from '../../../config/build.js'
-import type {
-  BoardView,
-  FamilyView,
-  FindingView,
-  AssignmentReportView,
-  RoomView,
-  TraceView,
-} from './types.js'
+import type { BoardView, FamilyView, FindingView, AssignmentReportView, RoomView } from './types.js'
 
 export type AssignmentReview = {
   board: BoardView
@@ -119,38 +112,11 @@ function reasonLabel(reason: string): string {
   return 'Es wurde kein passendes Zimmer gefunden.'
 }
 
-function traceStepLabel(step: string): string {
-  return (
-    {
-      retain: 'Bisherige Zuordnung',
-      forced: 'Zwingende Zuordnung',
-      greedy: 'Automatische Zuordnung',
-      repair: 'Verbesserte Zuordnung',
-      unplaceable: 'Nicht platzierbar',
-    }[step] ?? 'Belegungsprüfung'
-  )
-}
-
 function subjectLabel(world: KernelWorld, subject: string): string {
   if (world.families.some(({ id }) => id === subject)) return familyName(world, subject)
   if (inventoryWorld(world).rooms.some(({ id }) => id === subject)) return roomLabel(world, subject)
   const trait = activeProfile.traits[subject as keyof typeof activeProfile.traits]
   return localized(trait?.title) || 'Konfigurationsmerkmal'
-}
-
-function traceView(trace: TraceEntry, world: KernelWorld): TraceView {
-  const subject = subjectLabel(world, trace.subject)
-  const text =
-    trace.step === 'unplaceable'
-      ? reasonLabel(trace.text)
-      : trace.text.includes('→')
-        ? `${familyName(world, trace.subject)} wurde in ${roomLabel(world, trace.detail?.chosen?.target ?? '')} untergebracht.`
-        : 'Die Belegung wurde automatisch ermittelt.'
-  return {
-    step: traceStepLabel(trace.step),
-    subject,
-    text,
-  }
 }
 
 function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): readonly FindingView[] {
@@ -251,12 +217,6 @@ export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
     name,
     rooms: rooms.filter((room) => room.building === name),
   }))
-  const traces: Record<string, TraceView[]> = {}
-  for (const trace of plan.trace) {
-    const family = world.families.find(({ id }) => id === trace.subject)
-    if (!family) continue
-    ;(traces[family.id] ??= []).push(traceView(trace, world))
-  }
   const findings = findingViews(world, plan)
   const assignmentsByRoom = new Map<string, RoomAssignment[]>()
   for (const assignment of section.assignments) {
@@ -308,7 +268,6 @@ export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
       unplaced_reasons: Object.fromEntries(
         section.unplaced.map(({ family_id: id, reason }) => [id, reasonLabel(reason)]),
       ),
-      traces,
     },
     report,
   }
