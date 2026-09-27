@@ -156,8 +156,8 @@ residue party.
 Trace, per child room:
 
 > `K3` (Haus B, Raum 22, 6 places, Jungs 8–11) ← 5 children: Müller Jonas,
-> Schmidt Lena, Weber Ada, Weber Nils, Braun Mia.
-> 1 place left empty. Braun Tim has no matching child-group requirement.
+> Schmidt Lena, Weber Ada, Weber Nils, Seidel Mia.
+> 1 place left empty. Seidel Tim has no matching child-group requirement.
 
 Trace, per released child:
 

@@ -32,7 +32,7 @@ export const Selection: Story = {
         <DialogTrigger render={<Button />}>Raum auswählen</DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Familie Braun</DialogTitle>
+            <DialogTitle>Familie Seidel</DialogTitle>
             <DialogDescription>Wähle einen passenden Raum.</DialogDescription>
           </DialogHeader>
           <div className="mt-6 grid gap-2">

@@ -185,7 +185,7 @@ function DecisionDialog({ onClose }: { onClose: () => void }) {
             Betroffene Entität
             <input
               className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
-              defaultValue="Familie Braun"
+              defaultValue="Familie Seidel"
             />
           </label>
           <label className="grid gap-1 font-bold">

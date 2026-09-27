@@ -133,7 +133,7 @@ requests on behalf of a workshop.
 
 ```kdl
 MaterialRequested request_id=mreq_paint requested_by=ws_malen category=material name="Acrylfarben" quantity_text="5 Tuben" description=#null workshop_id=ws_malen concerns_person_id=#null
-MaterialCommitted commitment_id=mcom_paint-braun contributed_by=fam_braun category=material name="Acrylfarben" quantity_text="5 Tuben" description=#null workshop_id=ws_malen fulfills=mreq_paint
+MaterialCommitted commitment_id=mcom_paint-seidel contributed_by=fam_seidel category=material name="Acrylfarben" quantity_text="5 Tuben" description=#null workshop_id=ws_malen fulfills=mreq_paint
 ```
 
 ## 6. Labels and trait roles

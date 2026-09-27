@@ -171,7 +171,7 @@ phase 3 does not by itself justify displacing it.
 For each unplaced family, evaluate every room and report the most common blocking
 rule and closest near-miss:
 
-> `Braun ×5` — unplaced. 38 rooms rejected on capacity; 2 rejected on ensuite.
+> `Seidel ×5` — unplaced. 38 rooms rejected on capacity; 2 rejected on ensuite.
 > Closest: Room 31 (5 places free, no ensuite).
 
 ## 8. Rules and scoring

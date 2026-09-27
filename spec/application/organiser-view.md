@@ -50,11 +50,11 @@ grouped by building and floor.
 │ ACCOMMODATIONS · ALL BUILDINGS                                      │
 ├─────────────────┬────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                              │
-│ Braun ×5 ⚠      │ Room 12 · 4 places · Morgan ×2 ✓                      │
+│ Seidel ×5 ⚠     │ Room 12 · 4 places · Morgan ×2 ✓                      │
 │ Lang ×1         │ Room 14 · 6 places · open                             │
 ├─────────────────┴────────────────────────────────────────────────────────┤
 │ [Entwurfsmodus starten]                     [cloud-pause icon · 3]      │
-│ 3 Änderungsentwürfe · Braun → Room 14 · [Entwürfe verwerfen] [Entwürfe anwenden] │
+│ 3 Änderungsentwürfe · Seidel → Room 14 · [Entwürfe verwerfen] [Entwürfe anwenden] │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 

@@ -12,7 +12,7 @@ Organisers review the resolver's room placement and its consequences. Route:
 ├─────────────────┬──────────────────────────────────────────────────────────┤
 │ UNPLACED (2)    │ MAIN HOUSE · FIRST FLOOR                                │
 │ ┌─────────────┐ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│ │ Braun ×5    │ │ │ Room 12  ●●○○│ │ Room 14 ●●●●●○│ │ Room 16  ●●●│          │
+│ │ Seidel ×5   │ │ │ Room 12  ●●○○│ │ Room 14 ●●●●●○│ │ Room 16  ●●●│          │
 │ │ ensuite     │ │ │ ensuite     │ │ │            │ │ │             │          │
 │ │ ⚠ no fit    │ │ │ Morgan ×2 ✓ │ │ │ open       │ │ │ Rivera ×3 ✓ │          │
 │ └─────────────┘ │ └─────────────┘ └─────────────┘ └─────────────┘          │

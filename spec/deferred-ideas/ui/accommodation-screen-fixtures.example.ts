@@ -12,15 +12,15 @@ import type {
   RoomView,
 } from './types.js'
 
-const braun: FamilyView = {
-  id: 'family-braun',
-  name: 'Familie Braun',
+const seidel: FamilyView = {
+  id: 'family-seidel',
+  name: 'Familie Seidel',
   people: [
-    { id: 'person-braun-1', name: 'Mara Braun', role: 'adult' },
-    { id: 'person-braun-2', name: 'Jonas Braun', role: 'adult' },
-    { id: 'person-braun-3', name: 'Lina Braun', role: 'child' },
-    { id: 'person-braun-4', name: 'Emil Braun', role: 'child' },
-    { id: 'person-braun-5', name: 'Noa Braun', role: 'child' },
+    { id: 'person-seidel-1', name: 'Mara Seidel', role: 'adult' },
+    { id: 'person-seidel-2', name: 'Jonas Seidel', role: 'adult' },
+    { id: 'person-seidel-3', name: 'Lina Seidel', role: 'child' },
+    { id: 'person-seidel-4', name: 'Emil Seidel', role: 'child' },
+    { id: 'person-seidel-5', name: 'Noa Seidel', role: 'child' },
   ],
   requirements: ['5 Schlafplätze', 'ruhiger Bereich'],
   status: { label: 'Kein passendes Zimmer', tone: 'danger' },
@@ -111,9 +111,9 @@ const garden3: RoomView = {
 const findingCapacity: FindingView = {
   id: 'finding-capacity',
   severity: 'warning',
-  title: 'Familie Braun ist noch nicht platziert',
+  title: 'Familie Seidel ist noch nicht platziert',
   description: 'Kein verfügbares Zimmer erfüllt gleichzeitig Größe und Anforderungen.',
-  subjects: ['Familie Braun', 'Zimmer 14'],
+  subjects: ['Familie Seidel', 'Zimmer 14'],
   action: 'Auf dem Belegungsboard prüfen',
 }
 
@@ -132,9 +132,9 @@ export const accommodationBoardFixture: BoardView = {
     { id: 'building-main', name: 'Haupthaus', rooms: [room12, room14, room16] },
     { id: 'building-garden', name: 'Gartenhaus', rooms: [garden3] },
   ],
-  unplaced: [braun, lang],
+  unplaced: [seidel, lang],
   unplaced_reasons: {
-    'family-braun':
+    'family-seidel':
       '5 Plätze benötigt; kein Zimmer mit ausreichender Kapazität und passender Ruhezone.',
     'family-lang': 'Einzelzimmer ist vorhanden, die gewünschte Nähe zum Eingang aber nicht.',
   },
@@ -151,10 +151,10 @@ export const accommodationBoardFixture: BoardView = {
         ],
       },
     ],
-    'family-braun': [
+    'family-seidel': [
       {
         step: 'Nicht platziert',
-        subject: 'Familie Braun',
+        subject: 'Familie Seidel',
         text: 'Alle geprüften Zimmer wurden wegen harter Regeln ausgeschlossen.',
         rejected: [
           { room: 'Zimmer 12', reason: 'Nur 2 freie Plätze' },
@@ -165,7 +165,7 @@ export const accommodationBoardFixture: BoardView = {
     ],
   },
   draft_changes: [
-    { id: 'draft-1', summary: 'Braun → Zimmer 14', detail: 'Manuelle Platzierungsentscheidung' },
+    { id: 'draft-1', summary: 'Seidel → Zimmer 14', detail: 'Manuelle Platzierungsentscheidung' },
     { id: 'draft-2', summary: 'Zimmer 14: Ruhezone', detail: 'Zusätzliche Entscheidung' },
     { id: 'draft-3', summary: 'Lang → Prüfung', detail: 'Anforderung aktualisiert' },
   ],
@@ -227,7 +227,7 @@ const reviewPlan = {
   unplaced: 1,
   findings: 1,
   status: { label: 'Bereit zur Prüfung', tone: 'success' as const },
-  summary: 'Die manuelle Entscheidung bringt Familie Braun in Zimmer 14.',
+  summary: 'Die manuelle Entscheidung bringt Familie Seidel in Zimmer 14.',
 }
 
 export const planFixture: PlanView = {
@@ -246,7 +246,7 @@ export const planFixture: PlanView = {
     },
     {
       step: 'Nicht platziert',
-      subject: 'Familie Braun',
+      subject: 'Familie Seidel',
       text: 'Kein Zimmer erfüllt alle harten Regeln.',
     },
   ],
@@ -257,8 +257,8 @@ export const planDiffFixture: PlanDiffView = {
   after: currentPlan,
   changes: [
     {
-      id: 'change-braun',
-      family: 'Familie Braun',
+      id: 'change-seidel',
+      family: 'Familie Seidel',
       people: 'Mara, Jonas, Lina, Emil und Noa',
       kind: 'unplaced',
       before: 'Zimmer 14',
@@ -321,7 +321,7 @@ export const reportFixture: AssignmentReportView = {
   ],
   unplaced: [
     {
-      family: 'Familie Braun',
+      family: 'Familie Seidel',
       people: '5 Personen',
       reason: 'Kein Zimmer mit ausreichender Kapazität und passender Ruhezone.',
     },
@@ -366,7 +366,7 @@ export const communicationReviewFixture: CommunicationReviewView = {
   differences: [
     { label: 'Familie Morgan · Zimmer', before: 'Zimmer 12', after: 'Zimmer 14', kind: 'changed' },
     {
-      label: 'Familie Braun · Unterkunft',
+      label: 'Familie Seidel · Unterkunft',
       before: 'Zimmer 14',
       after: 'Nicht platziert',
       kind: 'changed',
@@ -378,7 +378,7 @@ export const communicationReviewFixture: CommunicationReviewView = {
       kind: 'changed',
     },
   ],
-  affected_families: ['Familie Morgan', 'Familie Braun', 'Familie Lang'],
+  affected_families: ['Familie Morgan', 'Familie Seidel', 'Familie Lang'],
   dependencies: [],
   reviewed_sequence: 1482,
   build_label: 'Profilstand · bestätigt',

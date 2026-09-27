@@ -683,3 +683,20 @@ common scheduling boundary, and module contributions are typed; no module reads
 another module's raw event payloads. This split preserves the event-log,
 pure-solver, resolver, and release boundaries while keeping each module's entity
 kinds, events, labels, routes, and reports uniquely owned.
+
+## D29 — Demonstration fixtures avoid historically loaded surnames
+
+*Chosen.* Fixture identities used in Storybook stories, tests, documentation
+examples, and deferred UI examples must use neutral example surnames. The
+historically loaded surname previously used by the accommodation example is
+removed; the shared example uses `Seidel` instead. This rule applies to display
+names, person names, fixture identifiers, email addresses, and references that
+describe the same example.
+
+*Why:* German-language product examples should avoid surnames with avoidable
+historical associations. Fixture data is part of the product's visible language,
+so choosing neutral identities prevents an unnecessary distraction from the
+behavior being demonstrated.
+
+*Consequence:* Repository-wide fixture and example searches must not reintroduce
+the removed surname; new examples follow the same neutral-identity rule.
