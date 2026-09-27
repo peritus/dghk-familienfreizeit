@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react'
-import { Tabs } from '../../../app/components/ui/tabs.js'
+import { useState } from 'react'
 import {
   FamilyCard,
   MetricsStrip,
@@ -13,13 +12,7 @@ import { deriveAssignmentReview } from './review.js'
 import type { BoardView } from './types.js'
 
 export function AssignmentBoard({ view }: { view: BoardView }) {
-  const [buildingId, setBuildingId] = useState(view.buildings[0]?.id ?? '')
   const [expandedRoom, setExpandedRoom] = useState<string | null>(null)
-  const building = view.buildings.find((item) => item.id === buildingId) ?? view.buildings[0]
-  const floors = useMemo(
-    () => [...new Set((building?.rooms ?? []).map((room) => room.floor))],
-    [building],
-  )
 
   return (
     <ScreenFrame
@@ -42,19 +35,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
             label: 'Platziert',
           },
           { value: view.unplaced.length, label: 'Offen', tone: 'attention' },
-          { value: view.sequence, label: 'Ereignisstand' },
         ]}
-      />
-
-      <Tabs
-        label="Gebäude"
-        value={building?.id ?? ''}
-        onChange={setBuildingId}
-        options={view.buildings.map((item) => ({
-          value: item.id,
-          label: item.name,
-          count: item.rooms.length,
-        }))}
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(16rem,0.75fr)_minmax(0,2fr)]">
@@ -73,38 +54,53 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
 
         <section className="space-y-8" aria-labelledby="rooms-title">
           <SectionHeading
-            title={building?.name ?? 'Gebäude'}
-            detail={`${floors.length} Ebenen · Räume und Belegung`}
+            title="Unterkünfte"
+            detail={`${view.buildings.length} Gebäude · Räume und Belegung`}
           />
-          {floors.map((floor) => (
-            <div key={floor} className="space-y-4">
-              <h3 className="border-b-2 border-black pb-2 text-lg">{floor}</h3>
-              <div className="grid gap-4 xl:grid-cols-2">
-                {(building?.rooms ?? [])
-                  .filter((room) => room.floor === floor)
-                  .map((room) => (
-                    <div key={room.id}>
-                      <RoomCard
-                        room={room}
-                        expanded={expandedRoom === room.id}
-                        onToggle={() =>
-                          setExpandedRoom((current) => (current === room.id ? null : room.id))
-                        }
-                      />
-                      {expandedRoom === room.id ? (
-                        <TracePanel
-                          traces={
-                            view.traces[room.occupants[0]?.id ?? ''] ??
-                            view.traces['family-braun'] ??
-                            []
-                          }
-                        />
-                      ) : null}
+          {view.buildings.map((building) => {
+            const floors = [...new Set(building.rooms.map((room) => room.floor))]
+            return (
+              <section key={building.id} className="space-y-6" aria-label={building.name}>
+                <SectionHeading
+                  title={building.name}
+                  detail={`${floors.length} ${floors.length === 1 ? 'Ebene' : 'Ebenen'} · ${building.rooms.length} Räume`}
+                />
+                {floors.map((floor) => (
+                  <div key={floor ?? 'no-floor'} className="space-y-4">
+                    <h3 className="border-b-2 border-black pb-2 text-lg">
+                      {floor ?? 'Ohne Etage'}
+                    </h3>
+                    <div className="grid gap-4 xl:grid-cols-2">
+                      {building.rooms
+                        .filter((room) => room.floor === floor)
+                        .map((room) => (
+                          <div key={room.id}>
+                            <RoomCard
+                              room={room}
+                              expanded={expandedRoom === room.id}
+                              onToggle={() =>
+                                setExpandedRoom((current) =>
+                                  current === room.id ? null : room.id,
+                                )
+                              }
+                            />
+                            {expandedRoom === room.id ? (
+                              <TracePanel
+                                traces={
+                                  view.traces[room.occupants[0]?.id ?? ''] ??
+                                  view.traces['family-braun'] ??
+                                  []
+                                }
+                              />
+                            ) : null}
+                          </div>
+                        ))}
                     </div>
-                  ))}
-              </div>
-            </div>
-          ))}
+                  </div>
+                ))}
+              </section>
+            )
+          })}
         </section>
       </div>
     </ScreenFrame>

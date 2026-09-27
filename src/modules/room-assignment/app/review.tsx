@@ -82,8 +82,16 @@ function requirements(world: KernelWorld, familyId: string): readonly string[] {
       world.requirements
         .filter(({ holder_id: holderId }) => holderId === familyId || personIds.has(holderId))
         .map(
-          ({ trait_key: key, value, strength }) =>
-            `${key}${value ? `: ${value}` : ''}${strength === 'required' ? ' · erforderlich' : ''}`,
+          ({ trait_key: key, value, strength }) => {
+            const trait = activeProfile.traits[key]
+            const valueTrait =
+              trait?.kind === 'requirement' && trait.satisfied_by
+                ? activeProfile.traits[trait.satisfied_by]
+                : undefined
+            const label = localized(trait?.title) || 'Anforderung'
+            const valueLabel = valueTrait ? localized(valueTrait.title) : null
+            return `${label}${valueLabel ? `: ${valueLabel}` : ''}${strength === 'required' ? ' · erforderlich' : ''}`
+          },
         ),
     ),
   ]
@@ -258,7 +266,6 @@ export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
   }))
   const report: AssignmentReportView = {
     generated_at: 'Aktueller Stand',
-    sequence: world.head_seq,
     total_families: world.families.length,
     placed_families: placedFamilies.size,
     unplaced_families: section.unplaced.length,
@@ -268,7 +275,6 @@ export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
   }
   return {
     board: {
-      sequence: world.head_seq,
       buildings,
       unplaced,
       unplaced_reasons: Object.fromEntries(

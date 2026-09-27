@@ -85,7 +85,12 @@ export function MetricsStrip({
 }) {
   return (
     <Card className="bg-white p-0">
-      <div className="grid grid-cols-2 divide-y-2 divide-black sm:grid-cols-4 sm:divide-x-2 sm:divide-y-0">
+      <div
+        className={cn(
+          'grid grid-cols-2 divide-y-2 divide-black sm:divide-x-2 sm:divide-y-0',
+          items.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-4',
+        )}
+      >
         {items.map((item) => (
           <div key={item.label} className="p-4 text-center">
             <p className={cn('text-4xl leading-none', item.tone === 'attention' && 'text-main')}>

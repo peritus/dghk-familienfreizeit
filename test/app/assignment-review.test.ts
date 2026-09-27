@@ -5,12 +5,12 @@ import { deriveAssignmentReview } from '../../src/modules/room-assignment/app/re
 import { organiserFixtureEvents } from '../../src/app/stories/organiser-fixtures.js'
 
 describe('assignment review projection', () => {
-  test('derives board and report from the same current solver result', () => {
+  test('derives user-facing board and report views without event-log metadata', () => {
     const world = derive(organiserFixtureEvents, activeProfile.validation_view)
     const review = deriveAssignmentReview(world)
 
-    expect(review.board.sequence).toBe(world.head_seq)
-    expect(review.report.sequence).toBe(world.head_seq)
+    expect(review.board).not.toHaveProperty('sequence')
+    expect(review.report).not.toHaveProperty('sequence')
     expect(review.report.total_families).toBe(world.families.length)
     expect(review.report.placed_families + review.report.unplaced_families).toBe(
       review.report.total_families,

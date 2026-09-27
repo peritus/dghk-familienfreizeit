@@ -55,7 +55,6 @@ export type TraceView = {
 }
 
 export type BoardView = {
-  sequence: number
   buildings: readonly BuildingView[]
   unplaced: readonly FamilyView[]
   unplaced_reasons: Readonly<Record<string, string>>
@@ -73,7 +72,6 @@ export type ReportRoomView = {
 
 export type AssignmentReportView = {
   generated_at: string
-  sequence: number
   total_families: number
   placed_families: number
   unplaced_families: number
