@@ -77,7 +77,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
                           <div key={room.id}>
                             <RoomCard
                               room={room}
-                              expandedFamilyIds={expandedFamilies}
+                              expanded_family_ids={expandedFamilies}
                               onToggleFamily={toggleFamily}
                             />
                           </div>

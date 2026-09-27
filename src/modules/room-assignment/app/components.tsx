@@ -228,15 +228,12 @@ export function FamilySummary({
   )
 }
 
-export function RoomCard({
-  room,
-  expandedFamilyIds,
-  onToggleFamily,
-}: {
+export function RoomCard(props: {
   room: RoomView
-  expandedFamilyIds: ReadonlySet<string>
+  expanded_family_ids: ReadonlySet<string>
   onToggleFamily: (familyId: string) => void
 }) {
+  const { room, onToggleFamily } = props
   const free = room.capacity - room.occupied
   const isFull = free === 0
   return (
@@ -268,7 +265,7 @@ export function RoomCard({
               <FamilySummary
                 key={family.id}
                 family={family}
-                expanded={expandedFamilyIds.has(family.id)}
+                expanded={props.expanded_family_ids.has(family.id)}
                 onToggle={() => onToggleFamily(family.id)}
               />
             ))}

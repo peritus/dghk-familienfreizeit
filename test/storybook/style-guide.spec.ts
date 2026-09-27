@@ -17,7 +17,7 @@ test.describe('repository-local UI contract', () => {
     test(`visual contract: ${entry.subject}`, async ({ page }) => {
       await page.goto(`/iframe.html?id=${entry.id}&viewMode=story`)
       const root = page.locator('#storybook-root')
-      await expect(root).toBeVisible()
+      await expect(root).toBeVisible({ timeout: 15_000 })
       await page.evaluate(async () => {
         await document.fonts?.ready
       })

@@ -58,15 +58,17 @@ grouped by building and floor.
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-The board renders the deterministic solver result, explains infeasible placements,
+The board renders the deterministic solver result and shows user-facing reasons for
+infeasible placements,
 and reflects unapplied family or room configuration drafts. The solver remains the
 only producer of assignments. Manual placement controls remain deferred.
-Room cards show capacity, sanitary arrangement, accessibility, occupants by family,
-hard-constraint status, and soft penalties. A drop never splits a family or merges
-two families.
+Room cards show capacity status, room capabilities, and occupants by family. A drop
+never splits a family or merges two families.
 
-Keyboard and touch users can expand placement explanations. Draft/apply/discard
-remains available through the global save-status control, not through the board.
+Keyboard and touch users can expand a family summary in place to inspect its people.
+Solver explanations are not shown per family or room; a future dedicated explanation
+screen owns that detail. Draft/apply/discard remains available through the global
+save-status control, not through the board.
 
 ## 3. Organiser decisions and reports
 
