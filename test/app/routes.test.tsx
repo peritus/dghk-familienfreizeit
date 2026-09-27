@@ -22,6 +22,8 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/families',
     '/organiser/families/:id',
     '/organiser/inventory',
+    '/organiser/board',
+    '/organiser/reports',
   ])
 })
 
@@ -35,6 +37,12 @@ test('module screens are composed only when their module is selected', () => {
   expect(organiserScreenRegistry.filter(({ id }) => id === 'organiser-inventory')).toEqual([
     expect.objectContaining({ host: 'module', route: '/organiser/inventory' }),
   ])
+  expect(organiserScreenRegistry).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ id: 'organiser-assignment-board', route: '/organiser/board' }),
+      expect.objectContaining({ id: 'organiser-assignment-report', route: '/organiser/reports' }),
+    ]),
+  )
   expect(new Set(organiserScreenRegistry.map(({ id }) => id)).size).toBe(
     organiserScreenRegistry.length,
   )
@@ -50,6 +58,10 @@ test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserUrls.dashboard()).toBe('/organiser')
   expect(organiserUrls.families()).toBe('/organiser/families')
   expect(organiserUrls.inventory()).toBe('/organiser/inventory')
+  expect(organiserPaths.assignment_board()).toBe('/board')
+  expect(organiserUrls.assignment_board()).toBe('/organiser/board')
+  expect(organiserPaths.assignment_report()).toBe('/reports')
+  expect(organiserUrls.assignment_report()).toBe('/organiser/reports')
 })
 
 test('family route IDs are opaque, URL-safe, and reversible', () => {
