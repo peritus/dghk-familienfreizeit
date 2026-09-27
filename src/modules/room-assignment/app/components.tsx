@@ -2,15 +2,10 @@ import type { ReactNode } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../../../app/components/ui/alert.js'
 import { Badge } from '../../../app/components/ui/badge.js'
 import { Button } from '../../../app/components/ui/button.js'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../../app/components/ui/card.js'
+import { Card, CardContent, CardDescription, CardHeader } from '../../../app/components/ui/card.js'
 import { cn } from '../../../app/lib/utils.js'
-import type { FamilyView, FindingView, RoomView, StatusLabel } from './types.js'
+import { ExpandableFamilyMemberList } from './expandable-family-member-list.js'
+import type { FamilyView, FindingView, StatusLabel } from './types.js'
 
 const severityTone = {
   error: 'danger',
@@ -172,7 +167,7 @@ export function FamilyCard({
   return (
     <Card className="bg-white">
       <CardHeader>
-        <FamilySummary family={family} expanded={expanded} onToggle={onToggle} />
+        <ExpandableFamilyMemberList family={family} expanded={expanded} onToggle={onToggle} />
         {family.requirements.length > 0 ? (
           <CardDescription>{family.requirements.join(' · ')}</CardDescription>
         ) : null}
@@ -184,105 +179,6 @@ export function FamilyCard({
             {action}
           </Button>
         ) : null}
-      </CardContent>
-    </Card>
-  )
-}
-
-export function FamilySummary({
-  family,
-  expanded,
-  onToggle,
-}: {
-  family: FamilyView
-  expanded: boolean
-  onToggle: () => void
-}) {
-  const peopleId = `family-people-${family.id}`
-  return (
-    <div className="space-y-2">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-3 border-l-4 border-black pl-3 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        aria-controls={peopleId}
-        aria-label={`${family.name}: ${expanded ? 'Personen ausblenden' : 'Personen anzeigen'}`}
-      >
-        <span className="flex min-w-0 flex-wrap items-center gap-2">
-          {family.status ? <StatusBadge status={family.status} /> : null}
-          <span className="font-bold">{family.name}</span>
-        </span>
-        <span className="shrink-0 text-sm text-muted">
-          {family.people.length} {family.people.length === 1 ? 'Person' : 'Personen'}
-        </span>
-      </button>
-      {expanded ? (
-        <div id={peopleId} className="flex flex-wrap gap-2 border-t-2 border-black pt-2">
-          {family.people.map((person) => (
-            <Badge key={person.id}>{person.name}</Badge>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
-export function RoomCard(props: {
-  room: RoomView
-  expanded_family_ids: ReadonlySet<string>
-  onToggleFamily: (familyId: string) => void
-}) {
-  const { room, onToggleFamily } = props
-  const free = room.capacity - room.occupied
-  const isFull = free === 0
-  return (
-    <Card
-      className={cn(
-        'p-0',
-        isFull ? 'bg-secondary-background' : 'bg-white',
-        room.state === 'infeasible' && 'border-danger bg-danger/10',
-      )}
-    >
-      <CardHeader className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <CardTitle className="text-xl">{room.name}</CardTitle>
-          <Badge tone={room.state === 'infeasible' ? 'danger' : isFull ? 'attention' : 'success'}>
-            {room.state === 'infeasible' ? 'Nicht möglich' : isFull ? 'Voll' : `${free} frei`}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4 px-5 pb-5">
-        <div className="flex flex-wrap gap-2">
-          {room.capabilities.map((capability) => (
-            <Badge key={capability}>{capability}</Badge>
-          ))}
-        </div>
-        {room.occupants.length > 0 ? (
-          <div className="space-y-2">
-            <p className="text-sm font-bold uppercase tracking-wide text-muted">Belegung</p>
-            {room.occupants.map((family) => (
-              <FamilySummary
-                key={family.id}
-                family={family}
-                expanded={props.expanded_family_ids.has(family.id)}
-                onToggle={() => onToggleFamily(family.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted">Noch keine Familie zugeordnet.</p>
-        )}
-        {room.reasons?.map((reason) => (
-          <p key={reason} className="border-l-4 border-danger pl-3 text-sm">
-            {reason}
-          </p>
-        ))}
-        {room.soft_notes?.map((note) => (
-          <p key={note} className="text-sm text-muted">
-            {note}
-          </p>
-        ))}
       </CardContent>
     </Card>
   )

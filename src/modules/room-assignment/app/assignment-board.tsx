@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { FamilyCard, MetricsStrip, RoomCard, ScreenFrame, SectionHeading } from './components.js'
+import { FamilyCard, MetricsStrip, ScreenFrame, SectionHeading } from './components.js'
 import { useOrganiser } from '../../../app/organiser/context.js'
 import { deriveAssignmentReview } from './review.js'
+import { RoomCard } from './room-card.js'
 import type { BoardView } from './types.js'
 
 export function AssignmentBoard({ view }: { view: BoardView }) {

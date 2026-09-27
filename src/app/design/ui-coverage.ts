@@ -234,6 +234,18 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/ui/badge.tsx',
   },
   {
+    id: 'components-accommodation-expandable-family-member-list--expanded',
+    area: 'component',
+    subject: 'Expandable family member list',
+    source: 'src/modules/room-assignment/app/expandable-family-member-list.tsx',
+  },
+  {
+    id: 'components-accommodation-room-card--full',
+    area: 'component',
+    subject: 'Accommodation room card',
+    source: 'src/modules/room-assignment/app/room-card.tsx',
+  },
+  {
     id: 'ui-tabs--buildings',
     area: 'component',
     subject: 'Tabs',
