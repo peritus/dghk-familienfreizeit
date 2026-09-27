@@ -41,21 +41,29 @@ describe('assignment review projection', () => {
     const world = derive(organiserAssignmentFixtureEvents, activeProfile.validation_view)
     const review = deriveAssignmentReview(world)
 
-    expect(review.board.buildings.map(({ name }) => name)).toEqual(['Haupthaus', 'Gartenhaus'])
-    expect(review.report.total_families).toBe(4)
+    expect(world.persons).toHaveLength(150)
+    expect(review.board.buildings.map(({ name }) => name)).toEqual([
+      'Haupthaus',
+      'Gartenhaus',
+      'Waldhaus',
+      'Seeblick',
+      'Birkenhof',
+      'Gästehaus',
+    ])
+    expect(review.report.total_families).toBe(39)
+    const rooms = review.board.buildings.flatMap(({ rooms: buildingRooms }) => buildingRooms)
+    expect(rooms.some(({ occupied, capacity }) => occupied === capacity)).toBe(true)
+    expect(rooms.some(({ occupied, capacity }) => occupied < capacity)).toBe(true)
+    expect(rooms.some(({ occupied }) => occupied === 0)).toBe(true)
     expect(review.board.unplaced.map(({ name }) => name)).toContain('Familie Braun')
     expect(review.board.unplaced_reasons['fam_braun']).toBe(
-      'In den passenden Zimmern sind nicht genügend Schlafplätze frei.',
+      'Kein verfügbares Zimmer erfüllt alle erforderlichen Merkmale.',
     )
     expect(review.report.unplaced[0]?.reason).toBe(
-      'In den passenden Zimmern sind nicht genügend Schlafplätze frei.',
+      'Kein verfügbares Zimmer erfüllt alle erforderlichen Merkmale.',
     )
-    expect(review.board.traces['fam_braun']?.[0]).toMatchObject({
-      step: 'Nicht platzierbar',
-      subject: 'Familie Braun',
-      text: 'In den passenden Zimmern sind nicht genügend Schlafplätze frei.',
-    })
     expect(review.board).not.toHaveProperty('sequence')
+    expect(review.board).not.toHaveProperty('traces')
     expect(review.report).not.toHaveProperty('sequence')
   })
 })

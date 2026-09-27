@@ -173,7 +173,7 @@ type AssignmentFixtureFamily = {
   }
 }
 
-const assignmentFixtureFamilies: readonly AssignmentFixtureFamily[] = [
+const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
   {
     family_id: 'fam_braun',
     email: 'braun@example.test',
@@ -287,10 +287,114 @@ const assignmentFixtureFamilies: readonly AssignmentFixtureFamily[] = [
   },
 ]
 
+const assignmentFixtureGeneratedSurnames = [
+  'Albrecht',
+  'Baumann',
+  'Conrad',
+  'Dietrich',
+  'Ebert',
+  'Fischer',
+  'Gaertner',
+  'Hoffmann',
+  'Jansen',
+  'Keller',
+  'Lehmann',
+  'Mertens',
+  'Neumann',
+  'Otto',
+  'Peters',
+  'Quandt',
+  'Richter',
+  'Scholz',
+  'Thiel',
+  'Ullrich',
+  'Vogt',
+  'Wagner',
+  'Yilmaz',
+  'Ziegler',
+  'Adler',
+  'Becker',
+  'Clausen',
+  'Doering',
+  'Engel',
+  'Franke',
+  'Grimm',
+  'Hartmann',
+  'Jaeger',
+  'Koenig',
+  'Lorenz',
+] as const
+
+const assignmentFixtureGivenNames = [
+  'Anna',
+  'Ben',
+  'Clara',
+  'David',
+  'Ella',
+  'Felix',
+  'Greta',
+  'Hannes',
+] as const
+
+function assignmentFixtureSlug(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+}
+
+const assignmentFixtureGeneratedFamilies: readonly AssignmentFixtureFamily[] =
+  assignmentFixtureGeneratedSurnames.map((surname, familyIndex) => {
+    const peopleCount = 3 + (familyIndex % 3)
+    const familySlug = assignmentFixtureSlug(surname)
+    return {
+      family_id: `fam_${familySlug}`,
+      email: `${familySlug}@example.test`,
+      display_name: `Familie ${surname}`,
+      people: Array.from({ length: peopleCount }, (_, personIndex) => ({
+        person_id: `per_${familySlug}_${personIndex + 1}`,
+        given_name:
+          assignmentFixtureGivenNames[
+            (familyIndex + personIndex) % assignmentFixtureGivenNames.length
+          ]!,
+        family_name: surname,
+        birthdate: null,
+        role: personIndex < 2 ? 'adult' : 'child',
+      })),
+    }
+  })
+
+const assignmentFixtureFamilies: readonly AssignmentFixtureFamily[] = [
+  ...assignmentFixtureFeaturedFamilies,
+  ...assignmentFixtureGeneratedFamilies,
+]
+
 const assignmentFixtureBuildings = [
   { building_id: 'bld_haupthaus', name: 'Haupthaus', sort_key: 1 },
   { building_id: 'bld_gartenhaus', name: 'Gartenhaus', sort_key: 2 },
 ] as const
+
+const assignmentFixtureAdditionalBuildings = [
+  { building_id: 'bld_waldhaus', name: 'Waldhaus', sort_key: 3 },
+  { building_id: 'bld_seeblick', name: 'Seeblick', sort_key: 4 },
+  { building_id: 'bld_birkenhof', name: 'Birkenhof', sort_key: 5 },
+  { building_id: 'bld_gaestehaus', name: 'Gästehaus', sort_key: 6 },
+] as const
+
+const assignmentFixtureAdditionalRooms = assignmentFixtureAdditionalBuildings.flatMap(
+  (building, buildingIndex) =>
+    (['ground', 'first'] as const).flatMap((floor, floorIndex) =>
+      [4, 5, 5, 6, 6].map((places, roomIndex) => ({
+        room_id: `rm_${assignmentFixtureSlug(building.name)}_${floor}_${roomIndex + 1}`,
+        building_id: building.building_id,
+        number: `${floorIndex + 1}${String(roomIndex + 1).padStart(2, '0')}`,
+        floor,
+        room_type: 'standard',
+        sort_key: (floorIndex + 1) * 100 + roomIndex + 1,
+        sanitary: roomIndex % 3 === 0 ? 'private' : 'shared-floor',
+        price: 78 + roomIndex * 6 + buildingIndex * 2,
+        accessible: buildingIndex === 0 && floor === 'ground' && roomIndex === 0,
+        places,
+      })),
+    ),
+)
 
 const assignmentFixtureRooms = [
   {
@@ -385,10 +489,10 @@ const assignmentFixtureDrafts: readonly EventDraft[] = (() => {
     }
   }
 
-  for (const building of assignmentFixtureBuildings) {
+  for (const building of [...assignmentFixtureBuildings, ...assignmentFixtureAdditionalBuildings]) {
     add('BuildingAdded', building)
   }
-  for (const room of assignmentFixtureRooms) {
+  for (const room of [...assignmentFixtureRooms, ...assignmentFixtureAdditionalRooms]) {
     add('RoomAdded', {
       room_id: room.room_id,
       building_id: room.building_id,
