@@ -49,9 +49,6 @@ export type TraceView = {
   step: string
   subject: string
   text: string
-  score?: number
-  terms?: readonly { label: string; value: number }[]
-  rejected?: readonly { room: string; reason: string }[]
 }
 
 export type BoardView = {

@@ -53,7 +53,7 @@ function labelValue(world: KernelWorld, entityId: string, key: string): unknown 
 }
 
 function familyName(world: KernelWorld, familyId: string): string {
-  return String(labelValue(world, familyId, 'display-name') ?? familyId)
+  return String(labelValue(world, familyId, 'display-name') ?? 'Unbekannte Familie')
 }
 
 function familyPeople(world: KernelWorld, familyId: string): FamilyView['people'] {
@@ -64,7 +64,7 @@ function familyPeople(world: KernelWorld, familyId: string): FamilyView['people'
       name:
         [labelValue(world, person.id, 'given-name'), labelValue(world, person.id, 'family-name')]
           .filter((value): value is string => typeof value === 'string' && value.length > 0)
-          .join(' ') || person.id,
+          .join(' ') || 'Unbekannte Person',
       role: (labelValue(world, person.id, 'role') === 'child' ? 'child' : 'adult') as
         | 'adult'
         | 'child',
@@ -81,43 +81,75 @@ function requirements(world: KernelWorld, familyId: string): readonly string[] {
     ...new Set(
       world.requirements
         .filter(({ holder_id: holderId }) => holderId === familyId || personIds.has(holderId))
-        .map(
-          ({ trait_key: key, value, strength }) => {
-            const trait = activeProfile.traits[key]
-            const valueTrait =
-              trait?.kind === 'requirement' && trait.satisfied_by
-                ? activeProfile.traits[trait.satisfied_by]
-                : undefined
-            const label = localized(trait?.title) || 'Anforderung'
-            const valueLabel = valueTrait ? localized(valueTrait.title) : null
-            return `${label}${valueLabel ? `: ${valueLabel}` : ''}${strength === 'required' ? ' · erforderlich' : ''}`
-          },
-        ),
+        .map(({ trait_key: key, strength }) => {
+          const trait = activeProfile.traits[key as keyof typeof activeProfile.traits]
+          const valueTrait =
+            trait?.kind === 'requirement' && trait.satisfied_by
+              ? activeProfile.traits[trait.satisfied_by as keyof typeof activeProfile.traits]
+              : undefined
+          const label = localized(trait?.title) || 'Anforderung'
+          const valueLabel = valueTrait ? localized(valueTrait.title) : null
+          return `${label}${valueLabel ? `: ${valueLabel}` : ''}${strength === 'required' ? ' · erforderlich' : ''}`
+        }),
     ),
   ]
 }
 
 function roomLabel(world: KernelWorld, roomId: string): string {
   const number = labelValue(world, roomId, 'number')
-  return typeof number === 'string' ? `Zimmer ${number}` : roomId
+  return typeof number === 'string' ? `Zimmer ${number}` : 'Unbekanntes Zimmer'
+}
+
+function reasonLabel(reason: string): string {
+  if (reason.includes('hard.capacity')) {
+    return 'In den passenden Zimmern sind nicht genügend Schlafplätze frei.'
+  }
+  if (reason.includes('hard.trait-requirements')) {
+    return 'Kein verfügbares Zimmer erfüllt alle erforderlichen Merkmale.'
+  }
+  if (reason.includes('hard.resolver-decisions')) {
+    return 'Die Raumkonfiguration schließt die verfügbaren Zimmer aus.'
+  }
+  if (reason.includes('hard.keep-apart')) {
+    return 'Die Belegungsregeln verhindern die gemeinsame Unterbringung.'
+  }
+  if (reason.includes('has no room satisfying')) {
+    return 'Keine passende Unterkunft erfüllt eine erforderliche Anforderung.'
+  }
+  return 'Es wurde kein passendes Zimmer gefunden.'
+}
+
+function traceStepLabel(step: string): string {
+  return (
+    {
+      retain: 'Bisherige Zuordnung',
+      forced: 'Zwingende Zuordnung',
+      greedy: 'Automatische Zuordnung',
+      repair: 'Verbesserte Zuordnung',
+      unplaceable: 'Nicht platzierbar',
+    }[step] ?? 'Belegungsprüfung'
+  )
+}
+
+function subjectLabel(world: KernelWorld, subject: string): string {
+  if (world.families.some(({ id }) => id === subject)) return familyName(world, subject)
+  if (inventoryWorld(world).rooms.some(({ id }) => id === subject)) return roomLabel(world, subject)
+  const trait = activeProfile.traits[subject as keyof typeof activeProfile.traits]
+  return localized(trait?.title) || 'Konfigurationsmerkmal'
 }
 
 function traceView(trace: TraceEntry, world: KernelWorld): TraceView {
-  const subject = world.families.some(({ id }) => id === trace.subject)
-    ? familyName(world, trace.subject)
-    : roomLabel(world, trace.subject)
+  const subject = subjectLabel(world, trace.subject)
+  const text =
+    trace.step === 'unplaceable'
+      ? reasonLabel(trace.text)
+      : trace.text.includes('→')
+        ? `${familyName(world, trace.subject)} wurde in ${roomLabel(world, trace.detail?.chosen?.target ?? '')} untergebracht.`
+        : 'Die Belegung wurde automatisch ermittelt.'
   return {
-    step: trace.step,
+    step: traceStepLabel(trace.step),
     subject,
-    text: trace.text
-      .replaceAll(/fam_[a-zA-Z0-9_-]+/g, (id) => familyName(world, id))
-      .replaceAll(/rm_[a-zA-Z0-9_-]+/g, (id) => roomLabel(world, id)),
-    score: trace.detail?.chosen?.score,
-    terms: trace.detail?.chosen?.terms?.map(([label, value]) => ({ label, value })),
-    rejected: trace.detail?.rejected?.map(({ target, rule }) => ({
-      room: roomLabel(world, target),
-      reason: rule,
-    })),
+    text,
   }
 }
 
@@ -127,7 +159,7 @@ function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): reado
       id: diagnostic.id,
       severity: diagnostic.severity,
       title: 'Hinweis aus der Konfiguration',
-      description: diagnostic.message,
+      description: reasonLabel(diagnostic.message),
       subjects: [familyName(world, diagnostic.subject_id)],
     })),
     ...plan.preflight.map((finding, index) => ({
@@ -137,12 +169,8 @@ function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): reado
         finding.check === 'room-assignment.unplaced-family'
           ? 'Familie nicht platziert'
           : 'Belegungsprüfung',
-      description: finding.text,
-      subjects: finding.subjects.map((subject) =>
-        world.families.some(({ id }) => id === subject)
-          ? familyName(world, subject)
-          : roomLabel(world, subject),
-      ),
+      description: reasonLabel(finding.text),
+      subjects: finding.subjects.map((subject) => subjectLabel(world, subject)),
     })),
   ]
 }
@@ -168,7 +196,7 @@ function roomViews(
     return {
       id: room.id,
       name: roomLabel(world, room.id),
-      building: buildings.get(room.building_id) ?? room.building_id,
+      building: buildings.get(room.building_id) ?? 'Unbekanntes Gebäude',
       floor,
       capacity: room.place_count,
       occupied,
@@ -177,7 +205,7 @@ function roomViews(
         const trait = Object.entries(activeProfile.traits).find(
           ([traitKey]) => traitKey === key,
         )?.[1]
-        return localized(trait?.title) || key
+        return localized(trait?.title) || 'Besonderes Merkmal'
       }),
       state: occupied >= room.place_count ? 'occupied' : 'available',
     }
@@ -262,7 +290,7 @@ export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
   const reportUnplaced = section.unplaced.map(({ family_id: id, person_ids: people, reason }) => ({
     family: familyName(world, id),
     people: `${people.length} ${people.length === 1 ? 'Person' : 'Personen'}`,
-    reason,
+    reason: reasonLabel(reason),
   }))
   const report: AssignmentReportView = {
     generated_at: 'Aktueller Stand',
@@ -278,7 +306,7 @@ export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
       buildings,
       unplaced,
       unplaced_reasons: Object.fromEntries(
-        section.unplaced.map(({ family_id: id, reason }) => [id, reason]),
+        section.unplaced.map(({ family_id: id, reason }) => [id, reasonLabel(reason)]),
       ),
       traces,
     },

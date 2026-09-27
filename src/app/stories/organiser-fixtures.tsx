@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, type Dispatch, type ReactNode } from 'react'
 import { activeProfile } from '../../config/index.js'
-import type { Event, EventDraft } from '../../events/types.js'
+import type { Event, EventDraft, JsonValue } from '../../events/types.js'
 import { OrganiserContext, type OrganiserContextValue } from '../organiser/context.js'
 import {
   deriveOrganiserWorld,
@@ -153,6 +153,299 @@ export const organiserFixtureState = organiserReducer(initialOrganiserState, {
   build_revision: 'storybook',
   compatibility_revision: 1,
   principal_email: actor,
+})
+
+type AssignmentFixtureFamily = {
+  family_id: string
+  email: string
+  display_name: string
+  people: readonly {
+    person_id: string
+    given_name: string
+    family_name: string
+    birthdate: string | null
+    role: string
+  }[]
+  requirement?: {
+    key: string
+    value: string
+    strength: 'required' | 'preferred'
+  }
+}
+
+const assignmentFixtureFamilies: readonly AssignmentFixtureFamily[] = [
+  {
+    family_id: 'fam_braun',
+    email: 'braun@example.test',
+    display_name: 'Familie Braun',
+    people: [
+      {
+        person_id: 'per_braun_mara',
+        given_name: 'Mara',
+        family_name: 'Braun',
+        birthdate: '1988-04-12',
+        role: 'adult',
+      },
+      {
+        person_id: 'per_braun_jonas',
+        given_name: 'Jonas',
+        family_name: 'Braun',
+        birthdate: '1987-09-03',
+        role: 'adult',
+      },
+      {
+        person_id: 'per_braun_lina',
+        given_name: 'Lina',
+        family_name: 'Braun',
+        birthdate: '2014-06-19',
+        role: 'child',
+      },
+      {
+        person_id: 'per_braun_emil',
+        given_name: 'Emil',
+        family_name: 'Braun',
+        birthdate: '2017-01-22',
+        role: 'child',
+      },
+      {
+        person_id: 'per_braun_noa',
+        given_name: 'Noa',
+        family_name: 'Braun',
+        birthdate: '2020-11-05',
+        role: 'child',
+      },
+    ],
+    requirement: { key: 'needs-accessible', value: 'accessible', strength: 'required' },
+  },
+  {
+    family_id: 'fam_morgan',
+    email: 'morgan@example.test',
+    display_name: 'Familie Morgan',
+    people: [
+      {
+        person_id: 'per_morgan_alex',
+        given_name: 'Alex',
+        family_name: 'Morgan',
+        birthdate: '1989-02-14',
+        role: 'adult',
+      },
+      {
+        person_id: 'per_morgan_jamie',
+        given_name: 'Jamie',
+        family_name: 'Morgan',
+        birthdate: '2018-08-30',
+        role: 'child',
+      },
+    ],
+    requirement: {
+      key: 'needs-private-sanitary',
+      value: 'private-sanitary',
+      strength: 'preferred',
+    },
+  },
+  {
+    family_id: 'fam_rivera',
+    email: 'rivera@example.test',
+    display_name: 'Familie Rivera',
+    people: [
+      {
+        person_id: 'per_rivera_sam',
+        given_name: 'Sam',
+        family_name: 'Rivera',
+        birthdate: '1985-07-11',
+        role: 'adult',
+      },
+      {
+        person_id: 'per_rivera_kim',
+        given_name: 'Kim',
+        family_name: 'Rivera',
+        birthdate: '1986-12-17',
+        role: 'adult',
+      },
+      {
+        person_id: 'per_rivera_toni',
+        given_name: 'Toni',
+        family_name: 'Rivera',
+        birthdate: '2015-03-28',
+        role: 'child',
+      },
+    ],
+  },
+  {
+    family_id: 'fam_lang',
+    email: 'lang@example.test',
+    display_name: 'Familie Lang',
+    people: [
+      {
+        person_id: 'per_lang_robin',
+        given_name: 'Robin',
+        family_name: 'Lang',
+        birthdate: '1992-10-08',
+        role: 'adult',
+      },
+    ],
+  },
+]
+
+const assignmentFixtureBuildings = [
+  { building_id: 'bld_haupthaus', name: 'Haupthaus', sort_key: 1 },
+  { building_id: 'bld_gartenhaus', name: 'Gartenhaus', sort_key: 2 },
+] as const
+
+const assignmentFixtureRooms = [
+  {
+    room_id: 'rm_12',
+    building_id: 'bld_haupthaus',
+    number: '12',
+    floor: 'first',
+    room_type: 'standard',
+    sort_key: 12,
+    sanitary: 'private',
+    price: 103,
+    accessible: false,
+    places: 4,
+  },
+  {
+    room_id: 'rm_14',
+    building_id: 'bld_haupthaus',
+    number: '14',
+    floor: 'first',
+    room_type: 'standard',
+    sort_key: 14,
+    sanitary: 'shared-floor',
+    price: 88.5,
+    accessible: false,
+    places: 6,
+  },
+  {
+    room_id: 'rm_16',
+    building_id: 'bld_haupthaus',
+    number: '16',
+    floor: 'first',
+    room_type: 'standard',
+    sort_key: 16,
+    sanitary: 'shared-floor',
+    price: 88.5,
+    accessible: false,
+    places: 3,
+  },
+  {
+    room_id: 'rm_garten_3',
+    building_id: 'bld_gartenhaus',
+    number: '3',
+    floor: 'ground',
+    room_type: 'standard',
+    sort_key: 3,
+    sanitary: 'private',
+    price: 103,
+    accessible: true,
+    places: 2,
+  },
+] as const
+
+function assignmentFixtureEvent(
+  index: number,
+  type: string,
+  payload: JsonValue,
+  subject: string | null = null,
+): EventDraft {
+  return {
+    at: new Date(Date.UTC(2027, 0, 3, 10, 0, index)).toISOString(),
+    actor: 'anna.keller@example.test',
+    subject,
+    type,
+    payload,
+  }
+}
+
+const assignmentFixtureDrafts: readonly EventDraft[] = (() => {
+  const drafts: EventDraft[] = []
+  const add = (type: string, payload: JsonValue, subject: string | null = null) => {
+    drafts.push(assignmentFixtureEvent(drafts.length, type, payload, subject))
+  }
+
+  for (const family of assignmentFixtureFamilies) {
+    add('FamilyInvited', {
+      family_id: family.family_id,
+      email: family.email,
+      display_name: family.display_name,
+      locale: 'de',
+    })
+    for (const person of family.people) {
+      add('PersonAdded', { ...person, family_id: family.family_id }, family.family_id)
+    }
+    if (family.requirement) {
+      add('LabelSet', {
+        entity_id: family.family_id,
+        key: family.requirement.key,
+        value: family.requirement.value,
+        strength: family.requirement.strength,
+        note: null,
+      })
+    }
+  }
+
+  for (const building of assignmentFixtureBuildings) {
+    add('BuildingAdded', building)
+  }
+  for (const room of assignmentFixtureRooms) {
+    add('RoomAdded', {
+      room_id: room.room_id,
+      building_id: room.building_id,
+      number: room.number,
+      floor: room.floor,
+      room_type: room.room_type,
+      sort_key: room.sort_key,
+    })
+    add('LabelSet', {
+      entity_id: room.room_id,
+      key: 'sanitary',
+      value: room.sanitary,
+      strength: null,
+      note: null,
+    })
+    add('LabelSet', {
+      entity_id: room.room_id,
+      key: 'price-per-bed-eur',
+      value: room.price,
+      strength: null,
+      note: null,
+    })
+    if (room.accessible) {
+      add('LabelSet', {
+        entity_id: room.room_id,
+        key: 'is-accessible',
+        value: true,
+        strength: null,
+        note: null,
+      })
+    }
+    for (let index = 1; index <= room.places; index += 1) {
+      add('BedAdded', {
+        bed_id: `bed_${room.room_id.slice(3)}_${index}`,
+        room_id: room.room_id,
+        label: `Bett ${index}`,
+        bed_type: 'single',
+        sleeps: 1,
+        sleeping_room: null,
+        sort_key: index,
+      })
+    }
+  }
+
+  return drafts
+})()
+
+export const organiserAssignmentFixtureEvents: readonly Event[] = assignmentFixtureDrafts.map(
+  (event, index) => ({ ...event, seq: index + 1 }),
+)
+
+export const organiserAssignmentFixtureState = organiserReducer(initialOrganiserState, {
+  type: 'loaded',
+  events: organiserAssignmentFixtureEvents,
+  build_revision: 'storybook-assignment-board',
+  compatibility_revision: 1,
+  principal_email: 'anna.keller@example.test',
 })
 
 export function stateWithDrafts(...drafts: readonly EventDraft[][]): OrganiserState {

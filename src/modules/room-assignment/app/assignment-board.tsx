@@ -79,9 +79,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
                               room={room}
                               expanded={expandedRoom === room.id}
                               onToggle={() =>
-                                setExpandedRoom((current) =>
-                                  current === room.id ? null : room.id,
-                                )
+                                setExpandedRoom((current) => (current === room.id ? null : room.id))
                               }
                             />
                             {expandedRoom === room.id ? (

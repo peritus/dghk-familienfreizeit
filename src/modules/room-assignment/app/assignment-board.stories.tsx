@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { FixtureProvider } from '../../../app/stories/organiser-fixtures.js'
+import {
+  FixtureProvider,
+  organiserAssignmentFixtureState,
+} from '../../../app/stories/organiser-fixtures.js'
 import { AssignmentBoardScreen } from './assignment-board.js'
 
 const meta = {
@@ -42,7 +45,7 @@ export const MobileReviewState: Story = {
 
 export const PopulatedWithSharedOrganiserState: Story = {
   render: () => (
-    <FixtureProvider>
+    <FixtureProvider initialState={organiserAssignmentFixtureState}>
       <AssignmentBoardScreen />
     </FixtureProvider>
   ),

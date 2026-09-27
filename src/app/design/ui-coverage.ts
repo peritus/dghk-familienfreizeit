@@ -240,7 +240,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/ui/tabs.tsx',
   },
   {
-    id: 'screens-organiser-assignment-board--populated',
+    id: 'screens-organiser-assignment-board--populated-with-shared-organiser-state',
     area: 'screen',
     subject: 'Assignment board',
     source: 'src/modules/room-assignment/app/assignment-board.tsx',
