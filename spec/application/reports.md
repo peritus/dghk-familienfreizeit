@@ -30,12 +30,15 @@ Every report identifies:
 |---|---|
 | Report title | Human-readable name from the active occasion profile |
 | Audience | `shared`, `family`, or `organiser` |
-| Data cut | Current-data sequence plus the communication references for included scopes |
+| Data cut | Current-data sequence; release-scoped reports additionally include communication references |
 | Generated at | Display-only browser generation time |
 | Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
-Organiser reports consume `CommunicationScopeView`; family and shared reports
+The M6 assignment report is an organiser-only current-state module report. It consumes
+the derived organiser world and room-assignment solver output directly and has no
+communication references. Later release-scoped organiser reports consume
+`CommunicationScopeView`; family and shared reports
 consume [`FamilyScopeView`](release-control.md), never `CommunicationScopeView` —
 the same audience split as the family application ([release control](release-control.md) §1). Both
 supply communication status, scope references, before/after content, and
@@ -48,7 +51,9 @@ identity. Reports are generated on demand from the world visible to the reader.
 
 ## 2. Derivation and visibility
 
-Reports never have a table, event type, cache entry or stored snapshot. Organiser
+Reports never have a table, event type, cache entry or stored snapshot. The M6
+assignment report is an on-demand projection of the current prospective organiser
+world; it does not imply that an arrangement has been released. Later organiser
 reports may render the full organiser-derived world; family/shared reports are
 derived and privacy-projected by the Worker. They render ordinary derived worlds and the audience projection defined in
 [release control](release-control.md) §2. Organisers may inspect current or pending
@@ -142,9 +147,9 @@ materials, and outstanding or unavailable release scopes.
 [release control](release-control.md) §6: outstanding scope differences,
 affected families and dependencies, with links to the detailed preview (§7).
 
-**Plan comparison** compares arbitrary derived plans for organiser investigation.
-It is distinct from the scope-selected communication preview and does not decide
-what families can see.
+Plan inspection and comparison are accepted but deferred in
+[`plan-inspection-and-comparison`](../deferred-ideas/plan-inspection-and-comparison.md).
+They remain distinct from the scope-selected communication preview when promoted.
 
 **Capacity and accommodation cost overview** shows room and bed use, free
 capacity, workshop fill, and the configured accommodation cost estimate. It is a
@@ -174,7 +179,8 @@ on every printed page.
 Reports appear as ordinary browser routes, with the same authenticated session
 rules as the corresponding family view or organiser view. They have no download,
 export, or print action. The visible controls are limited to filtering, sorting, and
-navigation.
+navigation. The M6 assignment report has no report-local mutation, release, or print
+control.
 
 The print stylesheet must:
 

@@ -33,13 +33,10 @@ link to affected sessions and people; the screen does not let an organiser assig
 attendance directly. Empty, unranked, unscheduled, and no-offering states remain
 distinct.
 
-An Add organiser decision action opens the shared [decision form](constraints.md)
-with the selected session and placement context. It can add matching, exclusion,
-separation, eligibility, or fixed-placement labels through the fixed resolver. It uses
-the shared local-first event pipeline and offers one optional note; immediate mode
-applies automatically, drafting mode waits for the shared draft workspace; applied labels show
-the existing event author and timestamp. The derived assignment and findings
-update through the ordinary solver.
+Placement override actions remain deferred in
+[`organiser-placement-overrides`](../../deferred-ideas/organiser-placement-overrides.md).
+The workshop screen may link to the relevant configuration surface later; it does
+not make direct attendance or accommodation placement a central interaction.
 
 The heatmap has a text table alternative and does not use color alone. On
 narrow screens, show one workshop card at a time followed by the ranking list.
@@ -61,7 +58,7 @@ Over-capacity preserves existing names and blocks new admission; warnings link t
 the affected workshop. Mode changes show the ordinary label changes or allocation
 release dependencies needed before communication; they never silently clear lists.
 
-**An Familien kommunizieren** opens [UI-11](release-control.md) with the relevant
+**An Familien kommunizieren** opens the deferred [UI-11](../../deferred-ideas/release-control-ui.md) with the relevant
 candidate, programme, schedule, or attendance scope selected. A slot allocation
 action selects the complete slot, never an individual workshop roster. Dependencies
 and detailed family-visible diffs are reviewed there, under [release control](../../application/release-control.md).

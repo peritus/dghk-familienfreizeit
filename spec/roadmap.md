@@ -21,18 +21,24 @@ and D5–D7.
 
 The verified business-logic foundation is documented in
 [`docs/modules/room-assignment.md`](../docs/modules/room-assignment.md). The
-remaining milestone scope is the organiser board, placement-decision controls,
-reports, plan diff, communications, and the outstanding integration fixtures.
+remaining milestone scope is the read-only organiser board, its compact
+printable assignment report, and the outstanding integration fixtures. Family
+requirements and room capabilities are edited through separate event-backed
+organiser surfaces; this milestone consumes their derived result rather than
+replacing those editors.
 
-- Complete the organiser board, placement-decision controls, reports, plan diff,
-  and communications around the derived plan.
-- Add the remaining real-inventory, decision, moved-assignment, shuffle, and
-  golden-plan fixtures as those surfaces land.
+- Complete the organiser board and assignment report around the derived plan.
+- Add the remaining real-inventory, configuration-change, shuffle, and golden-plan
+  fixtures.
+- Keep manual placement overrides, plan comparison, release control, and
+  communication UI in deferred scope; their domain contracts remain governed by
+  their later milestones.
 
 Acceptance: whole-family placement is deterministic, hard constraints are
-enforced, organiser actions remain event-backed, the board is usable, and every
-assignment decision has an explanatory trace. No family route or report route is
-required.
+enforced, family and room configuration changes flow through the shared organiser
+draft/apply/discard pipeline, the board and report render the same derived result,
+and every assignment outcome has an explanatory trace. The report is printable
+through browser print styles without an in-app print button.
 
 ## M7 — Organiser controls
 
@@ -104,7 +110,7 @@ Families cannot log in during this milestone.
 Specification coverage: [authentication](application/authentication.md), [family view](application/family-view.md),
 [family preferences](modules/family-preferences.md), [release control](application/release-control.md),
 [UI-01](ui/screens/login.md), [UI-02](ui/screens/login-link-invalid.md), [UI-03](ui/screens/family-preferences.md),
-[UI-04](ui/screens/family-assignment.md), [UI-11](ui/screens/release-control.md), and D14/D16/D24.
+[UI-04](ui/screens/family-assignment.md), [deferred UI-11](deferred-ideas/release-control-ui.md), and D14/D16/D24.
 
 - Implement invite-only family magic-link authentication, single-use tokens,
   canonical identities, sessions, rate limits, privacy projections, and the
@@ -167,7 +173,8 @@ Specification coverage: [reports](application/reports.md), [D21](../decisions.md
 and report contributions from all selected modules.
 
 - Complete the accommodation, programme, workshop roster, family information,
-  release, plan-comparison, cost, open-issues, and active-profile report catalogue.
+  release, cost, open-issues, and active-profile report catalogue. Plan inspection
+  and comparison remain deferred in the linked deferred-ideas contract.
 - Finish cross-feature projections, restricted/changed/incomplete states,
   responsive layouts, print fixtures, and browser-print acceptance.
 

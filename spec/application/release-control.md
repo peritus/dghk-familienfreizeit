@@ -8,7 +8,7 @@ notification; communicating does not imply that an email was sent (D16).
 This document owns release scopes, communication events, visibility composition,
 release dependencies, outstanding-change reporting, review, concurrency, history,
 and notification selection. Domain rules belong to their modules; screen layouts
-belong to [UI-11](../ui/screens/release-control.md). Other specifications refer here rather
+belong to the deferred [UI-11](../deferred-ideas/release-control-ui.md). Other specifications refer here rather
 than define independent release mechanisms.
 
 ## 1. Release scopes

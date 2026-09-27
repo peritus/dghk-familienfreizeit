@@ -29,17 +29,22 @@ experimentation.
 | UI-08 | [Inventory](screens/inventory.md) | `/organiser/inventory` |
 | UI-14 | [Workshop spaces](screens/workshop-spaces.md) | `/organiser/workshop-spaces` |
 | UI-10 | [Assignment board](screens/assignment-board.md) | `/organiser/board` |
-| UI-11 | [Release control](screens/release-control.md) | `/organiser/releases` |
+| UI-15 | [Assignment report](../application/reports.md) | `/organiser/reports` |
 | UI-12 | [Workshops](screens/workshops.md) | `/organiser/workshops` |
-| UI-13 | [Organiser decisions](screens/constraints.md) | `/organiser/constraints` |
 
 The party-review screen belongs to the separate sleeping modules. Its design sketch
 is kept in [`spec/deferred-ideas/party-review.md`](../deferred-ideas/party-review.md).
 
-The `/organiser/reports` route in [organiser view](../application/organiser-view.md) §1
-has no dedicated screen spec yet. Its content is specified by [reports](../application/reports.md);
-it follows UI-00 until a screen spec is written. Materials are accepted but deferred
-and are not part of the active organiser screen inventory.
+UI-13 organiser placement decisions are accepted but deferred in
+[`organiser-placement-overrides`](../deferred-ideas/organiser-placement-overrides.md).
+
+Release control, communication review, and communication history UI are deferred
+in [`release-control-ui`](../deferred-ideas/release-control-ui.md). The release
+control domain contract remains authoritative for its later milestone.
+
+The assignment report is the compact current-state organiser report described in
+[reports](../application/reports.md). The generic report host and broader catalogue
+remain later scope; the M6 report is not release- or communication-dependent.
 
 ## Screen-spec format
 

@@ -252,9 +252,9 @@ wholly unplaced.
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/board` — whole-family placement board |
-| Controls | room requirements and organiser decision labels supplied by the profile |
-| Reports | room assignments, unplaced families, and diagnostics |
+| Screen | `/organiser/board` — read-only whole-family placement review |
+| Controls | room requirements and organiser decision labels supplied by the profile; prominent override UI is deferred |
+| Reports | `room-assignment.assignment-report`: current room assignments, unplaced families, capacity, and diagnostics |
 | Emails | none |
 
 ## 12. Tests

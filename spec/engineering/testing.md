@@ -493,9 +493,9 @@ Recorded so the gaps are deliberate.
   principal and 401/404 otherwise, and that every screen renders from a fixture
   world without throwing. No snapshot tests of markup — they break on every copy
   change and catch nothing.
-- **The board's drag interaction.** Manually tested. A Playwright suite for
-  pragmatic-drag-and-drop would cost more to maintain than the feature and would
-  be flaky. The *server* side of every board action is tested through the API.
+- **Deferred placement interaction.** Manual placement is not an active M6 UI
+  surface. The active board is read-only; configuration edits are covered through
+  the shared organiser draft/apply/discard pipeline and the derived solver tests.
 - **Email rendering.** Sent to a real address and looked at. Litmus-style
   cross-client testing is not worth it for four plain emails.
 - **Load.** 150 people, three organisers. There is no load.

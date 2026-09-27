@@ -17,19 +17,16 @@ that host.
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
 | `/organiser/workshop-spaces` | Workshop spaces | Physical workshop-space inventory, capacity, availability, ordering, capabilities |
 | `/organiser/board` | The board | Whole-family room placement |
-| `/organiser/plans` | Plans | Derived plan investigation and comparison |
-| `/organiser/releases` | Release control | Outstanding scopes, detailed preview, communicate |
-| `/organiser/releases/history` | Communication history | Scope references, actor, time and reproducible comparisons |
-| `/organiser/plans/:a/diff/:b` | Plan diff | What moved and why |
+| `/organiser/reports` | Assignment report | Compact printable current assignment |
 | `/organiser/workshops` | Workshops | Calls, proposals, candidate rounds, demand, schedule, capacity, fill, rankings |
-| `/organiser/constraints` | Organiser decisions | Add, inspect, and clear resolver labels |
-| `/organiser/reports` | Reports | Printable operational reports |
 
-Every outstanding screen renders the organiser application's derived world. Screen
-actions use the shared local-first organiser pipeline: they create ordinary event
-groups, derive the proposed world locally, and then either invoke the ordinary apply
-command automatically or leave the group in the browser for review, according to the
+Every screen renders the organiser application's derived world. Mutating screens
+use the shared local-first organiser pipeline: they create ordinary event groups,
+derive the proposed world locally, and then either invoke the ordinary apply command
+automatically or leave the group in the browser for review, according to the
 session's commit policy. No screen owns a second draft list or persistence path.
+The assignment board and report are read-only projections of that same prospective
+world, so family and room drafts are visible before they are applied.
 
 The header exposes **Entwurfsmodus starten**. Immediate mode is the session default and
 automatically applies each locally staged group. Drafting mode defers the same apply
@@ -40,13 +37,13 @@ current ordered batch. A failed automatic apply keeps its events, opens the work
 and activates drafting mode.
 
 Release reporting and confirmation follow [release control](release-control.md)
-and [UI-11](../ui/screens/release-control.md). Live coordination findings remain separate
+and the deferred [release-control UI](../deferred-ideas/release-control-ui.md). Live coordination findings remain separate
 from held arrangements.
 
 ## 2. Whole-family assignment board
 
-The board is the only active screen with substantial interaction design. It has an
-unplaced-family rail and room cards grouped by building and floor.
+The board is a read-only review screen with an unplaced-family rail and room cards
+grouped by building and floor.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -61,28 +58,22 @@ unplaced-family rail and room cards grouped by building and floor.
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Dragging a family to a room creates organiser decision labels through the shared
-local-first pipeline, re-derives locally, and explains infeasible drops. In immediate
-mode the resulting batch is submitted automatically; drafting mode waits for Entwürfe anwenden.
-The solver remains the only producer of assignments.
+The board renders the deterministic solver result, explains infeasible placements,
+and reflects unapplied family or room configuration drafts. The solver remains the
+only producer of assignments. Manual placement controls remain deferred.
 Room cards show capacity, sanitary arrangement, accessibility, occupants by family,
 hard-constraint status, and soft penalties. A drop never splits a family or merges
 two families.
 
-Keyboard users can move through the unplaced list, open a room picker, add a room
-decision, discard the draft batch, and clear selection.
-Touch users get the same room picker through a drawer instead of drag-and-drop.
+Keyboard and touch users can expand placement explanations. Draft/apply/discard
+remains available through the global save-status control, not through the board.
 
 ## 3. Organiser decisions and reports
 
-The constraints screen exposes fixed resolver mechanisms: needs/provides, exclusions,
-and separation. Organisers may enter a new matching value under a mechanism, such as
-`provides=my-ad-hoc-thing`; the value needs no separate vocabulary declaration.
-Sleeping `groups-with` decisions are rejected or reported as outside the active module
-set. Optional notes stay attached
-to the label event; author and timestamp come from the event log.
+The fixed resolver mechanisms and organiser decision labels remain domain capabilities,
+but their prominent placement UI is deferred to
+[`organiser-placement-overrides`](../deferred-ideas/organiser-placement-overrides.md).
 
-Reports show family-to-room assignments, unplaced families, capacity and constraint
-findings, workshop proposals, demand, schedule results, attendance results, and
-communication status. They do not show party or child-room sections in the active
-scope.
+The M6 assignment report shows family-to-room assignments, unplaced families,
+capacity, and constraint findings. The later generic report catalogue covers
+workshops, attendance, and communication; it does not change the M6 data model.

@@ -8,8 +8,10 @@ The active profile is `familienfreizeit-2027`.
 
 Families state preferences and can join sign-up workshops. Solver allocations
 remain derived rather than directly assigned. A deterministic
-algorithm produces a complete proposal. Organisers review it, add decisions where
-their judgement should guide the result, and communicate. Decisions are recorded with
+algorithm produces a complete proposal. Organisers review it, correct family or
+room configuration where needed, and later communicate a reviewed result. Exceptional
+organiser decisions remain event-backed domain capabilities but their prominent UI is
+deferred. Decisions are recorded with
 an optional note so other organisers can understand them.
 
 ## The shape of the problem
@@ -34,4 +36,3 @@ re-run shuffles forty families who had no reason to move, the plan is useless an
 the organisers will go back to a spreadsheet. Stability across runs is a feature, and
 it is the reason the solver is a pure deterministic function and organiser decisions
 are stored as constraints rather than as edits.
-

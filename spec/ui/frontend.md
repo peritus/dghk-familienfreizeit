@@ -11,10 +11,10 @@ components, talking to a small JSON API.
 
 The derived world is the read side of the application
 ([architecture](../architecture/overview.md)), and must run in the organiser browser. The organiser
-screens are views over it: the dashboard, families, the board, plan
-diffs, workshops, and constraints all render `derive(committed ++ drafts)`. The
-draft list is shared by every one of them: the constraints screen adds decision
-labels to it just as the board drags into it. That is a client application with one piece of
+screens are views over it: the dashboard, families, inventory, assignment board,
+and assignment report all render `derive(committed ++ drafts)`. The draft list is
+shared by every mutating screen; the board and report are read-only consumers of
+the same prospective result. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
 
 So: render everything in React, organiser and family view alike, and keep the server
@@ -24,9 +24,9 @@ What that buys, concretely:
 
 - **One draft list across screens.** It lives in one reducer at the root of the
   organiser application, so every screen sees the same unapplied work.
-- **No hand-written rendering engine for the board.** Re-deriving on every drag,
-  keeping selection, focus, and drag state across renders, flashing moved cards —
-  this is component state and reconciliation, not DOM bookkeeping.
+- **No screen-local persistence.** Configuration screens stage ordinary events;
+  review screens render the resulting world and never create a second assignment
+  or report state store.
 - **Accessible primitives instead of hand-written ones.** The person picker, the room
   picker, confirmation dialogs, toasts, radio groups, and selects come from
   maintained components with keyboard and ARIA behaviour already correct.
@@ -93,7 +93,7 @@ src/app/
   family-view/               login, preferences page, assignment page
   organiser/
     OrganiserApp.tsx        loads the log, owns the draft reducer, derives the world
-    screens/            dashboard, families, inventory, board, plans, workshops, constraints, reports
+    screens/            dashboard, families, inventory, assignment board, assignment report
   components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
@@ -165,7 +165,7 @@ npx shadcn@latest init https://neobrutalism.dev/r/styling/<palette>.json
 npx shadcn@latest add <component URL from its neobrutalism.dev page>
 ```
 
-The outstanding screens require the following component inventory.
+The current and later screens use the following component inventory.
 [Implemented primitives](../../docs/ui/design-system.md) provide the starting set:
 
 | Component | Used for |
@@ -173,7 +173,7 @@ The outstanding screens require the following component inventory.
 | Button, Card, Badge, Alert | everywhere |
 | Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms |
 | Combobox, Popover, Command | person picker, room picker |
-| Dialog, Alert Dialog | organiser decisions, communicate confirmation, discard drafts |
+| Dialog, Alert Dialog | later organiser decisions, communicate confirmation, discard drafts |
 | Table, ScrollArea | families, plans, constraints, workshop fill |
 | Tabs | building filter on the board, before and after communication in the family view |
 | Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
@@ -208,26 +208,15 @@ The outstanding screens must meet these acceptance criteria:
 Use the existing Tailwind tokens, utility classes and component variants for
 these screens. Do not introduce hand-written component CSS beyond registry styling.
 
-## 6. The board
+## 6. The board and assignment report
 
-A screen of the organiser application like any other, with the most interaction.
-Drag and drop is `@atlaskit/pragmatic-drag-and-drop` — framework-agnostic, ~4.7kB
-core, attached to room cards and family cards from effects.
+The board and report are read-only screens. They receive the same prospective world
+that family and inventory editors receive, run the selected room-assignment solver
+projection, and render its assignments, diagnostics, and traces. They do not use
+drag-and-drop, screen-local draft state, or placement mutation controls.
 
-### Responsibilities
-
-```
-draggable()   family cards become draggable
-dropTarget()  room cards accept drops, with a canDrop predicate
-monitor()     global drag state → dim infeasible rooms, show penalty ghosts
-reducer       selection, keyboard handling, draft list
-world         derive(committed ++ drafts), memoised
-```
-
-The feasibility predicate is the real one. `canDrop` asks `derive` what happens if
-this constraint is appended, so an infeasible room is dimmed because it is
-infeasible — with the constraints and exclusions all present —
-rather than because a cheap approximation guessed so.
+The global organiser reducer and `SaveStatus` remain responsible for immediate mode,
+drafting mode, apply, discard, stale-head recovery, and pending-state navigation.
 
 ### Local-first mutation cycle
 
@@ -293,7 +282,6 @@ and locked when implemented:
 | Dependency | Outstanding use |
 |---|---|
 | `zod` | Shared event and request schemas |
-| `@atlaskit/pragmatic-drag-and-drop` | Assignment board drag and drop |
 | `tsx` | Node execution of offline weight tuning |
 | Additional registry primitives | Planned controls in the component inventory |
 

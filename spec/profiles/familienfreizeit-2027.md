@@ -27,7 +27,7 @@ rows remain later integration scope:
 | Module | Used for |
 |---|---|
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
-| [`room-assignment`](../modules/room-assignment.md) | deterministic placement and keep-apart relations; the organiser board remains outstanding |
+| [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, organiser board, and current assignment report |
 | [`workshop-space`](../modules/workshop-space.md) | later: physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
 | [`programme-core`](../modules/programme-core.md) | later: shared programme-session identity and scheduleable-session boundary |
 | [`official-workshops`](../modules/official-workshops.md) | later: organiser-authored official workshops, audience, and person-to-workshop leadership |
