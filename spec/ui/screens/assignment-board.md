@@ -21,19 +21,21 @@ Organisers review the resolver's room placement and its consequences. Route:
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The board is read-only. It renders the current derived world, including unapplied
+The board does not write assignments directly. It renders the current derived world, including unapplied
 events from the shared organiser draft buffer, and the deterministic solver output.
 It shows every configured building and its rooms in one view; there is no building
-selector. It shows hard failures, room availability, and unplaced families. Organisers
-correct family or room configuration in the corresponding editor; exceptional
-placement overrides remain deferred to [deferred scope](../../deferred-ideas/organiser-placement-overrides.md).
+selector. It shows hard failures, room availability, and unplaced families. The
+narrow fixed-assignment action writes paired `needs`/`provides` labels, re-derives
+locally, preserves invalid assignments with diagnostics, and clears both labels when
+removed. Richer placement overrides remain deferred to
+[deferred scope](../../deferred-ideas/organiser-placement-overrides.md).
 
 ## Narrow fallback
 
 The board becomes an unplaced list followed by a room list. Family summaries are
 compact by default and can be expanded in place to show the people in that family.
 The global organiser save-status control continues to show pending drafts without
-being duplicated inside the board.
+being duplicated inside the board. Fixed-assignment actions use that same control.
 
 ## Neobrutalist redesign and components
 

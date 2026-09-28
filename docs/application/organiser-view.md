@@ -58,9 +58,9 @@ work. Family principals receive no organiser log or apply access.
 ## Current limits
 
 The active profile currently contains the kernel `role` trait, room-inventory, and
-room-assignment modules. Assignment review is implemented; family-facing controls,
-manual placement, generic reports, plan comparison, release, and communication remain
-later scope.
+room-assignment modules. Assignment review and the narrow event-backed fixed-assignment
+workflow are implemented; richer placement overrides, family-facing controls, generic
+reports, plan comparison, release, and communication remain later scope.
 
 The verified tests cover local derivation, immediate and drafting commit timing,
 the inline draft workspace, apply-prefix acknowledgement, organiser log/apply

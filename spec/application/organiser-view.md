@@ -25,8 +25,10 @@ use the shared local-first organiser pipeline: they create ordinary event groups
 derive the proposed world locally, and then either invoke the ordinary apply command
 automatically or leave the group in the browser for review, according to the
 session's commit policy. No screen owns a second draft list or persistence path.
-The assignment board and report are read-only projections of that same prospective
-world, so family and room drafts are visible before they are applied.
+The assignment board and report are solver-owned projections of that same prospective
+world, so family and room drafts are visible before they are applied. The board's
+narrow fixed-assignment action stages paired resolver labels through this shared
+pipeline; it does not write assignments directly.
 
 The header exposes **Entwurfsmodus starten**. Immediate mode is the session default and
 automatically applies each locally staged group. Drafting mode defers the same apply
@@ -42,7 +44,7 @@ from held arrangements.
 
 ## 2. Whole-family assignment board
 
-The board is a read-only review screen with an unplaced-family rail and room cards
+The board is a solver-owned review screen with an unplaced-family rail and room cards
 grouped by building and floor.
 
 ```text
@@ -59,9 +61,11 @@ grouped by building and floor.
 ```
 
 The board renders the deterministic solver result and shows user-facing reasons for
-infeasible placements,
-and reflects unapplied family or room configuration drafts. The solver remains the
-only producer of assignments. Manual placement controls remain deferred.
+infeasible placements, and reflects unapplied family or room configuration drafts.
+The solver remains the only producer of assignments. The narrow fixed-assignment
+action writes paired generic `needs`/`provides` labels through the shared draft
+pipeline; invalid fixed assignments remain visible with diagnostics, and clearing
+the action clears both labels. Richer placement overrides remain deferred.
 Room cards show capacity status, room capabilities, and occupants by family. A drop
 never splits a family or merges two families.
 

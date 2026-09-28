@@ -28,9 +28,12 @@ organiser surfaces; this milestone consumes their derived result rather than
 replacing those editors.
 
 - Complete the organiser board and assignment report around the derived plan.
+- Include the narrow event-backed fixed-assignment workflow: paired
+  `needs`/`provides` labels, local re-derivation, invalid-assignment
+  diagnostics, and clearing through the shared draft pipeline.
 - Add the remaining real-inventory, configuration-change, shuffle, and golden-plan
   fixtures.
-- Keep manual placement overrides, plan comparison, release control, and
+- Keep richer placement overrides, plan comparison, release control, and
   communication UI in deferred scope; their domain contracts remain governed by
   their later milestones.
 

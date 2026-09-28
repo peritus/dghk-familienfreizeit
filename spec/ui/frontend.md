@@ -210,10 +210,12 @@ these screens. Do not introduce hand-written component CSS beyond registry styli
 
 ## 6. The board and assignment report
 
-The board and report are read-only screens. They receive the same prospective world
+The board and report are solver-owned review screens. They receive the same prospective world
 that family and inventory editors receive, run the selected room-assignment solver
 projection, and render its assignments, diagnostics, and traces. They do not use
-drag-and-drop, screen-local draft state, or placement mutation controls.
+drag-and-drop, screen-local draft state, or direct placement mutation. The board's
+narrow fixed-assignment action stages ordinary paired resolver labels through the
+shared draft pipeline; richer placement overrides remain deferred.
 
 The global organiser reducer and `SaveStatus` remain responsible for immediate mode,
 drafting mode, apply, discard, stale-head recovery, and pending-state navigation.
