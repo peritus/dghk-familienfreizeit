@@ -21,9 +21,11 @@ export const Statuses: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2 bg-background p-6">
       <Badge>Frei</Badge>
+      <Badge variant="free">2 frei</Badge>
       <Badge tone="success">Platziert</Badge>
       <Badge tone="attention">Prüfen</Badge>
       <Badge tone="danger">Blockiert</Badge>
+      <Badge variant="pinned">Fest zugeordnet</Badge>
       <Badge tone="draft">Entwurf</Badge>
       <Badge tone="held">Zurückgehalten</Badge>
     </div>
