@@ -246,6 +246,24 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/modules/room-assignment/app/room-card.tsx',
   },
   {
+    id: 'ui-tag--properties',
+    area: 'component',
+    subject: 'Tag properties',
+    source: 'src/app/components/ui/tag.tsx',
+  },
+  {
+    id: 'ui-stats-strip--dynamic-columns',
+    area: 'component',
+    subject: 'Stats strip',
+    source: 'src/app/components/ui/stats-strip.tsx',
+  },
+  {
+    id: 'ui-success-state--messages',
+    area: 'component',
+    subject: 'Success state',
+    source: 'src/app/components/ui/success-state.tsx',
+  },
+  {
     id: 'ui-tabs--buildings',
     area: 'component',
     subject: 'Tabs',
@@ -262,6 +280,18 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Assignment board mobile review state',
     source: 'src/modules/room-assignment/app/assignment-board.tsx',
+  },
+  {
+    id: 'screens-organiser-assignment-board--no-problems',
+    area: 'screen',
+    subject: 'Assignment board no-problems state',
+    source: 'src/modules/room-assignment/app/assignment-board.stories.tsx',
+  },
+  {
+    id: 'room-assignment-board-components--variants',
+    area: 'component',
+    subject: 'Assignment board components',
+    source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
   },
   {
     id: 'screens-organiser-assignment-report--populated',
