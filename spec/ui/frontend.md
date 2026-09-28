@@ -13,8 +13,9 @@ The derived world is the read side of the application
 ([architecture](../architecture/overview.md)), and must run in the organiser browser. The organiser
 screens are views over it: the dashboard, families, inventory, assignment board,
 and assignment report all render `derive(committed ++ drafts)`. The draft list is
-shared by every mutating screen; the board and report are read-only consumers of
-the same prospective result. That is a client application with one piece of
+shared by every mutating screen; the board and report consume the same prospective
+result, while the board's narrow fixed-assignment action stages ordinary labels
+through that shared state. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
 
 So: render everything in React, organiser and family view alike, and keep the server
@@ -70,17 +71,15 @@ or label and see the resolver, plan, diagnostics, and trace respond.
 
 Use the [implemented build](../../docs/architecture/overview.md) and
 [development commands](../../docs/engineering/development.md) as the foundation.
-Add deployment and offline weight-tuning commands when their features exist:
+Add deployment and any future offline weight-review tooling when those features exist:
 
 ```jsonc
 {
   "deploy": "vite build && wrangler deploy",
-  "tune": "tsx scripts/tune.ts"
 }
 ```
 
-`tune` runs under Node outside Vite. Extend both strict runtime TypeScript
-projects to include shared domain code as it is introduced, excluding Worker and
+Extend both strict runtime TypeScript projects to include shared domain code as it is introduced, excluding Worker and
 module Worker code from the browser project and browser/module app code from the
 Worker project. Preserve `noUncheckedIndexedAccess`, and regenerate and commit
 Worker types when the bindings change.
@@ -284,7 +283,6 @@ and locked when implemented:
 | Dependency | Outstanding use |
 |---|---|
 | `zod` | Shared event and request schemas |
-| `tsx` | Node execution of offline weight tuning |
 | Additional registry primitives | Planned controls in the component inventory |
 
 Resolve compatible versions when implementing each capability and commit the

@@ -214,9 +214,9 @@ events and clear them with `LabelCleared`.
 ## D12 — Weights live in code
 
 *Chosen.* Scoring weights and module parameters are occasion-profile code, and changing
-them is a deployment, not an event. Tuning happens offline: export the log, run
-`npm run tune`, and deploy the weights chosen ([deployment](spec/engineering/deployment.md),
-weight tuning). The exact build revision identifies the profile and parameters used.
+them is a deployment, not an event. Weight changes are reviewed offline against an
+exported event log before deployment ([deployment](spec/engineering/deployment.md),
+weight review). The exact build revision identifies the profile and parameters used.
 
 ## D13 — Workshop rankings are structured labels
 

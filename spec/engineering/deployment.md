@@ -139,19 +139,19 @@ corrective events through the ordinary append. Never edit event rows.
 
 ---
 
-## 3. Weight tuning
+## 3. Weight review
 
 There is no weight-editing screen, and this is deliberate. Weights are occasion
-profile code (D12), so tuning happens offline:
+profile code (D12), so changes are reviewed offline against an exported event log:
 
 ```bash
 wrangler d1 execute dghk-familienfreizeit --remote --json \
   --command "SELECT * FROM event ORDER BY seq" > events.json
-npm run tune
 ```
 
-Export the event log, run `npm run tune`, read the trade-off table, edit the
-active occasion profile, and deploy.
+Read the exported event log and the resulting assignment evidence, edit the active
+occasion profile when a deliberate weight change is approved, and deploy. The
+repository does not provide an automated weight-sweep command.
 
 ---
 
@@ -354,8 +354,8 @@ The week before, in order:
    the shared family reports are visible in the browser, and that the organiser
    reports show the expected data cut. Reports are not downloadable; print any
    paper copies needed for the occasion from their browser print views.
-3. **Run `npm run tune`** against the exported log and confirm the deployed
-   weights are the ones you settled on.
+3. **Review the deployed assignment parameters** against the approved profile
+   configuration and confirm that the deployed weights are the ones settled on.
 4. **Confirm required scopes are ready**, including the absence of blocking solver
    findings and release consistency failures.
 5. **Print the required reports.** Use the report print styles for room lists per

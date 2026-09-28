@@ -99,7 +99,7 @@ separate sleeping-parties module.
 
 | Module | Parameter | Value | Why |
 |---|---|---|---|
-| `room-assignment` | `weights` | exact fit 10, near fit 4, orphan bed −8 | module defaults; tune with `npm run tune` |
+| `room-assignment` | `weights` | exact fit 10, near fit 4, orphan bed −8 | module defaults; review changes against exported assignment evidence |
 | | `keep_apart_trait` | `apart-from` | |
 | | `priority_trait` | `needs-accessible` | accessible needs claim scarce places first |
 | | `scarce_capabilities` | `accessible: −3` | use accessible rooms for others only when it helps |

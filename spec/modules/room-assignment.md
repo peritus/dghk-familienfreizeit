@@ -48,9 +48,9 @@ type RoomAssignmentParams = {
 | `scarce_capabilities` | `{}` | room capability → integer penalty ≤ 0 |
 | `max_repair_passes` | `5` | integer ≥ 0 |
 
-Defaults are starting values. Expect to tune them against an exported event log
-with `npm run tune` ([deployment](../engineering/deployment.md), weight tuning) and deploy
-each change as a profile change, never as an event (D12).
+Defaults are starting values. Review deliberate changes against exported assignment
+evidence ([deployment](../engineering/deployment.md), weight review) and deploy each
+change as a profile change, never as an event (D12).
 
 ## 4. Entity kinds
 

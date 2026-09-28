@@ -237,7 +237,8 @@ describe('room assignment business logic', () => {
     const expected = runRoomAssignment(assignmentInput(rooms, families), params)
 
     for (let seed = 0; seed < 20; seed += 1) {
-      const shuffledRooms = seed % 2 === 0 ? [...rooms].reverse() : [rooms[1]!, rooms[2]!, rooms[0]!]
+      const shuffledRooms =
+        seed % 2 === 0 ? [...rooms].reverse() : [rooms[1]!, rooms[2]!, rooms[0]!]
       const shuffledFamilies =
         seed % 2 === 0 ? [...families].reverse() : [families[1]!, families[2]!, families[0]!]
       expect(runRoomAssignment(assignmentInput(shuffledRooms, shuffledFamilies), params)).toEqual(
@@ -258,7 +259,7 @@ describe('room assignment business logic', () => {
     )
     const before = runRoomAssignment(beforeInput, params)
     const afterInput = assignmentInput(
-      [room('rm_1', 2), room('rm_2', 2), room('rm_3', 2)],
+      [room('rm_1', 2), room('rm_2', 2), room('rm_3', 2, ['accessible'])],
       beforeInput.families,
     )
     const after = runRoomAssignment(afterInput, params, before.section)
@@ -276,7 +277,7 @@ describe('room assignment business logic', () => {
       ]),
     )
     expect(after.trace.filter(({ subject }) => subject === 'fam_2')).toHaveLength(1)
-    expect(after.trace.find(({ subject }) => subject === 'fam_1')?.step).toBe('greedy')
+    expect(after.trace.find(({ subject }) => subject === 'fam_1')?.step).toBe('forced')
   })
 
   test('exposes normalized profile requirements and scoring terms', () => {

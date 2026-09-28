@@ -326,7 +326,6 @@ src/
                           rng.ts: seeded xorshift32, unused by default
   lib/dates.ts            pure ageAt() over ISO strings
 profiles/                 working occasion configuration when implemented
-scripts/tune.ts           offline weight sweep, Node not Worker
 ```
 
 Worker routing must gain magic-link redemption and cron; the app must gain the
