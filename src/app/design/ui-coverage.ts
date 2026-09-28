@@ -288,7 +288,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/modules/room-assignment/app/assignment-board.stories.tsx',
   },
   {
-    id: 'room-assignment-board-components--variants',
+    id: 'room-assignment-board-components--room-card-variants',
     area: 'component',
     subject: 'Assignment board components',
     source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
