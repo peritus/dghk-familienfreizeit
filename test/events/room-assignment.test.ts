@@ -222,6 +222,63 @@ describe('room assignment business logic', () => {
     expect(first.trace.some(({ text }) => text.includes('fam_access'))).toBe(true)
   })
 
+  test('is invariant under room and family input permutations', () => {
+    const rooms = [room('rm_1', 2, ['accessible']), room('rm_2', 2), room('rm_3', 2)]
+    const families = [
+      family('fam_1', 2, [
+        familyRequirement('fam_1', {
+          capability_key: 'accessible',
+          strength: 'required',
+        }),
+      ]),
+      family('fam_2', 1),
+      family('fam_3', 1),
+    ]
+    const expected = runRoomAssignment(assignmentInput(rooms, families), params)
+
+    for (let seed = 0; seed < 20; seed += 1) {
+      const shuffledRooms = seed % 2 === 0 ? [...rooms].reverse() : [rooms[1]!, rooms[2]!, rooms[0]!]
+      const shuffledFamilies =
+        seed % 2 === 0 ? [...families].reverse() : [families[1]!, families[2]!, families[0]!]
+      expect(runRoomAssignment(assignmentInput(shuffledRooms, shuffledFamilies), params)).toEqual(
+        expected,
+      )
+    }
+  })
+
+  test('moves only the affected family when room configuration changes', () => {
+    const beforeInput = assignmentInput(
+      [room('rm_1', 2, ['accessible']), room('rm_2', 2), room('rm_3', 2)],
+      [
+        family('fam_1', 2, [
+          familyRequirement('fam_1', { capability_key: 'accessible', strength: 'required' }),
+        ]),
+        family('fam_2', 1),
+      ],
+    )
+    const before = runRoomAssignment(beforeInput, params)
+    const afterInput = assignmentInput(
+      [room('rm_1', 2), room('rm_2', 2), room('rm_3', 2)],
+      beforeInput.families,
+    )
+    const after = runRoomAssignment(afterInput, params, before.section)
+
+    expect(before.section.assignments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ family_id: 'fam_1', room_id: 'rm_1' }),
+        expect.objectContaining({ family_id: 'fam_2', room_id: 'rm_2' }),
+      ]),
+    )
+    expect(after.section.assignments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ family_id: 'fam_1', room_id: 'rm_3' }),
+        expect.objectContaining({ family_id: 'fam_2', room_id: 'rm_2' }),
+      ]),
+    )
+    expect(after.trace.filter(({ subject }) => subject === 'fam_2')).toHaveLength(1)
+    expect(after.trace.find(({ subject }) => subject === 'fam_1')?.step).toBe('greedy')
+  })
+
   test('exposes normalized profile requirements and scoring terms', () => {
     const world = derive(loadKdl(fixture, profile.validation_view), profile.validation_view)
     expect(world.requirements).toContainEqual(
