@@ -89,10 +89,21 @@ test('dashboard, families, and family detail form one working navigation chain',
   await expect(page).toHaveURL(/\/organiser\/families$/)
 })
 
+test('module navigation reaches canonical public URLs without duplicating the base', async ({
+  page,
+}) => {
+  await page.goto('/organiser')
+  const reportLink = page.getByRole('link', { name: 'Belegungsbericht' })
+  await expect(reportLink).toHaveAttribute('href', '/organiser/reports')
+  await reportLink.click()
+  await expect(page).toHaveURL(/\/organiser\/reports$/)
+  await expect(page.getByRole('heading', { name: 'Belegungsbericht' })).toBeVisible()
+})
+
 test('rendered organiser links are canonical and never duplicate the route base', async ({
   page,
 }) => {
-  const paths = ['/organiser', '/organiser/families', familyRoute]
+  const paths = organiserRouteDefinitions.map(({ test_path }) => test_path)
   for (const path of paths) {
     await page.goto(path)
     const hrefs = await page

@@ -86,6 +86,34 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/app/organiser/**/*.{ts,tsx}', 'src/modules/*/app/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'wouter',
+              importNames: ['Link'],
+              message: 'Use OrganiserLink for links inside the nested organiser router.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "ImportSpecifier[imported.name='organiserUrls']",
+          message: 'Use organiserPaths inside the nested organiser router.',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='a'] > JSXAttribute[name.name='href']",
+          message: 'Use OrganiserLink inside the nested organiser router.',
+        },
+      ],
+    },
+  },
+  {
     files: workerFiles,
     rules: {
       'no-restricted-imports': [

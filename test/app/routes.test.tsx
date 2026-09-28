@@ -4,11 +4,14 @@ import {
   familyIdFromRouteSegment,
   familyRouteSegment,
   isKnownOrganiserPath,
+  organiserNestedPath,
+  organiserPathWithHash,
   organiserPaths,
   organiserRouteDefinitions,
   organiserUrls,
 } from '../../src/organiser/routes.js'
 import { organiserScreenRegistry } from '../../src/organiser/registry.js'
+import { OrganiserLink } from '../../src/app/components/organiser-link.js'
 
 test('organiser route definitions have unique relative and absolute paths', () => {
   expect(new Set(organiserRouteDefinitions.map(({ relative_path }) => relative_path)).size).toBe(
@@ -62,6 +65,23 @@ test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserUrls.assignment_board()).toBe('/organiser/board')
   expect(organiserPaths.assignment_report()).toBe('/reports')
   expect(organiserUrls.assignment_report()).toBe('/organiser/reports')
+})
+
+test('organiser route boundaries reject duplicate bases and preserve nested path types', () => {
+  expect(organiserNestedPath('/organiser/reports')).toBe('/reports')
+  expect(organiserNestedPath('/organiser')).toBe('/')
+  expect(organiserPathWithHash(organiserPaths.inventory(), '#room=room_1')).toBe(
+    '/inventory#room=room_1',
+  )
+  expect(() => organiserNestedPath('/reports')).toThrow()
+  expect(() => organiserNestedPath('/organiser/organiser/reports')).toThrow()
+  expect(() => organiserPathWithHash(organiserPaths.inventory(), '/organiser')).toThrow()
+
+  const nestedLink = <OrganiserLink href={organiserPaths.assignment_report()}>Bericht</OrganiserLink>
+  expect(nestedLink.props.href).toBe('/reports')
+  // @ts-expect-error Canonical public URLs must not enter the nested link boundary.
+  const invalidLink = <OrganiserLink href={organiserUrls.assignment_report()}>Bericht</OrganiserLink>
+  expect(invalidLink).toBeDefined()
 })
 
 test('family route IDs are opaque, URL-safe, and reversible', () => {

@@ -3,6 +3,14 @@ import { activeProfile } from '../config/index.js'
 
 export const organiserBasePath = '/organiser'
 
+declare const organiserPathBrand: unique symbol
+
+declare const organiserUrlBrand: unique symbol
+
+export type OrganiserPath = string & { readonly [organiserPathBrand]: true }
+
+export type OrganiserUrl = string & { readonly [organiserUrlBrand]: true }
+
 export const organiserRoutePaths = {
   dashboard: '/',
   families: '/families',
@@ -50,7 +58,7 @@ export function composeOrganiserRouteDefinitions(
   const moduleRoutes = modules.flatMap((module) =>
     (module.contributions.screens ?? []).map((screen) => ({
       id: screen.id,
-      relative_path: screen.route.replace(organiserBasePath, '') || '/',
+      relative_path: organiserNestedPath(screen.route),
       absolute_path: screen.route,
       test_path: screen.route,
       label: screen.label,
@@ -71,6 +79,42 @@ export function composeOrganiserRouteDefinitions(
 
 /** The route catalog for the statically selected occasion profile. */
 export const organiserRouteDefinitions = composeOrganiserRouteDefinitions(activeProfile.modules)
+
+function nestedPath(path: string): OrganiserPath {
+  if (
+    !path.startsWith('/') ||
+    path.startsWith('//') ||
+    path === organiserBasePath ||
+    path.startsWith(`${organiserBasePath}/`)
+  ) {
+    throw new Error(`invalid nested organiser path: ${path}`)
+  }
+  return path as OrganiserPath
+}
+
+function publicUrl(path: string): OrganiserUrl {
+  if (path !== organiserBasePath && !path.startsWith(`${organiserBasePath}/`)) {
+    throw new Error(`invalid public organiser URL: ${path}`)
+  }
+  return path as OrganiserUrl
+}
+
+/** Convert a registered public organiser URL to the path expected by nested wouter links. */
+export function organiserNestedPath(publicPath: string): OrganiserPath {
+  if (publicPath === organiserBasePath) return nestedPath('/')
+  if (!publicPath.startsWith(`${organiserBasePath}/`)) {
+    throw new Error(`organiser route must start with ${organiserBasePath}: ${publicPath}`)
+  }
+  return nestedPath(publicPath.slice(organiserBasePath.length))
+}
+
+/** Add a fragment to a nested organiser path without losing its route type. */
+export function organiserPathWithHash(path: OrganiserPath, hash: string): OrganiserPath {
+  if (!hash.startsWith('#') || hash.includes('/organiser')) {
+    throw new Error(`invalid organiser path fragment: ${hash}`)
+  }
+  return nestedPath(`${path}${hash}`)
+}
 
 const familyRouteIdPattern = /^[a-zA-Z0-9_-]+$/
 
@@ -95,23 +139,25 @@ export function familyIdFromRouteSegment(segment: string): string {
 }
 
 export const organiserPaths = {
-  dashboard: (): string => organiserRoutePaths.dashboard,
-  families: (): string => organiserRoutePaths.families,
-  family_detail: (familyId: string): string =>
-    `${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`,
-  inventory: (): string => organiserRoutePaths.inventory,
-  assignment_board: (): string => organiserRoutePaths.assignment_board,
-  assignment_report: (): string => organiserRoutePaths.assignment_report,
+  dashboard: (): OrganiserPath => nestedPath(organiserRoutePaths.dashboard),
+  families: (): OrganiserPath => nestedPath(organiserRoutePaths.families),
+  family_detail: (familyId: string): OrganiserPath =>
+    nestedPath(`${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`),
+  inventory: (): OrganiserPath => nestedPath(organiserRoutePaths.inventory),
+  assignment_board: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_board),
+  assignment_report: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_report),
 } as const
 
 export const organiserUrls = {
-  dashboard: (): string => organiserBasePath,
-  families: (): string => `${organiserBasePath}${organiserRoutePaths.families}`,
-  family_detail: (familyId: string): string =>
-    `${organiserBasePath}${organiserPaths.family_detail(familyId)}`,
-  inventory: (): string => `${organiserBasePath}${organiserPaths.inventory()}`,
-  assignment_board: (): string => `${organiserBasePath}${organiserPaths.assignment_board()}`,
-  assignment_report: (): string => `${organiserBasePath}${organiserPaths.assignment_report()}`,
+  dashboard: (): OrganiserUrl => publicUrl(organiserBasePath),
+  families: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserRoutePaths.families}`),
+  family_detail: (familyId: string): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.family_detail(familyId)}`),
+  inventory: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserPaths.inventory()}`),
+  assignment_board: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.assignment_board()}`),
+  assignment_report: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.assignment_report()}`),
 } as const
 
 export function isKnownOrganiserPath(pathname: string): boolean {

@@ -16,6 +16,17 @@ for (const [file, source, rule] of [
     '@typescript-eslint/naming-convention',
   ],
   ['src/config/probe.ts', "import 'cloudflare:workers'", 'no-restricted-imports'],
+  ['src/app/organiser/probe.tsx', "import { Link } from 'wouter'", 'no-restricted-imports'],
+  [
+    'src/modules/room-assignment/app/probe.tsx',
+    "import { organiserUrls } from '../../../../organiser/routes.js'",
+    'no-restricted-syntax',
+  ],
+  [
+    'src/app/organiser/probe.tsx',
+    '<a href="/organiser/reports">Bericht</a>',
+    'no-restricted-syntax',
+  ],
   [
     'src/derive/probe.ts',
     'export const x = { familyId: 1 }',
