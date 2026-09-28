@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Button } from '../../../app/components/ui/button.js'
 import { StatsStrip } from '../../../app/components/ui/stats-strip.js'
 import { OrganiserSectionHeader } from '../../../app/organiser/components/layout.js'
 import { useOrganiser } from '../../../app/organiser/context.js'
@@ -108,11 +107,6 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
       <div className="assignment-board-screen">
         <ScreenFrame
           title="Wer schläft wo?"
-          actions={
-            <Button type="button" onClick={() => window.print()}>
-              Belegung drucken
-            </Button>
-          }
         >
           <StatsStrip
             items={[
