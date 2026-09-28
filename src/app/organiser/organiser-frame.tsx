@@ -4,11 +4,7 @@ import { useOrganiser } from './context.js'
 import { OrganiserLink, organiserHomePath } from '../components/organiser-link.js'
 import { SaveStatus } from './save-status.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
-import {
-  organiserNestedPath,
-  organiserPaths,
-  organiserRoutePaths,
-} from '../../organiser/routes.js'
+import { organiserNestedPath, organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
 import { cn } from '../lib/utils.js'
 

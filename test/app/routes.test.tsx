@@ -77,10 +77,20 @@ test('organiser route boundaries reject duplicate bases and preserve nested path
   expect(() => organiserNestedPath('/organiser/organiser/reports')).toThrow()
   expect(() => organiserPathWithHash(organiserPaths.inventory(), '/organiser')).toThrow()
 
-  const nestedLink = <OrganiserLink href={organiserPaths.assignment_report()}>Bericht</OrganiserLink>
+  const nestedLink = (
+    <OrganiserLink href={organiserPaths.assignment_report()}>Bericht</OrganiserLink>
+  )
   expect(nestedLink.props.href).toBe('/reports')
-  // @ts-expect-error Canonical public URLs must not enter the nested link boundary.
-  const invalidLink = <OrganiserLink href={organiserUrls.assignment_report()}>Bericht</OrganiserLink>
+  expect(() =>
+    OrganiserLink({
+      href: organiserUrls.assignment_report() as never,
+      children: <span>Bericht</span>,
+    }),
+  ).toThrow('organiser links must use nested paths')
+  const invalidLink = (
+    // @ts-expect-error Canonical public URLs must not enter the nested link boundary.
+    <OrganiserLink href={organiserUrls.assignment_report()}>Bericht</OrganiserLink>
+  )
   expect(invalidLink).toBeDefined()
 })
 

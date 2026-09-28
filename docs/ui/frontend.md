@@ -69,7 +69,12 @@ These semantics are covered in
 [app tests](../../test/app/shell.test.tsx), while real organiser navigation and
 link targets are covered by the [browser route suite](../../test/browser/routes.spec.ts).
 The shared [route contract](../../src/organiser/routes.ts) keeps nested organiser
-links separate from their public `/organiser/...` URLs.
+links separate from their public `/organiser/...` URLs. Components rendered inside
+the nested organiser router must use `OrganiserLink` with an `organiserPaths.*()`
+value; `organiserUrls.*()` is reserved for canonical URLs at the application
+boundary. ESLint rejects direct nested `Link`, raw anchor navigation, and
+`organiserUrls` imports in organiser/module UI, while route and browser tests
+assert that rendered hrefs contain the organiser base exactly once.
 
 See the [design system](design-system.md) for primitives and styling, the
 [implemented organiser view](../application/organiser-view.md), and the
