@@ -20,22 +20,17 @@ Specification coverage: [solver contract](architecture/solver-contract.md),
 and D5–D7.
 
 The verified business-logic foundation is documented in
-[`docs/modules/room-assignment.md`](../docs/modules/room-assignment.md). The
-remaining milestone scope is the read-only organiser board, its compact
-printable assignment report, and the outstanding integration fixtures. Family
-requirements and room capabilities are edited through separate event-backed
-organiser surfaces; this milestone consumes their derived result rather than
-replacing those editors.
+[`docs/modules/room-assignment.md`](../docs/modules/room-assignment.md). M6
+delivers the read-only organiser board, its compact printable assignment
+report, and their integration coverage. Family requirements and room
+capabilities are edited through separate event-backed organiser surfaces; this
+milestone consumes their derived result rather than replacing those editors.
 
 - Complete the organiser board and assignment report around the derived plan.
 - Include the narrow event-backed fixed-assignment workflow: paired
   `needs`/`provides` labels, local re-derivation, invalid-assignment
   diagnostics, and clearing through the shared draft pipeline.
-- Add the remaining real-inventory, configuration-change, shuffle, and golden-plan
-  fixtures.
-- Keep richer placement overrides, plan comparison, release control, and
-  communication UI in deferred scope; their domain contracts remain governed by
-  their later milestones.
+- Verify real-inventory, configuration-change, and shuffle scenarios.
 
 Acceptance: whole-family placement is deterministic, hard constraints are
 enforced, family and room configuration changes flow through the shared organiser
