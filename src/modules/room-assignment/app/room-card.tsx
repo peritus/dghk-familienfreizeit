@@ -16,25 +16,17 @@ export function RoomCard({
   const free = room.capacity - room.occupied
   const isFull = free === 0
   return (
-    <Card
-      className={cn(
-        'p-0',
-        isFull ? 'bg-secondary-background' : 'bg-white',
-        room.state === 'infeasible' && 'border-danger bg-danger/10',
-      )}
-    >
+    <Card className={cn('p-0', isFull ? 'bg-secondary-background' : 'bg-white')}>
       <CardHeader className="p-5">
         <div className="flex items-start justify-between gap-3">
           <CardTitle className="text-xl">{room.name}</CardTitle>
-          <Badge tone={room.state === 'infeasible' ? 'danger' : isFull ? 'attention' : 'success'}>
-            {room.state === 'infeasible' ? 'Nicht möglich' : isFull ? 'Voll' : `${free} frei`}
-          </Badge>
+          <Badge tone={isFull ? 'attention' : 'success'}>{isFull ? 'Voll' : `${free} frei`}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 px-5 pb-5">
         <div className="flex flex-wrap gap-2">
-          {room.capabilities.map((capability) => (
-            <Badge key={capability}>{capability}</Badge>
+          {room.features.map((feature) => (
+            <Badge key={feature}>{feature}</Badge>
           ))}
         </div>
         {room.occupants.length > 0 ? (
@@ -52,16 +44,6 @@ export function RoomCard({
         ) : (
           <p className="text-muted">Noch keine Familie zugeordnet.</p>
         )}
-        {room.reasons?.map((reason) => (
-          <p key={reason} className="border-l-4 border-danger pl-3 text-sm">
-            {reason}
-          </p>
-        ))}
-        {room.soft_notes?.map((note) => (
-          <p key={note} className="text-sm text-muted">
-            {note}
-          </p>
-        ))}
       </CardContent>
     </Card>
   )

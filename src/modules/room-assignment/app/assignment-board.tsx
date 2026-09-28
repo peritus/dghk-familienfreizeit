@@ -105,9 +105,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
   return (
     <>
       <div className="assignment-board-screen">
-        <ScreenFrame
-          title="Wer schläft wo?"
-        >
+        <ScreenFrame title="Wer schläft wo?">
           <StatsStrip
             items={[
               { value: view.stats.families, label: 'Familien' },

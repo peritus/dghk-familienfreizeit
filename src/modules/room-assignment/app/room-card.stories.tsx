@@ -12,6 +12,7 @@ const family: FamilyView = {
     { id: 'david-baumann', name: 'David Baumann', role: 'child' },
     { id: 'ella-baumann', name: 'Ella Baumann', role: 'child' },
   ],
+  bed_demand: 4,
   requirements: [],
   status: { label: 'Platziert', tone: 'success' },
 }
@@ -23,9 +24,14 @@ const room: RoomView = {
   floor: 'Erdgeschoss',
   capacity: 4,
   occupied: 4,
+  free: 0,
   occupants: [family],
-  capabilities: ['Eigenes Bad'],
-  state: 'occupied',
+  features: ['Eigenes Bad'],
+  feature_keys: ['private-sanitary'],
+  beds: [{ bed_type: 'single', count: 4, sleeps: 4 }],
+  fixed_family_ids: [],
+  fixed_invalid_family_ids: [],
+  fit_hints: [],
 }
 
 const meta = {

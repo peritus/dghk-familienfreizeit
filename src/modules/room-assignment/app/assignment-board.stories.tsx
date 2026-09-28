@@ -24,7 +24,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The board is a read-only projection of the current derived world and solver result. Configuration screens use the shared organiser draft pipeline.',
+          'The board is a solver-owned projection of the current derived world and result. Its narrow fixed-assignment action uses the shared organiser draft pipeline.',
       },
     },
   },

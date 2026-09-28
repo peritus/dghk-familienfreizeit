@@ -11,6 +11,7 @@ const family: FamilyView = {
     { id: 'david-baumann', name: 'David Baumann', role: 'child' },
     { id: 'ella-baumann', name: 'Ella Baumann', role: 'child' },
   ],
+  bed_demand: 4,
   requirements: [],
   status: { label: 'Platziert', tone: 'success' },
 }
