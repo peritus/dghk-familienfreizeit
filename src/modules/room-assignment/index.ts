@@ -241,7 +241,7 @@ export function runRoomAssignment(
       text: `${family.family_id} → ${room.id}`,
       detail: score
         ? { chosen: { target: room.id, score: score.score, terms: score.terms } }
-      : undefined,
+        : undefined,
     })
   }
 
@@ -347,22 +347,20 @@ export function runRoomAssignment(
       fixed_violations: Object.freeze(fixedViolations),
     },
     trace: Object.freeze(trace.map(({ family_id: _familyId, ...entry }) => entry)),
-    diagnostics: Object.freeze(
-      [
-        ...unplacedFamilies.map((family) => ({
-          check: 'room-assignment.unplaced-family' as const,
-          severity: 'warning' as const,
-          subjects: [family.family_id],
-          text: family.reason,
-        })),
-        ...fixedViolations.map((violation) => ({
-          check: 'room-assignment.fixed-invalid' as const,
-          severity: 'warning' as const,
-          subjects: [violation.family_id, violation.room_id],
-          text: `${violation.family_id} fixed in ${violation.room_id}: ${violation.reasons.join(', ')}`,
-        })),
-      ],
-    ),
+    diagnostics: Object.freeze([
+      ...unplacedFamilies.map((family) => ({
+        check: 'room-assignment.unplaced-family' as const,
+        severity: 'warning' as const,
+        subjects: [family.family_id],
+        text: family.reason,
+      })),
+      ...fixedViolations.map((violation) => ({
+        check: 'room-assignment.fixed-invalid' as const,
+        severity: 'warning' as const,
+        subjects: [violation.family_id, violation.room_id],
+        text: `${violation.family_id} fixed in ${violation.room_id}: ${violation.reasons.join(', ')}`,
+      })),
+    ]),
   }
 }
 
@@ -576,10 +574,13 @@ export function assignRoomPlaces(
   const used = new Set<string>()
   const assignments: RoomAssignment[] = []
   const fixedIds = new Set((input.fixed_assignments ?? []).map(({ family_id: id }) => id))
-  for (const family of families.slice().sort((left, right) =>
-    Number(fixedIds.has(right.family_id)) - Number(fixedIds.has(left.family_id)) ||
-    left.family_id.localeCompare(right.family_id),
-  )) {
+  for (const family of families
+    .slice()
+    .sort(
+      (left, right) =>
+        Number(fixedIds.has(right.family_id)) - Number(fixedIds.has(left.family_id)) ||
+        left.family_id.localeCompare(right.family_id),
+    )) {
     const roomId = placements.get(family.family_id)
     if (!roomId) continue
     const room = roomById(input.rooms, roomId)

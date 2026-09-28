@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BedIcon } from '../../components/bed-icons.js'
 import {
   AlertDialog,
@@ -83,6 +83,23 @@ export function Inventory() {
   const [openRoomForms, setOpenRoomForms] = useState<Record<string, boolean>>({})
   const [openRooms, setOpenRooms] = useState<Record<string, boolean>>({})
   const [error, setError] = useState<string | null>(null)
+  const handledRoomHash = useRef(false)
+
+  useEffect(() => {
+    if (handledRoomHash.current) return
+    const match = window.location.hash.match(/^#room=([^&]+)$/)
+    if (!match) return
+    const roomId = decodeURIComponent(match[1] ?? '')
+    if (!summary.rooms.some(({ id: candidateId }) => candidateId === roomId)) return
+    handledRoomHash.current = true
+    window.setTimeout(() => {
+      setOpenRooms({ [roomId]: true })
+      window.setTimeout(
+        () => document.getElementById(`room-${roomId}`)?.scrollIntoView({ block: 'start' }),
+        0,
+      )
+    }, 0)
+  }, [summary.rooms])
 
   function stageInventoryEvents(events: readonly Pick<EventDraft, 'type' | 'payload'>[]): void {
     if (!state.principal_email) return
@@ -673,7 +690,10 @@ function RoomRow({
 
   return (
     <>
-      <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+      <tr
+        id={`room-${room.id}`}
+        className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3"
+      >
         <th scope="row" className="p-3 align-top font-normal max-md:block max-md:p-0">
           <button
             type="button"
@@ -1212,7 +1232,7 @@ function TraitFields({
 }) {
   return (
     <fieldset className="space-y-3 border-t-2 border-black pt-3">
-      <legend className="font-heading text-lg">Raummerkmale</legend>
+      <legend className="font-heading text-lg">Merkmale</legend>
       {roomPropertyDefinitions.map(({ key, trait }) => {
         const options = traitOptions(trait)
         const value = values[key]

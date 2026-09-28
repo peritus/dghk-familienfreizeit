@@ -5,6 +5,9 @@ import * as CardStories from '../components/ui/card.stories'
 import * as DialogStories from '../components/ui/alert-dialog.stories'
 import * as SegmentStories from '../components/ui/segmented-control.stories'
 import * as BadgeStories from '../components/ui/badge.stories'
+import * as TagStories from '../components/ui/tag.stories'
+import * as StatsStories from '../components/ui/stats-strip.stories'
+import * as SuccessStories from '../components/ui/success-state.stories'
 import * as TabsStories from '../components/ui/tabs.stories'
 
 <Meta title="Foundations/Style guide" />
@@ -21,6 +24,9 @@ executable examples; this page records the usage decisions around them.
 - Use `Alert` for status and recovery information; include text, not only color.
 - Use `AlertDialog` before destructive or consequential actions.
 - Use `SegmentedControl` for a small visible choice set, not as a general select replacement.
+- Use `Tag` for a quiet, borderless room property; use `Badge` for state.
+- Use `StatsStrip` when the number of cells is data-driven and omit zero-value optional cells.
+- Use `SuccessState` for a positive empty state; do not put it in a dashed warning container.
 
 ## Primary and secondary actions
 
@@ -56,6 +62,12 @@ Use a text badge for compact state labels and tabs for a small set of sibling
 views sharing one context. Text remains present when color changes.
 
 <Canvas of={BadgeStories.Statuses} />
+
+<Canvas of={TagStories.Properties} />
+
+<Canvas of={StatsStories.DynamicColumns} />
+
+<Canvas of={SuccessStories.Messages} />
 
 <Canvas of={TabsStories.Buildings} />
 

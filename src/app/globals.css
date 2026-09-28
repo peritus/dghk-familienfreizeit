@@ -130,3 +130,40 @@
   --grid-major: rgb(0 48 110 / 0.35);
   --grid-minor: rgb(0 48 110 / 0.14);
 }
+
+@media print {
+  .assignment-board-screen {
+    display: none !important;
+  }
+
+  .assignment-print {
+    display: block !important;
+    color: black;
+    background: white;
+  }
+
+  .assignment-print-building {
+    break-before: page;
+  }
+
+  .assignment-print-building:first-child {
+    break-before: auto;
+  }
+
+  .assignment-print-room {
+    break-inside: avoid;
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+    padding: 0.5rem;
+  }
+
+  .assignment-print-room h2 {
+    margin: 0;
+  }
+
+  .assignment-print-room ul {
+    margin: 0.25rem 0 0;
+    padding-left: 1.25rem;
+  }
+}

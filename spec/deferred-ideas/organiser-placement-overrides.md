@@ -1,13 +1,13 @@
 # Organiser placement overrides
 
-This is accepted but deferred scope. The active room-assignment module remains
-responsible for deterministic placement, diagnostics, traces, and the ordinary
-`LabelSet` capability described in the room-assignment and labels-and-constraints
-specifications. This document defers only the prominent organiser UI for manual
-placement overrides.
+This document now defers only richer placement-override workflows. The active
+room-assignment board implements the narrow fixed-assignment workflow described
+in the module specification: it writes paired event-backed labels, re-derives
+locally, keeps invalid fixed assignments visible, and offers removal through the
+shared organiser draft pipeline.
 
-The exceptional UI may later allow an organiser to express a room preference or
-forced placement through the existing event-backed label mechanism. It must use
+Future UI may allow an organiser to express a room preference or broader forced
+placement workflow through the existing event-backed label mechanism. It must use
 the shared organiser draft/apply/discard pipeline, re-derive locally, preserve
 solver diagnostics, and never become a second placement state store.
 

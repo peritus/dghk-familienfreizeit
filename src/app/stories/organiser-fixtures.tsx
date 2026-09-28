@@ -537,6 +537,14 @@ const assignmentFixtureDrafts: readonly EventDraft[] = (() => {
     }
   }
 
+  add('LabelSet', {
+    entity_id: 'per_morgan_jamie',
+    key: 'needs-ground-floor',
+    value: 'ground-floor',
+    strength: 'preferred',
+    note: null,
+  })
+
   return drafts
 })()
 
@@ -551,6 +559,42 @@ export const organiserAssignmentFixtureState = organiserReducer(initialOrganiser
   compatibility_revision: 1,
   principal_email: 'anna.keller@example.test',
 })
+
+const organiserAssignmentFixedEvents: readonly EventDraft[] = [
+  assignmentFixtureEvent(0, 'LabelSet', {
+    entity_id: 'fam_morgan',
+    key: 'needs',
+    value: 'fam_morgan_room',
+    strength: 'required',
+    note: null,
+  }),
+  assignmentFixtureEvent(1, 'LabelSet', {
+    entity_id: 'rm_12',
+    key: 'provides',
+    value: 'fam_morgan_room',
+    strength: null,
+    note: null,
+  }),
+  assignmentFixtureEvent(2, 'LabelSet', {
+    entity_id: 'fam_seidel',
+    key: 'needs',
+    value: 'fam_seidel_room',
+    strength: 'required',
+    note: null,
+  }),
+  assignmentFixtureEvent(3, 'LabelSet', {
+    entity_id: 'rm_16',
+    key: 'provides',
+    value: 'fam_seidel_room',
+    strength: null,
+    note: null,
+  }),
+]
+
+export const organiserAssignmentFixedFixtureState = organiserAssignmentFixedEvents.reduce(
+  (state, draft) => organiserReducer(state, { type: 'stage', events: [draft] }),
+  organiserAssignmentFixtureState,
+)
 
 export function stateWithDrafts(...drafts: readonly EventDraft[][]): OrganiserState {
   return drafts.reduce(

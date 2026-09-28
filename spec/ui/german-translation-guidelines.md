@@ -69,6 +69,17 @@ emails, notifications, and help text.
 | list | **Liste** | Use only when the output is genuinely a list, such as a workshop roster |
 | shared report | **gemeinsame Übersicht** | A coordination view available to more than one family |
 | family report | **Familienübersicht** | A view containing one family's own information |
+| accommodation requirement | **Anforderung** | A family or person's room requirement; show its strength as **erforderlich** or **Wunsch** |
+| required | **erforderlich** | The hard strength of an accommodation requirement |
+| room feature | **Merkmal** | A feature provided by a room; use **Merkmale** for the room editor heading |
+| accessible room | **Barrierearmes Zimmer** | The family requirement; the room feature itself is **Barrierearm** |
+| do not share a room | **Zimmer nicht teilen** | Organiser-facing private-room requirement |
+| share a room | **Zimmer teilen** | Family-facing wording; do not replace it with *Eigenes Zimmer* |
+| free sleeping places | **Freie Schlafplätze** | Board statistic; use **Platz/Plätze** in capacity sentences |
+| fixed assignment | **Fest zuordnen** / **Fest zugeordnet** | Organiser action and resulting state |
+| remove fixed assignment | **Zuordnung aufheben** | Organiser action |
+| without a room | **Ohne Zimmer** | A family with no resulting room |
+| without a matching room | **Ohne passendes Zimmer** | A family for which hard room requirements prevent a match |
 
 ## 3. CQRS and technical language
 

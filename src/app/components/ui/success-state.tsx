@@ -2,13 +2,7 @@ import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-export function SuccessState({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
+export function SuccessState({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={cn('flex items-center gap-3 text-muted', className)}>
       <span

@@ -46,13 +46,16 @@ accepted branch threshold enforced in `vitest.config.ts`.
 
 ## Organiser review surface
 
-The selected module contributes the read-only `/organiser/board` and
+The selected module contributes the `/organiser/board` and
 `/organiser/reports` surfaces. Both consume the shared organiser prospective world
 and the deterministic `room-assignment` solver section; the report is a compact
 browser-printable projection of the board. Family and room configuration screens
 stage ordinary events through the shared organiser reducer, so unapplied drafts are
 visible to both review surfaces.
 
-Placement overrides, plan comparison, release control, and communication remain
-later scope. No placement result, report snapshot, or organiser decision record is
-persisted by this module.
+The board's fixed-assignment action writes the paired generic `needs` and
+`provides` labels `${family_id}_room` through the shared organiser draft
+pipeline. The solver keeps those assignments ahead of automatic placement;
+capacity or requirement violations remain visible as `fixed-invalid`
+diagnostics instead of dropping the assignment. Removing the action clears both
+labels. Plan comparison, release control, and communication remain later scope.

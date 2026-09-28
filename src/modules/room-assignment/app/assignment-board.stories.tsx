@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   FixtureProvider,
-  organiserAssignmentFixtureState,
+  organiserAssignmentFixedFixtureState,
 } from '../../../app/stories/organiser-fixtures.js'
-import { AssignmentBoardScreen } from './assignment-board.js'
+import { AssignmentBoard, AssignmentBoardScreen } from './assignment-board.js'
+import type { BoardView } from './types.js'
 
 const meta = {
   title: 'Screens/Organiser/Assignment board',
@@ -45,8 +46,52 @@ export const MobileReviewState: Story = {
 
 export const PopulatedWithSharedOrganiserState: Story = {
   render: () => (
-    <FixtureProvider initialState={organiserAssignmentFixtureState}>
+    <FixtureProvider initialState={organiserAssignmentFixedFixtureState}>
       <AssignmentBoardScreen />
+    </FixtureProvider>
+  ),
+}
+
+const noProblemsView: BoardView = {
+  stats: { families: 2, without_room: 0, without_match: 0, fixed: 0, free_places: 0 },
+  unplaced: [],
+  without_match: [],
+  free_rooms: [],
+  partial_rooms: [],
+  unplaced_reasons: {},
+  buildings: [
+    {
+      id: 'bld_haupthaus',
+      name: 'Haupthaus',
+      family_count: 2,
+      requirement_issues: 0,
+      wish_issues: 0,
+      rooms: [
+        {
+          id: 'rm_1',
+          name: 'Zimmer 1',
+          building: 'Haupthaus',
+          floor: 'Erdgeschoss',
+          capacity: 2,
+          occupied: 2,
+          free: 0,
+          occupants: [],
+          features: [],
+          feature_keys: [],
+          beds: [{ bed_type: 'single', count: 2, sleeps: 2 }],
+          fixed_family_ids: [],
+          fixed_invalid_family_ids: [],
+          fit_hints: [],
+        },
+      ],
+    },
+  ],
+}
+
+export const NoProblems: Story = {
+  render: () => (
+    <FixtureProvider>
+      <AssignmentBoard view={noProblemsView} />
     </FixtureProvider>
   ),
 }

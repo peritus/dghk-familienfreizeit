@@ -57,7 +57,7 @@ same popover before anything is deleted or the mode changes.
 
 The component registry and aliases live in [components.json](../../components.json).
 The implemented primitives are Button, Card, Alert, Skeleton, SegmentedControl,
-and AlertDialog in [`src/app/components/ui/`](../../src/app/components/ui/).
+AlertDialog, Badge, Tag, StatsStrip, and SuccessState in [`src/app/components/ui/`](../../src/app/components/ui/).
 Copied source and its adaptations are attributed in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). The Button uses Base UI's `render`
 composition API, supports variants (including a `danger` variant for
@@ -88,6 +88,16 @@ uses, applied to a table with an expandable row rather than an editable one.
 The organiser shell distinguishes a whole-app load failure from a save
 failure (`load_error` vs. `error` status) so a failed initial fetch never
 renders stats or forms against an empty, falsely-real world.
+
+The assignment board uses the shared primitives for its stat strip, quiet
+property tags, state badges, and success messages. Room cards, requirement
+chips, family entries, building sections, fit hints, the fixed-assignment
+dialog, and the print composition remain room-assignment-specific under
+[`src/modules/room-assignment/app/assignment-board/`](../../src/modules/room-assignment/app/assignment-board/).
+The board does not use `blueprint` or a paper background to mark fixed
+assignments: those tokens are reserved for browser-local draft state. Fixed
+assignments are ordinary event-backed organiser decisions and use the shared
+badge border language instead.
 
 Editing is read-only by default: existing family people show their values as
 plain text with **Bearbeiten** and **Entfernen** actions. **Bearbeiten** opens

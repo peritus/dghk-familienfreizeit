@@ -261,7 +261,9 @@ describe('room assignment business logic', () => {
       params,
     )
     expect(result.section.assignments).toEqual(
-      expect.arrayContaining([expect.objectContaining({ family_id: 'fam_fixed', room_id: 'rm_small' })]),
+      expect.arrayContaining([
+        expect.objectContaining({ family_id: 'fam_fixed', room_id: 'rm_small' }),
+      ]),
     )
     expect(result.section.unplaced).toEqual([])
     expect(result.section.fixed_violations).toEqual([
