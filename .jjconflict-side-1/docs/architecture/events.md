@@ -1,0 +1,57 @@
+# Event kernel
+
+The event log is the only persisted domain state. `src/events/types.ts` defines
+the kernel envelope and payload schemas; `src/events/fold.ts` validates and folds
+events into typed family/person entities and generic labels.
+
+## Storage
+
+Migration `0001_m1_kernel.sql` creates the append-only `event` table and the
+operational authentication tables. `defineOccasionProfile` composes kernel and
+selected-module payload schemas into its validation view. `readEvents` and
+`appendEvents` receive that selected `KernelConfig`, so stored JSON and new
+drafts use the same profile-aware payload schemas. `appendEvents` assigns
+contiguous sequence numbers and uses a compare-and-swap predicate in one D1
+batch. A stale or forward-moving head is rejected, and a failed batch does not
+partially append.
+
+No folded domain state is stored. `derive(events, config)` reconstructs the
+current profile world in memory; sessions, magic links, rate limits, and email
+records are not passed to it. Every Worker and authentication replay uses the
+same selected profile configuration for storage parsing and derivation.
+
+## Kernel events
+
+M1 implements `FamilyInvited`, `FamilyEmailChanged`, `PersonAdded`,
+`PersonUpdated`, `PersonWithdrawn`, `LabelSet`, and `LabelCleared`. Setup events
+map their complete payloads to generic labels. Email identity is NFC-normalized,
+trimmed, lowercased, and checked for uniqueness during replay.
+
+The fold rejects sequence gaps, duplicate identities, duplicate family email
+addresses, invalid payloads, invalid update history, and append-time dangling
+entity references. Resolver diagnostics still expose unknown references in a
+derived world, while `assertAppendableWorld` rejects error-severity dangling
+references before storage. Withdrawn people are hard-removed from the live
+world; historical views are reconstructed by re-deriving a truncated event
+slice.
+
+## Development event source
+
+`loadKdl` and `TextFileEventSource` accept the restricted KDL fixture format: one
+top-level event node per line, named properties only, no child blocks, no duplicate
+properties, and deterministic fixture envelope defaults. They pass payload parsing
+and replay invariants through the same kernel path as D1.
+
+The KDL parser is an adapter dependency. The fold itself remains dependency-free;
+boundary validation may use Zod as defined by [D26](../../decisions.md#d26--validation-boundary-and-pure-domain-core).
+
+## Limits
+
+`derive(events, config)` is implemented: it folds the kernel's seven event
+types and selected module event types into typed entities and generic labels
+(`src/events/fold.ts`), while the fixed resolver operators validate label scope,
+value shape, and references (`src/events/resolver.ts`). The room-inventory module
+is the first real selected module and exercises this replay path with its KDL
+fixture and lifecycle tests. The derived-world resolver, diagnostics, projections,
+draft derivation, and diff are documented in [derived world](derived-world.md).
+Solver stages remain outstanding.
