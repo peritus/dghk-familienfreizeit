@@ -1,8 +1,11 @@
 import { describe, expect, test } from 'vitest'
 import { activeProfile } from '../../src/config/index.js'
 import { derive } from '../../src/events/fold.js'
+import { deriveDraftWorld } from '../../src/events/world.js'
+import { materializeDraftEvents } from '../../src/app/organiser/state.js'
 import { deriveAssignmentReview } from '../../src/modules/room-assignment/app/review.js'
 import {
+  organiserAssignmentFixedFixtureState,
   organiserAssignmentFixtureEvents,
   organiserFixtureEvents,
 } from '../../src/app/stories/organiser-fixtures.js'
@@ -65,5 +68,30 @@ describe('assignment review projection', () => {
     expect(review.board).not.toHaveProperty('sequence')
     expect(review.board).not.toHaveProperty('traces')
     expect(review.report).not.toHaveProperty('sequence')
+  })
+
+  test('projects fixed labels, including a fixed assignment with violations', () => {
+    const state = organiserAssignmentFixedFixtureState
+    const world = deriveDraftWorld(
+      state.committed,
+      materializeDraftEvents(state),
+      activeProfile.validation_view,
+    )
+    const review = deriveAssignmentReview(world)
+    const rooms = review.board.buildings.flatMap(({ rooms: buildingRooms }) => buildingRooms)
+    const fixedFamily = rooms
+      .flatMap(({ occupants }) => occupants)
+      .find(({ id }) => id === 'fam_morgan')
+    const invalidFamily = rooms
+      .flatMap(({ occupants }) => occupants)
+      .find(({ id }) => id === 'fam_seidel')
+
+    expect(review.board.stats.fixed).toBe(2)
+    expect(fixedFamily?.fixed).toBe(true)
+    expect(fixedFamily?.fixed_room_name).toBe('Zimmer 12')
+    expect(invalidFamily?.fixed_invalid).toBe(true)
+    expect(review.report.findings).toEqual(
+      expect.arrayContaining([expect.objectContaining({ title: 'Ungültige feste Zuordnung' })]),
+    )
   })
 })
