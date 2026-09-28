@@ -1,8 +1,8 @@
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { Button } from '../../../../app/components/ui/button.js'
 import { FixedBadge, RequirementChip } from './chips.js'
 import type { FamilyView } from '../types.js'
-import { organiserUrls } from '../../../../organiser/routes.js'
+import { organiserPaths } from '../../../../organiser/routes.js'
 
 export function FamilyEntry({
   family,
@@ -20,12 +20,12 @@ export function FamilyEntry({
     <li className="space-y-2 border-t border-rule py-3 first:border-t-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <Link
+          <OrganiserLink
             className="font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
-            href={organiserUrls.family_detail(family.id)}
+            href={organiserPaths.family_detail(family.id)}
           >
             {family.name}
-          </Link>
+          </OrganiserLink>
           <span className="text-sm text-muted">
             · {family.people.length} {family.people.length === 1 ? 'Person' : 'Personen'}
           </span>

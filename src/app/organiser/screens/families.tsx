@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../components/organiser-link.js'
 import type { EventDraft } from '../../../events/types.js'
 import { Button } from '../../components/ui/button'
 import { useOrganiser } from '../context.js'
@@ -135,9 +135,12 @@ export function Families() {
               >
                 <th scope="row" className="p-3 font-bold">
                   <span className="mr-2 md:hidden">Familie:</span>
-                  <Link href={organiserPaths.family_detail(row.family.id)} className="underline">
+                  <OrganiserLink
+                    href={organiserPaths.family_detail(row.family.id)}
+                    className="underline"
+                  >
                     {row.display_name}
-                  </Link>
+                  </OrganiserLink>
                 </th>
                 <td className="p-3 max-md:block max-md:pt-1">
                   <span className="mr-2 font-bold md:hidden">E-Mail:</span>
@@ -148,9 +151,12 @@ export function Families() {
                   {row.persons.length}
                 </td>
                 <td className="p-3 max-md:block max-md:pt-1">
-                  <Link href={organiserPaths.family_detail(row.family.id)} className="underline">
+                  <OrganiserLink
+                    href={organiserPaths.family_detail(row.family.id)}
+                    className="underline"
+                  >
                     Öffnen
-                  </Link>
+                  </OrganiserLink>
                 </td>
               </tr>
             ))}

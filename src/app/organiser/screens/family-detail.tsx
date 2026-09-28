@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../components/organiser-link.js'
 import type { EventDraft } from '../../../events/types.js'
 import { materializeDraftEvents } from '../state.js'
 import { Button } from '../../components/ui/button'
@@ -232,9 +232,9 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
   return (
     <div className="space-y-6">
       <p>
-        <Link href={organiserPaths.families()} className="underline">
+        <OrganiserLink href={organiserPaths.families()} className="underline">
           ← Familien
-        </Link>
+        </OrganiserLink>
       </p>
       <div>
         <p className="text-sm font-bold uppercase tracking-wide">Familie</p>

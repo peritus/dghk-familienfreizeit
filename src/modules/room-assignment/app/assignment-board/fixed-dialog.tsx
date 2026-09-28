@@ -9,8 +9,8 @@ import {
 } from '../../../../app/components/ui/dialog.js'
 import { Button } from '../../../../app/components/ui/button.js'
 import { Badge } from '../../../../app/components/ui/badge.js'
-import { Link } from 'wouter'
-import { organiserUrls } from '../../../../organiser/routes.js'
+import { OrganiserLink } from '../../../../app/components/organiser-link.js'
+import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RequirementView, RoomView } from '../types.js'
 import { RequirementChip } from './chips.js'
 
@@ -91,12 +91,12 @@ export function FixedAssignmentDialog({
             <div key={room.id} className="space-y-3 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <Link
+                  <OrganiserLink
                     className="font-bold underline underline-offset-4"
-                    href={`${organiserUrls.inventory()}#room=${room.id}`}
+                    href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
                   >
                     {room.name}
-                  </Link>
+                  </OrganiserLink>
                   <p className="text-sm text-muted">
                     {room.building} · {room.floor}
                   </p>

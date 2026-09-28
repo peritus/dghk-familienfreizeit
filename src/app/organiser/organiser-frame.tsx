@@ -1,9 +1,14 @@
 import type { ReactNode } from 'react'
-import { Link, useLocation } from 'wouter'
+import { useLocation } from 'wouter'
 import { useOrganiser } from './context.js'
+import { OrganiserLink, organiserHomePath } from '../components/organiser-link.js'
 import { SaveStatus } from './save-status.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
-import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
+import {
+  organiserNestedPath,
+  organiserPaths,
+  organiserRoutePaths,
+} from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
 import { cn } from '../lib/utils.js'
 
@@ -14,7 +19,11 @@ const kernelNavItems = [
 
 const moduleNavItems = organiserScreenRegistry
   .filter(({ host }) => host === 'module')
-  .map(({ route, label }) => ({ href: route, match: route.replace('/organiser', ''), label }))
+  .map(({ route, label }) => ({
+    href: organiserNestedPath(route),
+    match: organiserNestedPath(route),
+    label,
+  }))
 
 const navItems = [...kernelNavItems, ...moduleNavItems]
 
@@ -31,9 +40,12 @@ export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
     <div className="min-h-dvh">
       <header className="border-b-2 border-black bg-white px-4 py-3 print:hidden sm:px-8">
         <div className="mx-auto max-w-5xl">
-          <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
+          <OrganiserLink
+            href={organiserHomePath}
+            className="inline-flex min-h-11 items-center text-xl font-heading"
+          >
             Familienfreizeit
-          </Link>
+          </OrganiserLink>
         </div>
       </header>
       <main id="content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10 sm:px-8">
@@ -52,9 +64,12 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
       <header className="border-b-2 border-black bg-white px-4 py-3 sm:px-8">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3">
           <div>
-            <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
+            <OrganiserLink
+              href={organiserHomePath}
+              className="inline-flex min-h-11 items-center text-xl font-heading"
+            >
               Familienfreizeit
-            </Link>
+            </OrganiserLink>
             <p className="text-sm text-muted">Organisationsteam</p>
           </div>
           <div className="order-last w-full sm:order-none sm:w-auto">
@@ -65,7 +80,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
                     ? location === item.match
                     : location === item.match || location.startsWith(`${item.match}/`)
                 return (
-                  <Link
+                  <OrganiserLink
                     key={item.href}
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
@@ -77,7 +92,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
                     )}
                   >
                     {item.label}
-                  </Link>
+                  </OrganiserLink>
                 )
               })}
             </nav>

@@ -1,9 +1,9 @@
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { BedIcon } from '../../../../app/components/bed-icons.js'
 import { Badge } from '../../../../app/components/ui/badge.js'
 import { Card } from '../../../../app/components/ui/card.js'
 import { Tag } from '../../../../app/components/ui/tag.js'
-import { organiserUrls } from '../../../../organiser/routes.js'
+import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../types.js'
 import { FamilyEntry } from './family-entry.js'
 
@@ -22,12 +22,12 @@ export function RoomCard({
       <div className="space-y-3 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <Link
+            <OrganiserLink
               className="text-xl font-heading underline decoration-black/25 underline-offset-4 hover:decoration-black"
-              href={`${organiserUrls.inventory()}#room=${room.id}`}
+              href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
             >
               {room.name}
-            </Link>
+            </OrganiserLink>
             <p className="text-sm text-muted">{room.floor}</p>
           </div>
           {room.free < 0 ? (

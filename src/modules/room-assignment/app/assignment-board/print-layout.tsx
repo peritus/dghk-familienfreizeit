@@ -1,6 +1,6 @@
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { BedIcon } from '../../../../app/components/bed-icons.js'
-import { organiserUrls } from '../../../../organiser/routes.js'
+import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { BuildingView } from '../types.js'
 
 export function AssignmentPrintLayout({ buildings }: { buildings: readonly BuildingView[] }) {
@@ -12,7 +12,11 @@ export function AssignmentPrintLayout({ buildings }: { buildings: readonly Build
           {building.rooms.map((room) => (
             <article key={room.id} className="assignment-print-room">
               <h2>
-                <Link href={`${organiserUrls.inventory()}#room=${room.id}`}>{room.name}</Link>
+                <OrganiserLink
+                  href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
+                >
+                  {room.name}
+                </OrganiserLink>
               </h2>
               <p>
                 {room.floor} · {room.capacity} {room.capacity === 1 ? 'Platz' : 'Plätze'}

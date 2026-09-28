@@ -1,4 +1,4 @@
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../components/organiser-link.js'
 import { Check } from 'lucide-react'
 import { Card } from '../../components/ui/card'
 import { cn } from '../../lib/utils.js'
@@ -55,7 +55,7 @@ export function Dashboard() {
       <div>
         <h2 className="text-xl font-bold">Überblick</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Link
+          <OrganiserLink
             href={organiserPaths.families()}
             className={cn(overviewCardClassName, 'group pressable')}
           >
@@ -64,7 +64,7 @@ export function Dashboard() {
             <p className="mt-1 text-muted underline group-hover:no-underline">
               Alle Familien ansehen
             </p>
-          </Link>
+          </OrganiserLink>
           <div className={overviewCardClassName}>
             <p className="text-5xl leading-none font-heading tracking-tight">{people}</p>
             <p className="mt-3 text-lg font-bold">Personen</p>

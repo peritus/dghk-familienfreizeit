@@ -1,8 +1,8 @@
-import { Link } from 'wouter'
+import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import type { ReactNode } from 'react'
 import { SuccessState } from '../../../../app/components/ui/success-state.js'
 import { Tag } from '../../../../app/components/ui/tag.js'
-import { organiserUrls } from '../../../../organiser/routes.js'
+import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../types.js'
 import { RequirementChip } from './chips.js'
 
@@ -16,12 +16,12 @@ export function FamilyOverviewRow({
   return (
     <li className="space-y-2 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Link
+        <OrganiserLink
           className="font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
-          href={organiserUrls.family_detail(family.id)}
+          href={organiserPaths.family_detail(family.id)}
         >
           {family.name}
-        </Link>
+        </OrganiserLink>
         {onFix ? (
           <button
             type="button"
@@ -45,12 +45,12 @@ export function RoomOverviewRow({ room }: { room: RoomView }) {
   return (
     <li className="space-y-2 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Link
+        <OrganiserLink
           className="font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
-          href={`${organiserUrls.inventory()}#room=${room.id}`}
+          href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
         >
           {room.name}
-        </Link>
+        </OrganiserLink>
         <span className="text-sm tabular-nums">
           {room.capacity} {room.capacity === 1 ? 'Platz' : 'Plätze'}
         </span>
@@ -71,12 +71,12 @@ export function FitHints({ room }: { room: RoomView }) {
         <ul className="space-y-1">
           {room.fit_hints.map((family) => (
             <li key={family.id} className="flex flex-wrap items-center gap-1.5">
-              <Link
+              <OrganiserLink
                 className="underline decoration-black/25 underline-offset-4 hover:decoration-black"
-                href={organiserUrls.family_detail(family.id)}
+                href={organiserPaths.family_detail(family.id)}
               >
                 {family.name}
-              </Link>
+              </OrganiserLink>
               {family.requirements.filter(
                 ({ strength, met }) => strength === 'required' && met !== true,
               ).length === 0 ? (
