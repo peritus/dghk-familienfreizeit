@@ -198,8 +198,9 @@ function assignmentInput(
   rooms: readonly RoomCandidate[],
   families: readonly FamilyPlacementUnit[],
   constraints: RoomAssignmentInput['constraints'] = [],
+  fixed_assignments: RoomAssignmentInput['fixed_assignments'] = [],
 ): RoomAssignmentInput {
-  return { rooms, families, constraints, person_family: {} }
+  return { rooms, families, constraints, person_family: {}, fixed_assignments }
 }
 
 describe('room assignment business logic', () => {
@@ -247,6 +248,32 @@ describe('room assignment business logic', () => {
     const first = runRoomAssignment(input as RoomAssignmentInput, params)
     const retained = runRoomAssignment(input as RoomAssignmentInput, params, first.section)
     expect(retained.trace.filter(({ step }) => step === 'retain')).toHaveLength(2)
+  })
+
+  test('keeps fixed assignments ahead of automatic placement and reports violations', () => {
+    const result = runRoomAssignment(
+      assignmentInput(
+        [room('rm_small', 1), room('rm_open', 3)],
+        [family('fam_fixed', 2), family('fam_other', 1)],
+        [],
+        [{ family_id: 'fam_fixed', room_id: 'rm_small' }],
+      ),
+      params,
+    )
+    expect(result.section.assignments).toEqual(
+      expect.arrayContaining([expect.objectContaining({ family_id: 'fam_fixed', room_id: 'rm_small' })]),
+    )
+    expect(result.section.unplaced).toEqual([])
+    expect(result.section.fixed_violations).toEqual([
+      expect.objectContaining({
+        family_id: 'fam_fixed',
+        room_id: 'rm_small',
+        reasons: ['hard.capacity'],
+      }),
+    ])
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({ check: 'room-assignment.fixed-invalid' }),
+    ])
   })
 
   test('covers forced placement, normalized input filtering, and rule/preflight contracts', () => {

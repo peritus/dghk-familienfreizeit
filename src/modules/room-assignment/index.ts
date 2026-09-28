@@ -44,6 +44,16 @@ export type RoomAssignmentInput = {
     set_seq: number
   }[]
   person_family: Readonly<Record<string, string>>
+  fixed_assignments?: readonly FixedRoomAssignment[]
+}
+
+export type FixedRoomAssignment = {
+  family_id: string
+  room_id: string
+}
+
+export type FixedAssignmentViolation = FixedRoomAssignment & {
+  reasons: readonly string[]
 }
 
 export type RoomAssignment = {
@@ -62,6 +72,8 @@ export type UnplacedFamily = {
 export type RoomAssignmentSection = {
   assignments: readonly RoomAssignment[]
   unplaced: readonly UnplacedFamily[]
+  fixed?: readonly FixedRoomAssignment[]
+  fixed_violations?: readonly FixedAssignmentViolation[]
 }
 
 type PlacementTrace = TraceEntry & { family_id: string }
@@ -168,6 +180,19 @@ export function buildRoomAssignmentInput(
       ),
     }
   })
+  const fixedAssignments = world.families.flatMap((family) => {
+    const token = `${family.id}_room`
+    const hasNeed = world.labels_by_entity[family.id]?.some(
+      (label) => label.key === 'needs' && label.value === token,
+    )
+    if (!hasNeed) return []
+    const room = inventory.rooms.find((candidate) =>
+      world.labels_by_entity[candidate.id]?.some(
+        (label) => label.key === 'provides' && label.value === token,
+      ),
+    )
+    return room ? [{ family_id: family.id, room_id: room.id }] : []
+  })
   return {
     rooms: Object.freeze(rooms.sort(compareEntity)),
     families: Object.freeze(
@@ -178,6 +203,7 @@ export function buildRoomAssignmentInput(
     ),
     constraints: Object.freeze(world.constraints.map((constraint) => ({ ...constraint }))),
     person_family: Object.freeze(personFamily),
+    fixed_assignments: Object.freeze(fixedAssignments),
   }
 }
 
@@ -215,11 +241,20 @@ export function runRoomAssignment(
       text: `${family.family_id} → ${room.id}`,
       detail: score
         ? { chosen: { target: room.id, score: score.score, terms: score.terms } }
-        : undefined,
+      : undefined,
     })
   }
 
+  const fixedAssignments = input.fixed_assignments ?? []
+  const fixedFamilyIds = new Set(fixedAssignments.map(({ family_id: familyId }) => familyId))
+  for (const fixed of fixedAssignments) {
+    const family = families.find(({ family_id: familyId }) => familyId === fixed.family_id)
+    const room = roomById(input.rooms, fixed.room_id)
+    if (family && room) place(family, room, 'fixed')
+  }
+
   for (const family of families) {
+    if (fixedFamilyIds.has(family.family_id)) continue
     const retainedRoom = previousRoom(previous, family.family_id)
     if (retainedRoom && input.rooms.some(({ id }) => id === retainedRoom)) {
       const current = roomById(input.rooms, retainedRoom)
@@ -230,7 +265,9 @@ export function runRoomAssignment(
   }
 
   const unplaced = (): FamilyPlacementUnit[] =>
-    families.filter(({ family_id: familyId }) => !placements.has(familyId))
+    families.filter(
+      ({ family_id: familyId }) => !placements.has(familyId) && !fixedFamilyIds.has(familyId),
+    )
   let changed = true
   let iterations = 0
   while (changed && iterations <= families.length) {
@@ -293,16 +330,38 @@ export function runRoomAssignment(
       text: family.reason,
     })
   const assignments = assignRoomPlaces(families, placements, input)
+  const fixedViolations = fixedAssignments.flatMap((fixed) => {
+    const family = families.find(({ family_id: familyId }) => familyId === fixed.family_id)
+    const room = roomById(input.rooms, fixed.room_id)
+    if (!family || !room) return []
+    const withoutFamily = new Map(placements)
+    withoutFamily.delete(family.family_id)
+    const reasons = feasible(family, room, withoutFamily, input, params).map(({ rule }) => rule)
+    return reasons.length > 0 ? [{ ...fixed, reasons: Object.freeze([...new Set(reasons)]) }] : []
+  })
   return {
-    section: { assignments, unplaced: Object.freeze(unplacedFamilies) },
+    section: {
+      assignments,
+      unplaced: Object.freeze(unplacedFamilies),
+      fixed: Object.freeze(fixedAssignments),
+      fixed_violations: Object.freeze(fixedViolations),
+    },
     trace: Object.freeze(trace.map(({ family_id: _familyId, ...entry }) => entry)),
     diagnostics: Object.freeze(
-      unplacedFamilies.map((family) => ({
-        check: 'room-assignment.unplaced-family' as const,
-        severity: 'warning' as const,
-        subjects: [family.family_id],
-        text: family.reason,
-      })),
+      [
+        ...unplacedFamilies.map((family) => ({
+          check: 'room-assignment.unplaced-family' as const,
+          severity: 'warning' as const,
+          subjects: [family.family_id],
+          text: family.reason,
+        })),
+        ...fixedViolations.map((violation) => ({
+          check: 'room-assignment.fixed-invalid' as const,
+          severity: 'warning' as const,
+          subjects: [violation.family_id, violation.room_id],
+          text: `${violation.family_id} fixed in ${violation.room_id}: ${violation.reasons.join(', ')}`,
+        })),
+      ],
     ),
   }
 }
@@ -516,7 +575,11 @@ export function assignRoomPlaces(
 ): readonly RoomAssignment[] {
   const used = new Set<string>()
   const assignments: RoomAssignment[] = []
-  for (const family of families) {
+  const fixedIds = new Set((input.fixed_assignments ?? []).map(({ family_id: id }) => id))
+  for (const family of families.slice().sort((left, right) =>
+    Number(fixedIds.has(right.family_id)) - Number(fixedIds.has(left.family_id)) ||
+    left.family_id.localeCompare(right.family_id),
+  )) {
     const roomId = placements.get(family.family_id)
     if (!roomId) continue
     const room = roomById(input.rooms, roomId)
