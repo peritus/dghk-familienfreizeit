@@ -9,10 +9,10 @@ export type OrganiserSectionNavigationItem = {
 }
 
 export function OrganiserSectionNavigation({
-  ariaLabel,
+  aria_label: ariaLabel,
   items,
 }: {
-  ariaLabel: string
+  aria_label: string
   items: readonly OrganiserSectionNavigationItem[]
 }) {
   const [location] = useLocation()

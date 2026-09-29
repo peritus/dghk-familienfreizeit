@@ -16,25 +16,25 @@ const primaryNavItems = [
     href: organiserPaths.dashboard(),
     match: organiserRoutePaths.dashboard,
     label: 'Dashboard',
-    includeDescendants: false,
+    include_descendants: false,
   },
   {
     href: organiserPaths.families(),
     match: organiserRoutePaths.families,
     label: 'Familien',
-    includeDescendants: true,
+    include_descendants: true,
   },
   {
     href: organiserPaths.accommodation(),
     match: organiserRoutePaths.accommodation,
     label: 'Unterbringung',
-    includeDescendants: true,
+    include_descendants: true,
   },
   {
     href: organiserPaths.workshops(),
     match: organiserRoutePaths.workshops,
     label: 'Workshops',
-    includeDescendants: true,
+    include_descendants: true,
   },
 ] as const
 
@@ -86,7 +86,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
           <div className="order-last w-full sm:order-none sm:w-auto">
             <nav aria-label="Hauptnavigation" className="flex flex-wrap gap-2">
               {primaryNavItems.map((item) => {
-                const active = isOrganiserPathActive(location, item.match, item.includeDescendants)
+                const active = isOrganiserPathActive(location, item.match, item.include_descendants)
                 return (
                   <OrganiserLink
                     key={item.href}

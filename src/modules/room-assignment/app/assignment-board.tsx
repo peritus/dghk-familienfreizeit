@@ -208,7 +208,7 @@ export function AssignmentBoardScreen() {
   return (
     <>
       <OrganiserSectionNavigation
-        ariaLabel="Unterbringungsbereiche"
+        aria_label="Unterbringungsbereiche"
         items={[
           { href: organiserPaths.inventory(), label: 'Unterkunft' },
           { href: organiserPaths.assignment_board(), label: 'Belegung' },

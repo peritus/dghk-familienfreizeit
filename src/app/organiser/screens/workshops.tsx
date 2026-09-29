@@ -26,7 +26,7 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
 function WorkshopNavigation() {
   return (
     <OrganiserSectionNavigation
-      ariaLabel="Workshopbereiche"
+      aria_label="Workshopbereiche"
       items={[
         { href: organiserPaths.workshops(), label: 'Workshops' },
         { href: organiserPaths.workshop_spaces(), label: 'Räume und Slots' },

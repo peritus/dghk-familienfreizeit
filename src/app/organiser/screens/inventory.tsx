@@ -225,7 +225,7 @@ export function Inventory() {
   return (
     <div className="space-y-8">
       <OrganiserSectionNavigation
-        ariaLabel="Unterbringungsbereiche"
+        aria_label="Unterbringungsbereiche"
         items={[
           { href: organiserPaths.inventory(), label: 'Unterkunft' },
           { href: organiserPaths.assignment_board(), label: 'Belegung' },
