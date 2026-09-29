@@ -82,7 +82,7 @@ family-detail people view uses a semantic editable table with a first-row
 creation action and same-row save/delete controls. At narrow widths, these
 tables become labeled stacked cards while preserving field and action order.
 
-The accommodation screen (`/organiser/inventory`,
+The accommodation screen (`/organiser/accommodation/inventory`,
 [`src/app/organiser/screens/inventory.tsx`](../../src/app/organiser/screens/inventory.tsx))
 implements a different table shape for a different need: rooms are a real
 `<table>` whose rows expand into a full-width detail row holding that room's

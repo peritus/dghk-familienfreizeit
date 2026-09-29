@@ -221,7 +221,7 @@ above):
 - only show a column if it compares across rows — a boolean becomes a tag
   (below), not a "Nein" line.
 
-**Implemented** for `/organiser/inventory` room rows
+**Implemented** for `/organiser/accommodation/inventory` room rows
 (`src/app/organiser/screens/inventory.tsx`); **outstanding** everywhere
 else this shape could apply.
 
@@ -265,7 +265,7 @@ Numbers large and bold with `leading-none`, label bold below. Include every
 level the screen manages. Never repeat a stat elsewhere on the same page.
 Mobile: a 2-column grid, never a 2+1 wrap.
 
-**Implemented** for `/organiser/inventory`; **outstanding** as a shared
+**Implemented** for `/organiser/accommodation/inventory`; **outstanding** as a shared
 component.
 
 ## Segmented controls

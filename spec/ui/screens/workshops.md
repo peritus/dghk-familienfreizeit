@@ -3,14 +3,17 @@
 ## Audience, purpose, and routes
 
 This is the organiser-only workshop workspace. The prototype's product views
-remain separate URLs with horizontal workshop tabs:
+remain separate URLs with page-local workshop navigation:
 
 | View | Route | Purpose |
 |---|---|---|
 | Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
+| Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Programme | `/organiser/workshops/programme` | one placement per workshop, schedule conflicts, and unscheduled cases |
-| Slots | `/organiser/workshops/slots` | event-backed slot creation, editing, retirement, and overlap validation |
-| Spaces | `/organiser/workshop-spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
+| Slots | `/organiser/workshops/slots` | direct event-backed slot creation, editing, retirement, and overlap validation; linked from Räume und Slots |
+
+The planned section order also reserves **Wünsche**, **Teilnahme**, and **Listen**.
+Those destinations are not rendered in navigation until their screens exist.
 
 The overview is the landing view. Participation review, demand, solver traces,
 and list/report views are product views reached from the workshop workspace and
@@ -100,7 +103,7 @@ There is no application print or export button. Browser printing is supported
 through the shared print stylesheet and prints either the current/prospective
 organiser plan or the released/effective plan, with the data context labelled.
 
-Use the neobrutalist design system, horizontal tabs, responsive cards and
+Use the neobrutalist design system, page-local section navigation, responsive cards and
 accessible tables. All supported screen sizes are equally important. Strong
 orange is reserved for actionable attention and is paired with text or a glyph;
 warnings never rely on colour alone.

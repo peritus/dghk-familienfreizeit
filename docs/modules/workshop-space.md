@@ -4,7 +4,7 @@
 Each space has a stable identity, display name, location description, capacity,
 availability windows, deterministic order, and resolver-backed capabilities.
 It is separate from accommodation rooms and is maintained at
-`/organiser/workshop-spaces`.
+`/organiser/workshops/spaces`.
 
 The screen provides event-backed add, retire, availability, and per-slot block
 actions. Scheduling consumes the derived live spaces and checks capacity,

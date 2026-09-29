@@ -39,7 +39,7 @@ ordering and place IDs, the 162-place capacity, and the €15,236 cost summary.
 
 ## Organiser surface and limits
 
-`/organiser/inventory` is registered by the selected module and uses the shared
+`/organiser/accommodation/inventory` is registered by the selected module and uses the shared
 organiser local-first event pipeline. It shows a stats strip, expandable building
 sections with real `<table>` room rows, bed details, capacity, profile-defined
 room traits shown as columns or tags, and cost summaries. Derived capabilities

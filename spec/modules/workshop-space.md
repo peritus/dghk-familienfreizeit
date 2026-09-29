@@ -161,7 +161,7 @@ schedule/release contract owned by [workshop scheduling](workshop-scheduling.md)
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/workshop-spaces` — maintain names, descriptions, capacity, availability, ordering, resolver-backed capabilities, and per-slot blocks ([UI-14](../ui/screens/workshop-spaces.md)) |
+| Screen | `/organiser/workshops/spaces` — maintain names, descriptions, capacity, availability, ordering, resolver-backed capabilities, and per-slot blocks ([UI-14](../ui/screens/workshop-spaces.md)) |
 | Report | Workshop-space inventory — live/retired spaces, capacity, availability, and resolved capabilities for organisers ([reports](../application/reports.md) §3.3) |
 | Controls | organiser-only add, full edit, and retire actions |
 | Family view | none until the schedule and release contract is revised by Issue 025 |

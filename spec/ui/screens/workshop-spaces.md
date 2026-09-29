@@ -3,7 +3,7 @@
 ## Audience, purpose, and route
 
 Organisers maintain physical workshop spaces and the schedule context that
-affects their availability. Route: `/organiser/workshop-spaces`.
+affects their availability. Route: `/organiser/workshops/spaces`.
 
 The view is not accommodation inventory. A workshop space is a typed physical
 entity with a name, location description, capacity, availability windows,

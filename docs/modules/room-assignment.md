@@ -55,7 +55,7 @@ route registration.
 
 ## Organiser review surface
 
-The selected module contributes the `/organiser/board` surface. It consumes the
+The selected module contributes the `/organiser/accommodation/assignment` surface. It consumes the
 shared organiser prospective world and the deterministic `room-assignment` solver
 section. The board includes a compact browser-printable projection of the current
 assignment, including room occupancy, summary metrics, unplaced families, and

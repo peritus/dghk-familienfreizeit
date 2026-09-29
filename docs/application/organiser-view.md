@@ -13,18 +13,21 @@ path before persistence.
 | `/organiser` | Dashboard with family/person counts, diagnostics, and draft-change status |
 | `/organiser/families` | Derived family table and manual invitation staging |
 | `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or draft event history |
-| `/organiser/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
-| `/organiser/board` | Read-only deterministic family-to-room assignment review with browser-printable output |
+| `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
+| `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
+| `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
 | `/organiser/workshops` | Workshop landing view with lifecycle summary, authoring, audience filters, and typed leader selection |
 | `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
 | `/organiser/workshops/slots` | Event-backed slot creation and retirement with overlap validation |
-| `/organiser/workshop-spaces` | Physical workshop-space inventory and schedule-aware availability context |
+| `/organiser/workshops/spaces` | Physical workshop-space inventory and schedule-aware availability context |
 
 The host exposes these kernel-owned and selected-module screens through one screen
-registry. The room-inventory module registers the inventory screen, room-assignment
-registers the board screen, and the selected workshop modules register the workshop
-routes. Workshop navigation uses horizontal tabs while each tab remains independently
-addressable and preserves the shared local-first draft state.
+registry. The app bar presents four primary areas: Dashboard, Familien,
+Unterbringung, and Workshops. Accommodation has page-local secondary links for
+Unterkunft and Belegung. Workshops visibly links Workshops, Räume und Slots, and
+Programm; the direct Slots screen is linked from Räume und Slots. Wünsche,
+Teilnahme, and Listen are reserved workshop areas and are not rendered until their
+screens exist. All routes preserve the shared local-first draft state.
 
 The board's browser print output is rendered from the same prospective assignment
 review. Print media hides navigation and interactive review controls, then exposes
