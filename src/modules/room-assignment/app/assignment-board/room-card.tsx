@@ -1,7 +1,6 @@
-import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { BedIcon } from '../../../../app/components/bed-icons.js'
 import { Card } from '../../../../app/components/ui/card.js'
-import { RoomCapacitySummary } from '../../../../app/components/ui/room-capacity-summary.js'
+import { RoomSummary } from '../../../../app/components/ui/room-summary.js'
 import { Tag } from '../../../../app/components/ui/tag.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../types.js'
@@ -20,17 +19,14 @@ export function RoomCard({
   return (
     <Card className={empty ? 'border-dashed bg-transparent p-0' : 'bg-white p-0'}>
       <div className="space-y-3 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <OrganiserLink
-              className="text-xl font-heading underline decoration-black/25 underline-offset-4 hover:decoration-black"
-              href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
-            >
-              {room.name}
-            </OrganiserLink>
-            <p className="text-sm text-muted">{room.floor}</p>
-          </div>
-        </div>
+        <RoomSummary
+          name={room.name}
+          building={room.building}
+          floor={room.floor}
+          href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
+          capacity={room.capacity}
+          free={room.free}
+        />
         <div className="flex flex-wrap gap-1.5 text-sm text-muted">
           {room.features.map((feature) => (
             <Tag key={feature}>{feature}</Tag>
@@ -45,7 +41,6 @@ export function RoomCard({
               </span>
             ))}
           </div>
-          <RoomCapacitySummary capacity={room.capacity} free={room.free} />
         </div>
       </div>
       {room.occupants.length > 0 ? (

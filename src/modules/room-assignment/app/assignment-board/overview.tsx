@@ -1,6 +1,6 @@
 import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import type { ReactNode } from 'react'
-import { RoomCapacitySummary } from '../../../../app/components/ui/room-capacity-summary.js'
+import { RoomSummary } from '../../../../app/components/ui/room-summary.js'
 import { SuccessState } from '../../../../app/components/ui/success-state.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../types.js'
@@ -44,17 +44,14 @@ export function FamilyOverviewRow({
 export function RoomOverviewRow({ room }: { room: RoomView }) {
   return (
     <li className="space-y-2 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <OrganiserLink
-          className="font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
-          href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
-        >
-          {room.name}
-        </OrganiserLink>
-      </div>
-      <p className="text-sm text-muted">
-        {room.building} · {room.floor}
-      </p>
+      <RoomSummary
+        name={room.name}
+        building={room.building}
+        floor={room.floor}
+        href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
+        capacity={room.capacity}
+        free={room.free}
+      />
       <FitHints room={room} />
     </li>
   )
@@ -63,7 +60,6 @@ export function RoomOverviewRow({ room }: { room: RoomView }) {
 export function FitHints({ room }: { room: RoomView }) {
   return (
     <div className="space-y-1 text-sm">
-      <RoomCapacitySummary capacity={room.capacity} free={room.free} />
       {room.fit_hints.length > 0 ? (
         <ul className="space-y-1">
           {room.fit_hints.map((family) => (
