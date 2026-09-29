@@ -294,7 +294,6 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
   },
   {
-    id: 'screens-organiser-assignment-report--populated',
     area: 'screen',
     subject: 'Assignment report',
     source: 'src/modules/room-assignment/app/reports.tsx',

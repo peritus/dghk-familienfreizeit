@@ -16,8 +16,7 @@ that host.
 |---|---|---|
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
 | `/organiser/workshop-spaces` | Workshop spaces | Physical workshop-space inventory, capacity, availability, ordering, capabilities |
-| `/organiser/board` | The board | Whole-family room placement |
-| `/organiser/reports` | Assignment report | Compact printable current assignment |
+| `/organiser/board` | The board | Whole-family room placement and browser-printable assignment output |
 | `/organiser/workshops` | Workshops | Calls, proposals, candidate rounds, demand, schedule, capacity, fill, rankings |
 
 Every screen renders the organiser application's derived world. Mutating screens
@@ -25,8 +24,8 @@ use the shared local-first organiser pipeline: they create ordinary event groups
 derive the proposed world locally, and then either invoke the ordinary apply command
 automatically or leave the group in the browser for review, according to the
 session's commit policy. No screen owns a second draft list or persistence path.
-The assignment board and report are solver-owned projections of that same prospective
-world, so family and room drafts are visible before they are applied. The board's
+The assignment board is a solver-owned projection of that same prospective
+world, so family and room drafts are visible before they are applied. Its
 narrow fixed-assignment action stages paired resolver labels through this shared
 pipeline; it does not write assignments directly.
 
@@ -80,6 +79,6 @@ The fixed resolver mechanisms and organiser decision labels remain domain capabi
 but their prominent placement UI is deferred to
 [`organiser-placement-overrides`](../deferred-ideas/organiser-placement-overrides.md).
 
-The M6 assignment report shows family-to-room assignments, unplaced families,
+The board's browser-printable output shows family-to-room assignments, unplaced families,
 capacity, and constraint findings. The later generic report catalogue covers
 workshops, attendance, and communication; it does not change the M6 data model.

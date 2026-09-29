@@ -35,7 +35,7 @@ Every report identifies:
 | Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
-The M6 assignment report is an organiser-only current-state module report. It consumes
+The M6 assignment print output is an organiser-only current-state projection. It consumes
 the derived organiser world and room-assignment solver output directly and has no
 communication references. Later release-scoped organiser reports consume
 `CommunicationScopeView`; family and shared reports
@@ -52,7 +52,7 @@ identity. Reports are generated on demand from the world visible to the reader.
 ## 2. Derivation and visibility
 
 Reports never have a table, event type, cache entry or stored snapshot. The M6
-assignment report is an on-demand projection of the current prospective organiser
+assignment print output is an on-demand projection of the current prospective organiser
 world; it does not imply that an arrangement has been released. Later organiser
 reports may render the full organiser-derived world; family/shared reports are
 derived and privacy-projected by the Worker. They render ordinary derived worlds and the audience projection defined in
@@ -179,8 +179,8 @@ on every printed page.
 Reports appear as ordinary browser routes, with the same authenticated session
 rules as the corresponding family view or organiser view. They have no download,
 export, or print action. The visible controls are limited to filtering, sorting, and
-navigation. The M6 assignment report has no report-local mutation, release, or print
-control.
+navigation. The M6 assignment print output has no local mutation, release, or print
+control; it is the browser-print stylesheet of the assignment board.
 
 The print stylesheet must:
 

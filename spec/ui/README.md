@@ -29,7 +29,6 @@ experimentation.
 | UI-08 | [Inventory](screens/inventory.md) | `/organiser/inventory` |
 | UI-14 | [Workshop spaces](screens/workshop-spaces.md) | `/organiser/workshop-spaces` |
 | UI-10 | [Assignment board](screens/assignment-board.md) | `/organiser/board` |
-| UI-15 | [Assignment report](../application/reports.md) | `/organiser/reports` |
 | UI-12 | [Workshops](screens/workshops.md) | `/organiser/workshops` |
 
 The party-review screen belongs to the separate sleeping modules. Its design sketch
@@ -42,9 +41,8 @@ Release control, communication review, and communication history UI are deferred
 in [`release-control-ui`](../deferred-ideas/release-control-ui.md). The release
 control domain contract remains authoritative for its later milestone.
 
-The assignment report is the compact current-state organiser report described in
-[reports](../application/reports.md). The generic report host and broader catalogue
-remain later scope; the M6 report is not release- or communication-dependent.
+The assignment board's browser-printable output is the compact current-state
+assignment view. The generic report host and broader catalogue remain later scope.
 
 ## Screen-spec format
 

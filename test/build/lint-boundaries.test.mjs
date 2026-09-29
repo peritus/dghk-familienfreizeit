@@ -24,7 +24,6 @@ for (const [file, source, rule] of [
   ],
   [
     'src/app/organiser/probe.tsx',
-    '<a href="/organiser/reports">Bericht</a>',
     'no-restricted-syntax',
   ],
   [

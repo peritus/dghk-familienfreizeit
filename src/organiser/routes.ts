@@ -17,7 +17,6 @@ export const organiserRoutePaths = {
   family_detail: '/families/:id',
   inventory: '/inventory',
   assignment_board: '/board',
-  assignment_report: '/reports',
 } as const
 
 export const kernelOrganiserRouteDefinitions = [
@@ -145,7 +144,6 @@ export const organiserPaths = {
     nestedPath(`${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`),
   inventory: (): OrganiserPath => nestedPath(organiserRoutePaths.inventory),
   assignment_board: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_board),
-  assignment_report: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_report),
 } as const
 
 export const organiserUrls = {
@@ -156,8 +154,6 @@ export const organiserUrls = {
   inventory: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserPaths.inventory()}`),
   assignment_board: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.assignment_board()}`),
-  assignment_report: (): OrganiserUrl =>
-    publicUrl(`${organiserBasePath}${organiserPaths.assignment_report()}`),
 } as const
 
 export function isKnownOrganiserPath(pathname: string): boolean {

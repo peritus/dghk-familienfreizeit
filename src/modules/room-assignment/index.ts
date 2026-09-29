@@ -138,14 +138,7 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
         label: 'Belegung',
         audience: 'organiser',
       },
-      {
-        id: 'organiser-assignment-report',
-        route: '/organiser/reports',
-        label: 'Belegungsbericht',
-        audience: 'organiser',
-      },
     ],
-    reports: [{ id: 'room-assignment.assignment-report' }],
   }),
 })
 

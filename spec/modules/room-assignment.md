@@ -254,9 +254,8 @@ under `unplaced` rather than emitting assignment rows.
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/board` — read-only whole-family placement review |
+| Screen | `/organiser/board` — read-only whole-family placement review with browser-printable assignment output |
 | Controls | room requirements and paired generic `needs`/`provides` labels for fixed assignments; invalid fixed assignments remain in the plan with diagnostics |
-| Reports | `room-assignment.assignment-report`: current room assignments, unplaced families, capacity, and diagnostics |
 | Emails | none |
 
 ## 12. Tests

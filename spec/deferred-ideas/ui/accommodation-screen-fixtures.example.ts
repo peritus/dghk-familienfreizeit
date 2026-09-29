@@ -1,5 +1,5 @@
 import type {
-  AssignmentReportView,
+  AssignmentPrintView,
   BoardView,
   CommunicationEntryView,
   CommunicationReviewView,
@@ -287,7 +287,7 @@ export const planDiffFixture: PlanDiffView = {
   ],
 }
 
-export const reportFixture: AssignmentReportView = {
+export const printFixture: AssignmentPrintView = {
   generated_at: 'Heute · 10:42',
   sequence: 1482,
   total_families: 5,

@@ -11,9 +11,9 @@ components, talking to a small JSON API.
 
 The derived world is the read side of the application
 ([architecture](../architecture/overview.md)), and must run in the organiser browser. The organiser
-screens are views over it: the dashboard, families, inventory, assignment board,
-and assignment report all render `derive(committed ++ drafts)`. The draft list is
-shared by every mutating screen; the board and report consume the same prospective
+screens are views over it: the dashboard, families, inventory, and assignment board
+all render `derive(committed ++ drafts)`. The draft list is
+shared by every mutating screen; the board and its print output consume the same prospective
 result, while the board's narrow fixed-assignment action stages ordinary labels
 through that shared state. That is a client application with one piece of
 state and a pure function over it, which is exactly the shape React is built for.
@@ -92,7 +92,7 @@ src/app/
   family-view/               login, preferences page, assignment page
   organiser/
     OrganiserApp.tsx        loads the log, owns the draft reducer, derives the world
-    screens/            dashboard, families, inventory, assignment board, assignment report
+    screens/            dashboard, families, inventory, assignment board
   components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
@@ -207,11 +207,13 @@ The outstanding screens must meet these acceptance criteria:
 Use the existing Tailwind tokens, utility classes and component variants for
 these screens. Do not introduce hand-written component CSS beyond registry styling.
 
-## 6. The board and assignment report
+## 6. The board and browser printing
 
-The board and report are solver-owned review screens. They receive the same prospective world
+The board is the solver-owned review screen. It receives the same prospective world
 that family and inventory editors receive, run the selected room-assignment solver
-projection, and render its assignments, diagnostics, and traces. They do not use
+projection, and renders its assignments, diagnostics, and traces. Its print-only
+layout renders the room list, summary, unplaced families, and findings through the
+browser's print command and print stylesheet. The board does not use
 drag-and-drop, screen-local draft state, or direct placement mutation. The board's
 narrow fixed-assignment action stages ordinary paired resolver labels through the
 shared draft pipeline; richer placement overrides remain deferred.
