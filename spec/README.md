@@ -54,7 +54,7 @@ particular profile.
 | 15 | [Reports](application/reports.md) | Report catalogue, audience scopes, responsive behavior, and print stylesheets |
 | 16 | [Modules](modules/contract.md) | Module contract, composition, and catalogue |
 | 17 | [Room inventory](modules/room-inventory.md) | Buildings, rooms, beds, places, and capacity |
-| 18 | [Room assignment](modules/room-assignment.md) | Deterministic placement, room scoring, and the board |
+| 18 | [Room assignment](modules/room-assignment.md) | Remaining placement extensions and consumers |
 | 19 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
 | 20 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
 | 21 | [Workshops](modules/workshops.md) | Direct workshop identity and selected workshop modules |

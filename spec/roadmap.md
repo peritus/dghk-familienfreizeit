@@ -13,31 +13,6 @@ reports are separate audience and presentation slices; an organiser milestone
 does not claim family behavior, and a domain milestone does not require reports
 before the report host exists.
 
-## M6 — Deterministic room assignment
-
-Specification coverage: [solver contract](architecture/solver-contract.md),
-[room assignment](modules/room-assignment.md), room-related [labels and constraints](architecture/labels-and-constraints.md),
-and D5–D7.
-
-The verified business-logic foundation is documented in
-[`docs/modules/room-assignment.md`](../docs/modules/room-assignment.md). M6
-delivers the read-only organiser board, its compact browser-printable assignment
-output, and their integration coverage. Family requirements and room
-capabilities are edited through separate event-backed organiser surfaces; this
-milestone consumes their derived result rather than replacing those editors.
-
-- Complete the organiser board and its browser-printable assignment output around the derived plan.
-- Include the narrow event-backed fixed-assignment workflow: paired
-  `needs`/`provides` labels, local re-derivation, invalid-assignment
-  diagnostics, and clearing through the shared draft pipeline.
-- Verify real-inventory, configuration-change, and shuffle scenarios.
-
-Acceptance: whole-family placement is deterministic, hard constraints are
-enforced, family and room configuration changes flow through the shared organiser
-draft/apply/discard pipeline, the board and its print output render the same derived result,
-and every assignment outcome has an explanatory trace. The print output is printable
-through browser print styles without an in-app print button.
-
 ## M7 — Organiser controls
 
 Specification coverage: [family preferences](modules/family-preferences.md),
