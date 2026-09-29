@@ -169,6 +169,9 @@ function family(
     person_ids: Object.freeze(
       Array.from({ length: bedDemand }, (_, index) => `${familyId}-person-${index}`),
     ),
+    bed_person_ids: Object.freeze(
+      Array.from({ length: bedDemand }, (_, index) => `${familyId}-person-${index}`),
+    ),
     bed_demand: bedDemand,
     requirements: Object.freeze(requirements),
   }
@@ -329,6 +332,7 @@ describe('room assignment business logic', () => {
         family_id: 'fam_fixed',
         room_id: 'rm_small',
         reasons: ['hard.capacity'],
+        unplaced_person_ids: ['fam_fixed-person-1'],
       }),
     ])
     expect(result.diagnostics).toEqual([
@@ -548,5 +552,28 @@ describe('room assignment business logic', () => {
         ),
       ),
     ).toEqual([expect.objectContaining({ family_id: 'fam_1', place_id: null })])
+  })
+
+  test('assigns beds to the actual bed-needing people in mixed families', () => {
+    const mixed = {
+      ...family('fam_mixed', 1),
+      person_ids: ['fam_mixed-infant', 'fam_mixed-adult'],
+      bed_person_ids: ['fam_mixed-adult'],
+    }
+    expect(
+      assignRoomPlaces(
+        [mixed],
+        new Map([['fam_mixed', 'rm_1']]),
+        assignmentInput([room('rm_1', 1)], [mixed]),
+      ),
+    ).toEqual([
+      { family_id: 'fam_mixed', person_id: 'fam_mixed-infant', room_id: 'rm_1', place_id: null },
+      {
+        family_id: 'fam_mixed',
+        person_id: 'fam_mixed-adult',
+        room_id: 'rm_1',
+        place_id: 'rm_1-place-0',
+      },
+    ])
   })
 })

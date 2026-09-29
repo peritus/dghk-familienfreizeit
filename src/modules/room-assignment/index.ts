@@ -30,6 +30,7 @@ export type FamilyPlacementUnit = {
   family_id: string
   sort_key: number
   person_ids: readonly string[]
+  bed_person_ids: readonly string[]
   bed_demand: number
   requirements: readonly FamilyRequirement[]
 }
@@ -46,6 +47,7 @@ export type RoomAssignmentInput = {
   }[]
   person_family: Readonly<Record<string, string>>
   fixed_assignments?: readonly FixedRoomAssignment[]
+  room_constraints?: readonly RoomConstraint[]
   rules?: readonly Rule[]
 }
 
@@ -54,8 +56,14 @@ export type FixedRoomAssignment = {
   room_id: string
 }
 
+export type RoomConstraint = {
+  family_id: string
+  room_ids: readonly string[]
+}
+
 export type FixedAssignmentViolation = FixedRoomAssignment & {
   reasons: readonly string[]
+  unplaced_person_ids: readonly string[]
 }
 
 export type RoomAssignment = {
@@ -157,6 +165,7 @@ export function buildRoomAssignmentInput(
     const familyId = personFamily[requirement.holder_id] ?? requirement.holder_id
     if (!world.families.some((family) => family.id === familyId)) continue
     const current = requirementsByFamily.get(familyId) ?? []
+    if (requirement.value === `${familyId}_room`) continue
     if (!current.some((item) => sameRequirement(item, requirement))) current.push(requirement)
     requirementsByFamily.set(familyId, current)
   }
@@ -171,6 +180,11 @@ export function buildRoomAssignmentInput(
       family_id: family.id,
       sort_key: family.sort_key,
       person_ids: Object.freeze(persons.map(({ id }) => id)),
+      bed_person_ids: Object.freeze(
+        persons
+          .filter((person) => labelValue(world, person.id, params.no_bed_trait ?? '') !== true)
+          .map(({ id }) => id),
+      ),
       bed_demand: bedDemand,
       requirements: Object.freeze(
         (requirementsByFamily.get(family.id) ?? []).map((requirement) => ({
@@ -180,19 +194,25 @@ export function buildRoomAssignmentInput(
       ),
     }
   })
-  const fixedAssignments = world.families.flatMap((family) => {
-    const token = `${family.id}_room`
-    const hasNeed = world.labels_by_entity[family.id]?.some(
-      (label) => label.key === 'needs' && label.value === token,
-    )
-    if (!hasNeed) return []
-    const room = inventory.rooms.find((candidate) =>
-      world.labels_by_entity[candidate.id]?.some(
-        (label) => label.key === 'provides' && label.value === token,
-      ),
-    )
-    return room ? [{ family_id: family.id, room_id: room.id }] : []
-  })
+  const allRoomIds = new Set(inventory.rooms.map(({ id }) => id))
+  const roomConstraints = world.requirements
+    .filter(({ kind, value }) => kind === 'generic-needs' && value?.endsWith('_room'))
+    .map((requirement) => {
+      const familyId = personFamily[requirement.holder_id] ?? requirement.holder_id
+      const token = requirement.value!
+      const roomIds = world.capabilities
+        .filter(
+          ({ entity_id: entityId, key, source }) =>
+            key === token && source === 'assigned' && allRoomIds.has(entityId),
+        )
+        .map(({ entity_id: entityId }) => entityId)
+        .sort()
+      return { family_id: familyId, room_ids: Object.freeze(roomIds) }
+    })
+    .filter(({ family_id: familyId }) => world.families.some((family) => family.id === familyId))
+  const fixedAssignments = roomConstraints.flatMap(({ family_id: familyId, room_ids: roomIds }) =>
+    roomIds.length === 1 ? [{ family_id: familyId, room_id: roomIds[0]! }] : [],
+  )
   return {
     rooms: Object.freeze(rooms.sort(compareEntity)),
     families: Object.freeze(
@@ -204,6 +224,7 @@ export function buildRoomAssignmentInput(
     constraints: Object.freeze(world.constraints.map((constraint) => ({ ...constraint }))),
     person_family: Object.freeze(personFamily),
     fixed_assignments: Object.freeze(fixedAssignments),
+    room_constraints: Object.freeze(roomConstraints),
   }
 }
 
@@ -334,13 +355,35 @@ export function runRoomAssignment(
   const fixedViolations = fixedAssignments.flatMap((fixed) => {
     const family = families.find(({ family_id: familyId }) => familyId === fixed.family_id)
     const room = roomById(input.rooms, fixed.room_id)
-    if (!family || !room) return []
+    if (!family) return []
+    if (!room)
+      return [
+        {
+          ...fixed,
+          reasons: Object.freeze(['hard.room-unavailable']),
+          unplaced_person_ids: Object.freeze(family.bed_person_ids),
+        },
+      ]
     const withoutFamily = new Map(placements)
     withoutFamily.delete(family.family_id)
     const reasons = feasible(family, room, withoutFamily, input, params, rules).map(
       ({ rule }) => rule,
     )
-    return reasons.length > 0 ? [{ ...fixed, reasons: Object.freeze([...new Set(reasons)]) }] : []
+    const assignedBedPeople = new Set(
+      assignments
+        .filter(({ family_id: familyId, place_id: placeId }) => familyId === fixed.family_id && placeId)
+        .map(({ person_id: personId }) => personId),
+    )
+    const unplacedPersonIds = family.bed_person_ids.filter((personId) => !assignedBedPeople.has(personId))
+    return reasons.length > 0 || unplacedPersonIds.length > 0
+      ? [
+          {
+            ...fixed,
+            reasons: Object.freeze([...new Set(reasons.length > 0 ? reasons : ['hard.capacity'])]),
+            unplaced_person_ids: Object.freeze(unplacedPersonIds),
+          },
+        ]
+      : []
   })
   return {
     section: {
@@ -510,8 +553,12 @@ function feasible(
         rule: 'hard.trait-requirements',
         text: 'room already holds another family',
       })
-    
   }
+  const roomConstraint = input.room_constraints?.find(
+    ({ family_id: familyId }) => familyId === family.family_id,
+  )
+  if (roomConstraint && !roomConstraint.room_ids.includes(room.id))
+    rejections.push({ rule: 'hard.room-decision', text: `room is not in the selected room set` })
   for (const constraint of input.constraints.filter(
     ({ holder_id: holderId, key, strength }) =>
       holderMatches(holderId, family, input) && key === 'excludes' && strength === 'required',
@@ -597,8 +644,9 @@ export function assignRoomPlaces(
     if (!room) continue
     const available = room.place_ids.filter((placeId) => !used.has(placeId))
     let index = 0
+    const bedPeople = new Set(family.bed_person_ids)
     for (const personId of family.person_ids) {
-      const placeId = index < family.bed_demand ? (available[index++] ?? null) : null
+      const placeId = bedPeople.has(personId) ? (available[index++] ?? null) : null
       if (placeId) used.add(placeId)
       assignments.push({
         family_id: family.family_id,
