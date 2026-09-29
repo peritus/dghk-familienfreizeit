@@ -234,13 +234,14 @@ type RoomAssignment = {
 }
 ```
 
-Every non-withdrawn person in a placed family appears exactly once. A normal
-person has a generated `place_id`; a person whose `no_bed_trait` property is true
-has `place_id: null` and shares the family's `room_id`. Null place ids do not
-consume capacity and are excluded from place-uniqueness checks. An unplaced
-family lists all of its non-withdrawn people under `unplaced` rather than emitting
-assignment rows. A family is therefore either wholly assigned to one room or
-wholly unplaced.
+Every non-withdrawn person in a validly placed family appears exactly once. A
+normal person has a generated `place_id`; a person whose `no_bed_trait` property
+is true has `place_id: null` and shares the family's `room_id`. Null place ids do
+not consume capacity and are excluded from place-uniqueness checks. When a fixed
+room cannot supply every required bed, `fixed_violations.unplaced_person_ids`
+names the missing bed-needing people; ordinary people are never represented by a
+misleading null place. An unplaced family lists all of its non-withdrawn people
+under `unplaced` rather than emitting assignment rows.
 
 `diff` change kinds, both attributed to the family that moved:
 

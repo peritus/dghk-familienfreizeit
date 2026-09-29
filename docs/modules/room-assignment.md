@@ -19,8 +19,9 @@ hard rules, and a requirement preflight check. No placement result is persisted.
   scarce capabilities contribute deterministic integer score terms.
 - A previous feasible placement is retained before forced placement, greedy
   scoring, and bounded pairwise repair are attempted.
-- All families are processed deterministically and every unplaced family gets a
-  blocking-rule diagnostic and trace entry.
+- All families are processed deterministically. Placement traces include the
+  selected score terms, rejected alternatives, and runners-up; unplaced families
+  get a blocking-rule diagnostic and closest near-miss trace.
 
 The solver input is sorted and frozen at the boundary. Module contributions,
 preflight checks, stage dependencies, outputs, traces, and diagnostics are
@@ -42,8 +43,9 @@ Run the domain coverage gate with:
 nix develop -c npm run test:room-assignment:coverage
 ```
 
-The gate currently reports 100% statements, functions, and lines, with the
-accepted branch threshold enforced in `vitest.config.ts`.
+The current gate reports 98.54% statements, 81.85% branches, 98.44% functions,
+and 98.65% lines. The accepted 98/80 thresholds are enforced in
+`vitest.config.ts`.
 
 ## Organiser review surface
 

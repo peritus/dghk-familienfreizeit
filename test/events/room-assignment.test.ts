@@ -202,8 +202,9 @@ function assignmentInput(
   families: readonly FamilyPlacementUnit[],
   constraints: RoomAssignmentInput['constraints'] = [],
   fixed_assignments: RoomAssignmentInput['fixed_assignments'] = [],
+  room_constraints: RoomAssignmentInput['room_constraints'] = [],
 ): RoomAssignmentInput {
-  return { rooms, families, constraints, person_family: {}, fixed_assignments }
+  return { rooms, families, constraints, person_family: {}, fixed_assignments, room_constraints }
 }
 
 describe('room assignment business logic', () => {
@@ -317,7 +318,10 @@ describe('room assignment business logic', () => {
         [room('rm_small', 1), room('rm_open', 3)],
         [family('fam_fixed', 2), family('fam_other', 1)],
         [],
-        [{ family_id: 'fam_fixed', room_id: 'rm_small' }],
+        [
+          { family_id: 'fam_fixed', room_id: 'rm_small' },
+          { family_id: 'fam_missing', room_id: 'rm_small' },
+        ],
       ),
       params,
     )
@@ -337,6 +341,29 @@ describe('room assignment business logic', () => {
     ])
     expect(result.diagnostics).toEqual([
       expect.objectContaining({ check: 'room-assignment.fixed-invalid' }),
+    ])
+  })
+
+  test('reports an unavailable fixed room and all bed-needing people', () => {
+    const result = runRoomAssignment(
+      assignmentInput(
+        [room('rm_open', 2)],
+        [family('fam_fixed', 2)],
+        [],
+        [{ family_id: 'fam_fixed', room_id: 'rm_removed' }],
+      ),
+      params,
+    )
+    expect(result.trace).toContainEqual(
+      expect.objectContaining({ step: 'fixed-invalid', subject: 'fam_fixed' }),
+    )
+    expect(result.section.fixed_violations).toEqual([
+      {
+        family_id: 'fam_fixed',
+        room_id: 'rm_removed',
+        reasons: ['hard.room-unavailable'],
+        unplaced_person_ids: ['fam_fixed-person-0', 'fam_fixed-person-1'],
+      },
     ])
   })
 
@@ -518,6 +545,73 @@ describe('room assignment business logic', () => {
     ).toBe(true)
   })
 
+  test('restricts multi-room decisions without silently pinning a provider', () => {
+    const result = runRoomAssignment(
+      assignmentInput(
+        [room('rm_1', 1), room('rm_2', 1), room('rm_3', 1)],
+        [family('fam_1', 1)],
+        [],
+        [],
+        [{ family_id: 'fam_1', room_ids: ['rm_2', 'rm_3'] }],
+      ),
+      params,
+    )
+    expect(result.section.assignments[0]?.room_id).not.toBe('rm_1')
+    expect(result.section.assignments[0]?.room_id).toBe('rm_2')
+    expect(result.trace[0]?.detail).toEqual(
+      expect.objectContaining({
+        chosen: expect.objectContaining({ target: 'rm_2' }),
+        rejected: [{ target: 'rm_1', rule: 'hard.room-decision' }],
+      }),
+    )
+  })
+
+  test('reports an unresolved room decision during preflight', () => {
+    const input = {
+      module_inputs: {
+        'room-assignment': assignmentInput(
+          [room('rm_1', 1)],
+          [family('fam_1', 1)],
+          [],
+          [],
+          [{ family_id: 'fam_1', room_ids: [] }],
+        ),
+      },
+    } as unknown as SolverInput
+    expect(roomAssignmentPreflight(input)).toEqual([
+      expect.objectContaining({
+        check: 'room-assignment.required-contradiction',
+        subjects: ['fam_1'],
+      }),
+    ])
+  })
+
+  test('builds room decisions from every matching assigned provider', () => {
+    const world = derive(
+      loadKdl(
+        `${fixture}
+LabelSet entity_id=fam_access key=needs value=fam_access_room strength=required note=#null
+LabelSet entity_id=rm_access key=provides value=fam_access_room strength=#null note=#null
+LabelSet entity_id=rm_open key=provides value=fam_access_room strength=#null note=#null
+LabelSet entity_id=fam_open key=provides value=fam_access_room strength=#null note=#null`,
+        profile.validation_view,
+      ),
+      profile.validation_view,
+    )
+    const input = buildSolverInput(world, contributions).module_inputs['room-assignment'] as
+      | RoomAssignmentInput
+      | undefined
+    expect(
+      input?.families
+        .find(({ family_id }) => family_id === 'fam_access')
+        ?.requirements.some(({ value }) => value === 'fam_access_room'),
+    ).toBe(false)
+    expect(input?.room_constraints).toEqual([
+      { family_id: 'fam_access', room_ids: ['rm_access', 'rm_open'] },
+    ])
+    expect(input?.fixed_assignments).toEqual([])
+  })
+
   test('reports unplaced families and assigns no-bed people without places', () => {
     const impossible = runRoomAssignment(
       assignmentInput(
@@ -552,6 +646,52 @@ describe('room assignment business logic', () => {
         ),
       ),
     ).toEqual([expect.objectContaining({ family_id: 'fam_1', place_id: null })])
+
+    const equallyImpossible = runRoomAssignment(
+      assignmentInput([room('rm_1', 0), room('rm_2', 0)], [family('fam_equal', 1)]),
+      params,
+    )
+    expect(equallyImpossible.section.unplaced[0]?.reason).toContain('Closest: rm_1')
+  })
+
+  test('reports arithmetic capacity and required room contradictions', () => {
+    expect(
+      roomAssignmentPreflight({
+        module_inputs: {
+          'room-assignment': assignmentInput([room('rm_1', 1)], [family('fam_capacity', 2)]),
+        },
+      } as unknown as SolverInput),
+    ).toEqual([
+      expect.objectContaining({
+        check: 'room-assignment.requirement-arithmetic',
+        subjects: ['fam_capacity'],
+      }),
+    ])
+
+    expect(
+      roomAssignmentPreflight({
+        module_inputs: {
+          'room-assignment': assignmentInput(
+            [room('rm_1', 1)],
+            [family('fam_contradiction', 1)],
+            [
+              {
+                key: 'excludes',
+                holder_id: 'fam_contradiction',
+                value: 'rm_1',
+                strength: 'required',
+                set_seq: 1,
+              },
+            ],
+          ),
+        },
+      } as unknown as SolverInput),
+    ).toEqual([
+      expect.objectContaining({
+        check: 'room-assignment.required-contradiction',
+        subjects: ['fam_contradiction'],
+      }),
+    ])
   })
 
   test('assigns beds to the actual bed-needing people in mixed families', () => {

@@ -555,9 +555,14 @@ export function roomAssignmentPreflight(
     const rejected = roomInput.rooms.map((room) =>
       feasible(family, room, new Map(), roomInput, params, rules),
     )
+    const unresolvedRoomDecision = roomInput.room_constraints?.some(
+      ({ family_id: familyId, room_ids: roomIds }) =>
+        familyId === family.family_id && roomIds.length === 0,
+    )
     if (
       roomInput.rooms.length > 0 &&
       rejected.every((reasons) => reasons.length > 0) &&
+      !unresolvedRoomDecision &&
       !findings.some(
         ({ check, subjects }) =>
           check === 'room-assignment.requirement-arithmetic' && subjects.includes(family.family_id),
@@ -569,12 +574,7 @@ export function roomAssignmentPreflight(
         subjects: [family.family_id],
         text: family.family_id + ' has no room satisfying all required decisions',
       })
-    if (
-      roomInput.room_constraints?.some(
-        ({ family_id: familyId, room_ids: roomIds }) =>
-          familyId === family.family_id && roomIds.length === 0,
-      )
-    )
+    if (unresolvedRoomDecision)
       findings.push({
         check: 'room-assignment.required-contradiction',
         severity: 'error',

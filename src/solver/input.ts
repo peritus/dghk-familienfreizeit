@@ -66,10 +66,12 @@ export function buildSolverInput(
     constraints: freezeSorted(
       world.constraints.map((constraint) => ({ ...constraint })),
       (left, right) =>
-        left.set_seq - right.set_seq ||
-        left.holder_id.localeCompare(right.holder_id) ||
-        left.key.localeCompare(right.key) ||
-        left.value.localeCompare(right.value),
+        firstNonZero([
+          left.set_seq - right.set_seq,
+          left.holder_id.localeCompare(right.holder_id),
+          left.key.localeCompare(right.key),
+          left.value.localeCompare(right.value),
+        ]),
     ),
     requirements: freezeSorted(
       world.requirements.map((requirement) => ({ ...requirement })),
@@ -91,35 +93,40 @@ function compareEntity(
   left: { sort_key: number; id: string },
   right: { sort_key: number; id: string },
 ): number {
-  return left.sort_key - right.sort_key || left.id.localeCompare(right.id)
+  return firstNonZero([left.sort_key - right.sort_key, left.id.localeCompare(right.id)])
 }
 
 function compareLabel(left: SolverLabel, right: SolverLabel): number {
-  return (
-    left.entity_id.localeCompare(right.entity_id) ||
-    left.key.localeCompare(right.key) ||
-    canonicalJson(left.value).localeCompare(canonicalJson(right.value)) ||
-    (left.strength ?? '').localeCompare(right.strength ?? '') ||
-    left.set_seq - right.set_seq
-  )
+  return firstNonZero([
+    left.entity_id.localeCompare(right.entity_id),
+    left.key.localeCompare(right.key),
+    canonicalJson(left.value).localeCompare(canonicalJson(right.value)),
+    (left.strength ?? '').localeCompare(right.strength ?? ''),
+    left.set_seq - right.set_seq,
+  ])
 }
 
 function compareRequirement(
   left: SolverInput['requirements'][number],
   right: SolverInput['requirements'][number],
 ): number {
-  return (
-    left.holder_id.localeCompare(right.holder_id) ||
-    left.trait_key.localeCompare(right.trait_key) ||
-    (left.capability_key ?? '').localeCompare(right.capability_key ?? '') ||
-    left.kind.localeCompare(right.kind) ||
-    (left.structural ?? '').localeCompare(right.structural ?? '') ||
-    (left.value ?? '').localeCompare(right.value ?? '') ||
-    (left.strength ?? '').localeCompare(right.strength ?? '') ||
-    (left.weight ?? 0) - (right.weight ?? 0) ||
-    (left.penalty ?? 0) - (right.penalty ?? 0) ||
-    left.set_seq - right.set_seq
-  )
+  return firstNonZero([
+    left.holder_id.localeCompare(right.holder_id),
+    left.trait_key.localeCompare(right.trait_key),
+    (left.capability_key ?? '').localeCompare(right.capability_key ?? ''),
+    left.kind.localeCompare(right.kind),
+    (left.structural ?? '').localeCompare(right.structural ?? ''),
+    (left.value ?? '').localeCompare(right.value ?? ''),
+    (left.strength ?? '').localeCompare(right.strength ?? ''),
+    (left.weight ?? 0) - (right.weight ?? 0),
+    (left.penalty ?? 0) - (right.penalty ?? 0),
+    left.set_seq - right.set_seq,
+  ])
+}
+
+function firstNonZero(comparisons: readonly number[]): number {
+  for (const comparison of comparisons) if (comparison !== 0) return comparison
+  return 0
 }
 
 function freezeSorted<T>(

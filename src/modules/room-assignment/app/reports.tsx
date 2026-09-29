@@ -140,14 +140,8 @@ export function AssignmentReportsScreen() {
   return (
     <AssignmentReports
       view={
-        deriveAssignmentReview(
-          world,
-          previousPlan ?? null,
-          new Intl.DateTimeFormat('de-DE', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-          }).format(new Date()),
-        ).report
+        deriveAssignmentReview(world, previousPlan ?? null, new Date().toLocaleString('de-DE'))
+          .report
       }
     />
   )
