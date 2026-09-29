@@ -200,7 +200,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
 }
 
 export function AssignmentBoardScreen() {
-  const { world } = useOrganiser()
+  const { world, previous_plan: previousPlan } = useOrganiser()
   if (!world) return null
-  return <AssignmentBoard view={deriveAssignmentReview(world).board} />
+  return <AssignmentBoard view={deriveAssignmentReview(world, previousPlan ?? null).board} />
 }

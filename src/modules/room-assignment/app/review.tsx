@@ -7,6 +7,8 @@ import type {
   RoomAssignmentSection,
 } from '../../../modules/room-assignment/index.js'
 import { buildSolverInput, solve } from '../../../solver/index.js'
+import { composeSolverContributions } from '../../../solver/index.js'
+import type { Plan } from '../../../solver/types.js'
 import type { SolverContributions } from '../../../solver/types.js'
 import type {
   AssignmentReportView,
@@ -36,16 +38,7 @@ function localized(value: string | Readonly<Record<string, string>> | undefined)
 }
 
 function contributions(): SolverContributions {
-  return {
-    solver_input: activeProfile.modules.flatMap(
-      (module) => module.contributions.solver_input ?? [],
-    ),
-    stages: activeProfile.modules.flatMap((module) => module.contributions.stages ?? []),
-    rules: activeProfile.modules.flatMap((module) => module.contributions.rules ?? []),
-    preflight_checks: activeProfile.modules.flatMap(
-      (module) => module.contributions.preflight_checks ?? [],
-    ),
-  }
+  return composeSolverContributions(activeProfile)
 }
 
 function labelValue(world: KernelWorld, entityId: string, key: string): unknown {
@@ -271,9 +264,12 @@ function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): reado
   }))
 }
 
-export function deriveAssignmentReview(world: KernelWorld): AssignmentReview {
+export function deriveAssignmentReview(
+  world: KernelWorld,
+  previousPlan: Plan | null = null,
+): AssignmentReview {
   const solverContributions = contributions()
-  const input = buildSolverInput(world, solverContributions)
+  const input = buildSolverInput(world, solverContributions, previousPlan)
   const plan = solve(input, solverContributions, {
     build_revision: buildRevision,
     compatibility_revision: compatibilityRevision,

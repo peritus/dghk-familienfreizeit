@@ -59,12 +59,8 @@ describe('assignment review projection', () => {
     expect(rooms.some(({ occupied, capacity }) => occupied < capacity)).toBe(true)
     expect(rooms.some(({ occupied }) => occupied === 0)).toBe(true)
     expect(review.board.unplaced.map(({ name }) => name)).toContain('Familie Seidel')
-    expect(review.board.unplaced_reasons['fam_seidel']).toBe(
-      'Kein verfügbares Zimmer erfüllt alle erforderlichen Merkmale.',
-    )
-    expect(review.report.unplaced[0]?.reason).toBe(
-      'Kein verfügbares Zimmer erfüllt alle erforderlichen Merkmale.',
-    )
+    expect(review.board.unplaced_reasons['fam_seidel']).toBe('Nicht genügend freie Schlafplätze.')
+    expect(review.report.unplaced[0]?.reason).toBe('Nicht genügend freie Schlafplätze.')
     expect(review.board).not.toHaveProperty('sequence')
     expect(review.board).not.toHaveProperty('traces')
     expect(review.report).not.toHaveProperty('sequence')

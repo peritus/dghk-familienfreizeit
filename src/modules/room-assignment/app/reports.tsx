@@ -133,7 +133,7 @@ export function AssignmentReports({ view }: { view: AssignmentReportView }) {
 }
 
 export function AssignmentReportsScreen() {
-  const { world } = useOrganiser()
+  const { world, previous_plan: previousPlan } = useOrganiser()
   if (!world) return null
-  return <AssignmentReports view={deriveAssignmentReview(world).report} />
+  return <AssignmentReports view={deriveAssignmentReview(world, previousPlan ?? null).report} />
 }

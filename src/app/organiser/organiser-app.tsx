@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
 import { Button } from '../components/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
+import { composeSolverContributions, deriveTransition } from '../../solver/index.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveOrganiserWorld,
@@ -108,6 +109,25 @@ export default function OrganiserApp() {
     }
   }, [state])
 
+  const transition = useMemo(() => {
+    if (
+      state.status === 'loading' ||
+      state.status === 'unauthorized' ||
+      state.status === 'load_error' ||
+      !state.build_revision ||
+      state.compatibility_revision === null
+    )
+      return null
+    const events = [...state.committed, ...materializeDraftEvents(state)]
+    return deriveTransition(state.committed, events, composeSolverContributions(activeProfile), {
+      build_revision: state.build_revision,
+      compatibility_revision: state.compatibility_revision,
+      event_date: activeProfile.meta.starts_on,
+      profile: activeProfile,
+      seed: null,
+    })
+  }, [state])
+
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
     const drafts = materializeDraftEvents(state)
@@ -198,7 +218,16 @@ export default function OrganiserApp() {
     )
 
   return (
-    <OrganiserContext.Provider value={{ state, world: derivation.world, dispatch, stage, apply }}>
+    <OrganiserContext.Provider
+      value={{
+        state,
+        world: derivation.world,
+        dispatch,
+        stage,
+        apply,
+        previous_plan: transition?.before ?? null,
+      }}
+    >
       <OrganiserFrame>
         <Switch>
           <Route path={organiserRoutePaths.dashboard}>
