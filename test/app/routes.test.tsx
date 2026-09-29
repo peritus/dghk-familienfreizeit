@@ -26,7 +26,6 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/families/:id',
     '/organiser/inventory',
     '/organiser/board',
-    '/organiser/reports',
   ])
 })
 
@@ -43,7 +42,6 @@ test('module screens are composed only when their module is selected', () => {
   expect(organiserScreenRegistry).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ id: 'organiser-assignment-board', route: '/organiser/board' }),
-      expect.objectContaining({ id: 'organiser-assignment-report', route: '/organiser/reports' }),
     ]),
   )
   expect(new Set(organiserScreenRegistry.map(({ id }) => id)).size).toBe(
@@ -63,35 +61,21 @@ test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserUrls.inventory()).toBe('/organiser/inventory')
   expect(organiserPaths.assignment_board()).toBe('/board')
   expect(organiserUrls.assignment_board()).toBe('/organiser/board')
-  expect(organiserPaths.assignment_report()).toBe('/reports')
-  expect(organiserUrls.assignment_report()).toBe('/organiser/reports')
 })
 
 test('organiser route boundaries reject duplicate bases and preserve nested path types', () => {
-  expect(organiserNestedPath('/organiser/reports')).toBe('/reports')
   expect(organiserNestedPath('/organiser')).toBe('/')
   expect(organiserPathWithHash(organiserPaths.inventory(), '#room=room_1')).toBe(
     '/inventory#room=room_1',
   )
-  expect(() => organiserNestedPath('/reports')).toThrow()
-  expect(() => organiserNestedPath('/organiser/organiser/reports')).toThrow()
+  expect(() => organiserNestedPath('/organiser/organiser/board')).toThrow()
   expect(() => organiserPathWithHash(organiserPaths.inventory(), '/organiser')).toThrow()
 
-  const nestedLink = (
-    <OrganiserLink href={organiserPaths.assignment_report()}>Bericht</OrganiserLink>
+  const nestedLink = <OrganiserLink href={organiserPaths.assignment_board()}>Belegung</OrganiserLink>
+  expect(nestedLink.props.href).toBe('/board')
+  expect(() => OrganiserLink({ href: organiserUrls.assignment_board() as never, children: <span>Belegung</span> })).toThrow(
+    'organiser links must use nested paths',
   )
-  expect(nestedLink.props.href).toBe('/reports')
-  expect(() =>
-    OrganiserLink({
-      href: organiserUrls.assignment_report() as never,
-      children: <span>Bericht</span>,
-    }),
-  ).toThrow('organiser links must use nested paths')
-  const invalidLink = (
-    // @ts-expect-error Canonical public URLs must not enter the nested link boundary.
-    <OrganiserLink href={organiserUrls.assignment_report()}>Bericht</OrganiserLink>
-  )
-  expect(invalidLink).toBeDefined()
 })
 
 test('family route IDs are opaque, URL-safe, and reversible', () => {
