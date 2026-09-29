@@ -46,7 +46,7 @@ export function FamilyEntry({
               Zuordnung aufheben
             </Button>
           ) : null}
-          {!family.fixed && onFix && unmetWish ? (
+          {!family.fixed && onFix && (unmetWish || family.status?.label === 'Nicht platziert') ? (
             <Button type="button" variant="neutral" size="sm" onClick={() => onFix(family)}>
               Fest zuordnen
             </Button>

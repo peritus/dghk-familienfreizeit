@@ -81,6 +81,12 @@ function requirementLabel(requirement: KernelWorld['requirements'][number]): {
   }
 }
 
+function relationFamilyId(world: KernelWorld, target: string): string {
+  return typeof labelValue(world, target, 'member-of') === 'string'
+    ? String(labelValue(world, target, 'member-of'))
+    : target
+}
+
 function requirements(
   world: KernelWorld,
   familyId: string,
@@ -105,9 +111,12 @@ function requirements(
     const met = room
       ? requirement.kind === 'structural' && requirement.structural === 'no-other-families'
         ? roomFamilyIds.every((id) => id === familyId)
-        : requirement.capability_key
-          ? room.feature_keys.includes(requirement.capability_key)
-          : true
+        : requirement.kind === 'relation'
+          ? !requirement.value ||
+            !roomFamilyIds.includes(relationFamilyId(world, requirement.value))
+          : requirement.capability_key
+            ? room.feature_keys.includes(requirement.capability_key)
+            : true
       : undefined
     return [
       {
@@ -115,6 +124,7 @@ function requirements(
         label: label.label,
         strength: requirement.strength,
         capability_key: requirement.capability_key,
+        value: requirement.value,
         kind: requirement.kind,
         structural: requirement.structural,
         met,
@@ -182,7 +192,7 @@ function roomViews(
   return inventory.rooms.map((room) => {
     const roomAssignments = assignmentsByRoom.get(room.id) ?? []
     const familyIds = [...new Set(roomAssignments.map(({ family_id: familyId }) => familyId))]
-    const occupied = roomAssignments.length
+    const occupied = roomAssignments.filter(({ place_id: placeId }) => placeId !== null).length
     const free = room.place_count - occupied
     const featureKeys = room.capabilities.filter((key) => !/^fam_.+_room$/.test(key))
     const features = featureKeys.map((key) => {
@@ -267,6 +277,7 @@ function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): reado
 export function deriveAssignmentReview(
   world: KernelWorld,
   previousPlan: Plan | null = null,
+  generatedAt = 'Im Browser erzeugt',
 ): AssignmentReview {
   const solverContributions = contributions()
   const input = buildSolverInput(world, solverContributions, previousPlan)
@@ -324,9 +335,14 @@ export function deriveAssignmentReview(
           met:
             requirement.kind === 'structural' && requirement.structural === 'no-other-families'
               ? room.occupants.length === 0
-              : requirement.capability_key
-                ? room.feature_keys.includes(requirement.capability_key)
-                : true,
+              : requirement.kind === 'relation'
+                ? !requirement.value ||
+                  !room.occupants.some(
+                    ({ id }) => id === relationFamilyId(world, requirement.value!),
+                  )
+                : requirement.capability_key
+                  ? room.feature_keys.includes(requirement.capability_key)
+                  : true,
         })),
       }))
   }
@@ -388,7 +404,10 @@ export function deriveAssignmentReview(
   }))
   const placedFamilies = new Set(section.assignments.map(({ family_id: id }) => id))
   const report: AssignmentReportView = {
-    generated_at: 'Aktueller Stand',
+    generated_at: generatedAt,
+    data_cut: `Ereignis ${world.head_seq}`,
+    audience: 'Organisationsteam',
+    sensitivity: 'Nur Organisationsteam',
     total_families: world.families.length,
     placed_families: placedFamilies.size,
     unplaced_families: section.unplaced.length,

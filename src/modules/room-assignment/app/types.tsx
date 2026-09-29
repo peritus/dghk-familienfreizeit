@@ -7,6 +7,7 @@ export type RequirementView = {
   label: string
   strength: RequirementStrength
   capability_key: string | null
+  value?: string | null
   kind: 'profile-requirement' | 'generic-needs' | 'relation' | 'structural'
   structural: string | null
   met?: boolean
@@ -101,6 +102,9 @@ export type ReportRoomView = {
 
 export type AssignmentReportView = {
   generated_at: string
+  data_cut: string
+  audience: string
+  sensitivity: string
   total_families: number
   placed_families: number
   unplaced_families: number

@@ -24,7 +24,9 @@ export function AssignmentReports({ view }: { view: AssignmentReportView }) {
         <MetaLine
           items={[
             { label: 'Erstellt', value: view.generated_at },
+            { label: 'Datenstand', value: view.data_cut },
             { label: 'Geltungsbereich', value: 'Unterkunft' },
+            { label: 'Vertraulichkeit', value: view.sensitivity },
           ]}
         />
       </div>
@@ -45,7 +47,7 @@ export function AssignmentReports({ view }: { view: AssignmentReportView }) {
         <div className="overflow-x-auto rounded-base border-2 border-black bg-white print:overflow-visible">
           <table className="w-full min-w-[48rem] border-collapse text-left print:min-w-0">
             <caption className="sr-only">Zimmerbelegung</caption>
-            <thead className="bg-black text-white">
+            <thead className="bg-black text-white print:bg-white print:text-black">
               <tr>
                 <th scope="col" className="p-3">
                   Zimmer
@@ -135,5 +137,18 @@ export function AssignmentReports({ view }: { view: AssignmentReportView }) {
 export function AssignmentReportsScreen() {
   const { world, previous_plan: previousPlan } = useOrganiser()
   if (!world) return null
-  return <AssignmentReports view={deriveAssignmentReview(world, previousPlan ?? null).report} />
+  return (
+    <AssignmentReports
+      view={
+        deriveAssignmentReview(
+          world,
+          previousPlan ?? null,
+          new Intl.DateTimeFormat('de-DE', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+          }).format(new Date()),
+        ).report
+      }
+    />
+  )
 }
