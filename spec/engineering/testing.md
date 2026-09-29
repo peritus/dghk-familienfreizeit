@@ -492,9 +492,10 @@ Recorded so the gaps are deliberate.
   principal and 401/404 otherwise, and that every screen renders from a fixture
   world without throwing. No snapshot tests of markup — they break on every copy
   change and catch nothing.
-- **Deferred placement interaction.** Manual placement is not an active M6 UI
-  surface. The active board is read-only; configuration edits are covered through
-  the shared organiser draft/apply/discard pipeline and the derived solver tests.
+- **Deferred placement interaction.** Richer manual placement overrides are not
+  active scope. The board's implemented narrow fixed-assignment flow is covered
+  through the shared organiser draft/apply/discard pipeline and the derived
+  solver tests; broader placement controls remain deferred.
 - **Email rendering.** Sent to a real address and looked at. Litmus-style
   cross-client testing is not worth it for four plain emails.
 - **Load.** 150 people, three organisers. There is no load.

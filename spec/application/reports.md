@@ -35,9 +35,8 @@ Every report identifies:
 | Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
-The M6 assignment print output is an organiser-only current-state projection. It consumes
-the derived organiser world and room-assignment solver output directly and has no
-communication references. Later release-scoped organiser reports consume
+The room-assignment board's organiser-only current-state print projection is
+documented with the implemented module. Later release-scoped organiser reports consume
 `CommunicationScopeView`; family and shared reports
 consume [`FamilyScopeView`](release-control.md), never `CommunicationScopeView` —
 the same audience split as the family application ([release control](release-control.md) §1). Both
@@ -57,9 +56,7 @@ identity. Reports are generated on demand from the world visible to the reader.
 
 ## 2. Derivation and visibility
 
-Reports never have a table, event type, cache entry or stored snapshot. The M6
-assignment print output is an on-demand projection of the current prospective organiser
-world; it does not imply that an arrangement has been released. Later organiser
+Reports never have a table, event type, cache entry or stored snapshot. Organiser
 reports may render the full organiser-derived world; family/shared reports are
 derived and privacy-projected by the Worker. They render ordinary derived worlds and the audience projection defined in
 [release control](release-control.md) §2. Organisers may inspect current or pending
@@ -188,8 +185,8 @@ on every printed page.
 Reports appear as ordinary browser routes, with the same authenticated session
 rules as the corresponding family view or organiser view. They have no download,
 export, or print action. The visible controls are limited to filtering, sorting, and
-navigation. The M6 assignment print output has no local mutation, release, or print
-control; it is the browser-print stylesheet of the assignment board.
+navigation. The implemented assignment board has no local mutation, release, or print
+control; its output is printed through the browser stylesheet.
 
 The print stylesheet must:
 

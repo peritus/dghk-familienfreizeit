@@ -43,9 +43,15 @@ Run the domain coverage gate with:
 nix develop -c npm run test:room-assignment:coverage
 ```
 
-The current gate reports 98.54% statements, 81.85% branches, 98.44% functions,
-and 98.65% lines. The accepted 98/80 thresholds are enforced in
+The current gate reports 99.77% statements, 87.38% branches, 100% functions,
+and 99.73% lines. The accepted 98/80 thresholds are enforced in
 `vitest.config.ts`.
+
+The organiser review projection and draft pipeline are covered by the focused
+assignment-review, organiser-state, worker, and route tests. Together with the
+coverage gate, these checks verify the board/print parity, fixed-assignment
+diagnostics, local draft derivation, apply/discard behavior, and selected-module
+route registration.
 
 ## Organiser review surface
 
