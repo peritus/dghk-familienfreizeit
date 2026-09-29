@@ -216,6 +216,16 @@ app.post('/api/events', async (context) => {
     return context.json({ error: 'invalid_request' }, 400)
   const expectedHead: number = body.expected_head
   const existing = await readEvents(context.env.DB, activeProfile.validation_view)
+  if (expectedHead !== existing.length)
+    return context.json(
+      {
+        error: 'stale_head',
+        expected_head: expectedHead,
+        actual_head: existing.length,
+        events: existing.filter((event) => event.seq > expectedHead),
+      },
+      409,
+    )
   const world = derive(existing, activeProfile.validation_view)
   const now = new Date().toISOString()
   try {

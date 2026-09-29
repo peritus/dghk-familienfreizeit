@@ -1,7 +1,7 @@
 ---
 id: "030"
 title: Generic event append can misreport stale heads as invalid events
-status: open
+status: archived
 severity: contract-contradiction
 category: kernel
 source: semantic-coherence-sweep-after-fix
@@ -11,6 +11,14 @@ opened: 2026-09-25
 ---
 
 # Generic event append can misreport stale heads as invalid events
+
+## Resolution
+
+The generic event endpoint now compares `expected_head` with the stored head
+before parsing or deriving the candidate batch. Lower and forward-moving heads
+return the canonical `409 stale_head` response with the current event suffix.
+
+The issue is resolved by the event handler and its lower/forward-head tests.
 
 ## Problem
 

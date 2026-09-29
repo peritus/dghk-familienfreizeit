@@ -64,7 +64,7 @@ describe('authentication boundary', () => {
       )
       .run()
     const options = {
-      now: () => '2026-01-01T00:00:00.000Z',
+      now: () => '2027-01-01T00:00:00.000Z',
       isOrganiser: (email: string) => email === 'organiser@example.test',
     }
     const link = await issueMagicLink(
@@ -163,6 +163,56 @@ describe('authentication boundary', () => {
       env,
     )
     expect(forbidden.status).toBe(403)
+  })
+
+  test('generic event append reports stale lower and forward heads before parsing', async () => {
+    await env.DB.prepare(
+      'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (1, ?1, ?2, ?3, NULL, ?4)',
+    )
+      .bind(
+        '2026-01-01T00:00:00.000Z',
+        'organiser@example.test',
+        'FamilyInvited',
+        JSON.stringify({
+          family_id: 'fam_stale',
+          email: 'stale@example.test',
+          display_name: 'Stale',
+          locale: 'de',
+        }),
+      )
+      .run()
+    const options = {
+      now: () => '2027-01-01T00:00:00.000Z',
+      isOrganiser: (email: string) => email === 'organiser@example.test',
+    }
+    const link = await issueMagicLink(env.DB, 'organiser@example.test', null, false, options)
+    const session = await redeemMagicLink(env.DB, link.token!, options)
+    const request = (expected_head: number) =>
+      app.request(
+        '/api/events',
+        {
+          method: 'POST',
+          headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ expected_head, events: [] }),
+        },
+        env,
+      )
+
+    const lower = await request(0)
+    expect(lower.status).toBe(409)
+    expect(await lower.json()).toMatchObject({
+      error: 'stale_head',
+      expected_head: 0,
+      actual_head: 1,
+    })
+
+    const forward = await request(2)
+    expect(forward.status).toBe(409)
+    expect(await forward.json()).toMatchObject({
+      error: 'stale_head',
+      expected_head: 2,
+      actual_head: 1,
+    })
   })
 
   test('rejects a family LabelSet on a key that is not declared family_writable', async () => {
