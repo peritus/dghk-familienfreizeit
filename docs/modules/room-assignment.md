@@ -49,12 +49,13 @@ and 98.65% lines. The accepted 98/80 thresholds are enforced in
 
 ## Organiser review surface
 
-The selected module contributes the `/organiser/board` and
-`/organiser/reports` surfaces. Both consume the shared organiser prospective world
-and the deterministic `room-assignment` solver section; the report is a compact
-browser-printable projection of the board. Family and room configuration screens
-stage ordinary events through the shared organiser reducer, so unapplied drafts are
-visible to both review surfaces.
+The selected module contributes the `/organiser/board` surface. It consumes the
+shared organiser prospective world and the deterministic `room-assignment` solver
+section. The board includes a compact browser-printable projection of the current
+assignment, including room occupancy, summary metrics, unplaced families, and
+diagnostic findings. Family and room configuration screens stage ordinary events
+through the shared organiser reducer, so unapplied drafts are visible to the board
+and its print output.
 
 The board's fixed-assignment action writes the paired generic `needs` and
 `provides` labels `${family_id}_room` through the shared organiser draft

@@ -58,6 +58,6 @@ pass.
 
 The module contributes world checks for rooms without places, no live capacity while
 people exist, and constraints that name a removed place. These diagnostics are kept
-outside persisted state. Assignment review and the printable assignment report are
+outside persisted state. Assignment review and its printable assignment output are
 owned by `room-assignment`; inventory remains the editor and derived source for room
 capabilities and capacity.

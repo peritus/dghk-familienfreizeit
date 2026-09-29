@@ -10,8 +10,7 @@ The route table is:
 | `/organiser/families` | Derived family table with first-row invitation staging |
 | `/organiser/families/:id` | Read-only-by-default people list, explicit editing, lifecycle staging and human-readable changes |
 | `/organiser/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
-| `/organiser/board` | Read-only deterministic assignment review |
-| `/organiser/reports` | Compact printable current assignment report |
+| `/organiser/board` | Read-only deterministic assignment review with browser-printable assignment output |
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
