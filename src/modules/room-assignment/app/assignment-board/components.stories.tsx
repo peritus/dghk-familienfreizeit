@@ -12,7 +12,13 @@ import {
   OverviewSuccess,
   RoomOverviewRow,
 } from './overview.js'
-import type { BuildingView, FamilyView, RequirementView, RoomView } from '../types.js'
+import type {
+  AssignmentPrintView,
+  BuildingView,
+  FamilyView,
+  RequirementView,
+  RoomView,
+} from '../types.js'
 
 const requirement = (overrides: Partial<RequirementView>): RequirementView => ({
   key: 'accessible',
@@ -188,5 +194,18 @@ export const FixedDialog: Story = {
 
 export const PrintLayout: Story = {
   args: { requirement: requirement({}) },
-  render: () => <AssignmentPrintLayout buildings={[building]} />,
+  render: () => <AssignmentPrintLayout buildings={[building]} print={print} />,
+}
+
+const print: AssignmentPrintView = {
+  generated_at: '01.01.2027, 12:00:00',
+  data_cut: 'Ereignis 1',
+  audience: 'Organisationsteam',
+  sensitivity: 'Nur Organisationsteam',
+  total_families: 2,
+  placed_families: 2,
+  unplaced_families: 0,
+  rooms: [],
+  unplaced: [],
+  findings: [],
 }

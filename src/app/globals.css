@@ -142,6 +142,54 @@
     background: white;
   }
 
+  .assignment-print-header {
+    border-bottom: 2px solid black;
+    padding-bottom: 1rem;
+  }
+
+  .assignment-print-header h1,
+  .assignment-print-building h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .assignment-print-header dl,
+  .assignment-print-summary dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+  }
+
+  .assignment-print-header dt,
+  .assignment-print-summary dt {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .assignment-print-header dd,
+  .assignment-print-summary dd {
+    margin: 0;
+  }
+
+  .assignment-print-summary,
+  .assignment-print-findings {
+    margin: 1rem 0;
+    break-inside: avoid;
+  }
+
+  .assignment-print-summary h2,
+  .assignment-print-findings h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+  }
+
+  .assignment-print-findings ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
   .assignment-print-building {
     break-before: page;
   }
@@ -160,6 +208,20 @@
 
   .assignment-print-room h2 {
     margin: 0;
+  }
+
+  .assignment-print-room p {
+    margin: 0.15rem 0;
+  }
+
+  .assignment-print-bed {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.75rem;
+  }
+
+  .assignment-print-room-status {
+    font-weight: bold;
   }
 
   .assignment-print-room ul {

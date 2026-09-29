@@ -11,24 +11,24 @@ import {
 } from '../../src/app/stories/organiser-fixtures.js'
 
 describe('assignment review projection', () => {
-  test('derives user-facing board and report views without event-log metadata', () => {
+  test('derives user-facing board and print views without event-log metadata', () => {
     const world = derive(organiserFixtureEvents, activeProfile.validation_view)
     const review = deriveAssignmentReview(world)
 
     expect(review.board).not.toHaveProperty('sequence')
-    expect(review.report).not.toHaveProperty('sequence')
-    expect(review.report.total_families).toBe(world.families.length)
-    expect(review.report.placed_families + review.report.unplaced_families).toBe(
-      review.report.total_families,
+    expect(review.print).not.toHaveProperty('sequence')
+    expect(review.print.total_families).toBe(world.families.length)
+    expect(review.print.placed_families + review.print.unplaced_families).toBe(
+      review.print.total_families,
     )
 
     const boardFamilies = review.board.buildings.flatMap(({ rooms }) =>
       rooms.flatMap(({ occupants }) => occupants.map(({ name }) => name)),
     )
-    const reportFamilies = review.report.rooms.flatMap(({ occupants }) =>
+    const printFamilies = review.print.rooms.flatMap(({ occupants }) =>
       occupants === 'Leer' ? [] : occupants.split(', '),
     )
-    expect([...boardFamilies].sort()).toEqual([...reportFamilies].sort())
+    expect([...boardFamilies].sort()).toEqual([...printFamilies].sort())
   })
 
   test('keeps solver findings and unplaced reasons in the review projection', () => {
@@ -36,8 +36,8 @@ describe('assignment review projection', () => {
     const review = deriveAssignmentReview(world)
 
     expect(review.board.unplaced_reasons).toBeDefined()
-    expect(review.report.findings).toEqual(expect.any(Array))
-    expect(review.report.unplaced).toEqual(expect.any(Array))
+    expect(review.print.findings).toEqual(expect.any(Array))
+    expect(review.print.unplaced).toEqual(expect.any(Array))
   })
 
   test('supports the rich shared organiser fixture without leaking event metadata', () => {
@@ -53,17 +53,17 @@ describe('assignment review projection', () => {
       'Birkenhof',
       'Gästehaus',
     ])
-    expect(review.report.total_families).toBe(39)
+    expect(review.print.total_families).toBe(39)
     const rooms = review.board.buildings.flatMap(({ rooms: buildingRooms }) => buildingRooms)
     expect(rooms.some(({ occupied, capacity }) => occupied === capacity)).toBe(true)
     expect(rooms.some(({ occupied, capacity }) => occupied < capacity)).toBe(true)
     expect(rooms.some(({ occupied }) => occupied === 0)).toBe(true)
     expect(review.board.unplaced.map(({ name }) => name)).toContain('Familie Seidel')
     expect(review.board.unplaced_reasons['fam_seidel']).toBe('Nicht genügend freie Schlafplätze.')
-    expect(review.report.unplaced[0]?.reason).toBe('Nicht genügend freie Schlafplätze.')
+    expect(review.print.unplaced[0]?.reason).toBe('Nicht genügend freie Schlafplätze.')
     expect(review.board).not.toHaveProperty('sequence')
     expect(review.board).not.toHaveProperty('traces')
-    expect(review.report).not.toHaveProperty('sequence')
+    expect(review.print).not.toHaveProperty('sequence')
   })
 
   test('projects fixed labels, including a fixed assignment with violations', () => {
@@ -86,7 +86,7 @@ describe('assignment review projection', () => {
     expect(fixedFamily?.fixed).toBe(true)
     expect(fixedFamily?.fixed_room_name).toBe('Zimmer 12')
     expect(invalidFamily?.fixed_invalid).toBe(true)
-    expect(review.report.findings).toEqual(
+    expect(review.print.findings).toEqual(
       expect.arrayContaining([expect.objectContaining({ title: 'Ungültige feste Zuordnung' })]),
     )
   })

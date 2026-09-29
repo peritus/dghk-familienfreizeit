@@ -100,7 +100,7 @@ export type ReportRoomView = {
   notes: readonly string[]
 }
 
-export type AssignmentReportView = {
+export type AssignmentPrintView = {
   generated_at: string
   data_cut: string
   audience: string

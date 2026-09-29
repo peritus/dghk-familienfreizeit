@@ -11,7 +11,7 @@ import { composeSolverContributions } from '../../../solver/index.js'
 import type { Plan } from '../../../solver/types.js'
 import type { SolverContributions } from '../../../solver/types.js'
 import type {
-  AssignmentReportView,
+  AssignmentPrintView,
   BoardView,
   FamilyView,
   FindingView,
@@ -21,7 +21,7 @@ import type {
 
 export type AssignmentReview = {
   board: BoardView
-  report: AssignmentReportView
+  print: AssignmentPrintView
 }
 
 const floorLabels: Readonly<Record<string, string>> = {
@@ -403,7 +403,7 @@ export function deriveAssignmentReview(
     notes: room.features,
   }))
   const placedFamilies = new Set(section.assignments.map(({ family_id: id }) => id))
-  const report: AssignmentReportView = {
+  const print: AssignmentPrintView = {
     generated_at: generatedAt,
     data_cut: `Ereignis ${world.head_seq}`,
     audience: 'Organisationsteam',
@@ -437,6 +437,6 @@ export function deriveAssignmentReview(
         section.unplaced.map(({ family_id: familyId, reason }) => [familyId, reasonLabel(reason)]),
       ),
     },
-    report,
+    print,
   }
 }

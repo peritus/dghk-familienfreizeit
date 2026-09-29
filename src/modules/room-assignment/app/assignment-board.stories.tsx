@@ -4,7 +4,7 @@ import {
   organiserAssignmentFixedFixtureState,
 } from '../../../app/stories/organiser-fixtures.js'
 import { AssignmentBoard, AssignmentBoardScreen } from './assignment-board.js'
-import type { BoardView } from './types.js'
+import type { AssignmentPrintView, BoardView } from './types.js'
 
 const meta = {
   title: 'Screens/Organiser/Assignment board',
@@ -88,10 +88,23 @@ const noProblemsView: BoardView = {
   ],
 }
 
+const noProblemsPrint: AssignmentPrintView = {
+  generated_at: '01.01.2027, 12:00:00',
+  data_cut: 'Ereignis 1',
+  audience: 'Organisationsteam',
+  sensitivity: 'Nur Organisationsteam',
+  total_families: 2,
+  placed_families: 2,
+  unplaced_families: 0,
+  rooms: [],
+  unplaced: [],
+  findings: [],
+}
+
 export const NoProblems: Story = {
   render: () => (
     <FixtureProvider>
-      <AssignmentBoard view={noProblemsView} />
+      <AssignmentBoard view={noProblemsView} print={noProblemsPrint} />
     </FixtureProvider>
   ),
 }

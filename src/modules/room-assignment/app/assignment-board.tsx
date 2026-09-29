@@ -4,7 +4,7 @@ import { OrganiserSectionHeader } from '../../../app/organiser/components/layout
 import { useOrganiser } from '../../../app/organiser/context.js'
 import type { EventDraft } from '../../../events/types.js'
 import { deriveAssignmentReview } from './review.js'
-import type { BoardView, FamilyView, RoomView } from './types.js'
+import type { AssignmentPrintView, BoardView, FamilyView, RoomView } from './types.js'
 import { BuildingSection } from './assignment-board/building-section.js'
 import { FixedAssignmentDialog } from './assignment-board/fixed-dialog.js'
 import {
@@ -68,7 +68,13 @@ function RoomList(props: { rooms: readonly RoomView[]; empty_message: string }) 
   )
 }
 
-export function AssignmentBoard({ view }: { view: BoardView }) {
+export function AssignmentBoard({
+  view,
+  print,
+}: {
+  view: BoardView
+  print: AssignmentPrintView
+}) {
   const { stage } = useOrganiser()
   const [dialogFamily, setDialogFamily] = useState<FamilyView | null>(null)
   const allRooms = view.buildings.flatMap(({ rooms }) => rooms)
@@ -185,7 +191,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
           </div>
         </ScreenFrame>
       </div>
-      <AssignmentPrintLayout buildings={view.buildings} />
+      <AssignmentPrintLayout buildings={view.buildings} print={print} />
       <FixedAssignmentDialog
         family={dialogFamily}
         rooms={allRooms}
@@ -202,5 +208,6 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
 export function AssignmentBoardScreen() {
   const { world, previous_plan: previousPlan } = useOrganiser()
   if (!world) return null
-  return <AssignmentBoard view={deriveAssignmentReview(world, previousPlan ?? null).board} />
+  const review = deriveAssignmentReview(world, previousPlan ?? null)
+  return <AssignmentBoard view={review.board} print={review.print} />
 }
