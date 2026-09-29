@@ -199,6 +199,7 @@ export function isOrganiserPathActive(
 ): boolean {
   const actual = pathname.split('/').filter(Boolean)
   const expected = target.split('/').filter(Boolean)
+  if (expected.length === 0) return actual.length === 0
   if (actual.length === expected.length) {
     return expected.every((segment, index) => segment === actual[index])
   }

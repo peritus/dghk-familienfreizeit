@@ -4,6 +4,7 @@ import {
   familyIdFromRouteSegment,
   familyRouteSegment,
   isKnownOrganiserPath,
+  isOrganiserPathActive,
   organiserNestedPath,
   organiserPathWithHash,
   organiserPaths,
@@ -24,9 +25,9 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser',
     '/organiser/families',
     '/organiser/families/:id',
-    '/organiser/inventory',
-    '/organiser/board',
-    '/organiser/workshop-spaces',
+    '/organiser/accommodation/inventory',
+    '/organiser/accommodation/assignment',
+    '/organiser/workshops/spaces',
     '/organiser/workshops',
     '/organiser/workshops/programme',
     '/organiser/workshops/slots',
@@ -41,11 +42,14 @@ test('module screens are composed only when their module is selected', () => {
   ])
   expect(organiserRouteDefinitions.some(({ id }) => id === 'organiser-inventory')).toBe(true)
   expect(organiserScreenRegistry.filter(({ id }) => id === 'organiser-inventory')).toEqual([
-    expect.objectContaining({ host: 'module', route: '/organiser/inventory' }),
+    expect.objectContaining({ host: 'module', route: '/organiser/accommodation/inventory' }),
   ])
   expect(organiserScreenRegistry).toEqual(
     expect.arrayContaining([
-      expect.objectContaining({ id: 'organiser-assignment-board', route: '/organiser/board' }),
+      expect.objectContaining({
+        id: 'organiser-assignment-board',
+        route: '/organiser/accommodation/assignment',
+      }),
     ]),
   )
   expect(new Set(organiserScreenRegistry.map(({ id }) => id)).size).toBe(
@@ -59,26 +63,28 @@ test('module screens are composed only when their module is selected', () => {
 test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserPaths.dashboard()).toBe('/')
   expect(organiserPaths.families()).toBe('/families')
-  expect(organiserPaths.inventory()).toBe('/inventory')
+  expect(organiserPaths.accommodation()).toBe('/accommodation')
+  expect(organiserPaths.inventory()).toBe('/accommodation/inventory')
   expect(organiserUrls.dashboard()).toBe('/organiser')
   expect(organiserUrls.families()).toBe('/organiser/families')
-  expect(organiserUrls.inventory()).toBe('/organiser/inventory')
-  expect(organiserPaths.assignment_board()).toBe('/board')
-  expect(organiserUrls.assignment_board()).toBe('/organiser/board')
+  expect(organiserUrls.accommodation()).toBe('/organiser/accommodation')
+  expect(organiserUrls.inventory()).toBe('/organiser/accommodation/inventory')
+  expect(organiserPaths.assignment_board()).toBe('/accommodation/assignment')
+  expect(organiserUrls.assignment_board()).toBe('/organiser/accommodation/assignment')
 })
 
 test('organiser route boundaries reject duplicate bases and preserve nested path types', () => {
   expect(organiserNestedPath('/organiser')).toBe('/')
   expect(organiserPathWithHash(organiserPaths.inventory(), '#room=room_1')).toBe(
-    '/inventory#room=room_1',
+    '/accommodation/inventory#room=room_1',
   )
-  expect(() => organiserNestedPath('/organiser/organiser/board')).toThrow()
+  expect(() => organiserNestedPath('/organiser/organiser/accommodation/assignment')).toThrow()
   expect(() => organiserPathWithHash(organiserPaths.inventory(), '/organiser')).toThrow()
 
   const nestedLink = (
     <OrganiserLink href={organiserPaths.assignment_board()}>Belegung</OrganiserLink>
   )
-  expect(nestedLink.props.href).toBe('/board')
+  expect(nestedLink.props.href).toBe('/accommodation/assignment')
   expect(() =>
     OrganiserLink({
       href: organiserUrls.assignment_board() as never,
@@ -111,7 +117,22 @@ test('known organiser path matching is driven by the route catalog', () => {
   expect(isKnownOrganiserPath('/organiser')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/families')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/families/6b4b44137d724c1e')).toBe(true)
-  expect(isKnownOrganiserPath('/organiser/inventory')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/accommodation')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/accommodation/inventory')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/spaces')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/slots')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/inventory')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/organiser/families')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/families/')).toBe(false)
+})
+
+test('primary and secondary navigation use segment-aware active matching', () => {
+  expect(isOrganiserPathActive('/accommodation/inventory', '/accommodation', true)).toBe(true)
+  expect(isOrganiserPathActive('/accommodation/assignment', '/accommodation', true)).toBe(true)
+  expect(isOrganiserPathActive('/workshops/spaces', '/workshops', true)).toBe(true)
+  expect(isOrganiserPathActive('/workshops/spaces', '/workshops/programme', true)).toBe(false)
+  expect(isOrganiserPathActive('/workshops/spaces', '/workshops/spaces')).toBe(true)
+  expect(isOrganiserPathActive('/workshops/spaces-extra', '/workshops/spaces', true)).toBe(false)
+  expect(isOrganiserPathActive('/', '/', false)).toBe(true)
+  expect(isOrganiserPathActive('/families/abc', '/', true)).toBe(false)
 })

@@ -120,10 +120,36 @@ test('a direct organiser URL loads the lazy route', async () => {
 })
 
 test('the organiser nav is labelled for assistive tech and the inventory page sets its own title', async () => {
-  open('/organiser/inventory')
+  open('/organiser/accommodation/inventory')
   expect(await screen.findByRole('heading', { name: 'Unterkunft' })).toBeTruthy()
   expect(screen.getByRole('navigation', { name: 'Hauptnavigation' })).toBeTruthy()
+  expect(screen.getByRole('navigation', { name: 'Unterbringungsbereiche' })).toBeTruthy()
   await waitFor(() => expect(document.title).toBe('Unterkunft · Familienfreizeit'))
+})
+
+test('section navigation keeps the primary and secondary current links separate', async () => {
+  open('/organiser/accommodation/assignment')
+  expect(await screen.findByRole('heading', { name: 'Wer schläft wo?' })).toBeTruthy()
+
+  expect(screen.getByRole('link', { name: 'Unterbringung' }).getAttribute('aria-current')).toBe(
+    'page',
+  )
+  expect(screen.getByRole('link', { name: 'Belegung' }).getAttribute('aria-current')).toBe('page')
+  expect(screen.getByRole('link', { name: 'Unterkunft' }).getAttribute('aria-current')).toBeNull()
+})
+
+test('workshop navigation exposes the intended visible areas and links to slot maintenance', async () => {
+  open('/organiser/workshops/spaces')
+  expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
+
+  const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
+  expect(navigation.textContent).toContain('Workshops')
+  expect(navigation.textContent).toContain('Räume und Slots')
+  expect(navigation.textContent).toContain('Programm')
+  expect(navigation.querySelector('a[href="/workshops/slots"]')).toBeNull()
+  expect(screen.getByRole('link', { name: 'Slots verwalten' }).getAttribute('href')).toBe(
+    '/organiser/workshops/slots',
+  )
 })
 
 test('a failed organiser log load shows a load error, not a save error', async () => {

@@ -94,10 +94,25 @@ test('module navigation reaches canonical public URLs without duplicating the ba
 }) => {
   await page.goto('/organiser')
   const boardLink = page.getByRole('link', { name: 'Belegung' })
-  await expect(boardLink).toHaveAttribute('href', '/organiser/board')
+  await expect(boardLink).toHaveAttribute('href', '/organiser/accommodation/assignment')
   await boardLink.click()
-  await expect(page).toHaveURL(/\/organiser\/board$/)
+  await expect(page).toHaveURL(/\/organiser\/accommodation\/assignment$/)
   await expect(page.getByRole('heading', { name: 'Wer schläft wo?' })).toBeVisible()
+})
+
+test('accommodation parent redirects to inventory and workshop spaces links to slots', async ({
+  page,
+}) => {
+  await page.goto('/organiser/accommodation')
+  await expect(page).toHaveURL(/\/organiser\/accommodation\/inventory$/)
+  await expect(page.getByRole('heading', { name: 'Unterkunft' })).toBeVisible()
+
+  await page.goto('/organiser/workshops/spaces')
+  await expect(page.getByRole('heading', { name: 'Räume und Slots' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Slots verwalten' })).toHaveAttribute(
+    'href',
+    '/organiser/workshops/slots',
+  )
 })
 
 test('rendered organiser links are canonical and never duplicate the route base', async ({

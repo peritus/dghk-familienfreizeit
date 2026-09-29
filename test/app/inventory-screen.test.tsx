@@ -57,7 +57,7 @@ function open(events: readonly Event[] = []) {
     )
   })
   vi.stubGlobal('fetch', fetchMock)
-  window.history.replaceState({}, '', '/organiser/inventory')
+  window.history.replaceState({}, '', '/organiser/accommodation/inventory')
   return { fetchMock, view: render(<App />) }
 }
 
