@@ -139,9 +139,24 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         })
         return true
       }
+      const traceRejection = (
+        personId: string,
+        workshopId: string,
+        step: string,
+        reason: string,
+      ): void => {
+        trace.push({
+          stage: 'workshop-assignment.attendance',
+          step,
+          subject: personId,
+          text: `${personId} rejected for ${workshopId}: ${reason}`,
+          detail: { chosen: { target: workshopId, score: 0, terms: [[reason, 0]] } },
+        })
+      }
       const rejectionReason = (personId: string, workshop: WorkshopRecord): string | null => {
+        if (workshop.cancelled) return 'hard.cancellation'
         const placement = placements.get(workshop.id)
-        if (!placement || workshop.cancelled) return 'hard.cancellation'
+        if (!placement) return 'hard.unscheduled'
         if (workshop.mode !== 'assigned') return 'hard.mode-not-assigned'
         if (leaderSlots.get(personId)?.has(placement.slot_id)) return 'hard.leader-conflict'
         if (!eligibleRole(labelValue(input, personId, 'role'), workshop)) return 'hard.eligibility'
@@ -238,8 +253,21 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         let assigned = assignedCount.get(person.id) ?? 0
         for (const choice of rankedChoices) {
           if (assigned >= params.minimum_workshops && (choice.rank ?? 0) > params.top_n) break
-          const workshop = choice.workshop_id ? workshops.get(choice.workshop_id) : undefined
-          if (!workshop || !place(person.id, workshop, choice.rank, 'ranked')) continue
+          const workshopId = choice.workshop_id!
+          const workshop = workshops.get(workshopId)
+          if (!workshop) {
+            traceRejection(person.id, workshopId, 'ranked-rejected', 'hard.cancellation')
+            continue
+          }
+          if (!place(person.id, workshop, choice.rank, 'ranked')) {
+            traceRejection(
+              person.id,
+              workshopId,
+              'ranked-rejected',
+              rejectionReason(person.id, workshop) ?? 'hard.capacity',
+            )
+            continue
+          }
           assigned += 1
         }
         if (assigned < params.minimum_workshops && params.fill_unassigned) {
@@ -261,9 +289,19 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
                 a.sort_key - b.sort_key ||
                 a.id.localeCompare(b.id),
             )
-          for (const workshop of candidates)
-            if (assigned < params.minimum_workshops && place(person.id, workshop, null, 'fill'))
+          for (const workshop of candidates) {
+            if (assigned >= params.minimum_workshops) break
+            if (place(person.id, workshop, null, 'fill')) {
               assigned += 1
+              continue
+            }
+            traceRejection(
+              person.id,
+              workshop.id,
+              'fill-rejected',
+              rejectionReason(person.id, workshop) ?? 'hard.capacity',
+            )
+          }
         }
       }
 

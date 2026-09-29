@@ -600,3 +600,54 @@ test('a workshop leader cannot also attend a different workshop in their own lea
     { person_id: 'per_leader', workshop_id: null, reason: 'no eligible capacity' },
   ])
 })
+
+function assignmentPlan(
+  events: Event[],
+  params: WorkshopAssignmentParams,
+): { section: WorkshopAssignmentSection; trace: readonly { step: string; subject?: string }[] } {
+  const profile = testProfile(params)
+  const world = derive(events, profile.validation_view)
+  const contributions = composeSolverContributions(profile)
+  const plan = solve(buildSolverInput(world, contributions), contributions, {
+    build_revision: 'test',
+    compatibility_revision: 1,
+    event_date: '2027-04-30',
+    profile,
+    seed: null,
+  })
+  return {
+    section: plan.sections['workshop-assignment'] as WorkshopAssignmentSection,
+    trace: plan.trace.filter((entry) => entry.stage === 'workshop-assignment.attendance'),
+  }
+}
+
+test('a rejected ranked choice is traced with its reason, not just the winning choice', () => {
+  const events = [
+    venue('wsp_a', 1),
+    venue('wsp_b', 2),
+    slot(3),
+    workshop('wks_1', 1, 1, 4),
+    workshop('wks_2', 1, 2, 5),
+    ...family('per_taken', 'fam_taken', 6),
+    ...family('per_a', 'fam_a', 8),
+    fixedAttendance('per_taken', ['wks_1'], 10),
+    ranking('per_a', 'wks_1', 1, 11),
+    ranking('per_a', 'wks_2', 2, 12),
+  ]
+  const { section, trace } = assignmentPlan(events, defaultParams)
+  expect(section.assignments).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', reason: 'ranked' }),
+    ]),
+  )
+  expect(trace).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        step: 'ranked-rejected',
+        subject: 'per_a',
+        text: 'per_a rejected for wks_1: hard.capacity',
+      }),
+      expect.objectContaining({ step: 'ranked', subject: 'per_a', text: 'per_a → wks_2' }),
+    ]),
+  )
+})
