@@ -57,6 +57,17 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       default: false,
       organiser_only: true,
     }),
+    'room-status': property({
+      title: { de: 'Raumstatus', en: 'Room status' },
+      scopes: ['room'],
+      value: enumOf(['active', 'blocked']),
+      default: 'active',
+      organiser_only: true,
+      copy: {
+        active: { de: 'Aktiv', en: 'Active' },
+        blocked: { de: 'Gesperrt', en: 'Blocked' },
+      },
+    }),
     'price-per-bed-eur': property({
       title: { de: 'Preis pro Schlafplatz', en: 'Price per sleeping place' },
       scopes: ['room'],

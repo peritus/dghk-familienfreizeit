@@ -108,6 +108,18 @@ export default defineOccasionProfile({
       default: false,
     }),
 
+    'room-status': property({
+      title: { de: 'Raumstatus', en: 'Room status' },
+      scopes: ['room'],
+      value: enumOf(['active', 'blocked']),
+      cardinality: 'zero-or-one',
+      default: 'active',
+      copy: {
+        active: { de: 'Aktiv', en: 'Active' },
+        blocked: { de: 'Gesperrt', en: 'Blocked' },
+      },
+    }),
+
     'price-per-bed-eur': property({
       title: { de: 'Preis pro Bett (beide Tage)', en: 'Price per bed (both days)' },
       scopes: ['room'],

@@ -9,7 +9,8 @@ hard rules, and a requirement preflight check. No placement result is persisted.
 ## Verified business logic
 
 - Families are the indivisible placement units.
-- Staff and blocked rooms are excluded from candidates.
+- Blocked rooms are excluded from candidates; room status is the profile-backed
+  `active`/`blocked` property.
 - Bed demand counts family members except those carrying the configured no-bed
   property; no-bed members receive the family room and a null place.
 - Required capabilities, structural sole-occupancy requirements, exclusions,

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { describe, expect, test } from 'vitest'
 import { capability, defineOccasionProfile, enumOf, property } from '../../src/config/define.js'
 import { kernelProfile } from '../../src/config/profiles/kernel.js'
+import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import { defineModule } from '../../src/modules/define.js'
 import { derive } from '../../src/events/fold.js'
 
@@ -17,6 +18,16 @@ const meta = {
 }
 
 describe('occasion profile', () => {
+  test('the active profile defines only active and blocked room statuses', () => {
+    expect(familienfreizeit2027Profile.traits['room-status']).toEqual(
+      expect.objectContaining({
+        kind: 'property',
+        default: 'active',
+        value: { kind: 'enum', values: ['active', 'blocked'] },
+      }),
+    )
+  })
+
   test('kernel-only fixture produces the validation view without module surface', () => {
     expect(kernelProfile.modules).toEqual([])
     expect(kernelProfile.validation_view.label_schemas?.map(({ key }) => key)).toEqual(['role'])

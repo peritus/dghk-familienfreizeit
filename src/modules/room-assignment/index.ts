@@ -143,9 +143,7 @@ export function buildRoomAssignmentInput(
 ): RoomAssignmentInput {
   const inventory = inventoryWorld(world)
   const rooms = inventory.rooms
-    .filter(
-      ({ traits }) => traits['room-status'] !== 'staff' && traits['room-status'] !== 'blocked',
-    )
+    .filter(({ traits }) => traits['room-status'] !== 'blocked')
     .map((room) => toRoomCandidate(room, inventory.places, world))
   const personFamily: Record<string, string> = {}
   for (const person of world.persons) {

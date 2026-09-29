@@ -80,7 +80,8 @@ Grouping relations for sleeping placement are not active in the current module s
 ## 7. Solver input and stages
 
 Reads `rooms`, `places`, `families`, `persons`, and labels from the kernel input.
-Rooms designated `staff` or `blocked` are not candidates for families.
+Rooms whose profile-backed `room-status` property is `blocked` are not candidates
+for families. Active is the default status.
 
 ### Stage `room-assignment.place`
 
