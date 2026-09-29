@@ -5,6 +5,7 @@ import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
 
 export const workshopModes = ['assigned', 'sign-up', 'interest'] as const
+
 export type WorkshopMode = (typeof workshopModes)[number]
 
 export type OfficialWorkshopsParams = {

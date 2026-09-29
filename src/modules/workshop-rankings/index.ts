@@ -11,7 +11,9 @@ export type WorkshopRankingsParams = {
 }
 
 export type WorkshopChoice = { workshop_id: string | null; rank: number | null }
+
 export type WorkshopRanking = { person_id: string; choices: readonly WorkshopChoice[] }
+
 export type WorkshopDemand = Readonly<Record<string, number>>
 
 const rankingValue = z
@@ -44,16 +46,20 @@ function buildRankings(world: KernelWorld): readonly WorkshopRanking[] {
     rankings.set(label.entity_id, choices)
   }
   return [...rankings.entries()]
-    .map(([person_id, choices]) => ({
-      person_id,
-      choices: choices
+    .map((entry) => {
+      const personId = entry[0]
+      const choices = entry[1]
+      return {
+        person_id: personId,
+        choices: choices
         .slice()
         .sort(
           (a, b) =>
             (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER) ||
             (a.workshop_id ?? '').localeCompare(b.workshop_id ?? ''),
         ),
-    }))
+      }
+    })
     .sort((a, b) => a.person_id.localeCompare(b.person_id))
 }
 

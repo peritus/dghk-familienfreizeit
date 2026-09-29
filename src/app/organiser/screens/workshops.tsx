@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { activeProfile } from '../../../config/index.js'
 import type { EventDraft } from '../../../events/types.js'
 import { workshopAssignmentSection } from '../../../modules/workshop-assignment/index.js'
@@ -247,20 +247,16 @@ export function WorkshopProgramme() {
   useDocumentTitle('Programm · Workshops · Familienfreizeit')
   const { world } = useOrganiser()
   const schedule = workshopSchedulingWorld(world!)
-  const plan = useMemo(
-    () =>
-      solve(
-        buildSolverInput(world!, composeSolverContributions(activeProfile)),
-        composeSolverContributions(activeProfile),
-        {
-          build_revision: 'organiser',
-          compatibility_revision: 1,
-          event_date: activeProfile.meta.starts_on,
-          profile: activeProfile,
-          seed: null,
-        },
-      ),
-    [world],
+  const plan = solve(
+    buildSolverInput(world!, composeSolverContributions(activeProfile)),
+    composeSolverContributions(activeProfile),
+    {
+      build_revision: 'organiser',
+      compatibility_revision: 1,
+      event_date: activeProfile.meta.starts_on,
+      profile: activeProfile,
+      seed: null,
+    },
   )
   const placements =
     (

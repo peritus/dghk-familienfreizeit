@@ -81,21 +81,21 @@ function validateSlot(world: KernelWorld, payload: JsonValue, updating: boolean)
   const current = entity(world, 'workshop-slot', value.slot_id)
   if (updating ? !current : current)
     return `${updating ? 'unknown' : 'duplicate'} slot: ${value.slot_id}`
-  if (Date.parse(value.starts_at) >= Date.parse(value.ends_at))
+  if (globalThis.Date.parse(value.starts_at) >= globalThis.Date.parse(value.ends_at))
     return 'slot starts_at must be before ends_at'
   const overlaps = (world.entities_by_kind['workshop-slot'] ?? []).some((slot) => {
     if (slot.id === value.slot_id) return false
-    const start = Date.parse(
+    const start = globalThis.Date.parse(
       String(
         world.labels_by_entity[slot.id]?.find((label) => label.key === 'starts-at')?.value ?? '',
       ),
     )
-    const end = Date.parse(
+    const end = globalThis.Date.parse(
       String(
         world.labels_by_entity[slot.id]?.find((label) => label.key === 'ends-at')?.value ?? '',
       ),
     )
-    return Date.parse(value.starts_at) <= end && start <= Date.parse(value.ends_at)
+    return globalThis.Date.parse(value.starts_at) <= end && start <= globalThis.Date.parse(value.ends_at)
   })
   return overlaps ? `slot overlaps or touches another live slot: ${value.slot_id}` : null
 }

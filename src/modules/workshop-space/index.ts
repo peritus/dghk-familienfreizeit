@@ -47,10 +47,10 @@ function validateSpace(world: KernelWorld, payload: JsonValue, updating: boolean
   for (let index = 0; index < value.availability_windows.length; index += 1) {
     const window = value.availability_windows[index]
     if (!window) continue
-    if (Date.parse(window.starts_at) >= Date.parse(window.ends_at))
+    if (globalThis.Date.parse(window.starts_at) >= globalThis.Date.parse(window.ends_at))
       return 'availability window is reversed'
     const next = value.availability_windows[index + 1]
-    if (next && Date.parse(window.ends_at) >= Date.parse(next.starts_at))
+    if (next && globalThis.Date.parse(window.ends_at) >= globalThis.Date.parse(next.starts_at))
       return 'availability windows overlap or touch'
   }
   return null
