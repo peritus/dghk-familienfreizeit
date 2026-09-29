@@ -25,6 +25,10 @@ and [testing](../docs/engineering/testing.md). The implemented [room inventory](
 now supplies the runtime event-derived fixture and organiser surface; remaining
 specification entries describe later solver, family, report, and operational work.
 
+Standalone visual prototypes are catalogued in [HTML prototypes](html-prototypes/README.md).
+They are illustrative only and follow the directory-specific promotion rules;
+their presence does not add requirements or establish implemented behavior.
+
 [Active implementation scope belongs in the roadmap milestones.](roadmap.md)
 Accepted work that is outside those milestones belongs in
 [deferred scope](deferred-ideas/README.md), the sole canonical mechanism for
