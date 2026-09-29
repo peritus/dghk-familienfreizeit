@@ -15,6 +15,8 @@ import {
 } from './assignment-board/overview.js'
 import { AssignmentPrintLayout } from './assignment-board/print-layout.js'
 import { ScreenFrame } from './components.js'
+import { OrganiserSectionNavigation } from '../../../app/organiser/components/section-navigation.js'
+import { organiserPaths } from '../../../organiser/routes.js'
 
 function event(type: string, payload: EventDraft['payload']): EventDraft {
   return {
@@ -203,5 +205,16 @@ export function AssignmentBoardScreen() {
   const { world, previous_plan: previousPlan } = useOrganiser()
   if (!world) return null
   const review = deriveAssignmentReview(world, previousPlan ?? null)
-  return <AssignmentBoard view={review.board} print={review.print} />
+  return (
+    <>
+      <OrganiserSectionNavigation
+        ariaLabel="Unterbringungsbereiche"
+        items={[
+          { href: organiserPaths.inventory(), label: 'Unterkunft' },
+          { href: organiserPaths.assignment_board(), label: 'Belegung' },
+        ]}
+      />
+      <AssignmentBoard view={review.board} print={review.print} />
+    </>
+  )
 }

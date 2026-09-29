@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/button.js'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card.js'
 import { Tag } from '../../components/ui/tag.js'
 import { OrganiserLink } from '../../components/organiser-link.js'
+import { OrganiserSectionNavigation } from '../components/section-navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
 
@@ -22,26 +23,16 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
   return { at: new Date().toISOString(), actor, subject: null, type, payload }
 }
 
-function WorkshopTabs({ active }: { active: 'overview' | 'programme' | 'slots' | 'spaces' }) {
-  const tabs = [
-    ['overview', organiserPaths.workshops(), 'Workshops'],
-    ['programme', organiserPaths.workshop_programme(), 'Programm'],
-    ['slots', organiserPaths.workshop_slots(), 'Slots'],
-    ['spaces', organiserPaths.workshop_spaces(), 'Räume und Slots'],
-  ] as const
+function WorkshopNavigation() {
   return (
-    <nav aria-label="Workshopbereiche" className="flex flex-wrap gap-2">
-      {tabs.map(([key, href, label]) => (
-        <OrganiserLink
-          key={key}
-          href={href}
-          aria-current={key === active ? 'page' : undefined}
-          className={`min-h-11 rounded-base border-2 px-4 py-2 font-bold ${key === active ? 'border-black bg-black text-white' : 'border-black bg-white hover:bg-main'}`}
-        >
-          {label}
-        </OrganiserLink>
-      ))}
-    </nav>
+    <OrganiserSectionNavigation
+      ariaLabel="Workshopbereiche"
+      items={[
+        { href: organiserPaths.workshops(), label: 'Workshops' },
+        { href: organiserPaths.workshop_spaces(), label: 'Räume und Slots' },
+        { href: organiserPaths.workshop_programme(), label: 'Programm' },
+      ]}
+    />
   )
 }
 
@@ -96,7 +87,7 @@ export function Workshops() {
   }
   return (
     <div className="space-y-8">
-      <WorkshopTabs active="overview" />
+      <WorkshopNavigation />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-bold uppercase tracking-wide text-muted">Workshops</p>
@@ -327,7 +318,7 @@ export function WorkshopProgramme() {
   )
   return (
     <div className="space-y-8">
-      <WorkshopTabs active="programme" />
+      <WorkshopNavigation />
       <header>
         <p className="font-bold uppercase tracking-wide text-muted">Programm</p>
         <h1 className="mt-1 text-3xl font-heading sm:text-4xl">Wann findet was statt?</h1>
@@ -407,7 +398,7 @@ export function WorkshopSlots() {
   }
   return (
     <div className="space-y-8">
-      <WorkshopTabs active="slots" />
+      <WorkshopNavigation />
       <header>
         <h1 className="text-3xl font-heading sm:text-4xl">Slots</h1>
         <p className="mt-2 text-muted">Event-backed Zeitfenster für das Programm.</p>
@@ -508,12 +499,22 @@ export function WorkshopSpaces() {
   }
   return (
     <div className="space-y-8">
-      <WorkshopTabs active="spaces" />
+      <WorkshopNavigation />
       <header>
-        <h1 className="text-3xl font-heading sm:text-4xl">Räume und Slots</h1>
-        <p className="mt-2 text-muted">
-          Physische Workshopräume, Kapazitäten und schedule-aware Verfügbarkeit.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-heading sm:text-4xl">Räume und Slots</h1>
+            <p className="mt-2 text-muted">
+              Physische Workshopräume, Kapazitäten und schedule-aware Verfügbarkeit.
+            </p>
+          </div>
+          <OrganiserLink
+            href={organiserPaths.workshop_slots()}
+            className="min-h-11 rounded-base border-2 border-black bg-white px-4 py-2 font-bold hover:bg-main"
+          >
+            Slots verwalten
+          </OrganiserLink>
+        </div>
       </header>
       <Card className="bg-white">
         <CardContent>

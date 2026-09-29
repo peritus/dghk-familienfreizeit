@@ -4,24 +4,39 @@ import { useOrganiser } from './context.js'
 import { OrganiserLink, organiserHomePath } from '../components/organiser-link.js'
 import { SaveStatus } from './save-status.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
-import { organiserNestedPath, organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
-import { organiserScreenRegistry } from '../../organiser/registry.js'
+import {
+  isOrganiserPathActive,
+  organiserPaths,
+  organiserRoutePaths,
+} from '../../organiser/routes.js'
 import { cn } from '../lib/utils.js'
 
-const kernelNavItems = [
-  { href: organiserPaths.dashboard(), match: organiserRoutePaths.dashboard, label: 'Dashboard' },
-  { href: organiserPaths.families(), match: organiserRoutePaths.families, label: 'Familien' },
-]
-
-const moduleNavItems = organiserScreenRegistry
-  .filter(({ host }) => host === 'module')
-  .map(({ route, label }) => ({
-    href: organiserNestedPath(route),
-    match: organiserNestedPath(route),
-    label,
-  }))
-
-const navItems = [...kernelNavItems, ...moduleNavItems]
+const primaryNavItems = [
+  {
+    href: organiserPaths.dashboard(),
+    match: organiserRoutePaths.dashboard,
+    label: 'Dashboard',
+    includeDescendants: false,
+  },
+  {
+    href: organiserPaths.families(),
+    match: organiserRoutePaths.families,
+    label: 'Familien',
+    includeDescendants: true,
+  },
+  {
+    href: organiserPaths.accommodation(),
+    match: organiserRoutePaths.accommodation,
+    label: 'Unterbringung',
+    includeDescendants: true,
+  },
+  {
+    href: organiserPaths.workshops(),
+    match: organiserRoutePaths.workshops,
+    label: 'Workshops',
+    includeDescendants: true,
+  },
+] as const
 
 /**
  * A brand-only header/main pair for the loading, unauthorized, stale-build,
@@ -70,11 +85,8 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
           </div>
           <div className="order-last w-full sm:order-none sm:w-auto">
             <nav aria-label="Hauptnavigation" className="flex flex-wrap gap-2">
-              {navItems.map((item) => {
-                const active =
-                  item.match === organiserRoutePaths.dashboard
-                    ? location === item.match
-                    : location === item.match || location.startsWith(`${item.match}/`)
+              {primaryNavItems.map((item) => {
+                const active = isOrganiserPathActive(location, item.match, item.includeDescendants)
                 return (
                   <OrganiserLink
                     key={item.href}

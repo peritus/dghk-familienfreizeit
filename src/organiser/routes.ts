@@ -191,3 +191,20 @@ export function isKnownOrganiserPath(pathname: string): boolean {
     )
   })
 }
+
+export function isOrganiserPathActive(
+  pathname: string,
+  target: string,
+  includeDescendants = false,
+): boolean {
+  const actual = pathname.split('/').filter(Boolean)
+  const expected = target.split('/').filter(Boolean)
+  if (actual.length === expected.length) {
+    return expected.every((segment, index) => segment === actual[index])
+  }
+  return (
+    includeDescendants &&
+    actual.length > expected.length &&
+    expected.every((segment, index) => segment === actual[index])
+  )
+}

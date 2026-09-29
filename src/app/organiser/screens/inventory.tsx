@@ -26,6 +26,8 @@ import {
 import type { EventDraft } from '../../../events/types.js'
 import type { Label } from '../../../events/fold.js'
 import { activeProfile } from '../../../config/index.js'
+import { OrganiserSectionNavigation } from '../components/section-navigation.js'
+import { organiserPaths } from '../../../organiser/routes.js'
 import {
   labelText,
   roomPropertyDefinitions,
@@ -222,6 +224,13 @@ export function Inventory() {
 
   return (
     <div className="space-y-8">
+      <OrganiserSectionNavigation
+        ariaLabel="Unterbringungsbereiche"
+        items={[
+          { href: organiserPaths.inventory(), label: 'Unterkunft' },
+          { href: organiserPaths.assignment_board(), label: 'Belegung' },
+        ]}
+      />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading sm:text-4xl">Unterkunft</h1>
