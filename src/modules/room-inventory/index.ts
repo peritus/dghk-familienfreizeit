@@ -610,7 +610,7 @@ export const roomInventory = defineModule({
     screens: [
       {
         id: 'organiser-inventory',
-        route: '/organiser/inventory',
+        route: '/organiser/accommodation/inventory',
         label: 'Unterkunft',
         audience: 'organiser',
       },

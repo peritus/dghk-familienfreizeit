@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
-import { Route, Switch } from 'wouter'
+import { Route, Switch, useLocation } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
 import type { EventDraft } from '../../events/types.js'
@@ -21,8 +21,22 @@ import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
 import { AssignmentBoardScreen } from '../../modules/room-assignment/app/assignment-board.js'
-import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
+import {
+  familyIdFromRouteSegment,
+  organiserPaths,
+  organiserRoutePaths,
+} from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
+
+function AccommodationRedirect() {
+  const [, navigate] = useLocation()
+
+  useEffect(() => {
+    void navigate(organiserPaths.inventory(), { replace: true })
+  }, [navigate])
+
+  return <RouteLoading />
+}
 
 const Workshops = lazy(() =>
   import('./screens/workshops.js').then((module) => ({ default: module.Workshops })),
@@ -257,6 +271,9 @@ export default function OrganiserApp() {
                   return <NotFound />
                 }
               }}
+            </Route>
+            <Route path={organiserRoutePaths.accommodation}>
+              <AccommodationRedirect />
             </Route>
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-inventory') ? (
               <Route path={organiserRoutePaths.inventory}>

@@ -134,7 +134,7 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
     screens: [
       {
         id: 'organiser-assignment-board',
-        route: '/organiser/board',
+        route: '/organiser/accommodation/assignment',
         label: 'Belegung',
         audience: 'organiser',
       },

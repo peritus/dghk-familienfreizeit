@@ -149,7 +149,7 @@ export const workshopSpace = defineModule({
     screens: [
       {
         id: 'organiser-workshop-spaces',
-        route: '/organiser/workshop-spaces',
+        route: '/organiser/workshops/spaces',
         label: 'Räume und Slots',
         audience: 'organiser',
       },

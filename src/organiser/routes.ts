@@ -15,12 +15,13 @@ export const organiserRoutePaths = {
   dashboard: '/',
   families: '/families',
   family_detail: '/families/:id',
-  inventory: '/inventory',
-  assignment_board: '/board',
+  accommodation: '/accommodation',
+  inventory: '/accommodation/inventory',
+  assignment_board: '/accommodation/assignment',
   workshops: '/workshops',
   workshop_programme: '/workshops/programme',
   workshop_slots: '/workshops/slots',
-  workshop_spaces: '/workshop-spaces',
+  workshop_spaces: '/workshops/spaces',
 } as const
 
 export const kernelOrganiserRouteDefinitions = [
@@ -146,6 +147,7 @@ export const organiserPaths = {
   families: (): OrganiserPath => nestedPath(organiserRoutePaths.families),
   family_detail: (familyId: string): OrganiserPath =>
     nestedPath(`${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`),
+  accommodation: (): OrganiserPath => nestedPath(organiserRoutePaths.accommodation),
   inventory: (): OrganiserPath => nestedPath(organiserRoutePaths.inventory),
   assignment_board: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_board),
   workshops: (): OrganiserPath => nestedPath(organiserRoutePaths.workshops),
@@ -159,6 +161,8 @@ export const organiserUrls = {
   families: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserRoutePaths.families}`),
   family_detail: (familyId: string): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.family_detail(familyId)}`),
+  accommodation: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.accommodation()}`),
   inventory: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserPaths.inventory()}`),
   assignment_board: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.assignment_board()}`),
@@ -174,7 +178,12 @@ export const organiserUrls = {
 export function isKnownOrganiserPath(pathname: string): boolean {
   if (pathname.length > 1 && pathname.endsWith('/')) return false
   const actual = pathname.split('/').filter(Boolean)
-  return organiserRouteDefinitions.some(({ absolute_path: absolutePath }) => {
+  const redirectPaths = [`${organiserBasePath}${organiserRoutePaths.accommodation}`]
+  const knownPaths = [
+    ...organiserRouteDefinitions.map(({ absolute_path: absolutePath }) => absolutePath),
+    ...redirectPaths,
+  ]
+  return knownPaths.some((absolutePath) => {
     const expected = absolutePath.split('/').filter(Boolean)
     return (
       actual.length === expected.length &&
