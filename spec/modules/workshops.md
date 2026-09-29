@@ -1,18 +1,16 @@
 # Workshops
 
-Workshop programme behavior is composed from these module contracts:
+Workshop behavior is composed from direct workshop identity, physical spaces,
+slots, rankings, and attendance:
 
-- [programme core](programme-core.md) owns shared programme-session identity;
-- [official workshops](official-workshops.md) owns official workshop facts;
-- [workshop scheduling](workshop-scheduling.md) owns offerings and placement;
-- [workshop rankings](workshop-rankings.md) owns pre-schedule rankings; and
-- [workshop attendance](workshop-assignment.md) owns final allocation.
+- [official workshops](official-workshops.md) owns `workshop` identity and
+  authoring facts;
+- [workshop space](workshop-space.md) owns physical spaces and capabilities;
+- [workshop scheduling](workshop-scheduling.md) owns slots and one placement;
+- [workshop rankings](workshop-rankings.md) owns current-cycle choices; and
+- [workshop attendance](workshop-assignment.md) owns allocation and traces.
 
-The shared workshop route and programme reports compose these contributions. No
-single module owns all workshop behavior, and no module reads another module's
-raw event payloads.
-
-Official workshops may be authored directly by organisers before the optional
-call-for-papers intake is enabled. Proposal review and self-organized sessions
-remain in the deferred contracts [call for papers](../deferred-ideas/call-for-papers.md)
-and [self-organized sessions](../deferred-ideas/self-organized-sessions.md).
+The organiser route composes these contributions without reading raw event
+payloads from another module. Self-organized workshops remain deferred. Family
+controls use the same domain semantics through a separate family-facing
+projection and UI.

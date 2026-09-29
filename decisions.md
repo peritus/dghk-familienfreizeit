@@ -218,12 +218,15 @@ them is a deployment, not an event. Weight changes are reviewed offline against 
 exported event log before deployment ([deployment](spec/engineering/deployment.md),
 weight review). The exact build revision identifies the profile and parameters used.
 
-## D13 — Workshop rankings are structured labels
+<a id="d13--workshop-rankings-are-structured-labels"></a>
+## D13 — Workshop rankings are structured labels for the current choice cycle
 
-*Chosen.* A person's ranking for a slot is a set of `prefers-workshop` labels whose
-structured values carry the slot, the workshop, and the rank, validated by the
-`ordered-choice` resolver operator. There is no dedicated ranking event and no
-property table. Rationale in [workshop rankings](spec/modules/workshop-rankings.md).
+*Chosen.* A person's ranking is a set of `prefers-workshop` labels whose
+structured values carry the workshop and rank for the one current occasion
+choice cycle, validated by the `ordered-choice` resolver operator. There is no
+round identity, session identity, dedicated ranking event, or property table.
+Late edits remain valid input to a later explicit calculation review. Rationale
+in [workshop rankings](spec/modules/workshop-rankings.md).
 
 ## D14 — `family_facing` in the occasion profile drives the family view
 
@@ -662,27 +665,24 @@ consumed it). `world.entities_by_kind` and `world.labels` only ever contain
 what is live at `head_seq`. A module's fold capability gets a `retireEntity`
 operation with these same hard-removal semantics, not a soft-retire.
 
-## D28 — Programme sessions have independent sources, scheduling, and attendance
+## D28 — Workshops have one direct identity and one placement
 
-*Chosen.* Issue 025 uses cooperating modules with one owner per durable identity
-and mechanism. `programme-core` owns the common programme-session identity and
-typed scheduleable-session boundary. `official-workshops` owns official
-workshop facts and may initially create organiser-authored sessions directly.
-`call-for-papers` is an optional later source that owns submissions, review,
-selection, and immutable candidate rounds. `self-organized-sessions` owns
-immediate self-organised sessions and proposer-selected placements.
-`workshop-scheduling` owns scheduled offerings and placement, while
-`workshop-ranking` and `workshop-attendance` own ranking and final attendance
-allocation respectively.
+*Chosen.* The active product uses one typed `workshop` identity owned by the
+official-workshops boundary. A workshop may have one schedule placement made of
+one slot and one physical space; there is no separate programme-session or
+scheduled-offering identity. Rankings and attendance refer directly to the
+workshop.
 
-An organiser-authored official session follows publication, ranking, demand
-summary, scheduling, and attendance; a later proposal source may publish the
-same official boundary without changing its owner. Self-organised sessions are
-published without ranking or solver attendance allocation. Both paths use the
-common scheduling boundary, and module contributions are typed; no module reads
-another module's raw event payloads. This split preserves the event-log,
-pure-solver, resolver, and release boundaries while keeping each module's entity
-kinds, events, labels, routes, and reports uniquely owned.
+The workshop lifecycle is represented by independent event-backed facts:
+authoring, choice visibility, calculation review, attendance/schedule release,
+and cancellation. The organiser UI summarizes those facts as four visible
+phases, but the phases do not collapse programme, schedule, attendance, or
+communication state into one flag.
+
+Self-organized workshops remain deferred. A future source may contribute the
+same direct workshop boundary without introducing a second identity. The
+event-log, pure-solver, resolver, privacy, and typed-module boundaries remain
+mandatory.
 
 ## D29 — Demonstration fixtures avoid historically loaded surnames
 

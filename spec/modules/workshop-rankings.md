@@ -2,21 +2,12 @@
 
 Module id `workshop-rankings` · factory `workshopRankings`
 
-Workshop rankings records an eligible person's ordered choices for an immutable
-candidate round. It does not assign people and it does not require a schedule.
+Workshop rankings records an eligible person's ordered choices for the one
+current workshop choice cycle. It does not create identity, placement, or
+attendance results.
 
-## 1. Purpose and boundary
-
-Rankings target stable programme-session identities. A later schedule may create
-zero, one, or several offerings for a session without changing the ranking
-fact. [Workshop attendance](workshop-assignment.md) consumes rankings only after
-[workshop scheduling](workshop-scheduling.md) has produced offerings.
-
-## 2. Dependencies and parameters
-
-Requires [programme core](programme-core.md) and [official workshops](official-workshops.md).
-Candidate rounds may be published by organiser-authored official workshops or by
-the optional call-for-papers source. Parameters remain:
+<a id="1-purpose-and-boundary"></a>
+## 1. Parameters
 
 ```ts
 type WorkshopRankingsParams = {
@@ -26,77 +17,42 @@ type WorkshopRankingsParams = {
 }
 ```
 
-`max_rank` defaults to `3`; `allow_no_preference` defaults to `true`.
+The active profile supplies these values. There is no hard-coded ranking count
+in the module or UI.
 
-## 3. Events and value shape
+<a id="3-events-and-value-shape"></a>
+## 2. Structured labels
 
-Rankings remain ordinary `LabelSet` and `LabelCleared` events. Re-ranking a round
-clears that round's labels and sets the new ones in one append.
+Rankings remain ordinary `LabelSet` and `LabelCleared` events. A ranking value
+contains the direct workshop identity and rank:
 
 ```ts
 type RankingValue =
-  | { round_id: string, session_id: string, rank: number }
-  | { round_id: string, session_id: null, rank: null }
+  | { workshop_id: string; rank: number }
+  | { workshop_id: null; rank: null }
 ```
 
-The null form is explicit “no preference” for the round. No response is the
-absence of a ranking label.
+The null form is explicit “no preference”. No response is the absence of a
+ranking label. Re-ranking clears the person's current-cycle ranking labels and
+sets the new values in one append.
 
-## 4. Validation and visibility
+<a id="4-validation-and-visibility"></a>
+## 3. Validation and demand
 
-The `ordered-choice` role is scoped to `person`, with `per: 'round'` and a
-programme-session choice. Append and replay validation require that:
+The ordered-choice resolver role is scoped to `person`, with `per: 'occasion'`
+and a `workshop` choice. Validation requires eligible current workshops,
+dense unique ranks, configured maximum rank, and exclusive no-preference.
 
-1. the round exists, is published, and contains the session;
-2. the person's candidate view for the session is eligible under official
-   audience, age, role, and fixed resolver rules;
-3. ranks are unique and dense from 1 through `max_rank`;
-4. a session appears at most once per person and round;
-5. a null value is the only value for its round and is permitted by configuration.
+The module contributes deterministic demand summaries by workshop and audience
+group. It never produces person-to-workshop assignments.
 
-Candidate publication is occasion-wide, but the family view exposes only the
-sessions each person can attend. Eligibility is checked again during attendance;
-filtered or later-invalid choices remain historical facts and become inactive,
-with a diagnostic rather than being rewritten.
+Late edits are accepted while the choice cycle remains active. A previously
+reviewed calculation remains stable until an organiser explicitly recalculates
+and reviews it.
 
-## 5. Solver input and stages
+## 4. Tests
 
-```ts
-type RankingsInput = {
-  rankings: readonly {
-    person_id: string
-    round_id: string
-    session_ids: readonly string[]
-    no_preference: boolean
-  }[]
-}
-```
-
-Rows sort by `round_id`, then person identity. A person with no response has no
-row. This module contributes the pre-schedule demand summary stage, which counts
-eligible ranked demand per session and round without producing person-to-session
-or person-to-offering assignments. The summary is deterministic and is consumed
-by workshop scheduling as a soft scoring input.
-
-## 6. World diagnostics
-
-The world reports cancelled, closed, ineligible, and unavailable choices. An old
-round remains inspectable, but only the active published round contributes to
-current candidate visibility and demand.
-
-## 7. Output and screens
-
-The world exposes rankings by person and round for the family view, organiser
-family detail, and preference heatmap. Organisers see round membership, response
-status, and demand summary; they do not receive a schedule-dependent assignment
-from this module.
-
-## 8. Tests
-
-- Every validation rule rejects at append and replay.
-- Ranking works before any schedule exists.
-- Candidate visibility is eligibility-filtered per person.
-- No-preference and no response remain distinct.
-- Round membership is immutable and old rankings become inactive in a new round.
-- Multiple offerings for one session do not rewrite ranking labels.
-- Demand summary is deterministic, shuffle-invariant, and contains no assignments.
+- Append and replay validation covers rank density, duplicate choices,
+  eligibility, no-preference, and current-cycle visibility.
+- Demand summaries are deterministic, shuffle-invariant, and group-filterable.
+- Late edits do not mutate a reviewed calculation without explicit review.

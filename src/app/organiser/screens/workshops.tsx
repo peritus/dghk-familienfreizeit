@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { activeProfile } from '../../../config/index.js'
 import type { EventDraft } from '../../../events/types.js'
-import { workshopAssignmentSection } from '../../../modules/workshop-assignment/index.js'
 import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
 import { workshopSchedulingWorld } from '../../../modules/workshop-scheduling/index.js'
 import { workshopSpaceWorld } from '../../../modules/workshop-space/index.js'
@@ -52,6 +51,19 @@ export function Workshops() {
   const summary = officialWorkshopsWorld(world!)
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [audienceFilter, setAudienceFilter] = useState<'all' | 'children' | 'adults'>('all')
+  const people = world!.persons
+    .map((person) => {
+      const labels = world!.labels_by_entity[person.id] ?? []
+      const name = [
+        labels.find((label) => label.key === 'given-name')?.value,
+        labels.find((label) => label.key === 'family-name')?.value,
+      ]
+        .filter((value): value is string => typeof value === 'string' && value.length > 0)
+        .join(' ')
+      return { id: person.id, name: name || person.id }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -70,7 +82,7 @@ export function Workshops() {
         age_max: Number(data.get('age_max') ?? 120),
         capacity: Number(data.get('capacity') ?? 8),
         participation_mode: String(data.get('mode') ?? 'assigned'),
-        leader_ids: [],
+        leader_ids: data.getAll('leader_ids').map(String),
         needs: String(data.get('needs') ?? '')
           .split(',')
           .map((value) => value.trim())
@@ -188,6 +200,29 @@ export function Workshops() {
                   className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
                 />
               </label>
+              <label className="grid gap-1 font-bold sm:col-span-2">
+                Leitungen
+                <span className="text-sm font-normal text-muted">
+                  Mehrere Personen oder externe Leitungen mit Strg/Cmd auswählen.
+                </span>
+                <select
+                  name="leader_ids"
+                  multiple
+                  size={Math.min(6, Math.max(3, people.length + summary.external_leaders.length))}
+                  className="min-h-24 rounded-base border-2 border-black px-3 py-2 font-normal"
+                >
+                  {people.map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
+                  {summary.external_leaders.map((leader) => (
+                    <option key={leader.id} value={leader.id}>
+                      {leader.name} (extern)
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div className="sm:col-span-2">
                 <Button type="submit">Entwurf anlegen</Button>
               </div>
@@ -204,28 +239,50 @@ export function Workshops() {
         <Stat value={summary.external_leaders.length} label="externe Leitungen" />
       </div>
       <section aria-labelledby="active-workshops" className="space-y-3">
-        <h2 id="active-workshops" className="text-2xl font-heading">
-          Aktive Workshops
-        </h2>
-        {summary.workshops.length ? (
-          summary.workshops.map((workshop) => (
-            <Card key={workshop.id} className="bg-white">
-              <CardContent className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-heading">{workshop.title}</h3>
-                  <p className="mt-1 text-muted">{workshop.description || 'Keine Beschreibung'}</p>
-                  <p className="mt-2 text-sm">
-                    {workshop.audience} · {workshop.capacity} Plätze · {workshop.age_min}–
-                    {workshop.age_max} Jahre
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Tag>{workshop.mode}</Tag>
-                  <Tag>{workshop.leader_ids.length} Leitungen</Tag>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 id="active-workshops" className="text-2xl font-heading">
+            Aktive Workshops
+          </h2>
+          <label className="grid gap-1 font-bold">
+            Zielgruppe
+            <select
+              value={audienceFilter}
+              onChange={(event) =>
+                setAudienceFilter(event.target.value as 'all' | 'children' | 'adults')
+              }
+              className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
+            >
+              <option value="all">Alle</option>
+              <option value="children">Kinder</option>
+              <option value="adults">Erwachsene</option>
+            </select>
+          </label>
+        </div>
+        {summary.workshops.filter(
+          (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
+        ).length ? (
+          summary.workshops
+            .filter((workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter)
+            .map((workshop) => (
+              <Card key={workshop.id} className="bg-white">
+                <CardContent className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-heading">{workshop.title}</h3>
+                    <p className="mt-1 text-muted">
+                      {workshop.description || 'Keine Beschreibung'}
+                    </p>
+                    <p className="mt-2 text-sm">
+                      {workshop.audience} · {workshop.capacity} Plätze · {workshop.age_min}–
+                      {workshop.age_max} Jahre
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag>{workshop.mode}</Tag>
+                    <Tag>{workshop.leader_ids.length} Leitungen</Tag>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
         ) : (
           <Card className="bg-white">
             <CardContent>
@@ -247,6 +304,7 @@ export function WorkshopProgramme() {
   useDocumentTitle('Programm · Workshops · Familienfreizeit')
   const { world } = useOrganiser()
   const schedule = workshopSchedulingWorld(world!)
+  const official = officialWorkshopsWorld(world!)
   const plan = solve(
     buildSolverInput(world!, composeSolverContributions(activeProfile)),
     composeSolverContributions(activeProfile),
@@ -264,7 +322,9 @@ export function WorkshopProgramme() {
         | { placements?: readonly { workshop_id: string; slot_id: string; space_id: string }[] }
         | undefined
     )?.placements ?? []
-  const unassigned = workshopAssignmentSection(plan).unassigned
+  const unassignedWorkshops = official.workshops.filter(
+    (workshop) => !placements.some((placement) => placement.workshop_id === workshop.id),
+  )
   return (
     <div className="space-y-8">
       <WorkshopTabs active="programme" />
@@ -292,7 +352,10 @@ export function WorkshopProgramme() {
               <tbody>
                 {placements.map((placement) => (
                   <tr key={placement.workshop_id} className="border-b border-black/30">
-                    <th className="p-3">{placement.workshop_id}</th>
+                    <th className="p-3">
+                      {official.workshops.find((workshop) => workshop.id === placement.workshop_id)
+                        ?.title ?? placement.workshop_id}
+                    </th>
                     <td className="p-3">
                       {schedule.slots.find((slot) => slot.id === placement.slot_id)?.starts_at ??
                         placement.slot_id}
@@ -303,14 +366,14 @@ export function WorkshopProgramme() {
                     </td>
                   </tr>
                 ))}
-                {unassigned.map((item) => (
-                  <tr key={`unassigned-${item.person_id}`} className="border-b border-black/30">
-                    <th className="p-3">{item.person_id}</th>
+                {unassignedWorkshops.map((workshop) => (
+                  <tr key={`unassigned-${workshop.id}`} className="border-b border-black/30">
+                    <th className="p-3">{workshop.title}</th>
                     <td className="p-3" colSpan={2}>
-                      Teilnahme offen
+                      Keine passende Platzierung
                     </td>
                     <td className="p-3">
-                      <Tag>{item.reason}</Tag>
+                      <Tag>prüfen</Tag>
                     </td>
                   </tr>
                 ))}
@@ -330,8 +393,8 @@ export function WorkshopSlots() {
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const starts = new Date(String(data.get('starts_at'))).toISOString()
-    const ends = new Date(String(data.get('ends_at'))).toISOString()
+    const starts = new globalThis.Date(String(data.get('starts_at'))).toISOString()
+    const ends = new globalThis.Date(String(data.get('ends_at'))).toISOString()
     stage([
       draft(state.principal_email ?? '', 'WorkshopSlotAdded', {
         slot_id: id('slot_'),
@@ -381,10 +444,10 @@ export function WorkshopSlots() {
           <Card key={slot.id} size="sm" className="bg-white">
             <CardContent className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <strong>{new Date(slot.starts_at).toLocaleString('de-DE')}</strong>
+                <strong>{new globalThis.Date(slot.starts_at).toLocaleString('de-DE')}</strong>
                 <span className="mx-2">–</span>
                 <strong>
-                  {new Date(slot.ends_at).toLocaleTimeString('de-DE', {
+                  {new globalThis.Date(slot.ends_at).toLocaleTimeString('de-DE', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
@@ -416,16 +479,28 @@ export function WorkshopSpaces() {
   useDocumentTitle('Räume und Slots · Workshops · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const summary = workshopSpaceWorld(world!)
+  const schedule = workshopSchedulingWorld(world!)
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
+    const availabilityStart = String(data.get('availability_start') ?? '')
+    const availabilityEnd = String(data.get('availability_end') ?? '')
+    const availabilityWindows =
+      availabilityStart && availabilityEnd
+        ? [
+            {
+              starts_at: new globalThis.Date(availabilityStart).toISOString(),
+              ends_at: new globalThis.Date(availabilityEnd).toISOString(),
+            },
+          ]
+        : []
     stage([
       draft(state.principal_email ?? '', 'WorkshopSpaceAdded', {
         workshop_space_id: id('wsp_'),
         name: String(data.get('name') ?? ''),
         location_description: String(data.get('location') ?? ''),
         capacity: Number(data.get('capacity') ?? 0),
-        availability_windows: [],
+        availability_windows: availabilityWindows,
         sort_key: summary.live.length + 1,
       }),
     ])
@@ -470,6 +545,22 @@ export function WorkshopSpaces() {
                 className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
               />
             </label>
+            <label className="grid gap-1 font-bold">
+              Verfügbar ab
+              <input
+                name="availability_start"
+                type="datetime-local"
+                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
+              />
+            </label>
+            <label className="grid gap-1 font-bold">
+              Verfügbar bis
+              <input
+                name="availability_end"
+                type="datetime-local"
+                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
+              />
+            </label>
             <div>
               <Button type="submit">Raum hinzufügen</Button>
             </div>
@@ -485,6 +576,49 @@ export function WorkshopSpaces() {
                 <p className="text-sm text-muted">
                   {space.location_description} · {space.capacity} Plätze
                 </p>
+                <ul className="mt-2 flex flex-wrap gap-2 text-sm">
+                  {schedule.slots.map((slot) => {
+                    const block = schedule.space_slot_blocks.find(
+                      (item) => item.space_id === space.id && item.slot_id === slot.id,
+                    )
+                    return (
+                      <li key={slot.id}>
+                        <Button
+                          size="sm"
+                          variant={block ? 'danger' : 'neutral'}
+                          onClick={() =>
+                            stage([
+                              draft(
+                                state.principal_email ?? '',
+                                block ? 'SpaceSlotUnblocked' : 'SpaceSlotBlocked',
+                                block
+                                  ? {
+                                      block_id: block.id,
+                                      space_id: space.id,
+                                      slot_id: slot.id,
+                                      reason: block.reason,
+                                    }
+                                  : {
+                                      block_id: id('blk_'),
+                                      space_id: space.id,
+                                      slot_id: slot.id,
+                                      reason: 'Für diesen Slot nicht verfügbar',
+                                    },
+                              ),
+                            ])
+                          }
+                        >
+                          {new globalThis.Date(slot.starts_at).toLocaleString('de-DE', {
+                            weekday: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}{' '}
+                          {block ? 'gesperrt' : 'frei'}
+                        </Button>
+                      </li>
+                    )
+                  })}
+                </ul>
               </div>
               <Button
                 size="sm"

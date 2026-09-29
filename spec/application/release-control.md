@@ -16,8 +16,8 @@ than define independent release mechanisms.
 ```ts
 type CommunicationScope =
   | { kind: 'accommodation' }
-  | { kind: 'workshop-candidates', round_id: string }
-  | { kind: 'workshop-programme', session_id: string }
+  | { kind: 'workshop-choice-cycle' }
+  | { kind: 'workshop-programme', workshop_id: string }
   | { kind: 'workshop-schedule', slot_id: string }
   | { kind: 'workshop-allocation', slot_id: string }
 
@@ -89,22 +89,22 @@ communicated, and what its most recent communicated update was.
 | Scope | Held content | Unit |
 |---|---|---|
 | `accommodation` | Family/person room, bed and place assignments, unplaced results, and the room/building/place descriptors necessary to understand them | The whole accommodation allocation |
-| `workshop-candidates` | The selected programme-session identities and family-safe candidate descriptions for an immutable ranking round | One candidate round |
-| `workshop-programme` | Session title, description, participation mode, capacity, age/audience eligibility, leaders, cancellation, and its family-safe explanation | One programme session |
-| `workshop-schedule` | Scheduled offering identities, slot/time, space/location, placement diagnostics, and unscheduled outcomes | All offerings in one slot |
+| `workshop-choice-cycle` | The current active workshop identities and family-safe choice descriptions | One current choice cycle |
+| `workshop-programme` | Workshop title, description, participation mode, capacity, age/audience eligibility, leaders, cancellation, and its family-safe explanation | One workshop |
+| `workshop-schedule` | Workshop placements, slot/time, space/location, placement diagnostics, and unscheduled outcomes | All workshops in one slot |
 | `workshop-allocation` | Solver participant assignments and unassigned outcomes for the slot | All assigned-mode workshops in one slot |
 
 Scope identity is stable. Several scopes can be communicated atomically in one
 action. Accommodation is indivisible because releasing individual families could
 promise the same bed twice. Workshop allocation is per slot because moving a person
 between individually released workshops could show them in both or neither.
-Candidate and programme scopes are independent: an eligible person can rank a
-published candidate round before its sessions have a schedule. Schedule release
+Choice-cycle and programme scopes are independent: an eligible person can rank a
+published workshop set before its workshops have a schedule. Schedule release
 precedes attendance allocation release.
 
 Only selected modules contribute scopes. `room-assignment` contributes accommodation;
-`programme-core` and the selected official-workshop source contribute candidate
-rounds; `call-for-papers` may contribute a later proposal source; source modules
+The selected official-workshop source contributes the choice-cycle and programme
+scopes; `call-for-papers` may contribute a later proposal source; source modules
 contribute programme scopes; `workshop-scheduling` contributes schedule scopes;
 `workshop-assignment` contributes slot allocations. A slot allocation may be empty,
 including when clearing an existing allocation after a mode or slot change. A
@@ -301,12 +301,11 @@ exposes both perspectives explicitly, never as per-screen relationship lookups.
 
 | Change | Release requirement |
 |---|---|
-| Candidate round | Publish the immutable candidate set before accepting rankings; each person's visible choices remain eligibility-filtered |
+| Workshop choice cycle | Open the configured current workshop set before accepting rankings; each person's visible choices remain eligibility-filtered |
 | New allocation | Every target must have a compatible communicated programme, or its programme scope must be selected in the same action |
-| Title/description | May be selected independently; show affected families and retain the stable session and ranking identity |
-| New or changed schedule | Release the reviewed offerings and resolve availability, space, leader, separation, and unscheduled-session conflicts before attendance release |
-| Capacity below live sign-ups | Preserve everyone; warn of over-capacity and block further admission until space exists |
-| Capacity below existing solver intake | Include a compatible allocation update; do not leave a communicated allocation above its effective capacity |
+| Title/description | May be selected independently; show affected families and retain the stable workshop and ranking identity |
+| New or changed schedule | Release the reviewed placements and resolve availability, space, leader, separation, and unscheduled-workshop conflicts before attendance release |
+| Capacity below current attendance | Reject the change until [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md) is resolved |
 | Mode change | Explicitly resolve incompatible active sign-up/interest labels before release; never convert participation types or resurrect dormant lists |
 | Slot change | Check both slots, active participation and allocation uniqueness; include both allocation scopes when needed to remove/reassign old entries |
 | Cancellation | Communicate it explicitly, preserve identity and participation history, and clearly mark attendance/assignments as cancelled; replacement allocations may follow |
@@ -326,7 +325,7 @@ and schedule first, then allocation later. Incompatible retained sign-up/interes
 must be explicitly cleared through ordinary authorised events before confirming the mode transition.
 They are never automatically cleared by `Communicated`. The mode-change preview names
 the affected people and required work. Old rankings remain recorded but are inactive
-when their session is no longer in the active candidate round or programme.
+when their workshop is no longer active in the current choice cycle or programme.
 
 A person with a live sign-up is excluded from draft solver allocation in the sign-up's
 **communicated slot**. If draft slot edits differ, report the transition conflict;
@@ -337,8 +336,9 @@ that overlap; live sign-up does not erase the old allocation itself.
 
 Time/slot changes validate prospective live sign-ups across workshops. Schedule,
 room and leader conflicts introduced by a release must be resolved through explicit
-edits or coordinated scope selection. Lowered sign-up capacity is the explicit
-non-eviction exception, reported as a world warning. Clearing participation is an
+edits or coordinated scope selection. A capacity reduction that would exceed live
+attendance is blocked under [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md),
+not handled by evicting participants during release. Clearing participation is an
 ordinary visible domain action, not a hidden side effect of releasing details.
 
 Uncommunicated workshop references in saved own rankings use the last safe descriptor

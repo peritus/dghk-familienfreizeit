@@ -84,7 +84,11 @@ module fold call that creates an entity of a kind it didn't itself declare.
 generically, for every kind including `family`/`person`. The selected
 room-inventory module exposes its typed ordered view through `inventoryWorld`;
 future modules add their own typed accessors without adding persisted property
-columns or relationship tables.
+columns or relationship tables. The selected workshop modules follow the same
+boundary: `workshop`, `workshop-space`, and `workshop-slot` are typed entities,
+while placement, ranking, mode, capacity, audience, and leader relationships are
+labels or derived solver output. A workshop has one derived placement at most; no
+separate placement identity is stored.
 
 Retirement is hard removal, not a tombstone
 ([D27](../../decisions.md#d27--entities-and-labels-are-hard-removed-on-retirementclear-history-is-re-derived-not-tombstoned)):

@@ -4,11 +4,10 @@ Module id `workshop-space` · factory `workshopSpace`
 
 ## 1. Purpose and boundary
 
-Workshop space records the physical places in which a future workshop schedule
-may run. It owns stable workshop-space identity, display and location facts,
-physical participant capacity, event-backed availability, and deterministic
-organiser ordering. It does not schedule workshops, assign attendance, or
-publish a location to families.
+Workshop space records the physical places in which the workshop schedule runs.
+It owns stable workshop-space identity, display and location facts, physical
+participant capacity, event-backed availability, and deterministic organiser
+ordering. It does not choose workshop placement or assign attendance.
 
 This first boundary deliberately has no `workshop-venue` parent hierarchy. A
 space's display name and location description are sufficient until a later
@@ -22,11 +21,11 @@ relationship engine.
 
 Requires: none. Enhances: none.
 
-`official-workshops` is independently selectable. Self-organized sessions remain
+`official-workshops` is independently selectable. Self-organized workshops remain
 deferred.
 The [workshop scheduling](workshop-scheduling.md) module consumes this module's
-input and owns scheduled offerings; workshop-space does not depend on proposal,
-ranking, scheduling, or attendance policy.
+input and owns slots and placements; workshop-space does not depend on ranking
+or attendance policy.
 
 ## 3. Parameters
 
@@ -134,9 +133,9 @@ Only live spaces are included. `resolved_capabilities` is the canonical output
 of the configured resolver's `needs`/`provides` mechanisms. Inputs are sorted by
 `sort_key`, then `id`, and all arrays are frozen at the solver boundary.
 
-Issue 025 owns the schedule stage, offering identity, assignment output,
-capacity overrides, conflict rules, ranking interaction, and attendance
-allocation. This module does not decide any of those.
+Workshop scheduling owns the placement output, capacity checks, conflict rules,
+ranking interaction, and attendance allocation. This module does not decide any
+of those.
 
 ## 8. Rules and scoring
 
@@ -162,14 +161,15 @@ schedule/release contract owned by [workshop scheduling](workshop-scheduling.md)
 
 | Kind | Contribution |
 |---|---|
-| Screen | `/organiser/workshop-spaces` — maintain names, descriptions, capacity, availability, ordering, and resolver-backed capabilities ([UI-14](../ui/screens/workshop-spaces.md)) |
+| Screen | `/organiser/workshop-spaces` — maintain names, descriptions, capacity, availability, ordering, resolver-backed capabilities, and per-slot blocks ([UI-14](../ui/screens/workshop-spaces.md)) |
 | Report | Workshop-space inventory — live/retired spaces, capacity, availability, and resolved capabilities for organisers ([reports](../application/reports.md) §3.3) |
 | Controls | organiser-only add, full edit, and retire actions |
 | Family view | none until the schedule and release contract is revised by Issue 025 |
 | Emails | none |
 
-The maintenance screen and report describe physical inventory only; they do
-not show a scheduled programme or imply a communicated location.
+The maintenance screen keeps inventory editing simple but shows schedule-aware
+occupancy and blocked-slot context. Placement decisions remain on the programme
+screen and the screen never implies a family-facing location release.
 
 ## 12. Tests
 

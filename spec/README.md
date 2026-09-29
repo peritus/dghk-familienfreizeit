@@ -57,14 +57,15 @@ particular profile.
 | 18 | [Room assignment](modules/room-assignment.md) | Deterministic placement, room scoring, and the board |
 | 19 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
 | 20 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
-| 21 | [Programme core](modules/programme-core.md) | Shared programme-session identity and typed module boundary |
-| 22 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred official proposal review, selection, and candidate rounds |
+| 21 | [Workshops](modules/workshops.md) | Direct workshop identity and selected workshop modules |
+| 22 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
 | 23 | [Official workshops](modules/official-workshops.md) | Official workshop facts and eligibility |
-| 24 | [Self-organized sessions](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred immediate self-organised sessions and proposer placement |
-| 25 | [Workshop scheduling](modules/workshop-scheduling.md) | Offerings, placement, conflicts, and schedule release |
-| 26 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered pre-schedule choices |
+| 24 | [Self-organized workshops](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred proposer-created workshops |
+| 25 | [Workshop scheduling](modules/workshop-scheduling.md) | Event-backed slots, one placement, conflicts, and schedule release |
+| 26 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered current-cycle choices |
 | 27 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
-| 28 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred per-person diet and allergy text |
-| 29 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
-| 30 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
-| 31 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |
+| 28 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred proposal intake |
+| 29 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred per-person diet and allergy text |
+| 30 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
+| 31 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
+| 32 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |

@@ -3,10 +3,11 @@
 The repository contains a Vite/Cloudflare Worker runtime, the event and
 authentication foundation, profile composition, generic labels, fixed resolver
 operators and `derive(events, config)`, the organiser host with kernel family
-surfaces, room inventory, and deterministic room-assignment business logic.
-The room-assignment board and its browser-printable assignment output are implemented organiser
-projections. Generic reports, family-facing controls, release communication, and
-workshop modules remain future work.
+surfaces, room inventory, workshop planning, and deterministic assignment business
+logic. The room-assignment board and workshop review surfaces are implemented
+organiser projections. Generic reports, family-facing controls, and release
+communication remain future work; workshop family projections are separate from
+the organiser planning slice.
 
 ## Runtime and build
 

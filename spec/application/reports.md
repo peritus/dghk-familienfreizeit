@@ -46,6 +46,12 @@ unavailable-history state. Reports may add report-specific aggregation and
 redaction, but they do not derive release status or compare scope content
 independently.
 
+Workshop reports label their data context explicitly as `current` (the committed
+live world), `prospective` (committed events plus organiser-local drafts), or
+`released/effective` (communicated scope content visible to the audience). A
+prospective organiser report never implies family visibility; a released/effective
+report never joins current draft labels onto historical content.
+
 The timestamp is not domain state and does not affect derivation or report
 identity. Reports are generated on demand from the world visible to the reader.
 
@@ -132,7 +138,10 @@ against bed occupancy; bed occupancy is the count of non-null place assignments.
 It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
-including leaders, capacity, assigned people, cancellations, and fill status.
+including leaders, capacity, assigned people, cancellations, and fill status. The
+organiser projection may include operational phone, emergency, health, or allergy
+contacts when authorization and profile sensitivity policy allow it; family/shared
+projections exclude those fields.
 
 **Food service overview** aggregates counts by configured diet and occasion day. A
 separate restricted **allergy and safety sheet** lists person, family, room, and
@@ -194,6 +203,7 @@ The print stylesheet must:
   page number;
 - carry the confidentiality label on every page of a confidential report;
 - remain usable on common A4 paper in portrait or landscape as appropriate.
+- print the selected current/prospective or released/effective context label.
 
 The mobile view must not depend on hover, wide-screen drag interactions, or a
 downloaded file. Long names, quantities, allergy text, and workshop titles must

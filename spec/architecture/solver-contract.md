@@ -199,10 +199,10 @@ array must not become a back door for material or programme-only data into Plan.
 
 Each selected module adds its own arrays with a declared sort key; for example
 [room inventory](../modules/room-inventory.md) §7 adds `buildings`, `rooms`, and `places`.
-Issue 025 modules additionally exchange typed derived contributions: official and
-self-organised sessions provide scheduleable-session input, ranking provides a
-pre-schedule demand summary, scheduling provides offerings, and attendance reads
-both rankings and offerings. No stage reads another module's raw event payloads.
+Workshop modules exchange typed derived contributions: official workshops provide
+scheduleable workshop input, ranking provides a current-cycle demand summary,
+scheduling provides one placement per workshop, and attendance reads rankings and
+placements. No stage reads another module's raw event payloads.
 
 `SolverLabel` omits the display-only note from the derived `Label` shape. Free-form
 organiser values resolve through the same fixed mechanisms as profile vocabulary;
@@ -258,10 +258,9 @@ workshop-ranking.demand
 ```
 
 The demand stage summarizes eligible ranked demand and never assigns a person.
-Scheduling places selected programme sessions into configured slots and spaces,
-then attendance assigns people to the resulting offerings. A self-organised
-session may contribute a proposer-selected placement without entering the ranking
-or attendance stages.
+Scheduling places active workshops into configured slots and spaces, then attendance
+assigns people to the resulting placements. A self-organized workshop may contribute
+a proposer-selected placement only after that deferred source is explicitly promoted.
 
 Preflight runs before any stage, over the solver input alone. Its value is timing: it
 says "19 beds required, 14 available" in week two, before a single placement runs.

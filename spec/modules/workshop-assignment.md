@@ -2,101 +2,69 @@
 
 Module id `workshop-assignment` · factory `workshopAssignment`
 
-Workshop attendance assigns eligible people to scheduled workshop offerings from
-their pre-schedule rankings. It does not create the schedule.
+Workshop attendance assigns eligible people to directly identified, placed
+workshops. It does not create workshops or slots.
 
-## 1. Dependencies and boundary
-
-Requires [workshop rankings](workshop-rankings.md) and
-[workshop scheduling](workshop-scheduling.md). It consumes the schedule output,
-ranking input, person facts, reservations, and resolved organiser decisions.
-
-Self-organised sessions are not attendance candidates.
-
-## 2. Parameters
+## 1. Parameters
 
 ```ts
 type WorkshopAssignmentParams = {
   top_n: number
   rank_weights: readonly number[]
+  minimum_workshops: number
+  fairness_targets: Readonly<Record<string, number>>
   fill_unassigned: boolean
   max_repair_passes: number
 }
 ```
 
-Defaults remain `top_n = 2`, rank weights `[3, 2, 1]`, and the profile's existing
-fill and bounded-repair policy.
+All values are supplied by the active profile/module configuration. The UI
+renders the active values and never assumes fixed prototype constants.
 
-## 3. Eligibility
+## 2. Eligibility and modes
 
-```text
-eligible(person, offering) :=
-  person is not withdrawn
-  and offering.session is official and active
-  and person can attend the offering's slot
-  and person meets audience, age, capacity, reservation, exclusion,
-      separation, and required resolver decisions
-```
+Assigned mode enters deterministic allocation. Sign-up mode exposes a live
+capacity-limited list. Interest mode records a named organiser-visible list;
+family sharing remains a separate privacy-scoped decision. Self-organized mode
+is deferred and is not selected by the active profile.
 
-Eligibility and capacity apply to retained assignments, required placements,
-ranked allocation, repair, and fill. A required decision that cannot be honoured
-is a conflict, never a silent bypass.
+Eligibility includes withdrawal, audience and age, slot availability,
+capacity, reservation, exclusion, separation, cancellation, and resolver-backed
+requirements. A required organiser decision that cannot be honoured is a
+diagnostic, never a silent bypass.
 
-## 4. Assignment policy
+## 3. Deterministic allocation
 
-The stage uses D4's stable sorted greedy policy with bounded repair:
+The stage follows D4:
 
-1. retain valid previous assignments where the offering and all constraints remain valid;
-2. apply feasible required decisions in deterministic source order;
-3. process ranked choices in rank order, using balanced opportunity and available
-   alternatives to resolve capacity contests;
-4. fill remaining eligible people only when configured;
-5. perform capped pairwise repair and record every movement reason.
+1. retain valid prior assignments;
+2. apply feasible fixed attendance decisions;
+3. process ranked choices with configured fairness and rank weights;
+4. fill eligible people when configured;
+5. perform bounded deterministic repair and explain every movement.
 
-The final result assigns at most one offering to a person per overlapping time
-period. A schedule change recomputes attendance from the unchanged ranking facts;
-it does not rewrite or require a new ranking round.
+The output assigns at most one workshop to a person per overlapping slot,
+respects workshop capacity, records unassigned reasons, and emits traces for
+capacity, overlap, leader, eligibility, cancellation, and unscheduled cases.
 
-## 5. Output and trace
+The domain supports fixed person-to-workshop attendance decisions even when the
+initial UI exposes only automatic allocation.
 
-```ts
-type WorkshopAttendanceSection = {
-  assignments: readonly {
-    person_id: string
-    session_id: string
-    offering_id: string
-    slot_id: string
-    space_id: string
-  }[]
-  unassigned: readonly { person_id: string, round_id: string, reason: string }[]
-  conflicts: readonly { constraint_key: string, reason: string }[]
-  stats: readonly {
-    slot_id: string
-    assigned: number
-    first_choice: number
-    top_n: number
-    unassigned: number
-  }[]
-}
-```
+<a id="4-assignment-policy"></a>
+## 4. Capacity and review
 
-Every assignment, retention, displacement, rejection, and unassigned result has
-a human-readable deterministic trace. Diff output attributes movements to
-capacity, eligibility, schedule changes, fixed decisions, fairness, or ranking.
+A capacity reduction that would exceed current attendance is rejected pending
+the policy decision in [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md).
+No preservation, displacement, or configurable reduction policy is inferred.
 
-## 6. Release and screens
+Reviewed/frozen allocation output is derived from the reviewed event-log input
+sequence. New rankings or planning edits remain prospective until explicit
+recalculation/review.
 
-The module contributes per-slot workshop-allocation release scopes, attendance
-diffs, roster reports, and the assignment portion of UI-12. Attendance release
-requires a compatible reviewed schedule.
+## 5. Tests
 
-## 7. Tests
-
-- Assignment never occurs before scheduling output exists.
-- At most one offering is assigned per person and overlapping period.
-- Valid previous assignments are retained where possible.
-- Capacity, eligibility, reservations, exclusions, separation, cancellation, and
-  fixed decisions hold through every path.
-- Fairness and rank priorities are deterministic and shuffle-invariant.
-- Schedule changes recompute from unchanged rankings and explain movements.
-- Unassigned reasons, conflicts, and traces are stable and complete.
+- Deterministic allocation, retention, fairness, rank weighting, minimum
+  targets, fill behavior, bounded repair, and stable traces.
+- Fixed attendance decisions and diagnostic precedence.
+- Capacity, cancellation, eligibility, overlap, leader, and unscheduled cases.
+- Capacity-reduction blocking and reviewed-input stability.

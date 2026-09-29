@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
 import { Route, Switch } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
@@ -21,9 +21,21 @@ import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
 import { AssignmentBoardScreen } from '../../modules/room-assignment/app/assignment-board.js'
-import { WorkshopProgramme, Workshops, WorkshopSlots, WorkshopSpaces } from './screens/workshops.js'
 import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
+
+const Workshops = lazy(() =>
+  import('./screens/workshops.js').then((module) => ({ default: module.Workshops })),
+)
+const WorkshopProgramme = lazy(() =>
+  import('./screens/workshops.js').then((module) => ({ default: module.WorkshopProgramme })),
+)
+const WorkshopSlots = lazy(() =>
+  import('./screens/workshops.js').then((module) => ({ default: module.WorkshopSlots })),
+)
+const WorkshopSpaces = lazy(() =>
+  import('./screens/workshops.js').then((module) => ({ default: module.WorkshopSpaces })),
+)
 
 export default function OrganiserApp() {
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
@@ -229,56 +241,58 @@ export default function OrganiserApp() {
       }}
     >
       <OrganiserFrame>
-        <Switch>
-          <Route path={organiserRoutePaths.dashboard}>
-            <Dashboard />
-          </Route>
-          <Route path={organiserRoutePaths.families}>
-            <Families />
-          </Route>
-          <Route path={organiserRoutePaths.family_detail}>
-            {(params) => {
-              try {
-                return <FamilyDetail family_id={familyIdFromRouteSegment(params.id)} />
-              } catch {
-                return <NotFound />
-              }
-            }}
-          </Route>
-          {organiserScreenRegistry.some(({ id }) => id === 'organiser-inventory') ? (
-            <Route path={organiserRoutePaths.inventory}>
-              <Inventory />
+        <Suspense fallback={<RouteLoading />}>
+          <Switch>
+            <Route path={organiserRoutePaths.dashboard}>
+              <Dashboard />
             </Route>
-          ) : null}
-          {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-board') ? (
-            <Route path={organiserRoutePaths.assignment_board}>
-              <AssignmentBoardScreen />
+            <Route path={organiserRoutePaths.families}>
+              <Families />
             </Route>
-          ) : null}
-          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshops') ? (
-            <Route path={organiserRoutePaths.workshops}>
-              <Workshops />
+            <Route path={organiserRoutePaths.family_detail}>
+              {(params) => {
+                try {
+                  return <FamilyDetail family_id={familyIdFromRouteSegment(params.id)} />
+                } catch {
+                  return <NotFound />
+                }
+              }}
             </Route>
-          ) : null}
-          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-programme') ? (
-            <Route path={organiserRoutePaths.workshop_programme}>
-              <WorkshopProgramme />
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-inventory') ? (
+              <Route path={organiserRoutePaths.inventory}>
+                <Inventory />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-board') ? (
+              <Route path={organiserRoutePaths.assignment_board}>
+                <AssignmentBoardScreen />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshops') ? (
+              <Route path={organiserRoutePaths.workshops}>
+                <Workshops />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-programme') ? (
+              <Route path={organiserRoutePaths.workshop_programme}>
+                <WorkshopProgramme />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-slots') ? (
+              <Route path={organiserRoutePaths.workshop_slots}>
+                <WorkshopSlots />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-spaces') ? (
+              <Route path={organiserRoutePaths.workshop_spaces}>
+                <WorkshopSpaces />
+              </Route>
+            ) : null}
+            <Route>
+              <NotFound />
             </Route>
-          ) : null}
-          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-slots') ? (
-            <Route path={organiserRoutePaths.workshop_slots}>
-              <WorkshopSlots />
-            </Route>
-          ) : null}
-          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-spaces') ? (
-            <Route path={organiserRoutePaths.workshop_spaces}>
-              <WorkshopSpaces />
-            </Route>
-          ) : null}
-          <Route>
-            <NotFound />
-          </Route>
-        </Switch>
+          </Switch>
+        </Suspense>
       </OrganiserFrame>
     </OrganiserContext.Provider>
   )

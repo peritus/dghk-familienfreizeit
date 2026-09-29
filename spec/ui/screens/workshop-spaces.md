@@ -2,45 +2,37 @@
 
 ## Audience, purpose, and route
 
-Organisers maintain the physical spaces that a future workshop schedule may
-use. Route: `/organiser/workshop-spaces`. Governing spec: [workshop-space](../../modules/workshop-space.md)
-§§5, 7, and 11 and [organiser view](../../application/organiser-view.md) §1.
+Organisers maintain physical workshop spaces and the schedule context that
+affects their availability. Route: `/organiser/workshop-spaces`.
 
-This is an inventory screen, not schedule review. It never displays a family
-location or implies that a space is part of the communicated programme.
+The view is not accommodation inventory. A workshop space is a typed physical
+entity with a name, location description, capacity, availability windows,
+resolver-backed capabilities, and deterministic order.
 
-```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│ Workshop spaces                              [Add workshop space]         │
-│ [All] [Available now] [Retired]                                             │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Space              Capacity  Availability             Capabilities  Order  │
-│ Main hall          24        Sat 08:00–18:00           accessible    1 [Edit]│
-│ Garden studio      12        Sat 10:00–16:00           outdoor       2 [Edit]│
-└──────────────────────────────────────────────────────────────────────────┘
-```
+## Controls
 
-Add and edit use full restatement fields: name, location description,
-non-negative physical capacity, ordered non-overlapping availability windows,
-and deterministic order. Capability labels use the existing resolver
-`provides` mechanism and accept generic organiser values. Retiring a space
-requires confirmation and a reason; history remains visible while the space is
-removed from future scheduler input.
+- Add, edit, and remove actions create event-backed changes. Removal retires
+  the identity and preserves historical derivation.
+- Capability editing is simple and supports multiple generic values. The
+  configured resolver, not the screen, decides whether a workshop need is met.
+- Slots are maintained on the dedicated slots view. This screen shows their
+  occupancy context and provides a simple per-space/per-slot block control.
+- Block and unblock actions remain event-backed typed constraints consumed by
+  scheduling.
 
-Changes use the ordinary local-first organiser pipeline; immediate mode applies them
-automatically and drafting mode exposes them through the shared draft apply/discard flow.
-Invalid capacity,
-timestamps, ordering, overlap, and touching windows are shown inline and block
-the event batch. The screen does not add a schedule assignment, choose a
-workshop, or edit attendance.
+## Responsive and print behavior
 
-At narrow widths the table becomes one labelled card per space. Availability
-windows and capability values remain text-readable, and retired state uses a
-text label in addition to any visual marker.
+Cards work at narrow widths without hover or drag interaction. Tables gain an
+accessible card alternative where necessary. Browser printing shows the space
+inventory and schedule context without interactive controls. No in-app print or
+export action exists.
 
-## Neobrutalist redesign and components
+## Acceptance criteria
 
-Use `Sidebar`, `Tabs` for live/retired filters, `Table` on wide screens, and
-`Card` rows on narrow screens. Add/edit uses a `Dialog` with `Label`, `Input`,
-`Textarea`, a repeatable availability-window row, and `Button`. Retirement uses
-the canonical `AlertDialog` pair and keeps the reason visible in the history.
+- Invalid capacity, names, timestamps, reversed or overlapping windows fail at
+  append and replay.
+- A retired space is absent from current scheduler input and remains available
+  in labelled history.
+- Space-slot blocks affect only the selected pair and produce an explainable
+  scheduler finding when they prevent placement.
+- The screen works with and without accommodation inventory selected.

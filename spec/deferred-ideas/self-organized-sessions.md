@@ -1,36 +1,35 @@
-# Self-organized sessions
+# Self-organized workshops
 
-This accepted module contract is deferred from the active roadmap. It is the
-canonical specification for a future promotion; it is not selected by the
-Familienfreizeit 2027 profile.
+This accepted module contract is deferred from the active roadmap. It is not
+selected by the Familienfreizeit 2027 profile.
 
-Module id `self-organized-sessions` · factory `selfOrganizedSessions`
+Module id `self-organized-workshops` · factory `selfOrganizedWorkshops`
 
-Self-organized sessions use the common programme-session identity but follow a
-separate path from official proposal review and ranking.
+The future source creates direct `workshop` identities through a proposer-owned
+workflow. It must compose with the active workshop, space, slot, ranking, and
+attendance contracts without introducing a second workshop identity or a second
+relationship engine.
 
 ## 1. Dependencies and ownership
 
-Requires [programme core](../modules/programme-core.md). It owns self-organised mode,
-immediate publication, proposer-selected placement, and the organiser override
-of that placement.
-
-The module does not depend on call for papers, workshop ranking, or workshop
-attendance.
+The module owns proposer attribution, approval, immediate publication, and a
+proposer-selected placement. It does not own official workshop content,
+current-cycle ranking values, physical spaces, or attendance allocation.
 
 ## 2. Placement and participation
 
-A proposer may select a configured slot and workshop space. The placement is
-validated against configured availability and capacity. An organiser may record
-an explicit override for a conflict or capacity issue; the override remains
-visible as a diagnostic and is not a hidden mutation of the event log.
+A proposer may request a configured slot and workshop space. The placement is
+validated against availability, capacity, capabilities, and leader conflicts.
+An organiser may record an explicit event-backed override for a blocking decision;
+the override remains visible in diagnostics and review.
 
-Self-organised sessions may be represented by the common schedule boundary for
-programme consistency, but they do not enter candidate rounds, ranking, demand
-summaries, or solver attendance allocation.
+Self-organized workshops do not enter the active profile until this contract is
+promoted and its affected binding decisions are reviewed. Promotion must define
+how their workshop identities appear in the current choice cycle and how their
+participation mode interacts with attendance.
 
 ## 3. Tests
 
-Fixtures cover immediate publication, proposer-selected placement, invalid
-availability or capacity, organiser override, and exclusion from official
-ranking and attendance outputs.
+Fixtures cover proposer publication, invalid availability or capacity, organiser
+override, replay at an event cut, and exclusion from the active profile before
+promotion.

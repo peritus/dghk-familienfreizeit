@@ -11,6 +11,10 @@ The route table is:
 | `/organiser/families/:id` | Read-only-by-default people list, explicit editing, lifecycle staging and human-readable changes |
 | `/organiser/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/board` | Read-only deterministic assignment review with browser-printable assignment output |
+| `/organiser/workshops` | Workshop overview and authoring |
+| `/organiser/workshops/programme` | Workshop placements and unscheduled outcomes |
+| `/organiser/workshops/slots` | Event-backed workshop slots |
+| `/organiser/workshop-spaces` | Physical workshop spaces and per-slot availability context |
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
@@ -20,6 +24,14 @@ locally, and then either invokes the Worker apply request automatically or leave
 draft changes for explicit review according to the session's drafting policy. The Worker
 remains the only persistence boundary; there is no separate drafting API or server
 draft state.
+
+Workshop routes use the same reducer and draft pipeline. Their horizontal tabs are
+navigation, not a second state boundary: moving between overview, programme, slots,
+and spaces preserves staged events. The overview may filter by configured audience;
+the space inventory remains physical inventory with schedule-aware slot context.
+The programme view exposes one derived placement per workshop or an explainable
+unscheduled result. Browser print is the only print path; no workshop screen adds
+an application print or export control.
 
 One app bar (brand, role, navigation, and the save-status control) covers every
 `/organiser*` route; there is no separate site shell header or boxed page header

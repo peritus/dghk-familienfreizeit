@@ -1,71 +1,106 @@
 # UI-12 — Workshops
 
-## Audience, purpose, and route
+## Audience, purpose, and routes
 
-Organisers review calls and proposals, publish candidate rounds, inspect demand,
-edit session details and participation mode, review scheduled offerings and
-conflicts, and inspect assigned-mode capacity, rankings and fairness.
-Route: `/organiser/workshops`, hosted by [official workshops](../../modules/official-workshops.md).
-[workshop scheduling](../../modules/workshop-scheduling.md) contributes
-placements and conflicts, [workshop rankings](../../modules/workshop-rankings.md)
-contributes demand and the preference heatmap, and [workshop attendance](../../modules/workshop-assignment.md)
-contributes intake, fill, cancellations, and fairness data.
+This is the organiser-only workshop workspace. The prototype's product views
+remain separate URLs with horizontal workshop tabs:
+
+| View | Route | Purpose |
+|---|---|---|
+| Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
+| Programme | `/organiser/workshops/programme` | one placement per workshop, schedule conflicts, and unscheduled cases |
+| Slots | `/organiser/workshops/slots` | event-backed slot creation, editing, retirement, and overlap validation |
+| Spaces | `/organiser/workshop-spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
+
+The overview is the landing view. Participation review, demand, solver traces,
+and list/report views are product views reached from the workshop workspace and
+may receive dedicated URLs as their implementation is delivered.
+
+The four visible lifecycle summaries are:
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│ Workshops                         [Candidates] [Schedule] [Attendance]    │
-│ 24 people · 4 sessions · 2 unscheduled conflicts                         │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Workshop       Capacity   Filled   Top choice   Warnings                  │
-│ Pottery        8          8        6            ✓                         │
-│ Hiking         10         9        5            —                         │
-│ Archery        6          5        2            ⚠ 1 no top-two choice     │
-├──────────────────────────────────────────────────────────────────────────┤
-│ PREFERENCE HEATMAP                                                        │
-│                   1st choice  2nd choice  3rd choice  assigned            │
-│ Alex Morgan       Pottery      Hiking       —           Pottery             │
-│ Jamie Morgan      Hiking       Archery      Pottery     Hiking             │
-└──────────────────────────────────────────────────────────────────────────┘
+Workshops anlegen → Wahl offen → Zuordnung prüfen → Festgelegt
 ```
 
-Round and slot selection changes the view only. Capacity and placement warnings
-link to affected sessions and people; the screen does not let an organiser assign
-attendance directly. Empty, unranked, unscheduled, and no-offering states remain
-distinct.
+They summarize independent authoring, choice-cycle, calculation, attendance,
+schedule, and communication facts. The summary does not replace those states.
+There is one current choice cycle only.
 
-Placement override actions remain deferred in
-[`organiser-placement-overrides`](../../deferred-ideas/organiser-placement-overrides.md).
-The workshop screen may link to the relevant configuration surface later; it does
-not make direct attendance or accommodation placement a central interaction.
+## Overview behavior
 
-The heatmap has a text table alternative and does not use color alone. On
-narrow screens, show one workshop card at a time followed by the ranking list.
+The whole programme is shown by default, with filters. The shared `Alle`,
+`Kinder`, and `Erwachsene` group filter applies to participation, demand, open
+cases, and traces where the profile provides those groups. Authoring and space
+inventory use their own profile fields instead.
 
-## Programme and participation modes
+Workshop cards show title, audience, age range, capacity, participation mode,
+leaders, demand headline, placement state, and actionable attention. Cancelled
+workshops are hidden from active planning and available in a labelled history
+view. Communication status and release diffs are shown in the release/review
+surface, not as card badges.
 
-Each session card has an explicit official or self-organised source and an
-`assigned`, `sign-up` or `interest` mode and its
-shared communication badge. Expanding the badge shows the privacy-appropriate inline
-before/after diff; admins see organiser details and the communication action. Assigned
-official assigned mode offers rankings/fairness before scheduling; sign-up mode shows a
-live list and optional capacity; interest mode shows organiser headcounts without
-shared names. Hide irrelevant ranking/solver columns for self-organised workshops.
+Authoring uses a compact editor with progressive disclosure for cancellation,
+publication, resolver needs, and operational details. Leaders are selected with
+typed searchable pickers. Internal people and external leaders are visibly
+distinct; external contact details are organiser-only.
 
-Setup changes use the shared local-first pipeline. Show draft versus effective communicated details
-when they differ, including capacity and slot. Family admission uses the effective
-programme, so a draft capacity edit must not suggest places have already changed.
-Over-capacity preserves existing names and blocks new admission; warnings link to
-the affected workshop. Mode changes show the ordinary label changes or allocation
-release dependencies needed before communication; they never silently clear lists.
+Participation modes are profile-configured:
 
-**An Familien kommunizieren** opens the deferred [UI-11](../../deferred-ideas/release-control-ui.md) with the relevant
-candidate, programme, schedule, or attendance scope selected. A slot allocation
-action selects the complete slot, never an individual workshop roster. Dependencies
-and detailed family-visible diffs are reviewed there, under [release control](../../application/release-control.md).
+- assigned: rankings feed the deterministic attendance solver;
+- sign-up: organisers see a live named list and capacity state;
+- interest: organisers see a named interest list, while family sharing follows
+  the separate family privacy projection; and
+- self-organized: deferred and absent from the active profile.
 
-## Neobrutalist redesign and components
+## Programme and review behavior
 
-Use `Sidebar`, a `Select` for slot choice, `Card` for workshop summaries, and
-`Table` for the accessible heatmap. `Badge` marks capacity and ranking status;
-`Tabs` switches between summary and heatmap without changing the selected slot.
-Warnings use `Alert` with a glyph and sentence, never saturated color alone.
+The programme view displays each workshop's one derived placement, consisting of
+one slot and one space. A workshop without a feasible placement remains visible
+with a blocking reason. Placement decisions stay on this view; attendance is
+not assigned by dragging rows in the UI.
+
+The automatic scheduler is deterministic and explainable. It consumes resolved
+multi-value needs/provides capabilities, space-slot blocks, availability,
+capacity, leaders, and demand. Fixed attendance and fixed placement decisions
+are supported by the domain and diagnostics even when the first UI exposes
+automatic allocation only.
+
+Rank count, fairness targets, minimum workshops, `top_n`, fill behavior, and
+rank weights come from profile/module configuration. The UI renders those
+values and never embeds prototype constants.
+
+Late ranking edits are accepted for the current choice cycle. A reviewed
+calculation remains stable until the organiser explicitly recalculates and
+reviews it. The local-first event draft/apply/discard pipeline and persistent
+save status are used for every mutation.
+
+Capacity reductions that would put current attendance above the new capacity
+are blocked pending [issue 036](../../issues/open/036-workshop-capacity-reduction-policy.md).
+
+## Privacy and lists
+
+The organiser workspace can open these real product views:
+
+- workshop roster;
+- person plan;
+- family plan; and
+- room/space plan.
+
+Operational rosters may include health and emergency-contact data for the
+organiser and assigned workshop leaders only. Confidentiality is explicit in
+the report projection and on every printed page. External leader contact data
+is organiser-only.
+
+The prototype remains organiser-only. Family rankings, sign-up, interest, and
+results use a separate companion design and privacy projection.
+
+## Printing and visual system
+
+There is no application print or export button. Browser printing is supported
+through the shared print stylesheet and prints either the current/prospective
+organiser plan or the released/effective plan, with the data context labelled.
+
+Use the neobrutalist design system, horizontal tabs, responsive cards and
+accessible tables. All supported screen sizes are equally important. Strong
+orange is reserved for actionable attention and is paired with text or a glyph;
+warnings never rely on colour alone.

@@ -51,7 +51,8 @@ boundary validation may use Zod as defined by [D26](../../decisions.md#d26--vali
 types and selected module event types into typed entities and generic labels
 (`src/events/fold.ts`), while the fixed resolver operators validate label scope,
 value shape, and references (`src/events/resolver.ts`). The room-inventory module
-is the first real selected module and exercises this replay path with its KDL
-fixture and lifecycle tests. The derived-world resolver, diagnostics, projections,
-draft derivation, and diff are documented in [derived world](derived-world.md).
-Solver stages remain outstanding.
+and workshop modules exercise this replay path with lifecycle tests. Workshop
+authoring, slot, space, cancellation, retirement, ranking, and participation
+facts are ordinary events; summaries and placements are derived and never stored
+as folded domain state. Release and family-facing workshop projections remain
+later scope.

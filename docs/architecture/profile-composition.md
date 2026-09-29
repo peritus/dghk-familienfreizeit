@@ -6,8 +6,8 @@ The active profile is a statically composed TypeScript value exported from
 vocabulary, aliases, default values, and deterministic trait evaluators.
 
 The executable `familienfreizeit-2027` profile supplies the kernel `role` trait,
-the room-inventory profile traits and capabilities, and selects `room-inventory`
-and `room-assignment`.
+the room-inventory profile traits and capabilities, and selects the accommodation
+and workshop planning modules.
 The kernel consumes the composed view through `derive(events, config)`; it neither
 imports module registration nor inspects profile parameters.
 
@@ -24,8 +24,8 @@ compatibility revision is the hardcoded integer `1`. The health response include
 both values so a runtime can identify the Worker artifact it reached.
 
 Profile composition does not implement solver stages. The selected room-inventory
-module contributes entity kinds, events, labels, typed summaries, world checks, and
-the organiser inventory screen through the composed validation view. Room assignment
-also contributes its solver and read-only board screen with browser-printable output. Release, family
-controls, generic report hosting, and other module contributions remain in the
-outstanding milestone specifications.
+and workshop modules contribute entity kinds, events, labels, typed summaries, world
+checks, solver stages, and organiser screens through the composed validation view.
+Room assignment and workshop planning each contribute deterministic solver output
+and review screens. Release, family controls, and generic report hosting remain in
+the outstanding milestone specifications.

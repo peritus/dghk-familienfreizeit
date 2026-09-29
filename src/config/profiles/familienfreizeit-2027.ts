@@ -22,8 +22,8 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
     id: 'familienfreizeit-2027',
     name: { de: 'Familienfreizeit 2027', en: 'Family retreat 2027' },
     description: {
-      de: 'Ausführbares Unterkunftsprofil für die Familienfreizeit 2027.',
-      en: 'Executable accommodation profile for the 2027 family retreat.',
+      de: 'Ausführbares Unterkunfts- und Workshopprofil für die Familienfreizeit 2027.',
+      en: 'Executable accommodation and workshop profile for the 2027 family retreat.',
     },
     starts_on: '2027-04-30',
     ends_on: '2027-05-02',

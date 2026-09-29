@@ -104,7 +104,7 @@ renderer in `src/modules/<module-id>/app/controls/`.
 | `person-picker` | this module | people within the same family | one `LabelSet` per selection, value = person id |
 | `workshop-sign-up` | [`workshops`](workshops.md) | join/leave with availability | `signed-up-for` set/clear |
 | `workshop-interest` | [`workshops`](workshops.md) | non-binding interest toggle | `interested-in` set/clear |
-| `ranking` | [`workshop-rankings`](workshop-rankings.md) | ordered choices per slot | clears the slot's labels and sets the new ones in one append |
+| `ranking` | [`workshop-rankings`](workshop-rankings.md) | ordered choices in the current workshop choice cycle | clears the cycle's labels and sets the new ones in one append |
 
 `invert: true` flips the wording so a positively named trait can read negatively, for
 example "Zimmer teilen: gerne / lieber nicht / auf keinen Fall", while the stored

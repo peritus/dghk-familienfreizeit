@@ -201,23 +201,22 @@ migration ([deployment](../engineering/deployment.md) §2).
 
 | Module | Owns | Requires | Enhances |
 |---|---|---|---|
-| [`programme-core`](programme-core.md) | Common programme-session identity and scheduleable-session boundary | — | — |
-| [`official-workshops`](official-workshops.md) | Official workshop facts and scheduleable sessions | `programme-core` | — |
+| [`official-workshops`](official-workshops.md) | Direct workshop identity, authoring facts, participation modes, leaders, and cancellation | — | — |
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
-| [`workshop-scheduling`](workshop-scheduling.md) | Scheduled offerings, placement, conflicts, and schedule release | `programme-core`, `workshop-space` | `official-workshops` |
-| [`workshop-rankings`](workshop-rankings.md) | Ordered per-person workshop choices | `programme-core`, `official-workshops` | — |
+| [`workshop-scheduling`](workshop-scheduling.md) | Event-backed slots, one placement per workshop, conflicts, and schedule release | `workshop-space`, `official-workshops` | — |
+| [`workshop-rankings`](workshop-rankings.md) | Ordered current-cycle per-person workshop choices | `official-workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`family-preferences`](family-preferences.md) | The profile-driven preferences page | — | — |
 
 `requires` is transitive. A room-only occasion selects `room-inventory` and
 `room-assignment`; it places whole families and has no child rooms. A
-An official-workshop occasion selects `programme-core`, `official-workshops`,
-`workshop-rankings`, `workshop-scheduling`, and `workshop-assignment`. The deferred
+An official-workshop occasion selects `official-workshops`, `workshop-rankings`,
+`workshop-scheduling`, and `workshop-assignment`. The deferred
 [call-for-papers](../deferred-ideas/call-for-papers.md) contract may later provide
 an additional proposal source for the same official boundary. Self-organized
-sessions remain independently deferred.
+workshops remain independently deferred.
 Neither has room entities or the accommodation board unless those modules are
 selected separately.
 

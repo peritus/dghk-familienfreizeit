@@ -95,7 +95,9 @@ function validateSlot(world: KernelWorld, payload: JsonValue, updating: boolean)
         world.labels_by_entity[slot.id]?.find((label) => label.key === 'ends-at')?.value ?? '',
       ),
     )
-    return globalThis.Date.parse(value.starts_at) <= end && start <= globalThis.Date.parse(value.ends_at)
+    return (
+      globalThis.Date.parse(value.starts_at) <= end && start <= globalThis.Date.parse(value.ends_at)
+    )
   })
   return overlaps ? `slot overlaps or touches another live slot: ${value.slot_id}` : null
 }

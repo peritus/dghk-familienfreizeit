@@ -153,4 +153,61 @@ describe('workshop domain events', () => {
       ),
     ).toThrow(/overlaps or touches/)
   })
+
+  test('blocks a capacity reduction below live sign-ups', () => {
+    const events = [
+      event(
+        'FamilyInvited',
+        {
+          family_id: 'fam_a',
+          email: 'family@example.test',
+          display_name: 'Familie A',
+          locale: 'de',
+        },
+        1,
+      ),
+      event(
+        'PersonAdded',
+        {
+          person_id: 'per_a',
+          family_id: 'fam_a',
+          given_name: 'Ada',
+          family_name: 'A',
+          birthdate: '2015-01-01',
+          role: 'child',
+        },
+        2,
+      ),
+      ...baseEvents.map((item) => ({ ...item, seq: item.seq + 2 })),
+      event(
+        'LabelSet',
+        {
+          entity_id: 'per_a',
+          key: 'signed-up-for',
+          value: 'wks_ceramics',
+          strength: null,
+          note: null,
+        },
+        7,
+      ),
+      event(
+        'WorkshopUpdated',
+        {
+          workshop_id: 'wks_ceramics',
+          title: 'Keramik',
+          description: 'Ton und Farbe',
+          audience: 'children',
+          age_min: 6,
+          age_max: 14,
+          capacity: 0,
+          participation_mode: 'sign-up',
+          leader_ids: ['ext_anna'],
+          needs: [],
+          sort_key: 1,
+        },
+        8,
+      ),
+    ]
+    expect(() => derive(events, profile.validation_view)).toThrow(/issue 036/)
+  })
 })

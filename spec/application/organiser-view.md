@@ -15,9 +15,11 @@ that host.
 | Route | Screen | Purpose |
 |---|---|---|
 | `/organiser/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
-| `/organiser/workshop-spaces` | Workshop spaces | Physical workshop-space inventory, capacity, availability, ordering, capabilities |
 | `/organiser/board` | The board | Whole-family room placement and browser-printable assignment output |
-| `/organiser/workshops` | Workshops | Calls, proposals, candidate rounds, demand, schedule, capacity, fill, rankings |
+| `/organiser/workshops` | Workshops | Authoring, one current choice cycle, demand, schedule, capacity, fill, rankings, and fairness |
+| `/organiser/workshops/programme` | Programme | One placement per workshop, conflicts, and unscheduled cases |
+| `/organiser/workshops/slots` | Slots | Event-backed slot maintenance and overlap validation |
+| `/organiser/workshop-spaces` | Workshop spaces | Physical spaces, schedule context, capabilities, and per-slot blocks |
 
 Every screen renders the organiser application's derived world. Mutating screens
 use the shared local-first organiser pipeline: they create ordinary event groups,

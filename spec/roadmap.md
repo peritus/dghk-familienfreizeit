@@ -62,45 +62,30 @@ also correct a family's display name while preserving the family and person
 identities, memberships, email routing, and event history. This is an
 organiser-complete slice, not a family-access slice.
 
-## M8 — Organiser-authored workshop programme
+<a id="m8--organiser-authored-workshop-programme"></a>
+## M8 — Workshop planning completion
 
-Specification coverage: [programme core](modules/programme-core.md), [official workshops](modules/official-workshops.md),
+Specification coverage: [official workshops](modules/official-workshops.md),
 [workshop space](modules/workshop-space.md), [workshops](modules/workshops.md),
-[UI-12](ui/screens/workshops.md), and programme behavior that remains organiser-only
-until M10.
+[workshop scheduling](modules/workshop-scheduling.md),
+[workshop rankings](modules/workshop-rankings.md),
+[workshop attendance](modules/workshop-assignment.md), and [UI-12](ui/screens/workshops.md).
 
-- Implement workshop spaces, slots, official workshop facts, organiser-authored
-  sessions, publication, cancellation, audience and age eligibility, and leaders.
-- Implement the organiser workshop surface and programme diagnostics.
-- Keep physical-space inventory independent from accommodation inventory.
-- Add replay-at-event-cut, capacity race, cancellation, slot-change, and
-  eligibility fixtures.
+The event-backed organiser foundation and deterministic automatic planner are
+implemented. Remaining active work is limited to the unresolved planning contract:
 
-Acceptance: organisers can create and publish an official workshop without
-call-for-papers, review its effective programme state, and prove through replay
-and fixtures that draft changes remain organiser-only.
+- add event-backed fixed attendance and fixed placement decisions and the review
+  controls that explain their precedence over automatic choices;
+- complete release/review surfaces for current, prospective, and released/effective
+  programme and allocation contexts;
+- finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
+  fixtures, including the blocking capacity-reduction issue 036;
+- add the remaining roster, heatmap, and finding views without creating another
+  workshop state store.
 
-<a id="m9--workshop-scheduling-and-attendance"></a>
-## M9 — Workshop scheduling and attendance
-
-Specification coverage: [workshop scheduling](modules/workshop-scheduling.md),
-[workshop rankings](modules/workshop-rankings.md), [workshop attendance](modules/workshop-assignment.md),
-workshop solver sections, and workshop tests.
-
-- Implement organiser-published candidate rounds, eligibility-filtered rankings,
-  no-preference values, demand summaries, deterministic scheduling, conflicts,
-  and schedule release.
-- Implement attendance eligibility, reservations, previous-plan retention,
-  balanced allocation, manual cancellation, fill, and attendance release.
-- Deliver organiser ranking, schedule, heatmap, roster, finding, and allocation
-  review surfaces.
-- Add ranking-before-schedule, fairness, capacity, separation, age,
-  cancellation, unscheduled, deterministic, and lifecycle fixtures.
-
-Acceptance: official sessions can be ranked before scheduling, selected sessions
-are placed or reported as blocking outcomes, each person receives at most one
-assignment per overlapping period, and every allocation decision is traced.
-Families cannot log in during this milestone.
+Acceptance: organisers can inspect automatic and explicitly fixed decisions,
+every blocking outcome is explainable, capacity changes follow issue 036, and all
+views retain direct workshop identity with at most one placement per workshop.
 
 <a id="m10--family-access-and-release-control"></a>
 ## M10 — Family access and release control
@@ -227,7 +212,7 @@ binding decisions, and reinsertion into an active roadmap milestone.
 - [Change notifications](deferred-ideas/change-notifications.md)
 - [Food preferences](deferred-ideas/food-preferences.md)
 - [Materials](deferred-ideas/materials.md)
-- [Self-organized sessions](deferred-ideas/self-organized-sessions.md)
+- [Self-organized workshops](deferred-ideas/self-organized-sessions.md)
 - [Sleeping parties](deferred-ideas/sleeping-parties.md)
 - [Child rooms](deferred-ideas/child-rooms.md)
 - [Party review](deferred-ideas/party-review.md)

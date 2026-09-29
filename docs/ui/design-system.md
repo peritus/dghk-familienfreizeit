@@ -23,6 +23,14 @@ cards and navigation links stay flat.
 The public family welcome view uses a responsive hero card with a clear
 registration status and a small inline drafting-compass illustration.
 
+Workshop screens reuse the same neobrutalist language at every viewport width:
+thick black outlines, offset shadows for actionable controls, flat white information
+cards, and wrapping horizontal tabs. Orange is reserved for actionable attention
+and is paired with a text or glyph meaning; status must never be communicated by
+colour alone. Workshop filters, unscheduled reasons, cancelled history, and save
+state therefore include visible labels. Browser print hides navigation and controls;
+the application does not add a print or export button.
+
 ## Local visual contract
 
 The repository-local [UI contract](storybook.md) is the visual workbench for

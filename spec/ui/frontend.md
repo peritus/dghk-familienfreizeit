@@ -92,7 +92,7 @@ src/app/
   family-view/               login, preferences page, assignment page
   organiser/
     OrganiserApp.tsx        loads the log, owns the draft reducer, derives the world
-    screens/            dashboard, families, inventory, assignment board
+    screens/            dashboard, families, inventory, assignment board, workshops
   components/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
@@ -150,6 +150,21 @@ notes, and workshop titles are all user-supplied and all rendered as `{value}`.
 The family preferences page is a renderer over `family_facing` occasion-profile entries
 rather than hand-written JSX ([family view](../application/family-view.md) §1): each
 `control` value maps one-to-one onto a component in `src/app/family-view/controls/`.
+
+### Workshop navigation and responsive behavior
+
+The organiser workshop landing route is `/organiser/workshops`. Its horizontal
+overview, programme, slots, and spaces tabs link to separate routes while sharing
+the same local-first state owner. The four visible lifecycle phases are summary
+labels over independent event-backed facts; they are not a persisted workflow
+state. Audience filtering is shared by workshop lists where relevant. Physical
+space inventory has its own schedule-aware slot context and never becomes an
+audience-filtered workshop list.
+
+The prototype's neobrutalist visual language is required at phone, tablet, laptop,
+and wide-screen widths. Tabs wrap, dense tables provide labelled narrow-screen
+fallbacks, focus targets remain at least 44px high, and browser print hides
+navigation and controls. There is no in-app print, PDF, CSV, or export action.
 
 ---
 

@@ -83,6 +83,19 @@ function labelValue(world: KernelWorld, idValue: string, key: string): JsonValue
   return world.labels_by_entity[idValue]?.find((label) => label.key === key)?.value
 }
 
+function liveAttendance(world: KernelWorld, workshopId: string): number {
+  return Object.values(world.labels_by_entity).reduce(
+    (count, labels) =>
+      count +
+      labels.filter(
+        (label) =>
+          (label.key === 'signed-up-for' || label.key === 'workshop-attendance') &&
+          label.value === workshopId,
+      ).length,
+    0,
+  )
+}
+
 function validateWorkshop(
   params: OfficialWorkshopsParams,
   world: KernelWorld,
@@ -98,6 +111,11 @@ function validateWorkshop(
   if (!params.available_modes.includes(value.participation_mode))
     return `participation mode is not configured: ${value.participation_mode}`
   if (value.age_min > value.age_max) return 'workshop age range is reversed'
+  if (updating) {
+    const attendance = liveAttendance(world, value.workshop_id)
+    if (value.capacity < attendance)
+      return `capacity reduction would strand ${attendance} current participant(s); resolve issue 036 before reducing capacity`
+  }
   for (const leaderId of value.leader_ids)
     if (
       !world.persons.some((person) => person.id === leaderId) &&
@@ -227,6 +245,9 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
       { key: 'need', scopes: ['workshop'], cardinality: 'zero-or-more' },
       { key: 'cancelled', scopes: ['workshop'], cardinality: 'zero-or-one' },
       { key: 'cancellation-reason', scopes: ['workshop'], cardinality: 'zero-or-one' },
+      { key: 'signed-up-for', scopes: ['person'], cardinality: 'zero-or-more' },
+      { key: 'interested-in', scopes: ['person'], cardinality: 'zero-or-more' },
+      { key: 'workshop-attendance', scopes: ['person'], cardinality: 'zero-or-more' },
       {
         key: 'external-leader-name',
         scopes: ['external-leader'],

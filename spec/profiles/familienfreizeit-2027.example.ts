@@ -28,7 +28,6 @@ import { familyPreferences } from '../../src/modules/family-preferences'
 import { roomAssignment } from '../../src/modules/room-assignment'
 import { roomInventory } from '../../src/modules/room-inventory'
 import { officialWorkshops } from '../../src/modules/official-workshops'
-import { programmeCore } from '../../src/modules/programme-core'
 import { workshopAssignment } from '../../src/modules/workshop-assignment'
 import { workshopRankings } from '../../src/modules/workshop-rankings'
 import { workshopScheduling } from '../../src/modules/workshop-scheduling'
@@ -273,7 +272,7 @@ export default defineOccasionProfile({
 
     'workshop-audience': property({
       title: { de: 'Zielgruppe', en: 'Audience' },
-      scopes: ['programme-session'],
+      scopes: ['workshop'],
       value: enumOf(['children', 'adults']),
       cardinality: 'exactly-one',
       organiser_only: true,
@@ -286,7 +285,7 @@ export default defineOccasionProfile({
     'leads-workshop': property({
       title: { de: 'Leitet Workshop', en: 'Leads workshop' },
       scopes: ['person'],
-      value: ref('programme-session'),
+      value: ref('workshop'),
       cardinality: 'zero-or-more',
       organiser_only: true,
     }),
@@ -294,8 +293,8 @@ export default defineOccasionProfile({
     'prefers-workshop': orderedChoice({
       title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
       scopes: ['person'],
-      per: 'round',
-      choice: 'programme-session',
+      per: 'occasion',
+      choice: 'workshop',
       family_facing: {
         control: 'ranking',
         title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
@@ -346,7 +345,7 @@ export default defineOccasionProfile({
 
     'organiser-note': note({
       title: { de: 'Notiz des Organisationsteams', en: 'Organiser note' },
-      scopes: ['family', 'person', 'room', 'programme-session', 'workshop-space'],
+      scopes: ['family', 'person', 'room', 'workshop', 'workshop-space'],
       value: text({ max_length: 4000 }),
       organiser_only: true,
       sensitivity: 'restricted',
@@ -388,8 +387,6 @@ export default defineOccasionProfile({
 
     workshopSpace(),
 
-    programmeCore(),
-
     officialWorkshops({
       audience_trait: 'workshop-audience',
       leader_trait: 'leads-workshop',
@@ -414,6 +411,8 @@ export default defineOccasionProfile({
       objectives: ['min-people-without-top-n', 'min-people-without-any-choice', 'max-rank-weight'],
       top_n: 2,
       rank_weights: [3, 2, 1],
+      minimum_workshops: 2,
+      fairness_targets: { children: 2, adults: 1 },
       fill_unassigned: true,
     }),
 

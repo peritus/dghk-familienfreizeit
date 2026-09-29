@@ -104,13 +104,13 @@ and a late edit does not alter a communicated arrangement until an organiser
 explicitly reviews and publishes a new plan. There is no single before/after
 switch for the whole page.
 
-Workshop controls use the communicated candidate and programme scopes: eligible
-people rank published official sessions before a schedule exists; scheduled official
-offerings later show attendance results. Sign-up workshops offer join/leave controls
-and current places remaining, and interest workshops offer a non-binding toggle.
-Own responses appear immediately. A pending conflict between a sign-up and a
-communicated attendance result is explained in plain words. Uncommunicated
-candidate, programme, or schedule details are not offered as choices.
+Workshop controls use the communicated choice-cycle and programme scopes: eligible
+people rank published workshops before a schedule exists; the later communicated
+placement shows the workshop's time and location. Sign-up workshops offer join/leave
+controls and current places remaining, and interest workshops offer a non-binding
+toggle. Own responses appear immediately. A pending conflict between a sign-up and a
+communicated attendance result is explained in plain words. Uncommunicated workshop
+or schedule details are not offered as choices.
 
 ```
   Deine Zimmer
@@ -212,8 +212,8 @@ fails renders disabled with the reason.
 **Workshop ranking is drag-to-order on desktop and numbered selects on mobile.**
 The same underlying data. Do not build a mobile drag interaction; numbered
 
-The ranking list contains only sessions eligible for that person in the active
-candidate round; it does not require a slot or room.
+The ranking list contains only workshops eligible for that person in the current
+choice cycle; it does not require a slot or room.
 
 **Deadlines are stated everywhere and remain advisory.** Accommodation and workshop
 sections can show separate upcoming or passed notices with the relevant contact

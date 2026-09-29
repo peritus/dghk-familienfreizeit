@@ -52,12 +52,12 @@ function buildRankings(world: KernelWorld): readonly WorkshopRanking[] {
       return {
         person_id: personId,
         choices: choices
-        .slice()
-        .sort(
-          (a, b) =>
-            (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER) ||
-            (a.workshop_id ?? '').localeCompare(b.workshop_id ?? ''),
-        ),
+          .slice()
+          .sort(
+            (a, b) =>
+              (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER) ||
+              (a.workshop_id ?? '').localeCompare(b.workshop_id ?? ''),
+          ),
       }
     })
     .sort((a, b) => a.person_id.localeCompare(b.person_id))

@@ -15,11 +15,16 @@ path before persistence.
 | `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or draft event history |
 | `/organiser/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
 | `/organiser/board` | Read-only deterministic family-to-room assignment review with browser-printable output |
+| `/organiser/workshops` | Workshop landing view with lifecycle summary, authoring, audience filters, and typed leader selection |
+| `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
+| `/organiser/workshops/slots` | Event-backed slot creation and retirement with overlap validation |
+| `/organiser/workshop-spaces` | Physical workshop-space inventory and schedule-aware availability context |
 
 The host exposes these kernel-owned and selected-module screens through one screen
-registry. The room-inventory module registers the inventory screen and room-assignment
-registers the board screen. Generic report hosting, workshops, and release
-screens remain later scope.
+registry. The room-inventory module registers the inventory screen, room-assignment
+registers the board screen, and the selected workshop modules register the workshop
+routes. Workshop navigation uses horizontal tabs while each tab remains independently
+addressable and preserves the shared local-first draft state.
 
 The board's browser print output is rendered from the same prospective assignment
 review. Print media hides navigation and interactive review controls, then exposes
@@ -60,12 +65,25 @@ event, and appends with the expected event head. A stale head returns the
 intervening events so the browser can re-derive while preserving its draft
 work. Family principals receive no organiser log or apply access.
 
+## Workshop behavior
+
+Workshop actions stage ordinary `Workshop*`, `WorkshopSlot*`, and
+`WorkshopSpace*` events in the shared local-first pipeline. The overview presents
+the prototype's four lifecycle phases as a summary over independent workshop,
+choice-cycle, programme, and allocation facts; it does not persist a phase enum.
+The programme review derives one slot and one physical space per workshop and
+keeps unscheduled workshops visible with a reason. Browser print is the only print
+path; these screens add no export or print button. External leader contacts are
+organiser-only, and cancelled workshops leave active planning while remaining
+available to historical reports.
+
 ## Current limits
 
-The active profile currently contains the kernel `role` trait, room-inventory, and
-room-assignment modules. Assignment review and the narrow event-backed fixed-assignment
-workflow are implemented; richer placement overrides, family-facing controls, generic
-reports, plan comparison, release, and communication remain later scope.
+The active profile contains the kernel `role` trait, accommodation modules, and
+the workshop planning modules. Assignment review and the narrow event-backed
+fixed-assignment workflow are implemented. Fixed workshop attendance/placement
+decisions, family-facing controls, generic reports, plan comparison, release, and
+communication remain later scope.
 
 The verified tests cover local derivation, immediate and drafting commit timing,
 the inline draft workspace, apply-prefix acknowledgement, organiser log/apply

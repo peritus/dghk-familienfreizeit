@@ -1,16 +1,17 @@
 # Familienfreizeit 2027 occasion profile
 
-This document retains the outstanding occasion-profile requirements. The
+This document records the occasion-profile requirements. The
 implemented runtime profile is
 [`src/config/profiles/familienfreizeit-2027.ts`](../../src/config/profiles/familienfreizeit-2027.ts)
-and its delivered accommodation behavior is documented in
+and its delivered accommodation and workshop-planning behavior is documented in
 [implemented room inventory](../../docs/modules/room-inventory.md) and
-[implemented room assignment](../../docs/modules/room-assignment.md). The
-accompanying TypeScript example remains illustrative for later modules.
+[implemented room assignment](../../docs/modules/room-assignment.md),
+[implemented official workshops](../../docs/modules/official-workshops.md), and
+the related workshop module docs. The accompanying TypeScript example remains
+illustrative for profile review.
 
-The executable profile currently selects the kernel plus `room-inventory` and
-`room-assignment`. The remaining selected-module composition becomes an
-integration scope for later work after those module contributions exist.
+The executable profile selects the kernel, accommodation modules, and the
+workshop modules described below. Self-organized workshops remain deferred.
 
 This is the active occasion profile for DGHK Familienfreizeit. Its
 configuration is [`familienfreizeit-2027.ts`](familienfreizeit-2027.example.ts); this document
@@ -20,21 +21,18 @@ composition remain in [deferred scope](../deferred-ideas/README.md).
 
 ## 1. Selected modules
 
-The full occasion is intended to select these modules ([modules](../modules/contract.md) §5).
-The executable profile selects `room-inventory` and `room-assignment`; the other
-rows remain later integration scope:
+The active occasion selects these modules ([modules](../modules/contract.md) §5):
 
 | Module | Used for |
 |---|---|
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
 | [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, organiser board, and browser-printable assignment output |
-| [`workshop-space`](../modules/workshop-space.md) | later: physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
-| [`programme-core`](../modules/programme-core.md) | later: shared programme-session identity and scheduleable-session boundary |
-| [`official-workshops`](../modules/official-workshops.md) | later: organiser-authored official workshops, audience, and person-to-workshop leadership |
-| [`workshop-scheduling`](../modules/workshop-scheduling.md) | later: configured slots, offerings, placement, and schedule release |
-| [`workshop-rankings`](../modules/workshop-rankings.md) | later: ordered per-person workshop rankings |
-| [`workshop-assignment`](../modules/workshop-assignment.md) | later: eligibility, capacity, cancellation, and fairness |
-| [`family-preferences`](../modules/family-preferences.md) | later: the family preferences page |
+| [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
+| [`official-workshops`](../modules/official-workshops.md) | organiser-authored workshops, audience, participation modes, leaders, and cancellation |
+| [`workshop-scheduling`](../modules/workshop-scheduling.md) | event-backed slots, one placement per workshop, and schedule release |
+| [`workshop-rankings`](../modules/workshop-rankings.md) | current-cycle ordered per-person workshop rankings |
+| [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and allocation traces |
+| [`family-preferences`](../modules/family-preferences.md) | the separate family-facing preferences projection |
 
 ## 2. Room inventory
 
@@ -44,13 +42,13 @@ profile source is [familienfreizeit-2027.ts](../../src/config/profiles/familienf
 and its canonical event fixture is
 [familienfreizeit-2027.kdl](../../test/fixtures/room-inventory/familienfreizeit-2027.kdl).
 
-The remaining profile sections describe modules and controls that are not yet
-selected by the executable profile and belong to later work.
+Family-facing controls and release projections remain later work; the selected
+organiser workshop planning modules are active in the executable profile.
 ## 3. Workshop-space inventory
 
 Workshop spaces are independent occasion data. The profile selects
-[`workshop-space`](../modules/workshop-space.md) alongside `programme-core`,
-`official-workshops`, and `workshop-scheduling`, while
+[`workshop-space`](../modules/workshop-space.md) alongside
+`official-workshops` and `workshop-scheduling`, while
 [`room-inventory`](../modules/room-inventory.md) remains solely the selected
 accommodation inventory. A workshop space is not a room, bed, place, or
 building, and no workshop event names an accommodation room.
@@ -66,7 +64,7 @@ The profile composition contract includes these independent fixtures:
 
 | Fixture | Selected modules | Purpose |
 |---|---|---|
-| `workshop-spaces-only` | `workshop-space`, `programme-core`, `official-workshops`, `workshop-scheduling` | Workshop spaces and programme facts without accommodation inventory |
+| `workshop-spaces-only` | `workshop-space`, `official-workshops`, `workshop-scheduling` | Workshop spaces and workshop facts without accommodation inventory |
 | `accommodation-only` | `room-inventory`, `room-assignment` | Accommodation remains valid without workshops or workshop spaces |
 | `familienfreizeit-2027` | Both inventories plus the selected workshop modules | Full occasion composition with independent physical boundaries |
 
@@ -112,17 +110,14 @@ them is a deployment, reviewed through the plan diff before communicating.
 
 | Module | Parameter | Value |
 |---|---|---|
-| `official-workshops` | `audience_trait` | `workshop-audience` (`children`, `adults`; organiser-only) |
-| | `leader_trait` | `leads-workshop` (zero or more workshops per person) |
-| | `leaders_consume_capacity` | `false` |
-| | `require_leader` | `false` |
+| `official-workshops` | `audience_values` | `children`, `adults`, `all` |
+| | `available_modes` | `assigned`, `sign-up`, `interest` |
 | | `excluded_roles` | `infant` |
-| | `audience_rules` | `children` → `child`; `adults` → `adult` |
+| `workshop-scheduling` | `placement_policy` | `automatic-with-fixed-decisions` |
 | `workshop-rankings` | `ranking_trait` | `prefers-workshop` |
 | | `max_rank` | `3` |
 | | `allow_no_preference` | `true` |
-| `workshop-assignment` | `objectives` | fewest people without a top-2 choice, then fewest without any choice, then most rank weight |
-| | `top_n`, `rank_weights` | `2`, `[3, 2, 1]` |
+| `workshop-assignment` | `top_n`, `rank_weights`, `minimum_workshops`, `fairness_targets` | `2`, `[3, 2, 1]`, `2`, `{ children: 2, adults: 1 }` |
 | | `fill_unassigned` | `true` |
 
 Children may lead workshops. Leadership does not consume participant capacity, and

@@ -12,6 +12,11 @@ are separate claims and require separate evidence.
 - [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
 - [Room inventory](modules/room-inventory.md): implemented accommodation entities, fixture, summaries, and organiser surface.
 - [Room assignment](modules/room-assignment.md): deterministic assignment solver and organiser review/report surfaces.
+- [Official workshops](modules/official-workshops.md): direct workshop authoring, modes, leaders, and cancellation.
+- [Workshop space](modules/workshop-space.md): physical workshop spaces and schedule context.
+- [Workshop scheduling](modules/workshop-scheduling.md): slots and one-placement scheduling.
+- [Workshop rankings](modules/workshop-rankings.md): current-cycle structured choices.
+- [Workshop assignment](modules/workshop-assignment.md): deterministic attendance allocation.
 - [Authentication](application/authentication.md): magic links, sessions and request principals.
 - [Organiser view](application/organiser-view.md): authenticated organiser host, family surfaces and draft changes.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.

@@ -1,36 +1,33 @@
 # Call for papers
 
-This accepted module contract is deferred from the active roadmap. It is the
-canonical specification for a future promotion; it is not selected by the
-Familienfreizeit 2027 profile.
+This accepted source module is deferred from the active roadmap. It is not
+selected by the Familienfreizeit 2027 profile.
 
 Module id `call-for-papers` · factory `callForPapers`
 
-Call for papers owns the official proposal intake and review workflow. It is a
-workflow module for Issue 025 only; it does not add a second programme type.
+Call for papers owns proposal intake and review. It contributes approved direct
+`workshop` identities to the same official workshop boundary; it does not add a
+second programme type, schedule identity, ranking cycle, or attendance model.
 
 ## 1. Dependencies and ownership
 
-Requires [programme core](../modules/programme-core.md). It owns calls, submissions,
-proposer attribution, review state, selection, closure, and immutable candidate
-rounds. A selected round contains stable `programme-session` identities.
-
-The module does not own official workshop content, scheduling, ranking values, or
-attendance assignments.
+The module owns calls, submissions, proposer attribution, review state, selection,
+and closure. It does not own official workshop content after approval, scheduling,
+ranking values, or attendance assignments.
 
 ## 2. Lifecycle
 
-Families may submit proposals, and organisers may submit proposals on a family's
-behalf. Organisers review proposals and explicitly select, reject, or close them.
-Selection publishes an immutable candidate round. Replacing its membership
-creates a new round; historical rankings remain tied to the old round and become
-inactive rather than being reinterpreted.
+Families and organisers may submit proposals. Organisers review, select, reject,
+or close them. Approval creates or updates a direct workshop identity through the
+ordinary event-backed workshop contract. A later content edit is a normal workshop
+restatement and appears in the programme release review.
 
-Proposal content may be edited after selection. Such edits keep the session and
-ranking identity stable and create ordinary programme release differences.
+The current choice cycle remains the only ranking scope. A proposal-source change
+must therefore preserve or explicitly retire affected workshop identities and
+explain any invalidated choices; it must not create parallel cycles implicitly.
 
 ## 3. Tests
 
-Fixtures cover family and organiser submissions, review and closure, immutable
-round membership, a new round after a candidate-set change, and rankings that
-remain attached to their original round.
+Fixtures cover family and organiser submissions, review and closure, approved
+workshop identity, source changes, choice-cycle compatibility, and rankings that
+remain structured references to direct workshop ids.

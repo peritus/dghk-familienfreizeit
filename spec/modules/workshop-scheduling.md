@@ -2,41 +2,73 @@
 
 Module id `workshop-scheduling` · factory `workshopScheduling`
 
-Workshop scheduling places official scheduleable sessions into configured slots
-and workshop spaces. It also consumes self-organised placement contributions but
-does not change their proposer-selected semantics.
+Workshop scheduling owns event-backed workshop slots and derives one placement
+per workshop from slots, spaces, resolved capabilities, demand, leaders, and
+organiser decisions.
 
-## 1. Dependencies and inputs
+## 1. Slots
 
-Requires [programme core](programme-core.md) and [workshop space](workshop-space.md).
-Official and self-organised modules contribute typed session values when selected.
-The stage consumes configured slots and spaces, resolved constraints, organiser
-placement decisions, and the ranking demand summary.
+`workshop-slot` is a typed entity with caller-generated stable identity. Slots
+are organiser data, not constants embedded in the UI.
 
-## 2. Stages
+```ts
+type WorkshopSlotRestatement = {
+  slot_id: string
+  starts_at: string
+  ends_at: string
+  sort_key: number
+}
 
-The schedule stage runs after the pre-schedule demand summary and before final
-attendance assignment. It assigns selected official sessions to zero or more
-offerings, each with a session, slot, and space identity.
+type WorkshopSlotAdded = WorkshopSlotRestatement
+type WorkshopSlotUpdated = WorkshopSlotRestatement
+type WorkshopSlotRetired = { slot_id: string; reason: string | null }
+```
 
-Hard checks cover availability, capacity, leader conflicts, configured typed
-interest-group separation, and organiser-fixed placements. Configured integer
-demand terms are soft scoring inputs after hard feasibility. Every placement,
-rejection, unscheduled outcome, and conflict has a deterministic trace.
+Timestamps are canonical instants, `starts_at < ends_at`, and live slots may
+not overlap or touch. Retiring a slot preserves identity and causes affected
+placements to produce diagnostics rather than silently moving.
 
-An official session that cannot be placed remains an explicit unscheduled outcome
-with a blocking diagnostic. It is not silently removed from the candidate round,
-and schedule release is blocked until the conflict is resolved.
+The scheduling boundary also records explicit space-slot blocking/unblocking
+facts. The space screen exposes these as a simple per-slot availability editor;
+the resolver and scheduler consume them as typed constraints.
 
-## 3. Outputs and boundaries
+<a id="2-stages"></a>
+## 2. Placement
 
-The module owns scheduled-offering identities, schedule conflicts, unscheduled
-outcomes, demand-aware placement output, and the schedule release scope. It does
-not assign people to offerings. [Workshop attendance](workshop-assignment.md)
-consumes its output.
+Each active workshop has zero or one derived placement:
+
+```ts
+type WorkshopPlacement = {
+  workshop_id: string
+  slot_id: string
+  space_id: string
+}
+```
+
+There is no additional placement entity. A workshop without a feasible placement remains a
+visible unscheduled outcome with a blocking diagnostic.
+
+Hard checks cover slot overlap, space availability and capacity, explicit
+space-slot blocks, leader availability/conflicts, workshop needs/provided
+capabilities, cancellation, and organiser-fixed placement decisions. Demand and
+profile-defined scoring terms are deterministic soft inputs.
+
+## 3. Review and release
+
+Automatic placement is the initial UI path. The domain also accepts typed
+organiser decisions for fixed workshop placement, with resolver diagnostics and
+precedence. A reviewed calculation records the input sequence and compatibility
+context, so a later ranking edit does not alter the reviewed result until an
+explicit recalculation/review.
+
+Schedule release is independent of the four visible organiser lifecycle phases.
 
 ## 4. Tests
 
-Fixtures cover deterministic placement, availability, capacity, leader conflicts,
-interest-group separation, fixed placements, unscheduled outcomes, multiple
-offerings for one session, demand scoring, and shuffle invariance.
+- Add, update, retire, replay, overlap, touching-window, and shuffle-invariant
+  slot behavior.
+- Space-slot blocks exclude only the blocked pair and remain inspectable.
+- Every workshop receives at most one placement.
+- Availability, capacity, needs/provides, leader conflicts, cancellation,
+  fixed placement, unscheduled diagnostics, and deterministic traces are tested.
+- Late ranking edits leave a reviewed calculation stable until explicit review.
