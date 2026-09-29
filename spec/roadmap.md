@@ -47,19 +47,22 @@ Specification coverage: [official workshops](modules/official-workshops.md),
 [workshop attendance](modules/workshop-assignment.md), and [UI-12](ui/screens/workshops.md).
 
 The event-backed organiser foundation and deterministic automatic planner are
-implemented. Remaining active work is limited to the unresolved planning contract:
+implemented. Event-backed fixed attendance decisions and their resolver
+mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md));
+remaining active work is limited to the unresolved planning contract:
 
-- add event-backed fixed attendance and fixed placement decisions and the review
-  controls that explain their precedence over automatic choices;
+- add event-backed fixed placement decisions, and the review controls that
+  explain a fixed decision's precedence over the automatic choice it overrides;
 - complete release/review surfaces for current, prospective, and released/effective
   programme and allocation contexts;
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
-  fixtures, including the blocking capacity-reduction issue 036;
+  fixtures (the capacity-reduction policy is resolved as
+  [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
 - add the remaining roster, heatmap, and finding views without creating another
   workshop state store.
 
 Acceptance: organisers can inspect automatic and explicitly fixed decisions,
-every blocking outcome is explainable, capacity changes follow issue 036, and all
+every blocking outcome is explainable, capacity changes follow D30, and all
 views retain direct workshop identity with at most one placement per workshop.
 
 <a id="m10--family-access-and-release-control"></a>
