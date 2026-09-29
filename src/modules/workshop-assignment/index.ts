@@ -81,6 +81,19 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       const previous = input.previous_plan?.sections['workshop-assignment'] as
         | WorkshopAssignmentSection
         | undefined
+      // A person leading any workshop cannot also attend a different one in
+      // the same slot. Built from static leader/placement data, not
+      // assignment order, so it applies uniformly to every placement path.
+      const leaderSlots = new Map<string, Set<string>>()
+      for (const workshop of official.workshops) {
+        const slotId = placements.get(workshop.id)?.slot_id
+        if (!slotId) continue
+        for (const leaderId of workshop.leader_ids) {
+          const slots = leaderSlots.get(leaderId) ?? new Set<string>()
+          slots.add(slotId)
+          leaderSlots.set(leaderId, slots)
+        }
+      }
       const place = (
         personId: string,
         workshop: WorkshopRecord,
@@ -122,7 +135,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         const placement = placements.get(workshop.id)
         if (!placement || workshop.cancelled) return 'hard.cancellation'
         if (workshop.mode !== 'assigned') return 'hard.mode-not-assigned'
-        if (workshop.leader_ids.includes(personId)) return 'hard.leader-conflict'
+        if (leaderSlots.get(personId)?.has(placement.slot_id)) return 'hard.leader-conflict'
         if (!eligibleRole(labelValue(input, personId, 'role'), workshop)) return 'hard.eligibility'
         if ((counts.get(workshop.id) ?? 0) >= workshop.capacity) return 'hard.capacity'
         if (usedBySlot.get(placement.slot_id)?.has(personId)) return 'hard.overlap'

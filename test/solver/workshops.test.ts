@@ -185,7 +185,13 @@ function family(personId: string, familyId: string, seq: number): Event[] {
   ]
 }
 
-function workshop(workshopId: string, capacity: number, sortKey: number, seq: number): Event {
+function workshop(
+  workshopId: string,
+  capacity: number,
+  sortKey: number,
+  seq: number,
+  leaderIds: readonly string[] = [],
+): Event {
   return event(
     'WorkshopAdded',
     {
@@ -197,7 +203,7 @@ function workshop(workshopId: string, capacity: number, sortKey: number, seq: nu
       age_max: 18,
       capacity,
       participation_mode: 'assigned',
-      leader_ids: [],
+      leader_ids: leaderIds,
       needs: [],
       sort_key: sortKey,
     },
@@ -402,4 +408,21 @@ test('bounded repair reseats an unassigned person by relocating a non-fixed occu
       expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', reason: 'repaired' }),
     ]),
   )
+})
+
+test('a workshop leader cannot also attend a different workshop in their own leading slot', () => {
+  const events = [
+    venue('wsp_a', 1),
+    venue('wsp_b', 2),
+    slot(3),
+    ...family('per_leader', 'fam_leader', 4),
+    workshop('wks_led', 5, 1, 6, ['per_leader']),
+    workshop('wks_other', 5, 2, 7),
+    ranking('per_leader', 'wks_other', 1, 8),
+  ]
+  const section = assignmentSection(events, defaultParams)
+  expect(section.assignments).toEqual([])
+  expect(section.unassigned).toEqual([
+    { person_id: 'per_leader', workshop_id: null, reason: 'no eligible capacity' },
+  ])
 })
