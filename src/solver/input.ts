@@ -71,7 +71,13 @@ export function buildSolverInput(
         left.key.localeCompare(right.key) ||
         left.value.localeCompare(right.value),
     ),
-    requirements: world.requirements.map((requirement) => ({ ...requirement })),
+    requirements: freezeSorted(
+      world.requirements.map((requirement) => ({ ...requirement })),
+      compareRequirement,
+    ),
+    rules: Object.freeze(
+      (contributions.rules ?? []).slice().sort((left, right) => left.id.localeCompare(right.id)),
+    ),
     module_inputs: Object.freeze(moduleInputs),
     previous_plan: previousPlan,
   }
@@ -94,6 +100,24 @@ function compareLabel(left: SolverLabel, right: SolverLabel): number {
     left.key.localeCompare(right.key) ||
     canonicalJson(left.value).localeCompare(canonicalJson(right.value)) ||
     (left.strength ?? '').localeCompare(right.strength ?? '') ||
+    left.set_seq - right.set_seq
+  )
+}
+
+function compareRequirement(
+  left: SolverInput['requirements'][number],
+  right: SolverInput['requirements'][number],
+): number {
+  return (
+    left.holder_id.localeCompare(right.holder_id) ||
+    left.trait_key.localeCompare(right.trait_key) ||
+    (left.capability_key ?? '').localeCompare(right.capability_key ?? '') ||
+    left.kind.localeCompare(right.kind) ||
+    (left.structural ?? '').localeCompare(right.structural ?? '') ||
+    (left.value ?? '').localeCompare(right.value ?? '') ||
+    (left.strength ?? '').localeCompare(right.strength ?? '') ||
+    (left.weight ?? 0) - (right.weight ?? 0) ||
+    (left.penalty ?? 0) - (right.penalty ?? 0) ||
     left.set_seq - right.set_seq
   )
 }

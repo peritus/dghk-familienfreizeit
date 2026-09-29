@@ -33,6 +33,7 @@ export type SolverInput = Readonly<{
     set_seq: number
   }[]
   requirements: readonly ResolvedRequirement[]
+  rules: readonly Rule[]
   module_inputs: Readonly<Record<string, unknown>>
   previous_plan?: Plan | null
 }>

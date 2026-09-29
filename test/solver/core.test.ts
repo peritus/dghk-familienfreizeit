@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { buildSolverInput } from '../../src/solver/input.js'
-import { orderStages, solve } from '../../src/solver/solve.js'
+import { evaluateRules, orderStages, solve } from '../../src/solver/solve.js'
 import type { SolverInput, SolverStage } from '../../src/solver/types.js'
 import { derive } from '../../src/events/fold.js'
 import { loadKdl } from '../../src/events/kdl.js'
@@ -36,8 +36,34 @@ test('builds sorted immutable solver input and module inputs from KDL', () => {
   expect(built.families.map(({ id }) => id)).toEqual(['fam_a', 'fam_b'])
   expect(built.persons.map(({ id }) => id)).toEqual(['per_a', 'per_b'])
   expect(Object.isFrozen(built.families)).toBe(true)
+  expect(Object.isFrozen(built.requirements)).toBe(true)
+  expect(Object.isFrozen(built.rules)).toBe(true)
   expect(built.module_inputs).toEqual({ a: 2, z: 2 })
   expect(built.constraints.map(({ value }) => value)).toEqual(['rm_a', 'rm_b'])
+})
+
+test('evaluates contributed rules through the shared solver evaluator', () => {
+  const evaluations = evaluateRules(
+    [
+      {
+        id: 'hard.second',
+        evaluate: () => 'infeasible' as const,
+        describe: () => 'second reason',
+      },
+      {
+        id: 'hard.first',
+        evaluate: () => 4,
+        describe: () => null,
+      },
+    ],
+    'family',
+    'room',
+    {},
+  )
+  expect(evaluations).toEqual([
+    { id: 'hard.first', score: 4, text: null },
+    { id: 'hard.second', score: 'infeasible', text: 'second reason' },
+  ])
 })
 
 test('orders dependencies, ignores missing optional references, and rejects cycles', () => {

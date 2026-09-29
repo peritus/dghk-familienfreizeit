@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { KernelWorld } from '../../events/fold.js'
 import type { ResolvedRequirement } from '../../events/resolver.js'
+import { evaluateRules } from '../../solver/index.js'
 import type { Rule, SolverInput, SolverStage, TraceEntry } from '../../solver/types.js'
 import { defineModule } from '../define.js'
 import { inventoryWorld, type InventoryRoom } from '../room-inventory/index.js'
@@ -45,6 +46,7 @@ export type RoomAssignmentInput = {
   }[]
   person_family: Readonly<Record<string, string>>
   fixed_assignments?: readonly FixedRoomAssignment[]
+  rules?: readonly Rule[]
 }
 
 export type FixedRoomAssignment = {
@@ -220,10 +222,11 @@ export function runRoomAssignment(
   }[]
 } {
   const placements = new Map<string, string>()
+  const rules = input.rules ?? roomAssignmentRules()
   const trace: PlacementTrace[] = []
   const families = input.families
     .slice()
-    .sort((left, right) => compareFamily(left, right, params, input))
+    .sort((left, right) => compareFamily(left, right, params, input, rules))
   const place = (
     family: FamilyPlacementUnit,
     room: RoomCandidate,
@@ -256,7 +259,7 @@ export function runRoomAssignment(
     const retainedRoom = previousRoom(previous, family.family_id)
     if (retainedRoom && input.rooms.some(({ id }) => id === retainedRoom)) {
       const current = roomById(input.rooms, retainedRoom)
-      if (current && feasible(family, current, placements, input, params).length === 0) {
+      if (current && feasible(family, current, placements, input, params, rules).length === 0) {
         place(family, current, 'retain')
       }
     }
@@ -272,7 +275,7 @@ export function runRoomAssignment(
     changed = false
     iterations += 1
     for (const family of unplaced()) {
-      const candidates = scoredRooms(family, placements, input, params)
+      const candidates = scoredRooms(family, placements, input, params, rules)
       if (candidates.length === 1) {
         place(family, candidates[0]!.room, 'forced', candidates[0])
         changed = true
@@ -281,7 +284,7 @@ export function runRoomAssignment(
   }
 
   for (const family of unplaced()) {
-    const candidates = scoredRooms(family, placements, input, params)
+    const candidates = scoredRooms(family, placements, input, params, rules)
     const sorted = candidates.slice().sort(compareScore)
     if (sorted[0]) place(family, sorted[0].room, 'greedy', sorted[0])
   }
@@ -295,8 +298,8 @@ export function runRoomAssignment(
         const oldRoom = placements.get(occupant.family_id)!
         const targetRoom = roomById(input.rooms, oldRoom)!
         placements.delete(occupant.family_id)
-        const alternatives = scoredRooms(occupant, placements, input, params)
-        const target = scoredRooms(family, placements, input, params).find(
+        const alternatives = scoredRooms(occupant, placements, input, params, rules)
+        const target = scoredRooms(family, placements, input, params, rules).find(
           ({ room }) => room.id === oldRoom,
         )
         const alternative = alternatives.find(({ room }) => room.id !== oldRoom)
@@ -317,7 +320,7 @@ export function runRoomAssignment(
   const unplacedFamilies = unplaced().map((family) => ({
     family_id: family.family_id,
     person_ids: family.person_ids,
-    reason: explainUnplaced(family, placements, input, params),
+    reason: explainUnplaced(family, placements, input, params, rules),
   }))
   for (const family of unplacedFamilies)
     trace.push({
@@ -334,7 +337,9 @@ export function runRoomAssignment(
     if (!family || !room) return []
     const withoutFamily = new Map(placements)
     withoutFamily.delete(family.family_id)
-    const reasons = feasible(family, room, withoutFamily, input, params).map(({ rule }) => rule)
+    const reasons = feasible(family, room, withoutFamily, input, params, rules).map(
+      ({ rule }) => rule,
+    )
     return reasons.length > 0 ? [{ ...fixed, reasons: Object.freeze([...new Set(reasons)]) }] : []
   })
   return {
@@ -370,10 +375,11 @@ function roomAssignmentStage(params: RoomAssignmentParams): SolverStage<RoomAssi
     reads: [],
     run: (input: SolverInput) => {
       const roomInput = input.module_inputs['room-assignment'] as RoomAssignmentInput
+      const scopedInput = { ...roomInput, rules: input.rules }
       const previous = input.previous_plan?.sections['room-assignment'] as
         | RoomAssignmentSection
         | undefined
-      const result = runRoomAssignment(roomInput, params, previous ?? null)
+      const result = runRoomAssignment(scopedInput, params, previous ?? null)
       return { output: result.section, trace: result.trace, diagnostics: result.diagnostics }
     },
   }
@@ -382,13 +388,19 @@ function roomAssignmentStage(params: RoomAssignmentParams): SolverStage<RoomAssi
 export function roomAssignmentRules(): readonly Rule<
   FamilyPlacementUnit,
   RoomCandidate,
-  RoomAssignmentInput
+  RoomAssignmentInput & { placements?: ReadonlyMap<string, string> }
 >[] {
   return [
     {
       id: 'hard.capacity',
-      evaluate: (family: FamilyPlacementUnit, room: RoomCandidate, context: RoomAssignmentInput) =>
-        roomRemaining(room, new Map(), context) >= family.bed_demand ? 0 : ('infeasible' as const),
+      evaluate: (
+        family: FamilyPlacementUnit,
+        room: RoomCandidate,
+        context: RoomAssignmentInput & { placements?: ReadonlyMap<string, string> },
+      ) =>
+        roomRemaining(room, context.placements ?? new Map(), context) >= family.bed_demand
+          ? 0
+          : ('infeasible' as const),
       describe: () => 'not enough free places',
     },
     {
@@ -465,10 +477,11 @@ function scoredRooms(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
+  rules: readonly Rule[],
 ): RoomScore[] {
   return input.rooms
     .map((room) => {
-      const rejection = feasible(family, room, placements, input, params)
+      const rejection = feasible(family, room, placements, input, params, rules)
       return rejection.length === 0 ? score(family, room, placements, input, params) : null
     })
     .filter((candidate): candidate is RoomScore => candidate !== null)
@@ -480,10 +493,13 @@ function feasible(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
+  rules: readonly Rule[],
 ): Rejection[] {
   const rejections: Rejection[] = []
-  if (roomRemaining(room, placements, input) < family.bed_demand)
-    rejections.push({ rule: 'hard.capacity', text: 'not enough free places' })
+  const ruleContext = { ...input, placements }
+  for (const result of evaluateRules(rules as readonly Rule<FamilyPlacementUnit, RoomCandidate, typeof ruleContext>[], family, room, ruleContext))
+    if (result.score === 'infeasible')
+      rejections.push({ rule: result.id, text: result.text ?? result.id })
   for (const requirement of family.requirements.filter(({ strength }) => strength === 'required')) {
     if (
       requirement.kind === 'structural' &&
@@ -494,11 +510,7 @@ function feasible(
         rule: 'hard.trait-requirements',
         text: 'room already holds another family',
       })
-    else if (requirement.capability_key && !room.capabilities.has(requirement.capability_key))
-      rejections.push({
-        rule: 'hard.trait-requirements',
-        text: `${requirement.trait_key} is not satisfied`,
-      })
+    
   }
   for (const constraint of input.constraints.filter(
     ({ holder_id: holderId, key, strength }) =>
@@ -604,10 +616,11 @@ function explainUnplaced(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
+  rules: readonly Rule[],
 ): string {
   const counts = new Map<string, number>()
   for (const room of input.rooms)
-    for (const rejection of feasible(family, room, placements, input, params))
+      for (const rejection of feasible(family, room, placements, input, params, rules))
       counts.set(rejection.rule, (counts.get(rejection.rule) ?? 0) + 1)
   const reason = [...counts.entries()].sort(
     (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
@@ -682,12 +695,13 @@ function compareFamily(
   right: FamilyPlacementUnit,
   params: RoomAssignmentParams,
   input: RoomAssignmentInput,
+  rules: readonly Rule[],
 ): number {
   const placements = new Map<string, string>()
   return (
     priority(right, params) - priority(left, params) ||
-    scoredRooms(left, placements, input, params).length -
-      scoredRooms(right, placements, input, params).length ||
+    scoredRooms(left, placements, input, params, rules).length -
+      scoredRooms(right, placements, input, params, rules).length ||
     right.bed_demand - left.bed_demand ||
     left.sort_key - right.sort_key ||
     left.family_id.localeCompare(right.family_id)

@@ -5,9 +5,33 @@ import type {
   SolverContributions,
   SolverInput,
   SolverStage,
+  Rule,
   StageOutputs,
   TraceEntry,
 } from './types.js'
+
+export type RuleEvaluation = {
+  id: string
+  score: number | 'infeasible'
+  text: string | null
+}
+
+export function evaluateRules<Candidate, Target, Context>(
+  rules: readonly Rule<Candidate, Target, Context>[],
+  candidate: Candidate,
+  target: Target,
+  context: Context,
+): readonly RuleEvaluation[] {
+  return Object.freeze(
+    rules
+      .map((rule) => ({
+        id: rule.id,
+        score: rule.evaluate(candidate, target, context),
+        text: rule.describe(candidate, target, context),
+      }))
+      .sort((left, right) => left.id.localeCompare(right.id)),
+  )
+}
 
 export function solve(
   input: SolverInput,
