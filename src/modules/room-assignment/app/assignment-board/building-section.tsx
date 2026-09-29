@@ -45,7 +45,7 @@ export function BuildingSection(props: {
               {building.wish_issues === 1 ? 'Wunsch nicht erfüllt' : 'Wünsche nicht erfüllt'}
             </Badge>
           ) : null}
-          {issueCount === 0 ? <SuccessState>✓ Alles in Ordnung</SuccessState> : null}
+          {issueCount === 0 ? <SuccessState>Alles in Ordnung</SuccessState> : null}
           <Button
             type="button"
             variant="neutral"

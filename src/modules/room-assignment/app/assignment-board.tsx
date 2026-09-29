@@ -142,7 +142,7 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
                   onFix={setDialogFamily}
                   empty_message={
                     view.stats.without_room === 0
-                      ? '✓ Alle Familien haben ein Zimmer'
+                      ? 'Alle Familien haben ein Zimmer'
                       : 'Keine Familien in diesem Bereich'
                   }
                 />
@@ -161,13 +161,13 @@ export function AssignmentBoard({ view }: { view: BoardView }) {
             <div className="space-y-8">
               <section className="space-y-3">
                 <OrganiserSectionHeader title="Freie Zimmer" />
-                <RoomList rooms={view.free_rooms} empty_message="✓ Alle Zimmer sind belegt" />
+                <RoomList rooms={view.free_rooms} empty_message="Alle Zimmer sind belegt" />
               </section>
               <section className="space-y-3">
                 <OrganiserSectionHeader title="Teilweise freie Zimmer" />
                 <RoomList
                   rooms={view.partial_rooms}
-                  empty_message="✓ Alle belegten Zimmer sind voll"
+                  empty_message="Alle belegten Zimmer sind voll"
                 />
               </section>
             </div>
