@@ -74,6 +74,10 @@ const externalLeaderReason = z.object({
   external_leader_id: externalLeaderId,
   reason: z.string().nullable(),
 })
+const attendanceFixedPayload = z.object({
+  person_id: nonEmpty,
+  workshop_ids: z.array(workshopId).max(32),
+})
 
 function entity(world: KernelWorld, kind: string, idValue: string): Entity | undefined {
   return world.entities_by_kind[kind]?.find((candidate) => candidate.id === idValue)
@@ -151,6 +155,17 @@ function validateReason(world: KernelWorld, payload: JsonValue, kind: string): s
   return entity(world, kind === 'workshop' ? 'workshop' : 'external-leader', entityId)
     ? null
     : `unknown ${kind}: ${entityId}`
+}
+
+function validateAttendanceFixed(world: KernelWorld, payload: JsonValue): string | null {
+  const value = attendanceFixedPayload.parse(payload)
+  if (!world.persons.some((person) => person.id === value.person_id))
+    return `unknown person: ${value.person_id}`
+  for (const workshop of value.workshop_ids)
+    if (!entity(world, 'workshop', workshop)) return `unknown workshop: ${workshop}`
+  if (value.workshop_ids.length !== new Set(value.workshop_ids).size)
+    return `duplicate workshop in fixed attendance: ${value.person_id}`
+  return null
 }
 
 function setLabels(
@@ -429,6 +444,24 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
         fold: (capability, event) => {
           const value = externalLeaderReason.parse(event.payload)
           capability.retireEntity('external-leader', value.external_leader_id)
+        },
+      },
+      {
+        type: 'WorkshopAttendanceFixed',
+        payload: attendanceFixedPayload,
+        validate: (payload, world) => validateAttendanceFixed(world, payload),
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: (capability, event) => {
+          const value = attendanceFixedPayload.parse(event.payload)
+          setLabels(
+            capability,
+            value.person_id,
+            ['workshop-attendance'],
+            value.workshop_ids.map((workshopId) => ({
+              key: 'workshop-attendance',
+              value: workshopId,
+            })),
+          )
         },
       },
     ],

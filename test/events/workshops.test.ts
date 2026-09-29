@@ -210,4 +210,149 @@ describe('workshop domain events', () => {
     ]
     expect(() => derive(events, profile.validation_view)).toThrow(/D30/)
   })
+
+  const personEvents: Event[] = [
+    event(
+      'FamilyInvited',
+      { family_id: 'fam_a', email: 'family@example.test', display_name: 'Familie A', locale: 'de' },
+      1,
+    ),
+    event(
+      'PersonAdded',
+      {
+        person_id: 'per_a',
+        family_id: 'fam_a',
+        given_name: 'Ada',
+        family_name: 'A',
+        birthdate: '2015-01-01',
+        role: 'child',
+      },
+      2,
+    ),
+    ...baseEvents.map((item) => ({ ...item, seq: item.seq + 2 })),
+  ]
+  const secondWorkshop = event(
+    'WorkshopAdded',
+    {
+      workshop_id: 'wks_painting',
+      title: 'Malen',
+      description: 'Farbe und Leinwand',
+      audience: 'children',
+      age_min: 6,
+      age_max: 14,
+      capacity: 8,
+      participation_mode: 'assigned',
+      leader_ids: [],
+      needs: [],
+      sort_key: 2,
+    },
+    personEvents.length + 1,
+  )
+
+  test('records a fixed attendance decision as a workshop-attendance label', () => {
+    const world = derive(
+      [
+        ...personEvents,
+        event(
+          'WorkshopAttendanceFixed',
+          { person_id: 'per_a', workshop_ids: ['wks_ceramics'] },
+          personEvents.length + 1,
+        ),
+      ],
+      profile.validation_view,
+    )
+    expect(world.labels_by_entity['per_a']).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: 'workshop-attendance', value: 'wks_ceramics' }),
+      ]),
+    )
+  })
+
+  test('full-restatement replaces the previous fixed set and an empty array clears it', () => {
+    const withTwoFixed = [
+      ...personEvents,
+      secondWorkshop,
+      event(
+        'WorkshopAttendanceFixed',
+        { person_id: 'per_a', workshop_ids: ['wks_ceramics', 'wks_painting'] },
+        secondWorkshop.seq + 1,
+      ),
+    ]
+    const worldWithBoth = derive(withTwoFixed, profile.validation_view)
+    expect(
+      worldWithBoth.labels_by_entity['per_a']?.filter(({ key }) => key === 'workshop-attendance'),
+    ).toHaveLength(2)
+
+    const nextSeq = withTwoFixed.length + 1
+    const worldRestated = derive(
+      [
+        ...withTwoFixed,
+        event(
+          'WorkshopAttendanceFixed',
+          { person_id: 'per_a', workshop_ids: ['wks_painting'] },
+          nextSeq,
+        ),
+      ],
+      profile.validation_view,
+    )
+    expect(
+      worldRestated.labels_by_entity['per_a']?.filter(({ key }) => key === 'workshop-attendance'),
+    ).toEqual([expect.objectContaining({ value: 'wks_painting' })])
+
+    const worldCleared = derive(
+      [
+        ...withTwoFixed,
+        event('WorkshopAttendanceFixed', { person_id: 'per_a', workshop_ids: [] }, nextSeq),
+      ],
+      profile.validation_view,
+    )
+    expect(
+      worldCleared.labels_by_entity['per_a']?.filter(({ key }) => key === 'workshop-attendance'),
+    ).toHaveLength(0)
+  })
+
+  test('rejects a fixed decision for an unknown person or workshop', () => {
+    expect(() =>
+      derive(
+        [
+          ...personEvents,
+          event(
+            'WorkshopAttendanceFixed',
+            { person_id: 'per_unknown', workshop_ids: ['wks_ceramics'] },
+            personEvents.length + 1,
+          ),
+        ],
+        profile.validation_view,
+      ),
+    ).toThrow(/unknown person/)
+    expect(() =>
+      derive(
+        [
+          ...personEvents,
+          event(
+            'WorkshopAttendanceFixed',
+            { person_id: 'per_a', workshop_ids: ['wks_missing'] },
+            personEvents.length + 1,
+          ),
+        ],
+        profile.validation_view,
+      ),
+    ).toThrow(/unknown workshop/)
+  })
+
+  test('rejects duplicate workshop ids in one fixed decision', () => {
+    expect(() =>
+      derive(
+        [
+          ...personEvents,
+          event(
+            'WorkshopAttendanceFixed',
+            { person_id: 'per_a', workshop_ids: ['wks_ceramics', 'wks_ceramics'] },
+            personEvents.length + 1,
+          ),
+        ],
+        profile.validation_view,
+      ),
+    ).toThrow(/duplicate workshop/)
+  })
 })
