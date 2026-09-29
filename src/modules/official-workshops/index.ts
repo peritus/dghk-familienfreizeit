@@ -58,8 +58,8 @@ const workshopPayload = z.object({
   age_max: z.number().int().min(0).max(120),
   capacity: z.number().int().min(0),
   participation_mode: mode,
-  leader_ids: z.array(z.string()).max(32),
-  needs: z.array(nonEmpty).max(32),
+  leader_ids: z.array(z.string()).max(32).default([]),
+  needs: z.array(nonEmpty).max(32).default([]),
   sort_key: z.number().int(),
 })
 const workshopReason = z.object({ workshop_id: workshopId, reason: z.string().nullable() })
@@ -67,7 +67,7 @@ const externalLeaderPayload = z.object({
   external_leader_id: externalLeaderId,
   name: nonEmpty,
   phone: z.string().trim().nullable(),
-  availability: z.array(z.string()).max(64),
+  availability: z.array(z.string()).max(64).default([]),
   sort_key: z.number().int(),
 })
 const externalLeaderReason = z.object({

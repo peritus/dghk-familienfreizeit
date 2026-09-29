@@ -355,4 +355,96 @@ describe('workshop domain events', () => {
       ),
     ).toThrow(/duplicate workshop/)
   })
+
+  test('WorkshopAdded defaults leader_ids and needs to empty when omitted', () => {
+    const world = derive(
+      [
+        event(
+          'WorkshopAdded',
+          {
+            workshop_id: 'wks_minimal',
+            title: 'Minimal',
+            description: 'Minimal',
+            audience: 'children',
+            age_min: 0,
+            age_max: 18,
+            capacity: 5,
+            participation_mode: 'assigned',
+            sort_key: 1,
+          },
+          1,
+        ),
+      ],
+      profile.validation_view,
+    )
+    const workshop = officialWorkshopsWorld(world).workshops[0]!
+    expect(workshop.leader_ids).toEqual([])
+    expect(workshop.needs).toEqual([])
+  })
+
+  test('a leader can be added to a workshop through an ordinary generic LabelSet', () => {
+    const world = derive(
+      [
+        event(
+          'WorkshopAdded',
+          {
+            workshop_id: 'wks_minimal',
+            title: 'Minimal',
+            description: 'Minimal',
+            audience: 'children',
+            age_min: 0,
+            age_max: 18,
+            capacity: 5,
+            participation_mode: 'assigned',
+            sort_key: 1,
+          },
+          1,
+        ),
+        event(
+          'FamilyInvited',
+          {
+            family_id: 'fam_a',
+            email: 'family@example.test',
+            display_name: 'Familie A',
+            locale: 'de',
+          },
+          2,
+        ),
+        event(
+          'PersonAdded',
+          {
+            person_id: 'per_a',
+            family_id: 'fam_a',
+            given_name: 'Ada',
+            family_name: 'A',
+            birthdate: '2015-01-01',
+            role: 'child',
+          },
+          3,
+        ),
+        event(
+          'LabelSet',
+          { entity_id: 'wks_minimal', key: 'leader', value: 'per_a', strength: null, note: null },
+          4,
+        ),
+      ],
+      profile.validation_view,
+    )
+    const workshop = officialWorkshopsWorld(world).workshops[0]!
+    expect(workshop.leader_ids).toEqual(['per_a'])
+  })
+
+  test('ExternalLeaderAdded defaults availability to empty when omitted', () => {
+    const world = derive(
+      [
+        event(
+          'ExternalLeaderAdded',
+          { external_leader_id: 'ext_minimal', name: 'Minimal', phone: null, sort_key: 1 },
+          1,
+        ),
+      ],
+      profile.validation_view,
+    )
+    expect(officialWorkshopsWorld(world).external_leaders[0]!.availability).toEqual([])
+  })
 })
