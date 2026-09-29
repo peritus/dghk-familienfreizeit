@@ -1,12 +1,12 @@
 ---
 id: "036"
 title: Workshop capacity reduction policy
-status: needs-decision
+status: resolved
 severity: contract-contradiction
 category: module:workshops
 source: workshop prototype alignment
-related_decisions: [D16, D28]
-related_milestones: [M9, M10]
+related_decisions: [D30]
+related_milestones: [M8]
 opened: 2026-09-29
 ---
 
@@ -38,6 +38,16 @@ visible as an unresolved issue rather than choosing a policy in the solver.
 1. Preserve existing names and block new admission while showing over-capacity.
 2. Recompute and displace or reassign affected people using fairness rules.
 3. Select the behavior through occasion-profile policy.
+
+## Resolution
+
+Resolved as [D30](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces):
+option 1. A capacity reduction that would put current attendance (solver
+assignments, live sign-ups, or fixed attendance decisions) over the new
+capacity is rejected outright; existing attendance names are preserved
+unchanged and no recomputation, displacement, or profile-configurable policy
+is applied. `official-workshops`' `validateWorkshop` already enforced this as
+an interim rule; it now cites D30 instead of this issue.
 
 ## Related files
 

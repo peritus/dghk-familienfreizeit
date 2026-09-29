@@ -305,7 +305,7 @@ exposes both perspectives explicitly, never as per-screen relationship lookups.
 | New allocation | Every target must have a compatible communicated programme, or its programme scope must be selected in the same action |
 | Title/description | May be selected independently; show affected families and retain the stable workshop and ranking identity |
 | New or changed schedule | Release the reviewed placements and resolve availability, space, leader, separation, and unscheduled-workshop conflicts before attendance release |
-| Capacity below current attendance | Reject the change until [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md) is resolved |
+| Capacity below current attendance | Reject the change, per [D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces) |
 | Mode change | Explicitly resolve incompatible active sign-up/interest labels before release; never convert participation types or resurrect dormant lists |
 | Slot change | Check both slots, active participation and allocation uniqueness; include both allocation scopes when needed to remove/reassign old entries |
 | Cancellation | Communicate it explicitly, preserve identity and participation history, and clearly mark attendance/assignments as cancelled; replacement allocations may follow |
@@ -337,7 +337,7 @@ that overlap; live sign-up does not erase the old allocation itself.
 Time/slot changes validate prospective live sign-ups across workshops. Schedule,
 room and leader conflicts introduced by a release must be resolved through explicit
 edits or coordinated scope selection. A capacity reduction that would exceed live
-attendance is blocked under [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md),
+attendance is blocked per [D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces),
 not handled by evicting participants during release. Clearing participation is an
 ordinary visible domain action, not a hidden side effect of releasing details.
 

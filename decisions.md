@@ -700,3 +700,30 @@ behavior being demonstrated.
 
 *Consequence:* Repository-wide fixture and example searches must not reintroduce
 the removed surname; new examples follow the same neutral-identity rule.
+
+## D30 — Workshop capacity reduction blocks, never displaces
+
+*Chosen.* Reducing a workshop's capacity below its current attendance (solver
+assignments, live sign-ups, or fixed attendance decisions) is rejected outright.
+Existing attendance names are preserved unchanged; the workshop simply stays
+over its nominal capacity until the organiser either raises capacity back up or
+removes attendees through the ordinary attendance/sign-up path. No recomputation,
+displacement, or reassignment is triggered by a capacity edit.
+
+*Rejected alternative:* recompute and displace or reassign affected people using
+fairness rules. This would silently move people who were never touched by the
+capacity edit, and it conflicts with fixed attendance decisions being meant to
+take precedence over automatic ones ([D4](#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)):
+an automatic displacement pass has no principled way to leave fixed decisions
+alone while still resolving the overflow.
+
+*Rejected alternative:* select the reduction behavior through occasion-profile
+policy. Only one profile is active today, so the flexibility has no consumer,
+and branching solver behavior on a profile-selected policy value risks becoming
+the kind of runtime-supplied executable rule occasion configuration must not
+contain ([modules/contract.md](spec/modules/contract.md) §1 kernel/profile
+boundary).
+
+*Consequence:* the capacity editor must surface the over-capacity state clearly
+(so organisers can see and resolve it) rather than hiding it behind a silently
+correct-looking number. This closes [issue 036](spec/issues/archived/036-workshop-capacity-reduction-policy.md).

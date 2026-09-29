@@ -114,7 +114,7 @@ function validateWorkshop(
   if (updating) {
     const attendance = liveAttendance(world, value.workshop_id)
     if (value.capacity < attendance)
-      return `capacity reduction would strand ${attendance} current participant(s); resolve issue 036 before reducing capacity`
+      return `capacity reduction would strand ${attendance} current participant(s); rejected per D30`
   }
   for (const leaderId of value.leader_ids)
     if (

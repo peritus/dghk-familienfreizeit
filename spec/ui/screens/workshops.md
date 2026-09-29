@@ -78,7 +78,7 @@ reviews it. The local-first event draft/apply/discard pipeline and persistent
 save status are used for every mutation.
 
 Capacity reductions that would put current attendance above the new capacity
-are blocked pending [issue 036](../../issues/open/036-workshop-capacity-reduction-policy.md).
+are blocked, per [D30](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces).
 
 ## Privacy and lists
 

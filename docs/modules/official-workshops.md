@@ -12,7 +12,7 @@ a workshop is an event-backed removal from the live world; historical views repl
 the earlier event prefix when needed.
 
 Capacity reductions that would put live sign-ups or recorded attendance above the
-new capacity are rejected and reference issue 036. No participant is silently
+new capacity are rejected outright, per D30. No participant is silently
 evicted by a workshop edit. External leader contact labels are restricted to
 organiser projections.
 

@@ -208,6 +208,6 @@ describe('workshop domain events', () => {
         8,
       ),
     ]
-    expect(() => derive(events, profile.validation_view)).toThrow(/issue 036/)
+    expect(() => derive(events, profile.validation_view)).toThrow(/D30/)
   })
 })

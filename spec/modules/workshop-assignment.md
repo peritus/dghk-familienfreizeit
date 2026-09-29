@@ -53,8 +53,8 @@ initial UI exposes only automatic allocation.
 <a id="4-assignment-policy"></a>
 ## 4. Capacity and review
 
-A capacity reduction that would exceed current attendance is rejected pending
-the policy decision in [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md).
+A capacity reduction that would exceed current attendance is rejected outright,
+per [D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces).
 No preservation, displacement, or configurable reduction policy is inferred.
 
 Reviewed/frozen allocation output is derived from the reviewed event-log input

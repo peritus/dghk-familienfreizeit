@@ -55,8 +55,9 @@ and organiser-only contact labels. Leader references are validated during
 append and replay.
 
 Capacity is a non-negative integer. A capacity reduction that would put current
-attendance above the new capacity is rejected until the open policy issue is
-resolved; see [issue 036](../issues/open/036-workshop-capacity-reduction-policy.md).
+attendance above the new capacity is rejected outright; existing attendance
+names are preserved and no displacement or recomputation is applied, per
+[D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces).
 
 ## 3. Derived contribution
 
