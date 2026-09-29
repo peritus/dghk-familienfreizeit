@@ -44,11 +44,21 @@ type WorkshopAdded = WorkshopRestatement
 type WorkshopUpdated = WorkshopRestatement
 type WorkshopCancelled = { workshop_id: string; reason: string | null }
 type WorkshopRetired = { workshop_id: string; reason: string | null }
+type WorkshopAttendanceFixed = { person_id: string; workshop_ids: readonly string[] }
 ```
 
 `WorkshopCancelled` preserves identity and history while removing the workshop
 from active planning. `WorkshopRetired` is the event-backed equivalent of the
 prototype's delete action; it does not erase history.
+
+`WorkshopAttendanceFixed` restates the complete set of workshops an organiser
+fixes a person into, replacing any prior fixed set for that person; an empty
+`workshop_ids` array clears it. It writes the person-scoped `workshop-attendance`
+label this module owns. Append validation checks only that the person and every
+workshop id exist — capacity, eligibility, slot overlap, and cancellation
+feasibility are evaluated by [workshop attendance](workshop-assignment.md), and
+an infeasible fixed decision is a solver diagnostic there, never a rejected
+append here.
 
 External leaders use add, full-update, and retire events with typed availability
 and organiser-only contact labels. Leader references are validated during
@@ -86,3 +96,5 @@ workshop identity and adds only its derived slot and space placement.
   identity are rejected at append and replay.
 - Capacity reductions that would overfill current attendance are blocked.
 - Internal and external leaders remain distinguishable and privacy-scoped.
+- Fixed attendance decisions restate the full set, an empty set clears it, and
+  unknown person/workshop references or duplicate workshop ids are rejected.

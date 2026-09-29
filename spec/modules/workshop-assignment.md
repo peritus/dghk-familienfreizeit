@@ -2,10 +2,22 @@
 
 Module id `workshop-assignment` · factory `workshopAssignment`
 
-Workshop attendance assigns eligible people to directly identified, placed
-workshops. It does not create workshops or slots.
+## 1. Purpose and boundary
 
-## 1. Parameters
+Workshop attendance assigns eligible people to directly identified, placed
+workshops. It does not create workshops (owned by
+[official workshops](official-workshops.md)), slots or spaces (owned by
+[workshop scheduling](workshop-scheduling.md) and
+[workshop space](workshop-space.md)), or rankings (owned by
+[workshop rankings](workshop-rankings.md)). It decides only who attends which
+already-scheduled workshop, and how an organiser's fixed decision relates to
+that automatic outcome.
+
+## 2. Dependencies
+
+Requires `official-workshops`, `workshop-rankings`, and `workshop-scheduling`.
+
+## 3. Parameters
 
 ```ts
 type WorkshopAssignmentParams = {
@@ -21,50 +33,131 @@ type WorkshopAssignmentParams = {
 All values are supplied by the active profile/module configuration. The UI
 renders the active values and never assumes fixed prototype constants.
 
-## 2. Eligibility and modes
+## 4. Entity kinds
 
-Assigned mode enters deterministic allocation. Sign-up mode exposes a live
-capacity-limited list. Interest mode records a named organiser-visible list;
-family sharing remains a separate privacy-scoped decision. Self-organized mode
-is deferred and is not selected by the active profile.
+None. Attendance is decided over the `person` and `workshop` entities owned by
+the kernel and by [official workshops](official-workshops.md); it introduces
+no identity of its own.
 
-Eligibility includes withdrawal, audience and age, slot availability,
-capacity, reservation, exclusion, separation, cancellation, and resolver-backed
-requirements. A required organiser decision that cannot be honoured is a
-diagnostic, never a silent bypass.
+## 5. Events
 
-## 3. Deterministic allocation
+None. A fixed attendance decision is authored through `WorkshopAttendanceFixed`,
+owned and authoritatively specified by
+[official workshops](official-workshops.md) §2, because it writes that
+module's `workshop-attendance` label. This module only reads the resolved
+label.
 
-The stage follows D4:
+## 6. Labels and trait roles
 
-1. retain valid prior assignments;
-2. apply feasible fixed attendance decisions;
-3. process ranked choices with configured fairness and rank weights;
-4. fill eligible people when configured;
-5. perform bounded deterministic repair and explain every movement.
-
-The output assigns at most one workshop to a person per overlapping slot,
-respects workshop capacity, records unassigned reasons, and emits traces for
-capacity, overlap, leader, eligibility, cancellation, and unscheduled cases.
-
-The domain supports fixed person-to-workshop attendance decisions even when the
-initial UI exposes only automatic allocation.
+Consumes the person-scoped `workshop-attendance` label (owned by
+[official workshops](official-workshops.md)): each value is a workshop id the
+person is fixed into for the current cycle. No trait roles.
 
 <a id="4-assignment-policy"></a>
-## 4. Capacity and review
 
-A capacity reduction that would exceed current attendance is rejected outright,
-per [D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces).
-No preservation, displacement, or configurable reduction policy is inferred.
+## 7. Solver input and stages
 
-Reviewed/frozen allocation output is derived from the reviewed event-log input
-sequence. New rankings or planning edits remain prospective until explicit
-recalculation/review.
+One stage, `workshop-assignment.attendance`, reading
+`workshop-scheduling.placement` and `workshop-rankings.demand`. It follows D4
+in five steps:
 
-## 5. Tests
+1. apply feasible fixed attendance decisions first — they always take
+   precedence over every automatic outcome, so they claim capacity and slot
+   occupancy before anything else runs;
+2. retain a still-feasible prior assignment (from the previous derived plan)
+   for anyone with no fixed decision this cycle;
+3. process ranked choices with configured fairness and rank weights;
+4. fill eligible people up to `minimum_workshops` when `fill_unassigned` is set;
+5. perform bounded deterministic repair (up to `max_repair_passes`), moving at
+   most one non-fixed occupant per repair to seat a still-unassigned person,
+   and explaining every movement in the trace.
 
-- Deterministic allocation, retention, fairness, rank weighting, minimum
-  targets, fill behavior, bounded repair, and stable traces.
-- Fixed attendance decisions and diagnostic precedence.
-- Capacity, cancellation, eligibility, overlap, leader, and unscheduled cases.
-- Capacity-reduction blocking and reviewed-input stability.
+The output assigns at most one workshop to a person per slot, respects
+workshop capacity, records unassigned reasons, and emits traces for capacity,
+overlap, leader-conflict, eligibility, cancellation, and unscheduled cases. A
+repair pass never moves a `'fixed'` assignment.
+
+## 8. Rules and scoring
+
+Hard constraints (cancellation, participation mode, leader conflict,
+eligibility, capacity, and same-slot overlap) are evaluated inline by the
+stage rather than declared as a separate `Rule[]`; every rejection carries one
+of the `hard.*` reason codes used in traces and violations. Ranked choices
+score by `rank_weights`; fixed, retained, filled, and repaired placements
+carry no rank score.
+
+## 9. Preflight checks
+
+None declared separately. An infeasible fixed attendance decision is reported
+by the stage itself as a `workshop-assignment.fixed-invalid` diagnostic
+(severity `warning`), never a thrown error or a silently dropped decision.
+
+## 10. Output and diff
+
+```ts
+type WorkshopAssignmentSection = {
+  assignments: readonly {
+    person_id: string
+    workshop_id: string
+    slot_id: string
+    rank: number | null
+    reason: 'fixed' | 'retained' | 'ranked' | 'fill' | 'repaired'
+  }[]
+  unassigned: readonly { person_id: string; workshop_id: string | null; reason: string }[]
+  signups: readonly { person_id: string; workshop_id: string }[]
+  interests: readonly { person_id: string; workshop_id: string }[]
+  fixed: readonly { person_id: string; workshop_id: string }[]
+  fixed_violations: readonly {
+    person_id: string
+    workshop_id: string
+    reasons: readonly string[]
+  }[]
+}
+```
+
+`fixed` lists every declared fixed decision verbatim; `fixed_violations` names
+the ones that could not be honoured this cycle and why. Diff/review surfaces
+that explain fixed-over-automatic precedence to organisers remain outstanding
+(§13).
+
+## 11. Screens, controls, reports, and emails
+
+No screens or controls. Reports: `workshop-roster`, `workshop-person-plan`,
+`workshop-family-plan`, `workshop-space-plan`. No emails.
+
+## 12. Tests
+
+- Deterministic allocation, retention across a stable re-derive, fairness,
+  rank weighting, minimum targets, fill behavior, bounded repair, and stable
+  traces.
+- A fixed attendance decision takes precedence over a ranked choice for the
+  same workshop.
+- Conflicting fixed decisions (capacity, cancellation, eligibility, or
+  overlap) surface as `fixed_violations` and a diagnostic, never a thrown
+  error.
+- Capacity, cancellation, eligibility, overlap, leader-conflict, and
+  unscheduled cases.
+- Capacity-reduction blocking ([D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces))
+  and reviewed-input stability.
+
+## 13. When not selected
+
+An unselected `workshop-assignment` contributes no stage, plan section, or
+report. Sign-up and interest lists (owned by
+[official workshops](official-workshops.md)) are unaffected — they were never
+converted into automatic assignments in the first place.
+
+## Outstanding
+
+- Review/precedence-explanation UI: an organiser-facing surface that shows a
+  fixed decision alongside the automatic outcome it overrides, and explains
+  why. The data model above already carries everything such a surface would
+  need (`fixed`, `fixed_violations`, and each assignment's `reason`).
+- Release/review surfaces for current, prospective, and released/effective
+  attendance (part of [M8](../roadmap.md#m8--workshop-planning-completion)).
+- Roster, heatmap, and finding views without a second workshop state store
+  (part of M8).
+- Fixed *placement* decisions (which slot a workshop runs in) are a separate,
+  still-outstanding mechanism owned by
+  [workshop scheduling](workshop-scheduling.md); this module only covers who
+  attends, not where a workshop is scheduled.

@@ -16,6 +16,14 @@ new capacity are rejected outright, per D30. No participant is silently
 evicted by a workshop edit. External leader contact labels are restricted to
 organiser projections.
 
+An organiser records a fixed person-to-workshop attendance decision through
+`WorkshopAttendanceFixed`, a full restatement of the person's fixed workshop
+set (an empty set clears it) that writes the person-scoped `workshop-attendance`
+label. Append validation only checks that the person and every workshop exist;
+[workshop attendance](workshop-assignment.md) evaluates whether the decision is
+actually feasible and reports an infeasible one as a solver diagnostic rather
+than a rejected event.
+
 The module exposes typed summaries to scheduling, rankings, attendance, reports,
 and the organiser UI. It does not persist a folded summary or an independent
 relationship table.
