@@ -71,11 +71,16 @@ test('organiser route boundaries reject duplicate bases and preserve nested path
   expect(() => organiserNestedPath('/organiser/organiser/board')).toThrow()
   expect(() => organiserPathWithHash(organiserPaths.inventory(), '/organiser')).toThrow()
 
-  const nestedLink = <OrganiserLink href={organiserPaths.assignment_board()}>Belegung</OrganiserLink>
-  expect(nestedLink.props.href).toBe('/board')
-  expect(() => OrganiserLink({ href: organiserUrls.assignment_board() as never, children: <span>Belegung</span> })).toThrow(
-    'organiser links must use nested paths',
+  const nestedLink = (
+    <OrganiserLink href={organiserPaths.assignment_board()}>Belegung</OrganiserLink>
   )
+  expect(nestedLink.props.href).toBe('/board')
+  expect(() =>
+    OrganiserLink({
+      href: organiserUrls.assignment_board() as never,
+      children: <span>Belegung</span>,
+    }),
+  ).toThrow('organiser links must use nested paths')
 })
 
 test('family route IDs are opaque, URL-safe, and reversible', () => {

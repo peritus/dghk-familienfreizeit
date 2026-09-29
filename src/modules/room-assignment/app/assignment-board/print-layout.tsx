@@ -34,7 +34,10 @@ export function AssignmentPrintLayout({
         </dl>
       </header>
 
-      <section className="assignment-print-summary" aria-labelledby="assignment-print-summary-title">
+      <section
+        className="assignment-print-summary"
+        aria-labelledby="assignment-print-summary-title"
+      >
         <h2 id="assignment-print-summary-title">Zusammenfassung</h2>
         <dl>
           <div>
@@ -57,7 +60,10 @@ export function AssignmentPrintLayout({
       </section>
 
       {print.unplaced.length > 0 ? (
-        <section className="assignment-print-findings" aria-labelledby="assignment-print-open-title">
+        <section
+          className="assignment-print-findings"
+          aria-labelledby="assignment-print-open-title"
+        >
           <h2 id="assignment-print-open-title">Nicht platzierte Familien</h2>
           <ul>
             {print.unplaced.map((family) => (
@@ -70,7 +76,10 @@ export function AssignmentPrintLayout({
       ) : null}
 
       {print.findings.length > 0 ? (
-        <section className="assignment-print-findings" aria-labelledby="assignment-print-diagnostics-title">
+        <section
+          className="assignment-print-findings"
+          aria-labelledby="assignment-print-diagnostics-title"
+        >
           <h2 id="assignment-print-diagnostics-title">Hinweise</h2>
           <ul>
             {print.findings.map((finding) => (

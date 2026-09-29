@@ -18,7 +18,7 @@ describe('assignment review projection', () => {
     expect(review.board).not.toHaveProperty('sequence')
     expect(review.print).not.toHaveProperty('sequence')
     expect(review.print.total_families).toBe(world.families.length)
-    expect(review.print.generated_at).toBe('')
+    expect(review.print.generated_at).toBe('Im Browser erzeugt')
     expect(review.print.data_cut).toBe(`Ereignis ${world.head_seq}`)
     expect(review.print.sensitivity).toBe('Nur Organisationsteam')
     expect(review.print.placed_families + review.print.unplaced_families).toBe(
@@ -41,7 +41,11 @@ describe('assignment review projection', () => {
     expect(review.board.unplaced_reasons).toBeDefined()
     expect(review.print.findings).toEqual(expect.any(Array))
     expect(review.print.unplaced).toEqual(expect.any(Array))
-    expect(review.print.rooms.every(({ status, capacity }) => status.label.length > 0 && capacity.length > 0)).toBe(true)
+    expect(
+      review.print.rooms.every(
+        ({ status, capacity }) => status.label.length > 0 && capacity.length > 0,
+      ),
+    ).toBe(true)
   })
 
   test('supports the rich shared organiser fixture without leaking event metadata', () => {

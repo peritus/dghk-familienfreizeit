@@ -22,10 +22,7 @@ for (const [file, source, rule] of [
     "import { organiserUrls } from '../../../../organiser/routes.js'",
     'no-restricted-syntax',
   ],
-  [
-    'src/app/organiser/probe.tsx',
-    'no-restricted-syntax',
-  ],
+  ['src/app/organiser/probe.tsx', 'no-restricted-syntax'],
   [
     'src/derive/probe.ts',
     'export const x = { familyId: 1 }',

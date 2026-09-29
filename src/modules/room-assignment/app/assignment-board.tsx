@@ -68,13 +68,7 @@ function RoomList(props: { rooms: readonly RoomView[]; empty_message: string }) 
   )
 }
 
-export function AssignmentBoard({
-  view,
-  print,
-}: {
-  view: BoardView
-  print: AssignmentPrintView
-}) {
+export function AssignmentBoard({ view, print }: { view: BoardView; print: AssignmentPrintView }) {
   const { stage } = useOrganiser()
   const [dialogFamily, setDialogFamily] = useState<FamilyView | null>(null)
   const allRooms = view.buildings.flatMap(({ rooms }) => rooms)

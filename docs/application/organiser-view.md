@@ -21,6 +21,12 @@ registry. The room-inventory module registers the inventory screen and room-assi
 registers the board screen. Generic report hosting, workshops, and release
 screens remain later scope.
 
+The board's browser print output is rendered from the same prospective assignment
+review. Print media hides navigation and interactive review controls, then exposes
+the assignment summary, data cut, unplaced-family reasons, diagnostic findings, and
+room-by-room occupants and capacity. There is no separate report route or in-app
+print control; organisers use the browser's print command.
+
 ## Local-first event workflow
 
 Screen actions add grouped ordinary event drafts to the shared draft reducer. The
