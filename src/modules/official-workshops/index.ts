@@ -411,6 +411,7 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
       },
     ],
     world_summaries: [{ id: 'official-workshops', summarize: summary }],
+    solver_input: [{ id: 'official-workshops', build: (world) => summary(world) }],
     world_checks: [diagnostics],
     screens: [
       {

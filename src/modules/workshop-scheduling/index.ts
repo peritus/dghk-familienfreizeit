@@ -2,6 +2,14 @@ import { z } from 'zod'
 import { defineModule } from '../define.js'
 import type { Entity, KernelWorld, ModuleFoldCapability } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
+import type {
+  PreflightFinding,
+  SolverInput,
+  SolverStage,
+  StageResult,
+  TraceEntry,
+} from '../../solver/types.js'
+import type { OfficialWorkshopsSummary, WorkshopRecord } from '../official-workshops/index.js'
 
 export type WorkshopSchedulingParams = {
   placement_policy: 'automatic' | 'automatic-with-fixed-decisions'
@@ -24,6 +32,27 @@ export type SpaceSlotBlock = {
 export type WorkshopSchedulingSummary = {
   slots: readonly WorkshopSlot[]
   space_slot_blocks: readonly SpaceSlotBlock[]
+}
+
+export type WorkshopPlacement = {
+  workshop_id: string
+  slot_id: string
+  space_id: string
+}
+
+export type WorkshopSchedulingSection = {
+  placements: readonly WorkshopPlacement[]
+  unscheduled: readonly { workshop_id: string; reason: string }[]
+}
+
+type ScheduleSolverInput = WorkshopSchedulingSummary & {
+  workshops: readonly WorkshopRecord[]
+  spaces: readonly {
+    id: string
+    capacity: number
+    availability_windows: readonly { starts_at: string; ends_at: string }[]
+    capabilities: readonly string[]
+  }[]
 }
 
 const slotId = z.string().regex(/^slot_[a-zA-Z0-9_-]+$/)
@@ -141,6 +170,130 @@ function summary(world: KernelWorld): WorkshopSchedulingSummary {
   return { slots, space_slot_blocks: blocks }
 }
 
+function solverInput(world: KernelWorld): ScheduleSolverInput {
+  const base = summary(world)
+  const official = world.summaries['official-workshops'] as OfficialWorkshopsSummary | undefined
+  const value = (id: string, key: string): JsonValue | undefined =>
+    world.labels_by_entity[id]?.find((label) => label.key === key)?.value
+  const spaces = (world.entities_by_kind['workshop-space'] ?? []).map((item) => ({
+    id: item.id,
+    capacity: Number(value(item.id, 'space-capacity') ?? 0),
+    availability_windows:
+      (value(item.id, 'space-availability') as
+        | { starts_at: string; ends_at: string }[]
+        | undefined) ?? [],
+    capabilities: world.capabilities
+      .filter((capability) => capability.entity_id === item.id)
+      .map((capability) => capability.key),
+  }))
+  return {
+    ...base,
+    workshops: official?.workshops ?? [],
+    spaces,
+  }
+}
+
+function placementStage(): SolverStage<WorkshopSchedulingSection> {
+  return {
+    id: 'workshop-scheduling.placement',
+    after: [],
+    before: [],
+    reads: [],
+    run: (input: SolverInput): StageResult<WorkshopSchedulingSection> => {
+      const schedule = input.module_inputs['workshop-scheduling'] as ScheduleSolverInput
+      const used = new Set<string>()
+      const leaderSlots = new Set<string>()
+      const placements: WorkshopPlacement[] = []
+      const unscheduled: { workshop_id: string; reason: string }[] = []
+      const trace: TraceEntry[] = []
+      const diagnostics: PreflightFinding[] = []
+      const workshops = schedule.workshops
+        .slice()
+        .sort((a, b) => a.sort_key - b.sort_key || a.id.localeCompare(b.id))
+      for (const workshop of workshops) {
+        let selected: WorkshopPlacement | null = null
+        const rejected: { target: string; rule: string }[] = []
+        for (const slot of schedule.slots) {
+          for (const space of schedule.spaces) {
+            const target = `${slot.id}/${space.id}`
+            if (used.has(target)) {
+              rejected.push({ target, rule: 'hard.space-occupied' })
+              continue
+            }
+            if (space.capacity < workshop.capacity) {
+              rejected.push({ target, rule: 'hard.space-capacity' })
+              continue
+            }
+            if (
+              !space.availability_windows.some(
+                (window) => window.starts_at <= slot.starts_at && window.ends_at >= slot.ends_at,
+              )
+            ) {
+              rejected.push({ target, rule: 'hard.space-unavailable' })
+              continue
+            }
+            if (
+              schedule.space_slot_blocks.some(
+                (block) => block.space_id === space.id && block.slot_id === slot.id,
+              )
+            ) {
+              rejected.push({ target, rule: 'hard.space-slot-blocked' })
+              continue
+            }
+            if (workshop.needs.some((need) => !space.capabilities.includes(need))) {
+              rejected.push({ target, rule: 'hard.missing-capability' })
+              continue
+            }
+            if (workshop.leader_ids.some((leader) => leaderSlots.has(`${slot.id}/${leader}`))) {
+              rejected.push({ target, rule: 'hard.leader-conflict' })
+              continue
+            }
+            selected = { workshop_id: workshop.id, slot_id: slot.id, space_id: space.id }
+            break
+          }
+          if (selected) break
+        }
+        if (!selected) {
+          const reason = rejected[0]?.rule ?? 'hard.no-slot-or-space'
+          unscheduled.push({ workshop_id: workshop.id, reason })
+          diagnostics.push({
+            check: 'workshop-scheduling.unscheduled',
+            severity: 'error',
+            subjects: [workshop.id],
+            text: reason,
+          })
+          trace.push({
+            stage: 'workshop-scheduling.placement',
+            step: 'unscheduled',
+            subject: workshop.id,
+            text: `${workshop.id}: ${reason}`,
+            detail: { rejected },
+          })
+          continue
+        }
+        placements.push(selected)
+        used.add(`${selected.slot_id}/${selected.space_id}`)
+        workshop.leader_ids.forEach((leader) => leaderSlots.add(`${selected!.slot_id}/${leader}`))
+        trace.push({
+          stage: 'workshop-scheduling.placement',
+          step: 'automatic',
+          subject: workshop.id,
+          text: `${workshop.id} → ${selected.slot_id}/${selected.space_id}`,
+          detail: {
+            chosen: {
+              target: `${selected.slot_id}/${selected.space_id}`,
+              score: 0,
+              terms: [['stable-order', 0]],
+            },
+            rejected,
+          },
+        })
+      }
+      return { output: { placements, unscheduled }, trace, diagnostics }
+    },
+  }
+}
+
 export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
   id: 'workshop-scheduling',
   requires: ['official-workshops', 'workshop-space'],
@@ -215,7 +368,8 @@ export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
           capability.retireEntity('space-slot-block', blockPayload.parse(event.payload).block_id),
       },
     ],
-    solver_input: [{ id: 'workshop-scheduling', build: (world) => summary(world) }],
+    solver_input: [{ id: 'workshop-scheduling', build: solverInput }],
+    stages: [placementStage()],
     world_summaries: [{ id: 'workshop-scheduling', summarize: summary }],
     screens: [
       {

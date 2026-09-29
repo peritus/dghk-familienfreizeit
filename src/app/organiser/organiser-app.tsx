@@ -21,6 +21,7 @@ import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
 import { AssignmentBoardScreen } from '../../modules/room-assignment/app/assignment-board.js'
+import { WorkshopProgramme, Workshops, WorkshopSlots, WorkshopSpaces } from './screens/workshops.js'
 import { familyIdFromRouteSegment, organiserRoutePaths } from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
 
@@ -252,6 +253,26 @@ export default function OrganiserApp() {
           {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-board') ? (
             <Route path={organiserRoutePaths.assignment_board}>
               <AssignmentBoardScreen />
+            </Route>
+          ) : null}
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshops') ? (
+            <Route path={organiserRoutePaths.workshops}>
+              <Workshops />
+            </Route>
+          ) : null}
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-programme') ? (
+            <Route path={organiserRoutePaths.workshop_programme}>
+              <WorkshopProgramme />
+            </Route>
+          ) : null}
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-slots') ? (
+            <Route path={organiserRoutePaths.workshop_slots}>
+              <WorkshopSlots />
+            </Route>
+          ) : null}
+          {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-spaces') ? (
+            <Route path={organiserRoutePaths.workshop_spaces}>
+              <WorkshopSpaces />
             </Route>
           ) : null}
           <Route>

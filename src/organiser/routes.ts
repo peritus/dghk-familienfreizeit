@@ -17,6 +17,10 @@ export const organiserRoutePaths = {
   family_detail: '/families/:id',
   inventory: '/inventory',
   assignment_board: '/board',
+  workshops: '/workshops',
+  workshop_programme: '/workshops/programme',
+  workshop_slots: '/workshops/slots',
+  workshop_spaces: '/workshop-spaces',
 } as const
 
 export const kernelOrganiserRouteDefinitions = [
@@ -144,6 +148,10 @@ export const organiserPaths = {
     nestedPath(`${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`),
   inventory: (): OrganiserPath => nestedPath(organiserRoutePaths.inventory),
   assignment_board: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_board),
+  workshops: (): OrganiserPath => nestedPath(organiserRoutePaths.workshops),
+  workshop_programme: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_programme),
+  workshop_slots: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_slots),
+  workshop_spaces: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_spaces),
 } as const
 
 export const organiserUrls = {
@@ -154,6 +162,13 @@ export const organiserUrls = {
   inventory: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserPaths.inventory()}`),
   assignment_board: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.assignment_board()}`),
+  workshops: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserPaths.workshops()}`),
+  workshop_programme: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_programme()}`),
+  workshop_slots: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_slots()}`),
+  workshop_spaces: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_spaces()}`),
 } as const
 
 export function isKnownOrganiserPath(pathname: string): boolean {

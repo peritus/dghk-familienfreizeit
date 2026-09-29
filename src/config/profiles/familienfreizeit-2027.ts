@@ -11,6 +11,11 @@ import {
 } from '../define.js'
 import { roomInventory } from '../../modules/room-inventory/index.js'
 import { roomAssignment } from '../../modules/room-assignment/index.js'
+import { officialWorkshops } from '../../modules/official-workshops/index.js'
+import { workshopAssignment } from '../../modules/workshop-assignment/index.js'
+import { workshopRankings } from '../../modules/workshop-rankings/index.js'
+import { workshopScheduling } from '../../modules/workshop-scheduling/index.js'
+import { workshopSpace } from '../../modules/workshop-space/index.js'
 
 export const familienfreizeit2027Profile = defineOccasionProfile({
   meta: {
@@ -188,6 +193,22 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       no_bed_trait: 'does-not-need-a-bed',
       priority_trait: 'needs-accessible',
       scarce_capabilities: { accessible: -3 },
+      max_repair_passes: 5,
+    }),
+    workshopSpace({}),
+    officialWorkshops({
+      audience_values: ['children', 'adults', 'all'],
+      available_modes: ['assigned', 'sign-up', 'interest'],
+      excluded_roles: ['infant'],
+    }),
+    workshopScheduling({ placement_policy: 'automatic-with-fixed-decisions' }),
+    workshopRankings({ ranking_trait: 'prefers-workshop', max_rank: 3, allow_no_preference: true }),
+    workshopAssignment({
+      top_n: 2,
+      rank_weights: [3, 2, 1],
+      minimum_workshops: 2,
+      fairness_targets: { children: 2, adults: 1 },
+      fill_unassigned: true,
       max_repair_passes: 5,
     }),
   ],
