@@ -1,5 +1,6 @@
 import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { BedIcon } from '../../../../app/components/bed-icons.js'
+import { AvailabilityBadge } from '../../../../app/components/ui/availability-badge.js'
 import { Badge } from '../../../../app/components/ui/badge.js'
 import { Card } from '../../../../app/components/ui/card.js'
 import { Tag } from '../../../../app/components/ui/tag.js'
@@ -35,7 +36,7 @@ export function RoomCard({
               {Math.abs(room.free)} {Math.abs(room.free) === 1 ? 'Platz' : 'Plätze'} zu wenig
             </Badge>
           ) : room.occupied > 0 && room.free > 0 ? (
-            <Badge variant="free">{room.free} frei</Badge>
+            <AvailabilityBadge free={room.free} />
           ) : null}
         </div>
         <div className="flex flex-wrap gap-1.5 text-sm text-muted">

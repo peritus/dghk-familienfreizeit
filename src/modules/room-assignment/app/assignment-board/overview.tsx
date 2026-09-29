@@ -1,7 +1,7 @@
 import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import type { ReactNode } from 'react'
+import { AvailabilityBadge } from '../../../../app/components/ui/availability-badge.js'
 import { SuccessState } from '../../../../app/components/ui/success-state.js'
-import { Tag } from '../../../../app/components/ui/tag.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../types.js'
 import { RequirementChip } from './chips.js'
@@ -66,7 +66,7 @@ export function RoomOverviewRow({ room }: { room: RoomView }) {
 export function FitHints({ room }: { room: RoomView }) {
   return (
     <div className="space-y-1 text-sm">
-      <Tag>{room.free} frei</Tag>
+      <AvailabilityBadge free={room.free} />
       {room.fit_hints.length > 0 ? (
         <ul className="space-y-1">
           {room.fit_hints.map((family) => (

@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../../../app/components/ui/dialog.js'
+import { AvailabilityBadge } from '../../../../app/components/ui/availability-badge.js'
 import { Button } from '../../../../app/components/ui/button.js'
-import { Badge } from '../../../../app/components/ui/badge.js'
 import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RequirementView, RoomView } from '../types.js'
@@ -106,7 +106,7 @@ export function FixedAssignmentDialog({
                     </p>
                   ) : null}
                 </div>
-                <Badge variant="free">{room.free} frei</Badge>
+                <AvailabilityBadge free={room.free} />
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {requirements.map((requirement) => (
