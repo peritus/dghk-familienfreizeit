@@ -33,6 +33,13 @@ export type WorkshopFixed = { person_id: string; workshop_id: string }
 
 export type WorkshopFixedViolation = WorkshopFixed & { reasons: readonly string[] }
 
+export type WorkshopRetentionDrop = {
+  person_id: string
+  workshop_id: string
+  slot_id: string
+  reason: string
+}
+
 export type WorkshopAssignmentSection = {
   assignments: readonly WorkshopAssignment[]
   unassigned: readonly WorkshopUnassigned[]
@@ -40,6 +47,7 @@ export type WorkshopAssignmentSection = {
   interests: readonly { person_id: string; workshop_id: string }[]
   fixed: readonly WorkshopFixed[]
   fixed_violations: readonly WorkshopFixedViolation[]
+  retention_drops: readonly WorkshopRetentionDrop[]
 }
 
 function labelValue(input: SolverInput, entityId: string, key: string): JsonValue | undefined {
@@ -165,17 +173,58 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         }
       }
 
-      // Step 2: retain a still-feasible prior assignment for anyone with no
-      // fixed decision this cycle, before any new ranking/fill decision runs.
+      // Step 2: retain every still-feasible prior assignment for anyone with
+      // no fixed decision this cycle, before any new ranking/fill decision
+      // runs. A person may have retained more than one prior assignment
+      // (e.g. minimum_workshops > 1) — every one of them is considered, not
+      // just the first found.
       const fixedPersonIds = new Set(fixed.map(({ person_id: personId }) => personId))
+      const retentionDrops: WorkshopRetentionDrop[] = []
+      const drop = (personId: string, workshopId: string, slotId: string, reason: string): void => {
+        retentionDrops.push({
+          person_id: personId,
+          workshop_id: workshopId,
+          slot_id: slotId,
+          reason,
+        })
+        trace.push({
+          stage: 'workshop-assignment.attendance',
+          step: 'retention-drop',
+          subject: personId,
+          text: `${personId} not retained in ${workshopId}: ${reason}`,
+        })
+      }
       if (previous)
         for (const person of assignedPeople) {
           if (fixedPersonIds.has(person.id)) continue
-          const priorWorkshopId = previous.assignments.find(
+          const priorAssignments = previous.assignments.filter(
             ({ person_id: personId }) => personId === person.id,
-          )?.workshop_id
-          const priorWorkshop = priorWorkshopId ? workshops.get(priorWorkshopId) : undefined
-          if (priorWorkshop) place(person.id, priorWorkshop, null, 'retained')
+          )
+          for (const prior of priorAssignments) {
+            const priorWorkshop = workshops.get(prior.workshop_id)
+            if (!priorWorkshop) {
+              drop(person.id, prior.workshop_id, prior.slot_id, 'hard.cancellation')
+              continue
+            }
+            const currentPlacement = placements.get(priorWorkshop.id)
+            if (!currentPlacement || currentPlacement.slot_id !== prior.slot_id) {
+              drop(person.id, prior.workshop_id, prior.slot_id, 'hard.schedule-changed')
+              continue
+            }
+            const stillRanked = rankingByPerson
+              .get(person.id)
+              ?.choices.some(
+                (choice) => choice.workshop_id === prior.workshop_id && choice.rank !== null,
+              )
+            if (!stillRanked) {
+              drop(person.id, prior.workshop_id, prior.slot_id, 'hard.no-longer-ranked')
+              continue
+            }
+            if (!place(person.id, priorWorkshop, null, 'retained')) {
+              const failure = rejectionReason(person.id, priorWorkshop) ?? 'hard.capacity'
+              drop(person.id, prior.workshop_id, prior.slot_id, failure)
+            }
+          }
         }
 
       // Steps 3–4: ranked choices, then fill remaining minimums.
@@ -300,6 +349,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           interests,
           fixed: Object.freeze(fixed),
           fixed_violations: Object.freeze(fixedViolations),
+          retention_drops: Object.freeze(retentionDrops),
         },
         trace,
         diagnostics: Object.freeze(
@@ -348,6 +398,7 @@ export function workshopAssignmentSection(plan: {
       interests: [],
       fixed: [],
       fixed_violations: [],
+      retention_drops: [],
     }
   )
 }
