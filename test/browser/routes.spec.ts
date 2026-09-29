@@ -92,7 +92,7 @@ test('dashboard, families, and family detail form one working navigation chain',
 test('module navigation reaches canonical public URLs without duplicating the base', async ({
   page,
 }) => {
-  await page.goto('/organiser')
+  await page.goto('/organiser/accommodation/inventory')
   const boardLink = page.getByRole('link', { name: 'Belegung' })
   await expect(boardLink).toHaveAttribute('href', '/organiser/accommodation/assignment')
   await boardLink.click()
@@ -105,7 +105,7 @@ test('accommodation parent redirects to inventory and workshop spaces links to s
 }) => {
   await page.goto('/organiser/accommodation')
   await expect(page).toHaveURL(/\/organiser\/accommodation\/inventory$/)
-  await expect(page.getByRole('heading', { name: 'Unterkunft' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Unterkunft', exact: true })).toBeVisible()
 
   await page.goto('/organiser/workshops/spaces')
   await expect(page.getByRole('heading', { name: 'Räume und Slots' })).toBeVisible()
