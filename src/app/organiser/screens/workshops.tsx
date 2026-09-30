@@ -16,7 +16,7 @@ import { OrganiserLink } from '../../components/application/organiser-link.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
-  WorkshopEditorForm,
+  WorkshopEditorDialog,
   WorkshopLeaderPicker,
 } from '../components/workshop/editors.js'
 import {
@@ -186,7 +186,7 @@ export function Workshops() {
   const schedule = workshopSchedulingWorld(world!)
   const spaces = workshopSpaceWorld(world!).live
   const plan = solveWorkshopPlan(world!)
-  const [open, setOpen] = useState(false)
+  const [editor, setEditor] = useState<'new' | string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [audienceFilter, setAudienceFilter] = useState<'all' | 'children' | 'adults'>('all')
   const people = world!.persons
@@ -212,37 +212,58 @@ export function Workshops() {
       (assignedByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
     )
   const placedWorkshopIds = new Set(plan.placements.map((placement) => placement.workshop_id))
+  const editingWorkshop =
+    editor && editor !== 'new'
+      ? summary.workshops.find((workshop) => workshop.id === editor)
+      : undefined
   const activeWorkshops = summary.workshops.filter(
     (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
   )
-  const add = (event: FormEvent<HTMLFormElement>) => {
+  const saveWorkshop = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const title = String(data.get('title') ?? '').trim()
+    const ageMin = Number(data.get('age_min') ?? 0)
+    const ageMax = Number(data.get('age_max') ?? 120)
+    const capacity = Number(data.get('capacity') ?? 0)
     if (!title) {
       setError('Gib dem Workshop einen Titel.')
       return
     }
+    if (
+      !Number.isInteger(ageMin) ||
+      !Number.isInteger(ageMax) ||
+      ageMin < 0 ||
+      ageMax > 120 ||
+      ageMin > ageMax
+    ) {
+      setError('Der Altersbereich muss zwischen 0 und 120 Jahren liegen und aufsteigend sein.')
+      return
+    }
+    if (!Number.isInteger(capacity) || capacity < 0) {
+      setError('Die Platzanzahl muss eine ganze Zahl ab 0 sein.')
+      return
+    }
     stage([
-      draft(state.principal_email ?? '', 'WorkshopAdded', {
-        workshop_id: id('wks_'),
+      draft(state.principal_email ?? '', editingWorkshop ? 'WorkshopUpdated' : 'WorkshopAdded', {
+        workshop_id: editingWorkshop?.id ?? id('wks_'),
         title,
         description: String(data.get('description') ?? ''),
         audience: String(data.get('audience') ?? 'all'),
-        age_min: Number(data.get('age_min') ?? 0),
-        age_max: Number(data.get('age_max') ?? 120),
-        capacity: Number(data.get('capacity') ?? 8),
+        age_min: ageMin,
+        age_max: ageMax,
+        capacity,
         participation_mode: String(data.get('participation_mode') ?? 'assigned'),
         leader_ids: data.getAll('leader_ids').map(String),
         needs: String(data.get('needs') ?? '')
           .split(',')
           .map((value) => value.trim())
           .filter(Boolean),
-        sort_key: summary.workshops.length + summary.cancelled.length + 1,
+        sort_key:
+          editingWorkshop?.sort_key ?? summary.workshops.length + summary.cancelled.length + 1,
       }),
     ])
-    event.currentTarget.reset()
-    setOpen(false)
+    setEditor(null)
     setError(null)
   }
   return (
@@ -253,8 +274,13 @@ export function Workshops() {
         title="Workshopübersicht"
         description="Anlegen, Wahl öffnen, Zuordnung prüfen und den aktuellen Plan festlegen."
         action={
-          <Button onClick={() => setOpen((value) => !value)}>
-            {open ? 'Abbrechen' : 'Workshop hinzufügen'}
+          <Button
+            onClick={() => {
+              setEditor('new')
+              setError(null)
+            }}
+          >
+            Workshop hinzufügen
           </Button>
         }
       />
@@ -301,25 +327,45 @@ export function Workshops() {
           ? 'Workshopdaten sind vorhanden. Prüfe als Nächstes die Zielgruppen, Leitungen und Programmwünsche.'
           : 'Die Workshopdatenbank ist bereit für den ersten Entwurf.'}
       </WorkshopPhaseNotice>
-      {error ? (
-        <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
-          {error}
-        </p>
-      ) : null}
-      {open ? (
-        <WorkshopEditorForm on_submit={add} submit_label="Entwurf anlegen" default_values={{}}>
-          <WorkshopLeaderPicker
-            leaders={[
-              ...people.map((person) => ({ id: person.id, label: person.name })),
-              ...summary.external_leaders.map((leader) => ({
-                id: leader.id,
-                label: leader.name,
-                external: true,
-              })),
-            ]}
-          />
-        </WorkshopEditorForm>
-      ) : null}
+      <WorkshopEditorDialog
+        open={editor !== null}
+        on_open_change={(open) => {
+          if (!open) {
+            setEditor(null)
+            setError(null)
+          }
+        }}
+        on_submit={saveWorkshop}
+        submit_label={editingWorkshop ? 'Speichern' : 'Entwurf anlegen'}
+        error={error}
+        default_values={
+          editingWorkshop
+            ? {
+                title: editingWorkshop.title,
+                description: editingWorkshop.description,
+                audience: editingWorkshop.audience,
+                capacity: editingWorkshop.capacity,
+                participation_mode: editingWorkshop.mode,
+                age_min: editingWorkshop.age_min,
+                age_max: editingWorkshop.age_max,
+                needs: editingWorkshop.needs.join(', '),
+              }
+            : undefined
+        }
+      >
+        <WorkshopLeaderPicker
+          key={editor ?? 'new'}
+          leaders={[
+            ...people.map((person) => ({ id: person.id, label: person.name })),
+            ...summary.external_leaders.map((leader) => ({
+              id: leader.id,
+              label: leader.name,
+              external: true,
+            })),
+          ]}
+          selected_ids={editingWorkshop?.leader_ids}
+        />
+      </WorkshopEditorDialog>
       <WorkshopStatsStrip
         items={[
           { value: summary.workshops.length, label: 'aktive Workshops' },
@@ -356,39 +402,54 @@ export function Workshops() {
           }
         />
         {activeWorkshops.length ? (
-          activeWorkshops.map((workshop) => (
-            <WorkshopSummaryRow
-              key={workshop.id}
-              workshop={{
-                id: workshop.id,
-                title: workshop.title,
-                description: workshop.description,
-                audience: audienceLabel(workshop.audience),
-                age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
-                capacity: workshop.capacity,
-                participation_mode: participationLabel(workshop.mode),
-                leaders: workshop.leader_ids.map(
-                  (leaderId) => leaderNames.get(leaderId) ?? leaderId,
-                ),
-                requirement: workshop.needs.join(', ') || undefined,
-                demand:
-                  workshop.mode === 'assigned'
-                    ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
-                        plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
-                      }`
-                    : workshop.mode === 'sign-up'
-                      ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
-                      : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
-                placement: {
-                  label:
-                    placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
-                    'Noch nicht eingeplant',
-                  tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
-                },
-                attention: workshop.leader_ids.length ? undefined : 'Leitung fehlt',
-              }}
-            />
-          ))
+          <div className="divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black bg-white">
+            {activeWorkshops.map((workshop) => (
+              <WorkshopSummaryRow
+                key={workshop.id}
+                workshop={{
+                  id: workshop.id,
+                  title: workshop.title,
+                  description: workshop.description,
+                  audience: audienceLabel(workshop.audience),
+                  age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+                  capacity: workshop.capacity,
+                  participation_mode: participationLabel(workshop.mode),
+                  leaders: workshop.leader_ids.map(
+                    (leaderId) => leaderNames.get(leaderId) ?? leaderId,
+                  ),
+                  requirement: workshop.needs.join(', ') || undefined,
+                  demand:
+                    workshop.mode === 'assigned'
+                      ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
+                          plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
+                        }`
+                      : workshop.mode === 'sign-up'
+                        ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
+                        : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
+                  placement: {
+                    label:
+                      placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
+                      'Noch nicht eingeplant',
+                    tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
+                  },
+                  attention: workshop.leader_ids.length ? undefined : 'Leitung fehlt',
+                }}
+                action={
+                  <Button
+                    size="sm"
+                    variant="neutral"
+                    onClick={() => {
+                      setEditor(workshop.id)
+                      setError(null)
+                    }}
+                  >
+                    Bearbeiten
+                    <span className="sr-only">: {workshop.title}</span>
+                  </Button>
+                }
+              />
+            ))}
+          </div>
         ) : (
           <WorkshopEmptyState title="Keine aktiven Workshops">
             Noch keine Workshops. Lege den ersten Entwurf an.

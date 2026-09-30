@@ -241,6 +241,71 @@ test('the workshop overview presents resolved labels and derived placement data'
   expect(screen.getByText(/Atelier/)).toBeTruthy()
 })
 
+test('workshop authoring uses the focused editor dialog to create a workshop', async () => {
+  const { fetchMock } = open('/organiser/workshops', workshopFixtureEvents())
+  if (!fetchMock) throw new Error('organiser fetch mock not installed')
+
+  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Workshop hinzufügen' }))
+
+  expect(screen.getByRole('dialog')).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Workshop hinzufügen' })).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Fotowerkstatt' } })
+  fireEvent.change(screen.getByLabelText('Beschreibung für Familien'), {
+    target: { value: 'Bilder machen und entwickeln.' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Entwurf anlegen' }))
+
+  expect(await screen.findByText('Fotowerkstatt')).toBeTruthy()
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith('/api/organiser/apply', expect.anything()),
+  )
+  const applyCall = fetchMock.mock.calls.find(([input]) =>
+    String(input).endsWith('/api/organiser/apply'),
+  )
+  const body = JSON.parse(String(applyCall?.[1]?.body ?? '{}')) as {
+    events?: readonly { type?: string; payload?: Record<string, unknown> }[]
+  }
+  expect(body.events?.[0]).toMatchObject({
+    type: 'WorkshopAdded',
+    payload: { title: 'Fotowerkstatt', description: 'Bilder machen und entwickeln.' },
+  })
+})
+
+test('workshop authoring opens existing values and stages a complete update', async () => {
+  const { fetchMock } = open('/organiser/workshops', workshopFixtureEvents())
+  if (!fetchMock) throw new Error('organiser fetch mock not installed')
+
+  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Keramik' }))
+
+  expect(screen.getByRole('heading', { name: 'Workshop bearbeiten: Keramik' })).toBeTruthy()
+  expect((screen.getByLabelText('Titel') as HTMLInputElement).value).toBe('Keramik')
+  expect((screen.getByRole('checkbox', { name: 'Mira Stein' }) as HTMLInputElement).checked).toBe(
+    true,
+  )
+  fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Keramik Plus' } })
+  fireEvent.change(screen.getByRole('spinbutton', { name: /^Plätze/ }), {
+    target: { value: '10' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+
+  expect(await screen.findByText('Keramik Plus')).toBeTruthy()
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith('/api/organiser/apply', expect.anything()),
+  )
+  const applyCall = fetchMock.mock.calls.find(([input]) =>
+    String(input).endsWith('/api/organiser/apply'),
+  )
+  const body = JSON.parse(String(applyCall?.[1]?.body ?? '{}')) as {
+    events?: readonly { type?: string; payload?: Record<string, unknown> }[]
+  }
+  expect(body.events?.[0]).toMatchObject({
+    type: 'WorkshopUpdated',
+    payload: { workshop_id: 'wks_keramik', title: 'Keramik Plus', capacity: 10 },
+  })
+})
+
 test('the programme groups slots by their actual date and avoids false action buttons', async () => {
   open('/organiser/workshops/programme', workshopFixtureEvents())
 
