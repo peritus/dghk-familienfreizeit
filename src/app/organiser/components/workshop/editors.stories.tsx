@@ -5,6 +5,7 @@ import {
   SlotEditorForm,
   SpaceEditorForm,
   WorkshopConfirmationDialog,
+  WorkshopEditorDialog,
   WorkshopEditorForm,
   WorkshopLeaderPicker,
 } from './editors.js'
@@ -96,4 +97,35 @@ export const Forms: Story = {
 
 export const Confirmation: Story = {
   render: () => <ConfirmationExample />,
+}
+
+export const EditorDialog: Story = {
+  render: () => {
+    const preventSubmit = (event: FormEvent<HTMLFormElement>) => event.preventDefault()
+    return (
+      <WorkshopEditorDialog
+        open
+        on_open_change={() => undefined}
+        on_submit={preventSubmit}
+        default_values={{
+          title: 'Waldentdecker',
+          description: 'Draußen Spuren lesen und Pflanzen entdecken.',
+          audience: 'children',
+          capacity: 12,
+          participation_mode: 'assigned',
+          age_min: 7,
+          age_max: 12,
+          needs: 'Außenbereich, Erste Hilfe',
+        }}
+      >
+        <WorkshopLeaderPicker
+          leaders={[
+            { id: 'internal-1', label: 'Mara Schmidt' },
+            { id: 'external-1', label: 'Nina Baum', external: true },
+          ]}
+          selected_ids={['external-1']}
+        />
+      </WorkshopEditorDialog>
+    )
+  },
 }

@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from 'react'
+import { useId, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +12,15 @@ import {
 import { Button } from '../../../components/shared/ui/button.js'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/shared/ui/card.js'
 import { WorkshopField } from '../../../components/shared/workshop/shared.js'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../components/shared/ui/dialog.js'
 
 const controlClass = 'min-h-11 rounded-base border-2 border-black px-3 font-normal'
 
@@ -102,27 +111,73 @@ export function WorkshopLeaderPicker({
   leaders: readonly { id: string; label: string; external?: boolean }[]
   selected_ids?: readonly string[]
 }) {
+  const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState<readonly string[]>(selectedIds)
+  const normalizedQuery = query.trim().toLocaleLowerCase('de-DE')
+  const visibleLeaders = useMemo(
+    () =>
+      leaders.filter((leader) => leader.label.toLocaleLowerCase('de-DE').includes(normalizedQuery)),
+    [leaders, normalizedQuery],
+  )
+  const groups = [
+    { label: 'Interne Leitungen', external: false },
+    { label: 'Externe Leitungen', external: true },
+  ]
   return (
-    <label className="grid gap-1 font-bold">
-      Leitungen
-      <span className="text-sm font-normal text-muted">
-        Mehrere Personen oder externe Leitungen mit Strg/Cmd auswählen.
-      </span>
-      <select
-        name="leader_ids"
-        multiple
-        size={Math.min(6, Math.max(3, leaders.length))}
-        defaultValue={selectedIds}
-        className={`${controlClass} min-h-24 py-2`}
+    <fieldset className="grid gap-2 sm:col-span-2">
+      <legend className="font-bold">Leitungen</legend>
+      <p className="text-sm font-normal text-muted" id="workshop-leader-hint">
+        Suche nach Personen aus der Veranstaltung oder bereits angelegten externen Leitungen.
+      </p>
+      <input
+        type="search"
+        aria-label="Leitungen durchsuchen"
+        placeholder="Leitung suchen …"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        className={controlClass}
+      />
+      <div
+        aria-describedby="workshop-leader-hint"
+        className="grid max-h-56 gap-3 overflow-y-auto rounded-base border-2 border-black bg-white p-3"
       >
-        {leaders.map((leader) => (
-          <option key={leader.id} value={leader.id}>
-            {leader.label}
-            {leader.external ? ' (extern)' : ''}
-          </option>
-        ))}
-      </select>
-    </label>
+        {groups.map((group) => {
+          const groupLeaders = visibleLeaders.filter(
+            (leader) => Boolean(leader.external) === group.external,
+          )
+          if (!groupLeaders.length) return null
+          return (
+            <div key={group.label} className="grid gap-2">
+              <p className="text-sm font-bold text-muted">{group.label}</p>
+              {groupLeaders.map((leader) => (
+                <label key={leader.id} className="flex min-h-11 items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="leader_ids"
+                    value={leader.id}
+                    checked={selected.includes(leader.id)}
+                    onChange={(event) =>
+                      setSelected((current) =>
+                        event.target.checked
+                          ? [...current, leader.id]
+                          : current.filter((id) => id !== leader.id),
+                      )
+                    }
+                  />
+                  <span>
+                    {leader.label}
+                    {leader.external ? ' (extern)' : ''}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )
+        })}
+        {!visibleLeaders.length ? (
+          <p className="text-sm text-muted">Keine Leitung gefunden.</p>
+        ) : null}
+      </div>
+    </fieldset>
   )
 }
 
@@ -135,6 +190,79 @@ export type WorkshopEditorValues = {
   age_min?: number
   age_max?: number
   needs?: string
+}
+
+function WorkshopEditorFields({
+  default_values: defaultValues,
+  children,
+}: {
+  default_values: WorkshopEditorValues
+  children?: ReactNode
+}) {
+  return (
+    <>
+      <WorkshopField label="Titel" name="title" defaultValue={defaultValues.title} required />
+      <WorkshopSelectField
+        label="Zielgruppe"
+        name="audience"
+        default_value={defaultValues.audience ?? 'all'}
+      >
+        <option value="all">Alle</option>
+        <option value="children">Kinder</option>
+        <option value="adults">Erwachsene</option>
+      </WorkshopSelectField>
+      <div className="sm:col-span-2">
+        <WorkshopTextareaField
+          label="Beschreibung für Familien"
+          name="description"
+          default_value={defaultValues.description}
+        />
+      </div>
+      <WorkshopField
+        label="Alter ab"
+        name="age_min"
+        type="number"
+        min="0"
+        max="120"
+        defaultValue={defaultValues.age_min ?? 0}
+      />
+      <WorkshopField
+        label="Alter bis"
+        name="age_max"
+        type="number"
+        min="0"
+        max="120"
+        defaultValue={defaultValues.age_max ?? 120}
+      />
+      <WorkshopField
+        label="Plätze"
+        name="capacity"
+        type="number"
+        min="0"
+        max="200"
+        defaultValue={defaultValues.capacity ?? 8}
+        hint="Leitungen zählen nicht mit."
+      />
+      <WorkshopSelectField
+        label="Teilnahme"
+        name="participation_mode"
+        default_value={defaultValues.participation_mode ?? 'assigned'}
+      >
+        <option value="assigned">Zuordnung</option>
+        <option value="sign-up">Anmeldung</option>
+        <option value="interest">Interesse</option>
+      </WorkshopSelectField>
+      <div className="sm:col-span-2">
+        <WorkshopField
+          label="Benötigt"
+          name="needs"
+          defaultValue={defaultValues.needs}
+          hint="Mehrere Fähigkeiten mit Komma trennen; die Prüfung erfolgt über den Resolver."
+        />
+      </div>
+      {children}
+    </>
+  )
 }
 
 export function WorkshopEditorForm({
@@ -155,68 +283,68 @@ export function WorkshopEditorForm({
       </CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-          <WorkshopField label="Titel" name="title" defaultValue={defaultValues.title} required />
-          <WorkshopSelectField
-            label="Zielgruppe"
-            name="audience"
-            default_value={defaultValues.audience ?? 'all'}
-          >
-            <option value="all">Alle</option>
-            <option value="children">Kinder</option>
-            <option value="adults">Erwachsene</option>
-          </WorkshopSelectField>
-          <div className="sm:col-span-2">
-            <WorkshopTextareaField
-              label="Beschreibung"
-              name="description"
-              default_value={defaultValues.description}
-            />
-          </div>
-          <WorkshopField
-            label="Kapazität"
-            name="capacity"
-            type="number"
-            min="0"
-            defaultValue={defaultValues.capacity ?? 8}
-          />
-          <WorkshopSelectField
-            label="Teilnahme"
-            name="participation_mode"
-            default_value={defaultValues.participation_mode ?? 'assigned'}
-          >
-            <option value="assigned">Zuordnung</option>
-            <option value="sign-up">Anmeldung</option>
-            <option value="interest">Interesse</option>
-          </WorkshopSelectField>
-          <WorkshopField
-            label="Mindestalter"
-            name="age_min"
-            type="number"
-            min="0"
-            defaultValue={defaultValues.age_min ?? 0}
-          />
-          <WorkshopField
-            label="Höchstalter"
-            name="age_max"
-            type="number"
-            min="0"
-            defaultValue={defaultValues.age_max ?? 120}
-          />
-          <div className="sm:col-span-2">
-            <WorkshopField
-              label="Benötigt"
-              name="needs"
-              defaultValue={defaultValues.needs}
-              hint="Mehrere Fähigkeiten mit Komma trennen; die Prüfung erfolgt über den Resolver."
-            />
-          </div>
-          {children ? <div className="sm:col-span-2">{children}</div> : null}
+          <WorkshopEditorFields default_values={defaultValues}>{children}</WorkshopEditorFields>
           <div className="sm:col-span-2">
             <Button type="submit">{submitLabel}</Button>
           </div>
         </form>
       </CardContent>
     </Card>
+  )
+}
+
+export function WorkshopEditorDialog({
+  open,
+  on_open_change: onOpenChange,
+  default_values: defaultValues = {},
+  on_submit: onSubmit,
+  submit_label: submitLabel = 'Übernehmen',
+  error,
+  children,
+}: {
+  open: boolean
+  on_open_change: (open: boolean) => void
+  default_values?: WorkshopEditorValues
+  on_submit: (event: FormEvent<HTMLFormElement>) => void
+  submit_label?: string
+  error?: ReactNode
+  children?: ReactNode
+}) {
+  const formId = useId()
+  const title = defaultValues.title
+    ? `Workshop bearbeiten: ${defaultValues.title}`
+    : 'Workshop hinzufügen'
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            Beschreibung, Zielgruppe und Rahmen für diesen Workshop festlegen.
+          </DialogDescription>
+          {error ? (
+            <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
+              {error}
+            </p>
+          ) : null}
+        </DialogHeader>
+        <form id={formId} className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
+          <WorkshopEditorFields default_values={defaultValues}>{children}</WorkshopEditorFields>
+        </form>
+        <DialogFooter>
+          <DialogClose
+            render={
+              <Button type="button" variant="neutral">
+                Abbrechen
+              </Button>
+            }
+          />
+          <Button type="submit" form={formId}>
+            {submitLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

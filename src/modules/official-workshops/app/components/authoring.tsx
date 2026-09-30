@@ -117,26 +117,24 @@ export function WorkshopSummaryRow({
   action?: ReactNode
 }) {
   return (
-    <Card size="sm" className="bg-white">
-      <CardContent className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 flex-1 space-y-2">
-          <WorkshopIdentity title={workshop.title} description={workshop.description} />
-          <WorkshopBadgeGroup
-            audience={workshop.audience}
-            participation_mode={workshop.participation_mode}
-          />
-          <WorkshopFacts
-            age_range={workshop.age_range}
-            capacity={workshop.capacity}
-            requirement={workshop.requirement}
-            demand={workshop.demand}
-          />
-          <WorkshopLeaderSummary leaders={workshop.leaders} />
-          <WorkshopPlacementStatus placement={workshop.placement} attention={workshop.attention} />
-        </div>
-        {action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}
-      </CardContent>
-    </Card>
+    <article className="flex flex-wrap items-start justify-between gap-4 bg-white p-4 sm:p-5">
+      <div className="min-w-0 flex-1 space-y-2">
+        <WorkshopIdentity title={workshop.title} description={workshop.description} />
+        <WorkshopBadgeGroup
+          audience={workshop.audience}
+          participation_mode={workshop.participation_mode}
+        />
+        <WorkshopFacts
+          age_range={workshop.age_range}
+          capacity={workshop.capacity}
+          requirement={workshop.requirement}
+          demand={workshop.demand}
+        />
+        <WorkshopLeaderSummary leaders={workshop.leaders} />
+        <WorkshopPlacementStatus placement={workshop.placement} attention={workshop.attention} />
+      </div>
+      {action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}
+    </article>
   )
 }
 
