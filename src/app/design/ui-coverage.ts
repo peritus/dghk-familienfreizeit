@@ -371,4 +371,28 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop programme review rows',
     source: 'src/app/organiser/components/workshop/programme.tsx',
   },
+  {
+    id: 'components-organiser-workshop-choices--answers-and-demand',
+    area: 'component',
+    subject: 'Workshop choice answers and demand',
+    source: 'src/app/organiser/components/workshop/choices.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-choices--trace',
+    area: 'component',
+    subject: 'Workshop choice trace',
+    source: 'src/app/organiser/components/workshop/choices.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-participation--attendance',
+    area: 'component',
+    subject: 'Workshop participation attendance',
+    source: 'src/app/organiser/components/workshop/participation.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-participation--cases',
+    area: 'component',
+    subject: 'Workshop participation cases',
+    source: 'src/app/organiser/components/workshop/participation.tsx',
+  },
 ]
