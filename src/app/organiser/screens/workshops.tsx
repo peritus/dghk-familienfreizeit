@@ -7,9 +7,17 @@ import { workshopSpaceWorld } from '../../../modules/workshop-space/index.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../../solver/index.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { Button } from '../../components/ui/button.js'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card.js'
+import { Card, CardContent } from '../../components/ui/card.js'
 import { Tag } from '../../components/ui/tag.js'
 import { OrganiserLink } from '../../components/organiser-link.js'
+import { WorkshopEditorForm, WorkshopLeaderPicker } from '../components/workshop/editors.js'
+import {
+  WorkshopEmptyState,
+  WorkshopScreenHeader,
+  WorkshopSectionHeader,
+  WorkshopStatsStrip,
+} from '../components/workshop/shared.js'
+import { WorkshopSummaryRow } from '../components/workshop/authoring.js'
 import { OrganiserSectionNavigation } from '../components/section-navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
@@ -72,7 +80,7 @@ export function Workshops() {
         age_min: Number(data.get('age_min') ?? 0),
         age_max: Number(data.get('age_max') ?? 120),
         capacity: Number(data.get('capacity') ?? 8),
-        participation_mode: String(data.get('mode') ?? 'assigned'),
+        participation_mode: String(data.get('participation_mode') ?? 'assigned'),
         leader_ids: data.getAll('leader_ids').map(String),
         needs: String(data.get('needs') ?? '')
           .split(',')
@@ -88,198 +96,90 @@ export function Workshops() {
   return (
     <div className="space-y-8">
       <WorkshopNavigation />
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-bold uppercase tracking-wide text-muted">Workshops</p>
-          <h1 className="mt-1 text-3xl font-heading sm:text-4xl">Workshopübersicht</h1>
-          <p className="mt-2 max-w-2xl text-muted">
-            Anlegen, Wahl öffnen, Zuordnung prüfen und den aktuellen Plan festlegen.
-          </p>
-        </div>
-        <Button onClick={() => setOpen((value) => !value)}>
-          {open ? 'Abbrechen' : 'Workshop hinzufügen'}
-        </Button>
-      </div>
+      <WorkshopScreenHeader
+        eyebrow="Workshops"
+        title="Workshopübersicht"
+        description="Anlegen, Wahl öffnen, Zuordnung prüfen und den aktuellen Plan festlegen."
+        action={
+          <Button onClick={() => setOpen((value) => !value)}>
+            {open ? 'Abbrechen' : 'Workshop hinzufügen'}
+          </Button>
+        }
+      />
       {error ? (
         <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
           {error}
         </p>
       ) : null}
       {open ? (
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>Workshop anlegen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-4 sm:grid-cols-2" onSubmit={add}>
-              <label className="grid gap-1 font-bold">
-                Titel
-                <input
-                  name="title"
-                  required
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                />
-              </label>
-              <label className="grid gap-1 font-bold">
-                Für
-                <select
-                  name="audience"
-                  defaultValue="all"
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                >
-                  <option value="all">Alle</option>
-                  <option value="children">Kinder</option>
-                  <option value="adults">Erwachsene</option>
-                </select>
-              </label>
-              <label className="grid gap-1 font-bold sm:col-span-2">
-                Beschreibung
-                <textarea
-                  name="description"
-                  className="min-h-24 rounded-base border-2 border-black px-3 py-2 font-normal"
-                />
-              </label>
-              <label className="grid gap-1 font-bold">
-                Kapazität
-                <input
-                  name="capacity"
-                  type="number"
-                  min="0"
-                  defaultValue="8"
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                />
-              </label>
-              <label className="grid gap-1 font-bold">
-                Teilnahme
-                <select
-                  name="mode"
-                  defaultValue="assigned"
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                >
-                  <option value="assigned">Zuordnung</option>
-                  <option value="sign-up">Anmeldung</option>
-                  <option value="interest">Interesse</option>
-                </select>
-              </label>
-              <label className="grid gap-1 font-bold">
-                Mindestalter
-                <input
-                  name="age_min"
-                  type="number"
-                  min="0"
-                  defaultValue="0"
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                />
-              </label>
-              <label className="grid gap-1 font-bold">
-                Höchstalter
-                <input
-                  name="age_max"
-                  type="number"
-                  min="0"
-                  defaultValue="120"
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                />
-              </label>
-              <label className="grid gap-1 font-bold sm:col-span-2">
-                Benötigt{' '}
-                <span className="text-sm font-normal text-muted">
-                  Mehrere Fähigkeiten mit Komma trennen; die Prüfung erfolgt über den Resolver.
-                </span>
-                <input
-                  name="needs"
-                  className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-                />
-              </label>
-              <label className="grid gap-1 font-bold sm:col-span-2">
-                Leitungen
-                <span className="text-sm font-normal text-muted">
-                  Mehrere Personen oder externe Leitungen mit Strg/Cmd auswählen.
-                </span>
-                <select
-                  name="leader_ids"
-                  multiple
-                  size={Math.min(6, Math.max(3, people.length + summary.external_leaders.length))}
-                  className="min-h-24 rounded-base border-2 border-black px-3 py-2 font-normal"
-                >
-                  {people.map((person) => (
-                    <option key={person.id} value={person.id}>
-                      {person.name}
-                    </option>
-                  ))}
-                  {summary.external_leaders.map((leader) => (
-                    <option key={leader.id} value={leader.id}>
-                      {leader.name} (extern)
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="sm:col-span-2">
-                <Button type="submit">Entwurf anlegen</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <WorkshopEditorForm on_submit={add} submit_label="Entwurf anlegen" default_values={{}}>
+          <WorkshopLeaderPicker
+            leaders={[
+              ...people.map((person) => ({ id: person.id, label: person.name })),
+              ...summary.external_leaders.map((leader) => ({
+                id: leader.id,
+                label: leader.name,
+                external: true,
+              })),
+            ]}
+          />
+        </WorkshopEditorForm>
       ) : null}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Stat value={summary.workshops.length} label="aktive Workshops" />
-        <Stat
-          value={summary.workshops.filter((workshop) => workshop.mode === 'assigned').length}
-          label="automatische Zuordnung"
+      <WorkshopStatsStrip
+        items={[
+          { value: summary.workshops.length, label: 'aktive Workshops' },
+          {
+            value: summary.workshops.filter((workshop) => workshop.mode === 'assigned').length,
+            label: 'automatische Zuordnung',
+          },
+          { value: summary.external_leaders.length, label: 'externe Leitungen' },
+        ]}
+      />
+      <section aria-label="Aktive Workshops" className="space-y-3">
+        <WorkshopSectionHeader
+          title="Aktive Workshops"
+          action={
+            <label className="grid gap-1 font-bold">
+              Zielgruppe
+              <select
+                value={audienceFilter}
+                onChange={(event) =>
+                  setAudienceFilter(event.target.value as 'all' | 'children' | 'adults')
+                }
+                className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
+              >
+                <option value="all">Alle</option>
+                <option value="children">Kinder</option>
+                <option value="adults">Erwachsene</option>
+              </select>
+            </label>
+          }
         />
-        <Stat value={summary.external_leaders.length} label="externe Leitungen" />
-      </div>
-      <section aria-labelledby="active-workshops" className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 id="active-workshops" className="text-2xl font-heading">
-            Aktive Workshops
-          </h2>
-          <label className="grid gap-1 font-bold">
-            Zielgruppe
-            <select
-              value={audienceFilter}
-              onChange={(event) =>
-                setAudienceFilter(event.target.value as 'all' | 'children' | 'adults')
-              }
-              className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
-            >
-              <option value="all">Alle</option>
-              <option value="children">Kinder</option>
-              <option value="adults">Erwachsene</option>
-            </select>
-          </label>
-        </div>
         {summary.workshops.filter(
           (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
         ).length ? (
           summary.workshops
             .filter((workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter)
             .map((workshop) => (
-              <Card key={workshop.id} className="bg-white">
-                <CardContent className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-heading">{workshop.title}</h3>
-                    <p className="mt-1 text-muted">
-                      {workshop.description || 'Keine Beschreibung'}
-                    </p>
-                    <p className="mt-2 text-sm">
-                      {workshop.audience} · {workshop.capacity} Plätze · {workshop.age_min}–
-                      {workshop.age_max} Jahre
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Tag>{workshop.mode}</Tag>
-                    <Tag>{workshop.leader_ids.length} Leitungen</Tag>
-                  </div>
-                </CardContent>
-              </Card>
+              <WorkshopSummaryRow
+                key={workshop.id}
+                workshop={{
+                  id: workshop.id,
+                  title: workshop.title,
+                  description: workshop.description,
+                  audience: workshop.audience,
+                  age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+                  capacity: workshop.capacity,
+                  participation_mode: workshop.mode,
+                  leaders: workshop.leader_ids,
+                  requirement: workshop.needs.join(', ') || undefined,
+                }}
+              />
             ))
         ) : (
-          <Card className="bg-white">
-            <CardContent>
-              <p>Noch keine Workshops. Lege den ersten Entwurf an.</p>
-            </CardContent>
-          </Card>
+          <WorkshopEmptyState title="Keine aktiven Workshops">
+            Noch keine Workshops. Lege den ersten Entwurf an.
+          </WorkshopEmptyState>
         )}
       </section>
       {summary.cancelled.length ? (
@@ -640,14 +540,5 @@ export function WorkshopSpaces() {
         ))}
       </div>
     </div>
-  )
-}
-
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <Card className="bg-white p-4 text-center">
-      <p className="text-4xl font-heading leading-none">{value}</p>
-      <p className="mt-1 font-bold">{label}</p>
-    </Card>
   )
 }

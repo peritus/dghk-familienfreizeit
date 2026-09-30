@@ -141,10 +141,12 @@ export function WorkshopEditorForm({
   default_values: defaultValues = {},
   on_submit: onSubmit,
   submit_label: submitLabel = 'Workshop speichern',
+  children,
 }: {
   default_values?: WorkshopEditorValues
   on_submit: (event: FormEvent<HTMLFormElement>) => void
   submit_label?: string
+  children?: ReactNode
 }) {
   return (
     <Card className="bg-white">
@@ -208,6 +210,7 @@ export function WorkshopEditorForm({
               hint="Mehrere Fähigkeiten mit Komma trennen; die Prüfung erfolgt über den Resolver."
             />
           </div>
+          {children ? <div className="sm:col-span-2">{children}</div> : null}
           <div className="sm:col-span-2">
             <Button type="submit">{submitLabel}</Button>
           </div>
