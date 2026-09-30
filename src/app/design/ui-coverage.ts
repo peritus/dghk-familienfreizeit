@@ -293,4 +293,28 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Assignment board components',
     source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
   },
+  {
+    id: 'components-organiser-workshop-shared--workspace-chrome',
+    area: 'component',
+    subject: 'Workshop shared composition chrome',
+    source: 'src/app/organiser/components/workshop/shared.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-shared--states',
+    area: 'component',
+    subject: 'Workshop loading, error, and empty states',
+    source: 'src/app/organiser/components/workshop/shared.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-shared--table-and-responsive-collection',
+    area: 'component',
+    subject: 'Workshop tables and responsive collections',
+    source: 'src/app/organiser/components/workshop/shared.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-shared--picker-and-print',
+    area: 'component',
+    subject: 'Workshop list picker and print document',
+    source: 'src/app/organiser/components/workshop/shared.tsx',
+  },
 ]
