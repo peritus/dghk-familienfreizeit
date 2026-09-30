@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { activeProfile } from '../../../config/index.js'
+import type { KernelWorld } from '../../../events/fold.js'
 import type { EventDraft } from '../../../events/types.js'
 import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
 import { workshopSchedulingWorld } from '../../../modules/workshop-scheduling/index.js'
@@ -16,6 +17,8 @@ import {
 } from '../components/workshop/editors.js'
 import {
   WorkshopEmptyState,
+  WorkshopLifecycleTimeline,
+  WorkshopPhaseNotice,
   WorkshopScreenHeader,
   WorkshopSectionHeader,
   WorkshopStatsStrip,
@@ -42,6 +45,76 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
   return { at: new Date().toISOString(), actor, subject: null, type, payload }
 }
 
+type Placement = { workshop_id: string; slot_id: string; space_id: string }
+
+type WorkshopPlan = {
+  placements: readonly Placement[]
+  unscheduled: readonly { workshop_id: string; reason: string }[]
+  demand: Readonly<Record<string, number>>
+  assignments: readonly { person_id: string; workshop_id: string }[]
+  signups: readonly { person_id: string; workshop_id: string }[]
+  interests: readonly { person_id: string; workshop_id: string }[]
+}
+
+function solveWorkshopPlan(world: KernelWorld): WorkshopPlan {
+  const contributions = composeSolverContributions(activeProfile)
+  const plan = solve(buildSolverInput(world, contributions), contributions, {
+    build_revision: 'organiser',
+    compatibility_revision: 1,
+    event_date: activeProfile.meta.starts_on,
+    profile: activeProfile,
+    seed: null,
+  })
+  const scheduling = plan.sections['workshop-scheduling'] as
+    | { placements?: readonly Placement[]; unscheduled?: readonly WorkshopPlan['unscheduled'][number][] }
+    | undefined
+  const rankings = plan.sections['workshop-rankings'] as
+    | { demand?: Readonly<Record<string, number>> }
+    | undefined
+  const attendance = plan.sections['workshop-assignment'] as
+    | {
+        assignments?: readonly { person_id: string; workshop_id: string }[]
+        signups?: readonly { person_id: string; workshop_id: string }[]
+        interests?: readonly { person_id: string; workshop_id: string }[]
+      }
+    | undefined
+  return {
+    placements: scheduling?.placements ?? [],
+    unscheduled: scheduling?.unscheduled ?? [],
+    demand: rankings?.demand ?? {},
+    assignments: attendance?.assignments ?? [],
+    signups: attendance?.signups ?? [],
+    interests: attendance?.interests ?? [],
+  }
+}
+
+function audienceLabel(audience: string): string {
+  return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[audience] ?? audience
+}
+
+function participationLabel(mode: string): string {
+  return { assigned: 'Automatische Zuordnung', 'sign-up': 'Anmeldung', interest: 'Interesse' }[mode] ?? mode
+}
+
+function placementLabel(
+  workshopId: string,
+  placements: readonly Placement[],
+  slots: readonly { id: string; starts_at: string }[],
+  spaces: readonly { id: string; name: string }[],
+): string | undefined {
+  const placement = placements.find((item) => item.workshop_id === workshopId)
+  if (!placement) return undefined
+  const slot = slots.find((item) => item.id === placement.slot_id)
+  const space = spaces.find((item) => item.id === placement.space_id)
+  if (!slot || !space) return 'Im Programm platziert'
+  const date = new globalThis.Date(slot.starts_at).toLocaleString('de-DE', {
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return `${date} Uhr · ${space.name}`
+}
+
 function WorkshopNavigation() {
   return (
     <OrganiserSectionNavigation
@@ -59,6 +132,9 @@ export function Workshops() {
   useDocumentTitle('Workshops · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const summary = officialWorkshopsWorld(world!)
+  const schedule = workshopSchedulingWorld(world!)
+  const spaces = workshopSpaceWorld(world!).live
+  const plan = solveWorkshopPlan(world!)
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [audienceFilter, setAudienceFilter] = useState<'all' | 'children' | 'adults'>('all')
@@ -74,6 +150,20 @@ export function Workshops() {
       return { id: person.id, name: name || person.id }
     })
     .sort((a, b) => a.name.localeCompare(b.name))
+  const leaderNames = new Map([
+    ...people.map((person) => [person.id, person.name] as const),
+    ...summary.external_leaders.map((leader) => [leader.id, `${leader.name} (extern)`] as const),
+  ])
+  const assignedByWorkshop = new Map<string, number>()
+  for (const assignment of plan.assignments)
+    assignedByWorkshop.set(
+      assignment.workshop_id,
+      (assignedByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
+    )
+  const placedWorkshopIds = new Set(plan.placements.map((placement) => placement.workshop_id))
+  const activeWorkshops = summary.workshops.filter(
+    (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
+  )
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -117,6 +207,49 @@ export function Workshops() {
           </Button>
         }
       />
+      <WorkshopLifecycleTimeline
+        steps={[
+          {
+            id: 'authoring',
+            label: 'Workshops anlegen',
+            state: summary.workshops.length ? 'complete' : 'current',
+            description: summary.workshops.length
+              ? `${summary.workshops.length} Workshop${summary.workshops.length === 1 ? '' : 's'} angelegt`
+              : 'Titel, Zielgruppe und Leitung erfassen',
+          },
+          {
+            id: 'choice',
+            label: 'Wahl öffnen',
+            state: summary.workshops.length ? 'current' : 'upcoming',
+            description: 'Die nächste manuelle Freigabe für Familien',
+          },
+          {
+            id: 'review',
+            label: 'Zuordnung prüfen',
+            state: 'upcoming',
+            description: 'Bedarf, Plätze und Konflikte kontrollieren',
+          },
+          {
+            id: 'fixed',
+            label: 'Festgelegt',
+            state: 'upcoming',
+            description: 'Plan veröffentlichen und Listen erzeugen',
+          },
+        ]}
+      />
+      <WorkshopPhaseNotice
+        label={summary.workshops.length ? 'Vorbereitung' : 'Noch kein Workshopplan'}
+        tone={summary.workshops.length ? 'success' : 'attention'}
+        details={
+          summary.workshops.length
+            ? 'Die Wahlphase ist in dieser Ansicht noch nicht als eigenes Ereignis gespeichert.'
+            : 'Lege den ersten Workshop an, um die nächste Phase vorzubereiten.'
+        }
+      >
+        {summary.workshops.length
+          ? 'Workshopdaten sind vorhanden. Prüfe als Nächstes die Zielgruppen, Leitungen und Programmwünsche.'
+          : 'Die Workshopdatenbank ist bereit für den ersten Entwurf.'}
+      </WorkshopPhaseNotice>
       {error ? (
         <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
           {error}
@@ -143,6 +276,10 @@ export function Workshops() {
             value: summary.workshops.filter((workshop) => workshop.mode === 'assigned').length,
             label: 'automatische Zuordnung',
           },
+          {
+            value: summary.workshops.filter((workshop) => !placedWorkshopIds.has(workshop.id)).length,
+            label: 'noch nicht eingeplant',
+          },
           { value: summary.external_leaders.length, label: 'externe Leitungen' },
         ]}
       />
@@ -166,27 +303,40 @@ export function Workshops() {
             </label>
           }
         />
-        {summary.workshops.filter(
-          (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
-        ).length ? (
-          summary.workshops
-            .filter((workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter)
-            .map((workshop) => (
+        {activeWorkshops.length ? (
+          activeWorkshops.map((workshop) => (
               <WorkshopSummaryRow
                 key={workshop.id}
                 workshop={{
                   id: workshop.id,
                   title: workshop.title,
                   description: workshop.description,
-                  audience: workshop.audience,
+                  audience: audienceLabel(workshop.audience),
                   age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
                   capacity: workshop.capacity,
-                  participation_mode: workshop.mode,
-                  leaders: workshop.leader_ids,
+                  participation_mode: participationLabel(workshop.mode),
+                  leaders: workshop.leader_ids.map((leaderId) => leaderNames.get(leaderId) ?? leaderId),
                   requirement: workshop.needs.join(', ') || undefined,
+                  demand:
+                    workshop.mode === 'assigned'
+                      ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
+                          plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
+                        }`
+                      : workshop.mode === 'sign-up'
+                        ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
+                        : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
+                  placement: {
+                    label:
+                      placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
+                      'Noch nicht eingeplant',
+                    tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
+                  },
+                  attention: workshop.leader_ids.length
+                    ? undefined
+                    : 'Leitung fehlt',
                 }}
               />
-            ))
+          ))
         ) : (
           <WorkshopEmptyState title="Keine aktiven Workshops">
             Noch keine Workshops. Lege den ersten Entwurf an.

@@ -13,6 +13,7 @@ export type WorkshopAuthoringView = {
   participation_mode: string
   leaders: readonly string[]
   requirement?: string
+  demand?: string
   placement?: {
     label: string
     tone?: 'neutral' | 'success' | 'attention' | 'danger' | 'draft' | 'held'
@@ -54,15 +55,18 @@ export function WorkshopFacts({
   age_range: ageRange,
   capacity,
   requirement,
+  demand,
 }: {
   age_range: string
   capacity: number
   requirement?: string
+  demand?: string
 }) {
   return (
     <p className="text-sm text-muted">
       {ageRange} · {capacity} {capacity === 1 ? 'Platz' : 'Plätze'}
       {requirement ? ` · braucht: ${requirement}` : ''}
+      {demand ? ` · ${demand}` : ''}
     </p>
   )
 }
@@ -121,6 +125,7 @@ export function WorkshopSummaryRow({
             age_range={workshop.age_range}
             capacity={workshop.capacity}
             requirement={workshop.requirement}
+            demand={workshop.demand}
           />
           <WorkshopLeaderSummary leaders={workshop.leaders} />
           <WorkshopPlacementStatus placement={workshop.placement} attention={workshop.attention} />
