@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from '../../../components/ui/button.js'
 import { ProgrammeGrid, UnplacedWorkshopRow, WorkshopOverlapTable } from './programme.js'
+import { fullProgrammeRows } from './story-fixtures.js'
 
 const meta = {
   title: 'Components/Organiser/Workshop/Programme',
@@ -26,41 +27,7 @@ export const Grid: Story = {
           { id: 'atelier', label: 'Atelier' },
           { id: 'wiese', label: 'Wiese' },
         ]}
-        rows={[
-          {
-            id: 'fr-1',
-            slot_label: '09:00–11:00',
-            cells: [
-              {
-                id: 'keramik',
-                state: 'placed',
-                title: 'Keramik',
-                audience: 'Kinder',
-                age_range: '5–14 Jahre',
-                leaders: 'Sam Morgan',
-                capacity_label: '4 Plätze frei',
-                on_open: () => undefined,
-              },
-              {
-                id: 'wald',
-                state: 'placed',
-                title: 'Waldexpedition',
-                audience: 'Kinder',
-                age_range: '5–14 Jahre',
-                leaders: 'Jens Brandt',
-                capacity_label: 'Voll',
-              },
-            ],
-          },
-          {
-            id: 'fr-2',
-            slot_label: '11:30–13:30',
-            cells: [
-              { id: 'blocked', state: 'blocked' },
-              { id: 'empty', state: 'empty' },
-            ],
-          },
-        ]}
+        rows={fullProgrammeRows}
       />
     </div>
   ),

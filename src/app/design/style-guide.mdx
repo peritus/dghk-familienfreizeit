@@ -17,6 +17,7 @@ import * as WorkshopProgrammeStories from '../organiser/components/workshop/prog
 import * as WorkshopChoicesStories from '../organiser/components/workshop/choices.stories'
 import * as WorkshopParticipationStories from '../organiser/components/workshop/participation.stories'
 import * as WorkshopEditorsStories from '../organiser/components/workshop/editors.stories'
+import * as WorkshopScreenStories from '../organiser/screens/workshops.stories'
 
 <Meta title="Foundations/Style guide" />
 
@@ -84,9 +85,11 @@ On narrow screens the options stack and retain their labels.
 
 ## Workshop semantic component catalogue
 
-The prototype-derived workshop library is intentionally composed below screen
-level. These stories are the visual reference for the next step, where routes
-will provide real derived data and events.
+The workshop catalogue below uses a synthetic full-programme fixture: multiple
+audiences, participation modes, external and internal leaders, demand, blocked
+resources, unplaced workshops, trace stages, and open participation cases. The
+stories derive their rows with the same kind of data-to-view mapping used by
+screen compositions, while keeping fixture data out of production code.
 
 <Canvas of={WorkshopSharedStories.WorkspaceChrome} />
 
@@ -125,5 +128,13 @@ will provide real derived data and events.
 <Canvas of={WorkshopEditorsStories.Forms} />
 
 <Canvas of={WorkshopEditorsStories.Confirmation} />
+
+<Canvas of={WorkshopScreenStories.Overview} />
+
+<Canvas of={WorkshopScreenStories.Programme} />
+
+<Canvas of={WorkshopScreenStories.Slots} />
+
+<Canvas of={WorkshopScreenStories.Spaces} />
 
 <Stories includePrimary={false} />

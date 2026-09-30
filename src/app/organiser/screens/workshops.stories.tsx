@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { FixtureProvider } from '../../stories/organiser-fixtures.js'
+import { FixtureProvider, organiserWorkshopFixtureState } from '../../stories/organiser-fixtures.js'
 import { Workshops, WorkshopProgramme, WorkshopSlots, WorkshopSpaces } from './workshops.js'
 
 const meta = {
@@ -8,7 +8,7 @@ const meta = {
     (story) => {
       const Story = story
       return (
-        <FixtureProvider>
+        <FixtureProvider initialState={organiserWorkshopFixtureState}>
           <Story />
         </FixtureProvider>
       )

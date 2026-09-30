@@ -50,6 +50,7 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
 }
 
 type Placement = { workshop_id: string; slot_id: string; space_id: string }
+
 type SchedulingUnscheduled = { workshop_id: string; reason: string }
 
 type WorkshopPlan = {

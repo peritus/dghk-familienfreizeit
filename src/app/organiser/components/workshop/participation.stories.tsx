@@ -53,6 +53,39 @@ const people: readonly ParticipationPersonView[] = [
       },
     ],
   },
+  {
+    id: 'person-3',
+    name: 'Mira Stein',
+    age_label: '11 Jahre',
+    group_label: 'Familie Stein',
+    status: 'vollständig',
+    status_tone: 'success',
+    assignments: [
+      {
+        workshop_id: 'w-4',
+        workshop_title: 'Bogenschießen',
+        slot_label: 'Sa · 09:00',
+        status: 'Wunsch 1',
+        status_tone: 'success',
+      },
+      {
+        workshop_id: 'w-1',
+        workshop_title: 'Keramik',
+        slot_label: 'Fr · 09:00',
+        status: 'Wunsch 3',
+        status_tone: 'neutral',
+      },
+    ],
+  },
+  {
+    id: 'person-4',
+    name: 'Lena Bauer',
+    age_label: '4 Jahre',
+    group_label: 'Familie Bauer',
+    status: 'nicht berücksichtigt',
+    status_tone: 'attention',
+    assignments: [],
+  },
 ]
 
 const groups: readonly GroupSummaryView[] = [
@@ -72,6 +105,14 @@ const groups: readonly GroupSummaryView[] = [
     unassigned: 2,
     open_cases: 1,
   },
+  {
+    id: 'family-stein',
+    label: 'Familie Stein',
+    people: 3,
+    assigned: 5,
+    unassigned: 0,
+    open_cases: 0,
+  },
 ]
 
 const unrequested: readonly UnrequestedAssignmentView[] = [
@@ -83,6 +124,15 @@ const unrequested: readonly UnrequestedAssignmentView[] = [
     reason: 'Keine verfügbare Wahl im Slot',
     priority: 'prüfen',
     priority_tone: 'attention',
+  },
+  {
+    id: 'unrequested-2',
+    person: 'Lena Bauer',
+    age_label: '4 Jahre',
+    workshop_title: 'Keramik',
+    reason: 'Keine Antwort für diesen Zeitraum',
+    priority: 'beobachten',
+    priority_tone: 'neutral',
   },
 ]
 
@@ -104,6 +154,15 @@ const cases: readonly OpenParticipationCaseView[] = [
     action: 'Wunsch zurückmelden',
     status: 'Hinweis',
     status_tone: 'neutral',
+  },
+  {
+    id: 'case-3',
+    person: 'Lena Bauer',
+    kind: 'Keine Antwort',
+    detail: 'Es liegt noch keine Rangfolge vor.',
+    action: 'Familie erinnern',
+    status: 'offen',
+    status_tone: 'attention',
   },
 ]
 

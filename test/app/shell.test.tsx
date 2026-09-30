@@ -75,7 +75,7 @@ function open(path: string, events: readonly Event[] = []) {
 }
 
 function workshopFixtureEvents(): readonly Event[] {
-  const drafts = [
+  const drafts: readonly Omit<Event, 'seq'>[] = [
     {
       at: '2027-01-01T00:00:00Z',
       actor: 'organiser@example.test',
@@ -149,7 +149,7 @@ function workshopFixtureEvents(): readonly Event[] {
         sort_key: 1,
       },
     },
-  ] satisfies readonly Omit<Event, 'seq'>[]
+  ]
   return drafts.map((event, index) => ({ ...event, seq: index + 1 }))
 }
 

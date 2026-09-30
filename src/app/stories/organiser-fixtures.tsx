@@ -155,6 +155,187 @@ export const organiserFixtureState = organiserReducer(initialOrganiserState, {
   principal_email: actor,
 })
 
+export const workshopCatalogueFixtureDrafts: readonly EventDraft[] = [
+  {
+    at: '2027-01-01T00:10:00Z',
+    actor,
+    subject: null,
+    type: 'ExternalLeaderAdded',
+    payload: {
+      external_leader_id: 'ext_pereira',
+      name: 'Pereira',
+      phone: '0151 555 0901',
+      availability: ['Fr 09:00–11:00', 'Sa 09:00–11:00'],
+      sort_key: 1,
+    },
+  },
+  {
+    at: '2027-01-01T00:11:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopAdded',
+    payload: {
+      workshop_id: 'wks_keramik',
+      title: 'Keramik',
+      description: 'Schalen und Figuren aus Ton, gebrannt bis Sonntag.',
+      audience: 'children',
+      age_min: 5,
+      age_max: 14,
+      capacity: 10,
+      participation_mode: 'assigned',
+      leader_ids: ['per_martin'],
+      needs: ['Brennofen'],
+      sort_key: 1,
+    },
+  },
+  {
+    at: '2027-01-01T00:12:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopAdded',
+    payload: {
+      workshop_id: 'wks_wald',
+      title: 'Waldexpedition',
+      description: 'Spuren lesen, Tiere beobachten, ein Lager bauen.',
+      audience: 'children',
+      age_min: 5,
+      age_max: 14,
+      capacity: 14,
+      participation_mode: 'assigned',
+      leader_ids: ['per_martin'],
+      needs: ['draußen'],
+      sort_key: 2,
+    },
+  },
+  {
+    at: '2027-01-01T00:13:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopAdded',
+    payload: {
+      workshop_id: 'wks_band',
+      title: 'Bandprobe',
+      description: 'Die Jugendgruppe probt offen. Wer mitspielen will, meldet sich an.',
+      audience: 'all',
+      age_min: 12,
+      age_max: 99,
+      capacity: 8,
+      participation_mode: 'sign-up',
+      leader_ids: ['ext_pereira'],
+      needs: ['Bühne'],
+      sort_key: 3,
+    },
+  },
+  {
+    at: '2027-01-01T00:14:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopAdded',
+    payload: {
+      workshop_id: 'wks_schmieden',
+      title: 'Schmieden',
+      description: 'Einen Haken aus Eisen schmieden.',
+      audience: 'children',
+      age_min: 12,
+      age_max: 15,
+      capacity: 6,
+      participation_mode: 'assigned',
+      leader_ids: ['ext_pereira'],
+      needs: ['Esse'],
+      sort_key: 4,
+    },
+  },
+  {
+    at: '2027-01-01T00:15:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopSpaceAdded',
+    payload: {
+      workshop_space_id: 'wsp_atelier',
+      name: 'Atelier',
+      location_description: 'Haupthaus',
+      capacity: 12,
+      availability_windows: [
+        { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-14T18:00:00Z' },
+      ],
+      sort_key: 1,
+    },
+  },
+  {
+    at: '2027-01-01T00:16:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopSpaceAdded',
+    payload: {
+      workshop_space_id: 'wsp_wiese',
+      name: 'Wiese',
+      location_description: 'Außengelände',
+      capacity: 30,
+      availability_windows: [
+        { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-16T18:00:00Z' },
+      ],
+      sort_key: 2,
+    },
+  },
+  {
+    at: '2027-01-01T00:17:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopSpaceAdded',
+    payload: {
+      workshop_space_id: 'wsp_halle',
+      name: 'Halle',
+      location_description: 'Haus 2',
+      capacity: 24,
+      availability_windows: [
+        { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-16T18:00:00Z' },
+      ],
+      sort_key: 3,
+    },
+  },
+  {
+    at: '2027-01-01T00:18:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopSlotAdded',
+    payload: {
+      slot_id: 'slot_fr_morning',
+      starts_at: '2027-05-14T09:00:00Z',
+      ends_at: '2027-05-14T11:00:00Z',
+      sort_key: 1,
+    },
+  },
+  {
+    at: '2027-01-01T00:19:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopSlotAdded',
+    payload: {
+      slot_id: 'slot_fr_late',
+      starts_at: '2027-05-14T11:30:00Z',
+      ends_at: '2027-05-14T13:30:00Z',
+      sort_key: 2,
+    },
+  },
+  {
+    at: '2027-01-01T00:20:00Z',
+    actor,
+    subject: null,
+    type: 'WorkshopSlotAdded',
+    payload: {
+      slot_id: 'slot_sa_morning',
+      starts_at: '2027-05-15T09:00:00Z',
+      ends_at: '2027-05-15T11:00:00Z',
+      sort_key: 3,
+    },
+  },
+]
+
+export const organiserWorkshopFixtureState = workshopCatalogueFixtureDrafts.reduce(
+  (state, event) => organiserReducer(state, { type: 'stage', events: [event] }),
+  organiserFixtureState,
+)
+
 type AssignmentFixtureFamily = {
   family_id: string
   email: string

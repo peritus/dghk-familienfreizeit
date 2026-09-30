@@ -39,6 +39,21 @@ const entries = [
     emergency_contact: 'Sam Morgan · 0151 555 1000',
     attendance: false,
   },
+  {
+    id: 'mira',
+    name: 'Mira Stein',
+    age_label: '11 Jahre',
+    health: 'Asthma. Spray immer dabei.',
+    emergency_contact: 'Eva Stein · 0151 555 1003',
+    attendance: true,
+  },
+  {
+    id: 'noah',
+    name: 'Noah Fischer',
+    age_label: '10 Jahre',
+    emergency_contact: 'Tim Fischer · 0151 555 1004',
+    attendance: false,
+  },
 ]
 
 export const Roster: Story = {
@@ -49,7 +64,7 @@ export const Roster: Story = {
         status="Vorläufig, nicht endgültig"
         metadata={[
           'Freitag, 14. Mai 2027 · 09:00–11:00 Uhr · Atelier',
-          'Leitung: Sam Morgan · 2 Personen von 10 Plätzen',
+          'Leitung: Sam Morgan, Anna Albers · 3 Personen von 10 Plätzen',
         ]}
         entries={entries}
       />
@@ -71,7 +86,14 @@ export const Plans: Story = {
             room: 'Atelier',
             role: 'nimmt teil (1. Wahl)',
           },
-          { id: 'two', slot: 'Fr 11:30–13:30', status: 'open' },
+          {
+            id: 'two',
+            slot: 'Fr 11:30–13:30',
+            workshop: 'Waldexpedition',
+            room: 'Wiese',
+            role: 'nimmt teil (2. Wahl)',
+          },
+          { id: 'three', slot: 'Sa 09:00–11:00', status: 'open' },
         ]}
       />
       <WorkshopFamilyPlanDocument
@@ -87,18 +109,34 @@ export const Plans: Story = {
               { id: 'jamie', name: 'Jamie', value: 'frei' },
             ],
           },
+          {
+            id: 'two',
+            label: 'Fr 11:30–13:30',
+            members: [
+              { id: 'sam', name: 'Sam', value: 'frei' },
+              { id: 'alex', name: 'Alex', value: 'Waldexpedition' },
+              { id: 'jamie', name: 'Jamie', value: 'Waldexpedition' },
+            ],
+          },
         ]}
       />
       <WorkshopRoomPlanDocument
         title="Atelier"
-        metadata={['2 Workshops in diesem Raum']}
+        metadata={['2 Workshops in diesem Raum', 'Haupthaus · 12 Plätze · Brennofen']}
         entries={[
           {
             id: 'one',
             time: 'Fr 09:00–11:00',
             workshop: 'Keramik',
             audience: 'Kinder, 5–14 Jahre',
-            leaders: 'Sam Morgan',
+            leaders: 'Sam Morgan, Anna Albers',
+          },
+          {
+            id: 'two',
+            time: 'Sa 11:30–13:30',
+            workshop: 'Aquarell',
+            audience: 'Erwachsene, 18–99 Jahre',
+            leaders: 'Katrin Conrad',
           },
         ]}
       />
