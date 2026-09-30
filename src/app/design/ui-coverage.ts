@@ -329,4 +329,22 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop leader rows',
     source: 'src/app/organiser/components/workshop/authoring.tsx',
   },
+  {
+    id: 'components-organiser-workshop-reports--roster',
+    area: 'component',
+    subject: 'Workshop roster reports',
+    source: 'src/app/organiser/components/workshop/reports.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-reports--plans',
+    area: 'component',
+    subject: 'Workshop person, family, and room plans',
+    source: 'src/app/organiser/components/workshop/reports.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-reports--list-navigation',
+    area: 'component',
+    subject: 'Workshop report list navigation',
+    source: 'src/app/organiser/components/workshop/reports.tsx',
+  },
 ]
