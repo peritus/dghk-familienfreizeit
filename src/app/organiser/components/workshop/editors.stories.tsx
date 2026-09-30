@@ -66,9 +66,10 @@ export const Forms: Story = {
           on_submit={preventSubmit}
           default_values={{
             name: 'Nina Baum',
-            email: 'nina@example.test',
             phone: '+49 170 123456',
+            availability: ['Freitag 14:00–15:30'],
           }}
+          slots={[{ value: 'Freitag 14:00–15:30', label: 'Freitag 14:00–15:30 Uhr' }]}
         />
         <SlotEditorForm
           on_submit={preventSubmit}

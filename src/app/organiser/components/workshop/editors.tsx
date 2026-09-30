@@ -350,17 +350,18 @@ export function WorkshopEditorDialog({
 
 export type ExternalLeaderEditorValues = {
   name?: string
-  email?: string
   phone?: string
-  notes?: string
+  availability?: readonly string[]
 }
 
 export function ExternalLeaderEditorForm({
   default_values: defaultValues = {},
+  slots = [],
   on_submit: onSubmit,
   submit_label: submitLabel = 'Externe Leitung speichern',
 }: {
   default_values?: ExternalLeaderEditorValues
+  slots?: readonly { value: string; label: string }[]
   on_submit: (event: FormEvent<HTMLFormElement>) => void
   submit_label?: string
 }) {
@@ -373,23 +374,40 @@ export function ExternalLeaderEditorForm({
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
           <WorkshopField label="Name" name="name" defaultValue={defaultValues.name} required />
           <WorkshopField
-            label="E-Mail"
-            name="email"
-            type="email"
-            defaultValue={defaultValues.email}
-          />
-          <WorkshopField
             label="Telefon"
             name="phone"
             type="tel"
             defaultValue={defaultValues.phone}
+            hint="Nur für die Organisation sichtbar."
           />
-          <WorkshopTextareaField
-            label="Notizen"
-            name="notes"
-            default_value={defaultValues.notes}
-            hint="Nur organisatorische Hinweise, keine vertraulichen Notizen."
-          />
+          <fieldset className="grid gap-2 sm:col-span-2">
+            <legend className="font-bold">Verfügbar</legend>
+            <p className="text-sm font-normal text-muted">
+              Wähle die Slots, in denen die externe Leitung einen Workshop übernehmen kann.
+            </p>
+            {slots.length ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {slots.map((slot) => (
+                  <label
+                    key={slot.value}
+                    className="flex min-h-11 items-center gap-2 rounded-base border-2 border-black bg-white px-3"
+                  >
+                    <input
+                      type="checkbox"
+                      name="availability"
+                      value={slot.value}
+                      defaultChecked={defaultValues.availability?.includes(slot.value)}
+                    />
+                    {slot.label}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-base border-2 border-black bg-attention p-3 text-sm">
+                Lege zuerst einen Workshop-Slot an.
+              </p>
+            )}
+          </fieldset>
           <div className="sm:col-span-2">
             <Button type="submit">{submitLabel}</Button>
           </div>

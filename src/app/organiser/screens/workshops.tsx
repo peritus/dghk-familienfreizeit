@@ -16,6 +16,7 @@ import { OrganiserLink } from '../../components/application/organiser-link.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
+  ExternalLeaderEditorForm,
   WorkshopEditorDialog,
   WorkshopLeaderPicker,
 } from '../components/workshop/editors.js'
@@ -27,7 +28,10 @@ import {
   WorkshopSectionHeader,
   WorkshopStatsStrip,
 } from '../../components/shared/workshop/shared.js'
-import { WorkshopSummaryRow } from '../../../modules/official-workshops/app/components/authoring.js'
+import {
+  ExternalLeaderRow,
+  WorkshopSummaryRow,
+} from '../../../modules/official-workshops/app/components/authoring.js'
 import {
   ProgrammeGrid,
   UnplacedWorkshopRow,
@@ -42,6 +46,13 @@ import {
 import { OrganiserSectionNavigation } from '../components/section-navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/shared/ui/dialog.js'
 
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -166,16 +177,170 @@ function placementLabel(
   return `${date} Uhr · ${space.name}`
 }
 
+function slotLabel(startsAt: string, endsAt?: string): string {
+  const starts = new globalThis.Date(startsAt)
+  const ends = endsAt ? new globalThis.Date(endsAt) : undefined
+  const day = starts.toLocaleDateString('de-DE', { weekday: 'short' })
+  const time = starts.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const endTime = ends?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return `${day} ${time}${endTime ? `–${endTime}` : ''}`
+}
+
 function WorkshopNavigation() {
   return (
     <OrganiserSectionNavigation
       aria_label="Workshopbereiche"
       items={[
         { href: organiserPaths.workshops(), label: 'Workshops' },
+        { href: organiserPaths.workshop_external_leaders(), label: 'Externe' },
         { href: organiserPaths.workshop_spaces(), label: 'Räume und Slots' },
         { href: organiserPaths.workshop_programme(), label: 'Programm' },
       ]}
     />
+  )
+}
+
+export function WorkshopExternalLeaders() {
+  useDocumentTitle('Externe Leitungen · Workshops · Familienfreizeit')
+  const { world, state, stage } = useOrganiser()
+  const summary = officialWorkshopsWorld(world!)
+  const schedule = workshopSchedulingWorld(world!)
+  const [editor, setEditor] = useState<'new' | string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const editingLeader =
+    editor && editor !== 'new'
+      ? summary.external_leaders.find((leader) => leader.id === editor)
+      : undefined
+  const slotOptions = schedule.slots.map((slot) => ({
+    value: slotLabel(slot.starts_at, slot.ends_at),
+    label: `${slotLabel(slot.starts_at, slot.ends_at)} Uhr`,
+  }))
+  const workshopNames = new Map(summary.workshops.map((workshop) => [workshop.id, workshop.title]))
+  const saveLeader = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const data = new FormData(event.currentTarget)
+    const name = String(data.get('name') ?? '').trim()
+    const availability = data.getAll('availability').map(String)
+    if (!name) {
+      setError('Gib einen Namen an.')
+      return
+    }
+    if (!availability.length) {
+      setError('Wähle mindestens einen verfügbaren Slot.')
+      return
+    }
+    stage([
+      draft(state.principal_email ?? '', editingLeader ? 'ExternalLeaderUpdated' : 'ExternalLeaderAdded', {
+        external_leader_id: editingLeader?.id ?? id('ext_'),
+        name,
+        phone: String(data.get('phone') ?? '').trim() || null,
+        availability,
+        sort_key: editingLeader?.sort_key ?? summary.external_leaders.length + 1,
+      }),
+    ])
+    setEditor(null)
+    setError(null)
+  }
+  return (
+    <div className="space-y-8">
+      <WorkshopNavigation />
+      <WorkshopScreenHeader
+        eyebrow="Workshops"
+        title="Externe Leitungen"
+        description="Personen außerhalb der Veranstaltung verwalten, die Workshops leiten."
+        action={
+          <Button
+            onClick={() => {
+              setEditor('new')
+              setError(null)
+            }}
+          >
+            Externe Leitung hinzufügen
+          </Button>
+        }
+      />
+      <Dialog
+        open={editor !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditor(null)
+            setError(null)
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingLeader ? `Externe Leitung: ${editingLeader.name}` : 'Externe Leitung hinzufügen'}
+            </DialogTitle>
+            <DialogDescription>
+              Externe Leitungen leiten Workshops, nehmen aber nicht an der Freizeit teil.
+            </DialogDescription>
+            {error ? (
+              <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
+                {error}
+              </p>
+            ) : null}
+          </DialogHeader>
+          <ExternalLeaderEditorForm
+            key={editor ?? 'new'}
+            on_submit={saveLeader}
+            slots={slotOptions}
+            default_values={
+              editingLeader
+                ? {
+                    name: editingLeader.name,
+                    phone: editingLeader.phone ?? undefined,
+                    availability: editingLeader.availability,
+                  }
+                : undefined
+            }
+            submit_label={editingLeader ? 'Speichern' : 'Externe Leitung anlegen'}
+          />
+        </DialogContent>
+      </Dialog>
+      <section aria-label="Externe Leitungen" className="space-y-3">
+        <WorkshopSectionHeader
+          title={`${summary.external_leaders.length} externe Leitungen`}
+          description="Sie leiten nur und nehmen sonst nicht teil."
+        />
+        {summary.external_leaders.length ? (
+          <div className="grid gap-3">
+            {summary.external_leaders.map((leader) => (
+              <ExternalLeaderRow
+                key={leader.id}
+                leader={{
+                  id: leader.id,
+                  name: leader.name,
+                  phone: leader.phone ?? undefined,
+                  availability: leader.availability,
+                  leads: summary.workshops
+                    .filter((workshop) => workshop.leader_ids.includes(leader.id))
+                    .map((workshop) => workshopNames.get(workshop.id) ?? workshop.id),
+                }}
+                action={
+                  <Button
+                    size="sm"
+                    variant="neutral"
+                    onClick={() => {
+                      setEditor(leader.id)
+                      setError(null)
+                    }}
+                  >
+                    Bearbeiten
+                    <span className="sr-only">: {leader.name}</span>
+                  </Button>
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <WorkshopEmptyState title="Noch keine externen Leitungen">
+            Lege eine externe Leitung an, bevor du sie einem Workshop zuweist.
+          </WorkshopEmptyState>
+        )}
+      </section>
+    </div>
   )
 }
 
