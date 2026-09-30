@@ -26,7 +26,8 @@ Workshops anlegen → Wahl offen → Zuordnung prüfen → Festgelegt
 ```
 
 They summarize independent authoring, choice-cycle, calculation, attendance,
-schedule, and communication facts. The summary does not replace those states.
+and schedule facts. Communication and release state belong to M10 and do not
+appear in the M8 summary. The summary does not replace those states.
 There is one current choice cycle only.
 
 ## Overview behavior
@@ -39,8 +40,8 @@ inventory use their own profile fields instead.
 Workshop cards show title, audience, age range, capacity, participation mode,
 leaders, demand headline, placement state, and actionable attention. Cancelled
 workshops are hidden from active planning and available in a labelled history
-view. Communication status and release diffs are shown in the release/review
-surface, not as card badges.
+view. M8 does not render communication status or release diffs; M10 owns
+those release/review surfaces rather than workshop cards.
 
 Authoring uses a compact editor with progressive disclosure for cancellation,
 publication, resolver needs, and operational details. Leaders are selected with
@@ -100,8 +101,9 @@ results use a separate companion design and privacy projection.
 ## Printing and visual system
 
 There is no application print or export button. Browser printing is supported
-through the shared print stylesheet and prints either the current/prospective
-organiser plan or the released/effective plan, with the data context labelled.
+through the shared print stylesheet for the current or prospective organiser
+plan, with the data context labelled. Released/effective printing belongs to
+M10.
 
 Use the neobrutalist design system, page-local section navigation, responsive cards and
 accessible tables. All supported screen sizes are equally important. Strong
