@@ -46,10 +46,12 @@ redaction, but they do not derive release status or compare scope content
 independently.
 
 Workshop reports label their data context explicitly as `current` (the committed
-live world), `prospective` (committed events plus organiser-local drafts), or
-`released/effective` (communicated scope content visible to the audience). A
-prospective organiser report never implies family visibility; a released/effective
-report never joins current draft labels onto historical content.
+live world) or `prospective` (committed events plus organiser-local drafts). M8
+organiser reports implement these two contexts. `released/effective` reports are
+an M10 release-control consumer: they use communicated scope content visible to
+the audience. A prospective organiser report never implies family visibility; an
+M10 released/effective report never joins current draft labels onto historical
+content.
 
 The timestamp is not domain state and does not affect derivation or report
 identity. Reports are generated on demand from the world visible to the reader.
