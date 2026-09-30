@@ -8,7 +8,9 @@ import {
   ref,
   relation,
   requirement,
+  text,
 } from '../define.js'
+import { familyPreferences } from '../../modules/family-preferences/index.js'
 import { roomInventory } from '../../modules/room-inventory/index.js'
 import { roomAssignment } from '../../modules/room-assignment/index.js'
 import { officialWorkshops } from '../../modules/official-workshops/index.js'
@@ -28,6 +30,10 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
     starts_on: '2027-04-30',
     ends_on: '2027-05-02',
     timezone: 'Europe/Berlin',
+    deadlines: {
+      accommodation: '2027-03-31T21:59:59Z',
+      workshops: '2027-04-15T21:59:59Z',
+    },
     locale: 'de',
     fallback_locale: 'en',
   },
@@ -117,6 +123,14 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       scopes: ['person'],
       value: bool(),
       default: false,
+      family_facing: {
+        control: 'toggle',
+        title: { de: 'Schläft bei den Eltern', en: 'Sleeps with the parents' },
+        help: null,
+        scope: 'person',
+        strengths: null,
+        invert: false,
+      },
     }),
     'needs-private-sanitary': requirement({
       title: { de: 'Eigenes Bad', en: 'Private bathroom' },
@@ -126,6 +140,17 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       strengths: ['required', 'preferred'],
       weight: 6,
       penalty: -2,
+      family_facing: {
+        control: 'tri-state',
+        title: { de: 'Eigenes Bad', en: 'Private bathroom' },
+        help: {
+          de: 'Zimmer mit eigenem Bad kosten mehr pro Schlafplatz.',
+          en: 'Rooms with private bathrooms cost more per sleeping place.',
+        },
+        scope: 'family',
+        strengths: ['required', 'preferred'],
+        invert: false,
+      },
     }),
     'needs-accessible': requirement({
       title: { de: 'Barrierearmes Zimmer', en: 'Accessible room' },
@@ -135,6 +160,14 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       strengths: ['required', 'preferred'],
       weight: 8,
       penalty: -2,
+      family_facing: {
+        control: 'tri-state',
+        title: { de: 'Barrierearmes Zimmer', en: 'Accessible room' },
+        help: null,
+        scope: 'family',
+        strengths: ['required', 'preferred'],
+        invert: false,
+      },
     }),
     'needs-ground-floor': requirement({
       title: { de: 'Erdgeschoss', en: 'Ground floor' },
@@ -153,6 +186,14 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       structural: 'no-other-families',
       strengths: ['required', 'preferred'],
       penalty: -12,
+      family_facing: {
+        control: 'tri-state',
+        title: { de: 'Zimmer teilen', en: 'Share a room' },
+        help: null,
+        scope: 'family',
+        strengths: ['required', 'preferred'],
+        invert: true,
+      },
     }),
     'apart-from': relation({
       title: { de: 'Getrennt von', en: 'Keep apart from' },
@@ -163,6 +204,39 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       strengths: ['required', 'preferred'],
       penalty: -20,
       organiser_only: true,
+    }),
+    'workshop-with': relation({
+      title: { de: 'Workshop zusammen mit', en: 'Workshop together with' },
+      scopes: ['person'],
+      value: ref('person'),
+      target: ['person'],
+      operator: 'groups-with',
+      strengths: ['required'],
+      family_facing: {
+        control: 'person-picker',
+        title: { de: 'Workshops gemeinsam mit', en: 'Workshops together with' },
+        help: null,
+        scope: 'person',
+        strengths: ['required'],
+        invert: false,
+      },
+    }),
+    'family-note': property({
+      title: { de: 'Hinweis der Familie', en: 'Family note' },
+      scopes: ['family'],
+      value: text({ max_length: 2000 }),
+      cardinality: 'zero-or-one',
+      family_facing: {
+        control: 'free-text',
+        title: { de: 'Sonst noch etwas?', en: 'Anything else?' },
+        help: {
+          de: 'Freitext — das Organisationsteam liest mit.',
+          en: 'Free text — the organisers read it.',
+        },
+        scope: 'family',
+        strengths: null,
+        invert: false,
+      },
     }),
   },
   modules: [
@@ -210,6 +284,70 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       fairness_targets: { children: 2, adults: 1 },
       fill_unassigned: true,
       max_repair_passes: 5,
+    }),
+    familyPreferences({
+      sections: [
+        {
+          key: 'people',
+          title: { de: 'Wer kommt mit', en: 'Who is coming' },
+          intro: null,
+          traits: ['does-not-need-a-bed'],
+          deadline_scope: null,
+        },
+        {
+          key: 'room-wishes',
+          title: { de: 'Zimmerwünsche', en: 'Room wishes' },
+          intro: null,
+          traits: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
+          deadline_scope: 'accommodation',
+        },
+        {
+          key: 'workshops',
+          title: { de: 'Workshops', en: 'Workshops' },
+          intro: null,
+          traits: ['workshop-with'],
+          deadline_scope: 'workshops',
+        },
+      ],
+      module_controls: [
+        {
+          key: 'prefers-workshop',
+          section: 'workshops',
+          title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
+          help: {
+            de: 'Bis zu drei Wünsche, der wichtigste zuerst.',
+            en: 'Up to three choices, most important first.',
+          },
+        },
+        {
+          key: 'workshop-sign-up',
+          section: 'workshops',
+          title: { de: 'Workshop-Anmeldung', en: 'Workshop sign-up' },
+          help: {
+            de: 'Du meldest Dich verbindlich an.',
+            en: 'This reserves your place.',
+          },
+        },
+        {
+          key: 'workshop-interest',
+          section: 'workshops',
+          title: { de: 'Interesse', en: 'Interest' },
+          help: {
+            de: 'Unverbindlich, ohne Platzreservierung.',
+            en: 'Non-binding; no place reserved.',
+          },
+        },
+      ],
+      deadline_contact: {
+        accommodation: {
+          de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
+          en: 'Please coordinate late room-preference changes with the organisers.',
+        },
+        workshops: {
+          de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
+          en: 'Please coordinate late workshop changes with the organisers.',
+        },
+      },
     }),
   ],
 })

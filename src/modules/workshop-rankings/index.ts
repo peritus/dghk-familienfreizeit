@@ -123,6 +123,7 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
         validate: rankingValueValid,
       },
     ],
+    family_controls: [{ key: params.ranking_trait, control: 'ranking' }],
     solver_input: [{ id: 'workshop-rankings', build: (world) => buildRankings(world) }],
     stages: [demandStage()],
   }),

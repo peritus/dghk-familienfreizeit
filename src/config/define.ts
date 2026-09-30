@@ -28,6 +28,55 @@ export type ValueDefinition =
   | { kind: 'date' }
   | { kind: 'ref'; entity_kind: string }
 
+export type FamilyControlKind =
+  | 'tri-state'
+  | 'toggle'
+  | 'choice'
+  | 'free-text'
+  | 'family-picker'
+  | 'person-picker'
+  | 'workshop-sign-up'
+  | 'workshop-interest'
+  | 'ranking'
+
+export type FamilyFacing = {
+  control: FamilyControlKind
+  title: LocalizedText
+  help?: LocalizedText | null
+  scope: 'family' | 'person'
+  strengths: readonly ('required' | 'preferred')[] | null
+  invert: boolean
+}
+
+export type FamilyPreferenceSection = {
+  key: string
+  title: LocalizedText
+  intro: LocalizedText | null
+  traits: readonly string[]
+  deadline_scope: 'accommodation' | 'workshops' | null
+}
+
+export type FamilyPreferenceModuleControl = {
+  key: string
+  section: string
+  title: LocalizedText
+  help: LocalizedText | null
+}
+
+export type FamilyPreferencesParams = {
+  sections: readonly FamilyPreferenceSection[]
+  module_controls: readonly FamilyPreferenceModuleControl[]
+  deadline_contact: {
+    accommodation: LocalizedText
+    workshops: LocalizedText
+  }
+}
+
+export type FamilyControlDefinition = {
+  key: string
+  control: FamilyControlKind
+}
+
 type TraitBase = {
   title: LocalizedText
   help?: LocalizedText | null
@@ -43,6 +92,7 @@ type TraitBase = {
    * exclusive with `organiser_only`.
    */
   family_writable?: boolean
+  family_facing?: FamilyFacing
   sensitivity?: 'normal' | 'restricted'
   valid_for?: (entity: { label(key: string): JsonValue | undefined }) => boolean | LocalizedText
 }
@@ -141,6 +191,7 @@ export type ModuleContributions = {
   stages?: readonly SolverStage[]
   rules?: readonly Rule[]
   preflight_checks?: readonly PreflightCheck[]
+  family_controls?: readonly FamilyControlDefinition[]
 }
 
 export type ScreenDefinition = {
@@ -225,7 +276,7 @@ export function defineOccasionProfile<Traits extends Record<string, Trait>>(inpu
   validateMeta(input.meta)
   const modules = input.modules ?? []
   validateTraits(input.traits, input.meta)
-  validateModules(modules, input.traits)
+  validateModules(modules, input.traits, input.meta)
   return { ...input, modules, validation_view: validationView(input.traits, modules) }
 }
 
@@ -274,6 +325,7 @@ function validateTraits(traits: Record<string, Trait>, meta: ProfileMeta): void 
       throw new Error(`trait ${key} copy requires enum value`)
     if (trait.organiser_only && trait.family_writable)
       throw new Error(`trait ${key} cannot be both organiser_only and family_writable`)
+    validateFamilyFacing(key, trait, meta)
     for (const evaluator of [
       trait.valid_for,
       trait.kind === 'capability' ? trait.derive : undefined,
@@ -283,7 +335,11 @@ function validateTraits(traits: Record<string, Trait>, meta: ProfileMeta): void 
   }
 }
 
-function validateModules(modules: readonly ProfileModule[], traits: Record<string, Trait>): void {
+function validateModules(
+  modules: readonly ProfileModule[],
+  traits: Record<string, Trait>,
+  meta: ProfileMeta,
+): void {
   const ids = new Set<string>()
   for (const module of modules) {
     if (!kebab(module.id) || ids.has(module.id))
@@ -378,6 +434,93 @@ function validateModules(modules: readonly ProfileModule[], traits: Record<strin
       (module) => module.contributions.reports?.map(({ id }) => `report:${id}`) ?? [],
     ),
   )
+  const familyControlKeys = modules.flatMap(
+    (module) =>
+      module.contributions.family_controls?.map(({ key }) => `family-control:${key}`) ?? [],
+  )
+  duplicate(familyControlKeys)
+  const familyControlDefinitions = new Map(
+    modules.flatMap(
+      (module) =>
+        module.contributions.family_controls?.map((control) => [control.key, control] as const) ??
+        [],
+    ),
+  )
+  const familyPreferences = modules.find((module) => module.id === 'family-preferences')
+  if (familyPreferences)
+    validateFamilyPreferences(
+      familyPreferences.parameters as unknown as FamilyPreferencesParams,
+      traits,
+      meta,
+      familyControlDefinitions,
+    )
+}
+
+function validateFamilyFacing(key: string, trait: Trait, meta: ProfileMeta): void {
+  const familyFacing = trait.family_facing
+  if (!familyFacing) return
+  if (trait.kind === 'note') throw new Error(`trait ${key} cannot be family-facing`)
+  if (trait.organiser_only)
+    throw new Error(`trait ${key} cannot be organiser_only and family-facing`)
+  if (!trait.scopes.includes(familyFacing.scope))
+    throw new Error(`trait ${key} family-facing scope is not declared by the trait`)
+  if (!familyFacing.title) throw new Error(`trait ${key} family-facing title is required`)
+  validateCopy(meta, familyFacing.title)
+  if (familyFacing.help) validateCopy(meta, familyFacing.help)
+  if (!Array.isArray(familyFacing.strengths)) return
+  if ('strengths' in trait) {
+    for (const strength of familyFacing.strengths)
+      if (!(trait.strengths ?? []).includes(strength))
+        throw new Error(`trait ${key} family-facing strength is not allowed by the trait`)
+  } else if (familyFacing.strengths.length > 0) {
+    throw new Error(`trait ${key} family-facing strengths require a requirement or relation`)
+  }
+}
+
+function validateFamilyPreferences(
+  params: FamilyPreferencesParams,
+  traits: Record<string, Trait>,
+  meta: ProfileMeta,
+  familyControls: ReadonlyMap<string, FamilyControlDefinition>,
+): void {
+  const sections = new Map<string, FamilyPreferenceSection>()
+  for (const section of params.sections) {
+    if (!kebab(section.key) || sections.has(section.key))
+      throw new Error(`family preference section is duplicate or invalid: ${section.key}`)
+    sections.set(section.key, section)
+    validateCopy(meta, section.title)
+    if (section.intro) validateCopy(meta, section.intro)
+    if (section.deadline_scope && !meta.deadlines?.[section.deadline_scope])
+      throw new Error(`family preference deadline is not configured: ${section.deadline_scope}`)
+  }
+  const occurrences = new Map<string, number>()
+  for (const section of params.sections) {
+    for (const traitKey of section.traits) {
+      const trait = traits[traitKey]
+      if (!trait) throw new Error(`family preference section names no trait: ${traitKey}`)
+      if (!trait.family_facing)
+        throw new Error(`family preference section names non-family-facing trait: ${traitKey}`)
+      occurrences.set(traitKey, (occurrences.get(traitKey) ?? 0) + 1)
+    }
+  }
+  for (const [traitKey, trait] of Object.entries(traits)) {
+    if (trait.family_facing && occurrences.get(traitKey) !== 1)
+      throw new Error(`family-facing trait must appear in exactly one section: ${traitKey}`)
+  }
+  const moduleControlKeys = new Set<string>()
+  for (const control of params.module_controls) {
+    if (moduleControlKeys.has(control.key))
+      throw new Error(`family preference module control is duplicate: ${control.key}`)
+    moduleControlKeys.add(control.key)
+    if (!sections.has(control.section))
+      throw new Error(`family preference module control names no section: ${control.section}`)
+    if (!familyControls.has(control.key))
+      throw new Error(`family preference module control is not contributed: ${control.key}`)
+    validateCopy(meta, control.title)
+    if (control.help) validateCopy(meta, control.help)
+  }
+  validateCopy(meta, params.deadline_contact.accommodation)
+  validateCopy(meta, params.deadline_contact.workshops)
 }
 
 const kernelEntityKinds = ['family', 'person']

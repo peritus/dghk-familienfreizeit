@@ -282,6 +282,10 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
         sensitivity: 'restricted',
       },
     ],
+    family_controls: [
+      { key: 'workshop-sign-up', control: 'workshop-sign-up' },
+      { key: 'workshop-interest', control: 'workshop-interest' },
+    ],
     events: [
       {
         type: 'WorkshopAdded',

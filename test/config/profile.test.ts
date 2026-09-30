@@ -4,6 +4,7 @@ import { capability, defineOccasionProfile, enumOf, property } from '../../src/c
 import { kernelProfile } from '../../src/config/profiles/kernel.js'
 import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import { defineModule } from '../../src/modules/define.js'
+import { familyPreferences } from '../../src/modules/family-preferences/index.js'
 import { derive } from '../../src/events/fold.js'
 
 const meta = {
@@ -26,6 +27,73 @@ describe('occasion profile', () => {
         value: { kind: 'enum', values: ['active', 'blocked'] },
       }),
     )
+    expect(familienfreizeit2027Profile.meta.deadlines).toEqual({
+      accommodation: '2027-03-31T21:59:59Z',
+      workshops: '2027-04-15T21:59:59Z',
+    })
+    expect(familienfreizeit2027Profile.traits['needs-private-sanitary'].family_facing).toEqual(
+      expect.objectContaining({ control: 'tri-state', scope: 'family' }),
+    )
+    expect(familienfreizeit2027Profile.modules.at(-1)?.id).toBe('family-preferences')
+  })
+
+  test('validates family-facing traits and their configured sections', () => {
+    const controlModule = defineModule({
+      id: 'family-control-source',
+      params: z.object({}),
+      contribute: () => ({
+        family_controls: [{ key: 'fixture-control', control: 'toggle' as const }],
+      }),
+    })
+    const traits = {
+      answer: property({
+        title: 'Answer',
+        scopes: ['family'] as const,
+        value: enumOf(['yes']),
+        family_facing: {
+          control: 'toggle' as const,
+          title: 'Answer',
+          help: null,
+          scope: 'family' as const,
+          strengths: null,
+          invert: false,
+        },
+      }),
+    }
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits,
+        modules: [
+          controlModule({}),
+          familyPreferences({
+            sections: [
+              { key: 'main', title: 'Main', intro: null, traits: ['answer'], deadline_scope: null },
+            ],
+            module_controls: [
+              { key: 'fixture-control', section: 'main', title: 'Fixture', help: null },
+            ],
+            deadline_contact: { accommodation: 'Contact', workshops: 'Contact' },
+          }),
+        ],
+      }),
+    ).not.toThrow()
+    expect(() =>
+      defineOccasionProfile({
+        meta,
+        traits,
+        modules: [
+          controlModule({}),
+          familyPreferences({
+            sections: [
+              { key: 'main', title: 'Main', intro: null, traits: [], deadline_scope: null },
+            ],
+            module_controls: [],
+            deadline_contact: { accommodation: 'Contact', workshops: 'Contact' },
+          }),
+        ],
+      }),
+    ).toThrow(/exactly one section/)
   })
 
   test('kernel-only fixture produces the validation view without module surface', () => {
