@@ -17,8 +17,10 @@ components.
 
 | Artifact | Scope | Status |
 |---|---|---|
+| [accommodation-assignment-prototype-v13.html](accommodation-assignment-prototype-v13.html) | Accommodation assignment board, overview, room cards, fixed-assignment dialog, responsive and print states | Imported standalone snapshot (2026-09-30) |
 | [workshops-prototype-v16.html](workshops-prototype-v16.html) | Workshop organisation, choice, assignment, and list views | Imported standalone snapshot |
 
-The listed artifact was imported unchanged from the local source
-`$HOME/workshops-prototype-v16.html`. Its fixture data is synthetic and must be
-treated as sensitive-looking test data, not participant data.
+The listed artifacts were imported unchanged from their local source files:
+`/home/dev/assignment-board-prototype-v13.html` and
+`$HOME/workshops-prototype-v16.html`. Their fixture data is synthetic and must
+be treated as sensitive-looking test data, not participant data.
