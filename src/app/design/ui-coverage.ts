@@ -3,6 +3,8 @@ export type UiCoverageEntry = {
   area: 'foundation' | 'component' | 'application' | 'screen'
   subject: string
   source: string
+  media?: 'screen' | 'print'
+  screenshot_target?: 'root' | 'dialog'
 }
 
 /**
@@ -288,6 +290,12 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/ui/tabs.tsx',
   },
   {
+    id: 'screens-organiser-assignment-board--populated',
+    area: 'screen',
+    subject: 'Assignment board populated',
+    source: 'src/modules/room-assignment/app/assignment-board.stories.tsx',
+  },
+  {
     id: 'screens-organiser-assignment-board--populated-with-shared-organiser-state',
     area: 'screen',
     subject: 'Assignment board',
@@ -306,10 +314,42 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/modules/room-assignment/app/assignment-board.stories.tsx',
   },
   {
+    id: 'room-assignment-board-components--requirement-chip-variants',
+    area: 'component',
+    subject: 'Requirement chip variants',
+    source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
+  },
+  {
     id: 'room-assignment-board-components--room-card-variants',
     area: 'component',
-    subject: 'Assignment board components',
+    subject: 'Room card variants',
     source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
+  },
+  {
+    id: 'room-assignment-board-components--family-entry-and-overview-rows',
+    area: 'component',
+    subject: 'Family entry and overview rows',
+    source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
+  },
+  {
+    id: 'room-assignment-board-components--building-header',
+    area: 'component',
+    subject: 'Assignment building header',
+    source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
+  },
+  {
+    id: 'room-assignment-board-components--fixed-dialog',
+    area: 'component',
+    subject: 'Fixed assignment dialog',
+    source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
+    screenshot_target: 'dialog',
+  },
+  {
+    id: 'room-assignment-board-components--print-layout',
+    area: 'component',
+    subject: 'Assignment print layout',
+    source: 'src/modules/room-assignment/app/assignment-board/components.stories.tsx',
+    media: 'print',
   },
   {
     id: 'components-organiser-workshop-shared--workspace-chrome',

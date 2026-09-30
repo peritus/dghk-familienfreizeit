@@ -14,14 +14,16 @@ test.describe('repository-local UI contract', () => {
   })
 
   for (const entry of uiCoverage.filter(({ area }) => area !== 'foundation')) {
-    test(`visual contract: ${entry.subject}`, async ({ page }) => {
+    test(`visual contract: ${entry.area}: ${entry.subject}`, async ({ page }) => {
       await page.goto(`/iframe.html?id=${entry.id}&viewMode=story`)
+      if (entry.media) await page.emulateMedia({ media: entry.media })
       const root = page.locator('#storybook-root')
-      await expect(root).toBeVisible({ timeout: 15_000 })
+      const target = entry.screenshot_target === 'dialog' ? page.getByRole('dialog') : root
+      await expect(target).toBeVisible({ timeout: 15_000 })
       await page.evaluate(async () => {
         await document.fonts?.ready
       })
-      await expect(root).toHaveScreenshot(`${entry.id}.png`, {
+      await expect(target).toHaveScreenshot(`${entry.id}.png`, {
         animations: 'disabled',
         caret: 'hide',
       })
