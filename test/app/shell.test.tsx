@@ -103,6 +103,19 @@ function workshopFixtureEvents(): readonly Event[] {
       },
     },
     {
+      at: '2027-01-01T00:01:30Z',
+      actor: 'organiser@example.test',
+      subject: null,
+      type: 'ExternalLeaderAdded',
+      payload: {
+        external_leader_id: 'ext_pereira',
+        name: 'Pereira',
+        phone: '0151 555 0901',
+        availability: ['Fr 09:00–11:00'],
+        sort_key: 1,
+      },
+    },
+    {
       at: '2027-01-01T00:02:00Z',
       actor: 'organiser@example.test',
       subject: null,
@@ -116,7 +129,7 @@ function workshopFixtureEvents(): readonly Event[] {
         age_max: 14,
         capacity: 8,
         participation_mode: 'assigned',
-        leader_ids: ['per_mira'],
+        leader_ids: ['per_mira', 'ext_pereira'],
         needs: [],
         sort_key: 1,
       },
@@ -223,6 +236,7 @@ test('workshop navigation exposes the intended visible areas and links to slot m
 
   const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
   expect(navigation.textContent).toContain('Workshops')
+  expect(navigation.textContent).toContain('Externe')
   expect(navigation.textContent).toContain('Räume und Slots')
   expect(navigation.textContent).toContain('Programm')
   expect(navigation.querySelector('a[href="/workshops/slots"]')).toBeNull()
@@ -231,13 +245,43 @@ test('workshop navigation exposes the intended visible areas and links to slot m
   )
 })
 
+test('the external leaders view follows the prototype list and stages a complete update', async () => {
+  const { fetchMock } = open('/organiser/workshops/externe', workshopFixtureEvents())
+  if (!fetchMock) throw new Error('organiser fetch mock not installed')
+
+  expect(await screen.findByRole('heading', { name: 'Externe Leitungen' })).toBeTruthy()
+  expect(screen.getByText('Pereira')).toBeTruthy()
+  expect(screen.getByText('Keramik')).toBeTruthy()
+  expect(screen.getByText('Fr 09:00–11:00')).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Pereira' }))
+
+  expect(screen.getByRole('heading', { name: 'Externe Leitung: Pereira' })).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Pereira Weber' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+
+  expect(await screen.findByText('Pereira Weber')).toBeTruthy()
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith('/api/organiser/apply', expect.anything()),
+  )
+  const applyCall = fetchMock.mock.calls.find(([input]) =>
+    String(input).endsWith('/api/organiser/apply'),
+  )
+  const body = JSON.parse(String(applyCall?.[1]?.body ?? '{}')) as {
+    events?: readonly { type?: string; payload?: Record<string, unknown> }[]
+  }
+  expect(body.events?.[0]).toMatchObject({
+    type: 'ExternalLeaderUpdated',
+    payload: { external_leader_id: 'ext_pereira', name: 'Pereira Weber' },
+  })
+})
+
 test('the workshop overview presents resolved labels and derived placement data', async () => {
   open('/organiser/workshops', workshopFixtureEvents())
 
   expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
   expect(screen.getAllByText('Kinder').length).toBeGreaterThan(0)
   expect(screen.getByText('Automatische Zuordnung')).toBeTruthy()
-  expect(screen.getByText('Mira Stein')).toBeTruthy()
+  expect(screen.getByText(/Mira Stein/)).toBeTruthy()
   expect(screen.getByText(/Atelier/)).toBeTruthy()
 })
 
