@@ -23,6 +23,7 @@ const eventTypeLabels: Record<string, string> = {
   PersonAdded: 'Person hinzugefügt',
   PersonUpdated: 'Person geändert',
   PersonWithdrawn: 'Person zurückgenommen',
+  ['FamilyDisplayNameChanged']: 'Familienname geändert',
 }
 
 export function roleLabel(role: string): string {

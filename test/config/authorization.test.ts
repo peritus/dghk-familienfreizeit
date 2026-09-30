@@ -26,6 +26,15 @@ const labelSet: Event = {
   payload: { entity_id: 'fam_1', key: 'flag', value: true, strength: null, note: null },
 }
 
+const displayNameChanged: Event = {
+  seq: 2,
+  at: '2027-01-01T00:00:01Z',
+  actor: 'org@test.invalid',
+  subject: 'fam_1',
+  type: 'FamilyDisplayNameChanged',
+  payload: { family_id: 'fam_1', old_display_name: 'A', new_display_name: 'A family' },
+}
+
 describe('event append authorization', () => {
   test('an organiser may LabelSet any key regardless of family_writable', () => {
     const world = derive(events)
@@ -53,6 +62,12 @@ describe('event append authorization', () => {
       payload: { ...labelSet.payload, entity_id: 'fam_2' },
     }
     expect(canAppendEvent(family, otherFamilysLabel, world, config)).toBe(false)
+  })
+
+  test('display-name correction is organiser-only until family access is delivered', () => {
+    const world = derive(events)
+    expect(canAppendEvent(organiser, displayNameChanged, world, {})).toBe(true)
+    expect(canAppendEvent(family, displayNameChanged, world, {})).toBe(false)
   })
 
   const moduleEvent: Event = {

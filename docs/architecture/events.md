@@ -47,7 +47,9 @@ boundary validation may use Zod as defined by [D26](../../decisions.md#d26--vali
 
 ## Limits
 
-`derive(events, config)` is implemented: it folds the kernel's seven event
+`derive(events, config)` is implemented: it folds the kernel's identity,
+person, and label event types, including the dedicated
+`FamilyDisplayNameChanged` identity-correction event,
 types and selected module event types into typed entities and generic labels
 (`src/events/fold.ts`), while the fixed resolver operators validate label scope,
 value shape, and references (`src/events/resolver.ts`). The room-inventory module

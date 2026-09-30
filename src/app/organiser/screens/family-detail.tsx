@@ -17,6 +17,8 @@ import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
 import { findFamily, labelValue } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
+import { activeProfile } from '../../../config/index.js'
+import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
 
 function makePersonId(givenName: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${globalThis.performance?.now() ?? 0}`
@@ -185,6 +187,12 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
   const [givenName, setGivenName] = useState('')
   const [familyName, setFamilyName] = useState('')
   const [role, setRole] = useState('adult')
+  const currentDisplayName = family
+    ? (labelValue(world!.labels_by_entity[family.family.id] ?? [], 'display-name') ??
+      family.family.id)
+    : ''
+  const [displayName, setDisplayName] = useState(currentDisplayName)
+  const [displayNameError, setDisplayNameError] = useState<string | null>(null)
 
   if (!family || !state.principal_email) return <p role="alert">Diese Familie gibt es nicht.</p>
 
@@ -229,6 +237,33 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
     setFamilyName('')
   }
 
+  function renameFamily(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const nextDisplayName = displayName.trim()
+    if (!nextDisplayName) {
+      setDisplayNameError('Bitte gib einen Familiennamen ein.')
+      return
+    }
+    if (nextDisplayName === currentDisplayName) {
+      setDisplayNameError(null)
+      return
+    }
+    stage([
+      {
+        at: new Date().toISOString(),
+        actor: state.principal_email!,
+        subject: selectedFamilyId,
+        type: 'FamilyDisplayNameChanged',
+        payload: {
+          family_id: selectedFamilyId,
+          old_display_name: currentDisplayName,
+          new_display_name: nextDisplayName,
+        },
+      },
+    ])
+    setDisplayNameError(null)
+  }
+
   return (
     <div className="space-y-6">
       <p>
@@ -241,6 +276,31 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
         <h2 className="text-3xl">{labelValue(labels, 'display-name') ?? family.family.id}</h2>
         <p>{labelValue(labels, 'email') ?? 'Keine E-Mail'}</p>
       </div>
+      <Card className="bg-white">
+        <CardHeader>
+          <h3 className="text-xl">Familienname</h3>
+        </CardHeader>
+        <CardContent>
+          <form className="flex flex-wrap items-end gap-3" onSubmit={renameFamily}>
+            <label htmlFor="family-display-name" className="grid min-w-64 flex-1 gap-1">
+              <span className="font-bold">Anzeigename</span>
+              <input
+                id="family-display-name"
+                required
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                className="min-h-11 rounded border-2 border-black px-3"
+              />
+            </label>
+            <Button type="submit">Familiennamen speichern</Button>
+          </form>
+          {displayNameError ? (
+            <p className="mt-2" role="alert">
+              {displayNameError}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
       <Card className="bg-white">
         <CardHeader>
           <h3 className="text-xl">Personen · {family.persons.length}</h3>
@@ -350,6 +410,14 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
           ) : null}
         </CardContent>
       </Card>
+      <FamilyPreferencesControls
+        profile={activeProfile}
+        family_id={selectedFamilyId}
+        persons={family.persons}
+        world={world!}
+        actor={state.principal_email}
+        stage={stage}
+      />
       <Card className="bg-white">
         <CardHeader>
           <h3 className="text-xl">Änderungen</h3>
@@ -361,7 +429,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
             <ol className="space-y-3">
               {history.map((event) => (
                 <li key={event.seq} className="border-l-4 border-black pl-3">
-                  <p className="font-bold">{changeSummary(event.type)}</p>
+                  <p className="font-bold">{changeSummary(event.type, event.payload)}</p>
                   {draftSeqs.has(event.seq) ? (
                     <p className="text-sm font-bold">Noch nicht gespeichert</p>
                   ) : null}
@@ -378,7 +446,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
   )
 }
 
-function changeSummary(type: string): string {
+function changeSummary(type: string, payload: unknown): string {
   switch (type) {
     case 'FamilyInvited':
       return 'Familie eingeladen'
@@ -388,6 +456,17 @@ function changeSummary(type: string): string {
       return 'Person geändert'
     case 'PersonWithdrawn':
       return 'Person entfernt'
+    case 'FamilyDisplayNameChanged': {
+      if (payload && typeof payload === 'object') {
+        const values = payload as { old_display_name?: unknown; new_display_name?: unknown }
+        if (
+          typeof values.old_display_name === 'string' &&
+          typeof values.new_display_name === 'string'
+        )
+          return `Familienname geändert: ${values.old_display_name} → ${values.new_display_name}`
+      }
+      return 'Familienname geändert'
+    }
     default:
       return 'Angabe geändert'
   }

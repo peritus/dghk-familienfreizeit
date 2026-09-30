@@ -31,6 +31,11 @@ export type FamilyEmailChanged = {
   payload: { family_id: string; old_email: string; new_email: string }
 }
 
+export type FamilyDisplayNameChanged = {
+  type: 'FamilyDisplayNameChanged'
+  payload: { family_id: string; old_display_name: string; new_display_name: string }
+}
+
 export type PersonAdded = {
   type: 'PersonAdded'
   payload: {
@@ -79,6 +84,7 @@ export type LabelCleared = {
 export type KernelEvent =
   | FamilyInvited
   | FamilyEmailChanged
+  | FamilyDisplayNameChanged
   | PersonAdded
   | PersonUpdated
   | PersonWithdrawn
@@ -121,6 +127,11 @@ export const kernelPayloadSchemas: {
     family_id: z.string().min(1),
     old_email: emailSchema,
     new_email: emailSchema,
+  }),
+  FamilyDisplayNameChanged: z.object({
+    family_id: z.string().min(1),
+    old_display_name: z.string().trim().min(1),
+    new_display_name: z.string().trim().min(1),
   }),
   PersonAdded: z.object({
     person_id: z.string().min(1),

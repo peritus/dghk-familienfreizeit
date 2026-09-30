@@ -48,6 +48,10 @@ labeled person cards. History entries use a thick left border and actor
 
 ## Family identity
 
+The editable identity block and the profile-driven preference controls are
+implemented on the organiser route and documented in
+[`docs/application/organiser-view.md`](../../../docs/application/organiser-view.md).
+
 Place an editable family identity block beside the family heading. It shows the
 current family `display-name` in a required text field with a clear save action.
 This is the organiser-facing family name used by family lists, headings, plans,

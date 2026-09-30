@@ -1,6 +1,7 @@
 import type { KernelConfig, KernelWorld } from '../events/fold.js'
 import type {
   Event,
+  FamilyDisplayNameChanged,
   LabelCleared,
   LabelSet,
   PersonAdded,
@@ -14,6 +15,7 @@ const kernelEntityEventTypes = new Set([
   'PersonAdded',
   'PersonUpdated',
   'PersonWithdrawn',
+  'FamilyDisplayNameChanged',
   'LabelSet',
   'LabelCleared',
 ])
@@ -25,7 +27,12 @@ export function canAppendEvent(
   config: KernelConfig,
 ): boolean {
   if (principal.kind === 'organiser') return true
-  if (event.type === 'FamilyInvited' || event.type === 'FamilyEmailChanged') return false
+  if (
+    event.type === 'FamilyInvited' ||
+    event.type === 'FamilyEmailChanged' ||
+    event.type === 'FamilyDisplayNameChanged'
+  )
+    return false
   if (event.type === 'LabelSet' || event.type === 'LabelCleared')
     if (!isFamilyWritable(config, (event as unknown as LabelSet | LabelCleared).payload.key))
       return false
@@ -34,11 +41,13 @@ export function canAppendEvent(
     return authorize ? authorize(principal, event.payload, world) : false
   }
   const entityId =
-    event.type === 'PersonAdded' || event.type === 'PersonUpdated'
-      ? (event as unknown as PersonAdded | PersonUpdated).payload.family_id
-      : event.type === 'PersonWithdrawn'
-        ? (event as unknown as PersonWithdrawn).payload.person_id
-        : (event as unknown as LabelSet | LabelCleared).payload.entity_id
+    event.type === 'FamilyDisplayNameChanged'
+      ? (event as unknown as FamilyDisplayNameChanged).payload.family_id
+      : event.type === 'PersonAdded' || event.type === 'PersonUpdated'
+        ? (event as unknown as PersonAdded | PersonUpdated).payload.family_id
+        : event.type === 'PersonWithdrawn'
+          ? (event as unknown as PersonWithdrawn).payload.person_id
+          : (event as unknown as LabelSet | LabelCleared).payload.entity_id
   return familyForEntity(world, entityId) === principal.family_id
 }
 

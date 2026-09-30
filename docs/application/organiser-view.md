@@ -12,7 +12,7 @@ path before persistence.
 |---|---|
 | `/organiser` | Dashboard with family/person counts, diagnostics, and draft-change status |
 | `/organiser/families` | Derived family table and manual invitation staging |
-| `/organiser/families/:id` | Derived family detail, Add/Save/Delete person actions, and committed or draft event history |
+| `/organiser/families/:id` | Derived family detail, family identity editing, profile-driven preference controls, Add/Save/Delete person actions, and committed or draft event history |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
 | `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
@@ -68,6 +68,23 @@ event, and appends with the expected event head. A stale head returns the
 intervening events so the browser can re-derive while preserving its draft
 work. Family principals receive no organiser log or apply access.
 
+## Family detail controls
+
+The family detail screen renders the selected profile's `family-preferences`
+sections. Family-facing traits are grouped by their configured scope: family
+traits edit the family entity, person traits repeat for each family member, and
+module controls write the canonical labels supplied by their module. Organiser
+changes use the same ordinary `LabelSet` and `LabelCleared` drafts as the later
+family route. Accommodation and workshop sections show their configured
+deadline and contact copy; a passed deadline is advisory and does not disable
+editing.
+
+The family identity field is separate from those generic labels. A changed,
+non-empty value stages `FamilyDisplayNameChanged`, which replaces only the
+family's display-name label after checking the recorded old value. A no-op does
+not create an event, and the event history renders the old and new names while
+preserving the family id, people, memberships, and email label.
+
 ## Workshop behavior
 
 Workshop actions stage ordinary `Workshop*`, `WorkshopSlot*`, and
@@ -82,13 +99,16 @@ available to historical reports.
 
 ## Current limits
 
-The active profile contains the kernel `role` trait, accommodation modules, and
-the workshop planning modules. Assignment review and the narrow event-backed
-fixed-assignment workflow are implemented. Fixed workshop attendance/placement
-decisions, family-facing controls, generic reports, plan comparison, release, and
+The active profile contains the kernel `role` trait, accommodation modules, the
+profile-driven organiser family controls, and the workshop planning modules.
+Assignment review and the narrow event-backed fixed-assignment workflow are
+implemented. Family authentication and family routes, fixed workshop
+attendance/placement decisions, generic reports, plan comparison, release, and
 communication remain later scope.
 
-The verified tests cover local derivation, immediate and drafting commit timing,
+The verified tests cover local derivation, family display-name replacement,
+profile control validation, rendered organiser family controls, immediate and
+drafting commit timing,
 the inline draft workspace, apply-prefix acknowledgement, organiser log/apply
 authorization, prospective replay rejection, stale-head responses, route loading, and
 the public/private route boundary.

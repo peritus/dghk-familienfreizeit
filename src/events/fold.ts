@@ -5,6 +5,7 @@ import {
   parseEvent,
   type Event,
   type EventPayloadSchemas,
+  type FamilyDisplayNameChanged,
   type FamilyEmailChanged,
   type FamilyInvited,
   type JsonValue,
@@ -20,7 +21,7 @@ import {
 } from './resolver.js'
 import type { ResolvedCapability } from './resolver.js'
 
-/** Written only by FamilyInvited/FamilyEmailChanged/PersonAdded/PersonUpdated; LabelSet/LabelCleared reject them. */
+/** Written only by family identity events and PersonAdded/PersonUpdated; LabelSet/LabelCleared reject them. */
 const kernelSetupOwnedLabelKeys = new Set([
   'display-name',
   'email',
@@ -417,6 +418,24 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       state.emails.set(newEmail, familyId)
       replaceLabels(state, familyId, 'email')
       setLabel(state, event, familyId, 'email', newEmail, null, null)
+      break
+    }
+    case 'FamilyDisplayNameChanged': {
+      const {
+        family_id: familyId,
+        old_display_name: oldDisplayName,
+        new_display_name: newDisplayName,
+      } = (event as unknown as FamilyDisplayNameChanged).payload
+      requireEntity(state.families, familyId, 'family')
+      const currentDisplayName = [...state.labels.values()].find(
+        (label) => label.entity_id === familyId && label.key === 'display-name',
+      )
+      if (currentDisplayName?.value !== oldDisplayName)
+        throw new Error(`old display name does not match family: ${familyId}`)
+      if (oldDisplayName === newDisplayName)
+        throw new Error(`display name did not change for family: ${familyId}`)
+      replaceLabels(state, familyId, 'display-name')
+      setLabel(state, event, familyId, 'display-name', newDisplayName, null, null)
       break
     }
     case 'PersonAdded':

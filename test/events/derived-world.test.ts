@@ -45,6 +45,38 @@ test('derives deterministic indexes and normalized resolver constraints', () => 
   expect(derive([...events].reverse().reverse())).toEqual(world)
 })
 
+test('FamilyDisplayNameChanged replaces only the family display-name label', () => {
+  const changed: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: 'fam_1',
+    type: 'FamilyDisplayNameChanged',
+    payload: {
+      family_id: 'fam_1',
+      old_display_name: 'A',
+      new_display_name: 'A family',
+    },
+  }
+  const world = derive([...events, changed])
+  expect(world.labels_by_entity.fam_1).toContainEqual(
+    expect.objectContaining({ key: 'display-name', value: 'A family', set_seq: 3 }),
+  )
+  expect(world.families).toEqual([{ id: 'fam_1', kind: 'family', sort_key: 1, created_seq: 1 }])
+  expect(() =>
+    derive([
+      ...events,
+      { ...changed, seq: 3, payload: { ...changed.payload, old_display_name: 'Other' } },
+    ]),
+  ).toThrow(/old display name/)
+  expect(() =>
+    derive([
+      ...events,
+      { ...changed, seq: 3, payload: { ...changed.payload, new_display_name: 'A' } },
+    ]),
+  ).toThrow(/did not change/)
+})
+
 test('a LabelCleared by value hard-removes the label instead of tombstoning it (D27)', () => {
   const clearByValue: Event = {
     seq: 3,

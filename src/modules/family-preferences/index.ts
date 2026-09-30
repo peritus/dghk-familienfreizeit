@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { FamilyPreferencesParams, LocalizedText } from '../../config/define.js'
+import type {
+  FamilyControlDefinition,
+  FamilyPreferencesParams,
+  LocalizedText,
+  OccasionProfile,
+} from '../../config/define.js'
 
 const localizedText = z.union([z.string().min(1), z.record(z.string().min(1), z.string().min(1))])
 
@@ -38,3 +43,17 @@ export const familyPreferences = defineModule<FamilyPreferencesParams>({
   params: familyPreferencesParams,
   contribute: () => ({}),
 })
+
+export function familyPreferencesConfig(
+  profile: Pick<OccasionProfile, 'modules'>,
+): FamilyPreferencesParams {
+  const module = profile.modules.find(({ id }) => id === 'family-preferences')
+  if (!module) throw new Error('family-preferences is not selected in this profile')
+  return module.parameters as FamilyPreferencesParams
+}
+
+export function familyControlDefinitions(
+  profile: Pick<OccasionProfile, 'modules'>,
+): readonly FamilyControlDefinition[] {
+  return profile.modules.flatMap((module) => module.contributions.family_controls ?? [])
+}
