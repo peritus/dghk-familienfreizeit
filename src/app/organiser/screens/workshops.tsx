@@ -3,11 +3,15 @@ import { activeProfile } from '../../../config/index.js'
 import type { KernelWorld } from '../../../events/fold.js'
 import type { EventDraft } from '../../../events/types.js'
 import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
-import { workshopSchedulingWorld } from '../../../modules/workshop-scheduling/index.js'
-import { workshopSpaceWorld } from '../../../modules/workshop-space/index.js'
+import {
+  workshopSchedulingWorld,
+  type WorkshopSlot,
+} from '../../../modules/workshop-scheduling/index.js'
+import { workshopSpaceWorld, type WorkshopSpace } from '../../../modules/workshop-space/index.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../../solver/index.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { Button } from '../../components/ui/button.js'
+import { DestructiveActionDialog } from '../../components/ui/destructive-action-dialog.js'
 import { OrganiserLink } from '../../components/organiser-link.js'
 import {
   SpaceEditorForm,
@@ -46,14 +50,54 @@ function draft(actor: string, type: string, payload: EventDraft['payload']): Eve
 }
 
 type Placement = { workshop_id: string; slot_id: string; space_id: string }
+type SchedulingUnscheduled = { workshop_id: string; reason: string }
 
 type WorkshopPlan = {
   placements: readonly Placement[]
-  unscheduled: readonly { workshop_id: string; reason: string }[]
+  unscheduled: readonly SchedulingUnscheduled[]
   demand: Readonly<Record<string, number>>
   assignments: readonly { person_id: string; workshop_id: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
   interests: readonly { person_id: string; workshop_id: string }[]
+}
+
+function dateTimeLocal(value: string): string {
+  const date = new globalThis.Date(value)
+  const part = (number: number) => String(number).padStart(2, '0')
+  return `${date.getFullYear()}-${part(date.getMonth() + 1)}-${part(date.getDate())}T${part(
+    date.getHours(),
+  )}:${part(date.getMinutes())}`
+}
+
+function WorkshopRetireAction({
+  label,
+  title,
+  description,
+  onConfirm,
+}: {
+  label: string
+  title: string
+  description: string
+  onConfirm: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Button size="sm" variant="danger" onClick={() => setOpen(true)}>
+        {label}
+      </Button>
+      <DestructiveActionDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={title}
+        description={description}
+        onConfirm={() => {
+          onConfirm()
+          setOpen(false)
+        }}
+      />
+    </>
+  )
 }
 
 function solveWorkshopPlan(world: KernelWorld): WorkshopPlan {
@@ -66,7 +110,7 @@ function solveWorkshopPlan(world: KernelWorld): WorkshopPlan {
     seed: null,
   })
   const scheduling = plan.sections['workshop-scheduling'] as
-    | { placements?: readonly Placement[]; unscheduled?: readonly WorkshopPlan['unscheduled'][number][] }
+    | { placements?: readonly Placement[]; unscheduled?: readonly SchedulingUnscheduled[] }
     | undefined
   const rankings = plan.sections['workshop-rankings'] as
     | { demand?: Readonly<Record<string, number>> }
@@ -93,7 +137,10 @@ function audienceLabel(audience: string): string {
 }
 
 function participationLabel(mode: string): string {
-  return { assigned: 'Automatische Zuordnung', 'sign-up': 'Anmeldung', interest: 'Interesse' }[mode] ?? mode
+  return (
+    { assigned: 'Automatische Zuordnung', 'sign-up': 'Anmeldung', interest: 'Interesse' }[mode] ??
+    mode
+  )
 }
 
 function placementLabel(
@@ -277,7 +324,8 @@ export function Workshops() {
             label: 'automatische Zuordnung',
           },
           {
-            value: summary.workshops.filter((workshop) => !placedWorkshopIds.has(workshop.id)).length,
+            value: summary.workshops.filter((workshop) => !placedWorkshopIds.has(workshop.id))
+              .length,
             label: 'noch nicht eingeplant',
           },
           { value: summary.external_leaders.length, label: 'externe Leitungen' },
@@ -305,37 +353,37 @@ export function Workshops() {
         />
         {activeWorkshops.length ? (
           activeWorkshops.map((workshop) => (
-              <WorkshopSummaryRow
-                key={workshop.id}
-                workshop={{
-                  id: workshop.id,
-                  title: workshop.title,
-                  description: workshop.description,
-                  audience: audienceLabel(workshop.audience),
-                  age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
-                  capacity: workshop.capacity,
-                  participation_mode: participationLabel(workshop.mode),
-                  leaders: workshop.leader_ids.map((leaderId) => leaderNames.get(leaderId) ?? leaderId),
-                  requirement: workshop.needs.join(', ') || undefined,
-                  demand:
-                    workshop.mode === 'assigned'
-                      ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
-                          plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
-                        }`
-                      : workshop.mode === 'sign-up'
-                        ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
-                        : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
-                  placement: {
-                    label:
-                      placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
-                      'Noch nicht eingeplant',
-                    tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
-                  },
-                  attention: workshop.leader_ids.length
-                    ? undefined
-                    : 'Leitung fehlt',
-                }}
-              />
+            <WorkshopSummaryRow
+              key={workshop.id}
+              workshop={{
+                id: workshop.id,
+                title: workshop.title,
+                description: workshop.description,
+                audience: audienceLabel(workshop.audience),
+                age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+                capacity: workshop.capacity,
+                participation_mode: participationLabel(workshop.mode),
+                leaders: workshop.leader_ids.map(
+                  (leaderId) => leaderNames.get(leaderId) ?? leaderId,
+                ),
+                requirement: workshop.needs.join(', ') || undefined,
+                demand:
+                  workshop.mode === 'assigned'
+                    ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
+                        plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
+                      }`
+                    : workshop.mode === 'sign-up'
+                      ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
+                      : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
+                placement: {
+                  label:
+                    placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
+                    'Noch nicht eingeplant',
+                  tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
+                },
+                attention: workshop.leader_ids.length ? undefined : 'Leitung fehlt',
+              }}
+            />
           ))
         ) : (
           <WorkshopEmptyState title="Keine aktiven Workshops">
@@ -358,47 +406,37 @@ export function WorkshopProgramme() {
   const schedule = workshopSchedulingWorld(world!)
   const spaces = workshopSpaceWorld(world!).live
   const official = officialWorkshopsWorld(world!)
-  const plan = solve(
-    buildSolverInput(world!, composeSolverContributions(activeProfile)),
-    composeSolverContributions(activeProfile),
-    {
-      build_revision: 'organiser',
-      compatibility_revision: 1,
-      event_date: activeProfile.meta.starts_on,
-      profile: activeProfile,
-      seed: null,
-    },
-  )
-  const placements =
-    (
-      plan.sections['workshop-scheduling'] as
-        | { placements?: readonly { workshop_id: string; slot_id: string; space_id: string }[] }
-        | undefined
-    )?.placements ?? []
-  const unscheduled = new Map(
-    (
-      plan.sections['workshop-scheduling'] as
-        | { unscheduled?: readonly { workshop_id: string; reason: string }[] }
-        | undefined
-    )?.unscheduled?.map((item) => [item.workshop_id, item.reason]) ?? [],
-  )
+  const plan = solveWorkshopPlan(world!)
+  const unscheduled = new Map(plan.unscheduled.map((item) => [item.workshop_id, item.reason]))
   const unassignedWorkshops = official.workshops
-    .filter((workshop) => !placements.some((placement) => placement.workshop_id === workshop.id))
+    .filter(
+      (workshop) => !plan.placements.some((placement) => placement.workshop_id === workshop.id),
+    )
     .map((workshop) => ({
       id: workshop.id,
       title: workshop.title,
       reason: unscheduled.get(workshop.id) ?? 'Keine passende Platzierung',
-      demand_label: `${workshop.capacity} Plätze benötigt`,
+      demand_label:
+        workshop.mode === 'assigned'
+          ? `${plan.demand[workshop.id] ?? 0} Wünsche · Kapazität ${workshop.capacity}`
+          : workshop.mode === 'sign-up'
+            ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
+            : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
     }))
   const rooms = spaces.map((space) => ({ id: space.id, label: space.name }))
   const rows = schedule.slots.map((slot) => ({
     id: slot.id,
+    day_label: new globalThis.Date(slot.starts_at).toLocaleDateString('de-DE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+    }),
     slot_label: new globalThis.Date(slot.starts_at).toLocaleTimeString('de-DE', {
       hour: '2-digit',
       minute: '2-digit',
     }),
     cells: rooms.map((room) => {
-      const placement = placements.find(
+      const placement = plan.placements.find(
         (candidate) => candidate.slot_id === slot.id && candidate.space_id === room.id,
       )
       const blocked = schedule.space_slot_blocks.some(
@@ -413,10 +451,13 @@ export function WorkshopProgramme() {
             id: workshop.id,
             state: 'placed' as const,
             title: workshop.title,
-            audience: workshop.audience,
+            audience: audienceLabel(workshop.audience),
             age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
-            leaders: `${workshop.leader_ids.length} Leitungen`,
+            leaders: `${workshop.leader_ids.length} ${workshop.leader_ids.length === 1 ? 'Leitung' : 'Leitungen'}`,
             capacity_label: `${workshop.capacity} Plätze`,
+            demand_label: plan.demand[workshop.id]
+              ? `${plan.demand[workshop.id]} Wünsche`
+              : undefined,
           }
         : { id: `${slot.id}-${room.id}`, state: 'empty' as const }
     }),
@@ -432,7 +473,7 @@ export function WorkshopProgramme() {
       <ProgrammeGrid
         rooms={rooms}
         rows={rows}
-        day_rows={rows.map((row) => ({ id: row.id, label: 'Programm' }))}
+        day_rows={rows.map((row) => ({ id: row.id, label: row.day_label }))}
       />
       {unassignedWorkshops.length ? (
         <section className="space-y-3" aria-label="Nicht eingeplante Workshops">
@@ -452,6 +493,23 @@ export function WorkshopSlots() {
   useDocumentTitle('Slots · Workshops · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const summary = workshopSchedulingWorld(world!)
+  const plan = solveWorkshopPlan(world!)
+  const [editingSlot, setEditingSlot] = useState<WorkshopSlot | null>(null)
+  const [slotError, setSlotError] = useState<string | null>(null)
+  const overlappingSlotIds = new Set(
+    summary.slots.flatMap((slot, index) =>
+      summary.slots
+        .slice(index + 1)
+        .flatMap((other) =>
+          new globalThis.Date(slot.starts_at).getTime() <=
+            new globalThis.Date(other.ends_at).getTime() &&
+          new globalThis.Date(other.starts_at).getTime() <=
+            new globalThis.Date(slot.ends_at).getTime()
+            ? [slot.id, other.id]
+            : [],
+        ),
+    ),
+  )
   const slotViews: readonly WorkshopSlotView[] = summary.slots.map((slot) => {
     const startsAt = new globalThis.Date(slot.starts_at)
     return {
@@ -465,7 +523,8 @@ export function WorkshopSlots() {
         hour: '2-digit',
         minute: '2-digit',
       }),
-      workshop_count: 0,
+      workshop_count: plan.placements.filter((placement) => placement.slot_id === slot.id).length,
+      conflict: overlappingSlotIds.has(slot.id) ? 'Überschneidung prüfen' : undefined,
     }
   })
   const slotsByDay = slotViews.reduce((groups, slot) => {
@@ -477,17 +536,42 @@ export function WorkshopSlots() {
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const starts = new globalThis.Date(String(data.get('starts_at'))).toISOString()
-    const ends = new globalThis.Date(String(data.get('ends_at'))).toISOString()
+    const startsDate = new globalThis.Date(String(data.get('starts_at')))
+    const endsDate = new globalThis.Date(String(data.get('ends_at')))
+    if (!Number.isFinite(startsDate.getTime()) || !Number.isFinite(endsDate.getTime())) {
+      setSlotError('Beginn und Ende müssen gültige Zeitpunkte sein.')
+      return
+    }
+    if (startsDate >= endsDate) {
+      setSlotError('Das Ende muss nach dem Beginn liegen.')
+      return
+    }
+    if (
+      summary.slots.some(
+        (slot) =>
+          slot.id !== editingSlot?.id &&
+          startsDate.getTime() <= new globalThis.Date(slot.ends_at).getTime() &&
+          new globalThis.Date(slot.starts_at).getTime() <= endsDate.getTime(),
+      )
+    ) {
+      setSlotError('Dieser Zeitraum überschneidet sich mit einem bestehenden Slot.')
+      return
+    }
     stage([
-      draft(state.principal_email ?? '', 'WorkshopSlotAdded', {
-        slot_id: id('slot_'),
-        starts_at: starts,
-        ends_at: ends,
-        sort_key: summary.slots.length + 1,
-      }),
+      draft(
+        state.principal_email ?? '',
+        editingSlot ? 'WorkshopSlotUpdated' : 'WorkshopSlotAdded',
+        {
+          slot_id: editingSlot?.id ?? id('slot_'),
+          starts_at: startsDate.toISOString(),
+          ends_at: endsDate.toISOString(),
+          sort_key: editingSlot?.sort_key ?? summary.slots.length + 1,
+        },
+      ),
     ])
     event.currentTarget.reset()
+    setEditingSlot(null)
+    setSlotError(null)
   }
   return (
     <div className="space-y-8">
@@ -496,7 +580,25 @@ export function WorkshopSlots() {
         title="Slots"
         description="Event-backed Zeitfenster für das Programm."
       />
-      <SlotEditorForm on_submit={add} submit_label="Slot hinzufügen" show_day={false} />
+      {slotError ? (
+        <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
+          {slotError}
+        </p>
+      ) : null}
+      <SlotEditorForm
+        key={editingSlot?.id ?? 'new-slot'}
+        on_submit={add}
+        submit_label={editingSlot ? 'Slot speichern' : 'Slot hinzufügen'}
+        show_day={false}
+        default_values={
+          editingSlot
+            ? {
+                starts_at: dateTimeLocal(editingSlot.starts_at),
+                ends_at: dateTimeLocal(editingSlot.ends_at),
+              }
+            : undefined
+        }
+      />
       <div className="grid gap-6">
         {Array.from(slotsByDay, ([day, slots]) => (
           <SlotDayGroup
@@ -504,20 +606,30 @@ export function WorkshopSlots() {
             day_label={day}
             slots={slots}
             action={(slot) => (
-              <Button
-                size="sm"
-                variant="danger"
-                onClick={() =>
-                  stage([
-                    draft(state.principal_email ?? '', 'WorkshopSlotRetired', {
-                      slot_id: slot.id,
-                      reason: 'Organisatorisch entfernt',
-                    }),
-                  ])
-                }
-              >
-                Entfernen
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="neutral"
+                  onClick={() =>
+                    setEditingSlot(summary.slots.find((item) => item.id === slot.id) ?? null)
+                  }
+                >
+                  Bearbeiten
+                </Button>
+                <WorkshopRetireAction
+                  label="Entfernen"
+                  title="Slot entfernen?"
+                  description={`${slot.day_label}, ${slot.time_label} wird aus dem Workshopprogramm entfernt.`}
+                  onConfirm={() =>
+                    stage([
+                      draft(state.principal_email ?? '', 'WorkshopSlotRetired', {
+                        slot_id: slot.id,
+                        reason: 'Organisatorisch entfernt',
+                      }),
+                    ])
+                  }
+                />
+              </>
             )}
           />
         ))}
@@ -531,15 +643,28 @@ export function WorkshopSpaces() {
   const { world, state, stage } = useOrganiser()
   const summary = workshopSpaceWorld(world!)
   const schedule = workshopSchedulingWorld(world!)
+  const [editingSpace, setEditingSpace] = useState<WorkshopSpace | null>(null)
+  const slotLabels = new Map(
+    schedule.slots.map((slot) => [
+      slot.id,
+      `${new globalThis.Date(slot.starts_at).toLocaleString('de-DE', {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      })} Uhr`,
+    ]),
+  )
   const spaceViews: readonly WorkshopSpaceView[] = summary.live.map((space) => ({
     id: space.id,
     name: space.name,
     location: space.location_description,
     capacity: space.capacity,
-    capabilities: [],
+    capabilities: world!.capabilities
+      .filter((capability) => capability.entity_id === space.id)
+      .map((capability) => capability.key),
     blocked_slots: schedule.space_slot_blocks
       .filter((block) => block.space_id === space.id)
-      .map((block) => block.slot_id),
+      .map((block) => slotLabels.get(block.slot_id) ?? block.slot_id),
   }))
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -556,16 +681,21 @@ export function WorkshopSpaces() {
           ]
         : []
     stage([
-      draft(state.principal_email ?? '', 'WorkshopSpaceAdded', {
-        workshop_space_id: id('wsp_'),
-        name: String(data.get('name') ?? ''),
-        location_description: String(data.get('location') ?? ''),
-        capacity: Number(data.get('capacity') ?? 0),
-        availability_windows: availabilityWindows,
-        sort_key: summary.live.length + 1,
-      }),
+      draft(
+        state.principal_email ?? '',
+        editingSpace ? 'WorkshopSpaceUpdated' : 'WorkshopSpaceAdded',
+        {
+          workshop_space_id: editingSpace?.id ?? id('wsp_'),
+          name: String(data.get('name') ?? ''),
+          location_description: String(data.get('location') ?? ''),
+          capacity: Number(data.get('capacity') ?? 0),
+          availability_windows: availabilityWindows,
+          sort_key: editingSpace?.sort_key ?? summary.live.length + 1,
+        },
+      ),
     ])
     event.currentTarget.reset()
+    setEditingSpace(null)
   }
   return (
     <div className="space-y-8">
@@ -582,7 +712,26 @@ export function WorkshopSpaces() {
           </OrganiserLink>
         }
       />
-      <SpaceEditorForm on_submit={add} submit_label="Raum hinzufügen" />
+      <SpaceEditorForm
+        key={editingSpace?.id ?? 'new-space'}
+        on_submit={add}
+        submit_label={editingSpace ? 'Raum speichern' : 'Raum hinzufügen'}
+        default_values={
+          editingSpace
+            ? {
+                name: editingSpace.name,
+                location: editingSpace.location_description,
+                capacity: editingSpace.capacity,
+                availability_start: editingSpace.availability_windows[0]
+                  ? dateTimeLocal(editingSpace.availability_windows[0].starts_at)
+                  : undefined,
+                availability_end: editingSpace.availability_windows[0]
+                  ? dateTimeLocal(editingSpace.availability_windows[0].ends_at)
+                  : undefined,
+              }
+            : undefined
+        }
+      />
       <div className="grid gap-3">
         {spaceViews.map((space) => (
           <SpaceRow
@@ -634,8 +783,18 @@ export function WorkshopSpaces() {
                 </ul>
                 <Button
                   size="sm"
-                  variant="danger"
+                  variant="neutral"
                   onClick={() =>
+                    setEditingSpace(summary.live.find((item) => item.id === space.id) ?? null)
+                  }
+                >
+                  Bearbeiten
+                </Button>
+                <WorkshopRetireAction
+                  label="Entfernen"
+                  title="Raum entfernen?"
+                  description={`${space.name} wird aus dem Workshopplan entfernt.`}
+                  onConfirm={() =>
                     stage([
                       draft(state.principal_email ?? '', 'WorkshopSpaceRetired', {
                         workshop_space_id: space.id,
@@ -643,9 +802,7 @@ export function WorkshopSpaces() {
                       }),
                     ])
                   }
-                >
-                  Entfernen
-                </Button>
+                />
               </div>
             }
           />

@@ -24,13 +24,17 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
     )
   return (
     <td className="p-3 align-top">
-      <button
-        type="button"
-        className="text-left font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
-        onClick={cell.on_open}
-      >
-        {cell.title}
-      </button>
+      {cell.on_open ? (
+        <button
+          type="button"
+          className="text-left font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
+          onClick={cell.on_open}
+        >
+          {cell.title}
+        </button>
+      ) : (
+        <strong>{cell.title}</strong>
+      )}
       {cell.audience || cell.age_range ? (
         <span className="mt-1 block text-sm text-muted">
           {cell.audience}

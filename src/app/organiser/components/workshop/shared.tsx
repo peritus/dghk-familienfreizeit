@@ -1,4 +1,4 @@
-import { Fragment, type ComponentProps, type ReactNode } from 'react'
+import { Fragment, useId, type ComponentProps, type ReactNode } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert.js'
 import { Badge } from '../../../components/ui/badge.js'
 import { Button } from '../../../components/ui/button.js'
@@ -406,13 +406,14 @@ export function WorkshopPrintDocument({
   confidential?: boolean
   children: ReactNode
 }) {
+  const titleId = useId()
   return (
-    <article className="space-y-4" aria-labelledby="workshop-print-title">
+    <article className="space-y-4" aria-labelledby={titleId}>
       <div className="flex flex-wrap justify-between gap-3 border-b-2 border-black pb-3 text-sm">
         <span>{kind}</span>
         <strong>{status}</strong>
       </div>
-      <h2 id="workshop-print-title" className="text-3xl font-heading">
+      <h2 id={titleId} className="text-3xl font-heading">
         {title}
       </h2>
       <div className="grid gap-1 text-sm text-muted">

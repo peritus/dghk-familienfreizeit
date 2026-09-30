@@ -387,16 +387,10 @@ export function SpaceEditorForm({
               defaultValue={defaultValues.availability_end}
             />
           </div>
-          <WorkshopCheckboxGroup
-            legend="Ausstattung"
-            default_values={defaultValues.default_capabilities}
-            options={[
-              { value: 'indoor', label: 'Innenraum' },
-              { value: 'outdoor', label: 'Außenbereich' },
-              { value: 'accessible', label: 'Barrierearm' },
-              { value: 'water', label: 'Wasseranschluss' },
-            ]}
-          />
+          <p className="text-sm text-muted">
+            Die Ausstattung wird aus den im Profil konfigurierten Fähigkeiten abgeleitet und
+            erscheint nach dem Speichern in der Raumübersicht.
+          </p>
           <div>
             <Button type="submit">{submitLabel}</Button>
           </div>
