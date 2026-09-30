@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { OrganiserLink } from '../../../../app/components/organiser-link.js'
 import { Button } from '../../../../app/components/ui/button.js'
+import { DestructiveActionDialog } from '../../../../app/components/ui/destructive-action-dialog.js'
 import { FixedBadge, RequirementChip } from './chips.js'
 import type { FamilyView } from '../types.js'
 import { organiserPaths } from '../../../../organiser/routes.js'
@@ -13,6 +15,7 @@ export function FamilyEntry({
   onFix?: (family: FamilyView) => void
   onUnassign?: (family: FamilyView) => void
 }) {
+  const [confirmUnassign, setConfirmUnassign] = useState(false)
   const unmetWish = family.requirements.some(
     ({ strength, met }) => strength === 'preferred' && met === false,
   )
@@ -42,9 +45,24 @@ export function FamilyEntry({
       {onUnassign || (onFix && (unmetWish || family.fixed)) ? (
         <div className="flex flex-wrap gap-2 pt-1">
           {family.fixed && onUnassign ? (
-            <Button type="button" variant="neutral" size="sm" onClick={() => onUnassign(family)}>
-              Zuordnung aufheben
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="neutral"
+                size="sm"
+                onClick={() => setConfirmUnassign(true)}
+              >
+                Zuordnung aufheben
+              </Button>
+              <DestructiveActionDialog
+                open={confirmUnassign}
+                onOpenChange={setConfirmUnassign}
+                title={`${family.name} aus dem Zimmer entfernen?`}
+                description="Die feste Zimmerzuordnung wird aufgehoben. Die Familie bleibt erhalten und kann neu zugeordnet werden."
+                confirmLabel="Zuordnung aufheben"
+                onConfirm={() => onUnassign(family)}
+              />
+            </>
           ) : null}
           {!family.fixed && onFix && (unmetWish || family.status?.label === 'Nicht platziert') ? (
             <Button type="button" variant="neutral" size="sm" onClick={() => onFix(family)}>

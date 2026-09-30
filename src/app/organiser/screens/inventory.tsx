@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { BedIcon } from '../../components/bed-icons.js'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '../../components/ui/alert-dialog.js'
+import { DestructiveActionDialog } from '../../components/ui/destructive-action-dialog.js'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge.js'
@@ -602,19 +593,13 @@ function BuildingEditor({
           <Button type="button" variant="neutral" onClick={handleRemoveClick}>
             Gebäude entfernen
           </Button>
-          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Gebäude {building.name} entfernen?</AlertDialogTitle>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel autoFocus>Behalten</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onRemove(building.id)}>
-                  Ja, entfernen
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DestructiveActionDialog
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            title={`Gebäude ${building.name} entfernen?`}
+            description="Das leere Gebäude und seine Einstellungen werden aus der Unterkunft entfernt."
+            onConfirm={() => onRemove(building.id)}
+          />
         </div>
       </div>
     </details>
@@ -815,6 +800,18 @@ function RoomDetail({
 }) {
   const [editing, setEditing] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [blockedReason, setBlockedReason] = useState<string | null>(null)
+
+  function handleRemoveClick() {
+    if (beds.length > 0) {
+      setBlockedReason(
+        `Das Zimmer kann nicht entfernt werden, solange ${beds.length === 1 ? 'ein Bett' : `${beds.length} Betten`} darin vorhanden ${beds.length === 1 ? 'ist' : 'sind'}.`,
+      )
+      return
+    }
+    setBlockedReason(null)
+    setConfirmOpen(true)
+  }
 
   return (
     <div className="space-y-4">
@@ -822,26 +819,22 @@ function RoomDetail({
         <Button type="button" variant="neutral" onClick={() => setEditing((value) => !value)}>
           Zimmer bearbeiten
         </Button>
-        <Button type="button" variant="neutral" onClick={() => setConfirmOpen(true)}>
+        <Button type="button" variant="neutral" onClick={handleRemoveClick}>
           Zimmer entfernen
         </Button>
-        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Zimmer {room.number} entfernen?</AlertDialogTitle>
-              {beds.length > 0 ? (
-                <AlertDialogDescription>
-                  Die {beds.length} Betten darin werden auch entfernt.
-                </AlertDialogDescription>
-              ) : null}
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel autoFocus>Behalten</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onRemove(room.id)}>Ja, entfernen</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DestructiveActionDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title={`Zimmer ${room.number} entfernen?`}
+          description="Das leere Zimmer und seine Einstellungen werden aus der Unterkunft entfernt."
+          onConfirm={() => onRemove(room.id)}
+        />
       </div>
+      {blockedReason ? (
+        <p role="alert" className="text-sm">
+          {blockedReason}
+        </p>
+      ) : null}
 
       {editing ? (
         <RoomForm
@@ -943,6 +936,7 @@ function BedRow({
   onRemove: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [label, setLabel] = useState(bed.label)
   const [bedType, setBedType] = useState(bed.bed_type)
   const typeLabel = bedTypes.find(({ value }) => value === bed.bed_type)?.label ?? bed.bed_type
@@ -1015,11 +1009,18 @@ function BedRow({
           variant="neutral"
           size="sm"
           aria-label={`${typeLabel}${bed.label ? ` ${bed.label}` : ''} entfernen`}
-          onClick={() => onRemove(bed.id)}
+          onClick={() => setConfirmOpen(true)}
         >
           Entfernen
         </Button>
       </div>
+      <DestructiveActionDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`${typeLabel}${bed.label ? ` ${bed.label}` : ''} entfernen?`}
+        description="Das Bett und die daraus abgeleiteten Schlafplätze werden aus dem Zimmer entfernt."
+        onConfirm={() => onRemove(bed.id)}
+      />
     </div>
   )
 }

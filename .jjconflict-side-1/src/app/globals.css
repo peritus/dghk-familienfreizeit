@@ -1,0 +1,231 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Neobrutalism orange registry tokens; see THIRD_PARTY.md. */
+:root {
+  --background: hsl(33 100% 92%);
+  --secondary-background: white;
+  --paper: #fffaf0;
+  --main: hsl(28 100% 51%);
+  --danger: hsl(2 90% 66%);
+  --offline: hsl(30 8% 80%);
+  --muted: hsl(30 10% 32%);
+  --foreground: black;
+  --main-foreground: black;
+  --border: black;
+  --ring: black;
+  --shadow: 4px 4px 0 0 var(--border);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-secondary-background: var(--secondary-background);
+  --color-paper: var(--paper);
+  --color-main: var(--main);
+  --color-danger: var(--danger);
+  --color-offline: var(--offline);
+  --color-muted: var(--muted);
+  --color-foreground: var(--foreground);
+  --color-main-foreground: var(--main-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --spacing-boxShadowX: 4px;
+  --spacing-boxShadowY: 4px;
+  --spacing-reverseBoxShadowX: -4px;
+  --spacing-reverseBoxShadowY: -4px;
+  --radius-base: 5px;
+  --font-weight-base: 500;
+  --font-weight-heading: 700;
+  --shadow-shadow: var(--shadow);
+}
+
+@layer base {
+  body {
+    @apply m-0 bg-background font-sans text-base leading-relaxed text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    @apply outline-2 outline-offset-4 outline-black;
+  }
+  main:focus {
+    outline: none;
+  }
+
+  /* Tailwind v4 preflight resets buttons to cursor: default. Every clickable element gets a pointer. */
+  button:not(:disabled),
+  [role='button'],
+  [role='switch'],
+  summary,
+  label:has(input) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  button[aria-busy='true'] {
+    cursor: wait;
+  }
+}
+
+/* A hard shadow means "you can press this". Buttons and whole-card links only. */
+@utility pressable {
+  position: relative;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition:
+    translate 120ms,
+    box-shadow 120ms;
+
+  &:hover,
+  &:active {
+    translate: 4px 4px;
+    box-shadow: none;
+  }
+
+  /* Keep the original footprint clickable while the element slides 4px into its shadow.
+     Without this, the top and left edges move out from under the cursor. (-4px travel, -2px border) */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: calc(-4px - 2px) -2px -2px calc(-4px - 2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover,
+    &:active {
+      translate: none;
+      box-shadow: var(--shadow);
+    }
+  }
+}
+
+/* Draft/provisional state = engineering grid (blueprint): 6px minor, 30px major lines.
+   Only for things that are not yet saved for the team. Never decorative. */
+@utility blueprint {
+  background-image:
+    linear-gradient(to right, var(--grid-major, rgb(31 95 191 / 0.35)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-major, rgb(31 95 191 / 0.35)) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-minor, rgb(31 95 191 / 0.14)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-minor, rgb(31 95 191 / 0.14)) 1px, transparent 1px);
+  background-size:
+    30px 30px,
+    30px 30px,
+    6px 6px,
+    6px 6px;
+  background-position: -1px -1px;
+}
+
+/* On accent orange, blue lines turn muddy, so switch them to dark navy. Use together with `blueprint`. */
+@utility blueprint-on-main {
+  --grid-major: rgb(0 48 110 / 0.35);
+  --grid-minor: rgb(0 48 110 / 0.14);
+}
+
+@media print {
+  .assignment-board-screen {
+    display: none !important;
+  }
+
+  .assignment-print {
+    display: block !important;
+    color: black;
+    background: white;
+  }
+
+  .assignment-print-header {
+    border-bottom: 2px solid black;
+    padding-bottom: 1rem;
+  }
+
+  .assignment-print-header h1,
+  .assignment-print-building h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .assignment-print-header dl,
+  .assignment-print-summary dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+  }
+
+  .assignment-print-header dt,
+  .assignment-print-summary dt {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .assignment-print-header dd,
+  .assignment-print-summary dd {
+    margin: 0;
+  }
+
+  .assignment-print-summary,
+  .assignment-print-findings {
+    margin: 1rem 0;
+    break-inside: avoid;
+  }
+
+  .assignment-print-summary h2,
+  .assignment-print-findings h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+  }
+
+  .assignment-print-findings ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .assignment-print-building {
+    break-before: page;
+  }
+
+  .assignment-print-building:first-child {
+    break-before: auto;
+  }
+
+  .assignment-print-room {
+    break-inside: avoid;
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+    padding: 0.5rem;
+  }
+
+  .assignment-print-room h2 {
+    margin: 0;
+  }
+
+  .assignment-print-room p {
+    margin: 0.15rem 0;
+  }
+
+  .assignment-print-bed {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.75rem;
+  }
+
+  .assignment-print-room-status {
+    font-weight: bold;
+  }
+
+  .assignment-print-room ul {
+    margin: 0.25rem 0 0;
+    padding-left: 1.25rem;
+  }
+}

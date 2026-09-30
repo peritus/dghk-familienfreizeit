@@ -3,16 +3,7 @@ import { OrganiserLink } from '../../components/organiser-link.js'
 import type { EventDraft } from '../../../events/types.js'
 import { materializeDraftEvents } from '../state.js'
 import { Button } from '../../components/ui/button'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '../../components/ui/alert-dialog.js'
+import { DestructiveActionDialog } from '../../components/ui/destructive-action-dialog.js'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { useOrganiser } from '../context.js'
 import { findFamily, labelValue } from '../family-data.js'
@@ -101,23 +92,13 @@ function PersonEditor({
               Entfernen
             </Button>
           </div>
-          <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {givenName} {familyName} entfernen?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  Die Person wird aus dieser Familie entfernt. Diese Änderung lässt sich nicht über
-                  die Familienansicht rückgängig machen.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel autoFocus>Behalten</AlertDialogCancel>
-                <AlertDialogAction onClick={onDelete}>Ja, entfernen</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DestructiveActionDialog
+            open={confirmDelete}
+            onOpenChange={setConfirmDelete}
+            title={`${givenName} ${familyName} entfernen?`}
+            description="Die Person wird aus dieser Familie entfernt. Diese Änderung lässt sich nicht über die Familienansicht rückgängig machen."
+            onConfirm={onDelete}
+          />
         </td>
       </tr>
     )
