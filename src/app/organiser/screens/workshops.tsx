@@ -8,7 +8,6 @@ import { buildSolverInput, composeSolverContributions, solve } from '../../../so
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { Button } from '../../components/ui/button.js'
 import { Card, CardContent } from '../../components/ui/card.js'
-import { Tag } from '../../components/ui/tag.js'
 import { OrganiserLink } from '../../components/organiser-link.js'
 import { WorkshopEditorForm, WorkshopLeaderPicker } from '../components/workshop/editors.js'
 import {
@@ -18,6 +17,7 @@ import {
   WorkshopStatsStrip,
 } from '../components/workshop/shared.js'
 import { WorkshopSummaryRow } from '../components/workshop/authoring.js'
+import { ProgrammeGrid, UnplacedWorkshopRow } from '../components/workshop/programme.js'
 import { OrganiserSectionNavigation } from '../components/section-navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
@@ -195,6 +195,7 @@ export function WorkshopProgramme() {
   useDocumentTitle('Programm · Workshops · Familienfreizeit')
   const { world } = useOrganiser()
   const schedule = workshopSchedulingWorld(world!)
+  const spaces = workshopSpaceWorld(world!).live
   const official = officialWorkshopsWorld(world!)
   const plan = solve(
     buildSolverInput(world!, composeSolverContributions(activeProfile)),
@@ -213,66 +214,75 @@ export function WorkshopProgramme() {
         | { placements?: readonly { workshop_id: string; slot_id: string; space_id: string }[] }
         | undefined
     )?.placements ?? []
-  const unassignedWorkshops = official.workshops.filter(
-    (workshop) => !placements.some((placement) => placement.workshop_id === workshop.id),
+  const unscheduled = new Map(
+    (
+      plan.sections['workshop-scheduling'] as
+        | { unscheduled?: readonly { workshop_id: string; reason: string }[] }
+        | undefined
+    )?.unscheduled?.map((item) => [item.workshop_id, item.reason]) ?? [],
   )
+  const unassignedWorkshops = official.workshops
+    .filter((workshop) => !placements.some((placement) => placement.workshop_id === workshop.id))
+    .map((workshop) => ({
+      id: workshop.id,
+      title: workshop.title,
+      reason: unscheduled.get(workshop.id) ?? 'Keine passende Platzierung',
+      demand_label: `${workshop.capacity} Plätze benötigt`,
+    }))
+  const rooms = spaces.map((space) => ({ id: space.id, label: space.name }))
+  const rows = schedule.slots.map((slot) => ({
+    id: slot.id,
+    slot_label: new globalThis.Date(slot.starts_at).toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    cells: rooms.map((room) => {
+      const placement = placements.find(
+        (candidate) => candidate.slot_id === slot.id && candidate.space_id === room.id,
+      )
+      const blocked = schedule.space_slot_blocks.some(
+        (block) => block.slot_id === slot.id && block.space_id === room.id,
+      )
+      if (blocked) return { id: `${slot.id}-${room.id}`, state: 'blocked' as const }
+      const workshop = placement
+        ? official.workshops.find((candidate) => candidate.id === placement.workshop_id)
+        : undefined
+      return workshop
+        ? {
+            id: workshop.id,
+            state: 'placed' as const,
+            title: workshop.title,
+            audience: workshop.audience,
+            age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+            leaders: `${workshop.leader_ids.length} Leitungen`,
+            capacity_label: `${workshop.capacity} Plätze`,
+          }
+        : { id: `${slot.id}-${room.id}`, state: 'empty' as const }
+    }),
+  }))
   return (
     <div className="space-y-8">
       <WorkshopNavigation />
-      <header>
-        <p className="font-bold uppercase tracking-wide text-muted">Programm</p>
-        <h1 className="mt-1 text-3xl font-heading sm:text-4xl">Wann findet was statt?</h1>
-        <p className="mt-2 text-muted">
-          Jeder Workshop erhält höchstens eine Platzierung. Nicht geplante Workshops bleiben mit
-          Grund sichtbar.
-        </p>
-      </header>
-      <Card className="bg-white">
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[38rem] text-left">
-              <caption className="sr-only">Workshopplatzierungen</caption>
-              <thead>
-                <tr className="border-b-2 border-black">
-                  <th className="p-3">Workshop</th>
-                  <th className="p-3">Slot</th>
-                  <th className="p-3">Raum</th>
-                  <th className="p-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {placements.map((placement) => (
-                  <tr key={placement.workshop_id} className="border-b border-black/30">
-                    <th className="p-3">
-                      {official.workshops.find((workshop) => workshop.id === placement.workshop_id)
-                        ?.title ?? placement.workshop_id}
-                    </th>
-                    <td className="p-3">
-                      {schedule.slots.find((slot) => slot.id === placement.slot_id)?.starts_at ??
-                        placement.slot_id}
-                    </td>
-                    <td className="p-3">{placement.space_id}</td>
-                    <td className="p-3">
-                      <Tag>geplant</Tag>
-                    </td>
-                  </tr>
-                ))}
-                {unassignedWorkshops.map((workshop) => (
-                  <tr key={`unassigned-${workshop.id}`} className="border-b border-black/30">
-                    <th className="p-3">{workshop.title}</th>
-                    <td className="p-3" colSpan={2}>
-                      Keine passende Platzierung
-                    </td>
-                    <td className="p-3">
-                      <Tag>prüfen</Tag>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      <WorkshopScreenHeader
+        eyebrow="Programm"
+        title="Wann findet was statt?"
+        description="Jeder Workshop erhält höchstens eine Platzierung. Nicht geplante Workshops bleiben mit Grund sichtbar."
+      />
+      <ProgrammeGrid
+        rooms={rooms}
+        rows={rows}
+        day_rows={rows.map((row) => ({ id: row.id, label: 'Programm' }))}
+      />
+      {unassignedWorkshops.length ? (
+        <section className="space-y-3" aria-label="Nicht eingeplante Workshops">
+          <h2 className="text-2xl font-heading">Nicht eingeplant</h2>
+          <ul className="overflow-hidden rounded-base border-2 border-black">
+            {unassignedWorkshops.map((workshop) => (
+              <UnplacedWorkshopRow key={workshop.id} workshop={workshop} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   )
 }
