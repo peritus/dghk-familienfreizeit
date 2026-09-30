@@ -71,13 +71,21 @@ export const Forms: Story = {
         />
         <SlotEditorForm
           on_submit={preventSubmit}
-          default_values={{ day: 'Freitag', starts_at: '14:00', ends_at: '15:30', capacity: 12 }}
+          default_values={{
+            day: 'Freitag',
+            starts_at: '2026-07-17T14:00',
+            ends_at: '2026-07-17T15:30',
+            capacity: 12,
+          }}
         />
         <SpaceEditorForm
           on_submit={preventSubmit}
           default_values={{
             name: 'Werkraum',
+            location: 'Haus 2',
             capacity: 14,
+            availability_start: '2026-07-17T08:00',
+            availability_end: '2026-07-19T18:00',
             default_capabilities: ['indoor', 'water'],
           }}
         />

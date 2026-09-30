@@ -7,9 +7,13 @@ import { workshopSpaceWorld } from '../../../modules/workshop-space/index.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../../solver/index.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { Button } from '../../components/ui/button.js'
-import { Card, CardContent } from '../../components/ui/card.js'
 import { OrganiserLink } from '../../components/organiser-link.js'
-import { WorkshopEditorForm, WorkshopLeaderPicker } from '../components/workshop/editors.js'
+import {
+  SpaceEditorForm,
+  SlotEditorForm,
+  WorkshopEditorForm,
+  WorkshopLeaderPicker,
+} from '../components/workshop/editors.js'
 import {
   WorkshopEmptyState,
   WorkshopScreenHeader,
@@ -18,6 +22,13 @@ import {
 } from '../components/workshop/shared.js'
 import { WorkshopSummaryRow } from '../components/workshop/authoring.js'
 import { ProgrammeGrid, UnplacedWorkshopRow } from '../components/workshop/programme.js'
+import {
+  SlotDayGroup,
+  SpaceRow,
+  SpaceSlotToggle,
+  type WorkshopSlotView,
+  type WorkshopSpaceView,
+} from '../components/workshop/resources.js'
 import { OrganiserSectionNavigation } from '../components/section-navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
@@ -291,6 +302,28 @@ export function WorkshopSlots() {
   useDocumentTitle('Slots · Workshops · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const summary = workshopSchedulingWorld(world!)
+  const slotViews: readonly WorkshopSlotView[] = summary.slots.map((slot) => {
+    const startsAt = new globalThis.Date(slot.starts_at)
+    return {
+      id: slot.id,
+      day_label: startsAt.toLocaleDateString('de-DE', {
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+      }),
+      time_label: startsAt.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      workshop_count: 0,
+    }
+  })
+  const slotsByDay = slotViews.reduce((groups, slot) => {
+    const daySlots = groups.get(slot.day_label) ?? []
+    daySlots.push(slot)
+    groups.set(slot.day_label, daySlots)
+    return groups
+  }, new Map<string, WorkshopSlotView[]>())
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -309,51 +342,18 @@ export function WorkshopSlots() {
   return (
     <div className="space-y-8">
       <WorkshopNavigation />
-      <header>
-        <h1 className="text-3xl font-heading sm:text-4xl">Slots</h1>
-        <p className="mt-2 text-muted">Event-backed Zeitfenster für das Programm.</p>
-      </header>
-      <Card className="bg-white">
-        <CardContent>
-          <form className="grid gap-3 sm:grid-cols-3" onSubmit={add}>
-            <label className="grid gap-1 font-bold">
-              Beginn
-              <input
-                required
-                name="starts_at"
-                type="datetime-local"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <label className="grid gap-1 font-bold">
-              Ende
-              <input
-                required
-                name="ends_at"
-                type="datetime-local"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <div className="flex items-end">
-              <Button type="submit">Slot hinzufügen</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-      <div className="grid gap-3">
-        {summary.slots.map((slot) => (
-          <Card key={slot.id} size="sm" className="bg-white">
-            <CardContent className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <strong>{new globalThis.Date(slot.starts_at).toLocaleString('de-DE')}</strong>
-                <span className="mx-2">–</span>
-                <strong>
-                  {new globalThis.Date(slot.ends_at).toLocaleTimeString('de-DE', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </strong>
-              </div>
+      <WorkshopScreenHeader
+        title="Slots"
+        description="Event-backed Zeitfenster für das Programm."
+      />
+      <SlotEditorForm on_submit={add} submit_label="Slot hinzufügen" show_day={false} />
+      <div className="grid gap-6">
+        {Array.from(slotsByDay, ([day, slots]) => (
+          <SlotDayGroup
+            key={day}
+            day_label={day}
+            slots={slots}
+            action={(slot) => (
               <Button
                 size="sm"
                 variant="danger"
@@ -368,8 +368,8 @@ export function WorkshopSlots() {
               >
                 Entfernen
               </Button>
-            </CardContent>
-          </Card>
+            )}
+          />
         ))}
       </div>
     </div>
@@ -381,6 +381,16 @@ export function WorkshopSpaces() {
   const { world, state, stage } = useOrganiser()
   const summary = workshopSpaceWorld(world!)
   const schedule = workshopSchedulingWorld(world!)
+  const spaceViews: readonly WorkshopSpaceView[] = summary.live.map((space) => ({
+    id: space.id,
+    name: space.name,
+    location: space.location_description,
+    capacity: space.capacity,
+    capabilities: [],
+    blocked_slots: schedule.space_slot_blocks
+      .filter((block) => block.space_id === space.id)
+      .map((block) => block.slot_id),
+  }))
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -410,94 +420,43 @@ export function WorkshopSpaces() {
   return (
     <div className="space-y-8">
       <WorkshopNavigation />
-      <header>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-heading sm:text-4xl">Räume und Slots</h1>
-            <p className="mt-2 text-muted">
-              Physische Workshopräume, Kapazitäten und schedule-aware Verfügbarkeit.
-            </p>
-          </div>
+      <WorkshopScreenHeader
+        title="Räume und Slots"
+        description="Physische Workshopräume, Kapazitäten und schedule-aware Verfügbarkeit."
+        action={
           <OrganiserLink
             href={organiserPaths.workshop_slots()}
             className="min-h-11 rounded-base border-2 border-black bg-white px-4 py-2 font-bold hover:bg-main"
           >
             Slots verwalten
           </OrganiserLink>
-        </div>
-      </header>
-      <Card className="bg-white">
-        <CardContent>
-          <form className="grid gap-3 sm:grid-cols-4" onSubmit={add}>
-            <label className="grid gap-1 font-bold sm:col-span-2">
-              Name
-              <input
-                required
-                name="name"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <label className="grid gap-1 font-bold">
-              Ort
-              <input
-                required
-                name="location"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <label className="grid gap-1 font-bold">
-              Kapazität
-              <input
-                required
-                name="capacity"
-                type="number"
-                min="0"
-                defaultValue="8"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <label className="grid gap-1 font-bold">
-              Verfügbar ab
-              <input
-                name="availability_start"
-                type="datetime-local"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <label className="grid gap-1 font-bold">
-              Verfügbar bis
-              <input
-                name="availability_end"
-                type="datetime-local"
-                className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
-              />
-            </label>
-            <div>
-              <Button type="submit">Raum hinzufügen</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+        }
+      />
+      <SpaceEditorForm on_submit={add} submit_label="Raum hinzufügen" />
       <div className="grid gap-3">
-        {summary.live.map((space) => (
-          <Card key={space.id} size="sm" className="bg-white">
-            <CardContent className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <strong>{space.name}</strong>
-                <p className="text-sm text-muted">
-                  {space.location_description} · {space.capacity} Plätze
-                </p>
-                <ul className="mt-2 flex flex-wrap gap-2 text-sm">
+        {spaceViews.map((space) => (
+          <SpaceRow
+            key={space.id}
+            space={space}
+            action={
+              <div className="grid gap-3">
+                <ul className="flex flex-wrap gap-2 text-sm">
                   {schedule.slots.map((slot) => {
                     const block = schedule.space_slot_blocks.find(
                       (item) => item.space_id === space.id && item.slot_id === slot.id,
                     )
                     return (
-                      <li key={slot.id}>
-                        <Button
-                          size="sm"
-                          variant={block ? 'danger' : 'neutral'}
-                          onClick={() =>
+                      <li key={slot.id} className="flex items-center gap-2">
+                        <span className="text-xs text-muted">
+                          {new globalThis.Date(slot.starts_at).toLocaleString('de-DE', {
+                            weekday: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        <SpaceSlotToggle
+                          blocked={Boolean(block)}
+                          onChange={() =>
                             stage([
                               draft(
                                 state.principal_email ?? '',
@@ -518,35 +477,28 @@ export function WorkshopSpaces() {
                               ),
                             ])
                           }
-                        >
-                          {new globalThis.Date(slot.starts_at).toLocaleString('de-DE', {
-                            weekday: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}{' '}
-                          {block ? 'gesperrt' : 'frei'}
-                        </Button>
+                        />
                       </li>
                     )
                   })}
                 </ul>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() =>
+                    stage([
+                      draft(state.principal_email ?? '', 'WorkshopSpaceRetired', {
+                        workshop_space_id: space.id,
+                        reason: 'Organisatorisch entfernt',
+                      }),
+                    ])
+                  }
+                >
+                  Entfernen
+                </Button>
               </div>
-              <Button
-                size="sm"
-                variant="danger"
-                onClick={() =>
-                  stage([
-                    draft(state.principal_email ?? '', 'WorkshopSpaceRetired', {
-                      workshop_space_id: space.id,
-                      reason: 'Organisatorisch entfernt',
-                    }),
-                  ])
-                }
-              >
-                Entfernen
-              </Button>
-            </CardContent>
-          </Card>
+            }
+          />
         ))}
       </div>
     </div>

@@ -282,10 +282,12 @@ export function SlotEditorForm({
   default_values: defaultValues = {},
   on_submit: onSubmit,
   submit_label: submitLabel = 'Slot speichern',
+  show_day: showDay = true,
 }: {
   default_values?: SlotEditorValues
   on_submit: (event: FormEvent<HTMLFormElement>) => void
   submit_label?: string
+  show_day?: boolean
 }) {
   return (
     <Card className="bg-white">
@@ -294,18 +296,20 @@ export function SlotEditorForm({
       </CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-          <WorkshopField label="Tag" name="day" defaultValue={defaultValues.day} required />
+          {showDay ? (
+            <WorkshopField label="Tag" name="day" defaultValue={defaultValues.day} />
+          ) : null}
           <WorkshopField
             label="Beginn"
             name="starts_at"
-            type="time"
+            type="datetime-local"
             defaultValue={defaultValues.starts_at}
             required
           />
           <WorkshopField
             label="Ende"
             name="ends_at"
-            type="time"
+            type="datetime-local"
             defaultValue={defaultValues.ends_at}
             required
           />
@@ -327,7 +331,10 @@ export function SlotEditorForm({
 
 export type SpaceEditorValues = {
   name?: string
+  location?: string
   capacity?: number
+  availability_start?: string
+  availability_end?: string
   default_capabilities?: readonly string[]
 }
 
@@ -355,11 +362,29 @@ export function SpaceEditorForm({
               required
             />
             <WorkshopField
+              label="Ort"
+              name="location"
+              defaultValue={defaultValues.location}
+              required
+            />
+            <WorkshopField
               label="Kapazität"
               name="capacity"
               type="number"
               min="0"
               defaultValue={defaultValues.capacity ?? 8}
+            />
+            <WorkshopField
+              label="Verfügbar ab"
+              name="availability_start"
+              type="datetime-local"
+              defaultValue={defaultValues.availability_start}
+            />
+            <WorkshopField
+              label="Verfügbar bis"
+              name="availability_end"
+              type="datetime-local"
+              defaultValue={defaultValues.availability_end}
             />
           </div>
           <WorkshopCheckboxGroup
