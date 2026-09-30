@@ -1,10 +1,11 @@
 import { OrganiserLink } from '../../components/organiser-link.js'
-import { Check } from 'lucide-react'
 import { Card } from '../../components/ui/card'
+import { SuccessState } from '../../components/ui/success-state.js'
 import { cn } from '../../lib/utils.js'
 import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
+import { OrganiserScreenHeader } from '../components/layout.js'
 
 const overviewCardClassName = 'block rounded-base border-2 border-black bg-white p-6'
 
@@ -17,7 +18,7 @@ export function Dashboard() {
   return (
     <div className="space-y-12">
       <div className="space-y-6">
-        <h1 className="text-3xl font-heading sm:text-4xl">Was braucht heute Aufmerksamkeit?</h1>
+        <OrganiserScreenHeader title="Was braucht heute Aufmerksamkeit?" />
         {diagnostics.length > 0 ? (
           <div>
             <h2 className="text-xl font-bold">{diagnostics.length} Hinweise</h2>
@@ -38,16 +39,7 @@ export function Dashboard() {
           <div>
             <h2 className="sr-only">Hinweise</h2>
             <Card className="flex-row items-center gap-4 bg-white p-6">
-              <span
-                aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-main"
-              >
-                <Check className="size-6" />
-              </span>
-              <div>
-                <p className="text-xl font-bold">Alles im Griff</p>
-                <p className="text-muted">Heute ist nichts zu erledigen.</p>
-              </div>
+              <SuccessState>Alles im Griff – heute ist nichts zu erledigen.</SuccessState>
             </Card>
           </div>
         )}

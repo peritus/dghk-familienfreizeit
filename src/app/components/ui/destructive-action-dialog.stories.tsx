@@ -5,7 +5,6 @@ import { DestructiveActionDialog } from './destructive-action-dialog.js'
 
 const meta = {
   title: 'UI/DestructiveActionDialog',
-  component: DestructiveActionDialog,
   parameters: {
     docs: {
       description: {

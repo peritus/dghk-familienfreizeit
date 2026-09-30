@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button'
 import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
+import { OrganiserScreenHeader } from '../components/layout.js'
 
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -55,13 +56,8 @@ export function Families() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-wide">Kernel</p>
-          <h2 className="text-3xl">Familien · {rows.length}</h2>
-        </div>
-      </div>
-      <div className="rounded border-2 border-black bg-white shadow-shadow">
+      <OrganiserScreenHeader title={`Familien · ${rows.length}`} />
+      <div className="rounded-base border-2 border-black bg-white shadow-shadow">
         <form id="invite-family-form" noValidate onSubmit={invite} />
         <table className="w-full text-left max-md:block">
           <caption className="p-4 text-left font-bold">Alle Familien</caption>
@@ -95,7 +91,7 @@ export function Families() {
                       setDisplayName(event.target.value)
                       setInviteError(null)
                     }}
-                    className="min-h-11 rounded border-2 border-black px-3"
+                    className="min-h-11 rounded-base border-2 border-black px-3"
                   />
                 </label>
               </th>
@@ -114,7 +110,7 @@ export function Families() {
                       setEmail(event.target.value)
                       setInviteError(null)
                     }}
-                    className="min-h-11 w-full rounded border-2 border-black px-3"
+                    className="min-h-11 w-full rounded-base border-2 border-black px-3"
                   />
                 </label>
               </td>

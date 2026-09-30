@@ -19,6 +19,7 @@ import { findFamily, labelValue } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
+import { OrganiserScreenHeader } from '../components/layout.js'
 
 function makePersonId(givenName: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${globalThis.performance?.now() ?? 0}`
@@ -266,16 +267,15 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
 
   return (
     <div className="space-y-6">
-      <p>
-        <OrganiserLink href={organiserPaths.families()} className="underline">
-          ← Familien
-        </OrganiserLink>
-      </p>
-      <div>
-        <p className="text-sm font-bold uppercase tracking-wide">Familie</p>
-        <h2 className="text-3xl">{labelValue(labels, 'display-name') ?? family.family.id}</h2>
-        <p>{labelValue(labels, 'email') ?? 'Keine E-Mail'}</p>
-      </div>
+      <OrganiserScreenHeader
+        title={labelValue(labels, 'display-name') ?? family.family.id}
+        actions={
+          <OrganiserLink href={organiserPaths.families()} className="underline">
+            ← Familien
+          </OrganiserLink>
+        }
+      />
+      <p className="-mt-4">{labelValue(labels, 'email') ?? 'Keine E-Mail'}</p>
       <Card className="bg-white">
         <CardHeader>
           <h3 className="text-xl">Familienname</h3>
@@ -289,7 +289,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                 required
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                className="min-h-11 rounded border-2 border-black px-3"
+                className="min-h-11 rounded-base border-2 border-black px-3"
               />
             </label>
             <Button type="submit">Familiennamen speichern</Button>
@@ -336,7 +336,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       required
                       value={givenName}
                       onChange={(event) => setGivenName(event.target.value)}
-                      className="min-h-11 w-full rounded border-2 border-black px-3"
+                      className="min-h-11 w-full rounded-base border-2 border-black px-3"
                     />
                   </label>
                 </th>
@@ -349,7 +349,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       required
                       value={familyName}
                       onChange={(event) => setFamilyName(event.target.value)}
-                      className="min-h-11 w-full rounded border-2 border-black px-3"
+                      className="min-h-11 w-full rounded-base border-2 border-black px-3"
                     />
                   </label>
                 </td>
@@ -361,7 +361,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       form="add-person-form"
                       value={role}
                       onChange={(event) => setRole(event.target.value)}
-                      className="min-h-11 w-full rounded border-2 border-black px-3"
+                      className="min-h-11 w-full rounded-base border-2 border-black px-3"
                     >
                       <option value="adult">Erwachsene(r)</option>
                       <option value="child">Kind</option>

@@ -12,7 +12,11 @@ import {
 } from '../../components/ui/alert-dialog.js'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge.js'
 import { SegmentedControl } from '../../components/ui/segmented-control.js'
+import { StatsStrip } from '../../components/ui/stats-strip.js'
+import { Tag } from '../../components/ui/tag.js'
+import { OrganiserScreenHeader } from '../components/layout.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { pluralDe } from '../../lib/plural-de.js'
 import { useOrganiser } from '../context.js'
@@ -231,17 +235,17 @@ export function Inventory() {
           { href: organiserPaths.assignment_board(), label: 'Belegung' },
         ]}
       />
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading sm:text-4xl">Unterkunft</h1>
-          <p className="mt-2 text-muted">Gebäude, Zimmer und Betten für diese Freizeit.</p>
-        </div>
-        {hasBuildings ? (
-          <Button variant="neutral" onClick={() => setAddingBuilding((open) => !open)}>
-            + Gebäude hinzufügen
-          </Button>
-        ) : null}
-      </div>
+      <OrganiserScreenHeader
+        title="Unterkunft"
+        actions={
+          hasBuildings ? (
+            <Button variant="neutral" onClick={() => setAddingBuilding((open) => !open)}>
+              + Gebäude hinzufügen
+            </Button>
+          ) : null
+        }
+      />
+      <p className="-mt-4 text-muted">Gebäude, Zimmer und Betten für diese Freizeit.</p>
 
       {error ? (
         <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
@@ -250,12 +254,14 @@ export function Inventory() {
       ) : null}
 
       {hasBuildings ? (
-        <Stats
-          buildings={summary.buildings.length}
-          rooms={summary.rooms.length}
-          beds={summary.beds.length}
-          places={summary.capacity}
-          cost_per_night={summary.cost_eur}
+        <StatsStrip
+          items={[
+            { value: summary.buildings.length, label: 'Gebäude' },
+            { value: summary.rooms.length, label: 'Zimmer' },
+            { value: summary.beds.length, label: 'Betten' },
+            { value: summary.capacity, label: 'Schlafplätze' },
+            { value: formatEuro(summary.cost_eur, 0), label: 'Kosten pro Nacht' },
+          ]}
         />
       ) : null}
 
@@ -316,43 +322,6 @@ function selectedInventoryConfig(): RoomInventoryParams {
   const module = activeProfile.modules.find((candidate) => candidate.id === 'room-inventory')
   if (!module?.parameters) throw new Error('room-inventory is not selected in this profile')
   return module.parameters as RoomInventoryParams
-}
-
-function Stats({
-  buildings,
-  rooms,
-  beds,
-  places,
-  cost_per_night: costPerNight,
-}: {
-  buildings: number
-  rooms: number
-  beds: number
-  places: number
-  cost_per_night: number
-}) {
-  const cells = [
-    { value: buildings, label: 'Gebäude' },
-    { value: rooms, label: 'Zimmer' },
-    { value: beds, label: 'Betten' },
-    { value: places, label: 'Schlafplätze' },
-  ]
-  return (
-    <Card className="bg-white p-0">
-      <div className="grid grid-cols-2 divide-y-2 divide-black sm:grid-cols-5 sm:divide-x-2 sm:divide-y-0">
-        {cells.map((cell) => (
-          <div key={cell.label} className="p-4 text-center">
-            <p className="text-4xl font-heading leading-none">{cell.value}</p>
-            <p className="mt-1 font-bold">{cell.label}</p>
-          </div>
-        ))}
-        <div className="col-span-2 p-4 text-center sm:col-span-1">
-          <p className="text-4xl font-heading leading-none">{formatEuro(costPerNight, 0)}</p>
-          <p className="mt-1 font-bold">Kosten pro Nacht</p>
-        </div>
-      </div>
-    </Card>
-  )
 }
 
 function NewBuildingForm({
@@ -717,12 +686,7 @@ function RoomRow({
           {tags.length > 0 ? (
             <div className="mt-1 flex flex-wrap gap-1">
               {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-base bg-background px-[7px] py-[1px] text-xs font-bold"
-                >
-                  {tag}
-                </span>
+                <Tag key={tag}>{tag}</Tag>
               ))}
             </div>
           ) : null}
@@ -745,13 +709,7 @@ function RoomRow({
         </td>
         <td className="p-3 text-right align-top font-bold tabular-nums max-md:block max-md:p-0 max-md:pt-2 max-md:text-left">
           <span className="mr-2 font-normal md:hidden">Plätze:</span>
-          {room.place_count === 0 ? (
-            <span className="rounded-base border-2 border-black bg-main px-[7px] py-[1px] text-xs font-bold">
-              Keine Betten
-            </span>
-          ) : (
-            room.place_count
-          )}
+          {room.place_count === 0 ? <Badge tone="attention">Keine Betten</Badge> : room.place_count}
         </td>
         <td className="p-3 text-right align-top tabular-nums max-md:block max-md:p-0 max-md:pt-2 max-md:text-left">
           <span className="mr-2 font-bold md:hidden">Preis/Platz:</span>
@@ -1043,12 +1001,7 @@ function BedRow({
           </p>
           <div className="mt-1 flex flex-wrap gap-1">
             {slotLabels(bed).map((slot) => (
-              <span
-                key={slot}
-                className="min-h-7 rounded-base border-2 border-black bg-white px-2 text-sm font-bold"
-              >
-                {slot}
-              </span>
+              <Tag key={slot}>{slot}</Tag>
             ))}
           </div>
         </div>
