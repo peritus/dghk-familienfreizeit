@@ -65,13 +65,16 @@ same popover before anything is deleted or the mode changes.
 
 The component registry and aliases live in [components.json](../../components.json).
 The implemented primitives are Button, Card, Alert, Skeleton, SegmentedControl,
-AlertDialog, Badge, Tag, StatsStrip, and SuccessState in [`src/app/components/ui/`](../../src/app/components/ui/).
+AlertDialog, DestructiveActionDialog, Badge, Tag, StatsStrip, and SuccessState in
+[`src/app/components/ui/`](../../src/app/components/ui/).
 Copied source and its adaptations are attributed in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). The Button uses Base UI's `render`
 composition API, supports variants (including a `danger` variant for
 destructive confirmations) and sizes, and includes reduced-motion handling.
 AlertDialog composes Base UI's `AlertDialog` (portal, backdrop, focus trap)
-with Button the same way. `Popover` and `Switch` are used directly from
+with Button the same way. `DestructiveActionDialog` is the canonical app-facing
+composition for removal and retirement actions; it requires consequence copy and
+keeps the safe cancel action beside the danger action. `Popover` and `Switch` are used directly from
 `@base-ui/react` (save-status control) rather than wrapped as our own
 components. Components are editable application source.
 
@@ -97,10 +100,10 @@ The organiser shell distinguishes a whole-app load failure from a save
 failure (`load_error` vs. `error` status) so a failed initial fetch never
 renders stats or forms against an empty, falsely-real world.
 
-The assignment board uses the shared primitives for its stat strip, quiet
-property tags, state badges, and success messages. Room cards, requirement
-chips, family entries, building sections, fit hints, the fixed-assignment
-dialog, and the print composition remain room-assignment-specific under
+All organiser screens use the shared screen header, stats strip, quiet property
+tags, state badges, success messages, and destructive-action confirmation. Room
+cards, requirement chips, family entries, building sections, fit hints, the
+fixed-assignment dialog, and the print composition remain room-assignment-specific under
 [`src/modules/room-assignment/app/assignment-board/`](../../src/modules/room-assignment/app/assignment-board/).
 The board does not use `blueprint` or a paper background to mark fixed
 assignments: those tokens are reserved for browser-local draft state. Fixed

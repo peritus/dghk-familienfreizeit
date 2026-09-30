@@ -36,6 +36,13 @@ The programme view exposes one derived placement per workshop or an explainable
 unscheduled result. Browser print is the only print path; no workshop screen adds
 an application print or export control.
 
+All organiser screens use the shared `OrganiserScreenHeader` for their primary
+heading and action row. Overview metrics use `StatsStrip`; quiet properties use
+`Tag`; state and attention labels use `Badge`; completed or empty-success states
+use `SuccessState`. Removal and retirement actions use the shared
+`DestructiveActionDialog`, with dependent entities blocked inline until they are
+handled.
+
 One app bar (brand, role, navigation, and the save-status control) covers every
 `/organiser*` route; there is no separate site shell header or boxed page header
 there. The save-status control is a single persistent button in the app bar with a

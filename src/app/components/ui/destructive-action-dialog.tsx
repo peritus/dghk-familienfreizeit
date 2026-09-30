@@ -21,16 +21,16 @@ export function DestructiveActionDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Ja, entfernen',
-  cancelLabel = 'Behalten',
+  confirm_label: confirmLabel = 'Ja, entfernen',
+  cancel_label: cancelLabel = 'Behalten',
   onConfirm,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: ReactNode
   description: ReactNode
-  confirmLabel?: string
-  cancelLabel?: string
+  confirm_label?: string
+  cancel_label?: string
   onConfirm: () => void
 }) {
   return (

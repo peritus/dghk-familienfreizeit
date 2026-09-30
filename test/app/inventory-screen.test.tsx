@@ -299,7 +299,7 @@ test('deleting an empty building asks for confirmation via the AlertDialog', asy
   expect(await screen.findByText('Noch keine Unterkunft angelegt')).toBeTruthy()
 }, 20000)
 
-test('deleting a room with beds asks for confirmation and names the bed count', async () => {
+test('deleting a room with beds is blocked and explains the required next step', async () => {
   const buildingEvent: Event = {
     seq: 1,
     at: '2027-01-01T00:00:00Z',
@@ -343,10 +343,10 @@ test('deleting a room with beds asks for confirmation and names the bed count', 
   fireEvent.click(await screen.findByRole('button', { name: /101/ }))
   const detail = within(view.container.querySelector('#betten-rm_1') as HTMLElement)
   fireEvent.click(detail.getByRole('button', { name: 'Zimmer entfernen' }))
-  // The confirmation dialog renders in a portal, outside the detail row.
-  const dialog = await screen.findByRole('alertdialog')
-  expect(within(dialog).getByText('Zimmer 101 entfernen?')).toBeTruthy()
-  expect(within(dialog).getByText('Die 1 Betten darin werden auch entfernt.')).toBeTruthy()
-  expect(within(dialog).getByRole('button', { name: 'Behalten' })).toBeTruthy()
-  expect(within(dialog).getByRole('button', { name: 'Ja, entfernen' })).toBeTruthy()
+  expect(
+    await screen.findByText(
+      'Das Zimmer kann nicht entfernt werden, solange ein Bett darin vorhanden ist.',
+    ),
+  ).toBeTruthy()
+  expect(screen.queryByRole('alertdialog')).toBeNull()
 }, 20000)

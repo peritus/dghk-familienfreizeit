@@ -59,7 +59,7 @@ export function FamilyEntry({
                 onOpenChange={setConfirmUnassign}
                 title={`${family.name} aus dem Zimmer entfernen?`}
                 description="Die feste Zimmerzuordnung wird aufgehoben. Die Familie bleibt erhalten und kann neu zugeordnet werden."
-                confirmLabel="Zuordnung aufheben"
+                confirm_label="Zuordnung aufheben"
                 onConfirm={() => onUnassign(family)}
               />
             </>

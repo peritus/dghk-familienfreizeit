@@ -105,10 +105,9 @@ API and keeps those semantics intact.
 ([`src/app/components/ui/alert-dialog.tsx`](../../src/app/components/ui/alert-dialog.tsx)),
 composing Base UI's `AlertDialog` (portal, backdrop, focus trap, Esc/
 outside-click handling) with `Button` through the `render` prop. The
-inventory screen's building and room delete confirmations use it; other
-destructive actions in the app (e.g. family-member delete,
-`family-detail.tsx`) still delete immediately with no confirmation of any
-kind and are candidates for migrating onto this same primitive.
+app-facing [`DestructiveActionDialog`](../../src/app/components/ui/destructive-action-dialog.tsx)
+composes this primitive for every removal and retirement action, requires visible
+consequence text, and keeps the safe cancel action beside the danger action.
 
 ## Pressable elements and hit areas
 

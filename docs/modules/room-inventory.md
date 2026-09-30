@@ -46,9 +46,9 @@ room traits shown as columns or tags, and cost summaries. Derived capabilities
 (e.g. `private-sanitary`) stay internal matching data and are never rendered;
 only the room's own traits and their configured copy reach the UI. Organisers
 can add, edit, and remove buildings, rooms, and beds, with removal blocked
-until dependent entities are handled (a blocked building delete explains why
-inline rather than disabling the button) and a confirmation step for deleting
-a room or bed. New and edited rooms stage their required profile labels in
+until dependent entities are handled (a blocked building or room delete explains why
+inline rather than disabling the button) and a shared confirmation step for empty
+building, room, and bed removal. New and edited rooms stage their required profile labels in
 the same event batch as the room event. Bed capacity follows from `bed_type`
 alone (`single`/`double`/`bunk`) via `sleepsForBedType`; there is no separate
 capacity input. Room inventory does not own the assignment board or report route;
