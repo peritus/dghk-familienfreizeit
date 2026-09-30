@@ -407,4 +407,28 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop confirmation dialog',
     source: 'src/app/organiser/components/workshop/editors.tsx',
   },
+  {
+    id: 'screens-organiser-workshops--overview',
+    area: 'screen',
+    subject: 'Workshop overview screen',
+    source: 'src/app/organiser/screens/workshops.stories.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--programme',
+    area: 'screen',
+    subject: 'Workshop programme screen',
+    source: 'src/app/organiser/screens/workshops.stories.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--slots',
+    area: 'screen',
+    subject: 'Workshop slots screen',
+    source: 'src/app/organiser/screens/workshops.stories.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--spaces',
+    area: 'screen',
+    subject: 'Workshop spaces screen',
+    source: 'src/app/organiser/screens/workshops.stories.tsx',
+  },
 ]
