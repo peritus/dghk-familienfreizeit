@@ -317,4 +317,16 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop list picker and print document',
     source: 'src/app/organiser/components/workshop/shared.tsx',
   },
+  {
+    id: 'components-organiser-workshop-authoring--workshop-rows',
+    area: 'component',
+    subject: 'Workshop authoring rows',
+    source: 'src/app/organiser/components/workshop/authoring.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-authoring--leader-rows',
+    area: 'component',
+    subject: 'Workshop leader rows',
+    source: 'src/app/organiser/components/workshop/authoring.tsx',
+  },
 ]
