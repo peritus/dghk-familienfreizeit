@@ -74,6 +74,85 @@ function open(path: string, events: readonly Event[] = []) {
   return { fetchMock, view: render(<App />) }
 }
 
+function workshopFixtureEvents(): readonly Event[] {
+  const drafts = [
+    {
+      at: '2027-01-01T00:00:00Z',
+      actor: 'organiser@example.test',
+      subject: null,
+      type: 'FamilyInvited',
+      payload: {
+        family_id: 'fam_stein',
+        email: 'stein@example.test',
+        display_name: 'Familie Stein',
+        locale: 'de',
+      },
+    },
+    {
+      at: '2027-01-01T00:01:00Z',
+      actor: 'organiser@example.test',
+      subject: 'fam_stein',
+      type: 'PersonAdded',
+      payload: {
+        person_id: 'per_mira',
+        family_id: 'fam_stein',
+        given_name: 'Mira',
+        family_name: 'Stein',
+        birthdate: '1988-04-12',
+        role: 'adult',
+      },
+    },
+    {
+      at: '2027-01-01T00:02:00Z',
+      actor: 'organiser@example.test',
+      subject: null,
+      type: 'WorkshopAdded',
+      payload: {
+        workshop_id: 'wks_keramik',
+        title: 'Keramik',
+        description: 'Mit den Händen gestalten.',
+        audience: 'children',
+        age_min: 5,
+        age_max: 14,
+        capacity: 8,
+        participation_mode: 'assigned',
+        leader_ids: ['per_mira'],
+        needs: [],
+        sort_key: 1,
+      },
+    },
+    {
+      at: '2027-01-01T00:03:00Z',
+      actor: 'organiser@example.test',
+      subject: null,
+      type: 'WorkshopSpaceAdded',
+      payload: {
+        workshop_space_id: 'wsp_atelier',
+        name: 'Atelier',
+        location_description: 'Haupthaus',
+        capacity: 12,
+        availability_windows: [
+          { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-14T18:00:00Z' },
+        ],
+        sort_key: 1,
+      },
+    },
+    {
+      at: '2027-01-01T00:04:00Z',
+      actor: 'organiser@example.test',
+      subject: null,
+      type: 'WorkshopSlotAdded',
+      payload: {
+        slot_id: 'slot_fr_morning',
+        starts_at: '2027-05-14T09:00:00Z',
+        ends_at: '2027-05-14T11:00:00Z',
+        sort_key: 1,
+      },
+    },
+  ] satisfies readonly Omit<Event, 'seq'>[]
+  return drafts.map((event, index) => ({ ...event, seq: index + 1 }))
+}
+
 test.each(['/', '/family'])(
   '%s renders a public, German shell without an organiser navigation',
   async (path) => {
@@ -150,6 +229,37 @@ test('workshop navigation exposes the intended visible areas and links to slot m
   expect(screen.getByRole('link', { name: 'Slots verwalten' }).getAttribute('href')).toBe(
     '/organiser/workshops/slots',
   )
+})
+
+test('the workshop overview presents resolved labels and derived placement data', async () => {
+  open('/organiser/workshops', workshopFixtureEvents())
+
+  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  expect(screen.getAllByText('Kinder').length).toBeGreaterThan(0)
+  expect(screen.getByText('Automatische Zuordnung')).toBeTruthy()
+  expect(screen.getByText('Mira Stein')).toBeTruthy()
+  expect(screen.getByText(/Atelier/)).toBeTruthy()
+})
+
+test('the programme groups slots by their actual date and avoids false action buttons', async () => {
+  open('/organiser/workshops/programme', workshopFixtureEvents())
+
+  expect(await screen.findByRole('heading', { name: 'Wann findet was statt?' })).toBeTruthy()
+  expect(screen.getByText(/Freitag/)).toBeTruthy()
+  expect(screen.getByText('Keramik')).toBeTruthy()
+  expect(screen.queryByRole('button', { name: 'Keramik' })).toBeNull()
+})
+
+test('slot and space retirement require explicit confirmation', async () => {
+  open('/organiser/workshops/spaces', workshopFixtureEvents())
+
+  expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Entfernen' }))
+
+  expect(screen.getByRole('alertdialog')).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Raum entfernen?' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Behalten' }))
+  expect(screen.queryByRole('alertdialog')).toBeNull()
 })
 
 test('a failed organiser log load shows a load error, not a save error', async () => {
