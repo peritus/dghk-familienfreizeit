@@ -347,4 +347,16 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop report list navigation',
     source: 'src/app/organiser/components/workshop/reports.tsx',
   },
+  {
+    id: 'components-organiser-workshop-resources--spaces',
+    area: 'component',
+    subject: 'Workshop spaces',
+    source: 'src/app/organiser/components/workshop/resources.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-resources--slots',
+    area: 'component',
+    subject: 'Workshop slots and availability',
+    source: 'src/app/organiser/components/workshop/resources.tsx',
+  },
 ]
