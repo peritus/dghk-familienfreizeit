@@ -25,14 +25,25 @@ const availabilityWindow = z.object({
   starts_at: z.string().datetime({ offset: true }),
   ends_at: z.string().datetime({ offset: true }),
 })
-const spacePayload = z.object({
-  workshop_space_id: spaceId,
-  name: nonEmpty,
-  location_description: nonEmpty,
-  capacity: z.number().int().min(0),
-  availability_windows: z.array(availabilityWindow),
-  sort_key: z.number().int(),
-})
+const spacePayload = z.preprocess(
+  (raw) => {
+    if (typeof raw !== 'object' || raw === null) return raw
+    const value = raw as Record<string, unknown>
+    if ('availability_windows' in value) return value
+    const { availability_starts_at: startsAt, availability_ends_at: endsAt, ...rest } = value
+    return typeof startsAt === 'string' && typeof endsAt === 'string'
+      ? { ...rest, availability_windows: [{ starts_at: startsAt, ends_at: endsAt }] }
+      : value
+  },
+  z.object({
+    workshop_space_id: spaceId,
+    name: nonEmpty,
+    location_description: nonEmpty,
+    capacity: z.number().int().min(0),
+    availability_windows: z.array(availabilityWindow),
+    sort_key: z.number().int(),
+  }),
+)
 const reasonPayload = z.object({ workshop_space_id: spaceId, reason: z.string().nullable() })
 
 function entity(world: KernelWorld, id: string): Entity | undefined {

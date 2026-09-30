@@ -447,4 +447,30 @@ describe('workshop domain events', () => {
     )
     expect(officialWorkshopsWorld(world).external_leaders[0]!.availability).toEqual([])
   })
+
+  test('WorkshopSpaceAdded accepts flat availability_starts_at/ends_at instead of the array form', () => {
+    const world = derive(
+      [
+        event(
+          'WorkshopSpaceAdded',
+          {
+            workshop_space_id: 'wsp_flat',
+            name: 'Flach',
+            location_description: 'Erdgeschoss',
+            capacity: 10,
+            availability_starts_at: '2027-04-30T08:00:00Z',
+            availability_ends_at: '2027-05-02T20:00:00Z',
+            sort_key: 1,
+          },
+          1,
+        ),
+      ],
+      profile.validation_view,
+    )
+    const space = workshopSpaceWorld(world).live[0]!
+    expect(space.availability_windows).toEqual([
+      { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-05-02T20:00:00Z' },
+    ])
+  })
+>>>>>>> conflict 1 of 1 ends
 })
