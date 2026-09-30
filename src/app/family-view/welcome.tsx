@@ -1,4 +1,4 @@
-import { DraftingCompassIcon } from '../components/drafting-compass-icon'
+import { DraftingCompassIcon } from '../components/shared/icons/drafting-compass-icon'
 
 export function Welcome() {
   return (

@@ -1,7 +1,7 @@
 import { useId, useState } from 'react'
-import { Badge } from '../../../../app/components/ui/badge.js'
-import { Button } from '../../../../app/components/ui/button.js'
-import { SuccessState } from '../../../../app/components/ui/success-state.js'
+import { Badge } from '../../../../app/components/shared/ui/badge.js'
+import { Button } from '../../../../app/components/shared/ui/button.js'
+import { SuccessState } from '../../../../app/components/shared/ui/success-state.js'
 import type { BuildingView, FamilyView } from '../types.js'
 import { RoomCard } from './room-card.js'
 

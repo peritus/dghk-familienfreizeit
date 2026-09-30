@@ -8,7 +8,7 @@ import type {
   Trait,
 } from '../../../config/define.js'
 import { familyControlDefinitions, familyPreferencesConfig } from '../index.js'
-import { Card, CardContent, CardHeader } from '../../../app/components/ui/card.js'
+import { Card, CardContent, CardHeader } from '../../../app/components/shared/ui/card.js'
 
 type Stage = (events: readonly EventDraft[]) => void
 

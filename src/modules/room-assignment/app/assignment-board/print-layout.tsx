@@ -1,5 +1,5 @@
-import { OrganiserLink } from '../../../../app/components/organiser-link.js'
-import { BedIcon } from '../../../../app/components/bed-icons.js'
+import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
+import { BedIcon } from '../../../../app/components/shared/icons/bed-icons.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { AssignmentPrintView, BuildingView } from '../types.js'
 

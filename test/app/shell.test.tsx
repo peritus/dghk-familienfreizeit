@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 import { App } from '../../src/app/app'
-import { RouteBoundary, RouteLoading } from '../../src/app/components/route-states'
+import { RouteBoundary, RouteLoading } from '../../src/app/components/application/route-states'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
 import type { Event } from '../../src/events/types.js'
 

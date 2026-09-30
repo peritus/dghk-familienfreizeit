@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'wouter'
-import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
-import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader } from '../components/ui/card'
+import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
+import { Button } from '../components/shared/ui/button'
+import { Card, CardContent, CardHeader } from '../components/shared/ui/card'
 
 type LoginStatus = 'idle' | 'sending' | 'sent' | 'error'
 

@@ -102,10 +102,10 @@ API and keeps those semantics intact.
 **Implemented** as `AlertDialog`/`AlertDialogContent`/`AlertDialogHeader`/
 `AlertDialogFooter`/`AlertDialogTitle`/`AlertDialogDescription`/
 `AlertDialogCancel`/`AlertDialogAction`
-([`src/app/components/ui/alert-dialog.tsx`](../../src/app/components/ui/alert-dialog.tsx)),
+([`src/app/components/shared/ui/alert-dialog.tsx`](../../src/app/components/shared/ui/alert-dialog.tsx)),
 composing Base UI's `AlertDialog` (portal, backdrop, focus trap, Esc/
 outside-click handling) with `Button` through the `render` prop. The
-app-facing [`DestructiveActionDialog`](../../src/app/components/ui/destructive-action-dialog.tsx)
+app-facing [`DestructiveActionDialog`](../../src/app/components/shared/ui/destructive-action-dialog.tsx)
 composes this primitive for every removal and retirement action, requires visible
 consequence text, and keeps the safe cancel action beside the danger action.
 
@@ -282,7 +282,7 @@ floor, which stay `<select>`s):
 - mobile: equal-width stacked segments, icon above label, min height 56px.
 
 **Implemented** as `SegmentedControl`
-([`src/app/components/ui/segmented-control.tsx`](../../src/app/components/ui/segmented-control.tsx)),
+([`src/app/components/shared/ui/segmented-control.tsx`](../../src/app/components/shared/ui/segmented-control.tsx)),
 used for the inventory bed-type choice; **outstanding** for any other
 `<select>` that would qualify.
 

@@ -42,7 +42,7 @@ Resolved. The composition recipe lives in
 the section states that every interactive control uses that API and keeps the
 primitive's accessible semantics. `asChild` appears nowhere else in the
 repository. No code changed: the Button already wraps the Base UI primitive
-([button.tsx](../../../src/app/components/ui/button.tsx)), which
+([button.tsx](../../../src/app/components/shared/ui/button.tsx)), which
 [docs/ui/design-system.md](../../../docs/ui/design-system.md) already records.
 
 ## Related files

@@ -1,6 +1,6 @@
 # Implemented design system
 
-[The shell](../../src/app/components/shell.tsx) contains a German skip link and
+[The shell](../../src/app/components/application/shell.tsx) contains a German skip link and
 focusable main content on every route. On public routes (`/`, `/login`, `/family`) it
 also renders its own brand header and `<main id="content">`. On `/organiser*` routes
 it renders neither -- the organiser section owns a single app bar and
@@ -66,7 +66,7 @@ same popover before anything is deleted or the mode changes.
 The component registry and aliases live in [components.json](../../components.json).
 The implemented primitives are Button, Card, Alert, Skeleton, SegmentedControl,
 AlertDialog, DestructiveActionDialog, Badge, Tag, StatsStrip, and SuccessState in
-[`src/app/components/ui/`](../../src/app/components/ui/).
+[`src/app/components/shared/ui/`](../../src/app/components/shared/ui/).
 Copied source and its adaptations are attributed in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). The Button uses Base UI's `render`
 composition API, supports variants (including a `danger` variant for

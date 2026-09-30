@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { useLocation } from 'wouter'
 import { useOrganiser } from './context.js'
-import { OrganiserLink, organiserHomePath } from '../components/organiser-link.js'
+import { OrganiserLink, organiserHomePath } from '../components/application/organiser-link.js'
 import { SaveStatus } from './save-status.js'
-import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import {
   isOrganiserPathActive,
   organiserPaths,

@@ -10,9 +10,9 @@ import {
 import { workshopSpaceWorld, type WorkshopSpace } from '../../../modules/workshop-space/index.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../../solver/index.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
-import { Button } from '../../components/ui/button.js'
-import { DestructiveActionDialog } from '../../components/ui/destructive-action-dialog.js'
-import { OrganiserLink } from '../../components/organiser-link.js'
+import { Button } from '../../components/shared/ui/button.js'
+import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
+import { OrganiserLink } from '../../components/application/organiser-link.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,

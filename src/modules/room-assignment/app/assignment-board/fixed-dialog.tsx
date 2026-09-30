@@ -6,10 +6,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../../../app/components/ui/dialog.js'
-import { AvailabilityBadge } from '../../../../app/components/ui/availability-badge.js'
-import { Button } from '../../../../app/components/ui/button.js'
-import { OrganiserLink } from '../../../../app/components/organiser-link.js'
+} from '../../../../app/components/shared/ui/dialog.js'
+import { AvailabilityBadge } from '../../../../app/components/shared/ui/availability-badge.js'
+import { Button } from '../../../../app/components/shared/ui/button.js'
+import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
 import type { FamilyView, RequirementView, RoomView } from '../types.js'
 import { RequirementChip } from './chips.js'

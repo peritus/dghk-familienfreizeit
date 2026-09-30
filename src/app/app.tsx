@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
-import { Shell } from './components/shell'
-import { NotFound, RouteBoundary, RouteLoading } from './components/route-states'
+import { Shell } from './components/application/shell'
+import { NotFound, RouteBoundary, RouteLoading } from './components/application/route-states'
 import { Login } from './auth/login'
 import { Welcome } from './family-view/welcome'
 

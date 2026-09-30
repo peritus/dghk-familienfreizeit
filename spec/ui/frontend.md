@@ -93,7 +93,7 @@ src/app/
   organiser/
     OrganiserApp.tsx        loads the log, owns the draft reducer, derives the world
     screens/            dashboard, families, inventory, assignment board, workshops
-  components/ui/        neobrutalism components, copied in by the shadcn CLI
+  components/shared/ui/        neobrutalism components, copied in by the shadcn CLI
 ```
 
 **Routing** is `wouter`: path patterns with parameters for the dozen routes in the
@@ -173,7 +173,7 @@ navigation and controls. There is no in-app print, PDF, CSV, or export action.
 ## 4. Components
 
 [neobrutalism.dev](https://www.neobrutalism.dev) is a shadcn-style registry built on
-Base UI. The CLI copies component source into `src/app/components/ui/`; the code is
+Base UI. The CLI copies component source into `src/app/components/shared/ui/`; the code is
 ours to read and edit, not a dependency to upgrade.
 
 ```bash

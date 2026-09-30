@@ -1,6 +1,6 @@
 # Copied UI components
 
-The Button, Card, Alert and Skeleton sources in `src/app/components/ui/` and the
+The Button, Card, Alert and Skeleton sources in `src/app/components/shared/ui/` and the
 orange theme tokens in `src/app/globals.css` come from the
 [neobrutalism registry](https://neobrutalism.dev/docs/installation).
 They were copied from its component JSON registries and adapted for minimum touch

@@ -8,10 +8,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog.js'
-import { Badge } from '../../components/ui/badge.js'
-import { Button } from '../../components/ui/button.js'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card.js'
+} from '../../components/shared/ui/alert-dialog.js'
+import { Badge } from '../../components/shared/ui/badge.js'
+import { Button } from '../../components/shared/ui/button.js'
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/shared/ui/card.js'
 import {
   releaseScopesFixture,
   communicationReviewFixture,

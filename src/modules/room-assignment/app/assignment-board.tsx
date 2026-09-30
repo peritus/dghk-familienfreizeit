@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { StatsStrip } from '../../../app/components/ui/stats-strip.js'
+import { StatsStrip } from '../../../app/components/shared/ui/stats-strip.js'
 import { OrganiserSectionHeader } from '../../../app/organiser/components/layout.js'
 import { useOrganiser } from '../../../app/organiser/context.js'
 import type { EventDraft } from '../../../events/types.js'

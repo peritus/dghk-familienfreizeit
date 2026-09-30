@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '../../../app/components/ui/alert.js'
-import { Badge } from '../../../app/components/ui/badge.js'
-import { Button } from '../../../app/components/ui/button.js'
-import { Card, CardContent } from '../../../app/components/ui/card.js'
-import { StatsStrip, type StatsStripItem } from '../../../app/components/ui/stats-strip.js'
+import { Alert, AlertDescription, AlertTitle } from '../../../app/components/shared/ui/alert.js'
+import { Badge } from '../../../app/components/shared/ui/badge.js'
+import { Button } from '../../../app/components/shared/ui/button.js'
+import { Card, CardContent } from '../../../app/components/shared/ui/card.js'
+import { StatsStrip, type StatsStripItem } from '../../../app/components/shared/ui/stats-strip.js'
 import {
   OrganiserScreenHeader,
   OrganiserSectionHeader,

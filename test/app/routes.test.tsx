@@ -12,7 +12,7 @@ import {
   organiserUrls,
 } from '../../src/organiser/routes.js'
 import { organiserScreenRegistry } from '../../src/organiser/registry.js'
-import { OrganiserLink } from '../../src/app/components/organiser-link.js'
+import { OrganiserLink } from '../../src/app/components/application/organiser-link.js'
 
 test('organiser route definitions have unique relative and absolute paths', () => {
   expect(new Set(organiserRouteDefinitions.map(({ relative_path }) => relative_path)).size).toBe(

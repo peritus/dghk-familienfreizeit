@@ -1,6 +1,6 @@
 import { useLocation } from 'wouter'
 import type { OrganiserPath } from '../../../organiser/routes.js'
-import { OrganiserLink } from '../../components/organiser-link.js'
+import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { cn } from '../../lib/utils.js'
 
 export type OrganiserSectionNavigationItem = {

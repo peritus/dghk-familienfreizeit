@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { Badge } from '../../components/ui/badge.js'
-import { Button } from '../../components/ui/button.js'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card.js'
-import { Tabs } from '../../components/ui/tabs.js'
+import { Badge } from '../../components/shared/ui/badge.js'
+import { Button } from '../../components/shared/ui/button.js'
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/shared/ui/card.js'
+import { Tabs } from '../../components/shared/ui/tabs.js'
 import { planDiffFixture, planFixture } from './fixtures.js'
 import {
   ComparisonTable,

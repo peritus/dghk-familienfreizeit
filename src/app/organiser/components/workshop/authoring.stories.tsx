@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '../../../components/ui/button.js'
+import { Button } from '../../../components/shared/ui/button.js'
 import { ExternalLeaderRow, InternalLeaderRow, WorkshopSummaryRow } from './authoring.js'
 import { fullExternalLeaders, fullInternalLeaders, fullWorkshopRows } from './story-fixtures.js'
 

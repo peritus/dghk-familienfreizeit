@@ -46,7 +46,7 @@ use its exported compatibility adapter for asset routing options. See the
 [Cloudflare testing documentation](https://developers.cloudflare.com/workers/testing/vitest-integration/)
 and [Miniflare source](https://github.com/cloudflare/workers-sdk/tree/main/packages/miniflare).
 
-Registry component source lives in `src/app/components/ui`; the registry and
+Registry component source lives in `src/app/components/shared/ui`; the registry and
 aliases are configured in `components.json`. Attribution is in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). M0 checks semantic focus/error/loading behavior
 in jsdom, not pixel appearance or real-browser keyboard layout.

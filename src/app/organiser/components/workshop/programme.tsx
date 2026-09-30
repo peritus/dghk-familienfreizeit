@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Badge } from '../../../components/ui/badge.js'
+import { Badge } from '../../../components/shared/ui/badge.js'
 import { WorkshopDataTable, WorkshopStatusBadge } from './shared.js'
 
 export type ProgrammeCellView = {

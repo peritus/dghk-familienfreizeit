@@ -52,7 +52,7 @@ not clicking anything in the UI — but the UI never said so.
   reload can help" case: the `load_error` branch a few lines above
   (`organiser-app.tsx`, "Neu laden" button calling
   `window.location.reload()`), and
-  [`RouteBoundary`](../../../src/app/components/route-states.tsx) uses the
+  [`RouteBoundary`](../../../src/app/components/application/route-states.tsx) uses the
   identical reload pattern for its own unrecoverable-render fallback.
 
 ## Recommendation

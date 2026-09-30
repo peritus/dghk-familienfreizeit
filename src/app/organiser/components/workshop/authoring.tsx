@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Badge } from '../../../components/ui/badge.js'
-import { Card, CardContent } from '../../../components/ui/card.js'
+import { Badge } from '../../../components/shared/ui/badge.js'
+import { Card, CardContent } from '../../../components/shared/ui/card.js'
 import { WorkshopPropertyTags, WorkshopRowActions, WorkshopStatusBadge } from './shared.js'
 
 export type WorkshopAuthoringView = {

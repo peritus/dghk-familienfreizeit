@@ -5,7 +5,7 @@ import { Check, ChevronDown, Pencil, TriangleAlert } from 'lucide-react'
 import { useOrganiser } from './context.js'
 import { draftCount, saveStatusView } from './state.js'
 import { changeCountLabel, pluralDe } from '../lib/plural-de.js'
-import { Button } from '../components/ui/button'
+import { Button } from '../components/shared/ui/button'
 import { cn } from '../lib/utils.js'
 
 type ConfirmStep = 'discard' | 'leave-draft' | null

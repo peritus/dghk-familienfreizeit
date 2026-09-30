@@ -8,9 +8,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../../components/ui/alert-dialog.js'
-import { Button } from '../../../components/ui/button.js'
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card.js'
+} from '../../../components/shared/ui/alert-dialog.js'
+import { Button } from '../../../components/shared/ui/button.js'
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/shared/ui/card.js'
 import { WorkshopField } from './shared.js'
 
 const controlClass = 'min-h-11 rounded-base border-2 border-black px-3 font-normal'
