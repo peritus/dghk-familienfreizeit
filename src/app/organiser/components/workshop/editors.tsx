@@ -95,6 +95,37 @@ export function WorkshopCheckboxGroup({
   )
 }
 
+export function WorkshopLeaderPicker({
+  leaders,
+  selected_ids: selectedIds = [],
+}: {
+  leaders: readonly { id: string; label: string; external?: boolean }[]
+  selected_ids?: readonly string[]
+}) {
+  return (
+    <label className="grid gap-1 font-bold">
+      Leitungen
+      <span className="text-sm font-normal text-muted">
+        Mehrere Personen oder externe Leitungen mit Strg/Cmd auswählen.
+      </span>
+      <select
+        name="leader_ids"
+        multiple
+        size={Math.min(6, Math.max(3, leaders.length))}
+        defaultValue={selectedIds}
+        className={`${controlClass} min-h-24 py-2`}
+      >
+        {leaders.map((leader) => (
+          <option key={leader.id} value={leader.id}>
+            {leader.label}
+            {leader.external ? ' (extern)' : ''}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 export type WorkshopEditorValues = {
   title?: string
   description?: string

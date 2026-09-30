@@ -6,6 +6,7 @@ import {
   SpaceEditorForm,
   WorkshopConfirmationDialog,
   WorkshopEditorForm,
+  WorkshopLeaderPicker,
 } from './editors.js'
 
 const meta = {
@@ -52,6 +53,13 @@ export const Forms: Story = {
             age_max: 12,
             needs: 'Außenbereich, Erste Hilfe',
           }}
+        />
+        <WorkshopLeaderPicker
+          leaders={[
+            { id: 'internal-1', label: 'Mara Schmidt' },
+            { id: 'external-1', label: 'Nina Baum', external: true },
+          ]}
+          selected_ids={['external-1']}
         />
         <ExternalLeaderEditorForm
           on_submit={preventSubmit}

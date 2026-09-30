@@ -9,6 +9,14 @@ import * as TagStories from '../components/ui/tag.stories'
 import * as StatsStories from '../components/ui/stats-strip.stories'
 import * as SuccessStories from '../components/ui/success-state.stories'
 import * as TabsStories from '../components/ui/tabs.stories'
+import * as WorkshopSharedStories from '../organiser/components/workshop/shared.stories'
+import * as WorkshopAuthoringStories from '../organiser/components/workshop/authoring.stories'
+import * as WorkshopReportsStories from '../organiser/components/workshop/reports.stories'
+import * as WorkshopResourcesStories from '../organiser/components/workshop/resources.stories'
+import * as WorkshopProgrammeStories from '../organiser/components/workshop/programme.stories'
+import * as WorkshopChoicesStories from '../organiser/components/workshop/choices.stories'
+import * as WorkshopParticipationStories from '../organiser/components/workshop/participation.stories'
+import * as WorkshopEditorsStories from '../organiser/components/workshop/editors.stories'
 
 <Meta title="Foundations/Style guide" />
 
@@ -73,5 +81,49 @@ views sharing one context. Text remains present when color changes.
 
 Use a segmented control only when the options are few enough to compare at a glance.
 On narrow screens the options stack and retain their labels.
+
+## Workshop semantic component catalogue
+
+The prototype-derived workshop library is intentionally composed below screen
+level. These stories are the visual reference for the next step, where routes
+will provide real derived data and events.
+
+<Canvas of={WorkshopSharedStories.WorkspaceChrome} />
+
+<Canvas of={WorkshopSharedStories.States} />
+
+<Canvas of={WorkshopSharedStories.TableAndResponsiveCollection} />
+
+<Canvas of={WorkshopSharedStories.PickerAndPrint} />
+
+<Canvas of={WorkshopAuthoringStories.WorkshopRows} />
+
+<Canvas of={WorkshopAuthoringStories.LeaderRows} />
+
+<Canvas of={WorkshopReportsStories.Roster} />
+
+<Canvas of={WorkshopReportsStories.Plans} />
+
+<Canvas of={WorkshopReportsStories.ListNavigation} />
+
+<Canvas of={WorkshopResourcesStories.Spaces} />
+
+<Canvas of={WorkshopResourcesStories.Slots} />
+
+<Canvas of={WorkshopProgrammeStories.Grid} />
+
+<Canvas of={WorkshopProgrammeStories.ReviewRows} />
+
+<Canvas of={WorkshopChoicesStories.AnswersAndDemand} />
+
+<Canvas of={WorkshopChoicesStories.Trace} />
+
+<Canvas of={WorkshopParticipationStories.Attendance} />
+
+<Canvas of={WorkshopParticipationStories.Cases} />
+
+<Canvas of={WorkshopEditorsStories.Forms} />
+
+<Canvas of={WorkshopEditorsStories.Confirmation} />
 
 <Stories includePrimary={false} />

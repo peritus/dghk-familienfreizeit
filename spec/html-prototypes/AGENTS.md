@@ -2,6 +2,10 @@
 
 These rules govern every file below `spec/html-prototypes/`.
 
+For the step-by-step implementation workflow, read the
+[prototype import guide](import-guide.md) before extracting components or
+composing application screens.
+
 ## Status and authority
 
 - An HTML prototype is an illustrative design artifact. It is not an
