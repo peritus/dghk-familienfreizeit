@@ -16,7 +16,7 @@ path before persistence.
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
 | `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
-| `/organiser/workshops` | Workshop landing view with lifecycle summary, authoring, audience filters, and typed leader selection |
+| `/organiser/workshops` | Workshop landing view with lifecycle summary, workshop creation/editing, audience filters, and typed leader selection |
 | `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
 | `/organiser/workshops/slots` | Event-backed slot creation, editing, and retirement with overlap validation |
 | `/organiser/workshops/spaces` | Physical workshop-space inventory and schedule-aware availability context |
@@ -91,10 +91,14 @@ Workshop actions stage ordinary `Workshop*`, `WorkshopSlot*`, and
 `WorkshopSpace*` events in the shared local-first pipeline. The overview presents
 the prototype's four lifecycle phases as a summary over independent workshop,
 choice-cycle, programme, and allocation facts; it does not persist a phase enum.
-It resolves audience and participation labels, internal and external leader names,
-demand counts, and one derived placement per workshop. The programme review derives
-one slot and one physical space per workshop and keeps unscheduled workshops visible
-with a reason; its cells show the actual day and do not expose a no-op action.
+The workshop overview provides a focused add/edit dialog for the core workshop
+fields, stages complete `WorkshopAdded` or `WorkshopUpdated` restatements, and
+updates the prospective world immediately. Its searchable leader picker preserves
+typed internal and existing external leader identities. The overview resolves
+audience and participation labels, leader names, demand counts, and one derived
+placement per workshop. The programme review derives one slot and one physical
+space per workshop and keeps unscheduled workshops visible with a reason; its cells
+show the actual day and do not expose a no-op action.
 Slots derive occupancy counts, reject client-visible reversed/overlapping edits before
 staging, and use the shared confirmation dialog for retirement. Space cards preserve
 profile-derived capabilities and readable blocked-slot labels; capability editing is

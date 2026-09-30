@@ -43,10 +43,13 @@ workshops are hidden from active planning and available in a labelled history
 view. M8 does not render communication status or release diffs; M10 owns
 those release/review surfaces rather than workshop cards.
 
-Authoring uses a compact editor with progressive disclosure for cancellation,
-publication, resolver needs, and operational details. Leaders are selected with
-typed searchable pickers. Internal people and external leaders are visibly
-distinct; external contact details are organiser-only.
+The implemented authoring foundation is a compact editor dialog for title,
+description, audience, age range, capacity, participation mode, resolver needs,
+and leaders. Leaders use a typed searchable picker, with internal people and
+existing external leaders visibly distinct. The overview stages complete
+`WorkshopAdded` or `WorkshopUpdated` restatements through the shared local-first
+pipeline. Cancellation, publication, and additional operational details remain
+outstanding authoring scope; they are not rendered by the current dialog.
 
 Participation modes are profile-configured:
 
