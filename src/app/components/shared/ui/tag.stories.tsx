@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Tag } from './tag.js'
 
-const meta = { title: 'UI/Tag', component: Tag } satisfies Meta<typeof Tag>
+const meta = { title: 'Shared/Primitives/Tag', component: Tag } satisfies Meta<typeof Tag>
 export default meta
 type Story = StoryObj<typeof meta>
 

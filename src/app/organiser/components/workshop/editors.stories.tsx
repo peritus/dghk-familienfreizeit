@@ -10,7 +10,7 @@ import {
 } from './editors.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Editors',
+  title: 'Application/Organiser/Workshop/Editors',
   parameters: { layout: 'padded' },
 } satisfies Meta
 

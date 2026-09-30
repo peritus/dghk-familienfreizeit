@@ -8,7 +8,7 @@ import {
 } from '../../../../app/stories/workshop-fixtures.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Authoring',
+  title: 'Modules/official-workshops/Components/Authoring',
   parameters: {
     layout: 'fullscreen',
     docs: {

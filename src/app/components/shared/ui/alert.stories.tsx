@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Alert, AlertDescription, AlertTitle } from './alert'
 
 const meta = {
-  title: 'UI/Alert',
+  title: 'Shared/Primitives/Alert',
   component: Alert,
   parameters: {
     docs: {

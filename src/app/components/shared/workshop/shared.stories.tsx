@@ -21,7 +21,7 @@ import {
 } from './shared.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Shared',
+  title: 'Shared/Workshop/Patterns',
   parameters: {
     layout: 'fullscreen',
     docs: {

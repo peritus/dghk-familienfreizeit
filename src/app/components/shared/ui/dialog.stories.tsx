@@ -11,7 +11,7 @@ import {
 } from './dialog'
 
 const meta = {
-  title: 'UI/Dialog',
+  title: 'Shared/Primitives/Dialog',
   parameters: {
     docs: {
       description: {

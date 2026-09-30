@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Shell } from './shell'
 
 const meta = {
-  title: 'Application/Public shell',
+  title: 'Application/Public/Shell',
   component: Shell,
   parameters: {
     docs: {

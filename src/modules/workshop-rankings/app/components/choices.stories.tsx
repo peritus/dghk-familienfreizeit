@@ -15,7 +15,7 @@ import {
 } from '../../../../app/stories/workshop-fixtures.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Choices',
+  title: 'Modules/workshop-rankings/Components/Choices',
   parameters: {
     layout: 'fullscreen',
     docs: {

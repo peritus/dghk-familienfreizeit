@@ -8,7 +8,7 @@ import {
 } from './reports.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Reports',
+  title: 'Application/Organiser/Workshop/Reports',
   parameters: {
     layout: 'fullscreen',
     docs: {

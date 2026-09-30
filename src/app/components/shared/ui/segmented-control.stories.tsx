@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { SegmentedControl } from './segmented-control'
 
 const meta = {
-  title: 'UI/SegmentedControl',
+  title: 'Shared/Primitives/SegmentedControl',
   component: SegmentedControl,
   parameters: {
     docs: {

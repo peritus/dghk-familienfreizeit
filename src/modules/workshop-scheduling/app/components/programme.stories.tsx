@@ -4,7 +4,7 @@ import { ProgrammeGrid, UnplacedWorkshopRow, WorkshopOverlapTable } from './prog
 import { fullProgrammeRows } from '../../../../app/stories/workshop-fixtures.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Programme',
+  title: 'Modules/workshop-scheduling/Components/Programme',
   parameters: {
     layout: 'fullscreen',
     docs: {

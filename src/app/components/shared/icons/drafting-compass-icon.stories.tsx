@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { DraftingCompassIcon } from './drafting-compass-icon'
 
 const meta = {
-  title: 'UI/Drafting compass icon',
+  title: 'Shared/Icons/Drafting compass icon',
   component: DraftingCompassIcon,
   parameters: {
     docs: {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StatsStrip } from './stats-strip.js'
 
-const meta = { title: 'UI/Stats strip', component: StatsStrip } satisfies Meta<typeof StatsStrip>
+const meta = { title: 'Shared/Primitives/Stats strip', component: StatsStrip } satisfies Meta<typeof StatsStrip>
 export default meta
 type Story = StoryObj<typeof meta>
 

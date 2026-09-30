@@ -7,7 +7,7 @@ import {
 } from '../stories/organiser-fixtures.js'
 
 const meta = {
-  title: 'Application/Save status',
+  title: 'Application/Organiser/Save status',
   component: SaveStatus,
   parameters: {
     docs: {

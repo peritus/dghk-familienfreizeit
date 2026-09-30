@@ -4,7 +4,7 @@ import OrganiserApp from './organiser-app.js'
 import { organiserFixtureEvents } from '../stories/organiser-fixtures.js'
 
 const meta = {
-  title: 'Application/Organiser app',
+  title: 'Application/Organiser/App',
   component: OrganiserApp,
   beforeEach: mockOrganiserApi,
   parameters: {

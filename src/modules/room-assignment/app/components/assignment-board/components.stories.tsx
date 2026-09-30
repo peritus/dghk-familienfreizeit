@@ -82,7 +82,7 @@ const building: BuildingView = {
 }
 
 const meta = {
-  title: 'Room assignment/Board components',
+  title: 'Modules/room-assignment/Components/Assignment board',
   component: RequirementChip,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof RequirementChip>

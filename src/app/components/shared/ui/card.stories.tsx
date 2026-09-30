@@ -11,7 +11,7 @@ import {
 } from './card'
 
 const meta = {
-  title: 'UI/Card',
+  title: 'Shared/Primitives/Card',
   component: Card,
   parameters: {
     docs: {

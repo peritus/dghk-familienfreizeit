@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Tabs } from './tabs.js'
 
 const meta = {
-  title: 'UI/Tabs',
+  title: 'Shared/Primitives/Tabs',
   component: Tabs,
   args: {
     label: 'Gebäude',

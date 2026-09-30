@@ -167,7 +167,7 @@ const cases: readonly OpenParticipationCaseView[] = [
 ]
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Participation',
+  title: 'Modules/workshop-assignment/Components/Participation',
   parameters: { layout: 'padded' },
 } satisfies Meta
 

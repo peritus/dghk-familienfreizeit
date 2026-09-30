@@ -4,7 +4,7 @@ import { SlotDayGroup, SpaceRow, SpaceSlotToggle } from './resources.js'
 import { fullWorkshopSlots, fullWorkshopSpaces } from '../../../stories/workshop-fixtures.js'
 
 const meta = {
-  title: 'Components/Organiser/Workshop/Resources',
+  title: 'Application/Organiser/Workshop/Resources',
   parameters: {
     layout: 'fullscreen',
     docs: {

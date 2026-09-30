@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { BedIcon, BunkBedIcon, DoubleBedIcon, SingleBedIcon } from './bed-icons'
 
 const meta = {
-  title: 'UI/Bed icons',
+  title: 'Shared/Icons/Bed icons',
   parameters: {
     docs: {
       description: {

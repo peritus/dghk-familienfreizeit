@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { RoomCapacitySummary } from './room-capacity-summary.js'
 
 const meta = {
-  title: 'UI/Room capacity summary',
+  title: 'Modules/room-assignment/Components/Room capacity summary',
   component: RoomCapacitySummary,
   parameters: {
     docs: {

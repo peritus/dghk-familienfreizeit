@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { AvailabilityBadge } from './availability-badge.js'
 
 const meta = {
-  title: 'UI/Availability badge',
+  title: 'Modules/room-assignment/Components/Availability badge',
   component: AvailabilityBadge,
   parameters: {
     docs: {

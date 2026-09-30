@@ -3,7 +3,7 @@ import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import { FixtureProvider } from '../stories/organiser-fixtures.js'
 
 const meta = {
-  title: 'Application/Organiser frame',
+  title: 'Application/Organiser/Frame',
   component: OrganiserFrame,
   decorators: [
     (story) => {

@@ -13,7 +13,7 @@ import {
 } from './alert-dialog'
 
 const meta = {
-  title: 'UI/AlertDialog',
+  title: 'Shared/Primitives/AlertDialog',
   parameters: {
     docs: {
       description: {

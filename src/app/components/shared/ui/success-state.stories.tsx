@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { SuccessState } from './success-state.js'
 
-const meta = { title: 'UI/Success state', component: SuccessState } satisfies Meta<
+const meta = { title: 'Shared/Primitives/Success state', component: SuccessState } satisfies Meta<
   typeof SuccessState
 >
 export default meta

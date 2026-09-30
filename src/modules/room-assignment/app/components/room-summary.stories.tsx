@@ -3,7 +3,7 @@ import { organiserPaths } from '../../../organiser/routes.js'
 import { RoomSummary } from './room-summary.js'
 
 const meta = {
-  title: 'UI/Room summary',
+  title: 'Modules/room-assignment/Components/Room summary',
   component: RoomSummary,
   args: {
     name: 'Zimmer 203',

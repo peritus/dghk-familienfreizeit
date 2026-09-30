@@ -4,7 +4,7 @@ import { Button } from './button.js'
 import { DestructiveActionDialog } from './destructive-action-dialog.js'
 
 const meta = {
-  title: 'UI/DestructiveActionDialog',
+  title: 'Shared/Primitives/DestructiveActionDialog',
   parameters: {
     docs: {
       description: {

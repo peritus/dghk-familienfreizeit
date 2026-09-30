@@ -7,7 +7,7 @@ import { AssignmentBoard, AssignmentBoardScreen } from './assignment-board.js'
 import type { AssignmentPrintView, BoardView } from './assignment-board/types.js'
 
 const meta = {
-  title: 'Screens/Organiser/Assignment board',
+  title: 'Modules/room-assignment/Screens/Assignment board',
   component: AssignmentBoardScreen,
   decorators: [
     (story) => {
