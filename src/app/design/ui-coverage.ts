@@ -78,6 +78,12 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/ui/alert-dialog.tsx',
   },
   {
+    id: 'ui-destructiveactiondialog--default',
+    area: 'component',
+    subject: 'Destructive action confirmation',
+    source: 'src/app/components/ui/destructive-action-dialog.tsx',
+  },
+  {
     id: 'ui-dialog--selection',
     area: 'component',
     subject: 'Dialog selection',
@@ -228,22 +234,34 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/organiser/screens/inventory.tsx',
   },
   {
+    id: 'screens-organiser-workshops--overview',
+    area: 'screen',
+    subject: 'Workshops overview',
+    source: 'src/app/organiser/screens/workshops.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--programme',
+    area: 'screen',
+    subject: 'Workshop programme',
+    source: 'src/app/organiser/screens/workshops.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--slots',
+    area: 'screen',
+    subject: 'Workshop slots',
+    source: 'src/app/organiser/screens/workshops.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--spaces',
+    area: 'screen',
+    subject: 'Workshop spaces',
+    source: 'src/app/organiser/screens/workshops.tsx',
+  },
+  {
     id: 'ui-badge--statuses',
     area: 'component',
     subject: 'Status badge',
     source: 'src/app/components/ui/badge.tsx',
-  },
-  {
-    id: 'components-accommodation-expandable-family-member-list--expanded',
-    area: 'component',
-    subject: 'Expandable family member list',
-    source: 'src/modules/room-assignment/app/expandable-family-member-list.tsx',
-  },
-  {
-    id: 'components-accommodation-room-card--full',
-    area: 'component',
-    subject: 'Accommodation room card',
-    source: 'src/modules/room-assignment/app/room-card.tsx',
   },
   {
     id: 'ui-tag--properties',
