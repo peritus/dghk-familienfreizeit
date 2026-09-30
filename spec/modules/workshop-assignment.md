@@ -153,8 +153,9 @@ converted into automatic assignments in the first place.
   fixed decision alongside the automatic outcome it overrides, and explains
   why. The data model above already carries everything such a surface would
   need (`fixed`, `fixed_violations`, and each assignment's `reason`).
-- Release/review surfaces for current, prospective, and released/effective
-  attendance (part of [M8](../roadmap.md#m8--workshop-planning-completion)).
+- Organiser review surfaces for current and prospective attendance (part of
+  [M8](../roadmap.md#m8--workshop-planning-completion)); released/effective
+  attendance belongs to M10 release control.
 - Roster, heatmap, and finding views without a second workshop state store
   (part of M8).
 - Fixed *placement* decisions (which slot a workshop runs in) are a separate,

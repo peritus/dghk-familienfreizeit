@@ -53,7 +53,7 @@ space-slot blocks, leader availability/conflicts, workshop needs/provided
 capabilities, cancellation, and organiser-fixed placement decisions. Demand and
 profile-defined scoring terms are deterministic soft inputs.
 
-## 3. Review and release
+## 3. Organiser review
 
 Automatic placement is the initial UI path. The domain also accepts typed
 organiser decisions for fixed workshop placement, with resolver diagnostics and
@@ -61,7 +61,8 @@ precedence. A reviewed calculation records the input sequence and compatibility
 context, so a later ranking edit does not alter the reviewed result until an
 explicit recalculation/review.
 
-Schedule release is independent of the four visible organiser lifecycle phases.
+Released/effective schedule composition belongs to M10 release control and is not
+part of the M8 organiser review surface.
 
 ## 4. Tests
 
