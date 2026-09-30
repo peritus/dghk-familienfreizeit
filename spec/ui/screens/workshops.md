@@ -10,7 +10,7 @@ remain separate URLs with page-local workshop navigation:
 | Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Programme | `/organiser/workshops/programme` | one placement per workshop, schedule conflicts, and unscheduled cases |
-| Slots | `/organiser/workshops/slots` | direct event-backed slot creation, editing, retirement, and overlap validation; linked from Räume und Slots |
+| Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
 
 The planned section order also reserves **Wünsche**, **Teilnahme**, and **Listen**.
 Those destinations are not rendered in navigation until their screens exist.

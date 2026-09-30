@@ -35,5 +35,5 @@ test('style-guide fixtures cover full-data states through the shared mapper', ()
   expect(fullWorkshopRows.some((workshop) => workshop.participation_mode === 'Anmeldung')).toBe(
     true,
   )
-  expect(fullWorkshopRows.some((workshop) => workshop.placement.tone === 'attention')).toBe(true)
+  expect(fullWorkshopRows.some((workshop) => workshop.placement?.tone === 'attention')).toBe(true)
 })

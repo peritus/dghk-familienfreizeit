@@ -18,7 +18,7 @@ path before persistence.
 | `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
 | `/organiser/workshops` | Workshop landing view with lifecycle summary, authoring, audience filters, and typed leader selection |
 | `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
-| `/organiser/workshops/slots` | Event-backed slot creation and retirement with overlap validation |
+| `/organiser/workshops/slots` | Event-backed slot creation, editing, and retirement with overlap validation |
 | `/organiser/workshops/spaces` | Physical workshop-space inventory and schedule-aware availability context |
 
 The host exposes these kernel-owned and selected-module screens through one screen
@@ -91,11 +91,17 @@ Workshop actions stage ordinary `Workshop*`, `WorkshopSlot*`, and
 `WorkshopSpace*` events in the shared local-first pipeline. The overview presents
 the prototype's four lifecycle phases as a summary over independent workshop,
 choice-cycle, programme, and allocation facts; it does not persist a phase enum.
-The programme review derives one slot and one physical space per workshop and
-keeps unscheduled workshops visible with a reason. Browser print is the only print
-path; these screens add no export or print button. External leader contacts are
-organiser-only, and cancelled workshops leave active planning while remaining
-available to historical reports.
+It resolves audience and participation labels, internal and external leader names,
+demand counts, and one derived placement per workshop. The programme review derives
+one slot and one physical space per workshop and keeps unscheduled workshops visible
+with a reason; its cells show the actual day and do not expose a no-op action.
+Slots derive occupancy counts, reject client-visible reversed/overlapping edits before
+staging, and use the shared confirmation dialog for retirement. Space cards preserve
+profile-derived capabilities and readable blocked-slot labels; capability editing is
+still owned by the selected profile/module contract rather than a screen-local field.
+Browser print is the only print path; these screens add no export or print button.
+External leader contacts are organiser-only, and cancelled workshops leave active
+planning while remaining available to historical reports.
 
 ## Current limits
 
@@ -110,5 +116,7 @@ The verified tests cover local derivation, family display-name replacement,
 profile control validation, rendered organiser family controls, immediate and
 drafting commit timing,
 the inline draft workspace, apply-prefix acknowledgement, organiser log/apply
-authorization, prospective replay rejection, stale-head responses, route loading, and
-the public/private route boundary.
+authorization, prospective replay rejection, stale-head responses, workshop overview
+labels and placement data, programme date grouping, retirement confirmation, route
+loading, and the public/private route boundary. The full unit suite also checks that
+the style-guide and screen fixtures derive a multi-state workshop catalogue.
