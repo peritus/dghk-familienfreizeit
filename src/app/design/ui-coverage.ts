@@ -395,4 +395,16 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop participation cases',
     source: 'src/app/organiser/components/workshop/participation.tsx',
   },
+  {
+    id: 'components-organiser-workshop-editors--forms',
+    area: 'component',
+    subject: 'Workshop editor forms',
+    source: 'src/app/organiser/components/workshop/editors.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-editors--confirmation',
+    area: 'component',
+    subject: 'Workshop confirmation dialog',
+    source: 'src/app/organiser/components/workshop/editors.tsx',
+  },
 ]
