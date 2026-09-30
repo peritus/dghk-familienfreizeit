@@ -359,4 +359,16 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop slots and availability',
     source: 'src/app/organiser/components/workshop/resources.tsx',
   },
+  {
+    id: 'components-organiser-workshop-programme--grid',
+    area: 'component',
+    subject: 'Workshop programme grid',
+    source: 'src/app/organiser/components/workshop/programme.tsx',
+  },
+  {
+    id: 'components-organiser-workshop-programme--review-rows',
+    area: 'component',
+    subject: 'Workshop programme review rows',
+    source: 'src/app/organiser/components/workshop/programme.tsx',
+  },
 ]
