@@ -16,21 +16,33 @@ export type WorkshopRanking = { person_id: string; choices: readonly WorkshopCho
 
 export type WorkshopDemand = Readonly<Record<string, number>>
 
-const rankingValue = z
-  .object({
-    workshop_id: z
-      .string()
-      .regex(/^wks_[a-zA-Z0-9_-]+$/)
-      .nullable(),
-    rank: z.number().int().positive().nullable(),
-  })
-  .superRefine((value, context) => {
-    if ((value.workshop_id === null) !== (value.rank === null))
-      context.addIssue({
-        code: 'custom',
-        message: 'workshop and rank must both be null or present',
-      })
-  })
+// Accepts either the object form { workshop_id, rank } or a compact
+// "wks_id:rank" string (e.g. from a KDL fixture, where a LabelSet value
+// can only be a scalar) — the compact form is transformed into the object
+// form before validation, so both remain equivalent to every consumer.
+const rankingValue = z.preprocess(
+  (raw) => {
+    if (typeof raw !== 'string') return raw
+    const [workshopId, rankText] = raw.split(':')
+    const rank = Number(rankText)
+    return { workshop_id: workshopId ?? null, rank: Number.isFinite(rank) ? rank : null }
+  },
+  z
+    .object({
+      workshop_id: z
+        .string()
+        .regex(/^wks_[a-zA-Z0-9_-]+$/)
+        .nullable(),
+      rank: z.number().int().positive().nullable(),
+    })
+    .superRefine((value, context) => {
+      if ((value.workshop_id === null) !== (value.rank === null))
+        context.addIssue({
+          code: 'custom',
+          message: 'workshop and rank must both be null or present',
+        })
+    }),
+)
 
 function rankingValueValid(value: JsonValue): string | null {
   const result = rankingValue.safeParse(value)

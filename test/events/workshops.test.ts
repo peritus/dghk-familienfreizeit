@@ -11,7 +11,10 @@ import {
   workshopSchedulingWorld,
 } from '../../src/modules/workshop-scheduling/index.js'
 import { workshopSpace, workshopSpaceWorld } from '../../src/modules/workshop-space/index.js'
-import { workshopRankings } from '../../src/modules/workshop-rankings/index.js'
+import {
+  workshopRankings,
+  workshopRankingsFromWorld,
+} from '../../src/modules/workshop-rankings/index.js'
 import { workshopAssignment } from '../../src/modules/workshop-assignment/index.js'
 
 const profile = defineOccasionProfile({
@@ -472,5 +475,30 @@ describe('workshop domain events', () => {
       { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-05-02T20:00:00Z' },
     ])
   })
->>>>>>> conflict 1 of 1 ends
+
+  test('a compact "workshop_id:rank" string is an equivalent ranking value to the object form', () => {
+    const rankingParams = {
+      ranking_trait: 'prefers-workshop',
+      max_rank: 3,
+      allow_no_preference: true,
+    }
+    const rankingFor = (value: JsonValue) =>
+      workshopRankingsFromWorld(
+        derive(
+          [
+            ...personEvents,
+            event(
+              'LabelSet',
+              { entity_id: 'per_a', key: 'prefers-workshop', value, strength: null, note: null },
+              personEvents.length + 1,
+            ),
+          ],
+          profile.validation_view,
+        ),
+        rankingParams,
+      )
+    expect(rankingFor('wks_ceramics:1')).toEqual(
+      rankingFor({ workshop_id: 'wks_ceramics', rank: 1 }),
+    )
+  })
 })
