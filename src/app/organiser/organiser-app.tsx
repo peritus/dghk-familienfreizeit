@@ -293,7 +293,9 @@ export default function OrganiserApp() {
                 <Workshops />
               </Route>
             ) : null}
-            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-external-leaders') ? (
+            {organiserScreenRegistry.some(
+              ({ id }) => id === 'organiser-workshop-external-leaders',
+            ) ? (
               <Route path={organiserRoutePaths.workshop_external_leaders}>
                 <WorkshopExternalLeaders />
               </Route>

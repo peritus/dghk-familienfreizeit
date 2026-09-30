@@ -230,13 +230,17 @@ export function WorkshopExternalLeaders() {
       return
     }
     stage([
-      draft(state.principal_email ?? '', editingLeader ? 'ExternalLeaderUpdated' : 'ExternalLeaderAdded', {
-        external_leader_id: editingLeader?.id ?? id('ext_'),
-        name,
-        phone: String(data.get('phone') ?? '').trim() || null,
-        availability,
-        sort_key: editingLeader?.sort_key ?? summary.external_leaders.length + 1,
-      }),
+      draft(
+        state.principal_email ?? '',
+        editingLeader ? 'ExternalLeaderUpdated' : 'ExternalLeaderAdded',
+        {
+          external_leader_id: editingLeader?.id ?? id('ext_'),
+          name,
+          phone: String(data.get('phone') ?? '').trim() || null,
+          availability,
+          sort_key: editingLeader?.sort_key ?? summary.external_leaders.length + 1,
+        },
+      ),
     ])
     setEditor(null)
     setError(null)
@@ -271,7 +275,9 @@ export function WorkshopExternalLeaders() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingLeader ? `Externe Leitung: ${editingLeader.name}` : 'Externe Leitung hinzufügen'}
+              {editingLeader
+                ? `Externe Leitung: ${editingLeader.name}`
+                : 'Externe Leitung hinzufügen'}
             </DialogTitle>
             <DialogDescription>
               Externe Leitungen leiten Workshops, nehmen aber nicht an der Freizeit teil.

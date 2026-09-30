@@ -5,6 +5,13 @@ log. The overview route `/organiser/workshops` creates and reviews full workshop
 restatements, including audience, age range, capacity, participation mode,
 resolver-backed needs, and typed internal or external leaders.
 
+The `/organiser/workshops/externe` view follows the workshop authoring pattern
+for external leaders: it lists each external leader with an explicit external
+badge, organiser-only phone metadata, linked workshops, and derived slot
+availability. The add/edit dialog stages complete `ExternalLeaderAdded` or
+`ExternalLeaderUpdated` restatements and requires at least one available slot.
+External leaders can then be selected by typed identity in the workshop editor.
+
 The supported modes are automatic assignment, sign-up, and organiser-visible
 interest. The current choice cycle is independent of schedule placement. Cancelled
 workshops leave active planning but remain available in labelled history. Retiring

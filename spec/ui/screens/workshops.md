@@ -8,6 +8,7 @@ remain separate URLs with page-local workshop navigation:
 | View | Route | Purpose |
 |---|---|---|
 | Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
+| Externe | `/organiser/workshops/externe` | create and edit external leaders, their organiser-only contact metadata, linked workshops, and slot availability |
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Programme | `/organiser/workshops/programme` | one placement per workshop, schedule conflicts, and unscheduled cases |
 | Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
@@ -48,8 +49,11 @@ description, audience, age range, capacity, participation mode, resolver needs,
 and leaders. Leaders use a typed searchable picker, with internal people and
 existing external leaders visibly distinct. The overview stages complete
 `WorkshopAdded` or `WorkshopUpdated` restatements through the shared local-first
-pipeline. Cancellation, publication, and additional operational details remain
-outstanding authoring scope; they are not rendered by the current dialog.
+pipeline. The **Externe** view uses the same event-backed pipeline to create and
+edit external leaders, including organiser-only phone metadata and one or more
+available workshop slots; its list shows linked workshops and derived
+availability labels. Cancellation, publication, and other release operations
+remain outstanding authoring scope.
 
 Participation modes are profile-configured:
 
