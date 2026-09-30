@@ -1,5 +1,5 @@
-import { OrganiserLink } from '../organiser-link.js'
-import type { OrganiserPath } from '../../../organiser/routes.js'
+import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
+import type { OrganiserPath } from '../../../../organiser/routes.js'
 import { RoomCapacitySummary } from './room-capacity-summary.js'
 
 /**

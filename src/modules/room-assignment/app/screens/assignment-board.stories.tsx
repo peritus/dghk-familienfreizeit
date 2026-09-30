@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   FixtureProvider,
   organiserAssignmentFixedFixtureState,
-} from '../../../app/stories/organiser-fixtures.js'
+} from '../../../../app/stories/organiser-fixtures.js'
 import { AssignmentBoard, AssignmentBoardScreen } from './assignment-board.js'
 import type { AssignmentPrintView, BoardView } from './assignment-board/types.js'
 

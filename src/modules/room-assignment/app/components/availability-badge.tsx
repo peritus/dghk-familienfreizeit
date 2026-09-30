@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { Badge } from './badge.js'
+import { Badge } from '../../../../app/components/shared/ui/badge.js'
 
 /**
  * Displays available sleeping places as a capacity status.

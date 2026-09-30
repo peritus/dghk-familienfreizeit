@@ -28,7 +28,10 @@ import {
   WorkshopStatsStrip,
 } from '../../components/shared/workshop/shared.js'
 import { WorkshopSummaryRow } from '../../../modules/official-workshops/app/components/authoring.js'
-import { ProgrammeGrid, UnplacedWorkshopRow } from '../../../modules/workshop-scheduling/app/components/programme.js'
+import {
+  ProgrammeGrid,
+  UnplacedWorkshopRow,
+} from '../../../modules/workshop-scheduling/app/components/programme.js'
 import {
   SlotDayGroup,
   SpaceRow,

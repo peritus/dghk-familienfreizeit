@@ -1,15 +1,15 @@
-import { activeProfile } from '../../../config/index.js'
-import { buildRevision, compatibilityRevision } from '../../../config/build.js'
-import type { KernelWorld } from '../../../events/fold.js'
-import { inventoryWorld } from '../../../modules/room-inventory/index.js'
+import { activeProfile } from '../../../../../config/index.js'
+import { buildRevision, compatibilityRevision } from '../../../../../config/build.js'
+import type { KernelWorld } from '../../../../../events/fold.js'
+import { inventoryWorld } from '../../../../../modules/room-inventory/index.js'
 import type {
   RoomAssignment,
   RoomAssignmentSection,
-} from '../../../modules/room-assignment/index.js'
-import { buildSolverInput, solve } from '../../../solver/index.js'
-import { composeSolverContributions } from '../../../solver/index.js'
-import type { Plan } from '../../../solver/types.js'
-import type { SolverContributions } from '../../../solver/types.js'
+} from '../../../../../modules/room-assignment/index.js'
+import { buildSolverInput, solve } from '../../../../../solver/index.js'
+import { composeSolverContributions } from '../../../../../solver/index.js'
+import type { Plan } from '../../../../../solver/types.js'
+import type { SolverContributions } from '../../../../../solver/types.js'
 import type {
   AssignmentPrintView,
   BoardView,

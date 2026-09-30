@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { organiserPaths } from '../../../organiser/routes.js'
+import { organiserPaths } from '../../../../organiser/routes.js'
 import { RoomSummary } from './room-summary.js'
 
 const meta = {

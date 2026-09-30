@@ -21,6 +21,21 @@ and CSS-token pipeline used by the application.
 - `test/storybook/style-guide.spec.ts` checks that every index entry resolves and
   takes a Playwright snapshot of every component/application/screen entry.
 
+Storybook's visible tree follows ownership rather than implementation depth:
+
+- `Foundations/` contains tokens and the style guide.
+- `Shared/` contains app-wide primitives, icons, and reusable patterns.
+- `Application/` contains shell and organiser-wide compositions.
+- `Screens/` contains route-level screens owned by the application host.
+- `Modules/<module>/` contains module-owned components and screens, using the
+  exact lowercase module ID from `src/modules/` (for example,
+  `Modules/room-assignment/`).
+
+The story title and source folder must agree on ownership. A component shared by
+multiple modules belongs in `Shared/` or `Application/`; it must not be placed
+under an arbitrary module only to shorten a Storybook tree. Module stories are
+kept beside their implementation under `src/modules/<module>/app/`.
+
 This split keeps intent readable in Markdown while the browser renders and
 tests the actual implementation. A story is not a mockup: it is a small,
 deterministic fixture around the production component.

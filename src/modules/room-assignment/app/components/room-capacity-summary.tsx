@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
 import { AvailabilityBadge } from './availability-badge.js'
-import { Badge } from './badge.js'
+import { Badge } from '../../../../app/components/shared/ui/badge.js'
 
 /**
  * Displays a room's total sleeping places together with its availability.

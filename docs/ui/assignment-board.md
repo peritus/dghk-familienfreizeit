@@ -5,7 +5,8 @@ room-assignment-specific components. Shared `Badge`, `Tag`, `StatsStrip`,
 `SuccessState`, `Button`, `Dialog`, and bed icons stay in their general source
 locations. Room cards, requirement chips, family entries, fit hints, building
 headers, the fixed-assignment dialog, and the print composition live under
-`src/modules/room-assignment/app/assignment-board/`.
+`src/modules/room-assignment/app/components/assignment-board/`, with the screen
+composition in `src/modules/room-assignment/app/screens/`.
 
 The board derives all placement state from the event-log world. A fixed family
 uses paired generic labels with the value `${family_id}_room`: `needs` on the

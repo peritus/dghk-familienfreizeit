@@ -1,8 +1,8 @@
-import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
+import { OrganiserLink } from '../../../../../app/components/application/organiser-link.js'
 import type { ReactNode } from 'react'
 import { RoomSummary } from '../room-summary.js'
-import { SuccessState } from '../../../../app/components/shared/ui/success-state.js'
-import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
+import { SuccessState } from '../../../../../app/components/shared/ui/success-state.js'
+import { organiserPathWithHash, organiserPaths } from '../../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../../screens/assignment-board/types.js'
 import { RequirementChip } from './chips.js'
 

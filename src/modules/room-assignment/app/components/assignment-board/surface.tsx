@@ -1,14 +1,21 @@
 import type { ReactNode } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '../../../app/components/shared/ui/alert.js'
-import { Badge } from '../../../app/components/shared/ui/badge.js'
-import { Button } from '../../../app/components/shared/ui/button.js'
-import { Card, CardContent } from '../../../app/components/shared/ui/card.js'
-import { StatsStrip, type StatsStripItem } from '../../../app/components/shared/ui/stats-strip.js'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '../../../../../app/components/shared/ui/alert.js'
+import { Badge } from '../../../../../app/components/shared/ui/badge.js'
+import { Button } from '../../../../../app/components/shared/ui/button.js'
+import { Card, CardContent } from '../../../../../app/components/shared/ui/card.js'
+import {
+  StatsStrip,
+  type StatsStripItem,
+} from '../../../../../app/components/shared/ui/stats-strip.js'
 import {
   OrganiserScreenHeader,
   OrganiserSectionHeader,
-} from '../../../app/organiser/components/layout.js'
-import { cn } from '../../../app/lib/utils.js'
+} from '../../../../../app/organiser/components/layout.js'
+import { cn } from '../../../../../app/lib/utils.js'
 import type { FindingView, StatusLabel } from '../../screens/assignment-board/types.js'
 
 const severityTone = { error: 'danger', warning: 'attention', info: 'neutral' } as const

@@ -104,7 +104,7 @@ All organiser screens use the shared screen header, stats strip, quiet property
 tags, state badges, success messages, and destructive-action confirmation. Room
 cards, requirement chips, family entries, building sections, fit hints, the
 fixed-assignment dialog, and the print composition remain room-assignment-specific under
-[`src/modules/room-assignment/app/assignment-board/`](../../src/modules/room-assignment/app/assignment-board/).
+[`src/modules/room-assignment/app/components/assignment-board/`](../../src/modules/room-assignment/app/components/assignment-board/).
 The board does not use `blueprint` or a paper background to mark fixed
 assignments: those tokens are reserved for browser-local draft state. Fixed
 assignments are ordinary event-backed organiser decisions and use the shared

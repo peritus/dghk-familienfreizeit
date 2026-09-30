@@ -1,8 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Link } from 'wouter'
 import { LoaderCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from './ui/alert'
-import { Button, buttonVariants } from './ui/button'
+import { Alert, AlertDescription, AlertTitle } from '../shared/ui/alert'
+import { Button, buttonVariants } from '../shared/ui/button'
 
 export function RouteLoading() {
   return (

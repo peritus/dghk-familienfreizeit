@@ -1,4 +1,4 @@
-import type { StatusTone } from '../../../app/organiser/ui-types.js'
+import type { StatusTone } from '../../../../../app/organiser/ui-types.js'
 
 export type RequirementStrength = 'required' | 'preferred'
 

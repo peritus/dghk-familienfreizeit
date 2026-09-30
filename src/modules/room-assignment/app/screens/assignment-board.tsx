@@ -1,10 +1,15 @@
 import { useState } from 'react'
-import { StatsStrip } from '../../../app/components/shared/ui/stats-strip.js'
-import { OrganiserSectionHeader } from '../../../app/organiser/components/layout.js'
-import { useOrganiser } from '../../../app/organiser/context.js'
-import type { EventDraft } from '../../../events/types.js'
+import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
+import { OrganiserSectionHeader } from '../../../../app/organiser/components/layout.js'
+import { useOrganiser } from '../../../../app/organiser/context.js'
+import type { EventDraft } from '../../../../events/types.js'
 import { deriveAssignmentReview } from './assignment-board/review.js'
-import type { AssignmentPrintView, BoardView, FamilyView, RoomView } from './assignment-board/types.js'
+import type {
+  AssignmentPrintView,
+  BoardView,
+  FamilyView,
+  RoomView,
+} from './assignment-board/types.js'
 import { BuildingSection } from '../components/assignment-board/building-section.js'
 import { FixedAssignmentDialog } from '../components/assignment-board/fixed-dialog.js'
 import {
@@ -15,8 +20,8 @@ import {
 } from '../components/assignment-board/overview.js'
 import { AssignmentPrintLayout } from '../components/assignment-board/print-layout.js'
 import { ScreenFrame } from '../components/assignment-board/surface.js'
-import { OrganiserSectionNavigation } from '../../../app/organiser/components/section-navigation.js'
-import { organiserPaths } from '../../../organiser/routes.js'
+import { OrganiserSectionNavigation } from '../../../../app/organiser/components/section-navigation.js'
+import { organiserPaths } from '../../../../organiser/routes.js'
 
 function event(type: string, payload: EventDraft['payload']): EventDraft {
   return {

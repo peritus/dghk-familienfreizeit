@@ -44,7 +44,11 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/family-view/` | Public welcome placeholder |
 | `src/app/organiser/` | Lazy authenticated organiser host, shared draft reducer, kernel family screens, and assignment review routes |
+| `src/app/components/shared/` | App-wide visual primitives, icons, and reusable patterns |
+| `src/app/components/application/` | Public shell, route states, and application-boundary components |
 | `src/app/components/shared/ui/` | Copied UI primitives |
+| `src/modules/<module>/app/components/` | Module-owned visual components and their stories |
+| `src/modules/<module>/app/screens/` | Module-owned screen compositions and their stories |
 | `scripts/bundle-graph.ts` | Build import-graph metadata |
 | `test/app/`, `test/worker/`, `test/build/` | App, Worker and emitted-output checks |
 | `spec/profiles/` | Illustrative specification, not runtime configuration |

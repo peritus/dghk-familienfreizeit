@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
-import { Button } from '../../../../app/components/shared/ui/button.js'
-import { DestructiveActionDialog } from '../../../../app/components/shared/ui/destructive-action-dialog.js'
+import { OrganiserLink } from '../../../../../app/components/application/organiser-link.js'
+import { Button } from '../../../../../app/components/shared/ui/button.js'
+import { DestructiveActionDialog } from '../../../../../app/components/shared/ui/destructive-action-dialog.js'
 import { FixedBadge, RequirementChip } from './chips.js'
 import type { FamilyView } from '../../screens/assignment-board/types.js'
-import { organiserPaths } from '../../../../organiser/routes.js'
+import { organiserPaths } from '../../../../../organiser/routes.js'
 
 export function FamilyEntry({
   family,

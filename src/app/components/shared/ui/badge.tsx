@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
 import { Pin } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { StatusTone } from '../../organiser/ui-types.js'
+import type { StatusTone } from '../../../organiser/ui-types.js'
 
 const toneClasses: Record<StatusTone, string> = {
   neutral: 'bg-white text-foreground',

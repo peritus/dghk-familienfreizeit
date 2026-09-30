@@ -1,5 +1,5 @@
 import { Link, type LinkProps } from 'wouter'
-import type { OrganiserPath } from '../../organiser/routes.js'
+import type { OrganiserPath } from '../../../organiser/routes.js'
 
 declare const organiserHomePathBrand: unique symbol
 export type OrganiserHomePath = '~/' & { readonly [organiserHomePathBrand]: true }
