@@ -8,7 +8,11 @@ import {
   TraceLegend,
   WorkshopDemandTable,
 } from './choices.js'
-import { fullChoiceAnswers, fullDemandRows, fullTraceStages } from './story-fixtures.js'
+import {
+  fullChoiceAnswers,
+  fullDemandRows,
+  fullTraceStages,
+} from '../../../../app/stories/workshop-fixtures.js'
 
 const meta = {
   title: 'Components/Organiser/Workshop/Choices',

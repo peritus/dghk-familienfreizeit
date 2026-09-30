@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '../../../components/shared/ui/button.js'
+import { Button } from '../ui/button.js'
 import {
   WorkshopDataTable,
   WorkshopEmptyState,

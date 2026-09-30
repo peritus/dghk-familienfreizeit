@@ -18,7 +18,7 @@ import type {
   FamilyView,
   RequirementView,
   RoomView,
-} from '../types.js'
+} from '../../screens/assignment-board/types.js'
 
 const requirement = (overrides: Partial<RequirementView>): RequirementView => ({
   key: 'accessible',

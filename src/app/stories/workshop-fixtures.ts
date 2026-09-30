@@ -1,5 +1,5 @@
-import type { WorkshopAuthoringView } from './authoring.js'
-import type { WorkshopSlotView, WorkshopSpaceView } from './resources.js'
+import type { WorkshopAuthoringView } from '../../modules/official-workshops/app/components/authoring.js'
+import type { WorkshopSlotView, WorkshopSpaceView } from '../organiser/components/workshop/resources.js'
 
 export type FullWorkshopFixture = {
   id: string

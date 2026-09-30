@@ -3,7 +3,7 @@ import { OrganiserLink } from '../../../../app/components/application/organiser-
 import { Button } from '../../../../app/components/shared/ui/button.js'
 import { DestructiveActionDialog } from '../../../../app/components/shared/ui/destructive-action-dialog.js'
 import { FixedBadge, RequirementChip } from './chips.js'
-import type { FamilyView } from '../types.js'
+import type { FamilyView } from '../../screens/assignment-board/types.js'
 import { organiserPaths } from '../../../../organiser/routes.js'
 
 export function FamilyEntry({

@@ -3,7 +3,7 @@ import { activeProfile } from '../../src/config/index.js'
 import { derive } from '../../src/events/fold.js'
 import { deriveDraftWorld } from '../../src/events/world.js'
 import { materializeDraftEvents } from '../../src/app/organiser/state.js'
-import { deriveAssignmentReview } from '../../src/modules/room-assignment/app/review.js'
+import { deriveAssignmentReview } from '../../src/modules/room-assignment/app/screens/assignment-board/review.js'
 import {
   organiserAssignmentFixedFixtureState,
   organiserAssignmentFixtureEvents,

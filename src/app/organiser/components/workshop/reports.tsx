@@ -6,7 +6,7 @@ import {
   WorkshopResponsiveCollection,
   WorkshopSectionTabs,
   WorkshopStatusBadge,
-} from './shared.js'
+} from '../../../components/shared/workshop/shared.js'
 
 export type WorkshopRosterEntry = {
   id: string

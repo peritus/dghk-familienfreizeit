@@ -1,5 +1,5 @@
 import { Badge } from '../../../../app/components/shared/ui/badge.js'
-import type { RequirementView } from '../types.js'
+import type { RequirementView } from '../../screens/assignment-board/types.js'
 
 export function RequirementChip({ requirement }: { requirement: RequirementView }) {
   const suffix = requirement.strength === 'required' ? ' (erforderlich)' : ' (Wunsch)'

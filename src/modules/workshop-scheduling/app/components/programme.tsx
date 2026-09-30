@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
-import { Badge } from '../../../components/shared/ui/badge.js'
-import { WorkshopDataTable, WorkshopStatusBadge } from './shared.js'
+import { Badge } from '../../../../app/components/shared/ui/badge.js'
+import {
+  WorkshopDataTable,
+  WorkshopStatusBadge,
+} from '../../../../app/components/shared/workshop/shared.js'
 
 export type ProgrammeCellView = {
   id: string

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '../../../components/shared/ui/button.js'
+import { Button } from '../../../../app/components/shared/ui/button.js'
 import { ProgrammeGrid, UnplacedWorkshopRow, WorkshopOverlapTable } from './programme.js'
-import { fullProgrammeRows } from './story-fixtures.js'
+import { fullProgrammeRows } from '../../../../app/stories/workshop-fixtures.js'
 
 const meta = {
   title: 'Components/Organiser/Workshop/Programme',

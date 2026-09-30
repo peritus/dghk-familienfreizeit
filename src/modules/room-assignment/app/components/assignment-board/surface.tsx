@@ -9,7 +9,7 @@ import {
   OrganiserSectionHeader,
 } from '../../../app/organiser/components/layout.js'
 import { cn } from '../../../app/lib/utils.js'
-import type { FindingView, StatusLabel } from './types.js'
+import type { FindingView, StatusLabel } from '../../screens/assignment-board/types.js'
 
 const severityTone = { error: 'danger', warning: 'attention', info: 'neutral' } as const
 const severityLabel = { error: 'Fehler', warning: 'Warnung', info: 'Hinweis' } as const

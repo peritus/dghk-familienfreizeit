@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../../../app/components/shared/ui/dialog.js'
-import { AvailabilityBadge } from '../../../../app/components/shared/ui/availability-badge.js'
+import { AvailabilityBadge } from '../availability-badge.js'
 import { Button } from '../../../../app/components/shared/ui/button.js'
 import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
-import type { FamilyView, RequirementView, RoomView } from '../types.js'
+import type { FamilyView, RequirementView, RoomView } from '../../screens/assignment-board/types.js'
 import { RequirementChip } from './chips.js'
 
 function evaluatedRequirements(family: FamilyView, room: RoomView): RequirementView[] {

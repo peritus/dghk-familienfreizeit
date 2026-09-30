@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '../../../components/shared/ui/button.js'
+import { Button } from '../../../../app/components/shared/ui/button.js'
 import { ExternalLeaderRow, InternalLeaderRow, WorkshopSummaryRow } from './authoring.js'
-import { fullExternalLeaders, fullInternalLeaders, fullWorkshopRows } from './story-fixtures.js'
+import {
+  fullExternalLeaders,
+  fullInternalLeaders,
+  fullWorkshopRows,
+} from '../../../../app/stories/workshop-fixtures.js'
 
 const meta = {
   title: 'Components/Organiser/Workshop/Authoring',

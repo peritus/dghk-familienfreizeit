@@ -2,7 +2,10 @@ import type { ReactNode } from 'react'
 import { Badge } from '../../../components/shared/ui/badge.js'
 import { Button } from '../../../components/shared/ui/button.js'
 import { Card, CardContent } from '../../../components/shared/ui/card.js'
-import { WorkshopPropertyTags, WorkshopRowActions } from './shared.js'
+import {
+  WorkshopPropertyTags,
+  WorkshopRowActions,
+} from '../../../components/shared/workshop/shared.js'
 
 export type WorkshopSpaceView = {
   id: string

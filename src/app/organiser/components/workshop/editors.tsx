@@ -11,7 +11,7 @@ import {
 } from '../../../components/shared/ui/alert-dialog.js'
 import { Button } from '../../../components/shared/ui/button.js'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/shared/ui/card.js'
-import { WorkshopField } from './shared.js'
+import { WorkshopField } from '../../../components/shared/workshop/shared.js'
 
 const controlClass = 'min-h-11 rounded-base border-2 border-black px-3 font-normal'
 

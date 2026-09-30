@@ -1,9 +1,9 @@
 import { BedIcon } from '../../../../app/components/shared/icons/bed-icons.js'
 import { Card } from '../../../../app/components/shared/ui/card.js'
-import { RoomSummary } from '../../../../app/components/shared/ui/room-summary.js'
+import { RoomSummary } from '../room-summary.js'
 import { Tag } from '../../../../app/components/shared/ui/tag.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../organiser/routes.js'
-import type { FamilyView, RoomView } from '../types.js'
+import type { FamilyView, RoomView } from '../../screens/assignment-board/types.js'
 import { FamilyEntry } from './family-entry.js'
 
 export function RoomCard({

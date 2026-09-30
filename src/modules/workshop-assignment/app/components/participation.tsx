@@ -4,7 +4,7 @@ import {
   WorkshopStatsStrip,
   WorkshopStatusBadge,
   type WorkshopStatusTone,
-} from './shared.js'
+} from '../../../../app/components/shared/workshop/shared.js'
 
 export type AssignmentView = {
   workshop_id: string

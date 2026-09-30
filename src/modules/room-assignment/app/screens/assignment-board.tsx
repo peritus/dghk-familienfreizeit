@@ -3,18 +3,18 @@ import { StatsStrip } from '../../../app/components/shared/ui/stats-strip.js'
 import { OrganiserSectionHeader } from '../../../app/organiser/components/layout.js'
 import { useOrganiser } from '../../../app/organiser/context.js'
 import type { EventDraft } from '../../../events/types.js'
-import { deriveAssignmentReview } from './review.js'
-import type { AssignmentPrintView, BoardView, FamilyView, RoomView } from './types.js'
-import { BuildingSection } from './assignment-board/building-section.js'
-import { FixedAssignmentDialog } from './assignment-board/fixed-dialog.js'
+import { deriveAssignmentReview } from './assignment-board/review.js'
+import type { AssignmentPrintView, BoardView, FamilyView, RoomView } from './assignment-board/types.js'
+import { BuildingSection } from '../components/assignment-board/building-section.js'
+import { FixedAssignmentDialog } from '../components/assignment-board/fixed-dialog.js'
 import {
   FamilyOverviewRow,
   OverviewList,
   OverviewSuccess,
   RoomOverviewRow,
-} from './assignment-board/overview.js'
-import { AssignmentPrintLayout } from './assignment-board/print-layout.js'
-import { ScreenFrame } from './components.js'
+} from '../components/assignment-board/overview.js'
+import { AssignmentPrintLayout } from '../components/assignment-board/print-layout.js'
+import { ScreenFrame } from '../components/assignment-board/surface.js'
 import { OrganiserSectionNavigation } from '../../../app/organiser/components/section-navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 

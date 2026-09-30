@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from '../../../components/shared/ui/button.js'
 import { SlotDayGroup, SpaceRow, SpaceSlotToggle } from './resources.js'
-import { fullWorkshopSlots, fullWorkshopSpaces } from './story-fixtures.js'
+import { fullWorkshopSlots, fullWorkshopSpaces } from '../../../stories/workshop-fixtures.js'
 
 const meta = {
   title: 'Components/Organiser/Workshop/Resources',

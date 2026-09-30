@@ -4,7 +4,7 @@ import {
   organiserAssignmentFixedFixtureState,
 } from '../../../app/stories/organiser-fixtures.js'
 import { AssignmentBoard, AssignmentBoardScreen } from './assignment-board.js'
-import type { AssignmentPrintView, BoardView } from './types.js'
+import type { AssignmentPrintView, BoardView } from './assignment-board/types.js'
 
 const meta = {
   title: 'Screens/Organiser/Assignment board',

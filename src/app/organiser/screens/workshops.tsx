@@ -26,9 +26,9 @@ import {
   WorkshopScreenHeader,
   WorkshopSectionHeader,
   WorkshopStatsStrip,
-} from '../components/workshop/shared.js'
-import { WorkshopSummaryRow } from '../components/workshop/authoring.js'
-import { ProgrammeGrid, UnplacedWorkshopRow } from '../components/workshop/programme.js'
+} from '../../components/shared/workshop/shared.js'
+import { WorkshopSummaryRow } from '../../../modules/official-workshops/app/components/authoring.js'
+import { ProgrammeGrid, UnplacedWorkshopRow } from '../../../modules/workshop-scheduling/app/components/programme.js'
 import {
   SlotDayGroup,
   SpaceRow,

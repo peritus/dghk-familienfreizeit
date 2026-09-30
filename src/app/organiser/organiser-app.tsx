@@ -20,7 +20,7 @@ import { Dashboard } from './screens/dashboard.js'
 import { Families } from './screens/families.js'
 import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
-import { AssignmentBoardScreen } from '../../modules/room-assignment/app/assignment-board.js'
+import { AssignmentBoardScreen } from '../../modules/room-assignment/app/screens/assignment-board.js'
 import {
   familyIdFromRouteSegment,
   organiserPaths,

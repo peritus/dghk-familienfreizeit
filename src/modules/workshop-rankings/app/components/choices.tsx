@@ -4,7 +4,7 @@ import {
   WorkshopResponsiveCollection,
   WorkshopStatsStrip,
   WorkshopStatusBadge,
-} from './shared.js'
+} from '../../../../app/components/shared/workshop/shared.js'
 
 export type ChoiceAnswerView = {
   id: string

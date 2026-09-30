@@ -8,7 +8,7 @@ import { organiserWorkshopFixtureState } from '../../src/app/stories/organiser-f
 import {
   fullWorkshopCatalogue,
   fullWorkshopRows,
-} from '../../src/app/organiser/components/workshop/story-fixtures.js'
+} from '../../src/app/stories/workshop-fixtures.js'
 
 test('the workshop screen fixture contains a derived multi-state catalogue', () => {
   const world = deriveOrganiserWorld(organiserWorkshopFixtureState, activeProfile.validation_view)
