@@ -41,6 +41,9 @@ function AccommodationRedirect() {
 const Workshops = lazy(() =>
   import('./screens/workshops.js').then((module) => ({ default: module.Workshops })),
 )
+const WorkshopExternalLeaders = lazy(() =>
+  import('./screens/workshops.js').then((module) => ({ default: module.WorkshopExternalLeaders })),
+)
 const WorkshopProgramme = lazy(() =>
   import('./screens/workshops.js').then((module) => ({ default: module.WorkshopProgramme })),
 )
@@ -288,6 +291,11 @@ export default function OrganiserApp() {
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshops') ? (
               <Route path={organiserRoutePaths.workshops}>
                 <Workshops />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-external-leaders') ? (
+              <Route path={organiserRoutePaths.workshop_external_leaders}>
+                <WorkshopExternalLeaders />
               </Route>
             ) : null}
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-programme') ? (

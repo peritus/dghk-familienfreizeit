@@ -29,6 +29,7 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/accommodation/assignment',
     '/organiser/workshops/spaces',
     '/organiser/workshops',
+    '/organiser/workshops/externe',
     '/organiser/workshops/programme',
     '/organiser/workshops/slots',
   ])
