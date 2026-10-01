@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useLocation } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import type { KernelWorld } from '../../../events/fold.js'
 import type { EventDraft } from '../../../events/types.js'
@@ -12,7 +13,9 @@ import { buildSolverInput, composeSolverContributions, solve } from '../../../so
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { Button } from '../../components/shared/ui/button.js'
 import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
-import { OrganiserLink } from '../../components/application/organiser-link.js'
+import { SegmentedControl } from '../../components/shared/ui/segmented-control.js'
+import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
+import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
@@ -22,7 +25,6 @@ import {
 } from '../components/workshop/editors.js'
 import {
   WorkshopEmptyState,
-  WorkshopLifecycleTimeline,
   WorkshopPhaseNotice,
   WorkshopList,
   WorkshopScreenHeader,
@@ -436,6 +438,24 @@ export function WorkshopLeaders() {
   )
 }
 
+function WorkshopResourceNavigation({ value }: { value: 'spaces' | 'slots' }) {
+  const [, setLocation] = useLocation()
+  return (
+    <TertiaryNavigation
+      aria_label="Räume und Slots"
+      value={value}
+      onChange={(next) =>
+        setLocation(
+          next === 'spaces' ? organiserPaths.workshop_spaces() : organiserPaths.workshop_slots(),
+        )
+      }
+      items={[
+        { value: 'spaces', label: 'Räume' },
+        { value: 'slots', label: 'Slots' },
+      ]}
+    />
+  )
+}
 export function Workshops() {
   useDocumentTitle('Workshops · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
@@ -446,6 +466,7 @@ export function Workshops() {
   const [editor, setEditor] = useState<'new' | string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [audienceFilter, setAudienceFilter] = useState<'all' | 'children' | 'adults'>('all')
+  const [view, setView] = useState<'workshops' | 'leaders' | 'external'>('workshops')
   const people = world!.persons
     .map((person) => {
       const labels = world!.labels_by_entity[person.id] ?? []
@@ -476,6 +497,16 @@ export function Workshops() {
   const activeWorkshops = summary.workshops.filter(
     (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
   )
+  const internalLeaders = people
+    .map((person) => ({
+      ...person,
+      workshops: summary.workshops.filter((workshop) => workshop.leader_ids.includes(person.id)),
+    }))
+    .filter((person) => person.workshops.length > 0)
+  const externalLeaders = summary.external_leaders.map((leader) => ({
+    ...leader,
+    workshops: summary.workshops.filter((workshop) => workshop.leader_ids.includes(leader.id)),
+  }))
   const saveWorkshop = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -541,7 +572,8 @@ export function Workshops() {
           </Button>
         }
       />
-      <WorkshopLifecycleTimeline
+      <WorkflowStepper
+        aria_label="Ablauf der Workshopwahl"
         steps={[
           {
             id: 'authoring',
@@ -638,81 +670,141 @@ export function Workshops() {
           { value: summary.external_leaders.length, label: 'externe Leitungen' },
         ]}
       />
-      <section aria-label="Aktive Workshops" className="space-y-3">
-        <WorkshopSectionHeader
-          title="Aktive Workshops"
-          action={
-            <label className="grid gap-1 font-bold">
-              Zielgruppe
-              <select
-                value={audienceFilter}
-                onChange={(event) =>
-                  setAudienceFilter(event.target.value as 'all' | 'children' | 'adults')
-                }
-                className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
-              >
-                <option value="all">Alle</option>
-                <option value="children">Kinder</option>
-                <option value="adults">Erwachsene</option>
-              </select>
-            </label>
-          }
-        />
-        {activeWorkshops.length ? (
-          <div className="divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black bg-white">
-            {activeWorkshops.map((workshop) => (
-              <WorkshopSummaryRow
-                key={workshop.id}
-                workshop={{
-                  id: workshop.id,
-                  title: workshop.title,
-                  description: workshop.description,
-                  audience: audienceLabel(workshop.audience),
-                  age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
-                  capacity: workshop.capacity,
-                  participation_mode: participationLabel(workshop.mode),
-                  leaders: workshop.leader_ids.map(
-                    (leaderId) => leaderNames.get(leaderId) ?? leaderId,
-                  ),
-                  requirement: workshop.needs.join(', ') || undefined,
-                  demand:
-                    workshop.mode === 'assigned'
-                      ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
-                          plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
-                        }`
-                      : workshop.mode === 'sign-up'
-                        ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
-                        : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
-                  placement: {
-                    label:
-                      placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
-                      'Noch nicht eingeplant',
-                    tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
-                  },
-                  attention: workshop.leader_ids.length ? undefined : 'Leitung fehlt',
-                }}
-                action={
-                  <Button
-                    size="sm"
-                    variant="neutral"
-                    onClick={() => {
-                      setEditor(workshop.id)
-                      setError(null)
-                    }}
-                  >
-                    Bearbeiten
-                    <span className="sr-only">: {workshop.title}</span>
-                  </Button>
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <WorkshopEmptyState title="Keine aktiven Workshops">
-            Noch keine Workshops. Lege den ersten Entwurf an.
-          </WorkshopEmptyState>
-        )}
-      </section>
+      <TertiaryNavigation
+        aria_label="Workshopansichten"
+        value={view}
+        onChange={(next) => setView(next as 'workshops' | 'leaders' | 'external')}
+        items={[
+          { value: 'workshops', label: 'Workshops' },
+          { value: 'leaders', label: 'Leitungen' },
+          { value: 'external', label: 'Extern' },
+        ]}
+        controls={
+          <SegmentedControl
+            label="Gruppe"
+            value={audienceFilter}
+            onChange={setAudienceFilter}
+            options={[
+              { value: 'all', label: 'Alle' },
+              { value: 'children', label: 'Kinder' },
+              { value: 'adults', label: 'Erwachsene' },
+            ]}
+          />
+        }
+      />
+      {view === 'workshops' ? (
+        <section aria-label="Aktive Workshops" className="space-y-3">
+          <WorkshopSectionHeader title="Aktive Workshops" />
+          {activeWorkshops.length ? (
+            <div className="divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black bg-white">
+              {activeWorkshops.map((workshop) => (
+                <WorkshopSummaryRow
+                  key={workshop.id}
+                  workshop={{
+                    id: workshop.id,
+                    title: workshop.title,
+                    description: workshop.description,
+                    audience: audienceLabel(workshop.audience),
+                    age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+                    capacity: workshop.capacity,
+                    participation_mode: participationLabel(workshop.mode),
+                    leaders: workshop.leader_ids.map(
+                      (leaderId) => leaderNames.get(leaderId) ?? leaderId,
+                    ),
+                    requirement: workshop.needs.join(', ') || undefined,
+                    demand:
+                      workshop.mode === 'assigned'
+                        ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
+                            plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
+                          }`
+                        : workshop.mode === 'sign-up'
+                          ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
+                          : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
+                    placement: {
+                      label:
+                        placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
+                        'Noch nicht eingeplant',
+                      tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
+                    },
+                    attention: workshop.leader_ids.length ? undefined : 'Leitung fehlt',
+                  }}
+                  action={
+                    <Button
+                      size="sm"
+                      variant="neutral"
+                      onClick={() => {
+                        setEditor(workshop.id)
+                        setError(null)
+                      }}
+                    >
+                      Bearbeiten
+                      <span className="sr-only">: {workshop.title}</span>
+                    </Button>
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <WorkshopEmptyState title="Keine aktiven Workshops">
+              Noch keine Workshops. Lege den ersten Entwurf an.
+            </WorkshopEmptyState>
+          )}
+        </section>
+      ) : null}
+      {view === 'leaders' ? (
+        <section aria-label="Interne Leitungen" className="space-y-3">
+          <WorkshopSectionHeader
+            title="Leitungen"
+            description="Personen mit mindestens einem Workshop."
+          />
+          {internalLeaders.length ? (
+            <ul className="divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black bg-white">
+              {internalLeaders.map((leader) => (
+                <li key={leader.id} className="p-4">
+                  <strong>{leader.name}</strong>
+                  <p className="mt-1 text-sm text-muted">
+                    Leitet: {leader.workshops.map((workshop) => workshop.title).join(', ')}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <WorkshopEmptyState title="Keine internen Leitungen">
+              Weise einer Person in einem Workshop eine Leitung zu.
+            </WorkshopEmptyState>
+          )}
+        </section>
+      ) : null}
+      {view === 'external' ? (
+        <section aria-label="Externe Leitungen" className="space-y-3">
+          <WorkshopSectionHeader title="Externe Leitungen" />
+          {externalLeaders.length ? (
+            <ul className="grid gap-3">
+              {externalLeaders.map((leader) => (
+                <li key={leader.id} className="rounded-base border-2 border-black bg-white p-4">
+                  <strong>{leader.name}</strong>
+                  {leader.phone ? (
+                    <span className="ml-2 text-sm text-muted">· {leader.phone}</span>
+                  ) : null}
+                  <p className="mt-1 text-sm text-muted">
+                    Leitet:{' '}
+                    {leader.workshops.length
+                      ? leader.workshops.map((workshop) => workshop.title).join(', ')
+                      : 'noch keinen Workshop'}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    Verfügbar: {leader.availability.length ? leader.availability.join(', ') : '—'}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <WorkshopEmptyState title="Keine externen Leitungen">
+              Externe Leitungen werden bei der Workshopplanung ergänzt.
+            </WorkshopEmptyState>
+          )}
+        </section>
+      ) : null}
       {summary.cancelled.length ? (
         <p className="text-sm text-muted">
           {summary.cancelled.length} abgesagte Workshops bleiben in der Historie sichtbar.
@@ -902,6 +994,7 @@ export function WorkshopSlots() {
         title="Slots"
         description="Event-backed Zeitfenster für das Programm."
       />
+      <WorkshopResourceNavigation value="slots" />
       {slotError ? (
         <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
           {slotError}
@@ -1025,15 +1118,8 @@ export function WorkshopSpaces() {
       <WorkshopScreenHeader
         title="Räume und Slots"
         description="Physische Workshopräume, Kapazitäten und schedule-aware Verfügbarkeit."
-        action={
-          <OrganiserLink
-            href={organiserPaths.workshop_slots()}
-            className="min-h-11 rounded-base border-2 border-black bg-white px-4 py-2 font-bold hover:bg-main"
-          >
-            Slots verwalten
-          </OrganiserLink>
-        }
       />
+      <WorkshopResourceNavigation value="spaces" />
       <SpaceEditorForm
         key={editingSpace?.id ?? 'new-space'}
         on_submit={add}
