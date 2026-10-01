@@ -13,7 +13,9 @@ The route table is:
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/accommodation/assignment` | Read-only deterministic assignment review with browser-printable assignment output |
 | `/organiser/workshops` | Workshop overview and authoring |
-| `/organiser/workshops/programme` | Workshop placements and unscheduled outcomes |
+| `/organiser/workshops/programme` | Whole programme: workshop placements by slot and room |
+| `/organiser/workshops/programme/unplaced` | Workshops without a feasible placement and their reasons |
+| `/organiser/workshops/programme/overlaps` | Ranked workshop pairs that occupy the same slot |
 | `/organiser/workshops/slots` | Event-backed workshop slots |
 | `/organiser/workshops/spaces` | Physical workshop spaces and per-slot availability context |
 | Other paths | Not-found message and a link back to the start |
@@ -33,8 +35,12 @@ overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Lei
 Moving between workshop routes preserves staged events because navigation does not
 create another state boundary. The overview may filter by configured audience; the
 space inventory remains physical inventory with schedule-aware slot context.
-The programme view exposes one derived placement per workshop or an explainable
-unscheduled result. Browser print is the only print path; no workshop screen adds
+Programme review is split across three URLs with page-local tabs for **Ganzes
+Programm**, **Nicht eingeplant**, and **Überschneidungen**. All three preserve the
+same organiser and workshop navigation context. The whole-programme view exposes
+one derived placement per workshop; the unscheduled view gives each missing
+placement an explainable reason; and the overlap view shows people whose ranked
+choices share a slot. Browser print is the only print path; no workshop screen adds
 an application print or export control.
 
 All organiser screens use the shared `OrganiserScreenHeader` for their primary

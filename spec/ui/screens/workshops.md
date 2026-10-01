@@ -10,7 +10,6 @@ remain separate URLs with page-local workshop navigation:
 | Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
 | Externe Leitungen | `/organiser/workshops/externe` | create and edit external leaders, their organiser-only contact metadata, linked workshops, and slot availability |
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
-| Programme | `/organiser/workshops/programme` | one placement per workshop, schedule conflicts, and unscheduled cases |
 | Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
 
 The section navigation contains only **Workshops** and **Räume und Slots**. The
@@ -66,12 +65,7 @@ Participation modes are profile-configured:
   the separate family privacy projection; and
 - self-organized: deferred and absent from the active profile.
 
-## Programme and review behavior
-
-The programme view displays each workshop's one derived placement, consisting of
-one slot and one space. A workshop without a feasible placement remains visible
-with a blocking reason. Placement decisions stay on this view; attendance is
-not assigned by dragging rows in the UI.
+## Outstanding programme and review behavior
 
 The automatic scheduler is deterministic and explainable. It consumes resolved
 multi-value needs/provides capabilities, space-slot blocks, availability,
