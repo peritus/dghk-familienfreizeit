@@ -6,6 +6,7 @@ import { useOrganiser } from '../context.js'
 import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
+import { CollectionCreateAction } from '../components/collection-create-action.js'
 
 function id(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -17,6 +18,7 @@ export function Families() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [inviteError, setInviteError] = useState<string | null>(null)
+  const [addingFamily, setAddingFamily] = useState(false)
   const rows = familyRows(world!)
   function stage(events: readonly EventDraft[]) {
     stageEvents(events)
@@ -52,11 +54,61 @@ export function Families() {
     ])
     setDisplayName('')
     setEmail('')
+    setAddingFamily(false)
   }
 
   return (
     <div className="space-y-6">
-      <OrganiserScreenHeader title={`Familien · ${rows.length}`} />
+      <OrganiserScreenHeader
+        title={`Familien · ${rows.length}`}
+        actions={
+          <CollectionCreateAction
+            label="Familie einladen"
+            title="Familie einladen"
+            description="Lege die Familie mit ihrem Namen und ihrer E-Mail-Adresse an."
+            open={addingFamily}
+            on_open_change={(open) => {
+              setAddingFamily(open)
+              if (!open) setInviteError(null)
+            }}
+            error={inviteError}
+          >
+            <form className="mt-5 grid gap-4" noValidate onSubmit={invite}>
+              <label className="grid gap-1">
+                <span className="font-bold">Familienname</span>
+                <input
+                  required
+                  value={displayName}
+                  onChange={(event) => {
+                    setDisplayName(event.target.value)
+                    setInviteError(null)
+                  }}
+                  className="min-h-11 rounded-base border-2 border-black px-3"
+                />
+              </label>
+              <label className="grid gap-1">
+                <span className="font-bold">E-Mail</span>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    setInviteError(null)
+                  }}
+                  className="min-h-11 rounded-base border-2 border-black px-3"
+                />
+              </label>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="neutral" onClick={() => setAddingFamily(false)}>
+                  Abbrechen
+                </Button>
+                <Button type="submit">Familie einladen</Button>
+              </div>
+            </form>
+          </CollectionCreateAction>
+        }
+      />
       <div className="rounded-base border-2 border-black bg-white shadow-shadow">
         <form id="invite-family-form" noValidate onSubmit={invite} />
         <table className="w-full text-left max-md:block">
@@ -78,7 +130,7 @@ export function Families() {
             </tr>
           </thead>
           <tbody className="max-md:block">
-            <tr className="border-b-2 border-black bg-main/15 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+            <tr className="hidden">
               <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
                 <label htmlFor="invite-family-name" className="grid gap-1">
                   <span className="md:sr-only">Name</span>

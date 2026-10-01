@@ -11,6 +11,7 @@ import { organiserPaths } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
+import { CollectionCreateAction } from '../components/collection-create-action.js'
 
 function makePersonId(givenName: string): string {
   const random = globalThis.crypto?.randomUUID?.() ?? `${globalThis.performance?.now() ?? 0}`
@@ -169,6 +170,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
   const [givenName, setGivenName] = useState('')
   const [familyName, setFamilyName] = useState('')
   const [role, setRole] = useState('adult')
+  const [addingPerson, setAddingPerson] = useState(false)
   const currentDisplayName = family
     ? (labelValue(world!.labels_by_entity[family.family.id] ?? [], 'display-name') ??
       family.family.id)
@@ -217,6 +219,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
     ])
     setGivenName('')
     setFamilyName('')
+    setAddingPerson(false)
   }
 
   function renameFamily(event: FormEvent<HTMLFormElement>) {
@@ -284,7 +287,39 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
       </Card>
       <Card className="bg-white">
         <CardHeader>
-          <h3 className="text-xl">Personen · {family.persons.length}</h3>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h3 className="text-xl">Personen · {family.persons.length}</h3>
+            <CollectionCreateAction
+              label="Person hinzufügen"
+              title="Person hinzufügen"
+              description="Lege eine Person in dieser Familie an."
+              open={addingPerson}
+              on_open_change={setAddingPerson}
+            >
+              <form className="mt-5 grid gap-4" onSubmit={addPerson}>
+                <label className="grid gap-1">
+                  <span className="font-bold">Vorname</span>
+                  <input required value={givenName} onChange={(event) => setGivenName(event.target.value)} className="min-h-11 rounded-base border-2 border-black px-3" />
+                </label>
+                <label className="grid gap-1">
+                  <span className="font-bold">Nachname</span>
+                  <input required value={familyName} onChange={(event) => setFamilyName(event.target.value)} className="min-h-11 rounded-base border-2 border-black px-3" />
+                </label>
+                <label className="grid gap-1">
+                  <span className="font-bold">Rolle</span>
+                  <select value={role} onChange={(event) => setRole(event.target.value)} className="min-h-11 rounded-base border-2 border-black px-3">
+                    <option value="adult">Erwachsene(r)</option>
+                    <option value="child">Kind</option>
+                    <option value="infant">Baby</option>
+                  </select>
+                </label>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="neutral" onClick={() => setAddingPerson(false)}>Abbrechen</Button>
+                  <Button type="submit">Person hinzufügen</Button>
+                </div>
+              </form>
+            </CollectionCreateAction>
+          </div>
         </CardHeader>
         <CardContent>
           <table className="w-full text-left max-md:block">
@@ -306,7 +341,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
               </tr>
             </thead>
             <tbody className="max-md:block">
-              <tr className="border-b-2 border-black bg-main/15 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+              <tr className="hidden">
                 <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
                   <form id="add-person-form" onSubmit={addPerson} />
                   <label htmlFor="add-person-given-name" className="grid gap-1">
