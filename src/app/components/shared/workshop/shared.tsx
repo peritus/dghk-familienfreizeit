@@ -3,20 +3,11 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert.js'
 import { Badge } from '../ui/badge.js'
 import { Button } from '../ui/button.js'
 import { Card, CardContent } from '../ui/card.js'
-import { SegmentedControl } from '../ui/segmented-control.js'
 import { StatsStrip, type StatsStripItem } from '../ui/stats-strip.js'
 import { SuccessState } from '../ui/success-state.js'
-import { TabPanel, Tabs, type TabOption } from '../ui/tabs.js'
 import { cn } from '../../../lib/utils.js'
 
 export type WorkshopStatusTone = 'neutral' | 'success' | 'attention' | 'danger' | 'draft' | 'held'
-
-export type WorkshopLifecycleStep = {
-  id: string
-  label: string
-  description?: string
-  state: 'complete' | 'current' | 'upcoming'
-}
 
 export function WorkshopScreenHeader({
   eyebrow,
@@ -62,97 +53,6 @@ export function WorkshopSectionHeader({
       </div>
       {action ? <div className="flex flex-wrap gap-2">{action}</div> : null}
     </div>
-  )
-}
-
-export function WorkshopSectionTabs({
-  label,
-  value,
-  options,
-  onChange,
-  children,
-}: {
-  label: string
-  value: string
-  options: readonly TabOption[]
-  onChange: (value: string) => void
-  children?: ReactNode
-}) {
-  return (
-    <div className="grid gap-4">
-      <Tabs label={label} value={value} options={options} onChange={onChange} />
-      {children}
-    </div>
-  )
-}
-
-export { TabPanel }
-
-export function WorkshopGroupFilter({
-  value,
-  onChange,
-  label = 'Gruppe',
-}: {
-  value: 'all' | 'kids' | 'adults'
-  onChange: (value: 'all' | 'kids' | 'adults') => void
-  label?: string
-}) {
-  return (
-    <SegmentedControl
-      label={label}
-      value={value}
-      onChange={onChange}
-      options={[
-        { value: 'all', label: 'Alle' },
-        { value: 'kids', label: 'Kinder' },
-        { value: 'adults', label: 'Erwachsene' },
-      ]}
-    />
-  )
-}
-
-export function WorkshopLifecycleTimeline({
-  steps,
-  next_action: nextAction,
-}: {
-  steps: readonly WorkshopLifecycleStep[]
-  next_action?: ReactNode
-}) {
-  return (
-    <section aria-label="Ablauf der Workshopwahl" className="space-y-4">
-      <ol className="grid gap-3 sm:grid-cols-4">
-        {steps.map((step, index) => (
-          <li
-            key={step.id}
-            aria-current={step.state === 'current' ? 'step' : undefined}
-            className={cn(
-              'relative border-t-2 border-dashed border-muted pt-3 sm:border-t-0 sm:border-l-2 sm:pl-4',
-              step.state === 'complete' && 'border-black',
-            )}
-          >
-            <span
-              aria-hidden="true"
-              className={cn(
-                'mr-2 inline-flex size-8 items-center justify-center rounded-full border-2 border-black bg-background font-bold',
-                step.state === 'current' && 'bg-black text-white',
-                step.state === 'complete' && 'bg-white',
-              )}
-            >
-              {step.state === 'complete' ? '✓' : index + 1}
-            </span>
-            <span className="font-bold">{step.label}</span>
-            {step.description ? (
-              <span className="mt-1 block text-sm text-muted">{step.description}</span>
-            ) : null}
-          </li>
-        ))}
-      </ol>
-      {nextAction ? (
-        <div className="flex flex-wrap items-center gap-3 border-t-2 border-black pt-3">
-          {nextAction}
-        </div>
-      ) : null}
-    </section>
   )
 }
 

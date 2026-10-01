@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
+import { TertiaryNavigation } from '../../../components/shared/ui/tertiary-navigation.js'
 import {
   WorkshopDataTable,
   WorkshopListPicker,
   WorkshopPrintDocument,
   WorkshopResponsiveCollection,
-  WorkshopSectionTabs,
   WorkshopStatusBadge,
 } from '../../../components/shared/workshop/shared.js'
 
@@ -231,11 +231,11 @@ export function WorkshopListKinds({
   onChange: (value: 'workshop' | 'person' | 'family' | 'room') => void
 }) {
   return (
-    <WorkshopSectionTabs
-      label="Art der Liste"
+    <TertiaryNavigation
+      aria_label="Art der Liste"
       value={value}
       onChange={(next) => onChange(next as 'workshop' | 'person' | 'family' | 'room')}
-      options={[
+      items={[
         { value: 'workshop', label: 'Workshop' },
         { value: 'person', label: 'Person' },
         { value: 'family', label: 'Familie' },

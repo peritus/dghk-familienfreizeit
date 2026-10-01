@@ -5,6 +5,7 @@ import { Card, CardContent } from '../../components/shared/ui/card'
 import { Button } from '../../components/shared/ui/button'
 import { Badge } from '../../components/shared/ui/badge.js'
 import { SegmentedControl } from '../../components/shared/ui/segmented-control.js'
+import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import { StatsStrip } from '../../components/shared/ui/stats-strip.js'
 import { Tag } from '../../components/shared/ui/tag.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
@@ -224,6 +225,31 @@ export function Inventory() {
         items={[
           { href: organiserPaths.inventory(), label: 'Unterkunft' },
           { href: organiserPaths.assignment_board(), label: 'Belegung' },
+        ]}
+      />
+      <WorkflowStepper
+        aria_label="Ablauf der Unterbringung"
+        steps={[
+          {
+            id: 'inventory',
+            label: 'Unterkunft anlegen',
+            description: hasBuildings
+              ? `${summary.buildings.length} ${summary.buildings.length === 1 ? 'Gebäude' : 'Gebäude'} erfasst`
+              : 'Gebäude, Zimmer und Schlafplätze erfassen',
+            state: hasBuildings ? 'complete' : 'current',
+          },
+          {
+            id: 'review',
+            label: 'Belegung prüfen',
+            description: 'Bedarf und passende Zimmer kontrollieren',
+            state: hasBuildings ? 'current' : 'upcoming',
+          },
+          {
+            id: 'fixed',
+            label: 'Festgelegt',
+            description: 'Plan kommunizieren',
+            state: 'upcoming',
+          },
         ]}
       />
       <OrganiserScreenHeader

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from '../ui/button.js'
+import { SegmentedControl } from '../ui/segmented-control.js'
+import { TertiaryNavigation } from '../ui/tertiary-navigation.js'
+import { WorkflowStepper } from '../ui/workflow-stepper.js'
 import {
   WorkshopDataTable,
   WorkshopEmptyState,
   WorkshopErrorState,
-  WorkshopGroupFilter,
-  WorkshopLifecycleTimeline,
   WorkshopListPicker,
   WorkshopLoadingState,
   WorkshopPhaseNotice,
@@ -15,7 +16,6 @@ import {
   WorkshopResponsiveCollection,
   WorkshopScreenHeader,
   WorkshopSectionHeader,
-  WorkshopSectionTabs,
   WorkshopStatsStrip,
   WorkshopStatusBadge,
 } from './shared.js'
@@ -48,7 +48,8 @@ export const WorkspaceChrome: Story = {
           description="Anlegen, prüfen und den aktuellen Plan nachvollziehbar machen."
           action={<Button>Workshop hinzufügen</Button>}
         />
-        <WorkshopLifecycleTimeline
+        <WorkflowStepper
+          aria_label="Ablauf der Workshopwahl"
           steps={[
             { id: 'create', label: 'Workshops anlegen', state: 'complete' },
             { id: 'choice', label: 'Wahl offen', state: 'current' },
@@ -65,21 +66,32 @@ export const WorkspaceChrome: Story = {
         <WorkshopPhaseNotice label="Vorläufig" tone="attention">
           Die Berechnung ändert sich mit jeder Antwort und jeder Änderung.
         </WorkshopPhaseNotice>
-        <WorkshopSectionTabs
-          label="Workshopbereiche"
+        <TertiaryNavigation
+          aria_label="Workshopbereiche"
           value={tab}
           onChange={setTab}
-          options={[
+          items={[
             { value: 'overview', label: 'Workshops' },
             { value: 'leaders', label: 'Leitungen' },
             { value: 'external', label: 'Extern' },
           ]}
+          controls={
+            <SegmentedControl
+              label="Gruppe"
+              value={group}
+              onChange={setGroup}
+              options={[
+                { value: 'all', label: 'Alle' },
+                { value: 'kids', label: 'Kinder' },
+                { value: 'adults', label: 'Erwachsene' },
+              ]}
+            />
+          }
         />
         <WorkshopSectionHeader
           title="Gefilterte Übersicht"
           description="Kleine, sichtbare Auswahlgruppen bleiben vergleichbar."
         />
-        <WorkshopGroupFilter value={group} onChange={setGroup} />
         <WorkshopPropertyTags items={['Kinder', '5–14 Jahre', 'Zugewiesen']} />
         <div className="flex flex-wrap gap-2">
           <WorkshopStatusBadge tone="attention">Nicht eingeplant</WorkshopStatusBadge>
