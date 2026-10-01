@@ -16,6 +16,9 @@ export type WorkshopRanking = { person_id: string; choices: readonly WorkshopCho
 
 export type WorkshopDemand = Readonly<Record<string, number>>
 
+/** Read-only ranked choices for organiser projections such as programme conflict review. */
+export type WorkshopRankingsSummary = { rankings: readonly WorkshopRanking[] }
+
 // Accepts either the object form { workshop_id, rank } or a compact
 // "wks_id:rank" string (e.g. from a KDL fixture, where a LabelSet value
 // can only be a scalar) — the compact form is transformed into the object
@@ -126,8 +129,20 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
     family_controls: [{ key: params.ranking_trait, control: 'ranking' }],
     solver_input: [{ id: 'workshop-rankings', build: (world) => buildRankings(world) }],
     stages: [demandStage()],
+    world_summaries: [
+      {
+        id: 'workshop-rankings',
+        summarize: (world) => ({ rankings: buildRankings(world) }),
+      },
+    ],
   }),
 })
+
+export function workshopRankingsWorld(world: KernelWorld): WorkshopRankingsSummary {
+  const value = world.summaries['workshop-rankings']
+  if (!value) throw new Error('workshop-rankings is not selected in this profile')
+  return value as WorkshopRankingsSummary
+}
 
 export function workshopRankingsFromWorld(
   world: KernelWorld,
