@@ -19,6 +19,7 @@ export const organiserRoutePaths = {
   inventory: '/accommodation/inventory',
   assignment_board: '/accommodation/assignment',
   workshops: '/workshops',
+  workshop_leaders: '/workshops/leitungen',
   workshop_external_leaders: '/workshops/externe',
   workshop_programme: '/workshops/programme',
   workshop_slots: '/workshops/slots',
@@ -152,6 +153,7 @@ export const organiserPaths = {
   inventory: (): OrganiserPath => nestedPath(organiserRoutePaths.inventory),
   assignment_board: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_board),
   workshops: (): OrganiserPath => nestedPath(organiserRoutePaths.workshops),
+  workshop_leaders: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_leaders),
   workshop_external_leaders: (): OrganiserPath =>
     nestedPath(organiserRoutePaths.workshop_external_leaders),
   workshop_programme: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_programme),
@@ -170,6 +172,8 @@ export const organiserUrls = {
   assignment_board: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.assignment_board()}`),
   workshops: (): OrganiserUrl => publicUrl(`${organiserBasePath}${organiserPaths.workshops()}`),
+  workshop_leaders: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_leaders()}`),
   workshop_external_leaders: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_external_leaders()}`),
   workshop_programme: (): OrganiserUrl =>

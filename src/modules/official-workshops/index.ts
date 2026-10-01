@@ -480,6 +480,12 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
         audience: 'organiser',
       },
       {
+        id: 'organiser-workshop-leaders',
+        route: '/organiser/workshops/leitungen',
+        label: 'Leitungen',
+        audience: 'organiser',
+      },
+      {
         id: 'organiser-workshop-external-leaders',
         route: '/organiser/workshops/externe',
         label: 'Externe Leitungen',
