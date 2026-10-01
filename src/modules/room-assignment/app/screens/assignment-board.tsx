@@ -20,7 +20,7 @@ import {
 } from '../components/assignment-board/overview.js'
 import { AssignmentPrintLayout } from '../components/assignment-board/print-layout.js'
 import { ScreenFrame } from '../components/assignment-board/surface.js'
-import { OrganiserSectionNavigation } from '../../../../app/organiser/components/section-navigation.js'
+import { SecondaryNavigation } from '../../../../app/organiser/components/navigation.js'
 import { organiserPaths } from '../../../../organiser/routes.js'
 
 function event(type: string, payload: EventDraft['payload']): EventDraft {
@@ -212,7 +212,7 @@ export function AssignmentBoardScreen() {
   const review = deriveAssignmentReview(world, previousPlan ?? null)
   return (
     <>
-      <OrganiserSectionNavigation
+      <SecondaryNavigation
         aria_label="Unterbringungsbereiche"
         items={[
           { href: organiserPaths.inventory(), label: 'Unterkunft' },

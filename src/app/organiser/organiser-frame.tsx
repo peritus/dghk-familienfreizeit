@@ -1,15 +1,10 @@
 import type { ReactNode } from 'react'
-import { useLocation } from 'wouter'
 import { useOrganiser } from './context.js'
 import { OrganiserLink, organiserHomePath } from '../components/application/organiser-link.js'
+import { PrimaryNavigation } from './components/navigation.js'
 import { SaveStatus } from './save-status.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
-import {
-  isOrganiserPathActive,
-  organiserPaths,
-  organiserRoutePaths,
-} from '../../organiser/routes.js'
-import { cn } from '../lib/utils.js'
+import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
 
 const primaryNavItems = [
   {
@@ -68,7 +63,6 @@ export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
 
 export function OrganiserFrame({ children }: { children: ReactNode }) {
   const { state } = useOrganiser()
-  const [location] = useLocation()
 
   return (
     <div className="min-h-dvh">
@@ -84,26 +78,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
             <p className="text-sm text-muted">Organisationsteam</p>
           </div>
           <div className="order-last w-full sm:order-none sm:w-auto">
-            <nav aria-label="Hauptnavigation" className="flex flex-wrap gap-2">
-              {primaryNavItems.map((item) => {
-                const active = isOrganiserPathActive(location, item.match, item.include_descendants)
-                return (
-                  <OrganiserLink
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'min-h-11 rounded-base border-2 px-4 py-2 font-bold',
-                      active
-                        ? 'border-black bg-black text-white'
-                        : 'border-transparent hover:border-black',
-                    )}
-                  >
-                    {item.label}
-                  </OrganiserLink>
-                )
-              })}
-            </nav>
+            <PrimaryNavigation items={primaryNavItems} />
           </div>
           <div className="ml-auto">
             <SaveStatus />

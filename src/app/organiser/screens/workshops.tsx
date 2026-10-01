@@ -44,7 +44,7 @@ import {
   type WorkshopSlotView,
   type WorkshopSpaceView,
 } from '../components/workshop/resources.js'
-import { OrganiserSectionNavigation } from '../components/section-navigation.js'
+import { SecondaryNavigation } from '../components/navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
 import {
@@ -191,7 +191,7 @@ function slotLabel(startsAt: string, endsAt?: string): string {
 
 function WorkshopNavigation() {
   return (
-    <OrganiserSectionNavigation
+    <SecondaryNavigation
       aria_label="Workshopbereiche"
       items={[
         { href: organiserPaths.workshops(), label: 'Workshops' },

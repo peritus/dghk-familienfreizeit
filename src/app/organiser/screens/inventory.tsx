@@ -21,7 +21,7 @@ import {
 import type { EventDraft } from '../../../events/types.js'
 import type { Label } from '../../../events/fold.js'
 import { activeProfile } from '../../../config/index.js'
-import { OrganiserSectionNavigation } from '../components/section-navigation.js'
+import { SecondaryNavigation } from '../components/navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import {
   labelText,
@@ -219,7 +219,7 @@ export function Inventory() {
 
   return (
     <div className="space-y-8">
-      <OrganiserSectionNavigation
+      <SecondaryNavigation
         aria_label="Unterbringungsbereiche"
         items={[
           { href: organiserPaths.inventory(), label: 'Unterkunft' },
