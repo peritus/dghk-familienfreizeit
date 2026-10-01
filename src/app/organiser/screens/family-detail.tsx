@@ -299,22 +299,38 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
               <form className="mt-5 grid gap-4" onSubmit={addPerson}>
                 <label className="grid gap-1">
                   <span className="font-bold">Vorname</span>
-                  <input required value={givenName} onChange={(event) => setGivenName(event.target.value)} className="min-h-11 rounded-base border-2 border-black px-3" />
+                  <input
+                    required
+                    value={givenName}
+                    onChange={(event) => setGivenName(event.target.value)}
+                    className="min-h-11 rounded-base border-2 border-black px-3"
+                  />
                 </label>
                 <label className="grid gap-1">
                   <span className="font-bold">Nachname</span>
-                  <input required value={familyName} onChange={(event) => setFamilyName(event.target.value)} className="min-h-11 rounded-base border-2 border-black px-3" />
+                  <input
+                    required
+                    value={familyName}
+                    onChange={(event) => setFamilyName(event.target.value)}
+                    className="min-h-11 rounded-base border-2 border-black px-3"
+                  />
                 </label>
                 <label className="grid gap-1">
                   <span className="font-bold">Rolle</span>
-                  <select value={role} onChange={(event) => setRole(event.target.value)} className="min-h-11 rounded-base border-2 border-black px-3">
+                  <select
+                    value={role}
+                    onChange={(event) => setRole(event.target.value)}
+                    className="min-h-11 rounded-base border-2 border-black px-3"
+                  >
                     <option value="adult">Erwachsene(r)</option>
                     <option value="child">Kind</option>
                     <option value="infant">Baby</option>
                   </select>
                 </label>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="neutral" onClick={() => setAddingPerson(false)}>Abbrechen</Button>
+                  <Button type="button" variant="neutral" onClick={() => setAddingPerson(false)}>
+                    Abbrechen
+                  </Button>
                   <Button type="submit">Person hinzufügen</Button>
                 </div>
               </form>

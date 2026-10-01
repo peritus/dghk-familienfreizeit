@@ -193,6 +193,16 @@ For every current or future screen that creates or edits records in a table:
 - keep destructive actions text-labelled or otherwise accessible, and require
   confirmation for consequential deletion.
 
+## Collection creation actions
+
+Every organiser collection creates an item through the shared
+`CollectionCreateAction`. Place its visible, explicitly labelled trigger in the
+collection's screen header or immediate parent-section header; it opens an
+accessible dialog with cancellation before the result-specific primary action.
+Use the same action in an empty state. Do not leave a creation form persistently
+visible in a populated collection. This applies to workshops, external leaders,
+workshop spaces, slots, families, people, buildings, rooms, and beds.
+
 When an implementation introduces a potentially reusable pattern, follow the
 general-rule promotion process in [AGENTS.md](../../AGENTS.md): name the
 candidate in the plan, obtain explicit user approval, and update this section

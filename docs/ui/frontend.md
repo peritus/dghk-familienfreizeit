@@ -65,12 +65,13 @@ saves them. Discarding drafts, or saving every pending draft, both exit drafting
 back to immediate mode -- there is no state where drafts are at zero and drafting mode
 stays on. Local events added during an in-flight request remain queued after the
 submitted prefix.
-The family invitation and people-management controls are integrated into their
-tables on wider screens. Each editable table puts its creation row first; the
-people table keeps **Speichern** and **Löschen** together in one action cell. At
-narrow widths the tables switch to labeled cards rather than requiring horizontal
-scrolling. These controls still stage the same ordinary event drafts through the
-shared local-first pipeline.
+Collection creation uses the shared `CollectionCreateAction`: its labelled action
+sits in the relevant screen or immediate parent-section header and opens an
+accessible dialog. Workshops, external leaders, workshop spaces and slots,
+families, people, buildings, rooms, and beds follow this pattern. Empty states
+repeat the same first useful action; populated views do not keep creation forms
+open in their normal flow. These controls still stage the same ordinary event
+drafts through the shared local-first pipeline.
 
 ## Frontend navigation and state invariants
 

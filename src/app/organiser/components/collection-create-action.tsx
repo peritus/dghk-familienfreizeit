@@ -8,6 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '../../components/shared/ui/dialog.js'
 
 export function CollectionCreateAction({
@@ -35,9 +36,7 @@ export function CollectionCreateAction({
   const formId = `collection-create-${generatedId.replaceAll(':', '')}`
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <Button type="button" onClick={() => onOpenChange(true)}>
-        {label}
-      </Button>
+      <DialogTrigger render={<Button type="button">{label}</Button>} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
