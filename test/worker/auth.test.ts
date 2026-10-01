@@ -32,6 +32,34 @@ describe('authentication boundary', () => {
       const redeemed = await app.request(link.pathname, {}, localEnv)
       expect(redeemed.status).toBe(302)
       expect(redeemed.headers.get('location')).toBe('/organiser')
+      expect(redeemed.headers.get('set-cookie')).toContain('Secure')
+    } finally {
+      log.mockRestore()
+    }
+  })
+
+  test('the explicit dangerous development flag permits an insecure session cookie', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const localEnv = {
+      ...env,
+      DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
+      DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES: 'true' as const,
+    }
+    try {
+      const response = await app.request(
+        'http://preview.tailnet.ts.net/api/login',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email: 'organiser@example.test' }),
+        },
+        localEnv,
+      )
+      expect(response.status).toBe(200)
+      const output = String(log.mock.calls[0]?.[0])
+      const link = new URL(output.slice(output.indexOf('http://')))
+      const redeemed = await app.request(link.pathname, {}, localEnv)
+      expect(redeemed.headers.get('set-cookie')).not.toContain('Secure')
     } finally {
       log.mockRestore()
     }

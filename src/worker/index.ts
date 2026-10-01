@@ -56,7 +56,7 @@ app.get('/auth/:token', async (context) => {
   if (!result) return context.redirect('/login?error=expired', 302)
   setCookie(context, 'sid', result.session, {
     httpOnly: true,
-    secure: true,
+    secure: !shouldAllowInsecureSessionCookies(context),
     sameSite: 'Lax',
     path: '/',
     maxAge: isOrganiser(result.email) ? 7 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
@@ -296,6 +296,10 @@ function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): bool
     hostname === '[::1]' ||
     context.env.DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE === 'true'
   )
+}
+
+function shouldAllowInsecureSessionCookies(context: Context<{ Bindings: Env }>): boolean {
+  return context.env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true'
 }
 
 function eventDraft(candidate: unknown, actor: string, at: string): EventDraft {
