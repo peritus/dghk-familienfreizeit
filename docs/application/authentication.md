@@ -19,6 +19,11 @@ is available only through the alarming binding
 enabled on a shared or production deployment. Real email delivery remains a
 separate deployment concern.
 
+Session cookies are always `Secure`, except when the separate alarming local-only
+binding `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` is set.
+The Station Tailscale preview uses it because browsers reject `Secure` cookies
+over its plain-HTTP URL. Shared and deployed environments must leave it unset.
+
 `GET /auth/:token` atomically deletes an unexpired token with `DELETE … RETURNING`,
 creates a hashed session, and redirects to the application. Reusing or expiring a
 token redirects to the invalid-link screen.

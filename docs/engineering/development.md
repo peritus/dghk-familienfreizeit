@@ -98,6 +98,11 @@ environment and remove it immediately afterward.
 The `dev-preview` task supplies that one variable from its process environment.
 Wrangler explicitly allowlists it as a local Worker binding; no `.env` file is
 read, and no other process environment values are exposed to the Worker.
+Because the Station preview uses plain HTTP on the Tailscale network, the task
+also supplies `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true`.
+That alarming local-only binding removes the `Secure` attribute from the session
+cookie solely for this preview; it must never be set for a shared or deployed
+environment.
 
 Hosted preview/prod deployment requires separate real D1 bindings, environment
 configuration and secrets under [deployment](../../spec/engineering/deployment.md). There is no
