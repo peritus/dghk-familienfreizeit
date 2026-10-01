@@ -313,6 +313,20 @@ export default function OrganiserApp() {
                 <WorkshopProgramme />
               </Route>
             ) : null}
+            {organiserScreenRegistry.some(
+              ({ id }) => id === 'organiser-workshop-programme-unplaced',
+            ) ? (
+              <Route path={organiserRoutePaths.workshop_programme_unplaced}>
+                <WorkshopProgramme />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(
+              ({ id }) => id === 'organiser-workshop-programme-overlaps',
+            ) ? (
+              <Route path={organiserRoutePaths.workshop_programme_overlaps}>
+                <WorkshopProgramme />
+              </Route>
+            ) : null}
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-slots') ? (
               <Route path={organiserRoutePaths.workshop_slots}>
                 <WorkshopSlots />

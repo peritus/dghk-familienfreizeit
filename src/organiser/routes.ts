@@ -22,6 +22,8 @@ export const organiserRoutePaths = {
   workshop_leaders: '/workshops/leitungen',
   workshop_external_leaders: '/workshops/externe',
   workshop_programme: '/workshops/programme',
+  workshop_programme_unplaced: '/workshops/programme/unplaced',
+  workshop_programme_overlaps: '/workshops/programme/overlaps',
   workshop_slots: '/workshops/slots',
   workshop_spaces: '/workshops/spaces',
 } as const
@@ -157,6 +159,10 @@ export const organiserPaths = {
   workshop_external_leaders: (): OrganiserPath =>
     nestedPath(organiserRoutePaths.workshop_external_leaders),
   workshop_programme: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_programme),
+  workshop_programme_unplaced: (): OrganiserPath =>
+    nestedPath(organiserRoutePaths.workshop_programme_unplaced),
+  workshop_programme_overlaps: (): OrganiserPath =>
+    nestedPath(organiserRoutePaths.workshop_programme_overlaps),
   workshop_slots: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_slots),
   workshop_spaces: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_spaces),
 } as const
@@ -178,6 +184,10 @@ export const organiserUrls = {
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_external_leaders()}`),
   workshop_programme: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_programme()}`),
+  workshop_programme_unplaced: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_programme_unplaced()}`),
+  workshop_programme_overlaps: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_programme_overlaps()}`),
   workshop_slots: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_slots()}`),
   workshop_spaces: (): OrganiserUrl =>

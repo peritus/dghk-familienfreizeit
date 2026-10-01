@@ -381,6 +381,18 @@ export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
         audience: 'organiser',
       },
       {
+        id: 'organiser-workshop-programme-unplaced',
+        route: '/organiser/workshops/programme/unplaced',
+        label: 'Nicht eingeplant',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-programme-overlaps',
+        route: '/organiser/workshops/programme/overlaps',
+        label: 'Überschneidungen',
+        audience: 'organiser',
+      },
+      {
         id: 'organiser-workshop-slots',
         route: '/organiser/workshops/slots',
         label: 'Slots',
