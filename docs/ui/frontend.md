@@ -83,9 +83,11 @@ pending-state retention. Do not key the organiser state owner, or its healthy
 route subtree, by location. Error boundaries may reset their error state on a
 route change without remounting healthy children.
 
-On navigation the app focuses the main content region. A skip link provides
-keyboard access to that region. Lazy loading renders a centered preparation panel
-with a live status;
+Ordinary route changes leave focus and scroll position under the user's control;
+clicking persistent navigation does not force focus onto the content region. A skip
+link provides explicit keyboard access to that region. Destination-specific links,
+such as a room link carrying `#room=...`, may deliberately open and scroll to their
+named target. Lazy loading renders a centered preparation panel with a live status;
 the route error boundary renders a sanitized recovery message and reload button.
 These semantics are covered in
 [app tests](../../test/app/shell.test.tsx), while real organiser navigation and

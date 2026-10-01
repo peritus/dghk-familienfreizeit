@@ -40,6 +40,13 @@ This split keeps intent readable in Markdown while the browser renders and
 tests the actual implementation. A story is not a mockup: it is a small,
 deterministic fixture around the production component.
 
+The global preview decorator gives every story its own in-memory router. Stories
+must not write `window.history` or navigate the preview iframe itself. Components
+may exercise ordinary and hash-bearing links inside that isolated router; a story
+that needs a non-root starting location declares `parameters.route.path`. The
+Storybook interaction suite verifies that route changes leave the iframe URL
+unchanged.
+
 ## Local workflow
 
 ```sh
