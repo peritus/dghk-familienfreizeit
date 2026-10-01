@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { Badge } from '../../../../app/components/shared/ui/badge.js'
-import { Card, CardContent } from '../../../../app/components/shared/ui/card.js'
 import {
-  WorkshopPropertyTags,
+  WorkshopCompactMeta,
+  WorkshopListRow,
   WorkshopRowActions,
   WorkshopStatusBadge,
 } from '../../../../app/components/shared/workshop/shared.js'
@@ -167,37 +167,48 @@ export type ExternalLeaderView = {
   leads: readonly string[]
 }
 
-export function LeaderAvailability({ slots }: { slots: readonly string[] }) {
-  return <WorkshopPropertyTags items={slots.length ? slots : ['kein Slot']} />
+export function LeaderAvailability({
+  slots,
+  total_slots: totalSlots,
+}: {
+  slots: readonly string[]
+  total_slots?: number
+}) {
+  if (totalSlots !== undefined && slots.length === totalSlots) return <>alle Slots</>
+  return slots.length ? (
+    <span className="inline-flex flex-wrap gap-x-2">
+      {slots.map((slot) => (
+        <span key={slot}>{slot}</span>
+      ))}
+    </span>
+  ) : (
+    <>kein Slot</>
+  )
 }
 
 export function ExternalLeaderRow({
   leader,
   action,
+  total_slots: totalSlots,
 }: {
   leader: ExternalLeaderView
   action?: ReactNode
+  total_slots?: number
 }) {
   return (
-    <Card size="sm" className="bg-white">
-      <CardContent className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <p>
-            <strong>{leader.name}</strong> <Badge>extern</Badge>
-            {leader.phone ? (
-              <span className="ml-2 text-sm text-muted">· {leader.phone}</span>
-            ) : null}
-          </p>
-          <WorkshopLeaderSummary leaders={leader.leads} />
-          <div className="text-sm text-muted">
-            <strong>Verfügbar:</strong>
-            <span className="ml-2">
-              <LeaderAvailability slots={leader.availability} />
-            </span>
-          </div>
-        </div>
-        {action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}
-      </CardContent>
-    </Card>
+    <WorkshopListRow action={action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}>
+      <div className="space-y-1">
+        <p>
+          <strong>{leader.name}</strong> <Badge>extern</Badge>
+          {leader.phone ? <span className="ml-2 text-sm text-muted">· {leader.phone}</span> : null}
+        </p>
+        <WorkshopCompactMeta label="Leitet">
+          {leader.leads.length ? leader.leads.join(', ') : '—'}
+        </WorkshopCompactMeta>
+        <WorkshopCompactMeta label="Verfügbar">
+          <LeaderAvailability slots={leader.availability} total_slots={totalSlots} />
+        </WorkshopCompactMeta>
+      </div>
+    </WorkshopListRow>
   )
 }

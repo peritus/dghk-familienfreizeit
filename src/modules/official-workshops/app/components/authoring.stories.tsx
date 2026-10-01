@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from '../../../../app/components/shared/ui/button.js'
 import { ExternalLeaderRow, InternalLeaderRow, WorkshopSummaryRow } from './authoring.js'
+import { WorkshopList } from '../../../../app/components/shared/workshop/shared.js'
 import {
   fullExternalLeaders,
   fullInternalLeaders,
@@ -62,17 +63,20 @@ export const LeaderRows: Story = {
           </tbody>
         </table>
       </div>
-      {fullExternalLeaders.map((leader) => (
-        <ExternalLeaderRow
-          key={leader.id}
-          leader={leader}
-          action={
-            <Button size="sm" variant="neutral">
-              Bearbeiten
-            </Button>
-          }
-        />
-      ))}
+      <WorkshopList>
+        {fullExternalLeaders.map((leader) => (
+          <ExternalLeaderRow
+            key={leader.id}
+            leader={leader}
+            total_slots={7}
+            action={
+              <Button size="sm" variant="neutral">
+                Bearbeiten
+              </Button>
+            }
+          />
+        ))}
+      </WorkshopList>
     </div>
   ),
 }
