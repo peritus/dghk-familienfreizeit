@@ -236,6 +236,7 @@ test('workshop navigation exposes the intended visible areas and links to slot m
 
   const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
   expect(navigation.textContent).toContain('Workshops')
+  expect(navigation.textContent).toContain('Leitungen')
   expect(navigation.textContent).toContain('Externe')
   expect(navigation.textContent).toContain('Räume und Slots')
   expect(navigation.textContent).toContain('Programm')
@@ -252,12 +253,12 @@ test('the external leaders view follows the prototype list and stages a complete
   expect(await screen.findByRole('heading', { name: 'Externe Leitungen' })).toBeTruthy()
   expect(screen.getByText('Pereira')).toBeTruthy()
   expect(screen.getByText('Keramik')).toBeTruthy()
-  expect(screen.getByText('Fr 09:00–11:00')).toBeTruthy()
+  expect(screen.getByText('alle Slots')).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Pereira' }))
 
   expect(screen.getByRole('heading', { name: 'Externe Leitung: Pereira' })).toBeTruthy()
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Pereira Weber' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }))
 
   expect(await screen.findByText('Pereira Weber')).toBeTruthy()
   await waitFor(() =>

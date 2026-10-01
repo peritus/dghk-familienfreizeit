@@ -31,6 +31,12 @@ colour alone. Workshop filters, unscheduled reasons, cancelled history, and save
 state therefore include visible labels. Browser print hides navigation and controls;
 the application does not add a print or export button.
 
+Compact workshop authoring collections use one bordered list with divider-separated
+rows rather than a grid of independent cards. Rows keep the primary identity,
+small muted metadata, and actions aligned while allowing content to wrap at narrow
+widths. Prototype-derived authoring dialogs use the shared bordered footer pattern,
+with inline checkbox options where the choice is a compact set of event slots.
+
 ## Local visual contract
 
 The repository-local [UI contract](storybook.md) is the visual workbench for
