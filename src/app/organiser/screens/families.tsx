@@ -17,6 +17,7 @@ export function Families() {
   const { world, state, stage: stageEvents } = useOrganiser()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
+  const [memberCount, setMemberCount] = useState('2')
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [addingFamily, setAddingFamily] = useState(false)
   const rows = familyRows(world!)
@@ -28,6 +29,7 @@ export function Families() {
     event.preventDefault()
     const trimmedName = displayName.trim()
     const trimmedEmail = email.trim()
+    const parsedMemberCount = Number(memberCount)
     if (!state.principal_email) return
     if (!trimmedName) {
       setInviteError('Bitte gib einen Familiennamen ein.')
@@ -37,23 +39,44 @@ export function Families() {
       setInviteError('Bitte gib eine gültige E-Mail-Adresse ein.')
       return
     }
+    if (!Number.isInteger(parsedMemberCount) || parsedMemberCount < 1) {
+      setInviteError('Gib eine ganze Zahl ab 1 für die Familienmitglieder an.')
+      return
+    }
+    const actor = state.principal_email
+    const familyId = id('fam_')
     setInviteError(null)
     stage([
       {
         at: new Date().toISOString(),
-        actor: state.principal_email,
+        actor,
         subject: null,
         type: 'FamilyInvited',
         payload: {
-          family_id: id('fam_'),
+          family_id: familyId,
           email: trimmedEmail,
           display_name: trimmedName,
           locale: 'de',
         },
       },
+      ...Array.from({ length: parsedMemberCount }, (_, index) => ({
+        at: new Date().toISOString(),
+        actor,
+        subject: familyId,
+        type: 'PersonAdded',
+        payload: {
+          person_id: id('per_'),
+          family_id: familyId,
+          given_name: index < 2 ? `Elternteil ${index + 1}` : `Kind ${index - 1}`,
+          family_name: trimmedName,
+          birthdate: null,
+          role: index < 2 ? 'adult' : 'child',
+        },
+      })),
     ])
     setDisplayName('')
     setEmail('')
+    setMemberCount('2')
     setAddingFamily(false)
   }
 
@@ -94,6 +117,21 @@ export function Families() {
                   value={email}
                   onChange={(event) => {
                     setEmail(event.target.value)
+                    setInviteError(null)
+                  }}
+                  className="min-h-11 rounded-base border-2 border-black px-3"
+                />
+              </label>
+              <label className="grid gap-1">
+                <span className="font-bold">Anzahl Familienmitglieder</span>
+                <input
+                  required
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={memberCount}
+                  onChange={(event) => {
+                    setMemberCount(event.target.value)
                     setInviteError(null)
                   }}
                   className="min-h-11 rounded-base border-2 border-black px-3"
