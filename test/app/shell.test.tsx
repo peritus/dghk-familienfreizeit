@@ -230,7 +230,7 @@ test('section navigation keeps the primary and secondary current links separate'
   expect(screen.getByRole('link', { name: 'Unterkunft' }).getAttribute('aria-current')).toBeNull()
 })
 
-test('workshop navigation exposes the intended visible areas and links to slot maintenance', async () => {
+test('workshop navigation exposes the intended areas and switches resource views with tabs', async () => {
   open('/organiser/workshops/spaces')
   expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
 
@@ -241,9 +241,10 @@ test('workshop navigation exposes the intended visible areas and links to slot m
   expect(navigation.textContent).toContain('Räume und Slots')
   expect(navigation.textContent).toContain('Programm')
   expect(navigation.querySelector('a[href="/workshops/slots"]')).toBeNull()
-  expect(screen.getByRole('link', { name: 'Slots verwalten' }).getAttribute('href')).toBe(
-    '/organiser/workshops/slots',
-  )
+  expect(screen.getByRole('tablist', { name: 'Räume und Slots' })).toBeTruthy()
+  expect(screen.getByRole('tab', { name: 'Räume' }).getAttribute('aria-selected')).toBe('true')
+  fireEvent.click(screen.getByRole('tab', { name: 'Slots' }))
+  expect(await screen.findByRole('heading', { name: 'Slots' })).toBeTruthy()
 })
 
 test('the external leaders view follows the prototype list and stages a complete update', async () => {
