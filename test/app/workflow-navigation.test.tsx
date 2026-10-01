@@ -1,9 +1,14 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { TertiaryNavigation } from '../../src/app/components/shared/ui/tertiary-navigation.js'
+import { SecondaryNavigation } from '../../src/app/organiser/components/navigation.js'
 import { WorkflowStepper } from '../../src/app/components/shared/ui/workflow-stepper.js'
+import { organiserPaths } from '../../src/organiser/routes.js'
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.history.replaceState({}, '', '/')
+})
 
 test('workflow stepper exposes the current mobile summary and can expand all steps', () => {
   render(
@@ -43,4 +48,30 @@ test('tertiary navigation selects and focuses the next view with arrow keys', ()
   fireEvent.keyDown(current, { key: 'ArrowRight' })
   expect(onChange).toHaveBeenCalledWith('leaders')
   expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Leitungen' }))
+})
+
+test('secondary navigation selects an item for any of its typed active routes', () => {
+  window.history.replaceState({}, '', '/workshops/slots')
+  render(
+    <SecondaryNavigation
+      aria_label="Workshopbereiche"
+      items={[
+        {
+          href: organiserPaths.workshops(),
+          active_paths: [organiserPaths.workshops()],
+          label: 'Workshops',
+        },
+        {
+          href: organiserPaths.workshop_spaces(),
+          active_paths: [organiserPaths.workshop_spaces(), organiserPaths.workshop_slots()],
+          label: 'Räume und Slots',
+        },
+      ]}
+    />,
+  )
+
+  expect(screen.getByRole('link', { name: 'Workshops' }).getAttribute('aria-current')).toBeNull()
+  expect(screen.getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current')).toBe(
+    'page',
+  )
 })

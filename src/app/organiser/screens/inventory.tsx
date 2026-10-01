@@ -223,8 +223,16 @@ export function Inventory() {
       <SecondaryNavigation
         aria_label="Unterbringungsbereiche"
         items={[
-          { href: organiserPaths.inventory(), label: 'Unterkunft' },
-          { href: organiserPaths.assignment_board(), label: 'Belegung' },
+          {
+            href: organiserPaths.inventory(),
+            active_paths: [organiserPaths.inventory()],
+            label: 'Unterkunft',
+          },
+          {
+            href: organiserPaths.assignment_board(),
+            active_paths: [organiserPaths.assignment_board()],
+            label: 'Belegung',
+          },
         ]}
       />
       <WorkflowStepper

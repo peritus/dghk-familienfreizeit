@@ -45,6 +45,7 @@ export function PrimaryNavigation({
 
 export type SecondaryNavigationItem = {
   href: OrganiserPath
+  active_paths: readonly [OrganiserPath, ...OrganiserPath[]]
   label: string
 }
 
@@ -61,7 +62,7 @@ export function SecondaryNavigation({
   return (
     <nav aria-label={ariaLabel} className="flex flex-wrap gap-2 print:hidden">
       {items.map((item) => {
-        const active = location === item.href
+        const active = item.active_paths.some((path) => isOrganiserPathActive(location, path))
         return (
           <OrganiserLink
             key={item.href}

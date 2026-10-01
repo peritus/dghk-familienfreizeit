@@ -196,11 +196,31 @@ function WorkshopNavigation() {
     <SecondaryNavigation
       aria_label="Workshopbereiche"
       items={[
-        { href: organiserPaths.workshops(), label: 'Workshops' },
-        { href: organiserPaths.workshop_leaders(), label: 'Leitungen' },
-        { href: organiserPaths.workshop_external_leaders(), label: 'Externe' },
-        { href: organiserPaths.workshop_spaces(), label: 'Räume und Slots' },
-        { href: organiserPaths.workshop_programme(), label: 'Programm' },
+        {
+          href: organiserPaths.workshops(),
+          active_paths: [organiserPaths.workshops()],
+          label: 'Workshops',
+        },
+        {
+          href: organiserPaths.workshop_leaders(),
+          active_paths: [organiserPaths.workshop_leaders()],
+          label: 'Leitungen',
+        },
+        {
+          href: organiserPaths.workshop_external_leaders(),
+          active_paths: [organiserPaths.workshop_external_leaders()],
+          label: 'Externe',
+        },
+        {
+          href: organiserPaths.workshop_spaces(),
+          active_paths: [organiserPaths.workshop_spaces()],
+          label: 'Räume und Slots',
+        },
+        {
+          href: organiserPaths.workshop_programme(),
+          active_paths: [organiserPaths.workshop_programme()],
+          label: 'Programm',
+        },
       ]}
     />
   )
