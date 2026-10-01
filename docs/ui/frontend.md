@@ -26,12 +26,13 @@ draft changes for explicit review according to the session's drafting policy. Th
 remains the only persistence boundary; there is no separate drafting API or server
 draft state.
 
-Workshop routes use the same reducer and draft pipeline. Their section navigation is
-page-local navigation, not a second state boundary: moving between overview,
-programme, and spaces preserves staged events. The Spaces screen links to direct slot
-maintenance at `/organiser/workshops/slots`. The overview may filter by configured
-audience; the space inventory remains physical inventory with schedule-aware slot
-context.
+Workshop routes use the same reducer and draft pipeline. Their two-item section
+navigation links **Workshops** and **Räume und Slots**; the resource item stays current
+on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
+overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
+Moving between workshop routes preserves staged events because navigation does not
+create another state boundary. The overview may filter by configured audience; the
+space inventory remains physical inventory with schedule-aware slot context.
 The programme view exposes one derived placement per workshop or an explainable
 unscheduled result. Browser print is the only print path; no workshop screen adds
 an application print or export control.
@@ -96,6 +97,10 @@ value; `organiserUrls.*()` is reserved for canonical URLs at the application
 boundary. ESLint rejects direct nested `Link`, raw anchor navigation, and
 `organiserUrls` imports in organiser/module UI, while route and browser tests
 assert that rendered hrefs contain the organiser base exactly once.
+Secondary-navigation items also declare a non-empty tuple of typed nested paths that
+selects each item. This makes grouped destinations explicit at the call site and keeps
+selection on the shared segment-aware route matcher instead of component-local string
+comparisons.
 
 See the [design system](design-system.md) for primitives and styling, the
 [implemented organiser view](../application/organiser-view.md), and the

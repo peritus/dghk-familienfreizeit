@@ -154,10 +154,14 @@ rather than hand-written JSX ([family view](../application/family-view.md) §1):
 ### Workshop navigation and responsive behavior
 
 The organiser workshop landing route is `/organiser/workshops`. Its page-local
-section navigation visibly links Workshops, Räume und Slots, and Programm while
-sharing the same local-first state owner. The Räume und Slots screen links to the
-direct slot-maintenance route `/organiser/workshops/slots`. Wünsche, Teilnahme,
+section navigation visibly links only Workshops and Räume und Slots while sharing the
+same local-first state owner. Räume und Slots is current on both the space route and
+the direct slot-maintenance route `/organiser/workshops/slots`. The workshop overview
+uses local tabs for Workshops, Leitungen, and Externe Leitungen. Wünsche, Teilnahme,
 and Listen are reserved section destinations until their screens are implemented.
+Every secondary-navigation item declares a non-empty set of typed nested paths that
+selects it; active state uses the shared segment-aware route matcher rather than raw
+location equality.
 The four visible lifecycle phases are summary labels over independent event-backed
 facts; they are not a persisted workflow state. Audience filtering is shared by
 workshop lists where relevant. Physical space inventory has its own schedule-aware

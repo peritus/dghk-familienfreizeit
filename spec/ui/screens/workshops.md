@@ -8,13 +8,16 @@ remain separate URLs with page-local workshop navigation:
 | View | Route | Purpose |
 |---|---|---|
 | Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
-| Externe | `/organiser/workshops/externe` | create and edit external leaders, their organiser-only contact metadata, linked workshops, and slot availability |
+| Externe Leitungen | `/organiser/workshops/externe` | create and edit external leaders, their organiser-only contact metadata, linked workshops, and slot availability |
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Programme | `/organiser/workshops/programme` | one placement per workshop, schedule conflicts, and unscheduled cases |
 | Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
 
-The planned section order also reserves **Wünsche**, **Teilnahme**, and **Listen**.
-Those destinations are not rendered in navigation until their screens exist.
+The section navigation contains only **Workshops** and **Räume und Slots**. The
+workshop overview groups **Workshops**, **Leitungen**, and **Externe Leitungen** as
+local tabs, while Räume und Slots groups the space and slot resource routes. The
+planned product views **Wünsche**, **Teilnahme**, and **Listen** remain reserved and
+are not rendered in navigation until their screens exist.
 
 The overview is the landing view. Participation review, demand, solver traces,
 and list/report views are product views reached from the workshop workspace and
@@ -49,7 +52,7 @@ description, audience, age range, capacity, participation mode, resolver needs,
 and leaders. Leaders use a typed searchable picker, with internal people and
 existing external leaders visibly distinct. The overview stages complete
 `WorkshopAdded` or `WorkshopUpdated` restatements through the shared local-first
-pipeline. The **Externe** view uses the same event-backed pipeline to create and
+pipeline. The **Externe Leitungen** view uses the same event-backed pipeline to create and
 edit external leaders, including organiser-only phone metadata and one or more
 available workshop slots; its list shows linked workshops and derived
 availability labels. Cancellation, publication, and other release operations
