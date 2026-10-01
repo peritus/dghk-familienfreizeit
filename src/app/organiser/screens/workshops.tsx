@@ -16,7 +16,7 @@ import { OrganiserLink } from '../../components/application/organiser-link.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
-  ExternalLeaderEditorForm,
+  ExternalLeaderEditorFields,
   WorkshopEditorDialog,
   WorkshopLeaderPicker,
 } from '../components/workshop/editors.js'
@@ -24,6 +24,7 @@ import {
   WorkshopEmptyState,
   WorkshopLifecycleTimeline,
   WorkshopPhaseNotice,
+  WorkshopList,
   WorkshopScreenHeader,
   WorkshopSectionHeader,
   WorkshopStatsStrip,
@@ -48,8 +49,10 @@ import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '../../components/shared/ui/dialog.js'
@@ -192,6 +195,7 @@ function WorkshopNavigation() {
       aria_label="Workshopbereiche"
       items={[
         { href: organiserPaths.workshops(), label: 'Workshops' },
+        { href: organiserPaths.workshop_leaders(), label: 'Leitungen' },
         { href: organiserPaths.workshop_external_leaders(), label: 'Externe' },
         { href: organiserPaths.workshop_spaces(), label: 'Räume und Slots' },
         { href: organiserPaths.workshop_programme(), label: 'Programm' },
@@ -288,21 +292,37 @@ export function WorkshopExternalLeaders() {
               </p>
             ) : null}
           </DialogHeader>
-          <ExternalLeaderEditorForm
-            key={editor ?? 'new'}
-            on_submit={saveLeader}
-            slots={slotOptions}
-            default_values={
-              editingLeader
-                ? {
-                    name: editingLeader.name,
-                    phone: editingLeader.phone ?? undefined,
-                    availability: editingLeader.availability,
-                  }
-                : undefined
-            }
-            submit_label={editingLeader ? 'Speichern' : 'Externe Leitung anlegen'}
-          />
+          <form
+            id="external-leader-form"
+            className="mt-5 grid gap-4 sm:grid-cols-2"
+            onSubmit={saveLeader}
+          >
+            <ExternalLeaderEditorFields
+              key={editor ?? 'new'}
+              slots={slotOptions}
+              default_values={
+                editingLeader
+                  ? {
+                      name: editingLeader.name,
+                      phone: editingLeader.phone ?? undefined,
+                      availability: editingLeader.availability,
+                    }
+                  : undefined
+              }
+            />
+          </form>
+          <DialogFooter>
+            <DialogClose
+              render={
+                <Button type="button" variant="neutral">
+                  Abbrechen
+                </Button>
+              }
+            />
+            <Button type="submit" form="external-leader-form">
+              Übernehmen
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       <section aria-label="Externe Leitungen" className="space-y-3">
@@ -311,7 +331,7 @@ export function WorkshopExternalLeaders() {
           description="Sie leiten nur und nehmen sonst nicht teil."
         />
         {summary.external_leaders.length ? (
-          <div className="grid gap-3">
+          <WorkshopList>
             {summary.external_leaders.map((leader) => (
               <ExternalLeaderRow
                 key={leader.id}
@@ -324,6 +344,7 @@ export function WorkshopExternalLeaders() {
                     .filter((workshop) => workshop.leader_ids.includes(leader.id))
                     .map((workshop) => workshopNames.get(workshop.id) ?? workshop.id),
                 }}
+                total_slots={schedule.slots.length}
                 action={
                   <Button
                     size="sm"
@@ -339,13 +360,78 @@ export function WorkshopExternalLeaders() {
                 }
               />
             ))}
-          </div>
+          </WorkshopList>
         ) : (
           <WorkshopEmptyState title="Noch keine externen Leitungen">
             Lege eine externe Leitung an, bevor du sie einem Workshop zuweist.
           </WorkshopEmptyState>
         )}
       </section>
+    </div>
+  )
+}
+
+export function WorkshopLeaders() {
+  useDocumentTitle('Leitungen · Workshops · Familienfreizeit')
+  const { world } = useOrganiser()
+  const summary = officialWorkshopsWorld(world!)
+  const workshopById = new Map(summary.workshops.map((workshop) => [workshop.id, workshop.title]))
+  const leaders = world!.persons
+    .map((person) => {
+      const labels = world!.labels_by_entity[person.id] ?? []
+      const name = [
+        labels.find((label) => label.key === 'given-name')?.value,
+        labels.find((label) => label.key === 'family-name')?.value,
+      ]
+        .filter((value): value is string => typeof value === 'string' && value.length > 0)
+        .join(' ')
+      const leads = summary.workshops
+        .filter((workshop) => workshop.leader_ids.includes(person.id))
+        .map((workshop) => workshopById.get(workshop.id) ?? workshop.id)
+      return { id: person.id, name: name || person.id, leads }
+    })
+    .filter((leader) => leader.leads.length)
+    .sort((a, b) => a.name.localeCompare(b.name, 'de'))
+  return (
+    <div className="space-y-8">
+      <WorkshopNavigation />
+      <WorkshopScreenHeader
+        eyebrow="Workshops"
+        title="Leitungen"
+        description="Personen aus der Veranstaltung, die Workshops leiten."
+      />
+      <WorkshopSectionHeader title={`${leaders.length} Leitungen`} />
+      {leaders.length ? (
+        <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
+          <table className="w-full min-w-[36rem] text-left text-sm">
+            <caption className="sr-only">Leitungen aus der Veranstaltung</caption>
+            <thead>
+              <tr className="border-b-2 border-black">
+                <th scope="col" className="p-3">
+                  Person
+                </th>
+                <th scope="col" className="p-3">
+                  Leitet
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaders.map((leader) => (
+                <tr key={leader.id} className="border-b border-black/30 last:border-b-0">
+                  <th scope="row" className="p-3">
+                    {leader.name}
+                  </th>
+                  <td className="p-3">{leader.leads.join(', ')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <WorkshopEmptyState title="Noch keine internen Leitungen">
+          Weise eine Person aus der Veranstaltung einem Workshop zu.
+        </WorkshopEmptyState>
+      )}
     </div>
   )
 }
