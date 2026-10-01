@@ -15,7 +15,13 @@
       "label": "dev-preview",
       "type": "process",
       "command": "nix",
-      "args": ["develop", "--command", "sh", "-c", "npm ci && exec npm run dev"],
+      "args": [
+        "develop",
+        "--command",
+        "sh",
+        "-c",
+        "export DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true; npm ci && exec npm run dev"
+      ],
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "problemMatcher": [],
