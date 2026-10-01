@@ -9,6 +9,7 @@ import * as TagStories from '../components/shared/ui/tag.stories'
 import * as StatsStories from '../components/shared/ui/stats-strip.stories'
 import * as SuccessStories from '../components/shared/ui/success-state.stories'
 import * as TabsStories from '../components/shared/ui/tabs.stories'
+import * as TertiaryNavigationStories from '../components/shared/ui/tertiary-navigation.stories'
 import * as WorkflowStepperStories from '../components/shared/ui/workflow-stepper.stories'
 import * as WorkshopSharedStories from '../components/shared/workshop/shared.stories'
 import * as WorkshopAuthoringStories from '../../modules/official-workshops/app/components/authoring.stories'
@@ -91,6 +92,15 @@ On narrow screens the options stack and retain their labels.
 Use `WorkflowStepper` to report a short ordered process such as Workshopwahl or
 Unterbringung. It is status, not navigation: its current step comes from the
 screen's derived view and it never changes domain state itself.
+
+## Navigation levels
+
+Primary navigation moves between organiser-wide areas. Secondary navigation
+moves between routes in one area. Use `TertiaryNavigation` only for sibling
+views within the already active route; its optional controls filter the current
+view and do not create a fourth navigation level.
+
+<Canvas of={TertiaryNavigationStories.WorkshopViews} />
 
 ## Workshop semantic component catalogue
 
