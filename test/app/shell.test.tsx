@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 import { App } from '../../src/app/app'
 import { RouteBoundary, RouteLoading } from '../../src/app/components/application/route-states'
@@ -231,20 +231,34 @@ test('section navigation keeps the primary and secondary current links separate'
 })
 
 test('workshop navigation exposes the intended areas and switches resource views with tabs', async () => {
-  open('/organiser/workshops/spaces')
-  expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
+  open('/organiser/workshops/slots')
+  expect(await screen.findByRole('heading', { name: 'Slots' })).toBeTruthy()
 
   const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
-  expect(navigation.textContent).toContain('Workshops')
-  expect(navigation.textContent).toContain('Leitungen')
-  expect(navigation.textContent).toContain('Externe')
-  expect(navigation.textContent).toContain('Räume und Slots')
-  expect(navigation.textContent).toContain('Programm')
-  expect(navigation.querySelector('a[href="/workshops/slots"]')).toBeNull()
+  expect(
+    within(navigation)
+      .getAllByRole('link')
+      .map((link) => link.textContent),
+  ).toEqual(['Workshops', 'Räume und Slots'])
+  expect(
+    within(navigation).getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current'),
+  ).toBe('page')
   expect(screen.getByRole('tablist', { name: 'Räume und Slots' })).toBeTruthy()
-  expect(screen.getByRole('tab', { name: 'Räume' }).getAttribute('aria-selected')).toBe('true')
-  fireEvent.click(screen.getByRole('tab', { name: 'Slots' }))
-  expect(await screen.findByRole('heading', { name: 'Slots' })).toBeTruthy()
+  expect(screen.getByRole('tab', { name: 'Slots' }).getAttribute('aria-selected')).toBe('true')
+  fireEvent.click(screen.getByRole('tab', { name: 'Räume' }))
+  expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
+})
+
+test('the workshop overview uses the prototype view labels', async () => {
+  open('/organiser/workshops', workshopFixtureEvents())
+  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+
+  const views = screen.getByRole('tablist', { name: 'Workshopansichten' })
+  expect(
+    within(views)
+      .getAllByRole('tab')
+      .map((tab) => tab.textContent),
+  ).toEqual(['Workshops', 'Leitungen', 'Externe Leitungen'])
 })
 
 test('the external leaders view follows the prototype list and stages a complete update', async () => {

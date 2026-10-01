@@ -198,28 +198,17 @@ function WorkshopNavigation() {
       items={[
         {
           href: organiserPaths.workshops(),
-          active_paths: [organiserPaths.workshops()],
+          active_paths: [
+            organiserPaths.workshops(),
+            organiserPaths.workshop_leaders(),
+            organiserPaths.workshop_external_leaders(),
+          ],
           label: 'Workshops',
         },
         {
-          href: organiserPaths.workshop_leaders(),
-          active_paths: [organiserPaths.workshop_leaders()],
-          label: 'Leitungen',
-        },
-        {
-          href: organiserPaths.workshop_external_leaders(),
-          active_paths: [organiserPaths.workshop_external_leaders()],
-          label: 'Externe',
-        },
-        {
           href: organiserPaths.workshop_spaces(),
-          active_paths: [organiserPaths.workshop_spaces()],
+          active_paths: [organiserPaths.workshop_spaces(), organiserPaths.workshop_slots()],
           label: 'Räume und Slots',
-        },
-        {
-          href: organiserPaths.workshop_programme(),
-          active_paths: [organiserPaths.workshop_programme()],
-          label: 'Programm',
         },
       ]}
     />
@@ -697,7 +686,7 @@ export function Workshops() {
         items={[
           { value: 'workshops', label: 'Workshops' },
           { value: 'leaders', label: 'Leitungen' },
-          { value: 'external', label: 'Extern' },
+          { value: 'external', label: 'Externe Leitungen' },
         ]}
         controls={
           <SegmentedControl
