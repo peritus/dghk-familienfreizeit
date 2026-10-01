@@ -49,6 +49,7 @@ import {
   type WorkshopSpaceView,
 } from '../components/workshop/resources.js'
 import { SecondaryNavigation } from '../components/navigation.js'
+import { CollectionCreateAction } from '../components/collection-create-action.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
 import {
@@ -1077,6 +1078,7 @@ export function WorkshopSlots() {
   const { world, state, stage } = useOrganiser()
   const summary = workshopSchedulingWorld(world!)
   const plan = solveWorkshopPlan(world!)
+  const [addingSlot, setAddingSlot] = useState(false)
   const [editingSlot, setEditingSlot] = useState<WorkshopSlot | null>(null)
   const [slotError, setSlotError] = useState<string | null>(null)
   const overlappingSlotIds = new Set(
@@ -1153,6 +1155,7 @@ export function WorkshopSlots() {
       ),
     ])
     event.currentTarget.reset()
+    setAddingSlot(false)
     setEditingSlot(null)
     setSlotError(null)
   }
@@ -1162,27 +1165,36 @@ export function WorkshopSlots() {
       <WorkshopScreenHeader
         title="Slots"
         description="Event-backed Zeitfenster für das Programm."
-      />
-      <WorkshopResourceNavigation value="slots" />
-      {slotError ? (
-        <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
-          {slotError}
-        </p>
-      ) : null}
-      <SlotEditorForm
-        key={editingSlot?.id ?? 'new-slot'}
-        on_submit={add}
-        submit_label={editingSlot ? 'Slot speichern' : 'Slot hinzufügen'}
-        show_day={false}
-        default_values={
-          editingSlot
-            ? {
-                starts_at: dateTimeLocal(editingSlot.starts_at),
-                ends_at: dateTimeLocal(editingSlot.ends_at),
+        action={
+          <CollectionCreateAction
+            label="Slot hinzufügen"
+            title={editingSlot ? 'Slot bearbeiten' : 'Slot hinzufügen'}
+            description="Lege ein Zeitfenster für das Workshopprogramm an."
+            open={addingSlot || editingSlot !== null}
+            on_open_change={(open) => {
+              setAddingSlot(open)
+              if (!open) setEditingSlot(null)
+            }}
+            error={slotError}
+          >
+            <SlotEditorForm
+              key={editingSlot?.id ?? 'new-slot'}
+              on_submit={add}
+              submit_label={editingSlot ? 'Slot speichern' : 'Slot anlegen'}
+              show_day={false}
+              default_values={
+                editingSlot
+                  ? {
+                      starts_at: dateTimeLocal(editingSlot.starts_at),
+                      ends_at: dateTimeLocal(editingSlot.ends_at),
+                    }
+                  : undefined
               }
-            : undefined
+            />
+          </CollectionCreateAction>
         }
       />
+      <WorkshopResourceNavigation value="slots" />
       <div className="grid gap-6">
         {Array.from(slotsByDay, ([day, slots]) => (
           <SlotDayGroup
@@ -1227,6 +1239,7 @@ export function WorkshopSpaces() {
   const { world, state, stage } = useOrganiser()
   const summary = workshopSpaceWorld(world!)
   const schedule = workshopSchedulingWorld(world!)
+  const [addingSpace, setAddingSpace] = useState(false)
   const [editingSpace, setEditingSpace] = useState<WorkshopSpace | null>(null)
   const slotLabels = new Map(
     schedule.slots.map((slot) => [
@@ -1279,6 +1292,7 @@ export function WorkshopSpaces() {
       ),
     ])
     event.currentTarget.reset()
+    setAddingSpace(false)
     setEditingSpace(null)
   }
   return (
@@ -1287,28 +1301,41 @@ export function WorkshopSpaces() {
       <WorkshopScreenHeader
         title="Räume und Slots"
         description="Physische Workshopräume, Kapazitäten und schedule-aware Verfügbarkeit."
-      />
-      <WorkshopResourceNavigation value="spaces" />
-      <SpaceEditorForm
-        key={editingSpace?.id ?? 'new-space'}
-        on_submit={add}
-        submit_label={editingSpace ? 'Raum speichern' : 'Raum hinzufügen'}
-        default_values={
-          editingSpace
-            ? {
-                name: editingSpace.name,
-                location: editingSpace.location_description,
-                capacity: editingSpace.capacity,
-                availability_start: editingSpace.availability_windows[0]
-                  ? dateTimeLocal(editingSpace.availability_windows[0].starts_at)
-                  : undefined,
-                availability_end: editingSpace.availability_windows[0]
-                  ? dateTimeLocal(editingSpace.availability_windows[0].ends_at)
-                  : undefined,
+        action={
+          <CollectionCreateAction
+            label="Raum hinzufügen"
+            title={editingSpace ? 'Workshopraum bearbeiten' : 'Workshopraum hinzufügen'}
+            description="Lege Ort, Kapazität und verfügbare Zeiten fest."
+            open={addingSpace || editingSpace !== null}
+            on_open_change={(open) => {
+              setAddingSpace(open)
+              if (!open) setEditingSpace(null)
+            }}
+          >
+            <SpaceEditorForm
+              key={editingSpace?.id ?? 'new-space'}
+              on_submit={add}
+              submit_label={editingSpace ? 'Raum speichern' : 'Raum anlegen'}
+              default_values={
+                editingSpace
+                  ? {
+                      name: editingSpace.name,
+                      location: editingSpace.location_description,
+                      capacity: editingSpace.capacity,
+                      availability_start: editingSpace.availability_windows[0]
+                        ? dateTimeLocal(editingSpace.availability_windows[0].starts_at)
+                        : undefined,
+                      availability_end: editingSpace.availability_windows[0]
+                        ? dateTimeLocal(editingSpace.availability_windows[0].ends_at)
+                        : undefined,
+                    }
+                  : undefined
               }
-            : undefined
+            />
+          </CollectionCreateAction>
         }
       />
+      <WorkshopResourceNavigation value="spaces" />
       <div className="grid gap-3">
         {spaceViews.map((space) => (
           <SpaceRow
