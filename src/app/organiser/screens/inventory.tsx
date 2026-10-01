@@ -9,6 +9,7 @@ import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import { StatsStrip } from '../../components/shared/ui/stats-strip.js'
 import { Tag } from '../../components/shared/ui/tag.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
+import { CollectionCreateAction } from '../components/collection-create-action.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { pluralDe } from '../../lib/plural-de.js'
 import { useOrganiser } from '../context.js'
@@ -263,11 +264,24 @@ export function Inventory() {
       <OrganiserScreenHeader
         title="Unterkunft"
         actions={
-          hasBuildings ? (
-            <Button variant="neutral" onClick={() => setAddingBuilding((open) => !open)}>
-              + Gebäude hinzufügen
-            </Button>
-          ) : null
+          <CollectionCreateAction
+            label="Gebäude hinzufügen"
+            title="Gebäude hinzufügen"
+            description="Lege eine Unterkunft an; Zimmer und Betten ergänzt du anschließend darin."
+            open={addingBuilding}
+            on_open_change={setAddingBuilding}
+          >
+            <NewBuildingForm
+              heading={hasBuildings ? undefined : 'Noch keine Unterkunft angelegt'}
+              intro={
+                hasBuildings
+                  ? undefined
+                  : 'Fang mit einem Gebäude an. Zimmer und Betten fügst du danach direkt darin hinzu.'
+              }
+              onCancel={() => setAddingBuilding(false)}
+              onSubmit={addBuilding}
+            />
+          </CollectionCreateAction>
         }
       />
       <p className="-mt-4 text-muted">Gebäude, Zimmer und Betten für diese Freizeit.</p>
@@ -287,19 +301,6 @@ export function Inventory() {
             { value: summary.capacity, label: 'Schlafplätze' },
             { value: formatEuro(summary.cost_eur, 0), label: 'Kosten pro Nacht' },
           ]}
-        />
-      ) : null}
-
-      {addingBuilding || !hasBuildings ? (
-        <NewBuildingForm
-          heading={hasBuildings ? undefined : 'Noch keine Unterkunft angelegt'}
-          intro={
-            hasBuildings
-              ? undefined
-              : 'Fang mit einem Gebäude an. Zimmer und Betten fügst du danach direkt darin hinzu.'
-          }
-          onCancel={hasBuildings ? () => setAddingBuilding(false) : undefined}
-          onSubmit={addBuilding}
         />
       ) : null}
 
@@ -477,22 +478,24 @@ function BuildingSection({
             onRemove={onRemoveBuilding}
           />
         </div>
-        <Button variant="neutral" onClick={onToggleRoomForm}>
-          + Zimmer hinzufügen
-        </Button>
+        <CollectionCreateAction
+          label="Zimmer hinzufügen"
+          title={`Zimmer in ${building.name} hinzufügen`}
+          description="Die Schlafplätze ergeben sich aus den Betten, die du danach im Zimmer hinzufügst."
+          open={roomFormOpen}
+          on_open_change={(open) => {
+            if (open !== roomFormOpen) onToggleRoomForm()
+          }}
+        >
+          <RoomForm
+            floors={floors}
+            room_types={roomTypes}
+            submit_label="Zimmer anlegen"
+            onCancel={onToggleRoomForm}
+            onSubmit={(payload, values) => onAddRoom(building.id, payload, values)}
+          />
+        </CollectionCreateAction>
       </div>
-
-      {roomFormOpen ? (
-        <RoomForm
-          heading={`Neues Zimmer in ${building.name}`}
-          intro="Die Schlafplätze ergeben sich aus den Betten, die du danach im Zimmer hinzufügst."
-          floors={floors}
-          room_types={roomTypes}
-          submit_label="Zimmer anlegen"
-          onCancel={onToggleRoomForm}
-          onSubmit={(payload, values) => onAddRoom(building.id, payload, values)}
-        />
-      ) : null}
 
       {rooms.length === 0 ? (
         <Card className="bg-white">
@@ -833,6 +836,7 @@ function RoomDetail({
   onRemoveBed: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
+  const [addingBed, setAddingBed] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [blockedReason, setBlockedReason] = useState<string | null>(null)
 
@@ -918,18 +922,29 @@ function RoomDetail({
             </div>
           ))
         )}
-        <BedForm
-          bed_types={bedTypes}
-          is_apartment={room.room_type === 'apartment'}
-          existing_schlafraeume={Array.from(
-            new Set(
-              beds
-                .map((bed) => bed.sleeping_room)
-                .filter((value): value is number => value !== null),
-            ),
-          ).sort((a, b) => a - b)}
-          onSubmit={(payload) => onAddBed(room.id, payload)}
-        />
+        <CollectionCreateAction
+          label="Bett hinzufügen"
+          title={`Bett in Zimmer ${room.number} hinzufügen`}
+          description="Ein Bett ergänzt die abgeleitete Schlafplatzkapazität dieses Zimmers."
+          open={addingBed}
+          on_open_change={setAddingBed}
+        >
+          <BedForm
+            bed_types={bedTypes}
+            is_apartment={room.room_type === 'apartment'}
+            existing_schlafraeume={Array.from(
+              new Set(
+                beds
+                  .map((bed) => bed.sleeping_room)
+                  .filter((value): value is number => value !== null),
+              ),
+            ).sort((a, b) => a - b)}
+            onSubmit={(payload) => {
+              onAddBed(room.id, payload)
+              setAddingBed(false)
+            }}
+          />
+        </CollectionCreateAction>
       </div>
     </div>
   )
