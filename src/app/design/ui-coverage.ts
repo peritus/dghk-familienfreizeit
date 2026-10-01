@@ -290,6 +290,12 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/shared/ui/tabs.tsx',
   },
   {
+    id: 'shared-primitives-workflowstepper--workshop-choice',
+    area: 'component',
+    subject: 'Workflow stepper',
+    source: 'src/app/components/shared/ui/workflow-stepper.tsx',
+  },
+  {
     id: 'modules-room-assignment-screens-assignment-board--populated',
     area: 'screen',
     subject: 'Assignment board populated',

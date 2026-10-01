@@ -9,6 +9,7 @@ import * as TagStories from '../components/shared/ui/tag.stories'
 import * as StatsStories from '../components/shared/ui/stats-strip.stories'
 import * as SuccessStories from '../components/shared/ui/success-state.stories'
 import * as TabsStories from '../components/shared/ui/tabs.stories'
+import * as WorkflowStepperStories from '../components/shared/ui/workflow-stepper.stories'
 import * as WorkshopSharedStories from '../components/shared/workshop/shared.stories'
 import * as WorkshopAuthoringStories from '../../modules/official-workshops/app/components/authoring.stories'
 import * as WorkshopReportsStories from '../organiser/components/workshop/reports.stories'
@@ -82,6 +83,14 @@ views sharing one context. Text remains present when color changes.
 
 Use a segmented control only when the options are few enough to compare at a glance.
 On narrow screens the options stack and retain their labels.
+
+## Workflow progress
+
+<Canvas of={WorkflowStepperStories.WorkshopChoice} />
+
+Use `WorkflowStepper` to report a short ordered process such as Workshopwahl or
+Unterbringung. It is status, not navigation: its current step comes from the
+screen's derived view and it never changes domain state itself.
 
 ## Workshop semantic component catalogue
 
