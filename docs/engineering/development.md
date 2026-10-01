@@ -95,6 +95,10 @@ needed. If a non-loopback preview must use the same flow, explicitly set
 `DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true` in that preview's
 environment and remove it immediately afterward.
 
+The `dev-preview` task supplies that one variable from its process environment.
+Wrangler explicitly allowlists it as a local Worker binding; no `.env` file is
+read, and no other process environment values are exposed to the Worker.
+
 Hosted preview/prod deployment requires separate real D1 bindings, environment
 configuration and secrets under [deployment](../../spec/engineering/deployment.md). There is no
 automatic deployment target in M0.
