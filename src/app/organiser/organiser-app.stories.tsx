@@ -9,6 +9,7 @@ const meta = {
   beforeEach: mockOrganiserApi,
   parameters: {
     layout: 'fullscreen',
+    route: { path: '/' },
     docs: {
       description: {
         component:
@@ -27,7 +28,6 @@ function LoadedOrganiserApp() {
 
 function mockOrganiserApi() {
   const originalFetch = globalThis.fetch
-  window.history.replaceState({}, '', '/organiser')
   globalThis.fetch = async (input) => {
     const url = String(input)
     if (url.endsWith('/api/me')) {

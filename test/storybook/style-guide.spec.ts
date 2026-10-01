@@ -2,6 +2,25 @@ import { expect, test } from '@playwright/test'
 import { uiCoverage } from '../../src/app/design/ui-coverage'
 
 test.describe('repository-local UI contract', () => {
+  test('story navigation stays inside the preview iframe', async ({ page }) => {
+    await page.goto('/iframe.html?id=application-organiser-app--loaded-dashboard&viewMode=story')
+    await expect(
+      page.getByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+    ).toBeVisible()
+    const organiserStoryUrl = page.url()
+
+    await page.getByRole('link', { name: 'Familien', exact: true }).click()
+    await expect(page.getByRole('heading', { name: /Familien/ })).toBeVisible()
+    expect(page.url()).toBe(organiserStoryUrl)
+
+    await page.goto(
+      '/iframe.html?id=modules-room-assignment-components-assignment-board--room-card-variants&viewMode=story',
+    )
+    const roomStoryUrl = page.url()
+    await page.getByRole('link', { name: 'Zimmer 23' }).first().click()
+    expect(page.url()).toBe(roomStoryUrl)
+  })
+
   test('every coverage entry resolves to a Storybook story', async ({ request }) => {
     const response = await request.get('/index.json')
     expect(response.ok()).toBeTruthy()
