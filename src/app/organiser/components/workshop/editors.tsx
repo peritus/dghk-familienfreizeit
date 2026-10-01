@@ -354,6 +354,50 @@ export type ExternalLeaderEditorValues = {
   availability?: readonly string[]
 }
 
+export function ExternalLeaderEditorFields({
+  default_values: defaultValues = {},
+  slots = [],
+}: {
+  default_values?: ExternalLeaderEditorValues
+  slots?: readonly { value: string; label: string }[]
+}) {
+  return (
+    <>
+      <WorkshopField label="Name" name="name" defaultValue={defaultValues.name} required />
+      <WorkshopField
+        label="Telefon"
+        name="phone"
+        type="tel"
+        defaultValue={defaultValues.phone}
+        hint="Nur für die Organisation sichtbar."
+      />
+      <fieldset className="grid gap-2 sm:col-span-2">
+        <legend className="font-bold">Verfügbar</legend>
+        {slots.length ? (
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {slots.map((slot) => (
+              <label key={slot.value} className="inline-flex min-h-11 items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="availability"
+                  value={slot.value}
+                  defaultChecked={defaultValues.availability?.includes(slot.value)}
+                  className="size-5 accent-black"
+                />
+                {slot.label}
+              </label>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-base border-2 border-black bg-attention p-3 text-sm">
+            Lege zuerst einen Workshop-Slot an.
+          </p>
+        )}
+      </fieldset>
+    </>
+  )
+}
+
 export function ExternalLeaderEditorForm({
   default_values: defaultValues = {},
   slots = [],
@@ -372,42 +416,7 @@ export function ExternalLeaderEditorForm({
       </CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-          <WorkshopField label="Name" name="name" defaultValue={defaultValues.name} required />
-          <WorkshopField
-            label="Telefon"
-            name="phone"
-            type="tel"
-            defaultValue={defaultValues.phone}
-            hint="Nur für die Organisation sichtbar."
-          />
-          <fieldset className="grid gap-2 sm:col-span-2">
-            <legend className="font-bold">Verfügbar</legend>
-            <p className="text-sm font-normal text-muted">
-              Wähle die Slots, in denen die externe Leitung einen Workshop übernehmen kann.
-            </p>
-            {slots.length ? (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {slots.map((slot) => (
-                  <label
-                    key={slot.value}
-                    className="flex min-h-11 items-center gap-2 rounded-base border-2 border-black bg-white px-3"
-                  >
-                    <input
-                      type="checkbox"
-                      name="availability"
-                      value={slot.value}
-                      defaultChecked={defaultValues.availability?.includes(slot.value)}
-                    />
-                    {slot.label}
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p className="rounded-base border-2 border-black bg-attention p-3 text-sm">
-                Lege zuerst einen Workshop-Slot an.
-              </p>
-            )}
-          </fieldset>
+          <ExternalLeaderEditorFields default_values={defaultValues} slots={slots} />
           <div className="sm:col-span-2">
             <Button type="submit">{submitLabel}</Button>
           </div>
