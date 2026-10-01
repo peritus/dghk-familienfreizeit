@@ -211,6 +211,20 @@ test('a direct organiser URL loads the lazy route', async () => {
   ).toBeTruthy()
 })
 
+test('ordinary route navigation preserves the user-controlled focus', async () => {
+  open('/organiser')
+  expect(
+    await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
+  ).toBeTruthy()
+
+  const familiesLink = screen.getByRole('link', { name: /^Familien$/ })
+  familiesLink.focus()
+  fireEvent.click(familiesLink)
+
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(document.activeElement).toBe(familiesLink)
+})
+
 test('the organiser nav is labelled for assistive tech and the inventory page sets its own title', async () => {
   open('/organiser/accommodation/inventory')
   expect(await screen.findByRole('heading', { name: 'Unterkunft' })).toBeTruthy()

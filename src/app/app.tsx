@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { Shell } from './components/application/shell'
 import { NotFound, RouteBoundary, RouteLoading } from './components/application/route-states'
@@ -9,9 +9,6 @@ const OrganiserApp = lazy(() => import('./organiser/organiser-app'))
 
 export function App() {
   const [location] = useLocation()
-  useEffect(() => {
-    document.getElementById('content')?.focus()
-  }, [location])
 
   return (
     <Shell>
