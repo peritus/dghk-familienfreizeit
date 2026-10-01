@@ -60,6 +60,7 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
 
 export type ProgrammeRowView = {
   id: string
+  day_label?: string
   slot_label: string
   cells: readonly ProgrammeCellView[]
 }
@@ -67,13 +68,10 @@ export type ProgrammeRowView = {
 export function ProgrammeGrid({
   rooms,
   rows,
-  day_rows: dayRows = [],
 }: {
   rooms: readonly { id: string; label: string }[]
   rows: readonly ProgrammeRowView[]
-  day_rows?: readonly { id: string; label: string }[]
 }) {
-  const dayById = new Map(dayRows.map((day) => [day.id, day.label]))
   return (
     <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
       <table className="w-full min-w-[48rem] text-left">
@@ -91,22 +89,32 @@ export function ProgrammeGrid({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className="border-b border-black/30">
-              <th scope="row" className="p-3">
-                {dayById.get(row.id) ? (
-                  <span className="block text-sm text-muted">{dayById.get(row.id)}</span>
-                ) : null}
-                {row.slot_label}
-              </th>
-              {rooms.map((room, index) => (
-                <ProgrammeCell
-                  key={`${row.id}-${room.id}`}
-                  cell={row.cells[index] ?? { id: `${row.id}-${room.id}`, state: 'empty' }}
-                />
-              ))}
-            </tr>
-          ))}
+          {rows.flatMap((row, index) => {
+            const previous = rows[index - 1]
+            const startsDay = row.day_label && row.day_label !== previous?.day_label
+            return [
+              ...(startsDay
+                ? [
+                    <tr key={`${row.id}-day`} className="border-b-2 border-black bg-background">
+                      <th scope="colgroup" colSpan={rooms.length + 1} className="p-3 text-left">
+                        {row.day_label}
+                      </th>
+                    </tr>,
+                  ]
+                : []),
+              <tr key={row.id} className="border-b border-black/30">
+                <th scope="row" className="p-3">
+                  {row.slot_label}
+                </th>
+                {rooms.map((room, cellIndex) => (
+                  <ProgrammeCell
+                    key={`${row.id}-${room.id}`}
+                    cell={row.cells[cellIndex] ?? { id: `${row.id}-${room.id}`, state: 'empty' }}
+                  />
+                ))}
+              </tr>,
+            ]
+          })}
         </tbody>
       </table>
     </div>

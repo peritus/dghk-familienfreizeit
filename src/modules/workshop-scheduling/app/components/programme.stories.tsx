@@ -27,7 +27,10 @@ export const Grid: Story = {
           { id: 'atelier', label: 'Atelier' },
           { id: 'wiese', label: 'Wiese' },
         ]}
-        rows={fullProgrammeRows}
+        rows={fullProgrammeRows.map((row) => ({
+          ...row,
+          day_label: row.id.startsWith('fr') ? 'Freitag, 14.05.' : 'Samstag, 15.05.',
+        }))}
       />
     </div>
   ),
