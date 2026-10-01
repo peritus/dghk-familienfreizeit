@@ -48,10 +48,6 @@ export function Login() {
             <AlertTitle>Magic Link angefordert</AlertTitle>
             <AlertDescription>
               <p>Prüfe Dein Postfach und öffne den Link.</p>
-              <p>
-                In der lokalen Entwicklung wird der Link im Worker-Terminal ausgegeben. Kopiere ihn
-                von dort in den Browser.
-              </p>
             </AlertDescription>
           </Alert>
         ) : null}
