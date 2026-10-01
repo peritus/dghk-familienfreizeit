@@ -14,6 +14,7 @@ import { workshopSpace, workshopSpaceWorld } from '../../src/modules/workshop-sp
 import {
   workshopRankings,
   workshopRankingsFromWorld,
+  workshopRankingsWorld,
 } from '../../src/modules/workshop-rankings/index.js'
 import { workshopAssignment } from '../../src/modules/workshop-assignment/index.js'
 
@@ -500,5 +501,29 @@ describe('workshop domain events', () => {
     expect(rankingFor('wks_ceramics:1')).toEqual(
       rankingFor({ workshop_id: 'wks_ceramics', rank: 1 }),
     )
+  })
+
+  test('exposes ranked choices as an event-derived organiser read model', () => {
+    const world = derive(
+      [
+        ...personEvents,
+        event(
+          'LabelSet',
+          {
+            entity_id: 'per_a',
+            key: 'prefers-workshop',
+            value: { workshop_id: 'wks_ceramics', rank: 1 },
+            strength: null,
+            note: null,
+          },
+          personEvents.length + 1,
+        ),
+      ],
+      profile.validation_view,
+    )
+
+    expect(workshopRankingsWorld(world).rankings).toEqual([
+      { person_id: 'per_a', choices: [{ workshop_id: 'wks_ceramics', rank: 1 }] },
+    ])
   })
 })

@@ -380,13 +380,23 @@ test('workshop authoring opens existing values and stages a complete update', as
   })
 })
 
-test('the programme groups slots by their actual date and avoids false action buttons', async () => {
+test('the programme review keeps each view at its own URL and avoids false roster actions', async () => {
   open('/organiser/workshops/programme', workshopFixtureEvents())
 
-  expect(await screen.findByRole('heading', { name: 'Wann findet was statt?' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Programm' })).toBeTruthy()
   expect(screen.getByText(/Freitag/)).toBeTruthy()
   expect(screen.getByText('Keramik')).toBeTruthy()
   expect(screen.queryByRole('button', { name: 'Keramik' })).toBeNull()
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Nicht eingeplant' }))
+  expect(await screen.findByRole('tab', { name: 'Nicht eingeplant', selected: true })).toBeTruthy()
+  expect(window.location.pathname).toBe('/organiser/workshops/programme/unplaced')
+  expect(screen.getByText('Nicht eingeplant')).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Überschneidungen' }))
+  expect(await screen.findByRole('tab', { name: 'Überschneidungen', selected: true })).toBeTruthy()
+  expect(window.location.pathname).toBe('/organiser/workshops/programme/overlaps')
+  expect(screen.getByRole('heading', { name: 'Überschneidungen' })).toBeTruthy()
 })
 
 test('slot and space retirement require explicit confirmation', async () => {

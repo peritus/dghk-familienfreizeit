@@ -32,6 +32,8 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/workshops/leitungen',
     '/organiser/workshops/externe',
     '/organiser/workshops/programme',
+    '/organiser/workshops/programme/unplaced',
+    '/organiser/workshops/programme/overlaps',
     '/organiser/workshops/slots',
   ])
 })
@@ -123,6 +125,8 @@ test('known organiser path matching is driven by the route catalog', () => {
   expect(isKnownOrganiserPath('/organiser/accommodation/inventory')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/spaces')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/slots')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/programme/unplaced')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/programme/overlaps')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/inventory')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/organiser/families')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/families/')).toBe(false)
