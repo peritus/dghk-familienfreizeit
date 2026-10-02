@@ -195,7 +195,7 @@ function slotLabel(startsAt: string, endsAt?: string): string {
   return `${day} ${time}${endTime ? `–${endTime}` : ''}`
 }
 
-function WorkshopNavigation() {
+export function WorkshopNavigation() {
   return (
     <SecondaryNavigation
       aria_label="Workshopbereiche"
@@ -217,6 +217,15 @@ function WorkshopNavigation() {
             organiserPaths.workshop_programme_overlaps(),
           ],
           label: 'Programm',
+        },
+        {
+          href: organiserPaths.workshop_allocation(),
+          active_paths: [
+            organiserPaths.workshop_allocation(),
+            organiserPaths.workshop_allocation_demand(),
+            organiserPaths.workshop_allocation_trace(),
+          ],
+          label: 'Wünsche',
         },
         {
           href: organiserPaths.workshop_spaces(),

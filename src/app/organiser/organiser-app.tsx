@@ -56,6 +56,11 @@ const WorkshopSlots = lazy(() =>
 const WorkshopSpaces = lazy(() =>
   import('./screens/workshops.js').then((module) => ({ default: module.WorkshopSpaces })),
 )
+const WorkshopAllocation = lazy(() =>
+  import('./screens/workshop-allocation.js').then((module) => ({
+    default: module.WorkshopAllocation,
+  })),
+)
 
 export default function OrganiserApp() {
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
@@ -325,6 +330,25 @@ export default function OrganiserApp() {
             ) ? (
               <Route path={organiserRoutePaths.workshop_programme_overlaps}>
                 <WorkshopProgramme />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-allocation') ? (
+              <Route path={organiserRoutePaths.workshop_allocation}>
+                <WorkshopAllocation />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(
+              ({ id }) => id === 'organiser-workshop-allocation-demand',
+            ) ? (
+              <Route path={organiserRoutePaths.workshop_allocation_demand}>
+                <WorkshopAllocation />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(
+              ({ id }) => id === 'organiser-workshop-allocation-trace',
+            ) ? (
+              <Route path={organiserRoutePaths.workshop_allocation_trace}>
+                <WorkshopAllocation />
               </Route>
             ) : null}
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-slots') ? (

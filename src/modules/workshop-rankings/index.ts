@@ -135,6 +135,26 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
         summarize: (world) => ({ rankings: buildRankings(world) }),
       },
     ],
+    screens: [
+      {
+        id: 'organiser-workshop-allocation',
+        route: '/organiser/workshops/allocation',
+        label: 'Wünsche',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-allocation-demand',
+        route: '/organiser/workshops/allocation/demand',
+        label: 'Nachfrage',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-allocation-trace',
+        route: '/organiser/workshops/allocation/trace',
+        label: 'Verlauf',
+        audience: 'organiser',
+      },
+    ],
   }),
 })
 

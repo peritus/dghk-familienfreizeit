@@ -3,7 +3,10 @@ import type { Plan, TraceEntry } from '../../../solver/types.js'
 import { officialWorkshopsWorld } from '../../official-workshops/index.js'
 import { workshopAssignmentSection } from '../../workshop-assignment/index.js'
 import { workshopRankingsWorld, type WorkshopRanking } from '../index.js'
-import { workshopSchedulingWorld } from '../../workshop-scheduling/index.js'
+import {
+  workshopSchedulingWorld,
+  type WorkshopSchedulingSection,
+} from '../../workshop-scheduling/index.js'
 
 export type WorkshopAllocationGroup = 'all' | 'children' | 'adults'
 
@@ -82,7 +85,7 @@ type AllocationPerson = {
   age_label: string
 }
 
-type ProjectionInput = {
+export type WorkshopAllocationProjectionInput = {
   world: KernelWorld
   plan: Plan
   event_date: string
@@ -226,15 +229,8 @@ function placementLabel(
     : 'Im Programm platziert'
 }
 
-function filteredPeople(
-  people: readonly AllocationPerson[],
-  group: WorkshopAllocationGroup,
-): readonly AllocationPerson[] {
-  return people.filter((person) => group === 'all' || person.group === group)
-}
-
 export function buildWorkshopAllocationProjection(
-  input: ProjectionInput,
+  input: WorkshopAllocationProjectionInput,
 ): WorkshopAllocationProjection {
   const official = officialWorkshopsWorld(input.world)
   const schedule = workshopSchedulingWorld(input.world)
@@ -250,11 +246,16 @@ export function buildWorkshopAllocationProjection(
     .sort((left, right) => left.name.localeCompare(right.name, 'de'))
   const rankingsByPerson = answerRankings(rankings, input.max_rank)
   const workshops = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
+  const scheduling = input.plan.sections['workshop-scheduling'] as
+    | WorkshopSchedulingSection
+    | undefined
   const placements = new Map(
-    schedule.placements.map((placement) => [placement.workshop_id, placement]),
+    (scheduling?.placements ?? []).map((placement) => [placement.workshop_id, placement]),
   )
   const slots = new Map(schedule.slots.map((slot) => [slot.id, slot]))
-  const unscheduled = new Map(schedule.unscheduled.map((item) => [item.workshop_id, item.reason]))
+  const unscheduled = new Map(
+    (scheduling?.unscheduled ?? []).map((item) => [item.workshop_id, item.reason]),
+  )
   const traces = input.plan.trace.filter((entry) => entry.stage === 'workshop-assignment.attendance')
   const assignmentByChoice = new Map(
     assignment.assignments.map((item) => [`${item.person_id}|${item.workshop_id}`, item]),
@@ -307,8 +308,16 @@ export function buildWorkshopAllocationProjection(
       id: person.id,
       name: person.name,
       age_label: person.age_label,
-      status: ranking ? (noPreference ? 'Keine Präferenz' : 'Rangfolge') : 'Keine Antwort',
-      status_tone: ranking && !noPreference ? undefined : ranking ? 'neutral' : 'attention',
+      status: (ranking
+        ? noPreference
+          ? 'Keine Präferenz'
+          : 'Rangfolge'
+        : 'Keine Antwort') as WorkshopAllocationAnswer['status'],
+      status_tone: (ranking && !noPreference
+        ? undefined
+        : ranking
+          ? 'neutral'
+          : 'attention') as WorkshopAllocationAnswer['status_tone'],
       ranks: (ranking?.choices ?? [])
         .filter((choice) => choice.workshop_id !== null)
         .sort((left, right) => (left.rank ?? 0) - (right.rank ?? 0))
