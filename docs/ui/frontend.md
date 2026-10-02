@@ -7,7 +7,7 @@ The route table is:
 |---|---|
 | `/`, `/login`, `/family` | Public foundation welcome placeholder |
 | `/organiser` | Lazy authenticated organiser dashboard |
-| `/organiser/families` | Derived family table with first-row invitation staging |
+| `/organiser/families` | Derived family table with header-dialog invitation staging |
 | `/organiser/families/:id` | Read-only-by-default people list, explicit editing, lifecycle staging and human-readable changes |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |

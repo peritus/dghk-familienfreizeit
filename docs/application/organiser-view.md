@@ -11,7 +11,7 @@ path before persistence.
 | Route | Behavior |
 |---|---|
 | `/organiser` | Dashboard with family/person counts, diagnostics, and draft-change status |
-| `/organiser/families` | Derived family table and manual invitation staging |
+| `/organiser/families` | Derived family table and manual invitation staging from the header dialog |
 | `/organiser/families/:id` | Derived family detail, family identity editing, profile-driven preference controls, Add/Save/Delete person actions, and committed or draft event history |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
