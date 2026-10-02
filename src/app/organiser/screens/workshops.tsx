@@ -41,6 +41,7 @@ import {
   UnplacedWorkshopRow,
   WorkshopOverlapTable,
 } from '../../../modules/workshop-scheduling/app/components/programme.js'
+import { buildProgrammeView } from '../../../modules/workshop-scheduling/app/programme-view.js'
 import {
   SlotDayGroup,
   SpaceRow,
@@ -205,11 +206,17 @@ function WorkshopNavigation() {
             organiserPaths.workshops(),
             organiserPaths.workshop_leaders(),
             organiserPaths.workshop_external_leaders(),
+          ],
+          label: 'Workshops',
+        },
+        {
+          href: organiserPaths.workshop_programme(),
+          active_paths: [
             organiserPaths.workshop_programme(),
             organiserPaths.workshop_programme_unplaced(),
             organiserPaths.workshop_programme_overlaps(),
           ],
-          label: 'Workshops',
+          label: 'Programm',
         },
         {
           href: organiserPaths.workshop_spaces(),
@@ -227,27 +234,6 @@ function programmeReviewView(pathname: string): ProgrammeReviewView {
   if (pathname.endsWith('/programme/unplaced')) return 'unplaced'
   if (pathname.endsWith('/programme/overlaps')) return 'overlaps'
   return 'programme'
-}
-
-function scheduleReasonLabel(reason: string): string {
-  switch (reason) {
-    case 'hard.space-occupied':
-      return 'Alle passenden Raum-Slots sind bereits belegt.'
-    case 'hard.space-capacity':
-      return 'Kein passender Raum bietet genügend Plätze.'
-    case 'hard.space-unavailable':
-      return 'Kein passender Raum ist in einem Slot verfügbar.'
-    case 'hard.space-slot-blocked':
-      return 'Passende Raum-Slots sind gesperrt.'
-    case 'hard.missing-capability':
-      return 'Kein Raum erfüllt die benötigten Eigenschaften.'
-    case 'hard.leader-conflict':
-      return 'Eine Leitung ist in den passenden Slots bereits eingeplant.'
-    case 'hard.no-slot-or-space':
-      return 'Es gibt keinen passenden Slot oder Raum.'
-    default:
-      return reason
-  }
 }
 
 export function WorkshopExternalLeaders() {
@@ -868,83 +854,6 @@ export function WorkshopProgramme() {
   const rankings = workshopRankingsWorld(world!)
   const plan = solveWorkshopPlan(world!)
   const view = programmeReviewView(location)
-  const unscheduled = new Map(plan.unscheduled.map((item) => [item.workshop_id, item.reason]))
-  const unassignedWorkshops = official.workshops
-    .filter(
-      (workshop) => !plan.placements.some((placement) => placement.workshop_id === workshop.id),
-    )
-    .map((workshop) => ({
-      id: workshop.id,
-      title: workshop.title,
-      reason: scheduleReasonLabel(unscheduled.get(workshop.id) ?? 'hard.no-slot-or-space'),
-      demand_label:
-        workshop.mode === 'assigned'
-          ? `${plan.demand[workshop.id] ?? 0} Wünsche · Kapazität ${workshop.capacity}`
-          : workshop.mode === 'sign-up'
-            ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
-            : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
-    }))
-  const rooms = spaces.map((space) => ({ id: space.id, label: space.name }))
-  const attendanceByWorkshop = new Map<string, number>()
-  for (const item of [...plan.assignments, ...plan.signups])
-    attendanceByWorkshop.set(
-      item.workshop_id,
-      (attendanceByWorkshop.get(item.workshop_id) ?? 0) + 1,
-    )
-  const interestsByWorkshop = new Map<string, number>()
-  for (const item of plan.interests)
-    interestsByWorkshop.set(item.workshop_id, (interestsByWorkshop.get(item.workshop_id) ?? 0) + 1)
-  const rows = schedule.slots.map((slot) => ({
-    id: slot.id,
-    day_label: new globalThis.Date(slot.starts_at).toLocaleDateString('de-DE', {
-      weekday: 'long',
-      day: '2-digit',
-      month: '2-digit',
-    }),
-    slot_label: new globalThis.Date(slot.starts_at).toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    cells: rooms.map((room) => {
-      const placement = plan.placements.find(
-        (candidate) => candidate.slot_id === slot.id && candidate.space_id === room.id,
-      )
-      const blocked = schedule.space_slot_blocks.some(
-        (block) => block.slot_id === slot.id && block.space_id === room.id,
-      )
-      if (blocked) return { id: `${slot.id}-${room.id}`, state: 'blocked' as const }
-      const workshop = placement
-        ? official.workshops.find((candidate) => candidate.id === placement.workshop_id)
-        : undefined
-      return workshop
-        ? {
-            id: workshop.id,
-            state: 'placed' as const,
-            title: workshop.title,
-            audience: audienceLabel(workshop.audience),
-            age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
-            leaders: `${workshop.leader_ids.length} ${workshop.leader_ids.length === 1 ? 'Leitung' : 'Leitungen'}`,
-            capacity_label:
-              workshop.mode === 'interest'
-                ? `${interestsByWorkshop.get(workshop.id) ?? 0} Interessen`
-                : (() => {
-                    const attendance = attendanceByWorkshop.get(workshop.id) ?? 0
-                    const remaining = workshop.capacity - attendance
-                    return `${attendance} / ${workshop.capacity} · ${
-                      remaining > 0
-                        ? `${remaining} frei`
-                        : remaining === 0
-                          ? 'voll'
-                          : 'über Kapazität'
-                    }`
-                  })(),
-            demand_label: plan.demand[workshop.id]
-              ? `${plan.demand[workshop.id]} Wünsche`
-              : undefined,
-          }
-        : { id: `${slot.id}-${room.id}`, state: 'empty' as const }
-    }),
-  }))
   const personNames = new Map(
     world!.persons.map((person) => {
       const labels = world!.labels_by_entity[person.id] ?? []
@@ -957,58 +866,30 @@ export function WorkshopProgramme() {
       return [person.id, name || person.id] as const
     }),
   )
-  const placementByWorkshop = new Map(
-    plan.placements.map((placement) => [placement.workshop_id, placement]),
-  )
-  const workshopsById = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
-  const overlapPeople = new Map<string, Set<string>>()
-  for (const ranking of rankings.rankings) {
-    const choices = ranking.choices
-      .filter(
-        (choice): choice is { workshop_id: string; rank: number } =>
-          choice.workshop_id !== null && choice.rank !== null && choice.rank <= 3,
-      )
-      .filter((choice) => placementByWorkshop.has(choice.workshop_id))
-    for (let first = 0; first < choices.length; first += 1) {
-      for (let second = first + 1; second < choices.length; second += 1) {
-        const firstWorkshop = choices[first]?.workshop_id
-        const secondWorkshop = choices[second]?.workshop_id
-        if (!firstWorkshop || !secondWorkshop) continue
-        const firstPlacement = placementByWorkshop.get(firstWorkshop)
-        const secondPlacement = placementByWorkshop.get(secondWorkshop)
-        if (!firstPlacement || firstPlacement.slot_id !== secondPlacement?.slot_id) continue
-        const key = [firstWorkshop, secondWorkshop].sort().join(':')
-        const people = overlapPeople.get(key) ?? new Set<string>()
-        people.add(ranking.person_id)
-        overlapPeople.set(key, people)
-      }
-    }
-  }
-  const overlaps = [...overlapPeople.entries()]
-    .map(([key, people]) => {
-      const [firstWorkshopId, secondWorkshopId] = key.split(':')
-      const firstWorkshop = firstWorkshopId ? workshopsById.get(firstWorkshopId) : undefined
-      const secondWorkshop = secondWorkshopId ? workshopsById.get(secondWorkshopId) : undefined
-      const slot = firstWorkshopId ? placementByWorkshop.get(firstWorkshopId) : undefined
-      return {
-        id: key,
-        workshops: `${firstWorkshop?.title ?? firstWorkshopId} + ${secondWorkshop?.title ?? secondWorkshopId}`,
-        slot: slot
-          ? slotLabel(
-              schedule.slots.find((candidate) => candidate.id === slot.slot_id)?.starts_at ?? '',
-            )
-          : '—',
-        people_count: people.size,
-        people: [...people]
-          .map((personId) => personNames.get(personId) ?? personId)
-          .sort((a, b) => a.localeCompare(b, 'de')),
-      }
-    })
-    .sort(
-      (first, second) =>
-        second.people_count - first.people_count ||
-        first.workshops.localeCompare(second.workshops, 'de'),
-    )
+  const leaderNames = new Map([
+    ...personNames,
+    ...official.external_leaders.map((leader) => [leader.id, `${leader.name} (extern)`] as const),
+  ])
+  const rankingModule = activeProfile.modules.find((module) => module.id === 'workshop-rankings')
+  const overlapRank =
+    typeof rankingModule?.parameters?.max_rank === 'number' ? rankingModule.parameters.max_rank : 3
+  const programme = buildProgrammeView({
+    workshops: official.workshops,
+    slots: schedule.slots,
+    spaces,
+    blocks: schedule.space_slot_blocks,
+    placements: plan.placements,
+    unscheduled: plan.unscheduled,
+    demand: plan.demand,
+    assignments: plan.assignments,
+    signups: plan.signups,
+    interests: plan.interests,
+    rankings: rankings.rankings,
+    person_names: personNames,
+    leader_names: leaderNames,
+    overlap_rank: overlapRank,
+    time_zone: activeProfile.meta.timezone,
+  })
   return (
     <div className="space-y-8">
       <WorkshopNavigation />
@@ -1017,6 +898,40 @@ export function WorkshopProgramme() {
         title="Programm"
         description="Welcher Workshop wann in welchem Raum stattfindet."
       />
+      <WorkflowStepper
+        aria_label="Ablauf der Workshopwahl"
+        steps={[
+          {
+            id: 'authoring',
+            label: 'Workshops anlegen',
+            state: official.workshops.length ? 'complete' : 'current',
+          },
+          {
+            id: 'choice',
+            label: 'Wahl öffnen',
+            state: rankings.rankings.length ? 'complete' : 'upcoming',
+          },
+          {
+            id: 'review',
+            label: 'Zuordnung prüfen',
+            state: official.workshops.length ? 'current' : 'upcoming',
+          },
+          { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
+        ]}
+      />
+      <WorkshopPhaseNotice
+        label={programme.unplaced.length ? 'Prüfung erforderlich' : 'Zuordnung prüfen'}
+        tone={programme.unplaced.length ? 'attention' : 'success'}
+        details={
+          programme.unplaced.length
+            ? `${programme.unplaced.length} Workshop${programme.unplaced.length === 1 ? '' : 's'} ohne passenden Platz.`
+            : 'Prüfe Bedarf, Plätze und Überschneidungen, bevor der Plan festgelegt wird.'
+        }
+      >
+        {programme.unplaced.length
+          ? 'Nicht eingeplante Workshops brauchen eine organisatorische Entscheidung.'
+          : 'Das Programm ist berechnet und kann auf Konflikte geprüft werden.'}
+      </WorkshopPhaseNotice>
       <TertiaryNavigation
         aria_label="Programmansicht"
         value={view}
@@ -1032,8 +947,8 @@ export function WorkshopProgramme() {
         ]}
       />
       {view === 'programme' ? (
-        schedule.slots.length && rooms.length ? (
-          <ProgrammeGrid rooms={rooms} rows={rows} />
+        programme.rows.length && programme.rooms.length ? (
+          <ProgrammeGrid rooms={programme.rooms} rows={programme.rows} />
         ) : (
           <WorkshopEmptyState title="Noch kein Programm">
             Ohne Slots und Räume kann nichts eingeplant werden.
@@ -1041,9 +956,9 @@ export function WorkshopProgramme() {
         )
       ) : null}
       {view === 'unplaced' ? (
-        unassignedWorkshops.length ? (
+        programme.unplaced.length ? (
           <ul className="overflow-hidden rounded-base border-2 border-black">
-            {unassignedWorkshops.map((workshop) => (
+            {programme.unplaced.map((workshop) => (
               <UnplacedWorkshopRow key={workshop.id} workshop={workshop} />
             ))}
           </ul>
@@ -1062,8 +977,8 @@ export function WorkshopProgramme() {
               bekommen.
             </p>
           </div>
-          {overlaps.length ? (
-            <WorkshopOverlapTable overlaps={overlaps} />
+          {programme.overlaps.length ? (
+            <WorkshopOverlapTable overlaps={programme.overlaps} />
           ) : (
             <WorkshopEmptyState success>Keine Überschneidungen.</WorkshopEmptyState>
           )}

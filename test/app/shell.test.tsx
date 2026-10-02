@@ -253,7 +253,7 @@ test('workshop navigation exposes the intended areas and switches resource views
     within(navigation)
       .getAllByRole('link')
       .map((link) => link.textContent),
-  ).toEqual(['Workshops', 'Räume und Slots'])
+  ).toEqual(['Workshops', 'Programm', 'Räume und Slots'])
   expect(
     within(navigation).getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current'),
   ).toBe('page')
