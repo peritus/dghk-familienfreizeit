@@ -253,7 +253,7 @@ test('workshop navigation exposes the intended areas and switches resource views
     within(navigation)
       .getAllByRole('link')
       .map((link) => link.textContent),
-  ).toEqual(['Workshops', 'Programm', 'Räume und Slots'])
+  ).toEqual(['Workshops', 'Programm', 'Wünsche', 'Räume und Slots'])
   expect(
     within(navigation).getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current'),
   ).toBe('page')
@@ -261,6 +261,27 @@ test('workshop navigation exposes the intended areas and switches resource views
   expect(screen.getByRole('tab', { name: 'Slots' }).getAttribute('aria-selected')).toBe('true')
   fireEvent.click(screen.getByRole('tab', { name: 'Räume' }))
   expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
+})
+
+test('workshop allocation exposes three URL-backed Wunsch views', async () => {
+  open('/organiser/workshops/allocation', workshopFixtureEvents())
+  expect(await screen.findByRole('heading', { name: 'Wünsche' })).toBeTruthy()
+
+  const navigation = screen.getByRole('tablist', { name: 'Wünsche' })
+  expect(
+    within(navigation)
+      .getAllByRole('tab')
+      .map((tab) => tab.textContent),
+  ).toEqual(['Antworten', 'Nachfrage', 'Verlauf'])
+  expect(screen.getByRole('tab', { name: 'Antworten' }).getAttribute('aria-selected')).toBe('true')
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Nachfrage' }))
+  expect(await screen.findByRole('heading', { name: 'Nachfrage' })).toBeTruthy()
+  expect(window.location.pathname).toBe('/organiser/workshops/allocation/demand')
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Verlauf' }))
+  expect(await screen.findByRole('heading', { name: 'Verlauf' })).toBeTruthy()
+  expect(window.location.pathname).toBe('/organiser/workshops/allocation/trace')
 })
 
 test('the workshop overview uses the prototype view labels', async () => {

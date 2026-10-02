@@ -18,7 +18,10 @@ import type {
   WorkshopAllocationAnswer,
   WorkshopAllocationProjection,
 } from '../workshop-allocation-view.js'
-import { WorkshopPrintDocument } from '../../../../app/components/shared/workshop/shared.js'
+import {
+  WorkshopLoadingState,
+  WorkshopPrintDocument,
+} from '../../../../app/components/shared/workshop/shared.js'
 
 const answers: readonly WorkshopAllocationAnswer[] = fullChoiceAnswers.map((answer, index) => ({
   ...answer,
@@ -31,6 +34,7 @@ const projection: WorkshopAllocationProjection = {
   demand: fullDemandRows,
   trace_events: [],
   person_names: answers.map(({ id, name }) => ({ id, name })),
+  unassigned_person_ids: ['noah'],
   fixed_violation_count: 0,
   unassigned_count: 1,
   has_workshops: true,
@@ -138,6 +142,14 @@ export const BlockedByConflicts: Story = {
         projection={{ ...projection, fixed_violation_count: 2, unassigned_count: 3 }}
       />
       <p className="text-muted">Die Vorschau kann erst nach der Prüfung festgelegt werden.</p>
+    </div>
+  ),
+}
+
+export const Loading: Story = {
+  render: () => (
+    <div className="max-w-2xl bg-background p-6">
+      <WorkshopLoadingState message="Wünsche werden berechnet" />
     </div>
   ),
 }

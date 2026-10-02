@@ -11,6 +11,7 @@ export type OrganiserContextValue = {
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>
   previous_plan?: Plan | null
+  current_plan?: Plan | null
 }
 
 export const OrganiserContext = createContext<OrganiserContextValue | null>(null)

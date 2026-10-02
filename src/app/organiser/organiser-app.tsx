@@ -263,6 +263,7 @@ export default function OrganiserApp() {
         stage,
         apply,
         previous_plan: transition?.before ?? null,
+        current_plan: transition?.after ?? null,
       }}
     >
       <OrganiserFrame>

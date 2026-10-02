@@ -58,6 +58,7 @@ export type WorkshopAllocationProjection = {
   demand: readonly WorkshopAllocationDemand[]
   trace_events: readonly WorkshopAllocationTraceEvent[]
   person_names: readonly { id: string; name: string }[]
+  unassigned_person_ids: readonly string[]
   fixed_violation_count: number
   unassigned_count: number
   has_workshops: boolean
@@ -365,6 +366,7 @@ export function buildWorkshopAllocationProjection(
     demand,
     trace_events: traceEvents,
     person_names: people.map(({ id, name }) => ({ id, name })),
+    unassigned_person_ids: assignment.unassigned.map(({ person_id: personId }) => personId),
     fixed_violation_count: assignment.fixed_violations.length,
     unassigned_count: assignment.unassigned.length,
     has_workshops: official.workshops.length > 0,

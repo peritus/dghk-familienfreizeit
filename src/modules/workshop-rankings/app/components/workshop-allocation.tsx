@@ -52,6 +52,8 @@ export function WorkshopAllocationSummary({
   const ranked = answers.filter((answer) => answer.status === 'Rangfolge').length
   const noPreference = answers.filter((answer) => answer.status === 'Keine Präferenz').length
   const noAnswer = answers.filter((answer) => answer.status === 'Keine Antwort').length
+  const answerIds = new Set(answers.map((answer) => answer.id))
+  const unassigned = projection.unassigned_person_ids.filter((id) => answerIds.has(id)).length
   return (
     <WorkshopStatsStrip
       items={[
@@ -60,9 +62,9 @@ export function WorkshopAllocationSummary({
         { value: noPreference, label: 'Keine Präferenz' },
         { value: noAnswer, label: 'Keine Antwort', tone: noAnswer ? 'attention' : undefined },
         {
-          value: projection.unassigned_count,
+          value: unassigned,
           label: 'ohne Zuordnung',
-          tone: projection.unassigned_count ? 'attention' : undefined,
+          tone: unassigned ? 'attention' : undefined,
         },
       ]}
     />
@@ -115,12 +117,15 @@ export function WorkshopAllocationConflictNotice({
 
 export function WorkshopAllocationEmptyState({
   projection,
+  has_answers: hasAnswersOverride,
   children,
 }: {
   projection: WorkshopAllocationProjection
+  has_answers?: boolean
   children?: ReactNode
 }) {
-  if (projection.has_workshops && projection.has_answers) return null
+  const hasAnswers = hasAnswersOverride ?? projection.has_answers
+  if (projection.has_workshops && hasAnswers) return null
   return (
     <WorkshopEmptyState
       title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Workshops'}

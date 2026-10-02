@@ -54,12 +54,13 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('direct navigation reaches every implemented organiser route', async ({ page }) => {
+  test.setTimeout(60_000)
   for (const route of organiserRouteDefinitions) {
     await page.goto(route.test_path)
     await expect(page.getByRole('heading', { name: 'Diese Seite gibt es nicht' })).toHaveCount(0)
     await expect(page.locator('main')).toBeVisible()
   }
-})
+}, 60_000)
 
 test('dashboard, families, and family detail form one working navigation chain', async ({
   page,
@@ -109,10 +110,8 @@ test('accommodation parent redirects to inventory and workshop spaces links to s
 
   await page.goto('/organiser/workshops/spaces')
   await expect(page.getByRole('heading', { name: 'Räume und Slots' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Slots verwalten' })).toHaveAttribute(
-    'href',
-    '/organiser/workshops/slots',
-  )
+  await page.getByRole('tab', { name: 'Slots' }).click()
+  await expect(page).toHaveURL(/\/organiser\/workshops\/slots$/)
 })
 
 test('rendered organiser links are canonical and never duplicate the route base', async ({

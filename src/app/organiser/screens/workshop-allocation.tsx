@@ -1,9 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocation } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
-import type { KernelWorld } from '../../../events/fold.js'
-import { composeSolverContributions, buildSolverInput, solve } from '../../../solver/index.js'
-import type { Plan } from '../../../solver/types.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
@@ -44,17 +41,6 @@ function allocationView(pathname: string): WorkshopAllocationView {
   return 'answers'
 }
 
-function solveWorkshopAllocation(world: KernelWorld, previousPlan: Plan | null): Plan {
-  const contributions = composeSolverContributions(activeProfile)
-  return solve(buildSolverInput(world, contributions, previousPlan), contributions, {
-    build_revision: 'organiser',
-    compatibility_revision: 1,
-    event_date: activeProfile.meta.starts_on,
-    profile: activeProfile,
-    seed: null,
-  })
-}
-
 function rankingLimit(): number {
   const module = activeProfile.modules.find((item) => item.id === 'workshop-rankings')
   return typeof module?.parameters?.max_rank === 'number' ? module.parameters.max_rank : 3
@@ -77,26 +63,22 @@ function traceStages(
 export function WorkshopAllocation() {
   useDocumentTitle('Wünsche · Workshops · Familienfreizeit')
   const [location, navigate] = useLocation()
-  const { world, previous_plan: previousPlan } = useOrganiser()
+  const { world, current_plan: currentPlan } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
   const [traceMode, setTraceMode] = useState<TraceMode>('all')
   const [selectedPersonName, setSelectedPersonName] = useState('')
-  const plan = useMemo(
-    () => (world ? solveWorkshopAllocation(world, previousPlan ?? null) : null),
-    [world, previousPlan],
-  )
   const projection = useMemo(
     () =>
-      world && plan
+      world && currentPlan
         ? buildWorkshopAllocationProjection({
             world,
-            plan,
+            plan: currentPlan,
             event_date: activeProfile.meta.starts_on,
             time_zone: activeProfile.meta.timezone,
             max_rank: rankingLimit(),
           })
         : null,
-    [plan, world],
+    [currentPlan, world],
   )
 
   if (!world || !projection) return null
@@ -158,7 +140,7 @@ export function WorkshopAllocation() {
             description="Die abgegebenen Rangfolgen und die daraus abgeleiteten Zuordnungen."
           />
           <WorkshopAllocationSummary answers={answers} projection={projection} />
-          <WorkshopAllocationEmptyState projection={projection}>
+          <WorkshopAllocationEmptyState projection={projection} has_answers={answers.length > 0}>
             {projection.has_workshops
               ? 'Sobald Personen eine Rangfolge abgegeben haben, erscheinen Antworten und Nachfrage hier.'
               : 'Lege zuerst Workshops an, damit Wünsche und Nachfrage berechnet werden können.'}
@@ -177,7 +159,10 @@ export function WorkshopAllocation() {
             title="Nachfrage"
             description="Erstwünsche, Rangfolgen und verfügbare Plätze je Workshop."
           />
-          <WorkshopAllocationEmptyState projection={projection} />
+          <WorkshopAllocationEmptyState
+            projection={projection}
+            has_answers={projection.demand.length > 0}
+          />
           {projection.has_workshops && projection.has_answers ? (
             <div id="allocation-demand-heading">
               <WorkshopAllocationDemand demand={projection.demand} />
@@ -208,7 +193,10 @@ export function WorkshopAllocation() {
               { label: 'ohne Termin', tone: 'bg-background' },
             ]}
           />
-          <WorkshopAllocationEmptyState projection={projection}>
+          <WorkshopAllocationEmptyState
+            projection={projection}
+            has_answers={stages[0]?.open ? stages[0].open > 0 : false}
+          >
             Noch kein Verlauf: Es gibt keine abgegebenen Wünsche, die verfolgt werden können.
           </WorkshopAllocationEmptyState>
           {projection.has_answers ? (
