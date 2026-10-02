@@ -4,12 +4,6 @@
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
-  "secrets": {
-    "required": [
-      "DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE",
-      "DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES",
-    ],
-  },
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",

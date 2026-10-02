@@ -16,13 +16,15 @@ During local development, requests served on `localhost`, `127.0.0.1`, or
 `::1` print the link to the Worker terminal. A deliberate non-loopback override
 is available only through the alarming binding
 `DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true`; it must never be
-enabled on a shared or production deployment. Real email delivery remains a
-separate deployment concern.
+enabled on a shared or production deployment. The binding is optional; when it
+is unset, the loopback-only default remains in force. Real email delivery
+remains a separate deployment concern.
 
 Session cookies are always `Secure`, except when the separate alarming local-only
 binding `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` is set.
 The Station Tailscale preview uses it because browsers reject `Secure` cookies
 over its plain-HTTP URL. Shared and deployed environments must leave it unset.
+The binding is optional and leaving it unset preserves the secure default.
 
 `GET /auth/:token` atomically deletes an unexpired token with `DELETE … RETURNING`,
 creates a hashed session, and redirects to the application. Reusing or expiring a
