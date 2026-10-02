@@ -23,6 +23,41 @@ Nix package set, and `nix flake check` verifies that the development shell
 evaluates on supported systems. To initialize or repair the local database
 without starting Vite, run `npm run db:migrate:local`.
 
+### Importing a fixture through the HTTP API
+
+Use `db:import-fixture` to populate a local or remote Worker through the same
+authenticated event API used by the organiser application. The importer parses
+and validates the complete KDL fixture with the active profile before uploading
+anything, then sends authenticated batches to `POST /api/events`.
+
+For local development, start the preview and request a magic link for the
+organiser identity. The local Worker prints the single-use link in its terminal:
+
+```sh
+nix develop --command npm run dev
+nix develop --command npm run db:import-fixture -- \
+  --base-url http://127.0.0.1:5173 \
+  --magic-link 'http://127.0.0.1:5173/auth/<single-use-token>' \
+  test/fixtures/room-inventory/familienfreizeit-2027.kdl
+```
+
+For a Cloudflare preview or another deployed Worker, use its HTTPS URL and a
+single-use organiser magic link from the normal authentication flow:
+
+```sh
+nix develop --command npm run db:import-fixture -- \
+  --base-url https://preview.example.test \
+  --magic-link 'https://preview.example.test/auth/<single-use-token>' \
+  test/fixtures/room-inventory/familienfreizeit-2027.kdl
+```
+
+An existing `sid` session cookie can be supplied instead with
+`--session-cookie`. The importer sends only each fixture event's type, subject,
+and payload; the Worker assigns the authenticated actor, current timestamp, and
+contiguous sequence number. It refuses to append to a non-empty log by default;
+use `--allow-non-empty` only when intentionally appending to that server. The
+event API is append-only, so the importer never resets or deletes a remote log.
+
 To run the full browser route suite locally, use
 `nix develop --command npm run test:browser`. It starts the local Vite/Worker
 preview on port 5173, waits for `/api/health`, and runs the Chromium tests in
