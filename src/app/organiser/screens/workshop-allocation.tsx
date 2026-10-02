@@ -125,7 +125,9 @@ export function WorkshopAllocation() {
 
   const openTrace = (answer: { id: string }) => {
     setTraceMode('highlight')
-    void navigate(`${organiserPaths.workshop_allocation_trace()}?person=${encodeURIComponent(answer.id)}`)
+    void navigate(
+      `${organiserPaths.workshop_allocation_trace()}?person=${encodeURIComponent(answer.id)}`,
+    )
   }
 
   return (

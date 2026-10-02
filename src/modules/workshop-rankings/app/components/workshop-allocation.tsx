@@ -122,7 +122,9 @@ export function WorkshopAllocationEmptyState({
 }) {
   if (projection.has_workshops && projection.has_answers) return null
   return (
-    <WorkshopEmptyState title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Workshops'}>
+    <WorkshopEmptyState
+      title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Workshops'}
+    >
       {children ??
         (projection.has_workshops
           ? 'Sobald Personen eine Rangfolge abgegeben haben, erscheinen Antworten und Nachfrage hier.'

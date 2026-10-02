@@ -35,6 +35,9 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/workshops/programme/unplaced',
     '/organiser/workshops/programme/overlaps',
     '/organiser/workshops/slots',
+    '/organiser/workshops/allocation',
+    '/organiser/workshops/allocation/demand',
+    '/organiser/workshops/allocation/trace',
   ])
 })
 
@@ -75,6 +78,10 @@ test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserUrls.inventory()).toBe('/organiser/accommodation/inventory')
   expect(organiserPaths.assignment_board()).toBe('/accommodation/assignment')
   expect(organiserUrls.assignment_board()).toBe('/organiser/accommodation/assignment')
+  expect(organiserPaths.workshop_allocation()).toBe('/workshops/allocation')
+  expect(organiserPaths.workshop_allocation_demand()).toBe('/workshops/allocation/demand')
+  expect(organiserPaths.workshop_allocation_trace()).toBe('/workshops/allocation/trace')
+  expect(organiserUrls.workshop_allocation()).toBe('/organiser/workshops/allocation')
 })
 
 test('organiser route boundaries reject duplicate bases and preserve nested path types', () => {
@@ -127,6 +134,9 @@ test('known organiser path matching is driven by the route catalog', () => {
   expect(isKnownOrganiserPath('/organiser/workshops/slots')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/programme/unplaced')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/programme/overlaps')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/allocation')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/allocation/demand')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/workshops/allocation/trace')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/inventory')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/organiser/families')).toBe(false)
   expect(isKnownOrganiserPath('/organiser/families/')).toBe(false)
@@ -139,6 +149,9 @@ test('primary and secondary navigation use segment-aware active matching', () =>
   expect(isOrganiserPathActive('/workshops/spaces', '/workshops/programme', true)).toBe(false)
   expect(isOrganiserPathActive('/workshops/spaces', '/workshops/spaces')).toBe(true)
   expect(isOrganiserPathActive('/workshops/spaces-extra', '/workshops/spaces', true)).toBe(false)
+  expect(isOrganiserPathActive('/workshops/allocation/trace', '/workshops/allocation', true)).toBe(
+    true,
+  )
   expect(isOrganiserPathActive('/', '/', false)).toBe(true)
   expect(isOrganiserPathActive('/families/abc', '/', true)).toBe(false)
 })

@@ -75,3 +75,30 @@ test('secondary navigation selects an item for any of its typed active routes', 
     'page',
   )
 })
+
+test('workshop allocation keeps the workshop area active across all three views', () => {
+  window.history.replaceState({}, '', '/workshops/allocation/trace')
+  render(
+    <SecondaryNavigation
+      aria_label="Workshopbereiche"
+      items={[
+        {
+          href: organiserPaths.workshops(),
+          active_paths: [organiserPaths.workshops()],
+          label: 'Workshops',
+        },
+        {
+          href: organiserPaths.workshop_allocation(),
+          active_paths: [
+            organiserPaths.workshop_allocation(),
+            organiserPaths.workshop_allocation_demand(),
+            organiserPaths.workshop_allocation_trace(),
+          ],
+          label: 'Wünsche',
+        },
+      ]}
+    />,
+  )
+
+  expect(screen.getByRole('link', { name: 'Wünsche' }).getAttribute('aria-current')).toBe('page')
+})

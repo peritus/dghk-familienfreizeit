@@ -107,7 +107,10 @@ function personName(world: KernelWorld, personId: string): string {
   )
 }
 
-function personGroup(world: KernelWorld, personId: string): Exclude<WorkshopAllocationGroup, 'all'> {
+function personGroup(
+  world: KernelWorld,
+  personId: string,
+): Exclude<WorkshopAllocationGroup, 'all'> {
   return labelValue(world.labels_by_entity[personId] ?? [], 'role') === 'adult'
     ? 'adults'
     : 'children'
@@ -133,7 +136,7 @@ function dateLabel(value: string, timeZone: string): string {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
 }
 
@@ -141,12 +144,12 @@ function timeLabel(startsAt: string, endsAt: string, timeZone: string): string {
   const starts = new globalThis.Date(startsAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
   const ends = new globalThis.Date(endsAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
   return `${starts}–${ends}`
 }
@@ -256,7 +259,9 @@ export function buildWorkshopAllocationProjection(
   const unscheduled = new Map(
     (scheduling?.unscheduled ?? []).map((item) => [item.workshop_id, item.reason]),
   )
-  const traces = input.plan.trace.filter((entry) => entry.stage === 'workshop-assignment.attendance')
+  const traces = input.plan.trace.filter(
+    (entry) => entry.stage === 'workshop-assignment.attendance',
+  )
   const assignmentByChoice = new Map(
     assignment.assignments.map((item) => [`${item.person_id}|${item.workshop_id}`, item]),
   )
@@ -382,8 +387,11 @@ export function buildWorkshopAllocationTraceStages(
 ): readonly WorkshopAllocationTraceStage[] {
   const events = projection.trace_events.filter((event) => {
     const answer = projection.answers.find((item) => item.id === event.person_id)
-    return answer && (group === 'all' || answer.group === group) &&
+    return (
+      answer &&
+      (group === 'all' || answer.group === group) &&
       (!onlySelected || event.person_id === selectedPersonId)
+    )
   })
   const total = events.filter((event) => event.rank !== null).length
   const stages: WorkshopAllocationTraceStage[] = [
@@ -451,16 +459,20 @@ export function buildWorkshopAllocationTraceStages(
     for (const stage of stages) {
       const stageEvents = selectedEvents.filter((event) => {
         if (stage.id === 'answers') return true
-        if (stage.id === 'retention') return event.outcome === 'retained' || event.outcome === 'dropped'
+        if (stage.id === 'retention')
+          return event.outcome === 'retained' || event.outcome === 'dropped'
         return event.rank === Number(stage.id.replace('round-', ''))
       })
-      stage.selected_summary = stage.id === 'answers'
-        ? selected?.ranks.length
-          ? `Rangfolge: ${selected.ranks.join(' · ')}`
-          : selected?.status
-        : stageEvents.length
-          ? stageEvents.map((event) => `${event.workshop_title}: ${outcomeLabel(event.outcome)}`).join(' · ')
-          : '—'
+      stage.selected_summary =
+        stage.id === 'answers'
+          ? selected?.ranks.length
+            ? `Rangfolge: ${selected.ranks.join(' · ')}`
+            : selected?.status
+          : stageEvents.length
+            ? stageEvents
+                .map((event) => `${event.workshop_title}: ${outcomeLabel(event.outcome)}`)
+                .join(' · ')
+            : '—'
     }
   }
   return stages

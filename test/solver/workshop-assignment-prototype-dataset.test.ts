@@ -18,6 +18,7 @@ import {
   workshopAssignment,
   type WorkshopAssignmentSection,
 } from '../../src/modules/workshop-assignment/index.js'
+import { buildWorkshopAllocationProjection } from '../../src/modules/workshop-rankings/app/workshop-allocation-view.js'
 import type { Plan, SolverInput } from '../../src/solver/types.js'
 
 // Same module selection and parameters as the real familienfreizeit-2027
@@ -61,7 +62,11 @@ const fixture = readFileSync(
   'utf-8',
 )
 
-function solveFixture(previousPlan: Plan | null = null): { plan: Plan; input: SolverInput } {
+function solveFixture(previousPlan: Plan | null = null): {
+  plan: Plan
+  input: SolverInput
+  world: ReturnType<typeof derive>
+} {
   const world = derive(loadKdl(fixture, profile.validation_view), profile.validation_view)
   const contributions = composeSolverContributions(profile)
   const input = buildSolverInput(world, contributions, previousPlan)
@@ -72,7 +77,7 @@ function solveFixture(previousPlan: Plan | null = null): { plan: Plan; input: So
     profile,
     seed: null,
   })
-  return { plan, input }
+  return { plan, input, world }
 }
 
 const assignmentKey = (section: WorkshopAssignmentSection) =>
@@ -189,4 +194,26 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
     if (workshop.audience === 'children') expect(role).toBe('child')
     if (workshop.audience === 'adults') expect(role).toBe('adult')
   }
+})
+
+test('the workshop allocation projection exposes answers, demand, and trace from the solved world', () => {
+  const { plan, world } = solveFixture()
+  const projection = buildWorkshopAllocationProjection({
+    world,
+    plan,
+    event_date: '2027-05-14',
+    time_zone: 'Europe/Berlin',
+    max_rank: 3,
+  })
+
+  expect(projection.has_workshops).toBe(true)
+  expect(projection.has_answers).toBe(true)
+  expect(projection.answers.length).toBeGreaterThan(0)
+  expect(projection.demand.find((row) => row.title === 'Keramik')).toEqual(
+    expect.objectContaining({ first_choices: 16, placement_label: 'platziert' }),
+  )
+  expect(projection.demand.find((row) => row.title === 'Schmieden')).toEqual(
+    expect.objectContaining({ placement_label: 'ohne Termin' }),
+  )
+  expect(projection.trace_events.length).toBeGreaterThan(projection.answers.length)
 })

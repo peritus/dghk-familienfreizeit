@@ -117,9 +117,7 @@ export function ChoiceAnswersTable({
       ]}
       rows={answers}
       rowKey={(answer) => answer.id}
-      renderRow={(answer) => (
-        <ChoiceAnswerRow key={answer.id} answer={answer} on_open={onOpen} />
-      )}
+      renderRow={(answer) => <ChoiceAnswerRow key={answer.id} answer={answer} on_open={onOpen} />}
     />
   )
   return (
@@ -228,11 +226,7 @@ export function WorkshopDemandTable({ workshops }: { workshops: readonly Worksho
   )
 }
 
-export function WorkshopDemandCards({
-  workshops,
-}: {
-  workshops: readonly WorkshopDemandView[]
-}) {
+export function WorkshopDemandCards({ workshops }: { workshops: readonly WorkshopDemandView[] }) {
   return (
     <ul className="grid gap-3">
       {workshops.map((workshop) => (
@@ -436,18 +430,12 @@ export function ChoiceTraceTable({
         { key: 'leader', label: 'leitet selbst', numeric: true },
         { key: 'unscheduled', label: 'ohne Termin', numeric: true },
         { key: 'open', label: 'noch offen', numeric: true },
-        ...(selectedPersonLabel
-          ? [{ key: 'selected', label: selectedPersonLabel }]
-          : []),
+        ...(selectedPersonLabel ? [{ key: 'selected', label: selectedPersonLabel }] : []),
       ]}
       rows={stages}
       rowKey={(stage) => stage.id}
       renderRow={(stage) => (
-        <TraceStageRow
-          key={stage.id}
-          stage={stage}
-          selected_person_label={selectedPersonLabel}
-        />
+        <TraceStageRow key={stage.id} stage={stage} selected_person_label={selectedPersonLabel} />
       )}
     />
   )
