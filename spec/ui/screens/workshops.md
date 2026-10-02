@@ -11,18 +11,23 @@ remain separate URLs with page-local workshop navigation:
 | Externe Leitungen | `/organiser/workshops/externe` | create and edit external leaders, their organiser-only contact metadata, linked workshops, and slot availability |
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
+| Wünsche · Antworten | `/organiser/workshops/allocation` | ranked answers, explicit no-preference, and missing-answer states |
+| Wünsche · Nachfrage | `/organiser/workshops/allocation/demand` | first-choice and ranked demand against capacity and placement |
+| Wünsche · Verlauf | `/organiser/workshops/allocation/trace` | deterministic solver trace with explanatory outcomes |
 
-The section navigation contains **Workshops**, **Programm**, and **Räume und Slots**. The
+The section navigation contains **Workshops**, **Programm**, **Wünsche**, and **Räume und Slots**. The
 workshop overview groups **Workshops**, **Leitungen**, and **Externe Leitungen** as
 local tabs, while **Programm** groups the three programme review URLs (**Ganzes
 Programm**, **Nicht eingeplant**, and **Überschneidungen**) as page-local tabs, and
 Räume und Slots groups the space and slot resource routes. The
-planned product views **Wünsche**, **Teilnahme**, and **Listen** remain reserved and
-are not rendered in navigation until their screens exist.
+The **Wünsche** entry is selected for all three allocation URLs and its tertiary
+navigation contains **Antworten**, **Nachfrage**, and **Verlauf**. The planned product
+views **Teilnahme** and **Listen** remain reserved and are not rendered in navigation
+until their screens exist.
 
-The overview is the landing view. Participation review, demand, solver traces,
-and list/report views are product views reached from the workshop workspace and
-may receive dedicated URLs as their implementation is delivered.
+The overview is the landing view. Participation review and list/report views remain
+outstanding product views. Workshop allocation demand and solver traces are delivered
+through the three allocation routes above.
 
 The four visible lifecycle summaries are:
 

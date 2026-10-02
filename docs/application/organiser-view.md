@@ -20,17 +20,21 @@ path before persistence.
 | `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
 | `/organiser/workshops/slots` | Event-backed slot creation, editing, and retirement with overlap validation |
 | `/organiser/workshops/spaces` | Physical workshop-space inventory and schedule-aware availability context |
+| `/organiser/workshops/allocation` | Workshop allocation answers (**Wünsche · Antworten**) |
+| `/organiser/workshops/allocation/demand` | Workshop allocation demand (**Wünsche · Nachfrage**) |
+| `/organiser/workshops/allocation/trace` | Workshop allocation trace (**Wünsche · Verlauf**) |
 
 The host exposes these kernel-owned and selected-module screens through one screen
 registry. The app bar presents four primary areas: Dashboard, Familien,
 Unterbringung, and Workshops. Accommodation has page-local secondary links for
 Unterkunft and Belegung. The workshop section navigation visibly links Workshops,
-Programm, and Räume und Slots. Programm remains selected across its programme review
+Programm, Wünsche, and Räume und Slots. Programm remains selected across its programme review
 URLs, while Räume und Slots remains selected for its Räume and Slots resource routes,
 and the workshop overview provides local tabs for Workshops, Leitungen, and
-Externe Leitungen. Wünsche, Teilnahme, and Listen are reserved workshop areas and are
-not rendered until their screens exist. All routes preserve the shared local-first
-draft state.
+Externe Leitungen. Wünsche remains selected across its three allocation URLs, whose
+tertiary views are Antworten, Nachfrage, and Verlauf. Teilnahme and Listen remain
+reserved workshop areas and are not rendered until their screens exist. All routes
+preserve the shared local-first draft state.
 
 The board's browser print output is rendered from the same prospective assignment
 review. Print media hides navigation and interactive review controls, then exposes
@@ -109,6 +113,15 @@ still owned by the selected profile/module contract rather than a screen-local f
 Browser print is the only print path; these screens add no export or print button.
 External leader contacts are organiser-only, and cancelled workshops leave active
 planning while remaining available to historical reports.
+
+Workshop allocation is a read-only projection over the current derived world and
+solver plan. Antworten shows ranked, no-preference, and missing-answer states;
+Nachfrage compares first choices and ranked demand with configured capacity and
+placement; Verlauf shows deterministic stages and explanations for capacity, overlap,
+leader, eligibility, cancellation, unscheduled, retention, and dropped cases. Group
+filters, person tracing, responsive tables/cards, keyboard tertiary navigation, and
+browser print use shared workshop components. Fixed violations and unassigned people
+remain visible as review notices; the views do not create attendance or roster events.
 
 ## Current limits
 

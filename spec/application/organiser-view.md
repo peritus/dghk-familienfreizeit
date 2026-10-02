@@ -20,6 +20,9 @@ that host.
 | `/organiser/workshops/programme` | Programme | One placement per workshop, conflicts, and unscheduled cases |
 | `/organiser/workshops/slots` | Slots | Event-backed slot maintenance and overlap validation |
 | `/organiser/workshops/spaces` | Workshop spaces | Physical spaces, schedule context, capabilities, and per-slot blocks |
+| `/organiser/workshops/allocation` | Workshop allocation · Wünsche / Antworten | Ranked answers, explicit no-preference, and missing answers |
+| `/organiser/workshops/allocation/demand` | Workshop allocation · Wünsche / Nachfrage | First-choice and ranked demand against capacity and placement |
+| `/organiser/workshops/allocation/trace` | Workshop allocation · Wünsche / Verlauf | Solver stages, reasons, retention, drops, and review cases |
 
 Every screen renders the organiser application's derived world. Mutating screens
 use the shared local-first organiser pipeline: they create ordinary event groups,

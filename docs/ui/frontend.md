@@ -18,6 +18,9 @@ The route table is:
 | `/organiser/workshops/programme/overlaps` | Ranked workshop pairs that occupy the same slot |
 | `/organiser/workshops/slots` | Event-backed workshop slots |
 | `/organiser/workshops/spaces` | Physical workshop spaces and per-slot availability context |
+| `/organiser/workshops/allocation` | Workshop allocation answers (**Wünsche · Antworten**) |
+| `/organiser/workshops/allocation/demand` | Workshop allocation demand (**Wünsche · Nachfrage**) |
+| `/organiser/workshops/allocation/trace` | Workshop allocation trace (**Wünsche · Verlauf**) |
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
@@ -28,8 +31,8 @@ draft changes for explicit review according to the session's drafting policy. Th
 remains the only persistence boundary; there is no separate drafting API or server
 draft state.
 
-Workshop routes use the same reducer and draft pipeline. Their three-item section
-navigation links **Workshops**, **Programm**, and **Räume und Slots**; the programme
+Workshop routes use the same reducer and draft pipeline. Their section navigation
+links **Workshops**, **Programm**, **Wünsche**, and **Räume und Slots**; the programme
 item stays current on all three programme review URLs, while the resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
 overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
@@ -42,7 +45,10 @@ same organiser and workshop navigation context. The whole-programme view exposes
 one derived placement per workshop; the unscheduled view gives each missing
 placement an explainable reason; and the overlap view shows people whose ranked
 choices share a slot. Browser print is the only print path; no workshop screen adds
-an application print or export control.
+an application print or export control. Workshop allocation keeps the same organiser
+and workshop navigation context and provides the URL-backed tertiary views **Antworten**,
+**Nachfrage**, and **Verlauf**. These views derive from the prospective world and plan,
+including conflict notices and person tracing, without adding a persistence boundary.
 
 All organiser screens use the shared `OrganiserScreenHeader` for their primary
 heading and action row. Overview metrics use `StatsStrip`; quiet properties use
