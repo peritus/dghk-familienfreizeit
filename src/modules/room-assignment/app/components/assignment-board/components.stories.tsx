@@ -147,7 +147,7 @@ export const FamilyEntryAndOverviewRows: Story = {
   args: { requirement: requirement({}) },
   render: () => (
     <div className="space-y-4 bg-background p-6">
-      <div className="rounded-base border-2 border-black bg-white px-5">
+      <div className="rounded-base border-2 border-border bg-secondary-background px-5">
         <ul>
           <FamilyEntry family={family} onFix={() => undefined} />
         </ul>

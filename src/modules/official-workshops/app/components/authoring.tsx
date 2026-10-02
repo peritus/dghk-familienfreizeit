@@ -117,7 +117,7 @@ export function WorkshopSummaryRow({
   action?: ReactNode
 }) {
   return (
-    <article className="flex flex-wrap items-start justify-between gap-4 bg-white p-4 sm:p-5">
+    <article className="flex flex-wrap items-start justify-between gap-4 bg-secondary-background p-4 sm:p-5">
       <div className="min-w-0 flex-1 space-y-2">
         <WorkshopIdentity title={workshop.title} description={workshop.description} />
         <WorkshopBadgeGroup
@@ -148,7 +148,7 @@ export type InternalLeaderView = {
 
 export function InternalLeaderRow({ leader }: { leader: InternalLeaderView }) {
   return (
-    <tr className="border-b border-black/30">
+    <tr className="border-b border-border/30">
       <th scope="row" className="p-3">
         {leader.name}
       </th>

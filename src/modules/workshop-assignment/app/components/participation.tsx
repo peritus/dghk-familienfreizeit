@@ -26,7 +26,7 @@ export type ParticipationPersonView = {
 
 export function AssignmentCell({ assignment }: { assignment?: AssignmentView }) {
   return assignment ? (
-    <div className="grid gap-1 rounded-base border-2 border-black bg-white p-2 text-sm">
+    <div className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-2 text-sm">
       <strong>{assignment.workshop_title}</strong>
       <span className="text-muted">{assignment.slot_label}</span>
       <WorkshopStatusBadge tone={assignment.status_tone}>{assignment.status}</WorkshopStatusBadge>
@@ -44,7 +44,7 @@ export function ParticipationRow({
   slot_count: number
 }) {
   return (
-    <tr className="border-b border-black/30 align-top">
+    <tr className="border-b border-border/30 align-top">
       <th scope="row" className="p-3 text-left">
         <div className="grid gap-1">
           <strong>{person.name}</strong>
@@ -73,7 +73,7 @@ export function AttendancePersonCard({
   slot_count: number
 }) {
   return (
-    <li className="grid gap-3 rounded-base border-2 border-black bg-white p-4">
+    <li className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-bold">{person.name}</h3>
@@ -156,7 +156,7 @@ export function GroupSummaryTable({ groups }: { groups: readonly GroupSummaryVie
       rows={groups}
       rowKey={(group) => group.id}
       renderRow={(group) => (
-        <tr key={group.id} className="border-b border-black/30">
+        <tr key={group.id} className="border-b border-border/30">
           <th scope="row" className="p-3 text-left">
             {group.label}
           </th>
@@ -209,7 +209,7 @@ export function UnrequestedAssignmentRow({
   assignment: UnrequestedAssignmentView
 }) {
   return (
-    <tr className="border-b border-black/30">
+    <tr className="border-b border-border/30">
       <th scope="row" className="p-3 text-left">
         {assignment.person}
       </th>
@@ -265,7 +265,7 @@ export function OpenParticipationCaseRow({
   case_item: OpenParticipationCaseView
 }) {
   return (
-    <tr className="border-b border-black/30 align-top">
+    <tr className="border-b border-border/30 align-top">
       <th scope="row" className="p-3 text-left">
         {caseItem.person}
       </th>

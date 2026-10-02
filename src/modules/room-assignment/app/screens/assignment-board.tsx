@@ -42,7 +42,7 @@ function FamilyList(props: {
   if (families.length === 0) return <OverviewSuccess>{emptyMessage}</OverviewSuccess>
   return (
     <OverviewList empty={null}>
-      <ul className="divide-y-2 divide-black">
+      <ul className="divide-y-2 divide-border">
         {families.map((family) => (
           <FamilyOverviewRow
             key={family.id}
@@ -66,7 +66,7 @@ function RoomList(props: { rooms: readonly RoomView[]; empty_message: string }) 
   if (rooms.length === 0) return <OverviewSuccess>{emptyMessage}</OverviewSuccess>
   return (
     <OverviewList empty={null}>
-      <ul className="divide-y-2 divide-black">
+      <ul className="divide-y-2 divide-border">
         {rooms.map((room) => (
           <RoomOverviewRow key={room.id} room={room} />
         ))}

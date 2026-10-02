@@ -20,11 +20,11 @@ export function FamilyEntry({
     ({ strength, met }) => strength === 'preferred' && met === false,
   )
   return (
-    <li className="space-y-2 border-t border-rule py-3 first:border-t-0">
+    <li className="space-y-2 border-t border-border py-3 first:border-t-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <OrganiserLink
-            className="font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
+            className="font-bold underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
             href={organiserPaths.family_detail(family.id)}
           >
             {family.name}

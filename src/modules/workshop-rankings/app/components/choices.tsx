@@ -41,7 +41,7 @@ export function ChoiceAnswerRow({
   on_open?: (answer: ChoiceAnswerView) => void
 }) {
   return (
-    <tr className="border-b border-black/30">
+    <tr className="border-b border-border/30">
       <th scope="row" className="p-3">
         {onOpen ? (
           <button
@@ -77,7 +77,7 @@ export function ChoiceAnswerCard({
   on_open?: (answer: ChoiceAnswerView) => void
 }) {
   return (
-    <li className="grid gap-2 rounded-base border-2 border-black bg-white p-4">
+    <li className="grid gap-2 rounded-base border-2 border-border bg-secondary-background p-4">
       <p>
         {onOpen ? (
           <button
@@ -158,14 +158,14 @@ export function DemandCapacityBar({
   return (
     <div
       aria-label={`${firstChoices} Erstwahlen bei ${capacity} Plätzen`}
-      className="relative h-7 min-w-36 rounded-base border-2 border-black bg-white"
+      className="relative h-7 min-w-36 rounded-base border-2 border-border bg-secondary-background"
     >
       <span
-        className="absolute inset-y-0 left-0 border-r-2 border-black bg-main"
+        className="absolute inset-y-0 left-0 border-r-2 border-border bg-main"
         style={{ width: `${Math.min((capacity / width) * 100, 100)}%` }}
       />
       <span
-        className="absolute inset-y-1 left-1 border-2 border-black"
+        className="absolute inset-y-1 left-1 border-2 border-border"
         style={{ width: `${Math.min((firstChoices / width) * 100, 100)}%` }}
       />
     </div>
@@ -180,7 +180,7 @@ export function WorkshopDemandRow({
   max_value: number
 }) {
   return (
-    <tr className="border-b border-black/30">
+    <tr className="border-b border-border/30">
       <th scope="row" className="p-3">
         {workshop.title}
       </th>
@@ -278,7 +278,7 @@ export function TraceControls({
   people?: readonly string[]
 }) {
   return (
-    <div className="flex flex-wrap items-end gap-4 rounded-base border-2 border-black bg-white p-4">
+    <div className="flex flex-wrap items-end gap-4 rounded-base border-2 border-border bg-secondary-background p-4">
       <fieldset className="flex flex-wrap gap-3">
         <legend className="sr-only">Darstellung</legend>
         {(
@@ -307,7 +307,7 @@ export function TraceControls({
             list="trace-people"
             value={selectedPerson ?? ''}
             onChange={(event) => onPersonChange(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-black px-3 font-normal"
+            className="min-h-11 rounded-base border-2 border-border px-3 font-normal"
           />
           <datalist id="trace-people">
             {people.map((person) => (
@@ -327,7 +327,7 @@ export function TraceLegend({ items }: { items: readonly { label: string; tone?:
         <span key={item.label} className="flex items-center gap-1">
           <i
             aria-hidden="true"
-            className={`inline-block size-3 rounded-sm border border-black ${item.tone ?? 'bg-white'}`}
+            className={`inline-block size-3 rounded-sm border border-border ${item.tone ?? 'bg-secondary-background'}`}
           />
           {item.label}
         </span>
@@ -368,14 +368,14 @@ export function TraceProgressBar({ stage }: { stage: TraceStageView }) {
     ['bg-background', stage.unscheduled],
   ] as const
   return (
-    <div className="flex h-7 overflow-hidden rounded-base border-2 border-black bg-white">
+    <div className="flex h-7 overflow-hidden rounded-base border-2 border-border bg-secondary-background">
       {segments.map(([tone, value]) =>
         value ? (
           <span key={tone} className={tone} style={{ width: `${(value / total) * 100}%` }} />
         ) : null,
       )}
       {stage.open ? (
-        <span className="bg-white" style={{ width: `${(stage.open / total) * 100}%` }} />
+        <span className="bg-secondary-background" style={{ width: `${(stage.open / total) * 100}%` }} />
       ) : null}
     </div>
   )
@@ -389,7 +389,7 @@ export function TraceStageRow({
   selected_person_label?: string
 }) {
   return (
-    <tr className="border-b border-black/30 align-top">
+    <tr className="border-b border-border/30 align-top">
       <th scope="row" className="p-3">
         <span className="block font-heading">{stage.label}</span>
         <span className="text-sm font-normal text-muted">{stage.description}</span>

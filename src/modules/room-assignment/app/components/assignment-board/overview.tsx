@@ -17,7 +17,7 @@ export function FamilyOverviewRow({
     <li className="space-y-2 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <OrganiserLink
-          className="font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
+          className="font-bold underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
           href={organiserPaths.family_detail(family.id)}
         >
           {family.name}
@@ -65,7 +65,7 @@ export function FitHints({ room }: { room: RoomView }) {
           {room.fit_hints.map((family) => (
             <li key={family.id} className="flex flex-wrap items-center gap-1.5">
               <OrganiserLink
-                className="underline decoration-black/25 underline-offset-4 hover:decoration-black"
+                className="underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
                 href={organiserPaths.family_detail(family.id)}
               >
                 {family.name}
@@ -93,7 +93,7 @@ export function FitHints({ room }: { room: RoomView }) {
 
 export function OverviewList({ children, empty }: { children: ReactNode; empty: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-base border-2 border-black bg-white">
+    <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background">
       {children || empty}
     </div>
   )
@@ -101,7 +101,7 @@ export function OverviewList({ children, empty }: { children: ReactNode; empty: 
 
 export function OverviewSuccess({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-base border border-rule bg-white p-4">
+    <div className="rounded-base border border-border bg-secondary-background p-4">
       <SuccessState>{children}</SuccessState>
     </div>
   )

@@ -15,7 +15,7 @@ export function RequirementChip({ requirement }: { requirement: RequirementView 
       <span
         className={
           requirement.strength === 'required'
-            ? 'inline-flex min-h-7 items-center rounded-base border-2 border-black bg-danger px-2 py-0.5 text-xs font-bold'
+            ? 'inline-flex min-h-7 items-center rounded-base border-2 border-border bg-danger px-2 py-0.5 text-xs font-bold'
             : 'inline-flex min-h-7 items-center rounded-base border border-dashed border-muted px-2 py-0.5 text-xs text-muted'
         }
       >

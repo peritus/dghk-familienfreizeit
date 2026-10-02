@@ -86,7 +86,7 @@ export function FixedAssignmentDialog({
             </p>
           ) : null}
         </DialogHeader>
-        <div className="mt-5 divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black">
+        <div className="mt-5 divide-y-2 divide-border overflow-hidden rounded-base border-2 border-border">
           {candidates.map(({ room, requirements, unmet_required: unmetRequired }) => (
             <div key={room.id} className="space-y-3 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">

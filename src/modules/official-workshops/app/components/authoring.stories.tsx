@@ -45,11 +45,11 @@ export const WorkshopRows: Story = {
 export const LeaderRows: Story = {
   render: () => (
     <div className="grid gap-6 bg-background p-6">
-      <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
+      <div className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
         <table className="w-full min-w-[36rem] text-left">
           <caption className="sr-only">Leitungen aus der Veranstaltung</caption>
           <thead>
-            <tr className="border-b-2 border-black">
+            <tr className="border-b-2 border-border">
               <th className="p-3">Person</th>
               <th className="p-3">Alter</th>
               <th className="p-3">Leitet</th>

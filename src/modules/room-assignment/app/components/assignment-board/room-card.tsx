@@ -17,7 +17,7 @@ export function RoomCard({
 }) {
   const empty = room.occupied === 0
   return (
-    <Card className={empty ? 'border-dashed bg-transparent p-0' : 'bg-white p-0'}>
+    <Card className={empty ? 'border-dashed bg-transparent p-0' : 'bg-secondary-background p-0'}>
       <div className="space-y-3 p-5">
         <RoomSummary
           name={room.name}
@@ -44,7 +44,7 @@ export function RoomCard({
         </div>
       </div>
       {room.occupants.length > 0 ? (
-        <ul className="border-t-2 border-black px-5">
+        <ul className="border-t-2 border-border px-5">
           {room.occupants.map((family) => (
             <FamilyEntry key={family.id} family={family} onFix={onFix} onUnassign={onUnassign} />
           ))}

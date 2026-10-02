@@ -26,7 +26,7 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
       {cell.on_open ? (
         <button
           type="button"
-          className="text-left font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
+          className="text-left font-bold underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
           onClick={cell.on_open}
         >
           {cell.title}
@@ -66,11 +66,11 @@ export function ProgrammeGrid({
   rows: readonly ProgrammeRowView[]
 }) {
   return (
-    <div className="overflow-x-auto rounded-base border-2 border-black bg-white print:overflow-visible print:rounded-none print:border">
+    <div className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background print:overflow-visible print:rounded-none print:border">
       <table className="w-full min-w-[48rem] text-left">
         <caption className="sr-only">Workshops nach Raum und Slot</caption>
         <thead>
-          <tr className="border-b-2 border-black">
+          <tr className="border-b-2 border-border">
             <th scope="col" className="p-3">
               Slot
             </th>
@@ -88,14 +88,14 @@ export function ProgrammeGrid({
             return [
               ...(startsDay
                 ? [
-                    <tr key={`${row.id}-day`} className="border-b-2 border-black bg-background">
+                    <tr key={`${row.id}-day`} className="border-b-2 border-border bg-background">
                       <th scope="colgroup" colSpan={rooms.length + 1} className="p-3 text-left">
                         {row.day_label}
                       </th>
                     </tr>,
                   ]
                 : []),
-              <tr key={row.id} className="border-b border-black/30 last:border-b-0">
+              <tr key={row.id} className="border-b border-border/30 last:border-b-0">
                 <th scope="row" className="p-3">
                   {row.slot_label}
                 </th>
@@ -124,7 +124,7 @@ export function UnplacedWorkshopRow({
   action?: ReactNode
 }) {
   return (
-    <li className="flex flex-wrap items-start justify-between gap-4 border-b border-black/30 bg-white p-4 last:border-b-0 print:break-inside-avoid">
+    <li className="flex flex-wrap items-start justify-between gap-4 border-b border-border/30 bg-secondary-background p-4 last:border-b-0 print:break-inside-avoid">
       <div className="min-w-0 flex-1">
         <h3 className="text-xl font-heading">{workshop.title}</h3>
         <p className="mt-1">
@@ -144,7 +144,7 @@ export type WorkshopOverlapView = WorkshopOverlapProjection
 
 export function WorkshopOverlapRow({ overlap }: { overlap: WorkshopOverlapView }) {
   return (
-    <tr className="border-b border-black/30">
+    <tr className="border-b border-border/30">
       <th scope="row" className="p-3">
         {overlap.workshops}
       </th>

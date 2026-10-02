@@ -42,7 +42,7 @@ export const Grid: Story = FullProgramme
 export const ReviewRows: Story = {
   render: () => (
     <div className="grid gap-6 bg-background p-6">
-      <ul className="overflow-hidden rounded-base border-2 border-black">
+      <ul className="overflow-hidden rounded-base border-2 border-border">
         <UnplacedWorkshopRow
           workshop={{
             id: 'schmieden',

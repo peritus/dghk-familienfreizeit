@@ -212,7 +212,7 @@ function TraitControl({
         <span className="font-bold">{title}</span>
         {help ? <span className="text-sm">{help}</span> : null}
         <textarea
-          className="min-h-24 rounded border-2 border-black px-3 py-2"
+          className="min-h-24 rounded border-2 border-border px-3 py-2"
           defaultValue={typeof current?.value === 'string' ? current.value : ''}
           disabled={disabled}
           onBlur={(event) => {
@@ -303,7 +303,7 @@ function TraitControl({
       <span className="font-bold">{title}</span>
       {help ? <span className="text-sm">{help}</span> : null}
       <select
-        className="min-h-11 rounded border-2 border-black px-3"
+        className="min-h-11 rounded border-2 border-border px-3"
         value={typeof current?.value === 'string' ? current.value : ''}
         disabled={disabled}
         onChange={(event) => {
@@ -398,7 +398,7 @@ function WorkshopControls({
           <label key={rank} className="grid gap-1">
             <span>{rank}. Wunsch</span>
             <select
-              className="min-h-11 rounded border-2 border-black px-3"
+              className="min-h-11 rounded border-2 border-border px-3"
               value={selected.get(rank) ?? ''}
               onChange={(event) => {
                 const next = new Map(selected)
@@ -493,7 +493,7 @@ export function FamilyPreferencesControls({
   return (
     <div className="space-y-4">
       {params.sections.map((section) => (
-        <Card key={section.key} className="bg-white">
+        <Card key={section.key} className="bg-secondary-background">
           <CardHeader>
             <h3 className="text-xl">
               {localized(section.title, profile.meta.locale, profile.meta.fallback_locale)}

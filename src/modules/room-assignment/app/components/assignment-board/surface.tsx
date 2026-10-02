@@ -67,7 +67,7 @@ export function MetricsStrip({ items }: { items: readonly StatsStripItem[] }) {
 
 export function FindingCard({ finding }: { finding: FindingView }) {
   return (
-    <Card className={cn('bg-white p-0', finding.severity === 'error' && 'border-danger')}>
+    <Card className={cn('bg-secondary-background p-0', finding.severity === 'error' && 'border-danger')}>
       <CardContent className="flex flex-wrap items-start gap-4 p-5">
         <Badge tone={severityTone[finding.severity]}>{severityLabel[finding.severity]}</Badge>
         <div className="min-w-0 flex-1">
@@ -100,7 +100,7 @@ export function FindingsList({
     <section className="space-y-4" aria-labelledby="findings-title">
       <SectionHeading title={title} detail={`${findings.length} Einträge`} />
       {findings.length === 0 ? (
-        <Alert className="bg-white">
+        <Alert className="bg-secondary-background">
           <AlertTitle>Keine offenen Hinweise</AlertTitle>
           <AlertDescription>Für diesen Bereich ist aktuell nichts zu prüfen.</AlertDescription>
         </Alert>
@@ -119,7 +119,7 @@ export function MetaLine({ items }: { items: readonly { label: string; value: st
   return (
     <dl className="grid gap-3 sm:grid-cols-3">
       {items.map((item) => (
-        <div key={item.label} className="border-l-4 border-black pl-3">
+        <div key={item.label} className="border-l-4 border-border pl-3">
           <dt className="text-sm font-bold uppercase tracking-wide text-muted">{item.label}</dt>
           <dd className="mt-1 font-bold">{item.value}</dd>
         </div>
@@ -138,7 +138,7 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <Card className="bg-white">
+    <Card className="bg-secondary-background">
       <CardContent className="space-y-3 p-8 text-center">
         <h2 className="text-2xl">{title}</h2>
         <p className="mx-auto max-w-lg text-muted">{description}</p>
