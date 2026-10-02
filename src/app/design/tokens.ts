@@ -9,15 +9,20 @@
 export const designTokens = {
   color: [
     { name: 'background', cssVariable: '--background', use: 'page background' },
-    { name: 'secondaryBackground', cssVariable: '--secondary-background', use: 'white surfaces' },
+    { name: 'secondaryBackground', cssVariable: '--secondary-background', use: 'cards, headers, and popovers' },
     { name: 'paper', cssVariable: '--paper', use: 'paper and provisional surfaces' },
+    { name: 'input', cssVariable: '--input', use: 'field backgrounds' },
     { name: 'main', cssVariable: '--main', use: 'primary action and attention' },
+    { name: 'mainDeep', cssVariable: '--main-deep', use: 'small accent controls and rules' },
+    { name: 'mainForeground', cssVariable: '--main-foreground', use: 'text on primary actions' },
     { name: 'danger', cssVariable: '--danger', use: 'destructive action or failure' },
+    { name: 'dangerForeground', cssVariable: '--danger-foreground', use: 'text on destructive actions' },
     { name: 'offline', cssVariable: '--offline', use: 'offline status' },
     { name: 'muted', cssVariable: '--muted', use: 'supporting text' },
     { name: 'foreground', cssVariable: '--foreground', use: 'body text' },
     { name: 'border', cssVariable: '--border', use: 'strong component outlines' },
     { name: 'ring', cssVariable: '--ring', use: 'keyboard focus' },
+    { name: 'shadowColor', cssVariable: '--shadow-c', use: 'pressable offset shadow color' },
   ],
   geometry: [
     { name: 'baseRadius', cssVariable: '--radius-base', use: 'shared corner radius' },
