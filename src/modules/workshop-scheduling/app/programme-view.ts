@@ -66,7 +66,7 @@ function dateLabel(value: string, timeZone: string): string {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
 }
 
@@ -74,12 +74,12 @@ function timeLabel(startsAt: string, endsAt: string, timeZone: string): string {
   const starts = new globalThis.Date(startsAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
   const ends = new globalThis.Date(endsAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
   return `${starts}–${ends}`
 }
