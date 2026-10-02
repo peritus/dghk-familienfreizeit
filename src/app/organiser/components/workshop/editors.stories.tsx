@@ -19,7 +19,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function ConfirmationExample() {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   return (
     <div className="grid gap-4">
       <button className="underline" type="button" onClick={() => setOpen(true)}>
