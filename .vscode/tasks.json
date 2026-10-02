@@ -20,7 +20,7 @@
         "--command",
         "sh",
         "-c",
-        "export DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true; npm ci && exec npm run dev"
+        "export DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true; npm ci && exec env CI=1 npm run dev"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
