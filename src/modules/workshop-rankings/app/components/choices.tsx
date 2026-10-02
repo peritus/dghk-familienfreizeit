@@ -33,11 +33,28 @@ export function ChoiceRankList({
   )
 }
 
-export function ChoiceAnswerRow({ answer }: { answer: ChoiceAnswerView }) {
+export function ChoiceAnswerRow({
+  answer,
+  on_open: onOpen,
+}: {
+  answer: ChoiceAnswerView
+  on_open?: (answer: ChoiceAnswerView) => void
+}) {
   return (
     <tr className="border-b border-black/30">
       <th scope="row" className="p-3">
-        {answer.name}
+        {onOpen ? (
+          <button
+            type="button"
+            className="text-left font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
+            onClick={() => onOpen(answer)}
+          >
+            {answer.name}
+            <span className="sr-only">: Wünsche verfolgen</span>
+          </button>
+        ) : (
+          answer.name
+        )}
       </th>
       <td className="p-3">{answer.age_label}</td>
       <td className="p-3">
@@ -52,11 +69,29 @@ export function ChoiceAnswerRow({ answer }: { answer: ChoiceAnswerView }) {
   )
 }
 
-export function ChoiceAnswerCard({ answer }: { answer: ChoiceAnswerView }) {
+export function ChoiceAnswerCard({
+  answer,
+  on_open: onOpen,
+}: {
+  answer: ChoiceAnswerView
+  on_open?: (answer: ChoiceAnswerView) => void
+}) {
   return (
     <li className="grid gap-2 rounded-base border-2 border-black bg-white p-4">
       <p>
-        <strong>{answer.name}</strong> <span className="text-muted">· {answer.age_label}</span>
+        {onOpen ? (
+          <button
+            type="button"
+            className="text-left font-bold underline decoration-black/25 underline-offset-4 hover:decoration-black"
+            onClick={() => onOpen(answer)}
+          >
+            {answer.name}
+            <span className="sr-only">: Wünsche verfolgen</span>
+          </button>
+        ) : (
+          <strong>{answer.name}</strong>
+        )}{' '}
+        <span className="text-muted">· {answer.age_label}</span>
       </p>
       <WorkshopStatusBadge tone={answer.status_tone}>{answer.status}</WorkshopStatusBadge>
       <ChoiceRankList ranks={answer.ranks} />
@@ -64,7 +99,13 @@ export function ChoiceAnswerCard({ answer }: { answer: ChoiceAnswerView }) {
   )
 }
 
-export function ChoiceAnswersTable({ answers }: { answers: readonly ChoiceAnswerView[] }) {
+export function ChoiceAnswersTable({
+  answers,
+  on_open: onOpen,
+}: {
+  answers: readonly ChoiceAnswerView[]
+  on_open?: (answer: ChoiceAnswerView) => void
+}) {
   const table = (
     <WorkshopDataTable
       caption="Antworten"
@@ -76,7 +117,9 @@ export function ChoiceAnswersTable({ answers }: { answers: readonly ChoiceAnswer
       ]}
       rows={answers}
       rowKey={(answer) => answer.id}
-      renderRow={(answer) => <ChoiceAnswerRow key={answer.id} answer={answer} />}
+      renderRow={(answer) => (
+        <ChoiceAnswerRow key={answer.id} answer={answer} on_open={onOpen} />
+      )}
     />
   )
   return (
@@ -85,7 +128,7 @@ export function ChoiceAnswersTable({ answers }: { answers: readonly ChoiceAnswer
       narrow={
         <ul className="grid gap-3">
           {answers.map((answer) => (
-            <ChoiceAnswerCard key={answer.id} answer={answer} />
+            <ChoiceAnswerCard key={answer.id} answer={answer} on_open={onOpen} />
           ))}
         </ul>
       }
@@ -185,6 +228,46 @@ export function WorkshopDemandTable({ workshops }: { workshops: readonly Worksho
   )
 }
 
+export function WorkshopDemandCards({
+  workshops,
+}: {
+  workshops: readonly WorkshopDemandView[]
+}) {
+  return (
+    <ul className="grid gap-3">
+      {workshops.map((workshop) => (
+        <li key={workshop.id} className="rounded-base border-2 border-black bg-white p-4">
+          <h3 className="text-xl font-heading">{workshop.title}</h3>
+          <p className="mt-1 text-sm text-muted">
+            {workshop.audience} · {workshop.slot}
+          </p>
+          <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">
+            <div>
+              <dt className="text-muted">Plätze</dt>
+              <dd className="font-bold tabular-nums">{workshop.capacity}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">1. Wahl</dt>
+              <dd className="font-bold tabular-nums">{workshop.first_choices}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Rangfolge</dt>
+              <dd className="font-bold tabular-nums">{workshop.ranked_count}</dd>
+            </div>
+          </dl>
+          <div className="mt-3">
+            <DemandCapacityBar
+              capacity={workshop.capacity}
+              first_choices={workshop.first_choices}
+              max_value={Math.max(workshop.capacity, workshop.first_choices, 1)}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export type TraceMode = 'all' | 'highlight' | 'only'
 
 export function TraceControls({
@@ -270,6 +353,7 @@ export type TraceStageView = {
   unscheduled: number
   open: number
   details?: ReactNode
+  selected_summary?: ReactNode
 }
 
 export function TraceProgressBar({ stage }: { stage: TraceStageView }) {
@@ -303,7 +387,13 @@ export function TraceProgressBar({ stage }: { stage: TraceStageView }) {
   )
 }
 
-export function TraceStageRow({ stage }: { stage: TraceStageView }) {
+export function TraceStageRow({
+  stage,
+  selected_person_label: selectedPersonLabel,
+}: {
+  stage: TraceStageView
+  selected_person_label?: string
+}) {
   return (
     <tr className="border-b border-black/30 align-top">
       <th scope="row" className="p-3">
@@ -320,12 +410,21 @@ export function TraceStageRow({ stage }: { stage: TraceStageView }) {
       <td className="p-3 text-right">{stage.leader}</td>
       <td className="p-3 text-right">{stage.unscheduled}</td>
       <td className="p-3 text-right font-bold">{stage.open}</td>
+      {selectedPersonLabel ? (
+        <td className="bg-paper p-3 text-sm">{stage.selected_summary ?? '—'}</td>
+      ) : null}
     </tr>
   )
 }
 
-export function ChoiceTraceTable({ stages }: { stages: readonly TraceStageView[] }) {
-  return (
+export function ChoiceTraceTable({
+  stages,
+  selected_person_label: selectedPersonLabel,
+}: {
+  stages: readonly TraceStageView[]
+  selected_person_label?: string
+}) {
+  const table = (
     <WorkshopDataTable
       caption="Verlauf der Wünsche Schritt für Schritt"
       columns={[
@@ -337,12 +436,58 @@ export function ChoiceTraceTable({ stages }: { stages: readonly TraceStageView[]
         { key: 'leader', label: 'leitet selbst', numeric: true },
         { key: 'unscheduled', label: 'ohne Termin', numeric: true },
         { key: 'open', label: 'noch offen', numeric: true },
+        ...(selectedPersonLabel
+          ? [{ key: 'selected', label: selectedPersonLabel }]
+          : []),
       ]}
       rows={stages}
       rowKey={(stage) => stage.id}
-      renderRow={(stage) => <TraceStageRow key={stage.id} stage={stage} />}
+      renderRow={(stage) => (
+        <TraceStageRow
+          key={stage.id}
+          stage={stage}
+          selected_person_label={selectedPersonLabel}
+        />
+      )}
     />
   )
+  const cards = (
+    <ul className="grid gap-3" aria-label="Verlauf der Wünsche">
+      {stages.map((stage) => (
+        <li key={stage.id} className="rounded-base border-2 border-black bg-white p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-lg font-heading">{stage.label}</h3>
+            <span className="text-sm text-muted">{stage.description}</span>
+          </div>
+          <div className="mt-3">
+            <TraceProgressBar stage={stage} />
+          </div>
+          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+            {[
+              ['erfüllt', stage.fulfilled],
+              ['voll', stage.capacity],
+              ['Überschneidung', stage.overlap],
+              ['leitet selbst', stage.leader],
+              ['ohne Termin', stage.unscheduled],
+              ['noch offen', stage.open],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-muted">{label}</dt>
+                <dd className="font-bold tabular-nums">{value}</dd>
+              </div>
+            ))}
+          </dl>
+          {stage.details ? <p className="mt-3 text-sm text-muted">{stage.details}</p> : null}
+          {selectedPersonLabel ? (
+            <p className="mt-3 rounded-base border-2 border-black bg-paper p-2 text-sm">
+              <strong>{selectedPersonLabel}:</strong> {stage.selected_summary ?? '—'}
+            </p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  )
+  return <WorkshopResponsiveCollection wide={table} narrow={cards} />
 }
 
 export function ChoiceSummary({
