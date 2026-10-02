@@ -15,7 +15,10 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh">
-      <a href="#content" className="sr-only z-10 bg-secondary-background p-4 focus:not-sr-only focus:absolute">
+      <a
+        href="#content"
+        className="sr-only z-10 bg-secondary-background p-4 focus:not-sr-only focus:absolute"
+      >
         Zum Inhalt
       </a>
       {organiserSection ? (

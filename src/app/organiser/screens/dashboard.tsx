@@ -7,7 +7,8 @@ import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
 
-const overviewCardClassName = 'block rounded-base border-2 border-border bg-secondary-background p-6'
+const overviewCardClassName =
+  'block rounded-base border-2 border-border bg-secondary-background p-6'
 
 export function Dashboard() {
   const { world } = useOrganiser()

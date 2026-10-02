@@ -30,10 +30,10 @@ function TokenGroup({
         {tokens.map((token) => (
           <article
             key={token.name}
-            className="rounded-base border-2 border-black bg-white p-4 shadow-shadow"
+            className="rounded-base border-2 border-border bg-secondary-background p-4 shadow-shadow"
           >
             <div
-              className="mb-3 h-16 rounded-base border-2 border-black"
+              className="mb-3 h-16 rounded-base border-2 border-border"
               style={{
                 background:
                   group === 'color'

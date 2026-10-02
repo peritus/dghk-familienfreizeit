@@ -328,7 +328,10 @@ export function WorkshopExternalLeaders() {
               Externe Leitungen leiten Workshops, nehmen aber nicht an der Freizeit teil.
             </DialogDescription>
             {error ? (
-              <p role="alert" className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3">
+              <p
+                role="alert"
+                className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3"
+              >
                 {error}
               </p>
             ) : null}
@@ -820,7 +823,10 @@ export function Workshops() {
           {externalLeaders.length ? (
             <ul className="grid gap-3">
               {externalLeaders.map((leader) => (
-                <li key={leader.id} className="rounded-base border-2 border-border bg-secondary-background p-4">
+                <li
+                  key={leader.id}
+                  className="rounded-base border-2 border-border bg-secondary-background p-4"
+                >
                   <strong>{leader.name}</strong>
                   {leader.phone ? (
                     <span className="ml-2 text-sm text-muted">· {leader.phone}</span>

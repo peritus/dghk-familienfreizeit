@@ -63,7 +63,10 @@ export function WorkshopRosterCards({ entries }: { entries: readonly WorkshopRos
   return (
     <ul className="grid gap-3">
       {entries.map((entry) => (
-        <li key={entry.id} className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-4">
+        <li
+          key={entry.id}
+          className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-4"
+        >
           <strong>{entry.name}</strong>
           <span className="text-sm text-muted">{entry.age_label}</span>
           {entry.health ? <strong className="text-sm">{entry.health}</strong> : null}
@@ -176,7 +179,10 @@ export function FamilyPlanCards({ slots }: { slots: readonly FamilyPlanSlot[] })
   return (
     <ul className="grid gap-3">
       {slots.map((slot) => (
-        <li key={slot.id} className="grid gap-2 rounded-base border-2 border-border bg-secondary-background p-4">
+        <li
+          key={slot.id}
+          className="grid gap-2 rounded-base border-2 border-border bg-secondary-background p-4"
+        >
           <strong>{slot.label}</strong>
           {slot.members.map((member) => (
             <p key={member.id} className="text-sm">

@@ -287,7 +287,10 @@ export function Inventory() {
       <p className="-mt-4 text-muted">Gebäude, Zimmer und Betten für diese Freizeit.</p>
 
       {error ? (
-        <p role="alert" className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3">
+        <p
+          role="alert"
+          className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3"
+        >
           {error}
         </p>
       ) : null}

@@ -9,9 +9,12 @@ it renders neither -- the organiser section owns a single app bar and
 sign-out and domain navigation controls are not implemented for the public shell.
 
 [Global CSS](../../src/app/globals.css) integrates Tailwind v4 and animation
-utilities. The copied orange theme uses a warm paper background, white cards,
-black text and borders, offset shadows and slightly rounded corners. Base text
-is 16px with relaxed line height. Links and buttons have visible keyboard focus.
+utilities. The orange theme uses semantic tokens for warm light surfaces and a
+dark system-preference variant with near-black surfaces, cream outlines, and
+accessible foreground colors. Cards and popovers use `secondary-background`,
+fields use `input`, pressable shadows use `shadow-c`, and native checkboxes and
+radios use `main-deep` as their accent. Base text is 16px with relaxed line
+height. Links and buttons have visible keyboard focus through the `ring` token.
 `cursor: pointer` is an explicit base-layer rule for every interactive element,
 since Tailwind v4's preflight resets buttons to `cursor: default`.
 
@@ -24,12 +27,14 @@ The public family welcome view uses a responsive hero card with a clear
 registration status and a small inline drafting-compass illustration.
 
 Workshop screens reuse the same neobrutalist language at every viewport width:
-thick black outlines, offset shadows for actionable controls, flat white information
+thick semantic outlines, offset shadows for actionable controls, flat information
 cards, and wrapping horizontal tabs. Orange is reserved for actionable attention
 and is paired with a text or glyph meaning; status must never be communicated by
 colour alone. Workshop filters, unscheduled reasons, cancelled history, and save
 state therefore include visible labels. Browser print hides navigation and controls;
-the application does not add a print or export button.
+the application does not add a print or export button. Printing forces the light
+palette, and mobile browser chrome follows the active preference through the
+light and dark `theme-color` metadata in `index.html`.
 
 Compact workshop authoring collections use one bordered list with divider-separated
 rows rather than a grid of independent cards. Rows keep the primary identity,

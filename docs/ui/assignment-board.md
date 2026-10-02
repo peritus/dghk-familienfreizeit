@@ -25,7 +25,7 @@ repository style guide resolves these differences:
 - Fixed families do not receive the prototype's paper background. `paper` and
   `blueprint` identify browser-local draft state in the design system, so fixed
   assignments use the normal card surface and a pinned badge.
-- Attention stats use the orange token with black text for contrast.
+- Attention stats use the orange token with `main-foreground` text for contrast.
 - Building headers are hierarchy, not cards. Cards are reserved for rooms.
 - Buttons use the existing `pressable` variants and the fixed-assignment flow
   uses the existing modal `Dialog` primitive.

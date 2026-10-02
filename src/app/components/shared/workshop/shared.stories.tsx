@@ -144,7 +144,7 @@ export const TableAndResponsiveCollection: Story = {
         rows={rows}
         rowKey={(row) => row.id}
         renderRow={(row) => (
-          <tr key={row.id} className="border-b border-black/30">
+          <tr key={row.id} className="border-b border-border/30">
             <th scope="row" className="p-3">
               {row.name}
             </th>
@@ -160,7 +160,10 @@ export const TableAndResponsiveCollection: Story = {
           narrow={
             <div className="grid gap-3">
               {rows.map((row) => (
-                <div key={row.id} className="rounded-base border-2 border-black bg-white p-4">
+                <div
+                  key={row.id}
+                  className="rounded-base border-2 border-border bg-secondary-background p-4"
+                >
                   <strong>{row.name}</strong>
                   <p className="text-sm text-muted">{row.status}</p>
                 </div>

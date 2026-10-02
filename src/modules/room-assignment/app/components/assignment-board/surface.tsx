@@ -67,7 +67,9 @@ export function MetricsStrip({ items }: { items: readonly StatsStripItem[] }) {
 
 export function FindingCard({ finding }: { finding: FindingView }) {
   return (
-    <Card className={cn('bg-secondary-background p-0', finding.severity === 'error' && 'border-danger')}>
+    <Card
+      className={cn('bg-secondary-background p-0', finding.severity === 'error' && 'border-danger')}
+    >
       <CardContent className="flex flex-wrap items-start gap-4 p-5">
         <Badge tone={severityTone[finding.severity]}>{severityLabel[finding.severity]}</Badge>
         <div className="min-w-0 flex-1">

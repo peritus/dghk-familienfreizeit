@@ -75,8 +75,10 @@ domain screens and verify the following behavior for their controls:
 ## Neobrutalist component contract
 
 The component contract follows the [neobrutalism Alert Dialog
-documentation](https://www.neobrutalism.dev/docs/alert-dialog): strong black
-outlines, offset shadows, direct labels, and deliberate primary actions.
+documentation](https://www.neobrutalism.dev/docs/alert-dialog): strong semantic
+outlines, offset shadows, direct labels, and deliberate primary actions. The
+orange palette follows the system/browser color preference and has no
+user-visible theme switch. Printing always selects the light palette.
 
 Use this composition for every action that applies, discards, communicates, sends,
 or clears something:

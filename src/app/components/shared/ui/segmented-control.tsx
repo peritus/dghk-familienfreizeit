@@ -47,7 +47,9 @@ export function SegmentedControl<T extends string>({
                 'flex min-h-11 items-center justify-center gap-1.5 px-3 font-bold sm:min-h-11',
                 'max-sm:flex-col max-sm:min-h-14 max-sm:gap-0.5',
                 index > 0 && 'border-l-2 border-border max-sm:border-l-0 max-sm:border-t-2',
-                selected ? 'bg-foreground text-background' : 'bg-secondary-background text-foreground',
+                selected
+                  ? 'bg-foreground text-background'
+                  : 'bg-secondary-background text-foreground',
               )}
             >
               {renderIcon?.(option.value)}

@@ -32,7 +32,9 @@ export function PrimaryNavigation({
             aria-current={active ? 'page' : undefined}
             className={cn(
               'min-h-11 rounded-base border-2 px-4 py-2 font-bold',
-              active ? 'border-border bg-foreground text-background' : 'border-transparent hover:border-border',
+              active
+                ? 'border-border bg-foreground text-background'
+                : 'border-transparent hover:border-border',
             )}
           >
             {item.label}
@@ -70,7 +72,9 @@ export function SecondaryNavigation({
             aria-current={active ? 'page' : undefined}
             className={cn(
               'min-h-11 rounded-base border-2 px-4 py-2 font-bold',
-              active ? 'border-border bg-foreground text-background' : 'border-border bg-secondary-background hover:bg-main',
+              active
+                ? 'border-border bg-foreground text-background'
+                : 'border-border bg-secondary-background hover:bg-main',
             )}
           >
             {item.label}

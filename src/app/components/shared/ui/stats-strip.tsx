@@ -30,7 +30,10 @@ export function StatsStrip({ items }: { items: readonly StatsStripItem[] }) {
         {items.map((item) => (
           <div
             key={item.label}
-            className={cn('p-4 text-center', item.tone === 'attention' && 'bg-main text-main-foreground')}
+            className={cn(
+              'p-4 text-center',
+              item.tone === 'attention' && 'bg-main text-main-foreground',
+            )}
           >
             <p className="text-4xl leading-none tabular-nums">{item.value}</p>
             <p className="mt-2 font-bold">{item.label}</p>

@@ -228,7 +228,12 @@ export function WorkshopDataTable<T>({
   className?: string
 }) {
   return (
-    <div className={cn('overflow-x-auto rounded-base border-2 border-border bg-secondary-background', className)}>
+    <div
+      className={cn(
+        'overflow-x-auto rounded-base border-2 border-border bg-secondary-background',
+        className,
+      )}
+    >
       <table className="w-full min-w-[38rem] text-left">
         <caption className="sr-only">{caption}</caption>
         <thead>

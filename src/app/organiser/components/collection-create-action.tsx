@@ -42,7 +42,10 @@ export function CollectionCreateAction({
           <DialogTitle>{title}</DialogTitle>
           {description ? <DialogDescription>{description}</DialogDescription> : null}
           {error ? (
-            <p role="alert" className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3">
+            <p
+              role="alert"
+              className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3"
+            >
               {error}
             </p>
           ) : null}

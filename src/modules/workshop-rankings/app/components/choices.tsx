@@ -375,7 +375,10 @@ export function TraceProgressBar({ stage }: { stage: TraceStageView }) {
         ) : null,
       )}
       {stage.open ? (
-        <span className="bg-secondary-background" style={{ width: `${(stage.open / total) * 100}%` }} />
+        <span
+          className="bg-secondary-background"
+          style={{ width: `${(stage.open / total) * 100}%` }}
+        />
       ) : null}
     </div>
   )
