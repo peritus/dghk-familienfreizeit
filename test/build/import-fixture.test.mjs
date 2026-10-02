@@ -3,9 +3,9 @@ import { test } from 'node:test'
 import { resolve } from 'node:path'
 import {
   eventsToDrafts,
+  matchingPrefixLength,
   normaliseSessionCookie,
   parseArgs,
-  parseBatchSize,
 } from '../../scripts/import-fixture.mjs'
 
 test('fixture importer parses target and upload options', () => {
@@ -15,16 +15,14 @@ test('fixture importer parses target and upload options', () => {
       'https://preview.example.test',
       '--session-cookie',
       'sid=secret; other=ignored',
-      '--batch-size=3',
-      '--allow-non-empty',
+      '--resume',
       'test/fixtures/room-inventory/familienfreizeit-2027.kdl',
     ]),
     {
       baseUrl: 'https://preview.example.test',
       sessionCookie: 'sid=secret; other=ignored',
       magicLink: null,
-      batchSize: 3,
-      allowNonEmpty: true,
+      resume: true,
       fixturePath: resolve('test/fixtures/room-inventory/familienfreizeit-2027.kdl'),
       help: false,
     },
@@ -35,12 +33,6 @@ test('fixture importer normalises raw or full session cookies', () => {
   assert.equal(normaliseSessionCookie('secret'), 'sid=secret')
   assert.equal(normaliseSessionCookie('sid=secret; other=value'), 'sid=secret')
   assert.throws(() => normaliseSessionCookie('other=value'), /sid value/)
-})
-
-test('fixture importer requires positive batch sizes', () => {
-  assert.equal(parseBatchSize('25'), 25)
-  assert.throws(() => parseBatchSize('0'), /positive integer/)
-  assert.throws(() => parseBatchSize('not-a-number'), /positive integer/)
 })
 
 test('fixture importer strips fixture envelope metadata before upload', () => {
@@ -63,4 +55,15 @@ test('fixture importer strips fixture envelope metadata before upload', () => {
       },
     ],
   )
+})
+
+test('fixture importer recognises an exact event prefix for resume', () => {
+  const fixture = [
+    { type: 'One', subject: null, payload: { b: 2, a: 1 } },
+    { type: 'Two', subject: 'two', payload: { value: ['x', 'y'] } },
+  ]
+  assert.equal(matchingPrefixLength(fixture.slice(0, 1), fixture), 1)
+  assert.equal(matchingPrefixLength(fixture, fixture), 2)
+  assert.equal(matchingPrefixLength([{ ...fixture[0], payload: { a: 9, b: 2 } }], fixture), -1)
+  assert.equal(matchingPrefixLength([...fixture, fixture[0]], fixture), -1)
 })

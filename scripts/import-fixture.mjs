@@ -4,7 +4,6 @@ import { dirname, resolve } from 'node:path'
 import { createServer } from 'vite'
 
 const defaultBaseUrl = 'http://127.0.0.1:5173'
-const defaultBatchSize = 50
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 export function usage() {
@@ -14,12 +13,13 @@ Options:
   --base-url URL             Worker URL (default: ${defaultBaseUrl})
   --session-cookie COOKIE    Existing organiser sid cookie or Cookie header
   --magic-link URL           Single-use organiser magic-link URL
-  --batch-size COUNT         Events per HTTP request (default: ${defaultBatchSize})
-  --allow-non-empty          Allow appending to an existing event log
+  --resume                   Resume only when the server log is a fixture prefix
   --help                     Show this help
 
 The fixture is parsed and validated with the active occasion profile before any
-HTTP request appends events. Use either --session-cookie or --magic-link.
+HTTP request appends events. The complete fixture is sent in one request so the
+server can validate and append it atomically. Use either --session-cookie or
+--magic-link.
 `
 }
 
@@ -28,8 +28,7 @@ export function parseArgs(argv) {
     baseUrl: defaultBaseUrl,
     sessionCookie: null,
     magicLink: null,
-    batchSize: defaultBatchSize,
-    allowNonEmpty: false,
+    resume: false,
     fixturePath: null,
     help: false,
   }
@@ -40,16 +39,15 @@ export function parseArgs(argv) {
       options.help = true
       continue
     }
-    if (argument === '--allow-non-empty') {
-      options.allowNonEmpty = true
+    if (argument === '--resume') {
+      options.resume = true
       continue
     }
     if (
       argument === '--base-url' ||
       argument === '--session-cookie' ||
       argument === '--cookie' ||
-      argument === '--magic-link' ||
-      argument === '--batch-size'
+      argument === '--magic-link'
     ) {
       const value = argv[++index]
       if (!value || value.startsWith('--')) throw new Error(`${argument} requires a value`)
@@ -57,7 +55,6 @@ export function parseArgs(argv) {
       else if (argument === '--session-cookie' || argument === '--cookie')
         options.sessionCookie = value
       else if (argument === '--magic-link') options.magicLink = value
-      else options.batchSize = parseBatchSize(value)
       continue
     }
     if (argument.startsWith('--base-url=')) options.baseUrl = argument.slice('--base-url='.length)
@@ -65,8 +62,6 @@ export function parseArgs(argv) {
       options.sessionCookie = argument.slice(argument.indexOf('=') + 1)
     else if (argument.startsWith('--magic-link='))
       options.magicLink = argument.slice('--magic-link='.length)
-    else if (argument.startsWith('--batch-size='))
-      options.batchSize = parseBatchSize(argument.slice('--batch-size='.length))
     else if (argument.startsWith('-')) throw new Error(`unknown option ${argument}`)
     else if (options.fixturePath) throw new Error('only one fixture path may be supplied')
     else options.fixturePath = resolve(argument)
@@ -76,13 +71,6 @@ export function parseArgs(argv) {
   if (options.sessionCookie && options.magicLink)
     throw new Error('use either --session-cookie or --magic-link, not both')
   return options
-}
-
-export function parseBatchSize(value) {
-  const batchSize = Number(value)
-  if (!Number.isSafeInteger(batchSize) || batchSize < 1)
-    throw new Error('batch size must be a positive integer')
-  return batchSize
 }
 
 export function normaliseSessionCookie(value) {
@@ -95,6 +83,33 @@ export function normaliseSessionCookie(value) {
 
 export function eventsToDrafts(events) {
   return events.map(({ type, subject, payload }) => ({ type, subject, payload }))
+}
+
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map(stableValue)
+  if (value && typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entry]) => [key, stableValue(entry)]),
+    )
+  return value
+}
+
+function sameEvent(left, right) {
+  return (
+    left.type === right.type &&
+    (left.subject ?? null) === (right.subject ?? null) &&
+    JSON.stringify(stableValue(left.payload)) === JSON.stringify(stableValue(right.payload))
+  )
+}
+
+export function matchingPrefixLength(existing, fixture) {
+  if (existing.length > fixture.length) return -1
+  for (let index = 0; index < existing.length; index += 1) {
+    if (!sameEvent(existing[index], fixture[index])) return -1
+  }
+  return existing.length
 }
 
 async function loadFixture(fixturePath) {
@@ -160,6 +175,11 @@ async function responseJson(response) {
   }
 }
 
+function apiFailure(response, body, fallback) {
+  const details = [body?.error, body?.message].filter(Boolean).join(': ')
+  return `${fallback} (HTTP ${response.status}${details ? `, ${details}` : ''})`
+}
+
 async function authenticatedLog(baseUrl, cookie) {
   const response = await apiRequest(baseUrl, '/api/organiser/log', cookie)
   const body = await responseJson(response)
@@ -167,7 +187,7 @@ async function authenticatedLog(baseUrl, cookie) {
     throw new Error(
       'authentication failed; provide a valid organiser --session-cookie or --magic-link',
     )
-  if (!response.ok) throw new Error(`could not read the event log (HTTP ${response.status})`)
+  if (!response.ok) throw new Error(apiFailure(response, body, 'could not read the event log'))
   if (!body || !Array.isArray(body.events) || !Number.isSafeInteger(body.head_seq))
     throw new Error('event-log response was malformed')
   if (body.head_seq !== body.events.length)
@@ -175,27 +195,20 @@ async function authenticatedLog(baseUrl, cookie) {
   return body
 }
 
-async function upload(baseUrl, cookie, events, batchSize, initialHead) {
-  let head = initialHead
-  for (let offset = 0; offset < events.length; offset += batchSize) {
-    const batch = events.slice(offset, offset + batchSize)
-    const response = await apiRequest(baseUrl, '/api/events', cookie, {
-      method: 'POST',
-      body: JSON.stringify({ expected_head: head, events: batch }),
-    })
-    const body = await responseJson(response)
-    if (response.status === 401 || response.status === 403)
-      throw new Error('authentication failed while uploading; provide a valid organiser credential')
-    if (response.status === 409)
-      throw new Error('event log changed during upload; no automatic retry was attempted')
-    if (!response.ok || !body || !Number.isSafeInteger(body.head))
-      throw new Error(`event upload failed at event ${offset + 1} (HTTP ${response.status})`)
-    head = body.head
-    console.log(
-      `Uploaded ${Math.min(offset + batch.length, events.length)}/${events.length} events (head ${head})`,
-    )
-  }
-  return head
+async function upload(baseUrl, cookie, events, initialHead, totalEvents) {
+  const response = await apiRequest(baseUrl, '/api/events', cookie, {
+    method: 'POST',
+    body: JSON.stringify({ expected_head: initialHead, events }),
+  })
+  const body = await responseJson(response)
+  if (response.status === 401 || response.status === 403)
+    throw new Error('authentication failed while uploading; provide a valid organiser credential')
+  if (response.status === 409)
+    throw new Error('event log changed during upload; no automatic retry was attempted')
+  if (!response.ok || !body || !Number.isSafeInteger(body.head))
+    throw new Error(apiFailure(response, body, `event upload failed for ${events.length} events`))
+  console.log(`Uploaded ${totalEvents}/${totalEvents} events (head ${body.head})`)
+  return body.head
 }
 
 export async function run(options) {
@@ -211,12 +224,30 @@ export async function run(options) {
     throw new Error('authentication is required; provide --session-cookie or --magic-link')
 
   const log = await authenticatedLog(options.baseUrl, cookie)
-  if (!options.allowNonEmpty && log.events.length > 0)
-    throw new Error(
-      `refusing to append to non-empty event log (${log.events.length} events); use --allow-non-empty to override`,
-    )
+  let remaining = drafts
+  let imported = 0
+  if (log.events.length > 0) {
+    if (!options.resume)
+      throw new Error(
+        `refusing to use non-empty event log (${log.events.length} events); use --resume only when it contains a prefix of this fixture`,
+      )
+    imported = matchingPrefixLength(log.events, drafts)
+    if (imported < 0)
+      throw new Error('cannot resume: the server event log is not a prefix of this fixture')
+    remaining = drafts.slice(imported)
+  }
+  if (remaining.length === 0) {
+    console.log(`Fixture already imported into ${options.baseUrl} (head ${log.head_seq})`)
+    return log.head_seq
+  }
 
-  const finalHead = await upload(options.baseUrl, cookie, drafts, options.batchSize, log.head_seq)
+  const finalHead = await upload(
+    options.baseUrl,
+    cookie,
+    remaining,
+    log.head_seq,
+    imported + remaining.length,
+  )
   console.log(`Imported ${events.length} events into ${options.baseUrl} (head ${finalHead})`)
   return finalHead
 }
