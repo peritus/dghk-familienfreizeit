@@ -7,7 +7,7 @@ const defaultBaseUrl = 'http://127.0.0.1:5173'
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 export function usage() {
-  return `Usage: npm run db:import-fixture -- [options] <fixture.kdl>
+  return `Usage: npm run db:import-fixture -- [options] <fixture.kdl> [fixture.kdl ...]
 
 Options:
   --base-url URL             Worker URL (default: ${defaultBaseUrl})
@@ -16,10 +16,10 @@ Options:
   --resume                   Resume only when the server log is a fixture prefix
   --help                     Show this help
 
-The fixture is parsed and validated with the active occasion profile before any
-HTTP request appends events. The complete fixture is sent in one request so the
-server can validate and append it atomically. Use either --session-cookie or
---magic-link.
+The fixtures are parsed in the supplied order and validated as one combined
+event stream before any HTTP request appends events. The complete stream is sent
+in one request so the server can validate and append it atomically. Use either
+--session-cookie or --magic-link.
 `
 }
 
@@ -29,7 +29,7 @@ export function parseArgs(argv) {
     sessionCookie: null,
     magicLink: null,
     resume: false,
-    fixturePath: null,
+    fixturePaths: [],
     help: false,
   }
 
@@ -63,11 +63,11 @@ export function parseArgs(argv) {
     else if (argument.startsWith('--magic-link='))
       options.magicLink = argument.slice('--magic-link='.length)
     else if (argument.startsWith('-')) throw new Error(`unknown option ${argument}`)
-    else if (options.fixturePath) throw new Error('only one fixture path may be supplied')
-    else options.fixturePath = resolve(argument)
+    else options.fixturePaths.push(resolve(argument))
   }
 
-  if (!options.help && !options.fixturePath) throw new Error('a KDL fixture path is required')
+  if (!options.help && options.fixturePaths.length === 0)
+    throw new Error('at least one KDL fixture path is required')
   if (options.sessionCookie && options.magicLink)
     throw new Error('use either --session-cookie or --magic-link, not both')
   return options
@@ -112,8 +112,7 @@ export function matchingPrefixLength(existing, fixture) {
   return existing.length
 }
 
-async function loadFixture(fixturePath) {
-  const text = await readFile(fixturePath, 'utf8')
+async function loadFixture(fixturePaths) {
   const vite = await createServer({
     root: repositoryRoot,
     configFile: false,
@@ -128,9 +127,14 @@ async function loadFixture(fixturePath) {
       vite.ssrLoadModule('/src/config/index.ts'),
       vite.ssrLoadModule('/src/events/fold.ts'),
     ])
-    const events = loadKdl(text, activeProfile.validation_view)
-    assertAppendableWorld(derive(events, activeProfile.validation_view))
-    return events
+    const events = []
+    for (const fixturePath of fixturePaths) {
+      const text = await readFile(fixturePath, 'utf8')
+      events.push(...loadKdl(text, activeProfile.validation_view))
+    }
+    const combined = events.map((event, index) => ({ ...event, seq: index + 1 }))
+    assertAppendableWorld(derive(combined, activeProfile.validation_view))
+    return combined
   } finally {
     await vite.close()
   }
@@ -212,7 +216,7 @@ async function upload(baseUrl, cookie, events, initialHead, totalEvents) {
 }
 
 export async function run(options) {
-  const events = await loadFixture(options.fixturePath)
+  const events = await loadFixture(options.fixturePaths)
   if (events.length === 0) throw new Error('fixture contains no events')
   const drafts = eventsToDrafts(events)
   const cookie = options.sessionCookie

@@ -16,14 +16,18 @@ test('fixture importer parses target and upload options', () => {
       '--session-cookie',
       'sid=secret; other=ignored',
       '--resume',
-      'test/fixtures/room-inventory/familienfreizeit-2027.kdl',
+      'test/fixtures/room-inventory/djh-luebben.kdl',
+      'test/fixtures/families/49_families.kdl',
     ]),
     {
       baseUrl: 'https://preview.example.test',
       sessionCookie: 'sid=secret; other=ignored',
       magicLink: null,
       resume: true,
-      fixturePath: resolve('test/fixtures/room-inventory/familienfreizeit-2027.kdl'),
+      fixturePaths: [
+        resolve('test/fixtures/room-inventory/djh-luebben.kdl'),
+        resolve('test/fixtures/families/49_families.kdl'),
+      ],
       help: false,
     },
   )
