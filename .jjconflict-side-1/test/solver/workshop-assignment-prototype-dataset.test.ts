@@ -1,0 +1,219 @@
+import { readFileSync } from 'node:fs'
+import { expect, test } from 'vitest'
+import { defineOccasionProfile } from '../../src/config/define.js'
+import { derive } from '../../src/events/fold.js'
+import { loadKdl } from '../../src/events/kdl.js'
+import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
+import {
+  officialWorkshops,
+  type OfficialWorkshopsSummary,
+} from '../../src/modules/official-workshops/index.js'
+import {
+  workshopScheduling,
+  type WorkshopSchedulingSection,
+} from '../../src/modules/workshop-scheduling/index.js'
+import { workshopSpace } from '../../src/modules/workshop-space/index.js'
+import { workshopRankings } from '../../src/modules/workshop-rankings/index.js'
+import {
+  workshopAssignment,
+  type WorkshopAssignmentSection,
+} from '../../src/modules/workshop-assignment/index.js'
+import { buildWorkshopAllocationProjection } from '../../src/modules/workshop-rankings/app/workshop-allocation-view.js'
+import type { Plan, SolverInput } from '../../src/solver/types.js'
+
+// Same module selection and parameters as the real familienfreizeit-2027
+// profile's workshop modules (src/config/profiles/familienfreizeit-2027.ts),
+// so this exercises the resolver against production configuration, not
+// arbitrary test values.
+const profile = defineOccasionProfile({
+  meta: {
+    id: 'workshop-prototype-dataset',
+    name: 'Workshop prototype dataset',
+    description: 'Full-scale dataset ported from the workshops HTML prototype',
+    starts_on: '2027-05-14',
+    ends_on: '2027-05-16',
+    timezone: 'Europe/Berlin',
+    locale: 'de',
+    fallback_locale: 'en',
+  },
+  traits: {},
+  modules: [
+    workshopSpace({}),
+    officialWorkshops({
+      audience_values: ['children', 'adults', 'all'],
+      available_modes: ['assigned', 'sign-up', 'interest'],
+      excluded_roles: ['infant'],
+    }),
+    workshopScheduling({ placement_policy: 'automatic-with-fixed-decisions' }),
+    workshopRankings({ ranking_trait: 'prefers-workshop', max_rank: 3, allow_no_preference: true }),
+    workshopAssignment({
+      top_n: 2,
+      rank_weights: [3, 2, 1],
+      minimum_workshops: 2,
+      fairness_targets: { children: 2, adults: 1 },
+      fill_unassigned: true,
+      max_repair_passes: 5,
+    }),
+  ],
+})
+
+const fixture = readFileSync(
+  new URL('../fixtures/workshop-assignment/prototype-dataset.kdl', import.meta.url),
+  'utf-8',
+)
+
+function solveFixture(previousPlan: Plan | null = null): {
+  plan: Plan
+  input: SolverInput
+  world: ReturnType<typeof derive>
+} {
+  const world = derive(loadKdl(fixture, profile.validation_view), profile.validation_view)
+  const contributions = composeSolverContributions(profile)
+  const input = buildSolverInput(world, contributions, previousPlan)
+  const plan = solve(input, contributions, {
+    build_revision: 'test',
+    compatibility_revision: 1,
+    event_date: '2027-05-14',
+    profile,
+    seed: null,
+  })
+  return { plan, input, world }
+}
+
+const assignmentKey = (section: WorkshopAssignmentSection) =>
+  section.assignments.map((item) => `${item.person_id}|${item.workshop_id}|${item.slot_id}`).sort()
+
+test('the resolver produces a constraint-valid, deterministic plan over the full prototype dataset', () => {
+  const { plan, input } = solveFixture()
+  const official = input.module_inputs['official-workshops'] as OfficialWorkshopsSummary
+  const schedule = plan.sections['workshop-scheduling'] as WorkshopSchedulingSection
+  const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+
+  // No fixed attendance decisions exist in this dataset (the prototype
+  // never depicts that concept), so both stay empty.
+  expect(attendance.fixed).toEqual([])
+  expect(attendance.fixed_violations).toEqual([])
+  expect(attendance.assignments.length).toBeGreaterThan(0)
+
+  const workshopsById = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
+  const placementsById = new Map(
+    schedule.placements.map((placement) => [placement.workshop_id, placement]),
+  )
+  const unscheduledIds = new Set(schedule.unscheduled.map(({ workshop_id: id }) => id))
+  // 'wks_schmieden' needs 'Esse', which no room in the dataset provides —
+  // it must come out unscheduled, exercising that this never crashes.
+  expect(unscheduledIds.has('wks_schmieden')).toBe(true)
+
+  const roleOf = (personId: string): unknown =>
+    input.labels.find((label) => label.entity_id === personId && label.key === 'role')?.value
+
+  // Never exceeds a workshop's own capacity.
+  const countByWorkshop = new Map<string, number>()
+  for (const assignment of attendance.assignments)
+    countByWorkshop.set(
+      assignment.workshop_id,
+      (countByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
+    )
+  for (const [workshopId, count] of countByWorkshop)
+    expect(count).toBeLessThanOrEqual(workshopsById.get(workshopId)!.capacity)
+
+  // Never places two assignments for the same person in the same slot.
+  const slotsByPerson = new Map<string, Set<string>>()
+  for (const assignment of attendance.assignments) {
+    const slots = slotsByPerson.get(assignment.person_id) ?? new Set<string>()
+    expect(slots.has(assignment.slot_id)).toBe(false)
+    slots.add(assignment.slot_id)
+    slotsByPerson.set(assignment.person_id, slots)
+  }
+
+  // Every assignment targets a workshop that actually exists, is not
+  // cancelled, is in assigned mode, has a real schedule placement, and
+  // matches the assignment's own recorded slot.
+  for (const assignment of attendance.assignments) {
+    const workshop = workshopsById.get(assignment.workshop_id)
+    expect(workshop).toBeDefined()
+    expect(workshop!.mode).toBe('assigned')
+    expect(unscheduledIds.has(assignment.workshop_id)).toBe(false)
+    expect(placementsById.get(assignment.workshop_id)?.slot_id).toBe(assignment.slot_id)
+
+    // Respects the workshop's audience.
+    const role = roleOf(assignment.person_id)
+    if (workshop!.audience === 'children') expect(role).toBe('child')
+    if (workshop!.audience === 'adults') expect(role).toBe('adult')
+  }
+
+  // No person is placed into a different workshop during a slot where they
+  // lead something (subsumes not attending their own workshop as well).
+  const leaderSlots = new Map<string, Set<string>>()
+  for (const workshop of official.workshops) {
+    const placement = placementsById.get(workshop.id)
+    if (!placement) continue
+    for (const leaderId of workshop.leader_ids) {
+      const slots = leaderSlots.get(leaderId) ?? new Set<string>()
+      slots.add(placement.slot_id)
+      leaderSlots.set(leaderId, slots)
+    }
+  }
+  for (const assignment of attendance.assignments)
+    expect(leaderSlots.get(assignment.person_id)?.has(assignment.slot_id)).not.toBe(true)
+
+  // Every person who has any assignment does not also appear unassigned,
+  // and vice versa — nobody is silently double-counted or dropped.
+  const assignedPeople = new Set(attendance.assignments.map(({ person_id: id }) => id))
+  const unassignedPeople = new Set(attendance.unassigned.map(({ person_id: id }) => id))
+  expect([...unassignedPeople].every((id) => !assignedPeople.has(id))).toBe(true)
+
+  // Determinism: re-deriving and re-solving the exact same events produces
+  // the exact same set of (person, workshop, slot) placements.
+  const again = solveFixture()
+  const attendanceAgain = again.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+  expect(assignmentKey(attendanceAgain)).toEqual(assignmentKey(attendance))
+
+  // Retaining against the previous plan (no new events) is *not* yet
+  // guaranteed to reproduce the identical placement set — see issue 037,
+  // filed from this exact finding: fill-origin placements (and, by a
+  // cascading effect through shared capacity/slots, some ranked ones too)
+  // can shift to a different-but-still-valid outcome. What must still hold
+  // is that the retained run stays constraint-valid on its own terms.
+  const retained = solveFixture(plan)
+  const attendanceRetained = retained.plan.sections[
+    'workshop-assignment'
+  ] as WorkshopAssignmentSection
+  const retainedCountByWorkshop = new Map<string, number>()
+  for (const assignment of attendanceRetained.assignments)
+    retainedCountByWorkshop.set(
+      assignment.workshop_id,
+      (retainedCountByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
+    )
+  for (const [workshopId, count] of retainedCountByWorkshop)
+    expect(count).toBeLessThanOrEqual(workshopsById.get(workshopId)!.capacity)
+  for (const assignment of attendanceRetained.assignments) {
+    const workshop = workshopsById.get(assignment.workshop_id)!
+    expect(leaderSlots.get(assignment.person_id)?.has(assignment.slot_id)).not.toBe(true)
+    const role = roleOf(assignment.person_id)
+    if (workshop.audience === 'children') expect(role).toBe('child')
+    if (workshop.audience === 'adults') expect(role).toBe('adult')
+  }
+})
+
+test('the workshop allocation projection exposes answers, demand, and trace from the solved world', () => {
+  const { plan, world } = solveFixture()
+  const projection = buildWorkshopAllocationProjection({
+    world,
+    plan,
+    event_date: '2027-05-14',
+    time_zone: 'Europe/Berlin',
+    max_rank: 3,
+  })
+
+  expect(projection.has_workshops).toBe(true)
+  expect(projection.has_answers).toBe(true)
+  expect(projection.answers.length).toBeGreaterThan(0)
+  expect(projection.demand.find((row) => row.title === 'Keramik')).toEqual(
+    expect.objectContaining({ first_choices: 16, placement_label: 'platziert' }),
+  )
+  expect(projection.demand.find((row) => row.title === 'Schmieden')).toEqual(
+    expect.objectContaining({ placement_label: 'ohne Termin' }),
+  )
+  expect(projection.trace_events.length).toBeGreaterThan(projection.answers.length)
+})
