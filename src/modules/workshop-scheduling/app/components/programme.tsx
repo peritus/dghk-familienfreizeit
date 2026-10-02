@@ -4,18 +4,14 @@ import {
   WorkshopDataTable,
   WorkshopStatusBadge,
 } from '../../../../app/components/shared/workshop/shared.js'
+import type {
+  ProgrammeCellProjection,
+  ProgrammeRowProjection,
+  UnplacedWorkshopProjection,
+  WorkshopOverlapProjection,
+} from '../programme-view.js'
 
-export type ProgrammeCellView = {
-  id: string
-  state: 'blocked' | 'empty' | 'placed'
-  title?: string
-  audience?: string
-  age_range?: string
-  leaders?: string
-  capacity_label?: string
-  demand_label?: string
-  on_open?: () => void
-}
+export type ProgrammeCellView = ProgrammeCellProjection & { on_open?: () => void }
 
 export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
   if (cell.state === 'blocked') return <td className="bg-background p-3 text-muted">gesperrt</td>
@@ -58,10 +54,7 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
   )
 }
 
-export type ProgrammeRowView = {
-  id: string
-  day_label?: string
-  slot_label: string
+export type ProgrammeRowView = ProgrammeRowProjection & {
   cells: readonly ProgrammeCellView[]
 }
 
@@ -73,7 +66,7 @@ export function ProgrammeGrid({
   rows: readonly ProgrammeRowView[]
 }) {
   return (
-    <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
+    <div className="overflow-x-auto rounded-base border-2 border-black bg-white print:overflow-visible print:rounded-none print:border">
       <table className="w-full min-w-[48rem] text-left">
         <caption className="sr-only">Workshops nach Raum und Slot</caption>
         <thead>
@@ -102,7 +95,7 @@ export function ProgrammeGrid({
                     </tr>,
                   ]
                 : []),
-              <tr key={row.id} className="border-b border-black/30">
+              <tr key={row.id} className="border-b border-black/30 last:border-b-0">
                 <th scope="row" className="p-3">
                   {row.slot_label}
                 </th>
@@ -121,12 +114,7 @@ export function ProgrammeGrid({
   )
 }
 
-export type UnplacedWorkshopView = {
-  id: string
-  title: string
-  reason: string
-  demand_label?: string
-}
+export type UnplacedWorkshopView = UnplacedWorkshopProjection
 
 export function UnplacedWorkshopRow({
   workshop,
@@ -136,7 +124,7 @@ export function UnplacedWorkshopRow({
   action?: ReactNode
 }) {
   return (
-    <li className="flex flex-wrap items-start justify-between gap-4 border-b border-black/30 bg-white p-4">
+    <li className="flex flex-wrap items-start justify-between gap-4 border-b border-black/30 bg-white p-4 last:border-b-0 print:break-inside-avoid">
       <div className="min-w-0 flex-1">
         <h3 className="text-xl font-heading">{workshop.title}</h3>
         <p className="mt-1">
@@ -152,13 +140,7 @@ export function UnplacedWorkshopRow({
   )
 }
 
-export type WorkshopOverlapView = {
-  id: string
-  workshops: string
-  slot: string
-  people_count: number
-  people: readonly string[]
-}
+export type WorkshopOverlapView = WorkshopOverlapProjection
 
 export function WorkshopOverlapRow({ overlap }: { overlap: WorkshopOverlapView }) {
   return (
