@@ -19,12 +19,18 @@ is available only through the alarming binding
 enabled on a shared or production deployment. The binding is optional; when it
 is unset, the loopback-only default remains in force. Real email delivery
 remains a separate deployment concern.
+When the override is enabled, the Worker emits a `WARN` message once per
+isolate explaining that authentication tokens will be printed to its logs and
+that the setting is unsafe for production.
 
 Session cookies are always `Secure`, except when the separate alarming local-only
 binding `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` is set.
 The Station Tailscale preview uses it because browsers reject `Secure` cookies
 over its plain-HTTP URL. Shared and deployed environments must leave it unset.
 The binding is optional and leaving it unset preserves the secure default.
+When the override is enabled, the Worker emits a `WARN` message once per
+isolate explaining that cookies will not require HTTPS and that the setting is
+unsafe for production.
 
 `GET /auth/:token` atomically deletes an unexpired token with `DELETE … RETURNING`,
 creates a hashed session, and redirects to the application. Reusing or expiring a

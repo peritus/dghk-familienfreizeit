@@ -8,6 +8,7 @@ import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 describe('authentication boundary', () => {
   test('local login mode prints a magic link and redeems it to the organiser host', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const localEnv = {
       ...env,
       DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
@@ -23,6 +24,11 @@ describe('authentication boundary', () => {
         localEnv,
       )
       expect(response.status).toBe(200)
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE is enabled: magic links will be printed to Worker logs',
+        ),
+      )
       const output = String(log.mock.calls[0]?.[0])
       expect(output).toMatch(
         /^\[DANGEROUS DEBUG\] magic link for organiser@example\.test: https:\/\/example\.invalid\/auth\//,
@@ -35,11 +41,13 @@ describe('authentication boundary', () => {
       expect(redeemed.headers.get('set-cookie')).toContain('Secure')
     } finally {
       log.mockRestore()
+      warn.mockRestore()
     }
   })
 
   test('the explicit dangerous development flag permits an insecure session cookie', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const localEnv = {
       ...env,
       DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
@@ -60,8 +68,14 @@ describe('authentication boundary', () => {
       const link = new URL(output.slice(output.indexOf('http://')))
       const redeemed = await app.request(link.pathname, {}, localEnv)
       expect(redeemed.headers.get('set-cookie')).not.toContain('Secure')
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES is enabled: session cookies will not require HTTPS',
+        ),
+      )
     } finally {
       log.mockRestore()
+      warn.mockRestore()
     }
   })
 

@@ -17,6 +17,14 @@ const app = new Hono<{ Bindings: Env }>()
 
 const isOrganiser = (email: string): boolean => organiserAllowlist.has(email)
 
+let warnedMagicLinkConsole = false
+let warnedInsecureSessionCookies = false
+
+app.use('*', async (context, next) => {
+  warnDangerousDevelopmentBindings(context.env)
+  await next()
+})
+
 app.post('/api/login', async (context) => {
   const email = await context.req
     .json<{ email?: string }>()
@@ -300,6 +308,27 @@ function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): bool
 
 function shouldAllowInsecureSessionCookies(context: Context<{ Bindings: Env }>): boolean {
   return context.env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true'
+}
+
+function warnDangerousDevelopmentBindings(env: Env): void {
+  if (
+    env.DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE === 'true' &&
+    !warnedMagicLinkConsole
+  ) {
+    console.warn(
+      '[WARN] DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE is enabled: magic links will be printed to Worker logs. This exposes authentication tokens and is dangerous; never enable it in production.',
+    )
+    warnedMagicLinkConsole = true
+  }
+  if (
+    env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true' &&
+    !warnedInsecureSessionCookies
+  ) {
+    console.warn(
+      '[WARN] DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES is enabled: session cookies will not require HTTPS. This can expose sessions over plain HTTP and is dangerous; never enable it in production.',
+    )
+    warnedInsecureSessionCookies = true
+  }
 }
 
 function eventDraft(candidate: unknown, actor: string, at: string): EventDraft {
