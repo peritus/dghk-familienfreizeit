@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "npm run db:migrate:local && vite",
     "db:migrate:local": "wrangler d1 migrations apply dghk-familienfreizeit-local --local",
+    "db:import-fixture": "node scripts/import-fixture.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "storybook": "storybook dev --no-open",
