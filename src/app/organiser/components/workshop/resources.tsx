@@ -63,7 +63,7 @@ export function BlockedSlotList({
 
 export function SpaceRow({ space, action }: { space: WorkshopSpaceView; action?: ReactNode }) {
   return (
-    <Card size="sm" className="bg-white">
+    <Card size="sm" className="bg-secondary-background">
       <CardContent className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1 space-y-2">
           <SpaceIdentity name={space.name} location={space.location} capacity={space.capacity} />
@@ -104,7 +104,7 @@ export function SlotConflictBadge({ conflict }: { conflict?: string }) {
 
 export function SlotRow({ slot, action }: { slot: WorkshopSlotView; action?: ReactNode }) {
   return (
-    <Card size="sm" className="bg-white">
+    <Card size="sm" className="bg-secondary-background">
       <CardContent className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <p className="flex flex-wrap items-center gap-2">

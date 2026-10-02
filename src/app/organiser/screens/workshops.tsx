@@ -328,7 +328,7 @@ export function WorkshopExternalLeaders() {
               Externe Leitungen leiten Workshops, nehmen aber nicht an der Freizeit teil.
             </DialogDescription>
             {error ? (
-              <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
+              <p role="alert" className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3">
                 {error}
               </p>
             ) : null}
@@ -443,11 +443,11 @@ export function WorkshopLeaders() {
       />
       <WorkshopSectionHeader title={`${leaders.length} Leitungen`} />
       {leaders.length ? (
-        <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
+        <div className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
           <table className="w-full min-w-[36rem] text-left text-sm">
             <caption className="sr-only">Leitungen aus der Veranstaltung</caption>
             <thead>
-              <tr className="border-b-2 border-black">
+              <tr className="border-b-2 border-border">
                 <th scope="col" className="p-3">
                   Person
                 </th>
@@ -458,7 +458,7 @@ export function WorkshopLeaders() {
             </thead>
             <tbody>
               {leaders.map((leader) => (
-                <tr key={leader.id} className="border-b border-black/30 last:border-b-0">
+                <tr key={leader.id} className="border-b border-border/30 last:border-b-0">
                   <th scope="row" className="p-3">
                     {leader.name}
                   </th>
@@ -735,7 +735,7 @@ export function Workshops() {
         <section aria-label="Aktive Workshops" className="space-y-3">
           <WorkshopSectionHeader title="Aktive Workshops" />
           {activeWorkshops.length ? (
-            <div className="divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black bg-white">
+            <div className="divide-y-2 divide-border overflow-hidden rounded-base border-2 border-border bg-secondary-background">
               {activeWorkshops.map((workshop) => (
                 <WorkshopSummaryRow
                   key={workshop.id}
@@ -797,7 +797,7 @@ export function Workshops() {
             description="Personen mit mindestens einem Workshop."
           />
           {internalLeaders.length ? (
-            <ul className="divide-y-2 divide-black overflow-hidden rounded-base border-2 border-black bg-white">
+            <ul className="divide-y-2 divide-border overflow-hidden rounded-base border-2 border-border bg-secondary-background">
               {internalLeaders.map((leader) => (
                 <li key={leader.id} className="p-4">
                   <strong>{leader.name}</strong>
@@ -820,7 +820,7 @@ export function Workshops() {
           {externalLeaders.length ? (
             <ul className="grid gap-3">
               {externalLeaders.map((leader) => (
-                <li key={leader.id} className="rounded-base border-2 border-black bg-white p-4">
+                <li key={leader.id} className="rounded-base border-2 border-border bg-secondary-background p-4">
                   <strong>{leader.name}</strong>
                   {leader.phone ? (
                     <span className="ml-2 text-sm text-muted">· {leader.phone}</span>
@@ -966,7 +966,7 @@ export function WorkshopProgramme() {
       ) : null}
       {view === 'unplaced' ? (
         programme.unplaced.length ? (
-          <ul className="overflow-hidden rounded-base border-2 border-black">
+          <ul className="overflow-hidden rounded-base border-2 border-border">
             {programme.unplaced.map((workshop) => (
               <UnplacedWorkshopRow key={workshop.id} workshop={workshop} />
             ))}

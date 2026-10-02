@@ -31,7 +31,7 @@ export function Login() {
   }
 
   return (
-    <Card className="mx-auto max-w-xl bg-white">
+    <Card className="mx-auto max-w-xl bg-secondary-background">
       <CardHeader>
         <p className="text-sm font-bold uppercase tracking-wide">Zugang</p>
         <h1 className="text-2xl">Mit Magic Link anmelden</h1>
@@ -66,7 +66,7 @@ export function Login() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="min-h-11 rounded border-2 border-black px-3"
+              className="min-h-11 rounded border-2 border-border px-3"
             />
           </label>
           <Button type="submit" disabled={status === 'sending'}>

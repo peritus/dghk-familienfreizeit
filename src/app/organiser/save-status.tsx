@@ -90,7 +90,7 @@ export function SaveStatus() {
   const Icon = view.kind === 'failed' ? TriangleAlert : view.kind === 'saved' ? Check : Pencil
 
   const draftModeSwitch = (
-    <div className="mt-5 flex items-center justify-between gap-3 border-t-2 border-black pt-4">
+    <div className="mt-5 flex items-center justify-between gap-3 border-t-2 border-border pt-4">
       <div>
         <p id="draft-mode-switch-label" className="font-bold">
           Entwurfsmodus
@@ -104,9 +104,9 @@ export function SaveStatus() {
         onCheckedChange={handleSwitchChange}
         aria-labelledby="draft-mode-switch-label"
         aria-describedby="draft-mode-switch-description"
-        className="h-8 w-14 shrink-0 rounded-full border-2 border-black bg-white data-[checked]:bg-main"
+        className="h-8 w-14 shrink-0 rounded-full border-2 border-border bg-secondary-background data-[checked]:bg-main"
       >
-        <Switch.Thumb className="block size-6 translate-x-0 rounded-full border-2 border-black bg-white transition-transform data-[checked]:translate-x-6" />
+        <Switch.Thumb className="block size-6 translate-x-0 rounded-full border-2 border-border bg-secondary-background transition-transform data-[checked]:translate-x-6" />
       </Switch.Root>
     </div>
   )
@@ -276,7 +276,7 @@ export function SaveStatus() {
           {view.kind === 'draft-pending' ? (
             <span
               aria-hidden="true"
-              className="pointer-events-none flex size-6 items-center justify-center rounded-full bg-black text-sm text-white"
+              className="pointer-events-none flex size-6 items-center justify-center rounded-full bg-foreground text-sm text-background"
             >
               {view.count}
             </span>
@@ -288,7 +288,7 @@ export function SaveStatus() {
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner side="bottom" align="end" sideOffset={12}>
-            <Popover.Popup className="w-[min(26rem,calc(100vw-2rem))] rounded-base border-2 border-black bg-paper p-5 shadow-shadow">
+            <Popover.Popup className="w-[min(26rem,calc(100vw-2rem))] rounded-base border-2 border-border bg-paper p-5 shadow-shadow">
               {renderContent()}
             </Popover.Popup>
           </Popover.Positioner>

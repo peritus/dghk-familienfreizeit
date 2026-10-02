@@ -106,7 +106,7 @@ export function Families() {
                     setDisplayName(event.target.value)
                     setInviteError(null)
                   }}
-                  className="min-h-11 rounded-base border-2 border-black px-3"
+                  className="min-h-11 rounded-base border-2 border-border px-3"
                 />
               </label>
               <label className="grid gap-1">
@@ -119,7 +119,7 @@ export function Families() {
                     setEmail(event.target.value)
                     setInviteError(null)
                   }}
-                  className="min-h-11 rounded-base border-2 border-black px-3"
+                  className="min-h-11 rounded-base border-2 border-border px-3"
                 />
               </label>
               <label className="grid gap-1">
@@ -134,7 +134,7 @@ export function Families() {
                     setMemberCount(event.target.value)
                     setInviteError(null)
                   }}
-                  className="min-h-11 rounded-base border-2 border-black px-3"
+                  className="min-h-11 rounded-base border-2 border-border px-3"
                 />
               </label>
               <div className="flex justify-end gap-2">
@@ -147,11 +147,11 @@ export function Families() {
           </CollectionCreateAction>
         }
       />
-      <div className="rounded-base border-2 border-black bg-white shadow-shadow">
+      <div className="rounded-base border-2 border-border bg-secondary-background shadow-shadow">
         <form id="invite-family-form" noValidate onSubmit={invite} />
         <table className="w-full text-left max-md:block">
           <caption className="p-4 text-left font-bold">Alle Familien</caption>
-          <thead className="border-y-2 border-black max-md:hidden">
+          <thead className="border-y-2 border-border max-md:hidden">
             <tr>
               <th scope="col" className="p-3">
                 Familie
@@ -181,7 +181,7 @@ export function Families() {
                       setDisplayName(event.target.value)
                       setInviteError(null)
                     }}
-                    className="min-h-11 rounded-base border-2 border-black px-3"
+                    className="min-h-11 rounded-base border-2 border-border px-3"
                   />
                 </label>
               </th>
@@ -200,7 +200,7 @@ export function Families() {
                       setEmail(event.target.value)
                       setInviteError(null)
                     }}
-                    className="min-h-11 w-full rounded-base border-2 border-black px-3"
+                    className="min-h-11 w-full rounded-base border-2 border-border px-3"
                   />
                 </label>
               </td>
@@ -217,7 +217,7 @@ export function Families() {
             {rows.map((row) => (
               <tr
                 key={row.family.id}
-                className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3"
+                className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3"
               >
                 <th scope="row" className="p-3 font-bold">
                   <span className="mr-2 md:hidden">Familie:</span>
@@ -249,7 +249,7 @@ export function Families() {
           </tbody>
         </table>
         {inviteError ? (
-          <p id="invite-error" role="alert" className="border-t-2 border-black p-4">
+          <p id="invite-error" role="alert" className="border-t-2 border-border p-4">
             {inviteError}
           </p>
         ) : null}

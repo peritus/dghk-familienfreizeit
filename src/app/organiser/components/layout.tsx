@@ -13,7 +13,7 @@ export function OrganiserScreenHeader({
   return (
     <header
       className={cn(
-        'flex flex-wrap items-end justify-between gap-4 border-b-2 border-black pb-6',
+        'flex flex-wrap items-end justify-between gap-4 border-b-2 border-border pb-6',
         className,
       )}
     >

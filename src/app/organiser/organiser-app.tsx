@@ -231,7 +231,7 @@ export default function OrganiserApp() {
   if (state.status === 'load_error')
     return (
       <OrganiserMinimalFrame>
-        <Alert role="alert" className="bg-white">
+        <Alert role="alert" className="bg-secondary-background">
           <AlertTitle>Die Organisationsdaten konnten nicht geladen werden</AlertTitle>
           <AlertDescription>
             <p>{state.error} Solange die Daten fehlen, zeigt diese Ansicht keine Zahlen an.</p>

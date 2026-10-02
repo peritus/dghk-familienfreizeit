@@ -287,7 +287,7 @@ export function Inventory() {
       <p className="-mt-4 text-muted">Gebäude, Zimmer und Betten für diese Freizeit.</p>
 
       {error ? (
-        <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
+        <p role="alert" className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3">
           {error}
         </p>
       ) : null}
@@ -364,7 +364,7 @@ function NewBuildingForm({
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
   return (
-    <Card className="bg-white">
+    <Card className="bg-secondary-background">
       <CardContent>
         {heading ? <h2 className="text-2xl font-heading">{heading}</h2> : null}
         {intro ? <p className="mt-1 text-muted">{intro}</p> : null}
@@ -384,7 +384,7 @@ function NewBuildingForm({
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="z. B. Haupthaus"
-              className="min-h-11 rounded-base border-2 border-black px-3"
+              className="min-h-11 rounded-base border-2 border-border px-3"
             />
           </label>
           {error ? (
@@ -498,7 +498,7 @@ function BuildingSection({
       </div>
 
       {rooms.length === 0 ? (
-        <Card className="bg-white">
+        <Card className="bg-secondary-background">
           <CardContent>
             <p className="font-bold">Noch keine Zimmer in {building.name}.</p>
             <p className="text-muted">
@@ -507,11 +507,11 @@ function BuildingSection({
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-white p-0">
+        <Card className="bg-secondary-background p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-left max-md:block">
               <caption className="sr-only">Zimmer in {building.name}</caption>
-              <thead className="border-b-2 border-black bg-paper max-md:hidden">
+              <thead className="border-b-2 border-border bg-paper max-md:hidden">
                 <tr>
                   <th scope="col" className="p-3 font-bold">
                     Zimmer
@@ -600,7 +600,7 @@ function BuildingEditor({
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary className="cursor-pointer font-bold underline">Gebäude bearbeiten</summary>
-      <div className="mt-2 space-y-3 rounded-base border-2 border-black bg-paper p-3">
+      <div className="mt-2 space-y-3 rounded-base border-2 border-border bg-paper p-3">
         <form
           className="flex flex-wrap items-end gap-2"
           onSubmit={(event) => {
@@ -614,14 +614,14 @@ function BuildingEditor({
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="min-h-11 rounded-base border-2 border-black px-3"
+              className="min-h-11 rounded-base border-2 border-border px-3"
             />
           </label>
           <Button type="submit" variant="neutral">
             Speichern
           </Button>
         </form>
-        <div className="border-t-2 border-black pt-3">
+        <div className="border-t-2 border-border pt-3">
           {blockedReason ? (
             <p role="alert" className="mb-2 text-sm">
               {blockedReason}
@@ -692,7 +692,7 @@ function RoomRow({
     <>
       <tr
         id={`room-${room.id}`}
-        className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3"
+        className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3"
       >
         <th scope="row" className="p-3 align-top font-normal max-md:block max-md:p-0">
           <button
@@ -741,7 +741,7 @@ function RoomRow({
       {open ? (
         <tr
           id={detailId}
-          className="border-b-2 border-t-2 border-black bg-paper max-md:mb-3 max-md:block max-md:border-2"
+          className="border-b-2 border-t-2 border-border bg-paper max-md:mb-3 max-md:block max-md:border-2"
         >
           <td colSpan={7} className="space-y-4 p-5 max-md:pl-5 md:pl-[54px]">
             <RoomDetail
@@ -908,7 +908,7 @@ function RoomDetail({
               {group.heading ? (
                 <h3 className="mb-1 font-heading text-lg">{group.heading}</h3>
               ) : null}
-              <div className="divide-y-2 divide-black rounded-base border-2 border-black bg-white">
+              <div className="divide-y-2 divide-border rounded-base border-2 border-border bg-secondary-background">
                 {group.beds.map((bed) => (
                   <BedRow
                     key={bed.id}
@@ -1012,7 +1012,7 @@ function BedRow({
           <input
             value={label}
             onChange={(event) => setLabel(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-black px-3"
+            className="min-h-11 rounded-base border-2 border-border px-3"
           />
         </label>
         <SegmentedControl
@@ -1097,7 +1097,7 @@ function BedForm({
   const [sleepingRoom, setSleepingRoom] = useState(existingSchlafraeume[0] ?? 1)
   return (
     <form
-      className="space-y-3 border-t-2 border-black pt-4"
+      className="space-y-3 border-t-2 border-border pt-4"
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit({ label, bed_type: bedType, sleeping_room: isApartment ? sleepingRoom : null })
@@ -1120,7 +1120,7 @@ function BedForm({
             value={label}
             onChange={(event) => setLabel(event.target.value)}
             placeholder="z. B. am Fenster"
-            className="min-h-11 rounded-base border-2 border-black px-3"
+            className="min-h-11 rounded-base border-2 border-border px-3"
           />
         </label>
       </div>
@@ -1206,7 +1206,7 @@ function RoomForm({
                 value={number}
                 onChange={(event) => setNumber(event.target.value)}
                 placeholder="z. B. 203 oder Eichhörnchen"
-                className="min-h-11 rounded-base border-2 border-black px-3"
+                className="min-h-11 rounded-base border-2 border-border px-3"
               />
             </label>
             {floorless ? null : (
@@ -1243,7 +1243,7 @@ function TraitFields({
   onChange: (key: string, value: TraitInput) => void
 }) {
   return (
-    <fieldset className="space-y-3 border-t-2 border-black pt-3">
+    <fieldset className="space-y-3 border-t-2 border-border pt-3">
       <legend className="font-heading text-lg">Merkmale</legend>
       {roomPropertyDefinitions.map(({ key, trait }) => {
         const options = traitOptions(trait)
@@ -1255,7 +1255,7 @@ function TraitFields({
                 type="checkbox"
                 checked={value === true}
                 onChange={(event) => onChange(key, event.target.checked)}
-                className="size-5 accent-black"
+                className="size-5 accent-main-deep"
               />
               {labelText(trait.title)}
             </label>
@@ -1278,7 +1278,7 @@ function TraitFields({
               step={trait.value.kind === 'decimal' ? '0.01' : '1'}
               value={value === null || value === undefined ? '' : String(value)}
               onChange={(event) => onChange(key, event.target.value)}
-              className="min-h-11 rounded-base border-2 border-black px-3"
+              className="min-h-11 rounded-base border-2 border-border px-3"
             />
           </label>
         )
@@ -1316,7 +1316,7 @@ function Select({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-11 rounded-base border-2 border-black bg-white px-3"
+        className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from '../../../components/shared/ui/dialog.js'
 
-const controlClass = 'min-h-11 rounded-base border-2 border-black px-3 font-normal'
+const controlClass = 'min-h-11 rounded-base border-2 border-border px-3 font-normal'
 
 export function WorkshopSelectField({
   label,
@@ -88,7 +88,7 @@ export function WorkshopCheckboxGroup({
         {options.map((option) => (
           <label
             key={option.value}
-            className="flex min-h-11 items-center gap-2 rounded-base border-2 border-black bg-white px-3"
+            className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border bg-secondary-background px-3"
           >
             <input
               type="checkbox"
@@ -139,7 +139,7 @@ export function WorkshopLeaderPicker({
       />
       <div
         aria-describedby="workshop-leader-hint"
-        className="grid max-h-56 gap-3 overflow-y-auto rounded-base border-2 border-black bg-white p-3"
+        className="grid max-h-56 gap-3 overflow-y-auto rounded-base border-2 border-border bg-secondary-background p-3"
       >
         {groups.map((group) => {
           const groupLeaders = visibleLeaders.filter(
@@ -277,7 +277,7 @@ export function WorkshopEditorForm({
   children?: ReactNode
 }) {
   return (
-    <Card className="bg-white">
+    <Card className="bg-secondary-background">
       <CardHeader>
         <CardTitle>Workshopdaten</CardTitle>
       </CardHeader>
@@ -323,7 +323,7 @@ export function WorkshopEditorDialog({
             Beschreibung, Zielgruppe und Rahmen für diesen Workshop festlegen.
           </DialogDescription>
           {error ? (
-            <p role="alert" className="rounded-base border-2 border-black bg-danger p-3">
+            <p role="alert" className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3">
               {error}
             </p>
           ) : null}
@@ -382,14 +382,14 @@ export function ExternalLeaderEditorFields({
                   name="availability"
                   value={slot.value}
                   defaultChecked={defaultValues.availability?.includes(slot.value)}
-                  className="size-5 accent-black"
+                  className="size-5 accent-main-deep"
                 />
                 {slot.label}
               </label>
             ))}
           </div>
         ) : (
-          <p className="rounded-base border-2 border-black bg-attention p-3 text-sm">
+          <p className="rounded-base border-2 border-border bg-main text-main-foreground p-3 text-sm">
             Lege zuerst einen Workshop-Slot an.
           </p>
         )}
@@ -410,7 +410,7 @@ export function ExternalLeaderEditorForm({
   submit_label?: string
 }) {
   return (
-    <Card className="bg-white">
+    <Card className="bg-secondary-background">
       <CardHeader>
         <CardTitle>Externe Leitung</CardTitle>
       </CardHeader>
@@ -445,7 +445,7 @@ export function SlotEditorForm({
   show_day?: boolean
 }) {
   return (
-    <Card className="bg-white">
+    <Card className="bg-secondary-background">
       <CardHeader>
         <CardTitle>Slot bearbeiten</CardTitle>
       </CardHeader>
@@ -503,7 +503,7 @@ export function SpaceEditorForm({
   submit_label?: string
 }) {
   return (
-    <Card className="bg-white">
+    <Card className="bg-secondary-background">
       <CardHeader>
         <CardTitle>Raum bearbeiten</CardTitle>
       </CardHeader>

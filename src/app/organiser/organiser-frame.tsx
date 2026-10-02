@@ -44,7 +44,7 @@ const primaryNavItems = [
 export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
-      <header className="border-b-2 border-black bg-white px-4 py-3 print:hidden sm:px-8">
+      <header className="border-b-2 border-border bg-secondary-background px-4 py-3 print:hidden sm:px-8">
         <div className="mx-auto max-w-5xl">
           <OrganiserLink
             href={organiserHomePath}
@@ -66,7 +66,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b-2 border-black bg-white px-4 py-3 print:hidden sm:px-8">
+      <header className="border-b-2 border-border bg-secondary-background px-4 py-3 print:hidden sm:px-8">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3">
           <div>
             <OrganiserLink
@@ -86,7 +86,7 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
         </div>
       </header>
       {state.error && state.status !== 'ready' && state.status !== 'applying' ? (
-        <Alert role="alert" className="mx-auto mt-6 max-w-5xl bg-white print:hidden">
+        <Alert role="alert" className="mx-auto mt-6 max-w-5xl bg-secondary-background print:hidden">
           <AlertTitle>Änderungen prüfen</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>

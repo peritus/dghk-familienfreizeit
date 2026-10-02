@@ -7,7 +7,7 @@ import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
 
-const overviewCardClassName = 'block rounded-base border-2 border-black bg-white p-6'
+const overviewCardClassName = 'block rounded-base border-2 border-border bg-secondary-background p-6'
 
 export function Dashboard() {
   const { world } = useOrganiser()
@@ -22,8 +22,8 @@ export function Dashboard() {
         {diagnostics.length > 0 ? (
           <div>
             <h2 className="text-xl font-bold">{diagnostics.length} Hinweise</h2>
-            <Card className="mt-4 bg-white p-0">
-              <ul className="divide-y-2 divide-black">
+            <Card className="mt-4 bg-secondary-background p-0">
+              <ul className="divide-y-2 divide-border">
                 {diagnostics.map((diagnostic) => (
                   <li
                     key={`${diagnostic.id}:${diagnostic.subject_id}`}
@@ -38,7 +38,7 @@ export function Dashboard() {
         ) : (
           <div>
             <h2 className="sr-only">Hinweise</h2>
-            <Card className="flex-row items-center gap-4 bg-white p-6">
+            <Card className="flex-row items-center gap-4 bg-secondary-background p-6">
               <SuccessState>Alles im Griff – heute ist nichts zu erledigen.</SuccessState>
             </Card>
           </div>

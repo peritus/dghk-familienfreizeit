@@ -37,7 +37,7 @@ export function WorkshopRosterTable({
       rows={entries}
       rowKey={(entry) => entry.id}
       renderRow={(entry) => (
-        <tr key={entry.id} className="border-b border-black/30">
+        <tr key={entry.id} className="border-b border-border/30">
           <th scope="row" className="p-3">
             {entry.name}
           </th>
@@ -63,7 +63,7 @@ export function WorkshopRosterCards({ entries }: { entries: readonly WorkshopRos
   return (
     <ul className="grid gap-3">
       {entries.map((entry) => (
-        <li key={entry.id} className="grid gap-1 rounded-base border-2 border-black bg-white p-4">
+        <li key={entry.id} className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-4">
           <strong>{entry.name}</strong>
           <span className="text-sm text-muted">{entry.age_label}</span>
           {entry.health ? <strong className="text-sm">{entry.health}</strong> : null}
@@ -80,7 +80,7 @@ export function AttendanceCheckCell({ checked = false }: { checked?: boolean }) 
   return (
     <span
       aria-label={checked ? 'anwesend' : 'nicht markiert'}
-      className="inline-block size-5 border-2 border-black"
+      className="inline-block size-5 border-2 border-border"
     >
       {checked ? '✓' : null}
     </span>
@@ -109,7 +109,7 @@ export function PersonPlanTable({ entries }: { entries: readonly PersonPlanEntry
       rows={entries}
       rowKey={(entry) => entry.id}
       renderRow={(entry) => (
-        <tr key={entry.id} className="border-b border-black/30">
+        <tr key={entry.id} className="border-b border-border/30">
           <th scope="row" className="p-3">
             {entry.slot}
           </th>
@@ -138,11 +138,11 @@ export type FamilyPlanSlot = {
 export function FamilyPlanTable({ slots }: { slots: readonly FamilyPlanSlot[] }) {
   const members = slots[0]?.members ?? []
   return (
-    <div className="overflow-x-auto rounded-base border-2 border-black bg-white">
+    <div className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
       <table className="w-full min-w-[42rem] text-left">
         <caption className="sr-only">Familienplan</caption>
         <thead>
-          <tr className="border-b-2 border-black">
+          <tr className="border-b-2 border-border">
             <th scope="col" className="p-3">
               Slot
             </th>
@@ -155,7 +155,7 @@ export function FamilyPlanTable({ slots }: { slots: readonly FamilyPlanSlot[] })
         </thead>
         <tbody>
           {slots.map((slot) => (
-            <tr key={slot.id} className="border-b border-black/30">
+            <tr key={slot.id} className="border-b border-border/30">
               <th scope="row" className="p-3">
                 {slot.label}
               </th>
@@ -176,7 +176,7 @@ export function FamilyPlanCards({ slots }: { slots: readonly FamilyPlanSlot[] })
   return (
     <ul className="grid gap-3">
       {slots.map((slot) => (
-        <li key={slot.id} className="grid gap-2 rounded-base border-2 border-black bg-white p-4">
+        <li key={slot.id} className="grid gap-2 rounded-base border-2 border-border bg-secondary-background p-4">
           <strong>{slot.label}</strong>
           {slot.members.map((member) => (
             <p key={member.id} className="text-sm">
@@ -210,7 +210,7 @@ export function RoomPlanTable({ entries }: { entries: readonly RoomPlanEntry[] }
       rows={entries}
       rowKey={(entry) => entry.id}
       renderRow={(entry) => (
-        <tr key={entry.id} className="border-b border-black/30">
+        <tr key={entry.id} className="border-b border-border/30">
           <th scope="row" className="p-3">
             {entry.time}
           </th>

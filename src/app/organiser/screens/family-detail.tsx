@@ -66,7 +66,7 @@ function PersonEditor({
 
   if (!editing) {
     return (
-      <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+      <tr className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
         <th scope="row" className="p-3 font-bold max-md:block max-md:p-0">
           <span className="mr-2 md:hidden">Vorname:</span>
           {givenName}
@@ -106,7 +106,7 @@ function PersonEditor({
   }
 
   return (
-    <tr className="border-b border-black last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
+    <tr className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
       <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
         <form id={formId} onSubmit={update} />
         <label htmlFor={`${formId}-given-name`} className="grid gap-1">
@@ -117,7 +117,7 @@ function PersonEditor({
             required
             value={givenName}
             onChange={(event) => setGivenName(event.target.value)}
-            className="min-h-11 w-full rounded border-2 border-black px-3"
+            className="min-h-11 w-full rounded border-2 border-border px-3"
           />
         </label>
       </th>
@@ -130,7 +130,7 @@ function PersonEditor({
             required
             value={familyName}
             onChange={(event) => setFamilyName(event.target.value)}
-            className="min-h-11 w-full rounded border-2 border-black px-3"
+            className="min-h-11 w-full rounded border-2 border-border px-3"
           />
         </label>
       </td>
@@ -142,7 +142,7 @@ function PersonEditor({
             form={formId}
             value={role}
             onChange={(event) => setRole(event.target.value)}
-            className="min-h-11 w-full rounded border-2 border-black px-3"
+            className="min-h-11 w-full rounded border-2 border-border px-3"
           >
             <option value="adult">Erwachsene(r)</option>
             <option value="child">Kind</option>
@@ -260,7 +260,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
         }
       />
       <p className="-mt-4">{labelValue(labels, 'email') ?? 'Keine E-Mail'}</p>
-      <Card className="bg-white">
+      <Card className="bg-secondary-background">
         <CardHeader>
           <h3 className="text-xl">Familienname</h3>
         </CardHeader>
@@ -273,7 +273,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                 required
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                className="min-h-11 rounded-base border-2 border-black px-3"
+                className="min-h-11 rounded-base border-2 border-border px-3"
               />
             </label>
             <Button type="submit">Familiennamen speichern</Button>
@@ -285,7 +285,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
           ) : null}
         </CardContent>
       </Card>
-      <Card className="bg-white">
+      <Card className="bg-secondary-background">
         <CardHeader>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h3 className="text-xl">Personen · {family.persons.length}</h3>
@@ -303,7 +303,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                     required
                     value={givenName}
                     onChange={(event) => setGivenName(event.target.value)}
-                    className="min-h-11 rounded-base border-2 border-black px-3"
+                    className="min-h-11 rounded-base border-2 border-border px-3"
                   />
                 </label>
                 <label className="grid gap-1">
@@ -312,7 +312,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                     required
                     value={familyName}
                     onChange={(event) => setFamilyName(event.target.value)}
-                    className="min-h-11 rounded-base border-2 border-black px-3"
+                    className="min-h-11 rounded-base border-2 border-border px-3"
                   />
                 </label>
                 <label className="grid gap-1">
@@ -320,7 +320,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                   <select
                     value={role}
                     onChange={(event) => setRole(event.target.value)}
-                    className="min-h-11 rounded-base border-2 border-black px-3"
+                    className="min-h-11 rounded-base border-2 border-border px-3"
                   >
                     <option value="adult">Erwachsene(r)</option>
                     <option value="child">Kind</option>
@@ -340,7 +340,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
         <CardContent>
           <table className="w-full text-left max-md:block">
             <caption className="sr-only">Personen dieser Familie</caption>
-            <thead className="border-y-2 border-black max-md:hidden">
+            <thead className="border-y-2 border-border max-md:hidden">
               <tr>
                 <th scope="col" className="p-3">
                   Vorname
@@ -368,7 +368,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       required
                       value={givenName}
                       onChange={(event) => setGivenName(event.target.value)}
-                      className="min-h-11 w-full rounded-base border-2 border-black px-3"
+                      className="min-h-11 w-full rounded-base border-2 border-border px-3"
                     />
                   </label>
                 </th>
@@ -381,7 +381,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       required
                       value={familyName}
                       onChange={(event) => setFamilyName(event.target.value)}
-                      className="min-h-11 w-full rounded-base border-2 border-black px-3"
+                      className="min-h-11 w-full rounded-base border-2 border-border px-3"
                     />
                   </label>
                 </td>
@@ -393,7 +393,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
                       form="add-person-form"
                       value={role}
                       onChange={(event) => setRole(event.target.value)}
-                      className="min-h-11 w-full rounded-base border-2 border-black px-3"
+                      className="min-h-11 w-full rounded-base border-2 border-border px-3"
                     >
                       <option value="adult">Erwachsene(r)</option>
                       <option value="child">Kind</option>
@@ -450,7 +450,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
         actor={state.principal_email}
         stage={stage}
       />
-      <Card className="bg-white">
+      <Card className="bg-secondary-background">
         <CardHeader>
           <h3 className="text-xl">Änderungen</h3>
         </CardHeader>
@@ -460,7 +460,7 @@ export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
           ) : (
             <ol className="space-y-3">
               {history.map((event) => (
-                <li key={event.seq} className="border-l-4 border-black pl-3">
+                <li key={event.seq} className="border-l-4 border-border pl-3">
                   <p className="font-bold">{changeSummary(event.type, event.payload)}</p>
                   {draftSeqs.has(event.seq) ? (
                     <p className="text-sm font-bold">Noch nicht gespeichert</p>

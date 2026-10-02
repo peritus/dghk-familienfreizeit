@@ -26,7 +26,7 @@ function Example({ error }: { error?: string }) {
     >
       <label className="grid gap-1">
         <span className="font-bold">Titel</span>
-        <input required className="min-h-11 rounded-base border-2 border-black px-3" />
+        <input required className="min-h-11 rounded-base border-2 border-border px-3" />
       </label>
     </CollectionCreateAction>
   )
