@@ -28,7 +28,9 @@ without starting Vite, run `npm run db:migrate:local`.
 Use `db:import-fixture` to populate a local or remote Worker through the same
 authenticated event API used by the organiser application. The importer parses
 and validates the complete KDL fixture with the active profile before uploading
-anything, then sends authenticated batches to `POST /api/events`.
+anything, then sends the complete fixture in one request to `POST /api/events`.
+This lets the Worker validate and append the fixture atomically, including when
+an intermediate prefix is not itself a valid world.
 
 For local development, start the preview and request a magic link for the
 organiser identity. The local Worker prints the single-use link in its terminal:
@@ -54,9 +56,11 @@ nix develop --command npm run db:import-fixture -- \
 An existing `sid` session cookie can be supplied instead with
 `--session-cookie`. The importer sends only each fixture event's type, subject,
 and payload; the Worker assigns the authenticated actor, current timestamp, and
-contiguous sequence number. It refuses to append to a non-empty log by default;
-use `--allow-non-empty` only when intentionally appending to that server. The
-event API is append-only, so the importer never resets or deletes a remote log.
+contiguous sequence number. It refuses to use a non-empty log by default. If a
+previous request failed, use `--resume` with the same fixture and credential;
+the importer checks that the server log is an exact fixture prefix and uploads
+only the remaining suffix in one request. It refuses mismatched logs. The event
+API is append-only, so the importer never resets or deletes a remote log.
 
 To run the full browser route suite locally, use
 `nix develop --command npm run test:browser`. It starts the local Vite/Worker
