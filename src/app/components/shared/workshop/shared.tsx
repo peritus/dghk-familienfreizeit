@@ -68,7 +68,7 @@ export function WorkshopPhaseNotice({
   details?: ReactNode
 }) {
   return (
-    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-base border-2 border-dashed border-black bg-paper px-4 py-3">
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-base border-2 border-dashed border-border bg-paper px-4 py-3">
       <Badge tone={tone}>{label}</Badge>
       <div className="min-w-0 flex-1 text-sm">{children}</div>
       {details ? <div className="basis-full text-sm text-muted">{details}</div> : null}
@@ -116,7 +116,7 @@ export function WorkshopCompactMeta({ label, children }: { label: string; childr
 
 export function WorkshopList({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-base border-2 border-black bg-white [&>*+*]:border-t-2 [&>*+*]:border-black">
+    <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background [&>*+*]:border-t-2 [&>*+*]:border-border">
       {children}
     </div>
   )
@@ -155,7 +155,7 @@ export function WorkshopEmptyState({
     )
   }
   return (
-    <Card size="sm" className="bg-white">
+    <Card size="sm" className="bg-secondary-background">
       <CardContent className="space-y-3">
         {title ? <h3 className="text-xl font-heading">{title}</h3> : null}
         <div className="text-muted">{children}</div>
@@ -173,11 +173,11 @@ export function WorkshopLoadingState({
   return (
     <div
       role="status"
-      className="flex items-center gap-3 rounded-base border-2 border-dashed border-muted bg-white p-6"
+      className="flex items-center gap-3 rounded-base border-2 border-dashed border-muted bg-secondary-background p-6"
     >
       <span
         aria-hidden="true"
-        className="size-5 animate-spin rounded-full border-2 border-black border-t-transparent"
+        className="size-5 animate-spin rounded-full border-2 border-border border-t-transparent"
       />
       <span>{message}</span>
     </div>
@@ -228,11 +228,11 @@ export function WorkshopDataTable<T>({
   className?: string
 }) {
   return (
-    <div className={cn('overflow-x-auto rounded-base border-2 border-black bg-white', className)}>
+    <div className={cn('overflow-x-auto rounded-base border-2 border-border bg-secondary-background', className)}>
       <table className="w-full min-w-[38rem] text-left">
         <caption className="sr-only">{caption}</caption>
         <thead>
-          <tr className="border-b-2 border-black">
+          <tr className="border-b-2 border-border">
             {columns.map((column) => (
               <th
                 key={column.key}
@@ -291,7 +291,7 @@ export function WorkshopListPicker({
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="min-h-11 rounded-base border-2 border-black bg-white px-3 font-normal"
+          className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3 font-normal"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -334,7 +334,7 @@ export function WorkshopPrintDocument({
   const titleId = useId()
   return (
     <article className="space-y-4" aria-labelledby={titleId}>
-      <div className="flex flex-wrap justify-between gap-3 border-b-2 border-black pb-3 text-sm">
+      <div className="flex flex-wrap justify-between gap-3 border-b-2 border-border pb-3 text-sm">
         <span>{kind}</span>
         <strong>{status}</strong>
       </div>
@@ -376,7 +376,7 @@ export function WorkshopField({ label, hint, id, ...props }: WorkshopFieldProps)
         {...props}
         id={fieldId}
         className={cn(
-          'min-h-11 rounded-base border-2 border-black px-3 font-normal',
+          'min-h-11 rounded-base border-2 border-border px-3 font-normal',
           props.className,
         )}
       />

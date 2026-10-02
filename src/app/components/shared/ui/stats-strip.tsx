@@ -20,17 +20,17 @@ export function StatsStrip({ items }: { items: readonly StatsStripItem[] }) {
             ? 'sm:grid-cols-4'
             : 'sm:grid-cols-5'
   return (
-    <Card className="bg-white p-0">
+    <Card className="bg-secondary-background p-0">
       <div
         className={cn(
-          'grid grid-cols-2 divide-y-2 divide-black sm:divide-y-0 sm:divide-x-2',
+          'grid grid-cols-2 divide-y-2 divide-border sm:divide-y-0 sm:divide-x-2',
           columns,
         )}
       >
         {items.map((item) => (
           <div
             key={item.label}
-            className={cn('p-4 text-center', item.tone === 'attention' && 'bg-main text-black')}
+            className={cn('p-4 text-center', item.tone === 'attention' && 'bg-main text-main-foreground')}
           >
             <p className="text-4xl leading-none tabular-nums">{item.value}</p>
             <p className="mt-2 font-bold">{item.label}</p>

@@ -27,7 +27,7 @@ export function AlertDialogContent({
       <AlertDialogPrimitive.Viewport className="fixed inset-0 flex items-center justify-center p-4">
         <AlertDialogPrimitive.Popup
           className={cn(
-            'w-full max-w-md space-y-4 rounded-base border-2 border-black bg-white p-6 shadow-shadow',
+            'w-full max-w-md space-y-4 rounded-base border-2 border-border bg-secondary-background p-6 shadow-shadow',
             className,
           )}
           {...props}

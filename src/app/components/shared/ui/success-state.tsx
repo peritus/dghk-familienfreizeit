@@ -13,7 +13,7 @@ export function SuccessState({ children, className }: { children: ReactNode; cla
     <div className={cn('flex items-center gap-3 text-muted', className)}>
       <span
         aria-hidden="true"
-        className="flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white text-black"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-border bg-secondary-background text-foreground"
       >
         <Check className="size-4" />
       </span>

@@ -46,7 +46,7 @@ export function TertiaryNavigation({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-end justify-between gap-x-6 gap-y-0 border-b-2 border-black/30 max-sm:flex-col max-sm:items-stretch',
+        'flex flex-wrap items-end justify-between gap-x-6 gap-y-0 border-b-2 border-border/30 max-sm:flex-col max-sm:items-stretch',
         className,
       )}
     >
@@ -68,8 +68,8 @@ export function TertiaryNavigation({
               onClick={() => onChange(item.value)}
               onKeyDown={(event) => onKeyDown(event, index)}
               className={cn(
-                'min-h-11 border-b-4 border-transparent px-0.5 pt-2 pb-1 text-left font-bold text-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2',
-                selected && 'border-black text-foreground',
+                'min-h-11 border-b-4 border-transparent px-0.5 pt-2 pb-1 text-left font-bold text-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                selected && 'border-border text-foreground',
               )}
             >
               {item.label}

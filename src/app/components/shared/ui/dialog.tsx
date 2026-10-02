@@ -17,7 +17,7 @@ export function DialogContent({
       <DialogPrimitive.Viewport className="fixed inset-0 z-30 flex items-end justify-center p-4 sm:items-center">
         <DialogPrimitive.Popup
           className={cn(
-            'max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-base border-2 border-black bg-white p-6 shadow-shadow',
+            'max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-base border-2 border-border bg-secondary-background p-6 shadow-shadow',
             className,
           )}
           {...props}
@@ -36,7 +36,7 @@ export function DialogHeader({ className, ...props }: ComponentProps<'div'>) {
 export function DialogFooter({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      className={cn('flex flex-wrap justify-end gap-2 border-t-2 border-black pt-4', className)}
+      className={cn('flex flex-wrap justify-end gap-2 border-t-2 border-border pt-4', className)}
       {...props}
     />
   )

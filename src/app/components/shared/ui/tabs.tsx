@@ -31,8 +31,8 @@ export function Tabs({
               tabIndex={selected ? 0 : -1}
               onClick={() => onChange(option.value)}
               className={cn(
-                'min-h-11 rounded-base border-2 border-black px-4 py-2 text-left font-bold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2',
-                selected ? 'bg-black text-white' : 'bg-white text-foreground hover:bg-main',
+                'min-h-11 rounded-base border-2 border-border px-4 py-2 text-left font-bold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                selected ? 'bg-foreground text-background' : 'bg-secondary-background text-foreground hover:bg-main',
               )}
             >
               {option.label}

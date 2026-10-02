@@ -12,7 +12,7 @@ export function RouteLoading() {
       aria-busy="true"
       className="grid min-h-72 place-items-center"
     >
-      <div className="w-full max-w-lg rounded-base border-2 border-black bg-white p-6 shadow-shadow">
+      <div className="w-full max-w-lg rounded-base border-2 border-border bg-secondary-background p-6 shadow-shadow">
         <div className="flex items-start gap-4">
           <LoaderCircle
             aria-hidden="true"
@@ -65,7 +65,7 @@ export class RouteBoundary extends Component<
   render() {
     if (!this.state.failed) return this.props.children
     return (
-      <Alert className="bg-white">
+      <Alert className="bg-secondary-background">
         <AlertTitle>Die Ansicht konnte nicht geladen werden</AlertTitle>
         <AlertDescription>
           <p>Bitte lade die Seite neu. Deine gespeicherten Angaben bleiben erhalten.</p>

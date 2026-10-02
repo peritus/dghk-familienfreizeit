@@ -51,17 +51,17 @@ export function WorkflowStepper({
                   aria-hidden="true"
                   className={cn(
                     'absolute top-8 bottom-[-1rem] left-4 border-l-2 border-dashed border-muted sm:top-4 sm:right-0 sm:bottom-auto sm:left-8 sm:border-t-2 sm:border-l-0',
-                    complete && 'border-solid border-black sm:border-t-[3px] sm:-translate-y-px',
+                    complete && 'border-solid border-border sm:border-t-[3px] sm:-translate-y-px',
                   )}
                 />
               ) : null}
               <span
                 aria-hidden="true"
                 className={cn(
-                  'absolute top-0 left-0 z-10 inline-flex size-8 items-center justify-center rounded-full border-2 border-black bg-background font-bold sm:static',
-                  complete && 'bg-white',
+                  'absolute top-0 left-0 z-10 inline-flex size-8 items-center justify-center rounded-full border-2 border-border bg-background font-bold sm:static',
+                  complete && 'bg-secondary-background',
                   current &&
-                    'size-9 -translate-x-0.5 -translate-y-0.5 bg-black text-white sm:-mt-0.5 sm:ml-[-0.125rem] sm:translate-x-0',
+                    'size-9 -translate-x-0.5 -translate-y-0.5 bg-foreground text-background sm:-mt-0.5 sm:ml-[-0.125rem] sm:translate-x-0',
                 )}
               >
                 {complete ? '✓' : index + 1}
@@ -93,7 +93,7 @@ export function WorkflowStepper({
         {expanded ? 'Weniger' : `Alle Schritte (${visibleStep} von ${steps.length})`}
       </button>
       {nextAction ? (
-        <div className="flex flex-wrap items-center gap-3 border-t-2 border-black pt-3">
+        <div className="flex flex-wrap items-center gap-3 border-t-2 border-border pt-3">
           {nextAction}
         </div>
       ) : null}
