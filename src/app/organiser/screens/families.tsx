@@ -148,7 +148,6 @@ export function Families() {
         }
       />
       <div className="rounded-base border-2 border-border bg-secondary-background shadow-shadow">
-        <form id="invite-family-form" noValidate onSubmit={invite} />
         <table className="w-full text-left max-md:block">
           <caption className="p-4 text-left font-bold">Alle Familien</caption>
           <thead className="border-y-2 border-border max-md:hidden">
@@ -168,52 +167,6 @@ export function Families() {
             </tr>
           </thead>
           <tbody className="max-md:block">
-            <tr className="hidden">
-              <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
-                <label htmlFor="invite-family-name" className="grid gap-1">
-                  <span className="md:sr-only">Name</span>
-                  <input
-                    id="invite-family-name"
-                    form="invite-family-form"
-                    required
-                    value={displayName}
-                    onChange={(event) => {
-                      setDisplayName(event.target.value)
-                      setInviteError(null)
-                    }}
-                    className="min-h-11 rounded-base border-2 border-border px-3"
-                  />
-                </label>
-              </th>
-              <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-                <label htmlFor="invite-family-email" className="grid gap-1">
-                  <span className="md:sr-only">E-Mail</span>
-                  <input
-                    id="invite-family-email"
-                    form="invite-family-form"
-                    required
-                    type="email"
-                    value={email}
-                    aria-invalid={inviteError ? true : undefined}
-                    aria-describedby={inviteError ? 'invite-error' : undefined}
-                    onChange={(event) => {
-                      setEmail(event.target.value)
-                      setInviteError(null)
-                    }}
-                    className="min-h-11 w-full rounded-base border-2 border-border px-3"
-                  />
-                </label>
-              </td>
-              <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-                <span className="block text-center text-2xl max-md:hidden">—</span>
-                <span className="font-bold md:hidden">Personen: —</span>
-              </td>
-              <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-                <Button form="invite-family-form" type="submit" className="w-full md:w-auto">
-                  Familie einladen
-                </Button>
-              </td>
-            </tr>
             {rows.map((row) => (
               <tr
                 key={row.family.id}
