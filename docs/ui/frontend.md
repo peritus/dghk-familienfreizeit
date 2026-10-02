@@ -28,8 +28,9 @@ draft changes for explicit review according to the session's drafting policy. Th
 remains the only persistence boundary; there is no separate drafting API or server
 draft state.
 
-Workshop routes use the same reducer and draft pipeline. Their two-item section
-navigation links **Workshops** and **Räume und Slots**; the resource item stays current
+Workshop routes use the same reducer and draft pipeline. Their three-item section
+navigation links **Workshops**, **Programm**, and **Räume und Slots**; the programme
+item stays current on all three programme review URLs, while the resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
 overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
 Moving between workshop routes preserves staged events because navigation does not

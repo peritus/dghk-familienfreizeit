@@ -384,6 +384,7 @@ test('the programme review keeps each view at its own URL and avoids false roste
   open('/organiser/workshops/programme', workshopFixtureEvents())
 
   expect(await screen.findByRole('heading', { name: 'Programm' })).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Programm' }).getAttribute('aria-current')).toBe('page')
   expect(screen.getByText(/Freitag/)).toBeTruthy()
   expect(screen.getByText('Keramik')).toBeTruthy()
   expect(screen.queryByRole('button', { name: 'Keramik' })).toBeNull()

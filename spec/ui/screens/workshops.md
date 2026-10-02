@@ -12,9 +12,11 @@ remain separate URLs with page-local workshop navigation:
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
 
-The section navigation contains only **Workshops** and **Räume und Slots**. The
+The section navigation contains **Workshops**, **Programm**, and **Räume und Slots**. The
 workshop overview groups **Workshops**, **Leitungen**, and **Externe Leitungen** as
-local tabs, while Räume und Slots groups the space and slot resource routes. The
+local tabs, while **Programm** groups the three programme review URLs (**Ganzes
+Programm**, **Nicht eingeplant**, and **Überschneidungen**) as page-local tabs, and
+Räume und Slots groups the space and slot resource routes. The
 planned product views **Wünsche**, **Teilnahme**, and **Listen** remain reserved and
 are not rendered in navigation until their screens exist.
 

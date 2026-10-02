@@ -19,7 +19,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Grid: Story = {
+export const FullProgramme: Story = {
   render: () => (
     <div className="bg-background p-6">
       <ProgrammeGrid
@@ -35,6 +35,9 @@ export const Grid: Story = {
     </div>
   ),
 }
+
+/** Compatibility alias for the style guide's existing catalogue entry. */
+export const Grid: Story = FullProgramme
 
 export const ReviewRows: Story = {
   render: () => (

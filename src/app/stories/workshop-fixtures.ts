@@ -253,6 +253,7 @@ export const fullWorkshopSlots: readonly WorkshopSlotView[] = [
   },
 ]
 
+/** Synthetic programme table transcribed from workshops-prototype-v16.html. */
 export const fullProgrammeRows = [
   {
     id: 'fr-1',

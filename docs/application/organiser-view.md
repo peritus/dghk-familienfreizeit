@@ -24,9 +24,10 @@ path before persistence.
 The host exposes these kernel-owned and selected-module screens through one screen
 registry. The app bar presents four primary areas: Dashboard, Familien,
 Unterbringung, and Workshops. Accommodation has page-local secondary links for
-Unterkunft and Belegung. The workshop section navigation visibly links Workshops and
-Räume und Slots. Räume und Slots remains selected for its Räume and Slots resource
-routes, while the workshop overview provides local tabs for Workshops, Leitungen, and
+Unterkunft and Belegung. The workshop section navigation visibly links Workshops,
+Programm, and Räume und Slots. Programm remains selected across its programme review
+URLs, while Räume und Slots remains selected for its Räume and Slots resource routes,
+and the workshop overview provides local tabs for Workshops, Leitungen, and
 Externe Leitungen. Wünsche, Teilnahme, and Listen are reserved workshop areas and are
 not rendered until their screens exist. All routes preserve the shared local-first
 draft state.

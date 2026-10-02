@@ -436,6 +436,12 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/modules/workshop-scheduling/app/components/programme.tsx',
   },
   {
+    id: 'modules-workshop-scheduling-components-programme--full-programme',
+    area: 'component',
+    subject: 'Full programme prototype fixture',
+    source: 'src/modules/workshop-scheduling/app/components/programme.tsx',
+  },
+  {
     id: 'modules-workshop-scheduling-components-programme--review-rows',
     area: 'component',
     subject: 'Workshop programme review rows',
