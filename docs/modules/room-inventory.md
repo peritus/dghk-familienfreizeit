@@ -32,7 +32,7 @@ clear optional setup labels when their payload value is null.
 
 ## Active occasion fixture
 
-[`test/fixtures/room-inventory/familienfreizeit-2027.kdl`](../../test/fixtures/room-inventory/familienfreizeit-2027.kdl)
+[`test/fixtures/room-inventory/djh-luebben.kdl`](../../test/fixtures/room-inventory/djh-luebben.kdl)
 contains the five buildings, 38 rooms (rooms 35–37 are apartment-type), and
 162 live sleeping places from the occasion inventory. The replay test verifies stable
 ordering and place IDs, the 162-place capacity, and the €15,236 cost summary.

@@ -40,7 +40,7 @@ The inventory portion is implemented and documented in
 [implemented room inventory](../../docs/modules/room-inventory.md). The active
 profile source is [familienfreizeit-2027.ts](../../src/config/profiles/familienfreizeit-2027.ts)
 and its canonical event fixture is
-[familienfreizeit-2027.kdl](../../test/fixtures/room-inventory/familienfreizeit-2027.kdl).
+[djh-luebben.kdl](../../test/fixtures/room-inventory/djh-luebben.kdl).
 
 Family-facing controls and release projections remain later work; the selected
 organiser workshop planning modules are active in the executable profile.

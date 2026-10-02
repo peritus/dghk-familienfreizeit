@@ -40,7 +40,9 @@ nix develop --command npm run dev
 nix develop --command npm run db:import-fixture -- \
   --base-url http://127.0.0.1:5173 \
   --magic-link 'http://127.0.0.1:5173/auth/<single-use-token>' \
-  test/fixtures/room-inventory/familienfreizeit-2027.kdl
+  test/fixtures/room-inventory/djh-luebben.kdl \
+  test/fixtures/workshop-assignment/prototype-catalogue.kdl \
+  test/fixtures/families/49_families.kdl
 ```
 
 For a Cloudflare preview or another deployed Worker, use its HTTPS URL and a
@@ -50,13 +52,21 @@ single-use organiser magic link from the normal authentication flow:
 nix develop --command npm run db:import-fixture -- \
   --base-url https://preview.example.test \
   --magic-link 'https://preview.example.test/auth/<single-use-token>' \
-  test/fixtures/room-inventory/familienfreizeit-2027.kdl
+  test/fixtures/room-inventory/djh-luebben.kdl \
+  test/fixtures/workshop-assignment/prototype-catalogue.kdl \
+  test/fixtures/families/49_families.kdl
 ```
 
 An existing `sid` session cookie can be supplied instead with
 `--session-cookie`. The importer sends only each fixture event's type, subject,
 and payload; the Worker assigns the authenticated actor, current timestamp, and
-contiguous sequence number. It refuses to use a non-empty log by default. If a
+contiguous sequence number. Pass fixture files in dependency order; the example
+loads the DJH room inventory, workshop catalogue, and 49-family dataset as one
+stream. The generator can create another synthetic family count with
+`nix develop --command node scripts/generate-family-fixture.mjs --count 12`.
+Food preferences in the synthetic family fixture use the existing free-text
+`family-note` field because the active profile has no structured food trait.
+It refuses to use a non-empty log by default. If a
 previous request failed, use `--resume` with the same fixture and credential;
 the importer checks that the server log is an exact fixture prefix and uploads
 only the remaining suffix in one request. It refuses mismatched logs. The event
