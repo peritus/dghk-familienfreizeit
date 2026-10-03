@@ -1,522 +1,406 @@
 import { useState, type FormEvent } from 'react'
+import { useLocation } from 'wouter'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
-import type { EventDraft } from '../../../events/types.js'
-import { materializeDraftEvents } from '../state.js'
-import { Button } from '../../components/shared/ui/button'
-import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
-import { Card, CardContent, CardHeader } from '../../components/shared/ui/card'
+import type { EventDraft, JsonValue } from '../../../events/types.js'
+import { Button } from '../../components/shared/ui/button.js'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/shared/ui/dialog.js'
+import { Card, CardContent, CardHeader } from '../../components/shared/ui/card.js'
 import { useOrganiser } from '../context.js'
-import { findFamily, labelValue } from '../family-data.js'
+import {
+  familyPeople,
+  familyStatus,
+  findFamily,
+  labelBoolean,
+  labelValue,
+  personName,
+} from '../family-data.js'
+import { familyTopicLabel, FamilyTopicNavigation } from '../components/family-navigation.js'
 import { organiserPaths, type FamilyTopic } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
+import { familyPreferencesConfig } from '../../../modules/family-preferences/index.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
-import { CollectionCreateAction } from '../components/collection-create-action.js'
 
-function makePersonId(givenName: string): string {
-  const random = globalThis.crypto?.randomUUID?.() ?? `${globalThis.performance?.now() ?? 0}`
-  return `per_${random.replaceAll('-', '').slice(0, 16)}_${givenName.toLowerCase()}`
+function eventTime(): string {
+  return new Date().toISOString()
 }
 
-function PersonEditor({
-  person_id: personId,
+function labelEvent(
+  actor: string,
+  familyId: string,
+  entityId: string,
+  key: string,
+  value: JsonValue | null,
+): EventDraft {
+  return value === null
+    ? {
+        at: eventTime(),
+        actor,
+        subject: entityId === familyId ? familyId : entityId,
+        type: 'LabelCleared',
+        payload: { entity_id: entityId, key, value: null },
+      }
+    : {
+        at: eventTime(),
+        actor,
+        subject: entityId === familyId ? familyId : entityId,
+        type: 'LabelSet',
+        payload: { entity_id: entityId, key, value, strength: null, note: null },
+      }
+}
+
+function FamilyEditDialog({
   family_id: familyId,
+  display_name: displayName,
+  email,
   actor,
-  initial_given_name: initialGivenName,
-  initial_family_name: initialFamilyName,
-  initial_role: initialRole,
-  onStage,
-  onDelete,
+  stage,
 }: {
-  person_id: string
   family_id: string
+  display_name: string
+  email: string
   actor: string
-  initial_given_name: string
-  initial_family_name: string
-  initial_role: string
-  onStage: (event: EventDraft) => void
-  onDelete: () => void
+  stage: (events: readonly EventDraft[]) => void
 }) {
-  const [editing, setEditing] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [givenName, setGivenName] = useState(initialGivenName)
-  const [familyName, setFamilyName] = useState(initialFamilyName)
-  const [role, setRole] = useState(initialRole)
+  const [open, setOpen] = useState(false)
+  const [nextName, setNextName] = useState(displayName)
+  const [nextEmail, setNextEmail] = useState(email)
+  const [error, setError] = useState<string | null>(null)
 
-  function update(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onStage({
-      at: new Date().toISOString(),
-      actor,
-      subject: familyId,
-      type: 'PersonUpdated',
-      payload: {
-        person_id: personId,
-        family_id: familyId,
-        given_name: givenName.trim(),
-        family_name: familyName.trim(),
-        birthdate: null,
-        role,
-      },
-    })
-    setEditing(false)
-  }
-
-  const formId = `person-form-${personId}`
-
-  if (!editing) {
-    return (
-      <tr className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
-        <th scope="row" className="p-3 font-bold max-md:block max-md:p-0">
-          <span className="mr-2 md:hidden">Vorname:</span>
-          {givenName}
-        </th>
-        <td className="p-3 max-md:block max-md:p-0 max-md:pt-2">
-          <span className="mr-2 font-bold md:hidden">Nachname:</span>
-          {familyName}
-        </td>
-        <td className="p-3 max-md:block max-md:p-0 max-md:pt-2">
-          <span className="mr-2 font-bold md:hidden">Rolle:</span>
-          {role === 'child' ? 'Kind' : role === 'infant' ? 'Baby' : 'Erwachsene(r)'}
-        </td>
-        <td className="p-3 max-md:block max-md:p-0 max-md:pt-2">
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="neutral" size="sm" onClick={() => setEditing(true)}>
-              Bearbeiten
-            </Button>
-            <Button
-              type="button"
-              variant="neutral"
-              size="sm"
-              onClick={() => setConfirmDelete(true)}
-            >
-              Entfernen
-            </Button>
-          </div>
-          <DestructiveActionDialog
-            open={confirmDelete}
-            onOpenChange={setConfirmDelete}
-            title={`${givenName} ${familyName} entfernen?`}
-            description="Die Person wird aus dieser Familie entfernt. Diese Änderung lässt sich nicht über die Familienansicht rückgängig machen."
-            onConfirm={onDelete}
-          />
-        </td>
-      </tr>
-    )
+    const name = nextName.trim()
+    const address = nextEmail.trim()
+    if (!name) {
+      setError('Bitte gib einen Familiennamen ein.')
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+      setError('Bitte gib eine gültige E-Mail-Adresse ein.')
+      return
+    }
+    const events: EventDraft[] = []
+    if (name !== displayName) {
+      events.push({
+        at: eventTime(),
+        actor,
+        subject: familyId,
+        type: 'FamilyDisplayNameChanged',
+        payload: {
+          family_id: familyId,
+          old_display_name: displayName,
+          new_display_name: name,
+        },
+      })
+    }
+    if (address !== email) {
+      events.push({
+        at: eventTime(),
+        actor,
+        subject: familyId,
+        type: 'FamilyEmailChanged',
+        payload: { family_id: familyId, old_email: email, new_email: address },
+      })
+    }
+    if (events.length) stage(events)
+    setOpen(false)
   }
 
   return (
-    <tr className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-3">
-      <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
-        <form id={formId} onSubmit={update} />
-        <label htmlFor={`${formId}-given-name`} className="grid gap-1">
-          <span className="md:sr-only">Vorname</span>
-          <input
-            id={`${formId}-given-name`}
-            form={formId}
-            required
-            value={givenName}
-            onChange={(event) => setGivenName(event.target.value)}
-            className="min-h-11 w-full rounded border-2 border-border px-3"
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (nextOpen) {
+          setNextName(displayName)
+          setNextEmail(email)
+          setError(null)
+        }
+        setOpen(nextOpen)
+      }}
+    >
+      <DialogTrigger render={<Button type="button">Familie bearbeiten</Button>} />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Familie bearbeiten</DialogTitle>
+          <DialogDescription>
+            Ändere den Anzeigenamen oder die E-Mail-Adresse der Familie.
+          </DialogDescription>
+        </DialogHeader>
+        {error ? (
+          <p role="alert" className="mt-4 rounded-base border-2 border-border bg-danger p-3">
+            {error}
+          </p>
+        ) : null}
+        <form id="family-edit-form" className="mt-5 grid gap-4" onSubmit={submit}>
+          <label className="grid gap-1">
+            <span className="font-bold">Familienname</span>
+            <span className="text-sm text-muted">
+              So erscheint die Familie in Listen und Zimmerplänen.
+            </span>
+            <input
+              required
+              value={nextName}
+              onChange={(event) => setNextName(event.target.value)}
+              className="min-h-11 rounded-base border-2 border-border px-3"
+            />
+          </label>
+          <label className="grid gap-1">
+            <span className="font-bold">E-Mail</span>
+            <input
+              required
+              type="email"
+              value={nextEmail}
+              onChange={(event) => setNextEmail(event.target.value)}
+              className="min-h-11 rounded-base border-2 border-border px-3"
+            />
+          </label>
+        </form>
+        <DialogFooter>
+          <DialogClose
+            render={
+              <Button type="button" variant="neutral">
+                Abbrechen
+              </Button>
+            }
           />
-        </label>
-      </th>
-      <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-        <label htmlFor={`${formId}-family-name`} className="grid gap-1">
-          <span className="font-bold md:sr-only">Nachname</span>
-          <input
-            id={`${formId}-family-name`}
-            form={formId}
-            required
-            value={familyName}
-            onChange={(event) => setFamilyName(event.target.value)}
-            className="min-h-11 w-full rounded border-2 border-border px-3"
-          />
-        </label>
-      </td>
-      <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-        <label htmlFor={`${formId}-role`} className="grid gap-1">
-          <span className="font-bold md:sr-only">Rolle</span>
-          <select
-            id={`${formId}-role`}
-            form={formId}
-            value={role}
-            onChange={(event) => setRole(event.target.value)}
-            className="min-h-11 w-full rounded border-2 border-border px-3"
+          <Button type="submit" form="family-edit-form">
+            Änderungen speichern
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function FamilyNoteEditor({
+  family_id: familyId,
+  value,
+  actor,
+  stage,
+}: {
+  family_id: string
+  value: string
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+}) {
+  const [draft, setDraft] = useState(value)
+  const dirty = draft !== value
+  return (
+    <Card className="bg-secondary-background">
+      <CardHeader>
+        <h3 className="text-xl">Sonstiges zum Zimmer</h3>
+        <p>Alles, was oben nicht vorkommt.</p>
+      </CardHeader>
+      <CardContent className="grid gap-3">
+        <textarea
+          aria-label="Sonstiges zum Zimmer"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          className="min-h-32 rounded-base border-2 border-border px-3 py-2"
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            disabled={!dirty}
+            onClick={() =>
+              stage([labelEvent(actor, familyId, familyId, 'family-note', draft.trim() || null)])
+            }
           >
-            <option value="adult">Erwachsene(r)</option>
-            <option value="child">Kind</option>
-            <option value="infant">Baby</option>
-          </select>
-        </label>
-      </td>
-      <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-        <div className="flex flex-wrap gap-2">
-          <Button form={formId} type="submit" size="sm">
-            Person übernehmen
+            Speichern
           </Button>
-          <Button type="button" variant="neutral" size="sm" onClick={() => setEditing(false)}>
-            Abbrechen
+          <Button type="button" variant="neutral" disabled={!dirty} onClick={() => setDraft(value)}>
+            Verwerfen
           </Button>
+          {dirty ? <span className="text-sm font-bold">Änderungen offen</span> : null}
         </div>
-      </td>
-    </tr>
+      </CardContent>
+    </Card>
+  )
+}
+
+function FamilyRoomView({
+  family_id: familyId,
+  persons,
+  world,
+  actor,
+  stage,
+}: {
+  family_id: string
+  persons: ReturnType<typeof familyPeople>
+  world: NonNullable<ReturnType<typeof useOrganiser>['world']>
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+}) {
+  const peopleWithOwnBed = persons.filter((person) => {
+    const labels = world.labels_by_entity[person.entity.id] ?? []
+    return labelBoolean(labels, 'does-not-need-a-bed') !== true
+  })
+  const infants = persons.filter((person) => person.role === 'infant')
+  const roomNote = labelValue(world.labels_by_entity[familyId] ?? [], 'family-note') ?? ''
+  return (
+    <div className="space-y-4">
+      <FamilyPreferencesControls
+        profile={activeProfile}
+        family_id={familyId}
+        persons={persons.map((person) => person.entity)}
+        world={world}
+        actor={actor}
+        stage={stage}
+        section_keys={['room-wishes']}
+        trait_keys={['needs-private-sanitary', 'needs-accessible', 'sole-occupancy']}
+      />
+      <Card className="bg-secondary-background">
+        <CardHeader>
+          <h3 className="text-xl">Schlafen</h3>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <p className="flex flex-wrap items-baseline gap-2">
+            <strong className="text-3xl">{peopleWithOwnBed.length}</strong>
+            <span>{peopleWithOwnBed.length === 1 ? 'Schlafplatz' : 'Schlafplätze'} nötig</span>
+          </p>
+          {infants.length ? (
+            infants.map((person) => {
+              const labels = world.labels_by_entity[person.entity.id] ?? []
+              const withParents = labelBoolean(labels, 'does-not-need-a-bed') === true
+              return (
+                <label key={person.entity.id} className="flex min-h-11 items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={withParents}
+                    onChange={(event) =>
+                      stage([
+                        labelEvent(
+                          actor,
+                          familyId,
+                          person.entity.id,
+                          'does-not-need-a-bed',
+                          event.target.checked,
+                        ),
+                      ])
+                    }
+                  />
+                  <span>{personName(person)} schläft im Bett der Eltern</span>
+                </label>
+              )
+            })
+          ) : (
+            <p className="text-sm text-muted">Jede Person braucht einen eigenen Schlafplatz.</p>
+          )}
+          {infants.length ? (
+            <p className="text-sm text-muted">
+              Babys im Bett der Eltern brauchen keinen eigenen Schlafplatz.
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
+      <FamilyNoteEditor family_id={familyId} value={roomNote} actor={actor} stage={stage} />
+    </div>
   )
 }
 
 export function FamilyDetail({
   family_id: familyId,
+  topic: requestedTopic = 'zimmer',
+  person_id: personId,
 }: {
   family_id?: string
   topic?: FamilyTopic
   person_id?: string
 }) {
   const { state, world, stage } = useOrganiser()
+  const [, navigate] = useLocation()
   const family = familyId ? findFamily(world!, familyId) : null
-  const [givenName, setGivenName] = useState('')
-  const [familyName, setFamilyName] = useState('')
-  const [role, setRole] = useState('adult')
-  const [addingPerson, setAddingPerson] = useState(false)
-  const currentDisplayName = family
-    ? (labelValue(world!.labels_by_entity[family.family.id] ?? [], 'display-name') ??
-      family.family.id)
-    : ''
-  const [displayName, setDisplayName] = useState(currentDisplayName)
-  const [displayNameError, setDisplayNameError] = useState<string | null>(null)
+  const topic = requestedTopic
 
   if (!family || !state.principal_email) return <p role="alert">Diese Familie gibt es nicht.</p>
 
   const selectedFamilyId = family.family.id
-  const labels = world!.labels_by_entity[family.family.id] ?? []
-  const familyEventSeqs = new Set<number>([
-    family.family.created_seq,
-    ...world!.labels
-      .filter((label) => label.entity_id === family.family.id)
-      .map((label) => label.set_seq),
-  ])
-  for (const person of family.persons) {
-    familyEventSeqs.add(person.created_seq)
-    for (const label of world!.labels_by_entity[person.id] ?? []) familyEventSeqs.add(label.set_seq)
-  }
-  const draftEvents = materializeDraftEvents(state)
-  const draftSeqs = new Set(draftEvents.map((event) => event.seq))
-  const history = [...state.committed, ...draftEvents]
-    .filter((event) => event.subject === family.family.id || familyEventSeqs.has(event.seq))
-    .sort((a, b) => b.seq - a.seq)
+  const labels = world!.labels_by_entity[selectedFamilyId] ?? []
+  const displayName = labelValue(labels, 'display-name') ?? selectedFamilyId
+  const email = labelValue(labels, 'email') ?? ''
+  const people = familyPeople(world!, selectedFamilyId)
+  const status = familyStatus(world!, family)
+  const sections = familyPreferencesConfig(activeProfile).sections
+  const peopleSection = sections.find((section) => section.key === 'people')
+  const detailPersonId =
+    personId && people.some((person) => person.entity.id === personId) ? personId : undefined
 
-  function addPerson(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!givenName.trim() || !familyName.trim()) return
-    stage([
-      {
-        at: new Date().toISOString(),
-        actor: state.principal_email!,
-        subject: selectedFamilyId,
-        type: 'PersonAdded',
-        payload: {
-          person_id: makePersonId(givenName),
-          family_id: selectedFamilyId,
-          given_name: givenName.trim(),
-          family_name: familyName.trim(),
-          birthdate: null,
-          role,
-        },
-      },
-    ])
-    setGivenName('')
-    setFamilyName('')
-    setAddingPerson(false)
-  }
-
-  function renameFamily(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const nextDisplayName = displayName.trim()
-    if (!nextDisplayName) {
-      setDisplayNameError('Bitte gib einen Familiennamen ein.')
+  function changeTopic(next: FamilyTopic) {
+    if (next === 'zimmer') {
+      void navigate(organiserPaths.family_topic(selectedFamilyId, next))
       return
     }
-    if (nextDisplayName === currentDisplayName) {
-      setDisplayNameError(null)
-      return
-    }
-    stage([
-      {
-        at: new Date().toISOString(),
-        actor: state.principal_email!,
-        subject: selectedFamilyId,
-        type: 'FamilyDisplayNameChanged',
-        payload: {
-          family_id: selectedFamilyId,
-          old_display_name: currentDisplayName,
-          new_display_name: nextDisplayName,
-        },
-      },
-    ])
-    setDisplayNameError(null)
+    const nextPerson = detailPersonId ?? people[0]?.entity.id
+    void navigate(
+      nextPerson
+        ? organiserPaths.family_person_topic(selectedFamilyId, next, nextPerson)
+        : organiserPaths.family_topic(selectedFamilyId, next),
+    )
   }
 
   return (
     <div className="space-y-6">
+      <OrganiserLink href={organiserPaths.families()} className="inline-block underline">
+        ← Familien
+      </OrganiserLink>
       <OrganiserScreenHeader
-        title={labelValue(labels, 'display-name') ?? family.family.id}
+        title={`Familie ${displayName}`}
         actions={
-          <OrganiserLink href={organiserPaths.families()} className="underline">
-            ← Familien
-          </OrganiserLink>
+          <FamilyEditDialog
+            family_id={selectedFamilyId}
+            display_name={displayName}
+            email={email}
+            actor={state.principal_email}
+            stage={stage}
+          />
         }
       />
-      <p className="-mt-4">{labelValue(labels, 'email') ?? 'Keine E-Mail'}</p>
-      <Card className="bg-secondary-background">
-        <CardHeader>
-          <h3 className="text-xl">Familienname</h3>
-        </CardHeader>
-        <CardContent>
-          <form className="flex flex-wrap items-end gap-3" onSubmit={renameFamily}>
-            <label htmlFor="family-display-name" className="grid min-w-64 flex-1 gap-1">
-              <span className="font-bold">Anzeigename</span>
-              <input
-                id="family-display-name"
-                required
-                value={displayName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                className="min-h-11 rounded-base border-2 border-border px-3"
-              />
-            </label>
-            <Button type="submit">Familiennamen speichern</Button>
-          </form>
-          {displayNameError ? (
-            <p className="mt-2" role="alert">
-              {displayNameError}
-            </p>
-          ) : null}
-        </CardContent>
-      </Card>
-      <Card className="bg-secondary-background">
-        <CardHeader>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <h3 className="text-xl">Personen · {family.persons.length}</h3>
-            <CollectionCreateAction
-              label="Person hinzufügen"
-              title="Person hinzufügen"
-              description="Lege eine Person in dieser Familie an."
-              open={addingPerson}
-              on_open_change={setAddingPerson}
-            >
-              <form className="mt-5 grid gap-4" onSubmit={addPerson}>
-                <label className="grid gap-1">
-                  <span className="font-bold">Vorname</span>
-                  <input
-                    required
-                    value={givenName}
-                    onChange={(event) => setGivenName(event.target.value)}
-                    className="min-h-11 rounded-base border-2 border-border px-3"
-                  />
-                </label>
-                <label className="grid gap-1">
-                  <span className="font-bold">Nachname</span>
-                  <input
-                    required
-                    value={familyName}
-                    onChange={(event) => setFamilyName(event.target.value)}
-                    className="min-h-11 rounded-base border-2 border-border px-3"
-                  />
-                </label>
-                <label className="grid gap-1">
-                  <span className="font-bold">Rolle</span>
-                  <select
-                    value={role}
-                    onChange={(event) => setRole(event.target.value)}
-                    className="min-h-11 rounded-base border-2 border-border px-3"
-                  >
-                    <option value="adult">Erwachsene(r)</option>
-                    <option value="child">Kind</option>
-                    <option value="infant">Baby</option>
-                  </select>
-                </label>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="neutral" onClick={() => setAddingPerson(false)}>
-                    Abbrechen
-                  </Button>
-                  <Button type="submit">Person hinzufügen</Button>
-                </div>
-              </form>
-            </CollectionCreateAction>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-left max-md:block">
-            <caption className="sr-only">Personen dieser Familie</caption>
-            <thead className="border-y-2 border-border max-md:hidden">
-              <tr>
-                <th scope="col" className="p-3">
-                  Vorname
-                </th>
-                <th scope="col" className="p-3">
-                  Nachname
-                </th>
-                <th scope="col" className="p-3">
-                  Rolle
-                </th>
-                <th scope="col" className="p-3">
-                  Aktionen
-                </th>
-              </tr>
-            </thead>
-            <tbody className="max-md:block">
-              <tr className="hidden">
-                <th scope="row" className="p-3 align-bottom max-md:block max-md:p-0">
-                  <form id="add-person-form" onSubmit={addPerson} />
-                  <label htmlFor="add-person-given-name" className="grid gap-1">
-                    <span className="md:sr-only">Vorname</span>
-                    <input
-                      id="add-person-given-name"
-                      form="add-person-form"
-                      required
-                      value={givenName}
-                      onChange={(event) => setGivenName(event.target.value)}
-                      className="min-h-11 w-full rounded-base border-2 border-border px-3"
-                    />
-                  </label>
-                </th>
-                <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-                  <label htmlFor="add-person-family-name" className="grid gap-1">
-                    <span className="font-bold md:sr-only">Nachname</span>
-                    <input
-                      id="add-person-family-name"
-                      form="add-person-form"
-                      required
-                      value={familyName}
-                      onChange={(event) => setFamilyName(event.target.value)}
-                      className="min-h-11 w-full rounded-base border-2 border-border px-3"
-                    />
-                  </label>
-                </td>
-                <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-                  <label htmlFor="add-person-role" className="grid gap-1">
-                    <span className="font-bold md:sr-only">Rolle der neuen Person</span>
-                    <select
-                      id="add-person-role"
-                      form="add-person-form"
-                      value={role}
-                      onChange={(event) => setRole(event.target.value)}
-                      className="min-h-11 w-full rounded-base border-2 border-border px-3"
-                    >
-                      <option value="adult">Erwachsene(r)</option>
-                      <option value="child">Kind</option>
-                      <option value="infant">Baby</option>
-                    </select>
-                  </label>
-                </td>
-                <td className="p-3 align-bottom max-md:block max-md:p-0 max-md:pt-2">
-                  <Button form="add-person-form" type="submit" className="w-full md:w-auto">
-                    Neue Person hinzufügen
-                  </Button>
-                </td>
-              </tr>
-              {family.persons.map((person) => {
-                const personLabels = world!.labels_by_entity[person.id] ?? []
-                return (
-                  <PersonEditor
-                    key={person.id}
-                    person_id={person.id}
-                    family_id={selectedFamilyId}
-                    actor={state.principal_email!}
-                    initial_given_name={labelValue(personLabels, 'given-name') ?? ''}
-                    initial_family_name={labelValue(personLabels, 'family-name') ?? ''}
-                    initial_role={labelValue(personLabels, 'role') ?? 'adult'}
-                    onStage={(event) => stage([event])}
-                    onDelete={() =>
-                      stage([
-                        {
-                          at: new Date().toISOString(),
-                          actor: state.principal_email!,
-                          subject: person.id,
-                          type: 'PersonWithdrawn',
-                          payload: { person_id: person.id, reason: null },
-                        },
-                      ])
-                    }
-                  />
-                )
-              })}
-            </tbody>
-          </table>
-          {family.persons.length === 0 ? (
-            <p className="mt-3" role="status">
-              Noch keine Personen erfasst.
-            </p>
-          ) : null}
-        </CardContent>
-      </Card>
-      <FamilyPreferencesControls
-        profile={activeProfile}
-        family_id={selectedFamilyId}
-        persons={family.persons}
-        world={world!}
-        actor={state.principal_email}
-        stage={stage}
-      />
-      <Card className="bg-secondary-background">
-        <CardHeader>
-          <h3 className="text-xl">Änderungen</h3>
-        </CardHeader>
-        <CardContent>
-          {history.length === 0 ? (
-            <p>Noch keine Änderungen.</p>
+      <p className="-mt-4 text-muted">{email || 'Keine E-Mail'}</p>
+      <section aria-label="Familienbereiche" className="space-y-5">
+        <FamilyTopicNavigation value={topic} onChange={changeTopic} />
+        {status.complete ? (
+          <p className="flex items-center gap-2 rounded-base border-2 border-border bg-secondary-background p-3 font-bold">
+            <span aria-hidden="true">✓</span> Alles angegeben.
+          </p>
+        ) : null}
+        <div role="tabpanel" aria-label={familyTopicLabel(topic)}>
+          {topic === 'zimmer' ? (
+            <FamilyRoomView
+              family_id={selectedFamilyId}
+              persons={people}
+              world={world!}
+              actor={state.principal_email}
+              stage={stage}
+            />
+          ) : topic === 'personen' && peopleSection ? (
+            <FamilyPreferencesControls
+              profile={activeProfile}
+              family_id={selectedFamilyId}
+              persons={family.persons}
+              world={world!}
+              actor={state.principal_email}
+              stage={stage}
+              section_keys={[peopleSection.key]}
+              person_id={detailPersonId}
+            />
           ) : (
-            <ol className="space-y-3">
-              {history.map((event) => (
-                <li key={event.seq} className="border-l-4 border-border pl-3">
-                  <p className="font-bold">{changeSummary(event.type, event.payload)}</p>
-                  {draftSeqs.has(event.seq) ? (
-                    <p className="text-sm font-bold">Noch nicht gespeichert</p>
-                  ) : null}
-                  <p className="text-sm">
-                    {event.actor} · {formatChangeDate(event.at)}
-                  </p>
-                </li>
-              ))}
-            </ol>
+            <p className="rounded-base border-2 border-dashed border-muted p-5">
+              {topic === 'essen' || topic === 'workshops'
+                ? 'Dieser Bereich wird noch aufgebaut.'
+                : 'Keine Person ausgewählt.'}
+            </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
-}
-
-function changeSummary(type: string, payload: unknown): string {
-  switch (type) {
-    case 'FamilyInvited':
-      return 'Familie eingeladen'
-    case 'PersonAdded':
-      return 'Person hinzugefügt'
-    case 'PersonUpdated':
-      return 'Person geändert'
-    case 'PersonWithdrawn':
-      return 'Person entfernt'
-    case 'FamilyDisplayNameChanged': {
-      if (payload && typeof payload === 'object') {
-        const values = payload as { old_display_name?: unknown; new_display_name?: unknown }
-        if (
-          typeof values.old_display_name === 'string' &&
-          typeof values.new_display_name === 'string'
-        )
-          return `Familienname geändert: ${values.old_display_name} → ${values.new_display_name}`
-      }
-      return 'Familienname geändert'
-    }
-    default:
-      return 'Angabe geändert'
-  }
-}
-
-function formatChangeDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.valueOf())) return value
-  const dateStyle = 'dateStyle'
-  const timeStyle = 'timeStyle'
-  return new Intl.DateTimeFormat('de-DE', {
-    [dateStyle]: 'medium',
-    [timeStyle]: 'short',
-  }).format(date)
 }

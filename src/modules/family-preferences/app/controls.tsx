@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Entity, World, Label } from '../../../events/fold.js'
 import type { EventDraft, JsonValue } from '../../../events/types.js'
 import type {
@@ -12,13 +12,17 @@ import { Card, CardContent, CardHeader } from '../../../app/components/shared/ui
 
 type Stage = (events: readonly EventDraft[]) => void
 
-type FamilyPreferencesControlsProps = {
+export type FamilyPreferencesControlsProps = {
   profile: Pick<OccasionProfile, 'meta' | 'traits' | 'modules'>
   family_id: string
   persons: readonly Entity[]
   world: World
   actor: string
   stage: Stage
+  section_keys?: readonly string[]
+  trait_keys?: readonly string[]
+  person_id?: string
+  defer_text?: boolean
 }
 
 type Target = { id: string; kind: 'family' | 'person' }
@@ -89,6 +93,72 @@ function controlTitle(
   return localized(title, meta.locale, meta.fallback_locale)
 }
 
+function DeferredTextControl({
+  title,
+  help,
+  current,
+  disabled,
+  actor,
+  family_id: familyId,
+  target,
+  trait_key: traitKey,
+  stage,
+}: {
+  title: string
+  help: string | null
+  current: Label | undefined
+  disabled: boolean
+  actor: string
+  family_id: string
+  target: Target
+  trait_key: string
+  stage: Stage
+}) {
+  const currentText = typeof current?.value === 'string' ? current.value : ''
+  const [draft, setDraft] = useState(currentText)
+  const dirty = draft !== currentText
+  return (
+    <div className="grid gap-2">
+      <label className="grid gap-1">
+        <span className="font-bold">{title}</span>
+        {help ? <span className="text-sm">{help}</span> : null}
+        <textarea
+          className="min-h-24 rounded border-2 border-border px-3 py-2"
+          value={draft}
+          disabled={disabled}
+          onChange={(event) => setDraft(event.target.value)}
+        />
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="min-h-11 rounded-base border-2 border-border bg-foreground px-3 font-bold text-background disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!dirty || disabled}
+          onClick={() => {
+            const value = draft.trim()
+            stage([
+              value
+                ? labelSet(actor, familyId, target, traitKey, value, null)
+                : labelClear(actor, familyId, target, traitKey),
+            ])
+          }}
+        >
+          Speichern
+        </button>
+        <button
+          type="button"
+          className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3 font-bold disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!dirty || disabled}
+          onClick={() => setDraft(currentText)}
+        >
+          Verwerfen
+        </button>
+        {dirty ? <span className="text-sm font-bold">Änderungen offen</span> : null}
+      </div>
+    </div>
+  )
+}
+
 function TraitControl({
   trait_key: traitKey,
   trait,
@@ -100,6 +170,7 @@ function TraitControl({
   actor,
   stage,
   meta,
+  defer_text: deferText,
 }: {
   trait_key: string
   trait: Trait
@@ -111,6 +182,7 @@ function TraitControl({
   actor: string
   stage: Stage
   meta: OccasionProfile['meta']
+  defer_text?: boolean
 }) {
   const facing = trait.family_facing!
   const title = controlTitle(facing.title, meta)
@@ -207,6 +279,21 @@ function TraitControl({
   }
 
   if (facing.control === 'free-text') {
+    if (deferText) {
+      return (
+        <DeferredTextControl
+          title={title}
+          help={help}
+          current={current}
+          disabled={disabled}
+          actor={actor}
+          family_id={familyId}
+          target={target}
+          trait_key={traitKey}
+          stage={stage}
+        />
+      )
+    }
     return (
       <label className="grid gap-1">
         <span className="font-bold">{title}</span>
@@ -475,86 +562,110 @@ function deadlineNotice(
   return `${passed ? 'Frist vorbei' : `Frist bis ${new Intl.DateTimeFormat(meta.locale).format(new Date(deadline))}`}. ${localized(contact, meta.locale, meta.fallback_locale)}`
 }
 
-export function FamilyPreferencesControls({
+export function FamilyPreferenceSection({
   profile,
   family_id: familyId,
   persons,
   world,
   actor,
   stage,
-}: FamilyPreferencesControlsProps) {
+  section,
+  person_id: personId,
+  trait_keys: traitKeys,
+  defer_text: deferText,
+}: FamilyPreferencesControlsProps & {
+  section: FamilyPreferencesParams['sections'][number]
+}) {
   const params = familyPreferencesConfig(profile)
   const definitions = useMemo(
     () => new Map(familyControlDefinitions(profile).map((item) => [item.key, item])),
     [profile],
   )
   const familyTarget: Target = { id: familyId, kind: 'family' }
+  const scopedPersons = personId ? persons.filter((person) => person.id === personId) : persons
 
   return (
+    <Card className="bg-secondary-background">
+      <CardHeader>
+        <h3 className="text-xl">
+          {localized(section.title, profile.meta.locale, profile.meta.fallback_locale)}
+        </h3>
+        {section.intro ? (
+          <p>{localized(section.intro, profile.meta.locale, profile.meta.fallback_locale)}</p>
+        ) : null}
+        {deadlineNotice(section, params, profile.meta) ? (
+          <p role="note">{deadlineNotice(section, params, profile.meta)}</p>
+        ) : null}
+      </CardHeader>
+      <CardContent className="grid gap-5">
+        {section.traits
+          .filter((traitKey) => !traitKeys || traitKeys.includes(traitKey))
+          .map((traitKey) => {
+            const trait = profile.traits[traitKey]
+            if (!trait?.family_facing) return null
+            const targets =
+              trait.family_facing.scope === 'family'
+                ? [familyTarget]
+                : scopedPersons.map((person) => ({ id: person.id, kind: 'person' as const }))
+            return targets.map((target) => (
+              <TraitControl
+                key={`${traitKey}-${target.id}`}
+                trait_key={traitKey}
+                trait={trait}
+                target={target}
+                family_id={familyId}
+                labels={labelsFor(world, target)}
+                persons={scopedPersons}
+                world={world}
+                actor={actor}
+                stage={stage}
+                meta={profile.meta}
+                defer_text={deferText}
+              />
+            ))
+          })}
+        {params.module_controls
+          .filter((control) => control.section === section.key)
+          .map((control) => {
+            const definition = definitions.get(control.key)
+            if (!definition) return null
+            return scopedPersons.map((person) => (
+              <WorkshopControls
+                key={`${control.key}-${person.id}`}
+                control={definition}
+                params={params}
+                target={{ id: person.id, kind: 'person' }}
+                family_id={familyId}
+                labels={labelsFor(world, { id: person.id, kind: 'person' })}
+                world={world}
+                actor={actor}
+                stage={stage}
+                meta={profile.meta}
+                person_name={
+                  `${labelText(labelsFor(world, { id: person.id, kind: 'person' }), 'given-name')} ${labelText(labelsFor(world, { id: person.id, kind: 'person' }), 'family-name')}`.trim() ||
+                  person.id
+                }
+              />
+            ))
+          })}
+      </CardContent>
+    </Card>
+  )
+}
+
+export function FamilyPreferencesControls({
+  profile,
+  section_keys: sectionKeys,
+  ...props
+}: FamilyPreferencesControlsProps) {
+  const params = familyPreferencesConfig(profile)
+  const sections = sectionKeys
+    ? params.sections.filter((section) => sectionKeys.includes(section.key))
+    : params.sections
+  return (
     <div className="space-y-4">
-      {params.sections.map((section) => (
-        <Card key={section.key} className="bg-secondary-background">
-          <CardHeader>
-            <h3 className="text-xl">
-              {localized(section.title, profile.meta.locale, profile.meta.fallback_locale)}
-            </h3>
-            {section.intro ? (
-              <p>{localized(section.intro, profile.meta.locale, profile.meta.fallback_locale)}</p>
-            ) : null}
-            {deadlineNotice(section, params, profile.meta) ? (
-              <p role="note">{deadlineNotice(section, params, profile.meta)}</p>
-            ) : null}
-          </CardHeader>
-          <CardContent className="grid gap-5">
-            {section.traits.map((traitKey) => {
-              const trait = profile.traits[traitKey]
-              if (!trait?.family_facing) return null
-              const targets =
-                trait.family_facing.scope === 'family'
-                  ? [familyTarget]
-                  : persons.map((person) => ({ id: person.id, kind: 'person' as const }))
-              return targets.map((target) => (
-                <TraitControl
-                  key={`${traitKey}-${target.id}`}
-                  trait_key={traitKey}
-                  trait={trait}
-                  target={target}
-                  family_id={familyId}
-                  labels={labelsFor(world, target)}
-                  persons={persons}
-                  world={world}
-                  actor={actor}
-                  stage={stage}
-                  meta={profile.meta}
-                />
-              ))
-            })}
-            {params.module_controls
-              .filter((control) => control.section === section.key)
-              .map((control) => {
-                const definition = definitions.get(control.key)
-                if (!definition) return null
-                return persons.map((person) => (
-                  <WorkshopControls
-                    key={`${control.key}-${person.id}`}
-                    control={definition}
-                    params={params}
-                    target={{ id: person.id, kind: 'person' }}
-                    family_id={familyId}
-                    labels={labelsFor(world, { id: person.id, kind: 'person' })}
-                    world={world}
-                    actor={actor}
-                    stage={stage}
-                    meta={profile.meta}
-                    person_name={
-                      `${labelText(labelsFor(world, { id: person.id, kind: 'person' }), 'given-name')} ${labelText(labelsFor(world, { id: person.id, kind: 'person' }), 'family-name')}`.trim() ||
-                      person.id
-                    }
-                  />
-                ))
-              })}
-          </CardContent>
-        </Card>
+      {sections.map((section) => (
+        <FamilyPreferenceSection key={section.key} profile={profile} section={section} {...props} />
       ))}
     </div>
   )
