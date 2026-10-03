@@ -28,6 +28,7 @@ import {
   personIdFromRouteSegment,
 } from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
+import type { ProfilePresentation } from '../../config/presentation.js'
 
 function AccommodationRedirect() {
   const [, navigate] = useLocation()
@@ -66,7 +67,7 @@ const FamilyDetail = lazy(() =>
   import('./screens/family-detail.js').then((module) => ({ default: module.FamilyDetail })),
 )
 
-export default function OrganiserApp() {
+export default function OrganiserApp({ profile }: { profile?: ProfilePresentation }) {
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
 
   const stage = useCallback((events: readonly EventDraft[]) => {
@@ -222,19 +223,19 @@ export default function OrganiserApp() {
 
   if (state.status === 'loading')
     return (
-      <OrganiserMinimalFrame>
+      <OrganiserMinimalFrame profile={profile}>
         <RouteLoading />
       </OrganiserMinimalFrame>
     )
   if (state.status === 'unauthorized' || state.status === 'stale_build')
     return (
-      <OrganiserMinimalFrame>
+      <OrganiserMinimalFrame profile={profile}>
         <p role="alert">{state.error}</p>
       </OrganiserMinimalFrame>
     )
   if (state.status === 'load_error')
     return (
-      <OrganiserMinimalFrame>
+      <OrganiserMinimalFrame profile={profile}>
         <Alert role="alert" className="bg-secondary-background">
           <AlertTitle>Die Organisationsdaten konnten nicht geladen werden</AlertTitle>
           <AlertDescription>
@@ -248,7 +249,7 @@ export default function OrganiserApp() {
     )
   if (!derivation.world)
     return (
-      <OrganiserMinimalFrame>
+      <OrganiserMinimalFrame profile={profile}>
         <div className="space-y-4" role="alert">
           <p>{derivation.error ?? state.error}</p>
           <Button variant="neutral" onClick={() => dispatch({ type: 'discard' })}>
@@ -270,7 +271,7 @@ export default function OrganiserApp() {
         current_plan: transition?.after ?? null,
       }}
     >
-      <OrganiserFrame>
+      <OrganiserFrame profile={profile}>
         <Suspense fallback={<RouteLoading />}>
           <Switch>
             <Route path={organiserRoutePaths.dashboard}>

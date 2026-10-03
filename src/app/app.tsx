@@ -4,28 +4,29 @@ import { Shell } from './components/application/shell'
 import { NotFound, RouteBoundary, RouteLoading } from './components/application/route-states'
 import { Login } from './auth/login'
 import { Welcome } from './family-view/welcome'
+import type { ProfilePresentation } from '../config/presentation.js'
 
 const OrganiserApp = lazy(() => import('./organiser/organiser-app'))
 
-export function App() {
+export function App({ profile }: { profile?: ProfilePresentation } = {}) {
   const [location] = useLocation()
 
   return (
-    <Shell>
+    <Shell profile={profile}>
       <RouteBoundary reset_key={location}>
         <Switch>
           <Route path="/">
-            <Welcome />
+            <Welcome profile={profile} />
           </Route>
           <Route path="/login">
             <Login />
           </Route>
           <Route path="/family">
-            <Welcome />
+            <Welcome profile={profile} />
           </Route>
           <Route path="/organiser" nest>
             <Suspense fallback={<RouteLoading />}>
-              <OrganiserApp />
+              <OrganiserApp profile={profile} />
             </Suspense>
           </Route>
           <Route>
