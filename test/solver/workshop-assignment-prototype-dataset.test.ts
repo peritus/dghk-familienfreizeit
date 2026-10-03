@@ -238,4 +238,23 @@ test('the workshop allocation projection exposes answers, demand, and trace from
   expect(stages.some((stage) => stage.phase === 'round')).toBe(true)
   expect(stages.some((stage) => stage.detail_items.length > 0)).toBe(true)
   expect(stages.at(-1)).toEqual(expect.objectContaining({ label: 'Ergebnis' }))
+  const firstRound = stages.find((stage) => stage.id === 'round-1')
+  const capacityDetails = firstRound?.detail_groups?.find((group) => group.id === 'capacity')
+  expect(capacityDetails?.items[0]).toEqual(
+    expect.objectContaining({
+      bold_prefix: expect.any(String),
+      strike_people: true,
+      people: expect.arrayContaining([expect.objectContaining({ name: expect.any(String) })]),
+    }),
+  )
+  const selectedId = projection.answers.find((answer) => answer.ranks.length > 0)?.id
+  expect(selectedId).toBeDefined()
+  const selectedStages = buildWorkshopAllocationTraceStages(projection, 'all', selectedId, true)
+  expect(selectedStages[0]?.open).toBeGreaterThan(0)
+  expect(
+    selectedStages
+      .flatMap((stage) => stage.detail_groups ?? [])
+      .flatMap((detailGroup) => detailGroup.items)
+      .every((item) => item.people.every((person) => person.id === selectedId)),
+  ).toBe(true)
 })

@@ -30,5 +30,8 @@ workshops affected plus structured reasons such as capacity, slot overlap,
 leader conflicts, eligibility, cancellation, or no schedule. The sticky
 controls support all-person, highlighted-person, and single-person views; the
 single-person context also reports matching workshops, leaderships, wish
-status, and the explicit no-wishes state. The table collapses to responsive
-cards and remains usable with keyboard focus and screen-reader labels.
+status, and the explicit no-wishes state. People in the explanation rows are
+keyboard-usable selectors; highlight mode marks the active person, while
+rejected names remain visibly struck through. The table collapses to
+responsive cards and remains usable with keyboard focus and screen-reader
+labels.

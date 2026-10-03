@@ -128,6 +128,8 @@ export type WorkshopAllocationTraceDetailItem = {
   person_id: string | null
   people: readonly { id: string; name: string }[]
   text: string
+  bold_prefix?: string
+  strike_people?: boolean
 }
 
 type AllocationPerson = {
@@ -336,6 +338,18 @@ function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): 
     default:
       return `${outcomeLabel(outcome)} · ${wishes}`
   }
+}
+
+function detailBoldPrefix(event: WorkshopAllocationTraceEvent): string | undefined {
+  return ['fulfilled', 'retained', 'capacity', 'unscheduled'].includes(event.outcome)
+    ? event.workshop_title
+    : undefined
+}
+
+function detailStrikesPeople(outcome: WorkshopAllocationTraceOutcome): boolean {
+  return ['capacity', 'overlap', 'leader', 'unscheduled', 'eligibility', 'cancellation'].includes(
+    outcome,
+  )
 }
 
 function answerRankings(
@@ -735,6 +749,8 @@ export function buildWorkshopAllocationTraceStages(
         person_id: event.person_id,
         people: [{ id: event.person_id, name: event.person_name }],
         text: traceDetailText(event),
+        bold_prefix: detailBoldPrefix(event),
+        strike_people: detailStrikesPeople(event.outcome),
       }))
     }
     const grouped = new Map<string, WorkshopAllocationTraceEvent[]>()
@@ -760,6 +776,8 @@ export function buildWorkshopAllocationTraceStages(
         person_id: events.length === 1 ? first.person_id : null,
         people: events.map((event) => ({ id: event.person_id, name: event.person_name })),
         text,
+        bold_prefix: first.workshop_title,
+        strike_people: detailStrikesPeople(outcome),
       }
     })
   }

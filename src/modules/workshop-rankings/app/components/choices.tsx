@@ -369,6 +369,8 @@ export type TraceStageView = {
       person_id: string | null
       people: readonly { id: string; name: string }[]
       text: string
+      bold_prefix?: string
+      strike_people?: boolean
     }[]
   }[]
   details?: ReactNode
@@ -501,6 +503,7 @@ export function TraceProgressBar({
 function TraceDetailGroups({
   groups,
   on_person_id: onPersonId,
+  selected_person_id: selectedPersonId,
 }: {
   groups: readonly {
     id: string
@@ -510,29 +513,80 @@ function TraceDetailGroups({
       person_id: string | null
       people: readonly { id: string; name: string }[]
       text: string
+      bold_prefix?: string
+      strike_people?: boolean
     }[]
   }[]
   on_person_id?: (personId: string) => void
+  selected_person_id?: string
 }) {
   const renderItem = (item: (typeof groups)[number]['items'][number]) => {
-    if (!onPersonId || !item.people.length) return item.text
     const parts: ReactNode[] = []
     let cursor = 0
-    item.people.forEach((person, index) => {
-      const position = item.text.indexOf(person.name, cursor)
-      if (position < cursor) return
-      parts.push(item.text.slice(cursor, position))
-      parts.push(
-        <button
-          key={`${item.id}-${person.id}-${index}`}
-          type="button"
-          className="font-bold underline underline-offset-2"
-          onClick={() => onPersonId(person.id)}
-        >
-          {person.name}
-        </button>,
-      )
-      cursor = position + person.name.length
+    const matches: {
+      start: number
+      end: number
+      kind: 'prefix' | 'person'
+      person?: { id: string; name: string }
+    }[] = []
+    if (item.bold_prefix) {
+      const position = item.text.indexOf(item.bold_prefix)
+      if (position >= 0) {
+        matches.push({
+          start: position,
+          end: position + item.bold_prefix.length,
+          kind: 'prefix',
+        })
+      }
+    }
+    let personCursor = 0
+    item.people.forEach((person) => {
+      const position = item.text.indexOf(person.name, personCursor)
+      if (position < 0) return
+      matches.push({
+        start: position,
+        end: position + person.name.length,
+        kind: 'person',
+        person,
+      })
+      personCursor = position + person.name.length
+    })
+    matches.sort((left, right) => left.start - right.start)
+    matches.forEach((match, index) => {
+      if (match.start < cursor) return
+      parts.push(item.text.slice(cursor, match.start))
+      if (match.kind === 'prefix') {
+        parts.push(
+          <strong key={`${item.id}-prefix-${index}`}>
+            {item.text.slice(match.start, match.end)}
+          </strong>,
+        )
+      } else if (match.person) {
+        const selected = match.person.id === selectedPersonId
+        const person = (
+          <span
+            className={`font-bold underline underline-offset-2 ${item.strike_people ? 'line-through' : ''} ${selected ? 'rounded-sm bg-foreground px-1 text-background' : ''}`}
+          >
+            {match.person.name}
+          </span>
+        )
+        parts.push(
+          onPersonId ? (
+            <button
+              key={`${item.id}-${match.person.id}-${index}`}
+              type="button"
+              className="rounded-sm"
+              aria-current={selected ? 'true' : undefined}
+              onClick={() => onPersonId(match.person!.id)}
+            >
+              {person}
+            </button>
+          ) : (
+            <span key={`${item.id}-${match.person.id}-${index}`}>{person}</span>
+          ),
+        )
+      }
+      cursor = match.end
     })
     parts.push(item.text.slice(cursor))
     return parts
@@ -560,6 +614,7 @@ export function TraceStageRow({
   show_detail_rows: showDetailRows,
   selected_person_label: selectedPersonLabel,
   on_person_id: onPersonId,
+  selected_person_id: selectedPersonId,
 }: {
   stage: TraceStageView
   stages: readonly TraceStageView[]
@@ -567,6 +622,7 @@ export function TraceStageRow({
   show_detail_rows: boolean
   selected_person_label?: string
   on_person_id?: (personId: string) => void
+  selected_person_id?: string
 }) {
   return (
     <>
@@ -592,7 +648,11 @@ export function TraceStageRow({
         <tr className="border-b border-border/30 align-top">
           <td aria-hidden="true" />
           <td colSpan={7} className="p-3 pt-0 text-sm text-muted">
-            <TraceDetailGroups groups={stage.detail_groups} on_person_id={onPersonId} />
+            <TraceDetailGroups
+              groups={stage.detail_groups}
+              on_person_id={onPersonId}
+              selected_person_id={selectedPersonId}
+            />
           </td>
           {selectedPersonLabel ? <td className="bg-paper" aria-hidden="true" /> : null}
         </tr>
@@ -606,11 +666,13 @@ export function ChoiceTraceTable({
   selected_person_label: selectedPersonLabel,
   show_detail_rows: showDetailRows = true,
   on_person_id: onPersonId,
+  selected_person_id: selectedPersonId,
 }: {
   stages: readonly TraceStageView[]
   selected_person_label?: string
   show_detail_rows?: boolean
   on_person_id?: (personId: string) => void
+  selected_person_id?: string
 }) {
   const table = (
     <WorkshopDataTable
@@ -637,6 +699,7 @@ export function ChoiceTraceTable({
           show_detail_rows={showDetailRows}
           selected_person_label={selectedPersonLabel}
           on_person_id={onPersonId}
+          selected_person_id={selectedPersonId}
         />
       )}
     />
@@ -669,7 +732,11 @@ export function ChoiceTraceTable({
           </dl>
           {stage.detail_groups?.length ? (
             <div className="mt-3 text-sm text-muted">
-              <TraceDetailGroups groups={stage.detail_groups} on_person_id={onPersonId} />
+              <TraceDetailGroups
+                groups={stage.detail_groups}
+                on_person_id={onPersonId}
+                selected_person_id={selectedPersonId}
+              />
             </div>
           ) : null}
           {selectedPersonLabel ? (

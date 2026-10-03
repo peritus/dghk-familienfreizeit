@@ -186,8 +186,10 @@ export function WorkshopAllocation() {
   const people = projection.answers
     .filter((answer) => group === 'all' || answer.group === group)
     .map((answer) => answer.name)
+    .sort((left, right) => left.localeCompare(right, 'de'))
   const stages = traceStages(projection, group, selectedPerson?.id, traceMode)
   const selectedLabel = traceMode === 'all' ? undefined : selectedPerson?.name
+  const activeSelectedPersonId = traceMode === 'all' ? undefined : selectedPerson?.id
 
   const setView = (next: string) => {
     const paths: Record<WorkshopAllocationView, string> = {
@@ -311,11 +313,18 @@ export function WorkshopAllocation() {
           <WorkshopAllocationTraceContext
             projection={projection}
             group={group}
-            selected_person_id={selectedPerson?.id}
+            selected_person_id={activeSelectedPersonId}
           />
           <TraceControls
             mode={traceMode}
-            onModeChange={setTraceMode}
+            onModeChange={(mode) => {
+              setTraceMode(mode)
+              if (mode === 'all') {
+                setSelectedPersonName('')
+              } else if (!selectedPerson && people[0]) {
+                setSelectedPersonName(people[0])
+              }
+            }}
             selected_person={selectedPersonName || selectedPerson?.name}
             onPersonChange={setSelectedPersonName}
             people={people}
@@ -345,6 +354,7 @@ export function WorkshopAllocation() {
                 selected_person_label={selectedLabel}
                 show_detail_rows={traceMode !== 'only'}
                 on_person_id={(personId) => openTrace({ id: personId })}
+                selected_person_id={activeSelectedPersonId}
               />
             </div>
           ) : null}
