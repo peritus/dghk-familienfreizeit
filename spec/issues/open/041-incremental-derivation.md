@@ -105,11 +105,22 @@ already enforces — room number within building, bed label within room — as
 indexes beside the existing ones, so a duplicate check is a lookup. Contained
 within `room-inventory` and the fold's state, no decision review needed.
 
-**Measure the organiser keystroke, not the occasion.** `deriveTransition`
-derives two worlds and runs two solves per draft batch, and the draft world can
-never be cached, so that path carries roughly twice the `solve` cost on every
-edit. It has never been measured, and it is the only place this cost is
-actually waited on. A full occasion plan at 210 ms is not a problem for anyone.
+**The organiser keystroke is now measured, and it is the remaining cost.**
+`deriveTransition` is 547 ms at 2 367 events — two folds and two solves, with
+the draft world novel by construction so no cache can serve it. Everything else
+on the request path is now cheap: an append folds twice regardless of batch size
+([append cost](../../../docs/architecture/events.md#append-cost)), and
+authorization resolves families through the derived indexes.
+
+Reducing the keystroke means one of two things, and this is the decision the
+issue is now waiting on:
+
+- Keep shaving `solve`. Sharing room sweeps between the ordering, forced and
+  greedy passes is answer-preserving and worth perhaps 40% of the placement
+  stage.
+- Stop re-solving the whole occasion to answer what one edit changed. A draft
+  usually touches a handful of families, and the plan for the rest is already
+  known. This is the larger change and the one with the bigger ceiling.
 
 **Then decide whether the search itself needs to change.** Sharing sweeps
 between the ordering, forced and greedy passes is answer-preserving and worth
@@ -138,9 +149,10 @@ review before any specification text changes.
 1. Is a discardable, content-keyed world snapshot acceptable under the "no
    tables that store folded domain state" rule, or does that rule stand as
    written and the fold has to stay fully recomputed?
-2. `solve` is now 210 ms against the fold's 74 ms at 2 367 events, so neither
-   dominates. Does the snapshot question stay open, given that the organiser
-   keystroke path has still not been measured?
+2. The organiser keystroke is 547 ms at 2 367 events and nothing else on the
+   request path is now significant. Is that acceptable, or should the draft
+   path stop re-solving the whole occasion? A snapshot does not help here: the
+   draft world has never existed before.
 
 ## Related files
 

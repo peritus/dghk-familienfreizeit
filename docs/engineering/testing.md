@@ -67,6 +67,13 @@ They assert different things, and neither measures time:
   have historically rescanned. The counts are produced by wrapping the rules in
   counting decorators and the collections in `Proxy` objects, so nothing in
   `src/` is instrumented.
+- [`request-budgets.test.ts`](../../test/solver/request-budgets.test.ts) counts
+  the same way for the request path: how many elements an authorized append and
+  an email lookup read from the unindexed collections. Both now read none, so
+  the budgets are small absolute numbers rather than ratios. The fixtures use
+  the *last* family deliberately — against the first one, a reverted
+  `families.some(...)` matches on its first element and the regression does not
+  show up in the count at all.
 - [`placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
   digests a whole plan, both solve passes, and compares it with a recorded
   value. Cost work must not change an answer, and this is what says so.
