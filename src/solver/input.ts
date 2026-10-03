@@ -61,7 +61,7 @@ export function buildSolverInput(
       persons,
       (left, right) => left.family_id.localeCompare(right.family_id) || compareEntity(left, right),
     ),
-    labels: freezeSorted(labels, compareLabel),
+    labels: sortedLabels(labels),
     capabilities,
     constraints: freezeSorted(
       world.constraints.map((constraint) => ({ ...constraint })),
@@ -96,14 +96,24 @@ function compareEntity(
   return firstNonZero([left.sort_key - right.sort_key, left.id.localeCompare(right.id)])
 }
 
-function compareLabel(left: SolverLabel, right: SolverLabel): number {
-  return firstNonZero([
-    left.entity_id.localeCompare(right.entity_id),
-    left.key.localeCompare(right.key),
-    canonicalJson(left.value).localeCompare(canonicalJson(right.value)),
-    (left.strength ?? '').localeCompare(right.strength ?? ''),
-    left.set_seq - right.set_seq,
-  ])
+/**
+ * Sorts labels on a canonical form computed once per label rather than inside
+ * the comparator. Canonicalizing during comparison re-serialized the same value
+ * on every one of the O(n log n) comparisons across the whole label store — and
+ * `deriveTransition` builds two solver inputs per organiser keystroke.
+ */
+function sortedLabels(labels: readonly SolverLabel[]): readonly SolverLabel[] {
+  const keyed = labels.map((label) => ({ label, canonical: canonicalJson(label.value) }))
+  keyed.sort((left, right) =>
+    firstNonZero([
+      left.label.entity_id.localeCompare(right.label.entity_id),
+      left.label.key.localeCompare(right.label.key),
+      left.canonical.localeCompare(right.canonical),
+      (left.label.strength ?? '').localeCompare(right.label.strength ?? ''),
+      left.label.set_seq - right.label.set_seq,
+    ]),
+  )
+  return Object.freeze(keyed.map(({ label }) => label))
 }
 
 function compareRequirement(
