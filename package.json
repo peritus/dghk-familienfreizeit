@@ -20,7 +20,7 @@
     "format:check": "oxfmt --check",
     "test": "vitest run",
     "bench": "vitest run -c vitest.bench.config.ts",
-    "bench:check": "vitest run --project kernel test/solver/work-budgets.test.ts test/solver/placement-equivalence.test.ts",
+    "bench:check": "vitest run --project kernel test/solver/work-budgets.test.ts test/solver/request-budgets.test.ts test/solver/placement-equivalence.test.ts",
     "test:room-assignment:coverage": "vitest run --project kernel --coverage",
     "test:build": "node --test test/build/*.test.mjs",
     "test:browser": "playwright test",
