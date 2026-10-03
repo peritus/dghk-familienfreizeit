@@ -8,7 +8,7 @@ import { appendEvents, readEvents, StaleHeadError, type EventDraft } from '../ev
 import { canonicalEmail, eventPayloadSchemas, parseEvent, type JsonValue } from '../events/types.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
-import { canAppendEvent } from '../auth/authorization.js'
+import { authorizeEventBatch } from '../auth/authorization.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
 import {
@@ -191,14 +191,11 @@ app.post('/api/organiser/apply', async (context) => {
     })
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
       span.setAttribute('event.count', events.length)
-      return events.some(
-        (event) =>
-          !canAppendEvent(
-            principal,
-            event,
-            deriveEventWorld(existing),
-            activeProfile.validation_view,
-          ),
+      return !authorizeEventBatch(
+        principal,
+        events,
+        deriveEventWorld(existing),
+        activeProfile.validation_view,
       )
     })
     if (forbidden) return context.json({ error: 'forbidden' }, 403)
@@ -289,9 +286,7 @@ app.post('/api/events', async (context) => {
     })
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
       span.setAttribute('event.count', events.length)
-      return events.some(
-        (event) => !canAppendEvent(principal, event, world, activeProfile.validation_view),
-      )
+      return !authorizeEventBatch(principal, events, world, activeProfile.validation_view)
     })
     if (forbidden) throw new Error('forbidden')
     tracing.enterSpan('events.validate_world', () =>

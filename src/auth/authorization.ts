@@ -20,6 +20,28 @@ const kernelEntityEventTypes = new Set([
   'LabelCleared',
 ])
 
+/**
+ * Authorizes a whole batch against one derived world.
+ *
+ * Taking a single `World` is the point of this function existing. The append
+ * handler used to call `canAppendEvent` inside `events.some(...)` and pass
+ * `derive(existing)` as the argument, so appending a batch folded the entire
+ * event log once per event in it. A batch signature makes that shape
+ * unrepresentable: there is one world, and the caller has to decide which.
+ *
+ * The world is the one before the batch, so every event in a batch is
+ * authorized against the same state. That is what the per-event version did,
+ * and changing it would be a policy decision rather than a cost one.
+ */
+export function authorizeEventBatch(
+  principal: Principal,
+  events: readonly Event[],
+  world: World,
+  config: KernelConfig,
+): boolean {
+  return events.every((event) => canAppendEvent(principal, event, world, config))
+}
+
 export function canAppendEvent(
   principal: Principal,
   event: Event,
