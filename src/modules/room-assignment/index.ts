@@ -496,12 +496,14 @@ export function roomAssignmentRules(): readonly Rule<
     {
       id: 'hard.trait-requirements',
       evaluate: (family: FamilyPlacementUnit, room: RoomCandidate) =>
-        family.requirements.filter(
+        // `some`, not `filter(...).length`: this runs once per candidate pair
+        // and the array was only ever tested for emptiness.
+        family.requirements.some(
           ({ strength, capability_key: capabilityKey }) =>
             strength === 'required' && capabilityKey && !room.capabilities.has(capabilityKey),
-        ).length === 0
-          ? 0
-          : ('infeasible' as const),
+        )
+          ? ('infeasible' as const)
+          : 0,
       describe: () => 'required requirement is not satisfied',
     },
   ]
@@ -627,9 +629,10 @@ function evaluateRooms(
 ): { candidates: RoomScore[]; rejections: { target: string; rule: string }[] } {
   const candidates: RoomScore[] = []
   const rejections: { target: string; rule: string }[] = []
+  const sweep = familySweep(family, input, params)
   for (const room of input.rooms) {
-    const reasons = feasible(family, room, placements, input, params, rules)
-    if (reasons.length === 0) candidates.push(score(family, room, placements, input, params))
+    const reasons = feasible(family, room, placements, input, params, rules, sweep)
+    if (reasons.length === 0) candidates.push(score(family, room, placements, input, params, sweep))
     else for (const { rule } of reasons) rejections.push({ target: room.id, rule })
   }
   return { candidates, rejections }
@@ -645,6 +648,46 @@ function scoredRooms(
   return evaluateRooms(family, placements, input, params, rules).candidates
 }
 
+/**
+ * The parts of a feasibility check that depend only on the family, resolved
+ * once per sweep instead of once per candidate room. Each list keeps the
+ * iteration order of its source so rejection order is unchanged.
+ */
+type FamilySweep = {
+  requires_sole_occupancy: boolean
+  excluded: readonly RoomAssignmentInput['constraints'][number][]
+  keep_apart: readonly FamilyRequirement[]
+  preferred: readonly FamilyRequirement[]
+  room_constraint: RoomConstraint | undefined
+}
+
+function familySweep(
+  family: FamilyPlacementUnit,
+  input: RoomAssignmentInput,
+  params: RoomAssignmentParams,
+): FamilySweep {
+  return {
+    requires_sole_occupancy: family.requirements.some(
+      ({ strength, kind, structural }) =>
+        strength === 'required' && kind === 'structural' && structural === 'no-other-families',
+    ),
+    excluded: input.constraints.filter(
+      ({ holder_id: holderId, key, strength }) =>
+        holderMatches(holderId, family, input) && key === 'excludes' && strength === 'required',
+    ),
+    keep_apart: family.requirements.filter(
+      ({ kind, strength, trait_key: traitKey }) =>
+        kind === 'relation' &&
+        strength === 'required' &&
+        (!params.keep_apart_trait || traitKey === params.keep_apart_trait),
+    ),
+    preferred: family.requirements.filter(({ strength }) => strength === 'preferred'),
+    room_constraint: input.room_constraints?.find(
+      ({ family_id: familyId }) => familyId === family.family_id,
+    ),
+  }
+}
+
 function feasible(
   family: FamilyPlacementUnit,
   room: RoomCandidate,
@@ -652,6 +695,7 @@ function feasible(
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
   rules: readonly Rule[],
+  sweep: FamilySweep = familySweep(family, input, params),
 ): Rejection[] {
   const rejections: Rejection[] = []
   const ruleContext = { ...input, placements }
@@ -663,34 +707,21 @@ function feasible(
   ))
     if (result.score === 'infeasible')
       rejections.push({ rule: result.id, text: result.text ?? result.id })
-  for (const requirement of family.requirements.filter(({ strength }) => strength === 'required')) {
-    if (
-      requirement.kind === 'structural' &&
-      requirement.structural === 'no-other-families' &&
-      roomFamilies(room.id, placements).some((id) => id !== family.family_id)
-    )
-      rejections.push({
-        rule: 'hard.trait-requirements',
-        text: 'room already holds another family',
-      })
-  }
-  const roomConstraint = input.room_constraints?.find(
-    ({ family_id: familyId }) => familyId === family.family_id,
+  if (
+    sweep.requires_sole_occupancy &&
+    roomFamilies(room.id, placements).some((id) => id !== family.family_id)
   )
+    rejections.push({
+      rule: 'hard.trait-requirements',
+      text: 'room already holds another family',
+    })
+  const roomConstraint = sweep.room_constraint
   if (roomConstraint && !roomConstraint.room_ids.includes(room.id))
     rejections.push({ rule: 'hard.room-decision', text: `room is not in the selected room set` })
-  for (const constraint of input.constraints.filter(
-    ({ holder_id: holderId, key, strength }) =>
-      holderMatches(holderId, family, input) && key === 'excludes' && strength === 'required',
-  ))
+  for (const constraint of sweep.excluded)
     if (constraint.value === room.id || room.capabilities.has(constraint.value))
       rejections.push({ rule: 'hard.resolver-decisions', text: `excluded by ${constraint.value}` })
-  for (const relation of family.requirements.filter(
-    ({ kind, strength, trait_key: traitKey }) =>
-      kind === 'relation' &&
-      strength === 'required' &&
-      (!params.keep_apart_trait || traitKey === params.keep_apart_trait),
-  ))
+  for (const relation of sweep.keep_apart)
     if (
       relation.value &&
       roomFamilies(room.id, placements).some((id) => familyOfTarget(relation.value!, input) === id)
@@ -705,6 +736,7 @@ function score(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
+  sweep: FamilySweep = familySweep(family, input, params),
 ): RoomScore {
   const slack = roomRemaining(room, placements, input) - family.bed_demand
   const terms: [string, number][] = []
@@ -713,9 +745,7 @@ function score(
     terms.push(['near-fit', params.weights.near_fit])
   if (slack > 0 && params.weights.orphan_bed !== 0)
     terms.push(['orphan-bed', params.weights.orphan_bed * slack])
-  for (const requirement of family.requirements.filter(
-    ({ strength }) => strength === 'preferred',
-  )) {
+  for (const requirement of sweep.preferred) {
     const satisfied =
       requirement.kind === 'structural' && requirement.structural === 'no-other-families'
         ? roomFamilies(room.id, placements).every((id) => id === family.family_id)
