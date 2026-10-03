@@ -51,6 +51,39 @@ aliases are configured in `components.json`. Attribution is in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). M0 checks semantic focus/error/loading behavior
 in jsdom, not pixel appearance or real-browser keyboard layout.
 
+## Solver cost gates
+
+`npm run bench:check` runs the two gates that protect derivation cost. Both are
+ordinary tests under `test/solver/`, so `npm test` — and therefore
+`npm run ci` — already runs them; the script exists to run just those two when
+that is all you want.
+
+They assert different things, and neither measures time:
+
+- [`work-budgets.test.ts`](../../test/solver/work-budgets.test.ts) counts how
+  much work the solver does, and fails when a count exceeds its budget. It
+  counts placement rule evaluations — the number of (family, room) pairs the
+  search examines — and element reads on the three collections that inner loops
+  have historically rescanned. The counts are produced by wrapping the rules in
+  counting decorators and the collections in `Proxy` objects, so nothing in
+  `src/` is instrumented.
+- [`placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
+  digests a whole plan, both solve passes, and compares it with a recorded
+  value. Cost work must not change an answer, and this is what says so.
+
+**A wall-clock budget is deliberately not part of CI.** Timings from a shared
+runner are either loose enough to miss a real regression or tight enough to fail
+on a busy machine, and a gate that does both gets muted. What has actually
+regressed in this area is how often the code walks a collection, which is
+deterministic and identical on every machine. `npm run bench` remains the tool
+for comparing wall clock between two runs on one machine.
+
+Budgets are tripwires, not targets. Tripping one means either a regression or a
+deliberate change to how the search works; in the second case the budget is
+updated in the same change as the code, with the new measurement recorded beside
+it. The margins are wide: reintroducing one per-candidate constraint scan took
+the `constraint_reads` count from 64 to 27904 against a budget of 192.
+
 ## Derivation benchmarks
 
 `npm run bench` runs `test/bench/` under its own

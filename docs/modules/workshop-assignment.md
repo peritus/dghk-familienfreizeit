@@ -36,3 +36,21 @@ choice target only; it does not authorize assigning an unchosen workshop.
 No review UI exists yet for a fixed decision's precedence over the automatic
 outcome it overrides — the initial surface remains automatic-only, even though
 the underlying data model and resolver mechanics above are fully event-backed.
+
+## Attendance cost
+
+Attendance is resolved in one pass per person over that person's ranked
+choices, so its cost tracks people times choices. Three lookups used to be
+resolved inside that pass and are now resolved once per stage run:
+
+- A person's `role`, which every eligibility check needs. It was read by
+  scanning the whole label array, once per candidate pair.
+- A person's prior assignments, which retention needs. They were found by
+  filtering the entire previous plan, once per person.
+- A person's ranked choices, filtered and ordered. The retention and repair
+  passes rebuilt that list on each iteration.
+
+The measured effect was two orders of magnitude, and the stage is now linear in
+the log: at 2 367 events it costs about 3 ms, against 383 ms before. See the
+[solver cost gates](../engineering/testing.md#solver-cost-gates) for what keeps
+it there.
