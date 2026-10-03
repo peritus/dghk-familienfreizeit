@@ -27,6 +27,14 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       de: 'Ausführbares Unterkunfts- und Workshopprofil für die Familienfreizeit 2027.',
       en: 'Executable accommodation and workshop profile for the 2027 family retreat.',
     },
+    event: {
+      title: { de: 'Familienfreizeit 2027', en: 'Family retreat 2027' },
+      subheading: {
+        de: 'Willkommen zur Familienfreizeit',
+        en: 'Welcome to the family retreat',
+      },
+      place: { de: 'Wird noch bekannt gegeben', en: 'To be announced' },
+    },
     starts_on: '2027-04-30',
     ends_on: '2027-05-02',
     timezone: 'Europe/Berlin',

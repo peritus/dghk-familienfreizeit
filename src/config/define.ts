@@ -15,6 +15,12 @@ import type { PreflightCheck, Rule, SolverInputContribution, SolverStage } from 
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
+export type ProfileEvent = {
+  title: LocalizedText
+  subheading: LocalizedText
+  place?: LocalizedText | null
+}
+
 export type EntityScope = 'family' | 'person' | (string & {})
 
 export type Cardinality = 'zero-or-one' | 'exactly-one' | 'zero-or-more'
@@ -147,6 +153,7 @@ export type ProfileMeta = {
   locale: string
   fallback_locale: string
   description: LocalizedText
+  event?: ProfileEvent
   deadlines?: Readonly<Record<string, string>>
 }
 
@@ -286,6 +293,11 @@ function validateMeta(meta: ProfileMeta): void {
   if (!meta.starts_on || !meta.ends_on || meta.starts_on > meta.ends_on)
     throw new Error('profile dates are invalid')
   if (!meta.locale || !meta.fallback_locale) throw new Error('profile locales are required')
+  if (meta.event) {
+    validateCopy(meta, meta.event.title)
+    validateCopy(meta, meta.event.subheading)
+    if (meta.event.place) validateCopy(meta, meta.event.place)
+  }
 }
 
 function validateTraits(traits: Record<string, Trait>, meta: ProfileMeta): void {
