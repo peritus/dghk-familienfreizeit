@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useOrganiser } from './context.js'
 import { OrganiserLink, organiserHomePath } from '../components/application/organiser-link.js'
 import { PrimaryNavigation } from './components/navigation.js'
@@ -7,6 +7,9 @@ import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/ale
 import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
 import { logout } from '../auth/session.js'
 import { Button } from '../components/shared/ui/button'
+import type { ProfilePresentation } from '../../config/presentation.js'
+import { ProfileBrand } from '../components/application/profile-brand.js'
+import { profileEventTitle } from '../lib/profile-presentation.js'
 
 const primaryNavItems = [
   {
@@ -43,16 +46,23 @@ const primaryNavItems = [
  * rather than leaving these states unwrapped, is what avoids reintroducing
  * the missing-`<main>` regression the single-app-bar merge is meant to fix.
  */
-export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
+export function OrganiserMinimalFrame({
+  children,
+  profile,
+}: {
+  children: ReactNode
+  profile?: ProfilePresentation
+}) {
   return (
     <div className="min-h-dvh">
       <header className="border-b-2 border-border bg-secondary-background px-4 py-3 print:hidden sm:px-8">
         <div className="mx-auto max-w-5xl">
           <OrganiserLink
             href={organiserHomePath}
-            className="inline-flex min-h-11 items-center text-xl font-heading"
+            className="inline-flex min-h-11 items-center gap-2 text-xl font-heading"
           >
-            Familienfreizeit
+            <ProfileBrand branding={profile?.branding} className="size-8 shrink-0 object-contain" />
+            {profileEventTitle(profile)}
           </OrganiserLink>
         </div>
       </header>
@@ -63,22 +73,14 @@ export function OrganiserMinimalFrame({ children }: { children: ReactNode }) {
   )
 }
 
-export function OrganiserFrame({ children }: { children: ReactNode }) {
+export function OrganiserFrame({
+  children,
+  profile,
+}: {
+  children: ReactNode
+  profile?: ProfilePresentation
+}) {
   const { state } = useOrganiser()
-  const [loggingOut, setLoggingOut] = useState(false)
-  const [logoutError, setLogoutError] = useState(false)
-
-  async function signOut() {
-    setLoggingOut(true)
-    setLogoutError(false)
-    try {
-      await logout()
-      window.location.assign('/')
-    } catch {
-      setLogoutError(true)
-      setLoggingOut(false)
-    }
-  }
 
   return (
     <div className="min-h-dvh">
@@ -87,28 +89,24 @@ export function OrganiserFrame({ children }: { children: ReactNode }) {
           <div>
             <OrganiserLink
               href={organiserHomePath}
-              className="inline-flex min-h-11 items-center text-xl font-heading"
+              className="inline-flex min-h-11 items-center gap-2 text-xl font-heading"
             >
-              Familienfreizeit
+              <ProfileBrand
+                branding={profile?.branding}
+                className="size-8 shrink-0 object-contain"
+              />
+              {profileEventTitle(profile)}
             </OrganiserLink>
             <p className="text-sm text-muted">Organisationsteam</p>
           </div>
           <div className="order-last w-full sm:order-none sm:w-auto">
             <PrimaryNavigation items={primaryNavItems} />
           </div>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto">
             <SaveStatus />
-            <Button type="button" variant="neutral" disabled={loggingOut} onClick={signOut}>
-              {loggingOut ? 'Abmeldung …' : 'Abmelden'}
-            </Button>
           </div>
         </div>
       </header>
-      {logoutError ? (
-        <p role="alert" className="mx-auto mt-4 max-w-5xl px-4 text-sm text-destructive sm:px-8">
-          Die Abmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut.
-        </p>
-      ) : null}
       {state.error && state.status !== 'ready' && state.status !== 'applying' ? (
         <Alert role="alert" className="mx-auto mt-6 max-w-5xl bg-secondary-background print:hidden">
           <AlertTitle>Änderungen prüfen</AlertTitle>

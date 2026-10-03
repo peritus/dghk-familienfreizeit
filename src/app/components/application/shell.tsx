@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'wouter'
+import type { ProfilePresentation } from '../../../config/presentation.js'
+import { ProfileBrand } from './profile-brand.js'
+import { profileEventTitle } from '../../lib/profile-presentation.js'
 
 /**
  * The organiser section owns a single app bar and `<main id="content">`
@@ -9,7 +12,13 @@ import { Link, useLocation } from 'wouter'
  * itself. Nesting this shell's own header/main around it would recreate
  * the nested-`<main>`/double-`<header>` bug the app-bar merge fixes.
  */
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({
+  children,
+  profile,
+}: {
+  children: ReactNode
+  profile?: ProfilePresentation
+}) {
   const [location] = useLocation()
   const organiserSection = location === '/organiser' || location.startsWith('/organiser/')
 
@@ -27,11 +36,15 @@ export function Shell({ children }: { children: ReactNode }) {
         <>
           <header className="border-b-2 border-border bg-secondary-background px-4 py-4 sm:px-8">
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-              <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
-                Familienfreizeit
-              </Link>
-              <Link href="/login" className="inline-flex min-h-11 items-center underline">
-                Anmelden
+              <Link
+                href="~/"
+                className="inline-flex min-h-11 items-center gap-2 text-xl font-heading"
+              >
+                <ProfileBrand
+                  branding={profile?.branding}
+                  className="size-8 shrink-0 object-contain"
+                />
+                {profileEventTitle(profile)}
               </Link>
             </div>
           </header>
