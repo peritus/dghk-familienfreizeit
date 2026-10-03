@@ -18,7 +18,10 @@ import {
   workshopAssignment,
   type WorkshopAssignmentSection,
 } from '../../src/modules/workshop-assignment/index.js'
-import { buildWorkshopAllocationProjection } from '../../src/modules/workshop-rankings/app/workshop-allocation-view.js'
+import {
+  buildWorkshopAllocationProjection,
+  buildWorkshopAllocationTraceStages,
+} from '../../src/modules/workshop-rankings/app/workshop-allocation-view.js'
 import type { Plan, SolverInput } from '../../src/solver/types.js'
 
 // Same module selection and parameters as the real familienfreizeit-2027
@@ -216,4 +219,23 @@ test('the workshop allocation projection exposes answers, demand, and trace from
     expect.objectContaining({ placement_label: 'ohne Termin' }),
   )
   expect(projection.trace_events.length).toBeGreaterThan(projection.answers.length)
+  expect(projection.trace_people).toHaveLength(projection.answers.length)
+  expect(projection.trace_people).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        name: expect.any(String),
+        matching_workshop_count: expect.any(Number),
+        wish_count: expect.any(Number),
+        fulfilled_count: expect.any(Number),
+      }),
+    ]),
+  )
+
+  const stages = buildWorkshopAllocationTraceStages(projection, 'all')
+  expect(stages[0]).toEqual(
+    expect.objectContaining({ label: 'Wünsche abgegeben', phase: 'answers' }),
+  )
+  expect(stages.some((stage) => stage.phase === 'round')).toBe(true)
+  expect(stages.some((stage) => stage.detail_items.length > 0)).toBe(true)
+  expect(stages.at(-1)).toEqual(expect.objectContaining({ label: 'Ergebnis' }))
 })
