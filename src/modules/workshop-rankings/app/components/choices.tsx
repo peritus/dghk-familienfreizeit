@@ -383,7 +383,13 @@ const rankColors: Record<number, string> = {
 
 function stageSegments(stage: TraceStageView): TraceSegment[] {
   const segments: TraceSegment[] = []
-  const add = (id: string, value: number, label: string, className?: string, style?: CSSProperties) => {
+  const add = (
+    id: string,
+    value: number,
+    label: string,
+    className?: string,
+    style?: CSSProperties,
+  ) => {
     if (value > 0) segments.push({ id, value, label, className, style })
   }
 
@@ -394,7 +400,7 @@ function stageSegments(stage: TraceStageView): TraceSegment[] {
       stage.fulfilled,
       stage.rank ? `Wunsch ${stage.rank}` : 'erfüllt',
       rankColor ? 'border-r border-black/20' : 'bg-main',
-      rankColor ? { backgroundColor: rankColor } : undefined,
+      rankColor ? { ['backgroundColor']: rankColor } : undefined,
     )
   }
   add(`${stage.id}-capacity`, stage.capacity, 'voll', 'bg-danger')
@@ -415,9 +421,17 @@ export function TraceProgressBar({
   const stage = stages[index]
   const segments = visibleStages.flatMap(stageSegments)
   if (stage?.open) {
-    segments.push({ id: `${stage.id}-open`, value: stage.open, label: 'noch offen', className: 'bg-secondary-background' })
+    segments.push({
+      id: `${stage.id}-open`,
+      value: stage.open,
+      label: 'noch offen',
+      className: 'bg-secondary-background',
+    })
   }
-  const total = Math.max(segments.reduce((sum, segment) => sum + segment.value, 0), 1)
+  const total = Math.max(
+    segments.reduce((sum, segment) => sum + segment.value, 0),
+    1,
+  )
   return (
     <div
       className="flex h-7 overflow-hidden rounded-base border-2 border-border bg-secondary-background"

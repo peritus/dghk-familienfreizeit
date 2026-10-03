@@ -291,7 +291,9 @@ test('workshop allocation exposes three URL-backed Wunsch views', async () => {
   expect(window.location.pathname).toBe('/organiser/workshops/allocation/demand')
 
   fireEvent.click(screen.getByRole('tab', { name: 'Verlauf' }))
-  expect(await screen.findByRole('heading', { name: 'Verlauf' })).toBeTruthy()
+  expect(
+    await screen.findByRole('heading', { name: 'Was ist aus jedem Wunsch geworden?' }),
+  ).toBeTruthy()
   expect(window.location.pathname).toBe('/organiser/workshops/allocation/trace')
 })
 

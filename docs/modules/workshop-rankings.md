@@ -21,3 +21,14 @@ placement; trace stages preserve solver reasons, retention, drops, fixed violati
 and unassigned outcomes. The projection adds no folded table, relationship store, or
 screen-local domain rule. It is recalculated for the prospective local-first world so
 unapplied organiser drafts are visible immediately.
+
+The trace view presents the allocation as a cumulative funnel. It shows the
+answer intake, retained assignments when a previous calculation exists, one
+stage per configured ranking, and a final result stage for fills, fixed or
+repaired assignments, and open cases. Each stage includes the people and
+workshops affected plus structured reasons such as capacity, slot overlap,
+leader conflicts, eligibility, cancellation, or no schedule. The sticky
+controls support all-person, highlighted-person, and single-person views; the
+single-person context also reports matching workshops, leaderships, wish
+status, and the explicit no-wishes state. The table collapses to responsive
+cards and remains usable with keyboard focus and screen-reader labels.

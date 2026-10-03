@@ -311,7 +311,9 @@ function slotLabel(
 ): string | null {
   const placement = placements.get(workshopId)
   const slot = placement ? slots.get(placement.slot_id) : undefined
-  return slot ? `${dateLabel(slot.starts_at, timeZone)} ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}` : null
+  return slot
+    ? `${dateLabel(slot.starts_at, timeZone)} ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}`
+    : null
 }
 
 function tracePhase(reason: string): WorkshopAllocationTracePhase {
@@ -403,7 +405,7 @@ export function buildWorkshopAllocationProjection(
         slot_label: slotLabel(choice.workshop_id, placements, slots, input.time_zone),
         capacity: workshop?.capacity ?? null,
         competing_workshop_title: competing
-          ? workshops.get(competing.workshop_id)?.title ?? competing.workshop_id
+          ? (workshops.get(competing.workshop_id)?.title ?? competing.workshop_id)
           : null,
         queue_position: null,
         queue_size: null,
@@ -510,7 +512,7 @@ export function buildWorkshopAllocationProjection(
       person_name: personName(input.world, item.person_id),
       workshop_id: item.workshop_id ?? '',
       workshop_title: item.workshop_id
-        ? workshops.get(item.workshop_id)?.title ?? item.workshop_id
+        ? (workshops.get(item.workshop_id)?.title ?? item.workshop_id)
         : 'Keine Zuordnung',
       rank: null,
       phase: 'result',
@@ -622,9 +624,7 @@ export function buildWorkshopAllocationTraceStages(
     for (const event of items) {
       const extra = [
         event.slot_label,
-        event.competing_workshop_title
-          ? `schon ${event.competing_workshop_title}`
-          : null,
+        event.competing_workshop_title ? `schon ${event.competing_workshop_title}` : null,
       ].filter((value): value is string => Boolean(value))
       const text = `${event.workshop_title}: ${event.person_name}${event.rank ? ` (${event.rank}. Wahl)` : ''}${extra.length ? ` · ${extra.join(' · ')}` : ''}`
       const list = groups.get(outcomeLabel(event.outcome)) ?? []
@@ -699,9 +699,7 @@ export function buildWorkshopAllocationTraceStages(
       detail_items: detailItems(round),
     })
   }
-  const resultEvents = events.filter(
-    (event) => event.rank === null && event.phase !== 'retention',
-  )
+  const resultEvents = events.filter((event) => event.rank === null && event.phase !== 'retention')
   if (resultEvents.length) {
     const resultCounts = counts(resultEvents)
     stages.push({
@@ -722,8 +720,7 @@ export function buildWorkshopAllocationTraceStages(
     for (const stage of stages) {
       const stageEvents = selectedEvents.filter((event) => {
         if (stage.id === 'answers') return true
-        if (stage.id === 'retention')
-          return event.phase === 'retention'
+        if (stage.id === 'retention') return event.phase === 'retention'
         if (stage.id === 'result') return event.rank === null && event.phase !== 'retention'
         return event.phase === 'round' && event.rank === stage.rank
       })

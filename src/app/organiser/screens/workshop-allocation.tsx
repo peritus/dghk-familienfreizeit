@@ -37,7 +37,13 @@ import {
 
 type WorkshopAllocationView = 'answers' | 'demand' | 'trace'
 
-const rankLegendTones = ['bg-yellow-300', 'bg-orange-300', 'bg-red-300', 'bg-purple-300', 'bg-blue-300']
+const rankLegendTones = [
+  'bg-yellow-300',
+  'bg-orange-300',
+  'bg-red-300',
+  'bg-purple-300',
+  'bg-blue-300',
+]
 
 function WorkshopAllocationTraceContext({
   projection,
@@ -55,6 +61,8 @@ function WorkshopAllocationTraceContext({
   )
   const selected = people.find((person) => person.id === selectedPersonId)
   if (selected) {
+    const selectedIsAdult =
+      projection.answers.find((answer) => answer.id === selected.id)?.group === 'adults'
     const noWishes = selected.wish_count === 0
     return (
       <div className="rounded-base border-2 border-border bg-paper p-4">
@@ -62,7 +70,9 @@ function WorkshopAllocationTraceContext({
         <dl className="mt-3 grid gap-3 sm:grid-cols-3">
           <div>
             <dt className="text-sm text-muted">Person</dt>
-            <dd className="font-bold">{selected.name}, {selected.age_label}</dd>
+            <dd className="font-bold">
+              {selected.name}, {selected.age_label}
+            </dd>
           </div>
           <div>
             <dt className="text-sm text-muted">Passende Workshops</dt>
@@ -81,7 +91,7 @@ function WorkshopAllocationTraceContext({
               : selected.status === 'Keine Antwort'
                 ? 'Noch keine Antwort.'
                 : 'Keine Rangfolge abgegeben.'}
-            {selected.age_label !== 'erwachsen'
+            {!selectedIsAdult
               ? ' Plätze kommen nur aus freien Plätzen.'
               : ' Erwachsene ohne Wünsche bekommen keine Plätze zugeteilt.'}
           </p>
@@ -101,7 +111,12 @@ function WorkshopAllocationTraceContext({
           ['mit Rangfolge', ranked],
           ['Keine Präferenz', noPreference],
           ['Keine Antwort', noAnswer],
-          ['ohne Zuordnung', projection.unassigned_person_ids.filter((id) => people.some((person) => person.id === id)).length],
+          [
+            'ohne Zuordnung',
+            projection.unassigned_person_ids.filter((id) =>
+              people.some((person) => person.id === id),
+            ).length,
+          ],
         ].map(([label, value]) => (
           <div key={label}>
             <dt className="text-sm text-muted">{label}</dt>
@@ -205,7 +220,9 @@ export function WorkshopAllocation() {
             id: 'authoring',
             label: 'Workshops anlegen',
             state: projection.has_workshops ? 'complete' : 'current',
-            description: projection.has_workshops ? 'Workshopplan vorhanden' : 'Workshopplan vorbereiten',
+            description: projection.has_workshops
+              ? 'Workshopplan vorhanden'
+              : 'Workshopplan vorbereiten',
           },
           {
             id: 'choice',
@@ -227,7 +244,9 @@ export function WorkshopAllocation() {
           },
         ]}
       />
-      <WorkshopAllocationStatus label={projection.has_answers ? 'Zuordnung prüfen' : 'Vorbereitung'}>
+      <WorkshopAllocationStatus
+        label={projection.has_answers ? 'Zuordnung prüfen' : 'Vorbereitung'}
+      >
         {projection.has_answers
           ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte vor dem Festlegen.'
           : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
