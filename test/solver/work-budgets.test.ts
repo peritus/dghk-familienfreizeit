@@ -117,13 +117,15 @@ function measureWork(factor: number): Counts {
  * ones get more, because an extra legitimate single pass over a collection is a
  * large relative change there and not a regression. Both still sit far below
  * what a reintroduced per-candidate scan costs: `constraint_reads` was 27840 at
- * factor 1 before the input lookups were memoised, against a budget of 192.
+ * factor 1 before the input lookups were memoised, against a budget of 192, and
+ * `rule_evaluations` was 25100 before the repair pass stopped sweeping every
+ * room to ask about one, against a budget of 11000.
  */
 const budgets: Readonly<Record<number, Counts>> = {
-  // measured: 25100 / 6260 / 64 / 180
-  1: { rule_evaluations: 35_000, label_reads: 8_800, constraint_reads: 192, family_reads: 512 },
-  // measured: 170800 / 12240 / 124 / 360
-  2: { rule_evaluations: 240_000, label_reads: 17_200, constraint_reads: 384, family_reads: 1_024 },
+  // measured: 7852 / 6260 / 64 / 180
+  1: { rule_evaluations: 11_000, label_reads: 8_800, constraint_reads: 192, family_reads: 512 },
+  // measured: 31408 / 12240 / 124 / 360
+  2: { rule_evaluations: 44_000, label_reads: 17_200, constraint_reads: 384, family_reads: 1_024 },
 }
 
 for (const factor of [1, 2]) {
