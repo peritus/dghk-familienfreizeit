@@ -2,15 +2,21 @@
 
 Attendance assignment consumes the derived current-cycle demand, one-placement
 schedule, workshop modes, person roles, capacities, and profile configuration.
-Assigned-mode workshops receive deterministic fixed, retained, ranked, or fill
-assignments, with at most one assignment per person per slot. Sign-up and
-interest lists remain separate outputs and are not converted into automatic
-assignments.
+Under [D31](../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
+automatic assigned-mode attendance is limited to a person's current ranked
+choices; fixed, retained, ranked, and repaired assignments are the valid
+origins. Sign-up and interest lists remain separate outputs and are not
+converted into automatic assignments.
+
+The production module still exposes a legacy fill path that can create an
+unchosen assignment. That behavior is a known implementation gap, not an
+accepted contract; removal is tracked in [issue 037](../../spec/issues/open/037-workshop-assignment-fill-retention-instability.md).
 
 The active profile uses top two ranked choices, weights `[3, 2, 1]`, a minimum of
-two workshops, configured child/adult fairness targets, fill enabled, and five
-repair passes. The stage emits assignments, unassigned outcomes, sign-ups,
-interests, fixed decisions, fixed violations, and explainable traces.
+two workshops, configured child/adult fairness targets, and five repair passes.
+The stage emits assignments, unassigned outcomes, sign-ups, interests, fixed
+decisions, fixed violations, and explainable traces. The minimum is a ranked
+choice target only; it does not authorize assigning an unchosen workshop.
 
 ## Verified business logic
 
@@ -28,8 +34,8 @@ interests, fixed decisions, fixed violations, and explainable traces.
   run — a re-derive with no new events reproduces the same assignment with
   reason `retained` instead of recomputing it as `ranked`.
 - Bounded repair (up to `max_repair_passes`) relocates at most one non-fixed
-  occupant per repair to seat a still-unassigned person, and never moves a
-  `'fixed'` assignment.
+  occupant per repair to seat a still-unassigned person using current ranked
+  choices only, and never moves a `'fixed'` assignment.
 
 No review UI exists yet for a fixed decision's precedence over the automatic
 outcome it overrides — the initial surface remains automatic-only, even though

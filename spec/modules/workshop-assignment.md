@@ -5,7 +5,9 @@ Module id `workshop-assignment` · factory `workshopAssignment`
 ## 1. Purpose and boundary
 
 Workshop attendance assigns eligible people to directly identified, placed
-workshops. It does not create workshops (owned by
+workshops. Automatic attendance is choice-bound: a person may be assigned only
+to a workshop in the person's current-cycle ranking. It does not create
+workshops (owned by
 [official workshops](official-workshops.md)), slots or spaces (owned by
 [workshop scheduling](workshop-scheduling.md) and
 [workshop space](workshop-space.md)), or rankings (owned by
@@ -25,7 +27,6 @@ type WorkshopAssignmentParams = {
   rank_weights: readonly number[]
   minimum_workshops: number
   fairness_targets: Readonly<Record<string, number>>
-  fill_unassigned: boolean
   max_repair_passes: number
 }
 ```
@@ -67,15 +68,20 @@ in five steps:
 2. retain a still-feasible prior assignment (from the previous derived plan)
    for anyone with no fixed decision this cycle;
 3. process ranked choices with configured fairness and rank weights;
-4. fill eligible people up to `minimum_workshops` when `fill_unassigned` is set;
-5. perform bounded deterministic repair (up to `max_repair_passes`), moving at
-   most one non-fixed occupant per repair to seat a still-unassigned person,
-   and explaining every movement in the trace.
+4. perform bounded deterministic repair (up to `max_repair_passes`) using only
+   current ranked choices, moving at most one non-fixed occupant per repair to
+   seat a still-unassigned person, and explaining every movement in the trace.
+
+`minimum_workshops` can cause lower-ranked current choices to be considered,
+but it never creates an assignment outside the person's ranking. No automatic
+fill is permitted for children or adults; an eligible person with no feasible
+ranked choice remains unassigned.
 
 The output assigns at most one workshop to a person per slot, respects
 workshop capacity, records unassigned reasons, and emits traces for capacity,
 overlap, leader-conflict, eligibility, cancellation, and unscheduled cases. A
-repair pass never moves a `'fixed'` assignment.
+repair pass never moves a `'fixed'` assignment or creates an unchosen
+assignment.
 
 ## 8. Rules and scoring
 
@@ -83,8 +89,8 @@ Hard constraints (cancellation, participation mode, leader conflict,
 eligibility, capacity, and same-slot overlap) are evaluated inline by the
 stage rather than declared as a separate `Rule[]`; every rejection carries one
 of the `hard.*` reason codes used in traces and violations. Ranked choices
-score by `rank_weights`; fixed, retained, filled, and repaired placements
-carry no rank score.
+score by `rank_weights`; fixed, retained, ranked, and repaired placements are
+the only assignment origins. There is no fill score or fill assignment.
 
 ## 9. Preflight checks
 
@@ -128,8 +134,10 @@ No screens or controls. Reports: `workshop-roster`, `workshop-person-plan`,
 ## 12. Tests
 
 - Deterministic allocation, retention across a stable re-derive, fairness,
-  rank weighting, minimum targets, fill behavior, bounded repair, and stable
-  traces.
+  rank weighting, minimum targets without implicit assignment, bounded repair,
+  and stable traces.
+- No automatic assignment targets a workshop outside the person's current
+  ranking, for either children or adults.
 - A fixed attendance decision takes precedence over a ranked choice for the
   same workshop.
 - Conflicting fixed decisions (capacity, cancellation, eligibility, or
@@ -162,3 +170,6 @@ converted into automatic assignments in the first place.
   still-outstanding mechanism owned by
   [workshop scheduling](workshop-scheduling.md); this module only covers who
   attends, not where a workshop is scheduled.
+- Remove the legacy `fill_unassigned` implementation and its fill-origin
+  output from the production solver, prototype, and projection surfaces. This
+  is tracked in [issue 037](../issues/open/037-workshop-assignment-fill-retention-instability.md).

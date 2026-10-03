@@ -727,3 +727,31 @@ boundary).
 *Consequence:* the capacity editor must surface the over-capacity state clearly
 (so organisers can see and resolve it) rather than hiding it behind a silently
 correct-looking number. This closes [issue 036](spec/issues/archived/036-workshop-capacity-reduction-policy.md).
+
+## D31 — Automatic workshop attendance is limited to chosen workshops
+
+*Chosen.* An automatic attendance assignment may target only a workshop in the
+person's current-cycle `prefers-workshop` ranking. A missing response, an
+explicit lack of preference, a blocked or exhausted ranking, and a
+`minimum_workshops` target never authorize assigning an unchosen workshop.
+Explicit organiser-authored `workshop-attendance` decisions remain the fixed
+exception defined by D6; they are decisions, not automatic filling.
+
+*Why:* attendance communicates a person's programme, so an unchosen workshop
+must not be presented as if the person had selected it. A minimum target can
+help compare or prioritize ranked choices, but it cannot override the person's
+choice boundary. This applies equally to children and adults.
+
+*Rejected alternative:* fill people to a minimum with any eligible workshop.
+This creates attendance the person did not choose and makes capacity or
+coverage goals look like consent.
+
+*Rejected alternative:* fill only children or only people without a response.
+The same choice-boundary applies to every person and every automatic path;
+different role-based filling would preserve the underlying agency violation.
+
+*Consequence:* the solver, prototypes, projections, and review surfaces must
+remove implicit fill outcomes. If ranked choices cannot produce an assignment,
+the person remains unassigned and the rejected choices remain explainable in
+the trace. The existing fill implementation is non-conforming and remains
+tracked in [issue 037](spec/issues/open/037-workshop-assignment-fill-retention-instability.md).
