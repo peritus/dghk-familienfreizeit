@@ -35,6 +35,41 @@ const displayNameChanged: Event = {
   payload: { family_id: 'fam_1', old_display_name: 'A', new_display_name: 'A family' },
 }
 
+const personUpdated: Event = {
+  seq: 2,
+  at: '2027-01-01T00:00:01Z',
+  actor: 'a@test.invalid',
+  subject: 'per_1',
+  type: 'PersonUpdated',
+  payload: {
+    person_id: 'per_1',
+    family_id: 'fam_1',
+    given_name: 'Updated',
+    family_name: 'Person',
+    birthdate: null,
+    role: 'adult',
+  },
+}
+
+const personEvents: Event[] = [
+  ...events,
+  {
+    seq: 2,
+    at: '2027-01-01T00:00:01Z',
+    actor: 'org@test.invalid',
+    subject: 'fam_1',
+    type: 'PersonAdded',
+    payload: {
+      person_id: 'per_1',
+      family_id: 'fam_1',
+      given_name: 'A',
+      family_name: 'Person',
+      birthdate: null,
+      role: 'adult',
+    },
+  },
+]
+
 describe('event append authorization', () => {
   test('an organiser may LabelSet any key regardless of family_writable', () => {
     const world = derive(events)
@@ -68,6 +103,20 @@ describe('event append authorization', () => {
     const world = derive(events)
     expect(canAppendEvent(organiser, displayNameChanged, world, {})).toBe(true)
     expect(canAppendEvent(family, displayNameChanged, world, {})).toBe(false)
+  })
+
+  test('a family update is authorized by the existing person ownership, not the payload family', () => {
+    const world = derive(personEvents)
+    const otherFamily = { kind: 'family' as const, email: 'b@test.invalid', family_id: 'fam_2' }
+    expect(canAppendEvent(family, personUpdated, world, {})).toBe(true)
+    expect(
+      canAppendEvent(
+        otherFamily,
+        { ...personUpdated, payload: { ...personUpdated.payload, family_id: 'fam_2' } },
+        world,
+        {},
+      ),
+    ).toBe(false)
   })
 
   const moduleEvent: Event = {

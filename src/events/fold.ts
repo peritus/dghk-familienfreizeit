@@ -672,6 +672,11 @@ function addPerson(
 function updatePerson(state: MutableWorld, event: Extract<Event, { type: 'PersonUpdated' }>): void {
   requireEntity(state.persons, event.payload.person_id, 'person')
   requireEntity(state.families, event.payload.family_id, 'family')
+  const currentFamilyId = [...state.labels.values()].find(
+    (label) => label.entity_id === event.payload.person_id && label.key === 'member-of',
+  )?.value
+  if (currentFamilyId !== event.payload.family_id)
+    throw new Error(`person ${event.payload.person_id} cannot change family during an update`)
   for (const key of ['member-of', 'given-name', 'family-name', 'birthdate', 'role'])
     replaceLabels(state, event.payload.person_id, key)
   writePersonLabels(state, event)
