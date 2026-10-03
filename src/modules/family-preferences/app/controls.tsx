@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { Entity, KernelWorld, Label } from '../../../events/fold.js'
+import type { Entity, World, Label } from '../../../events/fold.js'
 import type { EventDraft, JsonValue } from '../../../events/types.js'
 import type {
   FamilyControlDefinition,
@@ -16,7 +16,7 @@ type FamilyPreferencesControlsProps = {
   profile: Pick<OccasionProfile, 'meta' | 'traits' | 'modules'>
   family_id: string
   persons: readonly Entity[]
-  world: KernelWorld
+  world: World
   actor: string
   stage: Stage
 }
@@ -35,7 +35,7 @@ function localized(
   return value[locale] ?? value[fallback] ?? Object.values(value)[0] ?? ''
 }
 
-function labelsFor(world: KernelWorld, target: Target): readonly Label[] {
+function labelsFor(world: World, target: Target): readonly Label[] {
   return world.labels_by_entity[target.id] ?? []
 }
 
@@ -107,7 +107,7 @@ function TraitControl({
   family_id: string
   labels: readonly Label[]
   persons: readonly Entity[]
-  world: KernelWorld
+  world: World
   actor: string
   stage: Stage
   meta: OccasionProfile['meta']
@@ -364,7 +364,7 @@ function WorkshopControls({
   target: Target
   family_id: string
   labels: readonly Label[]
-  world: KernelWorld
+  world: World
   actor: string
   stage: Stage
   meta: OccasionProfile['meta']

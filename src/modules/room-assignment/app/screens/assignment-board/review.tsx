@@ -1,6 +1,6 @@
 import { activeProfile } from '../../../../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../../../../config/build.js'
-import type { KernelWorld } from '../../../../../events/fold.js'
+import type { World } from '../../../../../events/fold.js'
 import { inventoryWorld } from '../../../../../modules/room-inventory/index.js'
 import type {
   RoomAssignment,
@@ -41,15 +41,15 @@ function contributions(): SolverContributions {
   return composeSolverContributions(activeProfile)
 }
 
-function labelValue(world: KernelWorld, entityId: string, key: string): unknown {
+function labelValue(world: World, entityId: string, key: string): unknown {
   return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
 }
 
-function familyName(world: KernelWorld, familyId: string): string {
+function familyName(world: World, familyId: string): string {
   return String(labelValue(world, familyId, 'display-name') ?? 'Unbekannte Familie')
 }
 
-function familyPeople(world: KernelWorld, familyId: string): FamilyView['people'] {
+function familyPeople(world: World, familyId: string): FamilyView['people'] {
   return world.persons
     .filter((person) => labelValue(world, person.id, 'member-of') === familyId)
     .map((person) => ({
@@ -64,7 +64,7 @@ function familyPeople(world: KernelWorld, familyId: string): FamilyView['people'
     }))
 }
 
-function requirementLabel(requirement: KernelWorld['requirements'][number]): {
+function requirementLabel(requirement: World['requirements'][number]): {
   key: string
   label: string
 } {
@@ -81,14 +81,14 @@ function requirementLabel(requirement: KernelWorld['requirements'][number]): {
   }
 }
 
-function relationFamilyId(world: KernelWorld, target: string): string {
+function relationFamilyId(world: World, target: string): string {
   return typeof labelValue(world, target, 'member-of') === 'string'
     ? String(labelValue(world, target, 'member-of'))
     : target
 }
 
 function requirements(
-  world: KernelWorld,
+  world: World,
   familyId: string,
   room?: RoomView,
   roomFamilyIds: readonly string[] = [],
@@ -133,19 +133,19 @@ function requirements(
   })
 }
 
-function roomLabel(world: KernelWorld, roomId: string): string {
+function roomLabel(world: World, roomId: string): string {
   const number = labelValue(world, roomId, 'number')
   return typeof number === 'string' ? `Zimmer ${number}` : 'Unbekanntes Zimmer'
 }
 
-function familyBedDemand(world: KernelWorld, familyId: string): number {
+function familyBedDemand(world: World, familyId: string): number {
   return familyPeople(world, familyId).filter(
     (person) => labelValue(world, person.id, 'does-not-need-a-bed') !== true,
   ).length
 }
 
 function familyView(
-  world: KernelWorld,
+  world: World,
   familyId: string,
   status: 'placed' | 'unplaced',
   room: RoomView | undefined,
@@ -172,7 +172,7 @@ function familyView(
 }
 
 function roomViews(
-  world: KernelWorld,
+  world: World,
   assignments: readonly RoomAssignment[],
   section: RoomAssignmentSection,
 ): readonly RoomView[] {
@@ -252,14 +252,14 @@ function reasonLabel(reason: string): string {
   return 'Kein passendes Zimmer gefunden.'
 }
 
-function subjectLabel(world: KernelWorld, subject: string): string {
+function subjectLabel(world: World, subject: string): string {
   if (world.families.some(({ id }) => id === subject)) return familyName(world, subject)
   if (inventoryWorld(world).rooms.some(({ id }) => id === subject)) return roomLabel(world, subject)
   const trait = activeProfile.traits[subject as keyof typeof activeProfile.traits]
   return localized(trait?.title) || 'Konfigurationsmerkmal'
 }
 
-function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): readonly FindingView[] {
+function findingViews(world: World, plan: ReturnType<typeof solve>): readonly FindingView[] {
   return plan.preflight.map((finding, index) => ({
     id: `${finding.check}-${finding.subjects.join('-')}-${index}`,
     severity: finding.severity === 'error' ? ('error' as const) : ('warning' as const),
@@ -275,7 +275,7 @@ function findingViews(world: KernelWorld, plan: ReturnType<typeof solve>): reado
 }
 
 export function deriveAssignmentReview(
-  world: KernelWorld,
+  world: World,
   previousPlan: Plan | null = null,
   generatedAt = 'Im Browser erzeugt',
 ): AssignmentReview {

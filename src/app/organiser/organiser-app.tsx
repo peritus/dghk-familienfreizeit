@@ -11,7 +11,7 @@ import { OrganiserContext } from './context.js'
 import { composeSolverContributions, deriveTransition } from '../../solver/index.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
-  deriveOrganiserWorld,
+  deriveWorld,
   initialOrganiserState,
   materializeDraftEvents,
   organiserReducer,
@@ -137,7 +137,7 @@ export default function OrganiserApp() {
     )
       return { world: null, error: null }
     try {
-      return { world: deriveOrganiserWorld(state, activeProfile.validation_view), error: null }
+      return { world: deriveWorld(state, activeProfile.validation_view), error: null }
     } catch {
       return {
         world: null,

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { KernelWorld } from '../../events/fold.js'
+import type { World } from '../../events/fold.js'
 import type { ResolvedRequirement } from '../../events/resolver.js'
 import { evaluateRules } from '../../solver/index.js'
 import type { Rule, SolverInput, SolverStage, TraceEntry } from '../../solver/types.js'
@@ -143,7 +143,7 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
 })
 
 export function buildRoomAssignmentInput(
-  world: KernelWorld,
+  world: World,
   params: RoomAssignmentParams,
 ): RoomAssignmentInput {
   const inventory = inventoryWorld(world)
@@ -581,7 +581,7 @@ export function roomAssignmentPreflight(
 function toRoomCandidate(
   room: InventoryRoom,
   places: readonly { id: string; room_id: string }[],
-  world: KernelWorld,
+  world: World,
 ): RoomCandidate {
   return {
     id: room.id,
@@ -811,7 +811,7 @@ function roomById(rooms: readonly RoomCandidate[], id: string): RoomCandidate | 
   return rooms.find((room) => room.id === id)
 }
 
-function labelValue(world: KernelWorld, entityId: string, key: string): unknown {
+function labelValue(world: World, entityId: string, key: string): unknown {
   return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
 }
 

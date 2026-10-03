@@ -128,7 +128,7 @@ export function materializeDraftEvents(state: OrganiserState): Event[] {
     }))
 }
 
-export function deriveOrganiserWorld(state: OrganiserState, config: KernelConfig = {}) {
+export function deriveWorld(state: OrganiserState, config: KernelConfig = {}) {
   return deriveDraftWorld(state.committed, materializeDraftEvents(state), config)
 }
 

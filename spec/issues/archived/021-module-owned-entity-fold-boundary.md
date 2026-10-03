@@ -61,7 +61,7 @@ module's fold function a narrow capability — create an entity of one of that
 module's own declared kinds, set a label under one of its own declared keys —
 rather than the raw mutable world, so the "may create identity and emit
 labels, may not emit derived results" boundary is enforced by construction,
-not by convention. `KernelWorld` needs a generic per-kind entity bucket
+not by convention. `World` needs a generic per-kind entity bucket
 alongside its existing `families`/`persons` fields for module-owned entities
 to land in.
 
@@ -90,7 +90,7 @@ module rather than a real one:
   `KernelEvent` union to `KernelEvent | { type: string; payload: JsonValue }`,
   parameterized by an optional merged schema map (`kernelPayloadSchemas` by
   default).
-- `src/events/fold.ts` gained `KernelWorld.entities_by_kind` (one sorted
+- `src/events/fold.ts` gained `World.entities_by_kind` (one sorted
   collection per kind, kernel and module alike), `ModuleFoldCapability`
   (`createEntity`, `setLabel`), and `guardModuleFold`, which wraps a raw
   module fold function so every capability call is checked against that

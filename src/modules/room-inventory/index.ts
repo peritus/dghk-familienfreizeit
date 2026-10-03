@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, KernelWorld, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
 
@@ -141,16 +141,16 @@ const bedRemovedPayload = z.object({ bed_id: bedId, reason: z.string().nullable(
 
 const locationKey = 'located-in'
 
-function labelValue(world: KernelWorld, entityId: string, key: string): JsonValue | undefined {
+function labelValue(world: World, entityId: string, key: string): JsonValue | undefined {
   return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
 }
 
-function entity(world: KernelWorld, kind: string, id: string): Entity | undefined {
+function entity(world: World, kind: string, id: string): Entity | undefined {
   return world.entities_by_kind[kind]?.find((candidate) => candidate.id === id)
 }
 
 function validateBuilding(
-  world: KernelWorld,
+  world: World,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -163,7 +163,7 @@ function validateBuilding(
 
 function validateRoom(
   params: RoomInventoryParams,
-  world: KernelWorld,
+  world: World,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -187,7 +187,7 @@ function validateRoom(
 
 function validateBed(
   params: RoomInventoryParams,
-  world: KernelWorld,
+  world: World,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -212,12 +212,12 @@ function validateBed(
   return duplicate ? `bed label already exists in room: ${value.label}` : null
 }
 
-function validateRemovedBed(payload: JsonValue, world: KernelWorld): string | null {
+function validateRemovedBed(payload: JsonValue, world: World): string | null {
   const value = payload as z.infer<typeof bedRemovedPayload>
   return entity(world, 'bed', value.bed_id) ? null : `unknown bed: ${value.bed_id}`
 }
 
-function validateRemovedBuilding(payload: JsonValue, world: KernelWorld): string | null {
+function validateRemovedBuilding(payload: JsonValue, world: World): string | null {
   const value = buildingRemovedPayload.parse(payload)
   if (!entity(world, 'building', value.building_id)) return `unknown building: ${value.building_id}`
   const hasRooms = (world.entities_by_kind.room ?? []).some(
@@ -226,7 +226,7 @@ function validateRemovedBuilding(payload: JsonValue, world: KernelWorld): string
   return hasRooms ? `building has rooms: ${value.building_id}` : null
 }
 
-function validateRemovedRoom(payload: JsonValue, world: KernelWorld): string | null {
+function validateRemovedRoom(payload: JsonValue, world: World): string | null {
   const value = roomRemovedPayload.parse(payload)
   if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
   const hasBeds = (world.entities_by_kind.bed ?? []).some(
@@ -276,7 +276,7 @@ function setupLabels(
   }
 }
 
-function inventorySummary(world: KernelWorld, priceTrait: string | null = null): InventorySummary {
+function inventorySummary(world: World, priceTrait: string | null = null): InventorySummary {
   const buildings = (world.entities_by_kind.building ?? []).map((item) => ({
     id: item.id,
     name: String(labelValue(world, item.id, 'name') ?? ''),
@@ -374,7 +374,7 @@ function inventorySummary(world: KernelWorld, priceTrait: string | null = null):
   }
 }
 
-function inventoryDiagnostics(world: KernelWorld) {
+function inventoryDiagnostics(world: World) {
   const summary = inventorySummary(world)
   const diagnostics: Diagnostic[] = summary.rooms
     .filter((room) => room.place_count === 0)
@@ -618,7 +618,7 @@ export const roomInventory = defineModule({
   }),
 })
 
-export function inventoryWorld(world: KernelWorld): InventorySummary {
+export function inventoryWorld(world: World): InventorySummary {
   const summary = world.summaries['room-inventory']
   if (!summary) throw new Error('room-inventory is not selected in this profile')
   return summary as InventorySummary

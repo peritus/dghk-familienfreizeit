@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, KernelWorld, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
 
 export type AvailabilityWindow = { starts_at: string; ends_at: string }
@@ -46,11 +46,11 @@ const spacePayload = z.preprocess(
 )
 const reasonPayload = z.object({ workshop_space_id: spaceId, reason: z.string().nullable() })
 
-function entity(world: KernelWorld, id: string): Entity | undefined {
+function entity(world: World, id: string): Entity | undefined {
   return world.entities_by_kind['workshop-space']?.find((candidate) => candidate.id === id)
 }
 
-function validateSpace(world: KernelWorld, payload: JsonValue, updating: boolean): string | null {
+function validateSpace(world: World, payload: JsonValue, updating: boolean): string | null {
   const value = spacePayload.parse(payload)
   const current = entity(world, value.workshop_space_id)
   if (updating ? !current : current)
@@ -85,7 +85,7 @@ function setLabels(
   ])
 }
 
-function summary(world: KernelWorld): WorkshopSpaceSummary {
+function summary(world: World): WorkshopSpaceSummary {
   const value = (id: string, key: string): JsonValue | undefined =>
     world.labels_by_entity[id]?.find((label) => label.key === key)?.value
   const spaces = (world.entities_by_kind['workshop-space'] ?? [])
@@ -168,7 +168,7 @@ export const workshopSpace = defineModule({
   }),
 })
 
-export function workshopSpaceWorld(world: KernelWorld): WorkshopSpaceSummary {
+export function workshopSpaceWorld(world: World): WorkshopSpaceSummary {
   const value = world.summaries['workshop-space']
   if (!value) throw new Error('workshop-space is not selected in this profile')
   return value as WorkshopSpaceSummary

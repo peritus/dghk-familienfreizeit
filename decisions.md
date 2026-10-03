@@ -660,7 +660,7 @@ Removing entries at fold time instead of tombstoning them means the resolver,
 read-side code.
 
 *Consequence:* `Entity` drops `retired_seq`; `Label` drops `cleared_seq`;
-`KernelWorld` drops `withdrawn_person_ids` (nothing outside the fold itself
+`World` drops `withdrawn_person_ids` (nothing outside the fold itself
 consumed it). `world.entities_by_kind` and `world.labels` only ever contain
 what is live at `head_seq`. A module's fold capability gets a `retireEntity`
 operation with these same hard-removal semantics, not a soft-retire.

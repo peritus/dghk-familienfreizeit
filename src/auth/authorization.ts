@@ -1,4 +1,4 @@
-import type { KernelConfig, KernelWorld } from '../events/fold.js'
+import type { KernelConfig, World } from '../events/fold.js'
 import type {
   Event,
   FamilyDisplayNameChanged,
@@ -23,7 +23,7 @@ const kernelEntityEventTypes = new Set([
 export function canAppendEvent(
   principal: Principal,
   event: Event,
-  world: KernelWorld,
+  world: World,
   config: KernelConfig,
 ): boolean {
   if (principal.kind === 'organiser') return true
@@ -60,7 +60,7 @@ function isFamilyWritable(config: KernelConfig, key: string): boolean {
   )
 }
 
-function familyForEntity(world: KernelWorld, entityId: string): string | null {
+function familyForEntity(world: World, entityId: string): string | null {
   if (world.families.some((family) => family.id === entityId)) return entityId
   const memberOf = world.labels.find(
     (label) => label.entity_id === entityId && label.key === 'member-of',

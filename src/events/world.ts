@@ -1,5 +1,5 @@
 import { canonicalJson, type Event } from './types.js'
-import { derive, type Entity, type KernelConfig, type KernelWorld, type Label } from './fold.js'
+import { derive, type Entity, type KernelConfig, type World, type Label } from './fold.js'
 
 export type WorldChange = {
   kind: 'entity-created' | 'entity-retired' | 'label-set' | 'label-cleared'
@@ -13,12 +13,12 @@ export function deriveDraftWorld(
   committed: readonly Event[],
   drafts: readonly Event[],
   config: KernelConfig = {},
-): KernelWorld {
+): World {
   return derive([...committed, ...drafts], config)
 }
 
 /** Removes restricted labels from a shared view while retaining ordinary derived state. */
-export function projectSharedWorld(world: KernelWorld): KernelWorld {
+export function projectSharedWorld(world: World): World {
   return project(
     world,
     world.labels.filter((label) => label.sensitivity === 'normal'),
@@ -28,7 +28,7 @@ export function projectSharedWorld(world: KernelWorld): KernelWorld {
 }
 
 /** Returns only a family's entities and labels; another family's restricted facts never cross this boundary. */
-export function projectFamilyWorld(world: KernelWorld, familyId: string): KernelWorld {
+export function projectFamilyWorld(world: World, familyId: string): World {
   const personIds = new Set(
     world.labels
       .filter((label) => label.key === 'member-of' && label.value === familyId)
@@ -44,7 +44,7 @@ export function projectFamilyWorld(world: KernelWorld, familyId: string): Kernel
 }
 
 /** Produces a stable, domain-only change list from two derived worlds. */
-export function diff(before: KernelWorld, after: KernelWorld): readonly WorldChange[] {
+export function diff(before: World, after: World): readonly WorldChange[] {
   const changes: WorldChange[] = []
   const beforeEntities = new Map(allEntities(before).map((entity) => [entity.id, entity]))
   const afterEntities = new Map(allEntities(after).map((entity) => [entity.id, entity]))
@@ -68,11 +68,11 @@ export function diff(before: KernelWorld, after: KernelWorld): readonly WorldCha
 }
 
 function project(
-  world: KernelWorld,
+  world: World,
   labels: readonly Label[],
   families: readonly Entity[],
   persons: readonly Entity[],
-): KernelWorld {
+): World {
   const entities = [...families, ...persons]
   return {
     ...world,
@@ -103,7 +103,7 @@ function index<T>(
   return result
 }
 
-function allEntities(world: KernelWorld): readonly Entity[] {
+function allEntities(world: World): readonly Entity[] {
   return Object.values(world.entities_by_kind).flat()
 }
 

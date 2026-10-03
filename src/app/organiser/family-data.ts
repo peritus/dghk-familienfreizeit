@@ -1,4 +1,4 @@
-import type { Entity, KernelWorld, Label } from '../../events/fold.js'
+import type { Entity, World, Label } from '../../events/fold.js'
 
 export type FamilyRow = {
   family: Entity
@@ -34,7 +34,7 @@ export function eventTypeLabel(type: string): string {
   return eventTypeLabels[type] ?? type
 }
 
-export function familyRows(world: KernelWorld): FamilyRow[] {
+export function familyRows(world: World): FamilyRow[] {
   return world.families.map((family) => {
     const labels = world.labels_by_entity[family.id] ?? []
     const persons = world.persons.filter((person) =>
@@ -51,6 +51,6 @@ export function familyRows(world: KernelWorld): FamilyRow[] {
   })
 }
 
-export function findFamily(world: KernelWorld, familyId: string): FamilyRow | null {
+export function findFamily(world: World, familyId: string): FamilyRow | null {
   return familyRows(world).find(({ family }) => family.id === familyId) ?? null
 }

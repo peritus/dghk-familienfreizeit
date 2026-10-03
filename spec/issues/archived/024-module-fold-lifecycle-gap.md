@@ -66,7 +66,7 @@ entities and labels are now hard-removed from the live world on
 retirement/clear, since historical/reviewed views already work by
 re-deriving over a truncated event slice at a specific `seq` — nothing needs
 the *current* world to remember what used to be true. This is a larger change
-than the module-fold capability alone: `Entity`/`Label`/`KernelWorld` lost
+than the module-fold capability alone: `Entity`/`Label`/`World` lost
 their tombstone fields, `resolver.ts` and `world.ts`'s `diff`/`project` were
 simplified accordingly, and `PersonWithdrawn` now hard-removes rather than
 flags (`src/events/fold.ts`, `src/events/resolver.ts`, `src/events/world.ts`).

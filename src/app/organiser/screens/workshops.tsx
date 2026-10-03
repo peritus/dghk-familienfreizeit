@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useLocation } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
-import type { KernelWorld } from '../../../events/fold.js'
+import type { World } from '../../../events/fold.js'
 import type { EventDraft } from '../../../events/types.js'
 import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
 import { workshopRankingsWorld } from '../../../modules/workshop-rankings/index.js'
@@ -124,7 +124,7 @@ function WorkshopRetireAction({
   )
 }
 
-function solveWorkshopPlan(world: KernelWorld): WorkshopPlan {
+function solveWorkshopPlan(world: World): WorkshopPlan {
   const contributions = composeSolverContributions(activeProfile)
   const plan = solve(buildSolverInput(world, contributions), contributions, {
     build_revision: 'organiser',

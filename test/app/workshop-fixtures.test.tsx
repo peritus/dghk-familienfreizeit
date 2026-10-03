@@ -3,12 +3,12 @@ import { activeProfile } from '../../src/config/index.js'
 import { officialWorkshopsWorld } from '../../src/modules/official-workshops/index.js'
 import { workshopSchedulingWorld } from '../../src/modules/workshop-scheduling/index.js'
 import { workshopSpaceWorld } from '../../src/modules/workshop-space/index.js'
-import { deriveOrganiserWorld } from '../../src/app/organiser/state.js'
+import { deriveWorld } from '../../src/app/organiser/state.js'
 import { organiserWorkshopFixtureState } from '../../src/app/stories/organiser-fixtures.js'
 import { fullWorkshopCatalogue, fullWorkshopRows } from '../../src/app/stories/workshop-fixtures.js'
 
 test('the workshop screen fixture contains a derived multi-state catalogue', () => {
-  const world = deriveOrganiserWorld(organiserWorkshopFixtureState, activeProfile.validation_view)
+  const world = deriveWorld(organiserWorkshopFixtureState, activeProfile.validation_view)
   const workshops = officialWorkshopsWorld(world)
   const spaces = workshopSpaceWorld(world)
   const schedule = workshopSchedulingWorld(world)

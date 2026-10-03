@@ -1,4 +1,4 @@
-import type { KernelWorld } from '../events/fold.js'
+import type { World } from '../events/fold.js'
 import type { Event, EventPayloadSchemas, JsonValue } from '../events/types.js'
 
 export type ScreenDescriptor = {
@@ -33,7 +33,7 @@ export type OrganiserApplyRequest = {
 export type OrganiserApplyResponse = {
   events: readonly Event[]
   head_seq: number
-  world: KernelWorld
+  world: World
   build_revision: string
   compatibility_revision: number
 }

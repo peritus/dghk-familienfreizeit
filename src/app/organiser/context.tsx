@@ -1,12 +1,12 @@
 import { createContext, useContext, type Dispatch } from 'react'
-import type { KernelWorld } from '../../events/fold.js'
+import type { World } from '../../events/fold.js'
 import type { EventDraft } from '../../events/types.js'
 import type { OrganiserAction, OrganiserState } from './state.js'
 import type { Plan } from '../../solver/types.js'
 
 export type OrganiserContextValue = {
   state: OrganiserState
-  world: KernelWorld | null
+  world: World | null
   dispatch: Dispatch<OrganiserAction>
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>

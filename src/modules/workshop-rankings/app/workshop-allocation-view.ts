@@ -1,4 +1,4 @@
-import type { KernelWorld, Label } from '../../../events/fold.js'
+import type { World, Label } from '../../../events/fold.js'
 import type { Plan, TraceEntry } from '../../../solver/types.js'
 import { officialWorkshopsWorld } from '../../official-workshops/index.js'
 import { workshopAssignmentSection } from '../../workshop-assignment/index.js'
@@ -87,7 +87,7 @@ type AllocationPerson = {
 }
 
 export type WorkshopAllocationProjectionInput = {
-  world: KernelWorld
+  world: World
   plan: Plan
   event_date: string
   time_zone: string
@@ -99,7 +99,7 @@ function labelValue(labels: readonly Label[], key: string): string | null {
   return typeof value === 'string' ? value : null
 }
 
-function personName(world: KernelWorld, personId: string): string {
+function personName(world: World, personId: string): string {
   const labels = world.labels_by_entity[personId] ?? []
   return (
     [labelValue(labels, 'given-name'), labelValue(labels, 'family-name')]
@@ -109,7 +109,7 @@ function personName(world: KernelWorld, personId: string): string {
 }
 
 function personGroup(
-  world: KernelWorld,
+  world: World,
   personId: string,
 ): Exclude<WorkshopAllocationGroup, 'all'> {
   return labelValue(world.labels_by_entity[personId] ?? [], 'role') === 'adult'
@@ -117,7 +117,7 @@ function personGroup(
     : 'children'
 }
 
-function ageLabel(world: KernelWorld, personId: string, eventDate: string): string {
+function ageLabel(world: World, personId: string, eventDate: string): string {
   const labels = world.labels_by_entity[personId] ?? []
   const birthdate = labelValue(labels, 'birthdate')
   const role = labelValue(labels, 'role')

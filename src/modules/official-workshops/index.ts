@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, KernelWorld, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
 
@@ -79,15 +79,15 @@ const attendanceFixedPayload = z.object({
   workshop_ids: z.array(workshopId).max(32),
 })
 
-function entity(world: KernelWorld, kind: string, idValue: string): Entity | undefined {
+function entity(world: World, kind: string, idValue: string): Entity | undefined {
   return world.entities_by_kind[kind]?.find((candidate) => candidate.id === idValue)
 }
 
-function labelValue(world: KernelWorld, idValue: string, key: string): JsonValue | undefined {
+function labelValue(world: World, idValue: string, key: string): JsonValue | undefined {
   return world.labels_by_entity[idValue]?.find((label) => label.key === key)?.value
 }
 
-function liveAttendance(world: KernelWorld, workshopId: string): number {
+function liveAttendance(world: World, workshopId: string): number {
   return Object.values(world.labels_by_entity).reduce(
     (count, labels) =>
       count +
@@ -102,7 +102,7 @@ function liveAttendance(world: KernelWorld, workshopId: string): number {
 
 function validateWorkshop(
   params: OfficialWorkshopsParams,
-  world: KernelWorld,
+  world: World,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -132,7 +132,7 @@ function validateWorkshop(
 }
 
 function validateExternalLeader(
-  world: KernelWorld,
+  world: World,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -147,7 +147,7 @@ function validateExternalLeader(
       : null
 }
 
-function validateReason(world: KernelWorld, payload: JsonValue, kind: string): string | null {
+function validateReason(world: World, payload: JsonValue, kind: string): string | null {
   const entityId =
     kind === 'workshop'
       ? workshopReason.parse(payload).workshop_id
@@ -157,7 +157,7 @@ function validateReason(world: KernelWorld, payload: JsonValue, kind: string): s
     : `unknown ${kind}: ${entityId}`
 }
 
-function validateAttendanceFixed(world: KernelWorld, payload: JsonValue): string | null {
+function validateAttendanceFixed(world: World, payload: JsonValue): string | null {
   const value = attendanceFixedPayload.parse(payload)
   if (!world.persons.some((person) => person.id === value.person_id))
     return `unknown person: ${value.person_id}`
@@ -178,7 +178,7 @@ function setLabels(
   for (const { key, value } of values) capability.setLabel(entityId, key, value, null, null)
 }
 
-function summary(world: KernelWorld): OfficialWorkshopsSummary {
+function summary(world: World): OfficialWorkshopsSummary {
   const toWorkshop = (item: Entity): WorkshopRecord => {
     const labels = world.labels_by_entity[item.id] ?? []
     const values = (key: string) =>
@@ -222,7 +222,7 @@ function summary(world: KernelWorld): OfficialWorkshopsSummary {
   }
 }
 
-function diagnostics(world: KernelWorld): readonly Diagnostic[] {
+function diagnostics(world: World): readonly Diagnostic[] {
   return summary(world)
     .workshops.filter((workshop) => workshop.capacity === 0)
     .map((workshop) => ({
@@ -495,7 +495,7 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
   }),
 })
 
-export function officialWorkshopsWorld(world: KernelWorld): OfficialWorkshopsSummary {
+export function officialWorkshopsWorld(world: World): OfficialWorkshopsSummary {
   const value = world.summaries['official-workshops']
   if (!value) throw new Error('official-workshops is not selected in this profile')
   return value as OfficialWorkshopsSummary

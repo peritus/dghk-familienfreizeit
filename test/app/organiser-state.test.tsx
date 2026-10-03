@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import type { EventDraft } from '../../src/events/types.js'
 import {
-  deriveOrganiserWorld,
+  deriveWorld,
   initialOrganiserState,
   materializeDraftEvents,
   organiserReducer,
@@ -43,7 +43,7 @@ test('draft batches materialize contiguous events and derive locally', () => {
   const state = organiserReducer(loaded, { type: 'stage', events: [family] })
   expect(draftCount(state)).toBe(1)
   expect(materializeDraftEvents(state)[0]?.seq).toBe(1)
-  expect(deriveOrganiserWorld(state).families.map(({ id }) => id)).toEqual(['fam_state'])
+  expect(deriveWorld(state).families.map(({ id }) => id)).toEqual(['fam_state'])
 })
 
 test('discard clears all drafts and exits drafting mode', () => {
@@ -65,7 +65,7 @@ test('an apply error keeps draft events in the derived organiser world', () => {
     error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
   })
 
-  expect(deriveOrganiserWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
+  expect(deriveWorld(failed).families.map(({ id }) => id)).toEqual(['fam_state'])
   expect(draftCount(failed)).toBe(1)
   expect(failed.change_mode).toBe('drafting')
 })

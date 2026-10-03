@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, KernelWorld, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
 import type {
   PreflightFinding,
@@ -72,11 +72,11 @@ const blockPayload = z.object({
   reason: z.string().nullable(),
 })
 
-function entity(world: KernelWorld, kind: string, id: string): Entity | undefined {
+function entity(world: World, kind: string, id: string): Entity | undefined {
   return world.entities_by_kind[kind]?.find((candidate) => candidate.id === id)
 }
 
-function validateSlot(world: KernelWorld, payload: JsonValue, updating: boolean): string | null {
+function validateSlot(world: World, payload: JsonValue, updating: boolean): string | null {
   const value = slotPayload.parse(payload)
   const current = entity(world, 'workshop-slot', value.slot_id)
   if (updating ? !current : current)
@@ -102,7 +102,7 @@ function validateSlot(world: KernelWorld, payload: JsonValue, updating: boolean)
   return overlaps ? `slot overlaps or touches another live slot: ${value.slot_id}` : null
 }
 
-function validateBlock(world: KernelWorld, payload: JsonValue, unblocking: boolean): string | null {
+function validateBlock(world: World, payload: JsonValue, unblocking: boolean): string | null {
   const value = blockPayload.parse(payload)
   if (!entity(world, 'workshop-space', value.space_id))
     return `unknown workshop space: ${value.space_id}`
@@ -140,7 +140,7 @@ function setBlockLabels(
   ])
 }
 
-function summary(world: KernelWorld): WorkshopSchedulingSummary {
+function summary(world: World): WorkshopSchedulingSummary {
   const value = (id: string, key: string): JsonValue | undefined =>
     world.labels_by_entity[id]?.find((label) => label.key === key)?.value
   const slots = (world.entities_by_kind['workshop-slot'] ?? [])
@@ -172,7 +172,7 @@ function summary(world: KernelWorld): WorkshopSchedulingSummary {
   return { slots, space_slot_blocks: blocks }
 }
 
-function solverInput(world: KernelWorld): ScheduleSolverInput {
+function solverInput(world: World): ScheduleSolverInput {
   const base = summary(world)
   const official = world.summaries['official-workshops'] as OfficialWorkshopsSummary | undefined
   const value = (id: string, key: string): JsonValue | undefined =>
@@ -402,7 +402,7 @@ export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
   }),
 })
 
-export function workshopSchedulingWorld(world: KernelWorld): WorkshopSchedulingSummary {
+export function workshopSchedulingWorld(world: World): WorkshopSchedulingSummary {
   const value = world.summaries['workshop-scheduling']
   if (!value) throw new Error('workshop-scheduling is not selected in this profile')
   return value as WorkshopSchedulingSummary

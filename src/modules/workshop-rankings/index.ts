@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { KernelWorld } from '../../events/fold.js'
+import type { World } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult } from '../../solver/types.js'
 
@@ -52,7 +52,7 @@ function rankingValueValid(value: JsonValue): string | null {
   return result.success ? null : (result.error.issues[0]?.message ?? 'invalid workshop ranking')
 }
 
-function buildRankings(world: KernelWorld): readonly WorkshopRanking[] {
+function buildRankings(world: World): readonly WorkshopRanking[] {
   const rankings = new Map<string, WorkshopChoice[]>()
   for (const label of world.labels.filter((item) => item.key === 'prefers-workshop')) {
     const parsed = rankingValue.parse(label.value)
@@ -158,14 +158,14 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
   }),
 })
 
-export function workshopRankingsWorld(world: KernelWorld): WorkshopRankingsSummary {
+export function workshopRankingsWorld(world: World): WorkshopRankingsSummary {
   const value = world.summaries['workshop-rankings']
   if (!value) throw new Error('workshop-rankings is not selected in this profile')
   return value as WorkshopRankingsSummary
 }
 
 export function workshopRankingsFromWorld(
-  world: KernelWorld,
+  world: World,
   params: WorkshopRankingsParams,
 ): readonly WorkshopRanking[] {
   return buildRankings(world).map((ranking) => ({

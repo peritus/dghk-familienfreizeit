@@ -3,7 +3,7 @@ import { activeProfile } from '../../config/index.js'
 import type { Event, EventDraft, JsonValue } from '../../events/types.js'
 import { OrganiserContext, type OrganiserContextValue } from '../organiser/context.js'
 import {
-  deriveOrganiserWorld,
+  deriveWorld,
   initialOrganiserState,
   organiserReducer,
   type OrganiserAction,
@@ -801,7 +801,7 @@ export function FixtureProvider({
     [update],
   )
   const apply = useCallback(async () => undefined, [])
-  const world = useMemo(() => deriveOrganiserWorld(state, activeProfile.validation_view), [state])
+  const world = useMemo(() => deriveWorld(state, activeProfile.validation_view), [state])
   const value: OrganiserContextValue = { state, world, dispatch: update, stage, apply }
 
   return <OrganiserContext.Provider value={value}>{children}</OrganiserContext.Provider>

@@ -14,7 +14,7 @@ opened: 2026-09-26
 
 ## Problem
 
-When `deriveOrganiserWorld` throws while deriving the organiser world,
+When `deriveWorld` throws while deriving the organiser world,
 [`OrganiserApp`](../../../src/app/organiser/organiser-app.tsx) falls back to a
 generic error screen (the `!derivation.world` branch, currently around
 lines 186–196). That screen unconditionally renders a button labelled

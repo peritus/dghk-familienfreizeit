@@ -1,4 +1,4 @@
-import type { Entity, KernelWorld } from '../events/fold.js'
+import type { Entity, World } from '../events/fold.js'
 import type { ResolvedRequirement } from '../events/resolver.js'
 import type { JsonValue } from '../events/types.js'
 
@@ -16,7 +16,7 @@ export type SolverPerson = Entity & { family_id: string }
 
 export type SolverInputContribution = {
   id: string
-  build: (world: KernelWorld) => unknown
+  build: (world: World) => unknown
 }
 
 export type SolverInput = Readonly<{

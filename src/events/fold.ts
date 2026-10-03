@@ -64,7 +64,7 @@ export type Label = {
   sensitivity: 'normal' | 'restricted'
 }
 
-export type KernelWorld = {
+export type World = {
   families: Entity[]
   persons: Entity[]
   labels: Label[]
@@ -219,9 +219,9 @@ export type CapabilityDescriptor = {
   derive?: (entity: { label(key: string): JsonValue | undefined }) => boolean
 }
 
-export type WorldSummaryDefinition = { id: string; summarize: (world: KernelWorld) => unknown }
+export type WorldSummaryDefinition = { id: string; summarize: (world: World) => unknown }
 
-export type WorldCheck = (world: KernelWorld) => readonly Diagnostic[]
+export type WorldCheck = (world: World) => readonly Diagnostic[]
 
 /** Structural subset of `auth.Principal` the kernel needs for event authorization, kept free of the auth module's I/O-adjacent types. */
 export type ModuleEventPrincipal = { kind: 'organiser' } | { kind: 'family'; family_id: string }
@@ -230,11 +230,11 @@ export type ModuleEventPrincipal = { kind: 'organiser' } | { kind: 'family'; fam
 export type ModuleEventAuthorize = (
   principal: ModuleEventPrincipal,
   payload: JsonValue,
-  world: KernelWorld,
+  world: World,
 ) => boolean
 
 /** Validates a module event against the live world immediately before it folds. */
-export type ModuleEventValidate = (payload: JsonValue, world: KernelWorld) => string | null
+export type ModuleEventValidate = (payload: JsonValue, world: World) => string | null
 
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
@@ -268,7 +268,7 @@ type MutableWorld = {
   entities_by_id: Map<string, Entity>
 }
 
-export function derive(events: readonly Event[], config: KernelConfig = {}): KernelWorld {
+export function derive(events: readonly Event[], config: KernelConfig = {}): World {
   const validatedEvents = normalizeEvents(events, config)
   const state = createMutableWorld()
   for (const event of validatedEvents) applyEvent(state, event, config)
@@ -297,7 +297,7 @@ export function validateEventStream(events: readonly Event[], config: KernelConf
 }
 
 /** Rejects only diagnostics that violate the append contract; other diagnostics remain visible. */
-export function assertAppendableWorld(world: KernelWorld): void {
+export function assertAppendableWorld(world: World): void {
   const dangling = world.diagnostics.find(
     (diagnostic) =>
       ['kernel.dangling-reference', 'kernel.cardinality'].includes(diagnostic.id) &&
@@ -347,7 +347,7 @@ function createMutableWorld(): MutableWorld {
   }
 }
 
-function worldFromState(state: MutableWorld, config: KernelConfig): KernelWorld {
+function worldFromState(state: MutableWorld, config: KernelConfig): World {
   const labels = [...state.labels.values()].sort(
     (a, b) =>
       a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),

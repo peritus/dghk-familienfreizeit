@@ -1,4 +1,4 @@
-import { derive, type KernelConfig, type KernelWorld } from '../events/fold.js'
+import { derive, type KernelConfig, type World } from '../events/fold.js'
 import { readEvents } from '../events/store.js'
 import { canonicalEmail } from '../events/types.js'
 import { hash } from './service.js'
@@ -34,7 +34,7 @@ export async function currentPrincipal(
   return { kind: 'family', email, family_id: familyId }
 }
 
-export function familyForEmail(world: KernelWorld, email: string): string | null {
+export function familyForEmail(world: World, email: string): string | null {
   return (
     world.labels.find((label) => label.key === 'email' && label.value === email)?.entity_id ?? null
   )

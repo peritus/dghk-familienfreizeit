@@ -1,5 +1,5 @@
 import { canonicalJson, type JsonValue } from '../events/types.js'
-import type { KernelWorld } from '../events/fold.js'
+import type { World } from '../events/fold.js'
 import type {
   Plan,
   SolverContributions,
@@ -10,7 +10,7 @@ import type {
 } from './types.js'
 
 export function buildSolverInput(
-  world: KernelWorld,
+  world: World,
   contributions: SolverContributions = {},
   previousPlan: Plan | null = null,
 ): SolverInput {
@@ -85,7 +85,7 @@ export function buildSolverInput(
   }
 }
 
-function labelValue(world: KernelWorld, entityId: string, key: string): JsonValue | undefined {
+function labelValue(world: World, entityId: string, key: string): JsonValue | undefined {
   return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
 }
 
