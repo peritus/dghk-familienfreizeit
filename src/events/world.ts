@@ -29,9 +29,11 @@ export function projectSharedWorld(world: World): World {
 
 /** Returns only a family's entities and labels; another family's restricted facts never cross this boundary. */
 export function projectFamilyWorld(world: World, familyId: string): World {
+  // Membership comes off the key index: scanning every label in the occasion to
+  // find one family's members ran on each family request.
   const personIds = new Set(
-    world.labels
-      .filter((label) => label.key === 'member-of' && label.value === familyId)
+    (world.labels_by_key['member-of'] ?? [])
+      .filter((label) => label.value === familyId)
       .map((label) => label.entity_id),
   )
   const visibleIds = new Set([familyId, ...personIds])
@@ -74,6 +76,10 @@ function project(
   persons: readonly Entity[],
 ): World {
   const entities = [...families, ...persons]
+  // Holder membership as a set, not a scan of the surviving entities per
+  // resolved row: the shared projection is over the whole occasion, so the
+  // paired loops cost entities times constraints.
+  const visible = new Set(entities.map((entity) => entity.id))
   return {
     ...world,
     families: [...families],
@@ -81,15 +87,9 @@ function project(
     labels: [...labels],
     labels_by_entity: index(labels, (label) => label.entity_id),
     labels_by_key: index(labels, (label) => label.key),
-    constraints: world.constraints.filter((constraint) =>
-      entities.some((entity) => entity.id === constraint.holder_id),
-    ),
-    requirements: world.requirements.filter((requirement) =>
-      entities.some((entity) => entity.id === requirement.holder_id),
-    ),
-    capabilities: world.capabilities.filter((capability) =>
-      entities.some((entity) => entity.id === capability.entity_id),
-    ),
+    constraints: world.constraints.filter((constraint) => visible.has(constraint.holder_id)),
+    requirements: world.requirements.filter((requirement) => visible.has(requirement.holder_id)),
+    capabilities: world.capabilities.filter((capability) => visible.has(capability.entity_id)),
     entities_by_kind: index(entities, (entity) => entity.kind),
   }
 }
