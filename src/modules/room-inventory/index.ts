@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
 
@@ -145,11 +145,20 @@ function labelValue(world: World, entityId: string, key: string): JsonValue | un
   return world.labels_by_entity[entityId]?.find((label) => label.key === key)?.value
 }
 
-function entity(world: World, kind: string, id: string): Entity | undefined {
-  return world.entities_by_kind[kind]?.find((candidate) => candidate.id === id)
+function entity(world: ValidationWorld, kind: string, id: string): Entity | undefined {
+  return world.findEntity(kind, id)
 }
 
-function validateBuilding(world: World, payload: JsonValue, updating: boolean): string | null {
+/** Validator-side label read; the summary path keeps `labelValue` over a full world. */
+function liveLabel(world: ValidationWorld, entityId: string, key: string): JsonValue | undefined {
+  return world.labels(entityId).find((label) => label.key === key)?.value
+}
+
+function validateBuilding(
+  world: ValidationWorld,
+  payload: JsonValue,
+  updating: boolean,
+): string | null {
   const value = payload as z.infer<typeof buildingPayload>
   const current = entity(world, 'building', value.building_id)
   if (updating ? !current : current)
@@ -159,7 +168,7 @@ function validateBuilding(world: World, payload: JsonValue, updating: boolean): 
 
 function validateRoom(
   params: RoomInventoryParams,
-  world: World,
+  world: ValidationWorld,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -171,11 +180,11 @@ function validateRoom(
   if (value.floor !== null && !params.floors.includes(value.floor))
     return `invalid floor: ${value.floor}`
   if (!params.room_types.includes(value.room_type)) return `invalid room type: ${value.room_type}`
-  const duplicate = (world.entities_by_kind.room ?? []).some((room) => {
+  const duplicate = world.entities('room').some((room) => {
     if (room.id === value.room_id) return false
     return (
-      labelValue(world, room.id, locationKey) === value.building_id &&
-      labelValue(world, room.id, 'number') === value.number
+      liveLabel(world, room.id, locationKey) === value.building_id &&
+      liveLabel(world, room.id, 'number') === value.number
     )
   })
   return duplicate ? `room number already exists in building: ${value.number}` : null
@@ -183,7 +192,7 @@ function validateRoom(
 
 function validateBed(
   params: RoomInventoryParams,
-  world: World,
+  world: ValidationWorld,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -193,41 +202,41 @@ function validateBed(
     return `${updating ? 'unknown' : 'duplicate'} bed: ${value.bed_id}`
   if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
   if (!params.bed_types.includes(value.bed_type)) return `invalid bed type: ${value.bed_type}`
-  const roomType = labelValue(world, value.room_id, 'room-type')
+  const roomType = liveLabel(world, value.room_id, 'room-type')
   if ((value.sleeping_room ?? null) !== null && roomType !== 'apartment')
     return `sleeping_room only applies to apartment rooms: ${value.room_id}`
   const duplicate =
     value.label !== '' &&
-    (world.entities_by_kind.bed ?? []).some((bed) => {
+    world.entities('bed').some((bed) => {
       if (bed.id === value.bed_id) return false
       return (
-        labelValue(world, bed.id, locationKey) === value.room_id &&
-        labelValue(world, bed.id, 'label') === value.label
+        liveLabel(world, bed.id, locationKey) === value.room_id &&
+        liveLabel(world, bed.id, 'label') === value.label
       )
     })
   return duplicate ? `bed label already exists in room: ${value.label}` : null
 }
 
-function validateRemovedBed(payload: JsonValue, world: World): string | null {
+function validateRemovedBed(payload: JsonValue, world: ValidationWorld): string | null {
   const value = payload as z.infer<typeof bedRemovedPayload>
   return entity(world, 'bed', value.bed_id) ? null : `unknown bed: ${value.bed_id}`
 }
 
-function validateRemovedBuilding(payload: JsonValue, world: World): string | null {
+function validateRemovedBuilding(payload: JsonValue, world: ValidationWorld): string | null {
   const value = buildingRemovedPayload.parse(payload)
   if (!entity(world, 'building', value.building_id)) return `unknown building: ${value.building_id}`
-  const hasRooms = (world.entities_by_kind.room ?? []).some(
-    (room) => labelValue(world, room.id, locationKey) === value.building_id,
-  )
+  const hasRooms = world
+    .entities('room')
+    .some((room) => liveLabel(world, room.id, locationKey) === value.building_id)
   return hasRooms ? `building has rooms: ${value.building_id}` : null
 }
 
-function validateRemovedRoom(payload: JsonValue, world: World): string | null {
+function validateRemovedRoom(payload: JsonValue, world: ValidationWorld): string | null {
   const value = roomRemovedPayload.parse(payload)
   if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
-  const hasBeds = (world.entities_by_kind.bed ?? []).some(
-    (bed) => labelValue(world, bed.id, locationKey) === value.room_id,
-  )
+  const hasBeds = world
+    .entities('bed')
+    .some((bed) => liveLabel(world, bed.id, locationKey) === value.room_id)
   return hasBeds ? `room has beds: ${value.room_id}` : null
 }
 

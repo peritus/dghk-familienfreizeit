@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
 
@@ -79,30 +79,28 @@ const attendanceFixedPayload = z.object({
   workshop_ids: z.array(workshopId).max(32),
 })
 
-function entity(world: World, kind: string, idValue: string): Entity | undefined {
-  return world.entities_by_kind[kind]?.find((candidate) => candidate.id === idValue)
+function entity(world: ValidationWorld, kind: string, idValue: string): Entity | undefined {
+  return world.findEntity(kind, idValue)
 }
 
 function labelValue(world: World, idValue: string, key: string): JsonValue | undefined {
   return world.labels_by_entity[idValue]?.find((label) => label.key === key)?.value
 }
 
-function liveAttendance(world: World, workshopId: string): number {
-  return Object.values(world.labels_by_entity).reduce(
-    (count, labels) =>
-      count +
-      labels.filter(
-        (label) =>
-          (label.key === 'signed-up-for' || label.key === 'workshop-attendance') &&
-          label.value === workshopId,
-      ).length,
-    0,
-  )
+/**
+ * Live participants of one workshop. Reads the two attendance keys directly:
+ * scanning every entity's labels made a capacity check cost the whole label
+ * store, on an event type organisers fire repeatedly.
+ */
+function liveAttendance(world: ValidationWorld, workshopId: string): number {
+  return ['signed-up-for', 'workshop-attendance']
+    .flatMap((key) => world.labelsByKey(key))
+    .filter((label) => label.value === workshopId).length
 }
 
 function validateWorkshop(
   params: OfficialWorkshopsParams,
-  world: World,
+  world: ValidationWorld,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -121,10 +119,7 @@ function validateWorkshop(
       return `capacity reduction would strand ${attendance} current participant(s); rejected per D30`
   }
   for (const leaderId of value.leader_ids)
-    if (
-      !world.persons.some((person) => person.id === leaderId) &&
-      !entity(world, 'external-leader', leaderId)
-    )
+    if (!entity(world, 'person', leaderId) && !entity(world, 'external-leader', leaderId))
       return `unknown workshop leader: ${leaderId}`
   if (value.leader_ids.length !== new Set(value.leader_ids).size)
     return `duplicate workshop leader: ${value.workshop_id}`
@@ -132,7 +127,7 @@ function validateWorkshop(
 }
 
 function validateExternalLeader(
-  world: World,
+  world: ValidationWorld,
   payload: JsonValue,
   updating: boolean,
 ): string | null {
@@ -147,7 +142,7 @@ function validateExternalLeader(
       : null
 }
 
-function validateReason(world: World, payload: JsonValue, kind: string): string | null {
+function validateReason(world: ValidationWorld, payload: JsonValue, kind: string): string | null {
   const entityId =
     kind === 'workshop'
       ? workshopReason.parse(payload).workshop_id
@@ -157,10 +152,9 @@ function validateReason(world: World, payload: JsonValue, kind: string): string 
     : `unknown ${kind}: ${entityId}`
 }
 
-function validateAttendanceFixed(world: World, payload: JsonValue): string | null {
+function validateAttendanceFixed(world: ValidationWorld, payload: JsonValue): string | null {
   const value = attendanceFixedPayload.parse(payload)
-  if (!world.persons.some((person) => person.id === value.person_id))
-    return `unknown person: ${value.person_id}`
+  if (!entity(world, 'person', value.person_id)) return `unknown person: ${value.person_id}`
   for (const workshop of value.workshop_ids)
     if (!entity(world, 'workshop', workshop)) return `unknown workshop: ${workshop}`
   if (value.workshop_ids.length !== new Set(value.workshop_ids).size)

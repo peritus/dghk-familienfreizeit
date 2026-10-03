@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { Entity, World, ModuleFoldCapability } from '../../events/fold.js'
+import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
 import type {
   PreflightFinding,
@@ -72,28 +72,28 @@ const blockPayload = z.object({
   reason: z.string().nullable(),
 })
 
-function entity(world: World, kind: string, id: string): Entity | undefined {
-  return world.entities_by_kind[kind]?.find((candidate) => candidate.id === id)
+function entity(world: ValidationWorld, kind: string, id: string): Entity | undefined {
+  return world.findEntity(kind, id)
 }
 
-function validateSlot(world: World, payload: JsonValue, updating: boolean): string | null {
+function validateSlot(
+  world: ValidationWorld,
+  payload: JsonValue,
+  updating: boolean,
+): string | null {
   const value = slotPayload.parse(payload)
   const current = entity(world, 'workshop-slot', value.slot_id)
   if (updating ? !current : current)
     return `${updating ? 'unknown' : 'duplicate'} slot: ${value.slot_id}`
   if (globalThis.Date.parse(value.starts_at) >= globalThis.Date.parse(value.ends_at))
     return 'slot starts_at must be before ends_at'
-  const overlaps = (world.entities_by_kind['workshop-slot'] ?? []).some((slot) => {
+  const overlaps = world.entities('workshop-slot').some((slot) => {
     if (slot.id === value.slot_id) return false
     const start = globalThis.Date.parse(
-      String(
-        world.labels_by_entity[slot.id]?.find((label) => label.key === 'starts-at')?.value ?? '',
-      ),
+      String(world.labels(slot.id).find((label) => label.key === 'starts-at')?.value ?? ''),
     )
     const end = globalThis.Date.parse(
-      String(
-        world.labels_by_entity[slot.id]?.find((label) => label.key === 'ends-at')?.value ?? '',
-      ),
+      String(world.labels(slot.id).find((label) => label.key === 'ends-at')?.value ?? ''),
     )
     return (
       globalThis.Date.parse(value.starts_at) <= end && start <= globalThis.Date.parse(value.ends_at)
@@ -102,7 +102,11 @@ function validateSlot(world: World, payload: JsonValue, updating: boolean): stri
   return overlaps ? `slot overlaps or touches another live slot: ${value.slot_id}` : null
 }
 
-function validateBlock(world: World, payload: JsonValue, unblocking: boolean): string | null {
+function validateBlock(
+  world: ValidationWorld,
+  payload: JsonValue,
+  unblocking: boolean,
+): string | null {
   const value = blockPayload.parse(payload)
   if (!entity(world, 'workshop-space', value.space_id))
     return `unknown workshop space: ${value.space_id}`

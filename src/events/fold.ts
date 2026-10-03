@@ -234,7 +234,30 @@ export type ModuleEventAuthorize = (
 ) => boolean
 
 /** Validates a module event against the live world immediately before it folds. */
-export type ModuleEventValidate = (payload: JsonValue, world: World) => string | null
+/**
+ * The read surface an event validator receives. Deliberately not `World`.
+ *
+ * A validator checks invariants against live identity and labels; it never
+ * reads a resolved constraint, requirement, capability, diagnostic or module
+ * summary. Handing it a full `World` meant building one — a complete label sort
+ * plus a complete `resolve()` — before every validated event in the log, which
+ * made `derive` quadratic in the log's own length. Accessors rather than records
+ * keep every call O(1) or O(bucket) and make the quadratic unrepresentable: a
+ * future validator cannot reach for resolver output without widening this type
+ * on purpose.
+ *
+ * `entities` is unordered. Validators only ever ask whether some entity matches,
+ * and sorting a kind's whole population on every event would reintroduce the
+ * cost this type exists to remove.
+ */
+export type ValidationWorld = {
+  findEntity(kind: string, id: string): Entity | undefined
+  entities(kind: string): readonly Entity[]
+  labels(entityId: string): readonly Label[]
+  labelsByKey(key: string): readonly Label[]
+}
+
+export type ModuleEventValidate = (payload: JsonValue, world: ValidationWorld) => string | null
 
 export type KernelConfig = {
   entity_kinds?: readonly EntityKind[]
@@ -337,15 +360,30 @@ function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[
     expectedSeq += 1
   }
   const state = createMutableWorld()
+  // One view for the whole log: it reads through to `state`, so it stays current
+  // as the fold advances without being rebuilt per event.
+  const view = validationWorld(state)
   for (const event of validatedEvents) {
     const validator = config.event_validate_dispatch?.[event.type]
     if (validator) {
-      const error = validator(event.payload, worldFromState(state, config))
+      const error = validator(event.payload, view)
       if (error) throw new Error(error)
     }
     applyEvent(state, event, config)
   }
   return validatedEvents
+}
+
+function validationWorld(state: MutableWorld): ValidationWorld {
+  return {
+    findEntity: (kind, id) => {
+      const target = state.entities_by_id.get(id)
+      return target?.kind === kind ? target : undefined
+    },
+    entities: (kind) => [...(state.entities_by_kind.get(kind)?.values() ?? [])],
+    labels: (entityId) => entityLabels(state, entityId),
+    labelsByKey: (key) => [...(state.labels_by_key.get(key)?.values() ?? [])],
+  }
 }
 
 function createMutableWorld(): MutableWorld {
