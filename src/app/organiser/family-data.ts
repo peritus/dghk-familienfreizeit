@@ -15,6 +15,11 @@ export type FamilyPerson = {
   role: string
 }
 
+export type FamilyStatus = {
+  complete: boolean
+  open: readonly string[]
+}
+
 export function labelValue(labels: readonly Label[], key: string): string | null {
   const value = labels.find((label) => label.key === key)?.value
   return typeof value === 'string' ? value : null
@@ -78,6 +83,37 @@ export function familyPeople(world: World, familyId: string): readonly FamilyPer
       ),
     )
     .map((person) => personView(world, person))
+}
+
+function workshopWishCount(world: World, personId: string): number {
+  return (world.labels_by_entity[personId] ?? []).filter(
+    (label) => label.key === 'prefers-workshop',
+  ).length
+}
+
+/** The list status is a projection of the same labels edited by the detail views. */
+export function familyStatus(world: World, row: FamilyRow): FamilyStatus {
+  const open: string[] = []
+  const familyLabels = world.labels_by_entity[row.family.id] ?? []
+  for (const [key, label] of [
+    ['needs-private-sanitary', 'Eigenes Bad'],
+    ['needs-accessible', 'Barrierearmes Zimmer'],
+    ['sole-occupancy', 'Zimmer allein'],
+  ] as const) {
+    if (!familyLabels.some((label) => label.key === key)) open.push(label)
+  }
+
+  if (row.persons.length === 0) open.push('Personen')
+  for (const person of row.persons.map((entity) => personView(world, entity))) {
+    const name = personName(person) || person.entity.id
+    if (person.role === 'child' && !person.birthdate) open.push(`${name}: Alter`)
+    if (!world.labels_by_entity[person.entity.id]?.some((label) => label.key === 'diet')) {
+      open.push(`${name}: Essen`)
+    }
+    const target = person.role === 'infant' ? 0 : person.role === 'child' ? 2 : 1
+    if (workshopWishCount(world, person.entity.id) < target) open.push(`${name}: Workshops`)
+  }
+  return { complete: open.length === 0, open }
 }
 
 export function eventTypeLabel(type: string): string {
