@@ -46,12 +46,7 @@ export type WorkshopAllocationTraceOutcome =
   | 'repaired'
   | 'open'
 
-export type WorkshopAllocationTracePhase =
-  | 'round'
-  | 'retention'
-  | 'repair'
-  | 'fixed'
-  | 'result'
+export type WorkshopAllocationTracePhase = 'round' | 'retention' | 'repair' | 'fixed' | 'result'
 
 export type WorkshopAllocationTraceEvent = {
   id: string
@@ -159,10 +154,7 @@ function personName(world: World, personId: string): string {
   )
 }
 
-function personGroup(
-  world: World,
-  personId: string,
-): Exclude<WorkshopAllocationGroup, 'all'> {
+function personGroup(world: World, personId: string): Exclude<WorkshopAllocationGroup, 'all'> {
   return labelValue(world.labels_by_entity[personId] ?? [], 'role') === 'adult'
     ? 'adults'
     : 'children'

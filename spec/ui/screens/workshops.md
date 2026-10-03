@@ -83,7 +83,7 @@ automatic allocation only.
 Rank count, fairness targets, minimum workshops, `top_n`, unfulfilled-choice
 handling, and rank weights come from profile/module configuration. The UI
 renders those values and never embeds prototype constants. Per
-[D31](../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
+[D31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
 unfulfilled choices remain unassigned rather than being filled with an
 unchosen workshop.
 
