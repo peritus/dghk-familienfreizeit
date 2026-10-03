@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { useLocation } from 'wouter'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
+import type { World } from '../../../events/fold.js'
 import type { EventDraft, JsonValue } from '../../../events/types.js'
 import { Button } from '../../components/shared/ui/button.js'
+import { SegmentedControl } from '../../components/shared/ui/segmented-control.js'
+import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
 import {
   Dialog,
   DialogClose,
@@ -21,14 +24,15 @@ import {
   findFamily,
   labelBoolean,
   labelValue,
+  personAge,
   personName,
 } from '../family-data.js'
 import { familyTopicLabel, FamilyTopicNavigation } from '../components/family-navigation.js'
 import { organiserPaths, type FamilyTopic } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
-import { familyPreferencesConfig } from '../../../modules/family-preferences/index.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
+import { CollectionCreateAction } from '../components/collection-create-action.js'
 
 function eventTime(): string {
   return new Date().toISOString()
@@ -236,7 +240,7 @@ function FamilyRoomView({
 }: {
   family_id: string
   persons: ReturnType<typeof familyPeople>
-  world: NonNullable<ReturnType<typeof useOrganiser>['world']>
+  world: World
   actor: string
   stage: (events: readonly EventDraft[]) => void
 }) {
@@ -307,6 +311,346 @@ function FamilyRoomView({
   )
 }
 
+function makePersonId(givenName: string): string {
+  const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
+  return `per_${random.replaceAll('-', '').slice(0, 16)}_${givenName.toLowerCase()}`
+}
+
+const personRoleOptions = [
+  { value: 'adult', label: 'Erwachsene(r)' },
+  { value: 'child', label: 'Kind' },
+  { value: 'infant', label: 'Baby' },
+] as const
+
+export function FamilyPersonSidebar({
+  family_id: familyId,
+  topic,
+  persons,
+  selected_person_id: selectedPersonId,
+  on_select: onSelect,
+  adding,
+  on_add_change: onAddChange,
+  actor,
+  stage,
+}: {
+  family_id: string
+  topic: Exclude<FamilyTopic, 'zimmer'>
+  persons: ReturnType<typeof familyPeople>
+  selected_person_id?: string
+  on_select: (personId: string) => void
+  adding: boolean
+  on_add_change: (open: boolean) => void
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+}) {
+  const [, navigate] = useLocation()
+  return (
+    <aside className="grid content-start gap-3" aria-label="Person auswählen">
+      {persons.length ? (
+        <div
+          role="tablist"
+          aria-label="Person auswählen"
+          aria-orientation="vertical"
+          className="grid gap-2"
+        >
+          {persons.map((person) => {
+            const age = personAge(person.birthdate)
+            const selected = person.entity.id === selectedPersonId
+            return (
+              <button
+                key={person.entity.id}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => {
+                  onSelect(person.entity.id)
+                  void navigate(
+                    organiserPaths.family_person_topic(familyId, topic, person.entity.id),
+                  )
+                }}
+                className={`grid min-h-16 w-full justify-items-start gap-1 rounded-base border-2 border-border px-3 py-2 text-left ${selected ? 'bg-foreground text-background shadow-shadow' : 'bg-secondary-background hover:bg-main'}`}
+              >
+                <span className="font-bold">{personName(person) || person.entity.id}</span>
+                <span className={`text-sm ${selected ? 'text-background' : 'text-muted'}`}>
+                  {person.role === 'adult'
+                    ? 'Erwachsene(r)'
+                    : person.role === 'infant'
+                      ? 'Baby'
+                      : age === null
+                        ? 'Kind · Alter fehlt'
+                        : `Kind · ${age} ${age === 1 ? 'Jahr' : 'Jahre'}`}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      ) : (
+        <p className="rounded-base border-2 border-dashed border-muted p-3">
+          Noch niemand eingetragen.
+        </p>
+      )}
+      <CollectionCreateAction
+        label="Person hinzufügen"
+        title="Person hinzufügen"
+        description="Lege eine Person in dieser Familie an."
+        open={adding}
+        on_open_change={onAddChange}
+      >
+        <PersonForm
+          family_id={familyId}
+          actor={actor}
+          stage={stage}
+          on_done={() => onAddChange(false)}
+          is_new
+        />
+      </CollectionCreateAction>
+    </aside>
+  )
+}
+
+function PersonForm({
+  family_id: familyId,
+  person,
+  actor,
+  stage,
+  on_done: onDone,
+  is_new: isNew = false,
+}: {
+  family_id: string
+  person?: ReturnType<typeof familyPeople>[number]
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+  on_done: () => void
+  is_new?: boolean
+}) {
+  const [givenName, setGivenName] = useState(person?.given_name ?? '')
+  const [familyName, setFamilyName] = useState(person?.family_name ?? '')
+  const [role, setRole] = useState(person?.role ?? 'adult')
+  const [birthdate, setBirthdate] = useState(person?.birthdate ?? '')
+  const [error, setError] = useState<string | null>(null)
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const given = givenName.trim()
+    const family = familyName.trim()
+    if (!given || !family) {
+      setError('Bitte gib Vor- und Nachnamen ein.')
+      return
+    }
+    const nextBirthdate =
+      role === 'adult' || role === 'infant' ? birthdate || null : birthdate || null
+    if (isNew) {
+      stage([
+        {
+          at: eventTime(),
+          actor,
+          subject: familyId,
+          type: 'PersonAdded',
+          payload: {
+            person_id: makePersonId(given),
+            family_id: familyId,
+            given_name: given,
+            family_name: family,
+            birthdate: nextBirthdate,
+            role,
+          },
+        },
+      ])
+    } else if (person) {
+      stage([
+        {
+          at: eventTime(),
+          actor,
+          subject: familyId,
+          type: 'PersonUpdated',
+          payload: {
+            person_id: person.entity.id,
+            family_id: familyId,
+            given_name: given,
+            family_name: family,
+            birthdate: nextBirthdate,
+            role,
+          },
+        },
+      ])
+    }
+    onDone()
+  }
+
+  return (
+    <form className="grid gap-4" onSubmit={submit}>
+      {error ? <p role="alert">{error}</p> : null}
+      <SegmentedControl
+        label="Altersgruppe"
+        value={role}
+        onChange={setRole}
+        options={personRoleOptions}
+      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-1">
+          <span className="font-bold">Vorname</span>
+          <input
+            required
+            value={givenName}
+            onChange={(event) => setGivenName(event.target.value)}
+            className="min-h-11 rounded-base border-2 border-border px-3"
+          />
+        </label>
+        <label className="grid gap-1">
+          <span className="font-bold">Nachname</span>
+          <input
+            required
+            value={familyName}
+            onChange={(event) => setFamilyName(event.target.value)}
+            className="min-h-11 rounded-base border-2 border-border px-3"
+          />
+        </label>
+      </div>
+      <label className="grid max-w-xs gap-1">
+        <span className="font-bold">Geburtsdatum</span>
+        <input
+          type="date"
+          value={birthdate}
+          onChange={(event) => setBirthdate(event.target.value)}
+          className="min-h-11 rounded-base border-2 border-border px-3"
+        />
+      </label>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button type="button" variant="neutral" onClick={onDone}>
+          Abbrechen
+        </Button>
+        <Button type="submit">{isNew ? 'Person hinzufügen' : 'Speichern'}</Button>
+      </div>
+    </form>
+  )
+}
+
+function FamilyPeopleView({
+  family_id: familyId,
+  persons,
+  actor,
+  stage,
+  selected_person_id: selectedPersonId,
+  on_select: onSelect,
+}: {
+  family_id: string
+  persons: ReturnType<typeof familyPeople>
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+  selected_person_id?: string
+  on_select: (personId: string) => void
+}) {
+  const [adding, setAdding] = useState(false)
+  const selected = persons.find((person) => person.entity.id === selectedPersonId) ?? persons[0]
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  if (!selected) {
+    return (
+      <Card className="bg-secondary-background">
+        <CardHeader>
+          <h3 className="text-xl">Personen</h3>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <p>Noch niemand eingetragen. Mit „Person hinzufügen“ geht es los.</p>
+          <CollectionCreateAction
+            label="Person hinzufügen"
+            title="Person hinzufügen"
+            description="Lege eine Person in dieser Familie an."
+            open={adding}
+            on_open_change={setAdding}
+          >
+            <PersonForm
+              family_id={familyId}
+              actor={actor}
+              stage={stage}
+              on_done={() => setAdding(false)}
+              is_new
+            />
+          </CollectionCreateAction>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-[minmax(13rem,23%)_minmax(0,1fr)]">
+      <FamilyPersonSidebar
+        family_id={familyId}
+        topic="personen"
+        persons={persons}
+        selected_person_id={selected.entity.id}
+        on_select={onSelect}
+        adding={adding}
+        on_add_change={setAdding}
+        actor={actor}
+        stage={stage}
+      />
+      <div className="grid min-w-0 gap-5">
+        <Card className="bg-secondary-background">
+          <CardHeader>
+            <h3 className="text-xl">Person</h3>
+            <p className="text-muted">
+              {personName(selected) || selected.entity.id} ·{' '}
+              {selected.role === 'adult'
+                ? 'Erwachsene(r)'
+                : selected.role === 'infant'
+                  ? 'Baby'
+                  : personAge(selected.birthdate) === null
+                    ? 'Kind · Alter fehlt'
+                    : `Kind · ${personAge(selected.birthdate)} Jahre`}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <PersonForm
+              key={selected.entity.id}
+              family_id={familyId}
+              person={selected}
+              actor={actor}
+              stage={stage}
+              on_done={() => undefined}
+            />
+          </CardContent>
+        </Card>
+        <section
+          className="grid gap-3 rounded-base border-2 border-dashed border-muted p-5"
+          aria-labelledby="remove-person-title"
+        >
+          <h3 id="remove-person-title" className="font-bold">
+            Person entfernen
+          </h3>
+          <p>
+            Entfernt {personName(selected) || selected.entity.id} mit allen Angaben zu Essen und
+            Workshops.
+          </p>
+          <div>
+            <Button type="button" variant="neutral" onClick={() => setConfirmDelete(true)}>
+              Person entfernen
+            </Button>
+          </div>
+          <DestructiveActionDialog
+            open={confirmDelete}
+            onOpenChange={setConfirmDelete}
+            title={`${personName(selected) || selected.entity.id} wirklich entfernen?`}
+            description="Alle Angaben zu Essen und Workshops gehen verloren. Das lässt sich nicht rückgängig machen."
+            onConfirm={() =>
+              stage([
+                {
+                  at: eventTime(),
+                  actor,
+                  subject: selected.entity.id,
+                  type: 'PersonWithdrawn',
+                  payload: { person_id: selected.entity.id, reason: null },
+                },
+              ])
+            }
+          />
+        </section>
+      </div>
+    </div>
+  )
+}
+
 export function FamilyDetail({
   family_id: familyId,
   topic: requestedTopic = 'zimmer',
@@ -329,8 +673,6 @@ export function FamilyDetail({
   const email = labelValue(labels, 'email') ?? ''
   const people = familyPeople(world!, selectedFamilyId)
   const status = familyStatus(world!, family)
-  const sections = familyPreferencesConfig(activeProfile).sections
-  const peopleSection = sections.find((section) => section.key === 'people')
   const detailPersonId =
     personId && people.some((person) => person.entity.id === personId) ? personId : undefined
 
@@ -344,6 +686,16 @@ export function FamilyDetail({
       nextPerson
         ? organiserPaths.family_person_topic(selectedFamilyId, next, nextPerson)
         : organiserPaths.family_topic(selectedFamilyId, next),
+    )
+  }
+
+  function selectPerson(nextPersonId: string) {
+    void navigate(
+      organiserPaths.family_person_topic(
+        selectedFamilyId,
+        topic === 'zimmer' ? 'personen' : topic,
+        nextPersonId,
+      ),
     )
   }
 
@@ -381,16 +733,14 @@ export function FamilyDetail({
               actor={state.principal_email}
               stage={stage}
             />
-          ) : topic === 'personen' && peopleSection ? (
-            <FamilyPreferencesControls
-              profile={activeProfile}
+          ) : topic === 'personen' ? (
+            <FamilyPeopleView
               family_id={selectedFamilyId}
-              persons={family.persons}
-              world={world!}
+              persons={people}
               actor={state.principal_email}
               stage={stage}
-              section_keys={[peopleSection.key]}
-              person_id={detailPersonId}
+              selected_person_id={detailPersonId}
+              on_select={selectPerson}
             />
           ) : (
             <p className="rounded-base border-2 border-dashed border-muted p-5">
