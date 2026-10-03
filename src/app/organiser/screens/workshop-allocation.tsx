@@ -118,7 +118,9 @@ export function WorkshopAllocation() {
   }
 
   const openTrace = (answer: { id: string }) => {
-    setTraceMode('highlight')
+    const person = projection.person_names.find((item) => item.id === answer.id)
+    if (person) setSelectedPersonName(person.name)
+    if (traceMode === 'all') setTraceMode('highlight')
     void navigate(
       `${organiserPaths.workshop_allocation_trace()}?person=${encodeURIComponent(answer.id)}`,
     )

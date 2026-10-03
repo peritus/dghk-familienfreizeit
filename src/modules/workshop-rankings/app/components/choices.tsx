@@ -565,7 +565,11 @@ function TraceDetailGroups({
         const selected = match.person.id === selectedPersonId
         const personContent = (
           <span
-            className={`font-bold underline underline-offset-2 ${selected ? 'rounded-sm bg-foreground px-1 text-background' : ''}`}
+            className={
+              selected
+                ? 'rounded-sm bg-foreground px-1 text-background no-underline'
+                : 'underline underline-offset-2'
+            }
           >
             {match.person.name}
           </span>
