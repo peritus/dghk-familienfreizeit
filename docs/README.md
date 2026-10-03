@@ -23,6 +23,8 @@ are separate claims and require separate evidence.
 - [Design system](ui/design-system.md): copied primitives and shell styling.
 - [Local UI contract](ui/storybook.md): Storybook, Markdown guidance, coverage, and visual baselines.
 - [Development](engineering/development.md): installation, CI and local preview.
+- [Hosted performance analysis](engineering/performance-analysis.md): repeatable
+  API, Chromium, Cloudflare trace, and guarded mutation benchmarking.
 - [Testing](engineering/testing.md): checks and verification limits.
 - [Documentation workflow](engineering/documentation.md): maintaining this split.
 
