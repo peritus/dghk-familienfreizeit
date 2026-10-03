@@ -1,5 +1,6 @@
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
+import { tracing } from 'cloudflare:workers'
 import { assertAppendableWorld, derive } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
@@ -37,8 +38,8 @@ app.post('/api/login', async (context) => {
     })
     .catch(() => null)
   if (!email) return context.json({ accepted: true })
-  const events = await readEvents(context.env.DB, activeProfile.validation_view)
-  const world = derive(events, activeProfile.validation_view)
+  const events = await readEventLog(context)
+  const world = deriveEventWorld(events)
   const familyExists = familyForEmail(world, email) !== null
   const result = await issueMagicLink(
     context.env.DB,
@@ -100,7 +101,7 @@ app.get('/api/organiser/log', async (context) => {
   const principal = await principalFromContext(context)
   if (!principal || principal.kind !== 'organiser')
     return context.json({ error: 'unauthorized' }, 401)
-  const events = await readEvents(context.env.DB, activeProfile.validation_view)
+  const events = await readEventLog(context)
   return context.json({
     events,
     head_seq: events.length,
@@ -145,7 +146,7 @@ app.post('/api/organiser/apply', async (context) => {
       409,
     )
 
-  const existing = await readEvents(context.env.DB, activeProfile.validation_view)
+  const existing = await readEventLog(context)
   const inputSeq = body.input_seq as number
   if (inputSeq !== existing.length)
     return context.json(
@@ -161,26 +162,30 @@ app.post('/api/organiser/apply', async (context) => {
   try {
     const now = new Date().toISOString()
     const drafts = body.events.map((candidate) => eventDraft(candidate, principal.email, now))
-    const events = prepareEventBatch(existing, drafts, activeProfile.validation_view)
-    if (
-      events.some(
+    const events = tracing.enterSpan('events.prepare_and_validate', (span) => {
+      span.setAttribute('event.count', drafts.length)
+      return prepareEventBatch(existing, drafts, activeProfile.validation_view)
+    })
+    const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
+      span.setAttribute('event.count', events.length)
+      return events.some(
         (event) =>
           !canAppendEvent(
             principal,
             event,
-            derive(existing, activeProfile.validation_view),
+            deriveEventWorld(existing),
             activeProfile.validation_view,
           ),
       )
-    )
+    })
+    if (forbidden)
       return context.json({ error: 'forbidden' }, 403)
-    const appended = await appendEvents(
-      context.env.DB,
+    const appended = await appendEventBatch(
+      context,
       inputSeq,
       events.map(({ seq: _seq, ...event }) => event),
-      activeProfile.validation_view,
     )
-    const world = derive([...existing, ...appended], activeProfile.validation_view)
+    const world = deriveEventWorld([...existing, ...appended])
     return context.json({
       events: appended,
       head_seq: inputSeq + appended.length,
@@ -223,7 +228,7 @@ app.post('/api/events', async (context) => {
   )
     return context.json({ error: 'invalid_request' }, 400)
   const expectedHead: number = body.expected_head
-  const existing = await readEvents(context.env.DB, activeProfile.validation_view)
+  const existing = await readEventLog(context)
   if (expectedHead !== existing.length)
     return context.json(
       {
@@ -234,26 +239,33 @@ app.post('/api/events', async (context) => {
       },
       409,
     )
-  const world = derive(existing, activeProfile.validation_view)
+  const world = deriveEventWorld(existing)
   const now = new Date().toISOString()
   try {
     const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
     const schemas = eventPayloadSchemas(activeProfile.validation_view)
-    const events = drafts.map((draft, index) =>
-      parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
-    )
-    if (
-      events.some(
+    const events = tracing.enterSpan('events.parse_and_validate', (span) => {
+      const parsed = drafts.map((draft, index) =>
+        parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
+      )
+      span.setAttribute('event.count', parsed.length)
+      return parsed
+    })
+    const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
+      span.setAttribute('event.count', events.length)
+      return events.some(
         (event) => !canAppendEvent(principal, event, world, activeProfile.validation_view),
       )
-    )
+    })
+    if (forbidden)
       throw new Error('forbidden')
-    assertAppendableWorld(derive([...existing, ...events], activeProfile.validation_view))
-    await appendEvents(
-      context.env.DB,
+    tracing.enterSpan('events.validate_world', () =>
+      assertAppendableWorld(deriveEventWorld([...existing, ...events])),
+    )
+    await appendEventBatch(
+      context,
       expectedHead,
       events.map(({ seq: _seq, ...event }) => event),
-      activeProfile.validation_view,
     )
     return context.json({ head: expectedHead + events.length }, 201)
   } catch (error) {
@@ -287,12 +299,43 @@ export default app
 async function principalFromContext(
   context: Context<{ Bindings: Env }>,
 ): Promise<Principal | null> {
-  return currentPrincipal(
-    context.env.DB,
-    getCookie(context, 'sid'),
-    { isOrganiser },
-    activeProfile.validation_view,
-  )
+  return tracing.enterSpan('auth.resolve_principal', async (span) => {
+    const principal = await currentPrincipal(
+      context.env.DB,
+      getCookie(context, 'sid'),
+      { isOrganiser },
+      activeProfile.validation_view,
+    )
+    if (principal) span.setAttribute('auth.kind', principal.kind)
+    return principal
+  })
+}
+
+async function readEventLog(context: Context<{ Bindings: Env }>) {
+  return tracing.enterSpan('events.read_log', async (span) => {
+    const events = await readEvents(context.env.DB, activeProfile.validation_view)
+    span.setAttribute('event.count', events.length)
+    return events
+  })
+}
+
+function deriveEventWorld(events: Parameters<typeof derive>[0]) {
+  return tracing.enterSpan('events.derive_world', (span) => {
+    span.setAttribute('event.count', events.length)
+    return derive(events, activeProfile.validation_view)
+  })
+}
+
+async function appendEventBatch(
+  context: Context<{ Bindings: Env }>,
+  expectedHead: number,
+  drafts: readonly EventDraft[],
+) {
+  return tracing.enterSpan('events.append_batch', async (span) => {
+    span.setAttribute('event.count', drafts.length)
+    span.setAttribute('event.expected_head', expectedHead)
+    return appendEvents(context.env.DB, expectedHead, drafts, activeProfile.validation_view)
+  })
 }
 
 function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): boolean {
