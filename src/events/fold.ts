@@ -266,6 +266,19 @@ type MutableWorld = {
   module_entities: Map<string, Entity>
   /** Currently live entities, kernel and module alike, keyed by id. Retirement removes the entry (D27). */
   entities_by_id: Map<string, Entity>
+  /**
+   * Live state indexed the three ways the fold itself queries it. Each inner map
+   * is keyed by the same composite key as `labels`, so one label can be dropped
+   * from every index without scanning a bucket.
+   *
+   * These exist because the alternatives are all linear in the whole store:
+   * restating a label, retiring an entity, and a module fold asking for one
+   * entity's labels each used to walk every label the occasion has, which makes
+   * folding a log quadratic in its own length.
+   */
+  entities_by_kind: Map<string, Map<string, Entity>>
+  labels_by_entity: Map<string, Map<string, Label>>
+  labels_by_key: Map<string, Map<string, Label>>
 }
 
 export function derive(events: readonly Event[], config: KernelConfig = {}): World {
@@ -344,7 +357,46 @@ function createMutableWorld(): MutableWorld {
     head_seq: 0,
     module_entities: new Map(),
     entities_by_id: new Map(),
+    entities_by_kind: new Map(),
+    labels_by_entity: new Map(),
+    labels_by_key: new Map(),
   }
+}
+
+function indexBucket<T>(index: Map<string, Map<string, T>>, key: string): Map<string, T> {
+  const existing = index.get(key)
+  if (existing) return existing
+  const created = new Map<string, T>()
+  index.set(key, created)
+  return created
+}
+
+function dropFromBucket<T>(index: Map<string, Map<string, T>>, key: string, member: string): void {
+  const target = index.get(key)
+  if (!target) return
+  target.delete(member)
+  if (target.size === 0) index.delete(key)
+}
+
+/** The only write path into `labels`; keeps both label indexes in step. */
+function putLabel(state: MutableWorld, mapKey: string, label: Label): void {
+  state.labels.set(mapKey, label)
+  indexBucket(state.labels_by_entity, label.entity_id).set(mapKey, label)
+  indexBucket(state.labels_by_key, label.key).set(mapKey, label)
+}
+
+/** The only delete path out of `labels`; keeps both label indexes in step. */
+function dropLabel(state: MutableWorld, mapKey: string): void {
+  const label = state.labels.get(mapKey)
+  if (!label) return
+  state.labels.delete(mapKey)
+  dropFromBucket(state.labels_by_entity, label.entity_id, mapKey)
+  dropFromBucket(state.labels_by_key, label.key, mapKey)
+}
+
+/** Live labels of one entity, in insertion order (which is `set_seq` order). */
+function entityLabels(state: MutableWorld, entityId: string): readonly Label[] {
+  return [...(state.labels_by_entity.get(entityId)?.values() ?? [])]
 }
 
 function worldFromState(state: MutableWorld, config: KernelConfig): World {
@@ -427,8 +479,8 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         new_display_name: newDisplayName,
       } = (event as unknown as FamilyDisplayNameChanged).payload
       requireEntity(state.families, familyId, 'family')
-      const currentDisplayName = [...state.labels.values()].find(
-        (label) => label.entity_id === familyId && label.key === 'display-name',
+      const currentDisplayName = entityLabels(state, familyId).find(
+        (label) => label.key === 'display-name',
       )
       if (currentDisplayName?.value !== oldDisplayName)
         throw new Error(`old display name does not match family: ${familyId}`)
@@ -448,7 +500,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
       const { person_id: personId } = (event as unknown as PersonWithdrawn).payload
       requireEntity(state.persons, personId, 'person')
       state.persons.delete(personId)
-      state.entities_by_id.delete(personId)
+      unregisterEntity(state, personId)
       removeLabelsForEntity(state, personId)
       break
     }
@@ -476,7 +528,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         state.entities_by_id.get(entityId),
       )
       if (value === null) replaceLabels(state, entityId, clearKey)
-      else state.labels.delete(labelKey(entityId, clearKey, value))
+      else dropLabel(state, labelKey(entityId, clearKey, value))
       break
     }
     default: {
@@ -488,11 +540,8 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
           return target?.kind === kind ? target : undefined
         },
         entities: (kind) =>
-          [...state.entities_by_id.values()]
-            .filter((entity) => entity.kind === kind)
-            .sort(sortEntities),
-        labels: (entityId) =>
-          [...state.labels.values()].filter((label) => label.entity_id === entityId),
+          [...(state.entities_by_kind.get(kind)?.values() ?? [])].sort(sortEntities),
+        labels: (entityId) => entityLabels(state, entityId),
         setSortKey: (kind, id, sortKey) => {
           const target = state.entities_by_id.get(id)
           if (!target || target.kind !== kind) throw new Error(`unknown ${kind}: ${id}`)
@@ -507,7 +556,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
           const target = state.entities_by_id.get(id)
           if (!target || target.kind !== kind) throw new Error(`unknown ${kind}: ${id}`)
           state.module_entities.delete(id)
-          state.entities_by_id.delete(id)
+          unregisterEntity(state, id)
           removeLabelsForEntity(state, id)
         },
         clearLabel: (entityId, key) => {
@@ -554,7 +603,16 @@ function registerEntity(
   if (state.entities_by_id.has(id)) throw new Error(`entity already exists: ${id}`)
   const created = entity(id, kind, seq, sortKey)
   state.entities_by_id.set(id, created)
+  indexBucket(state.entities_by_kind, kind).set(id, created)
   return created
+}
+
+/** The only removal path for a live entity; keeps the per-kind index in step. */
+function unregisterEntity(state: MutableWorld, id: string): void {
+  const target = state.entities_by_id.get(id)
+  if (!target) return
+  state.entities_by_id.delete(id)
+  dropFromBucket(state.entities_by_kind, target.kind, id)
 }
 
 function addPerson(
@@ -606,7 +664,7 @@ function setLabel(
   note: string | null,
   sensitivity: Label['sensitivity'] = 'normal',
 ): void {
-  state.labels.set(labelKey(entityId, key, value), {
+  putLabel(state, labelKey(entityId, key, value), {
     entity_id: entityId,
     key,
     value,
@@ -702,16 +760,18 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
 
 /** Removes every live label under `key` for `entityId` (a restatement or an explicit clear-all). */
 function replaceLabels(state: MutableWorld, entityId: string, key: string): void {
-  const prefix = `${entityId}|${key}|`
-  for (const mapKey of state.labels.keys())
-    if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
+  const bucket = state.labels_by_entity.get(entityId)
+  if (!bucket) return
+  const doomed: string[] = []
+  for (const [mapKey, label] of bucket) if (label.key === key) doomed.push(mapKey)
+  for (const mapKey of doomed) dropLabel(state, mapKey)
 }
 
 /** Removes every live label belonging to `entityId`, regardless of key (entity retirement). */
 function removeLabelsForEntity(state: MutableWorld, entityId: string): void {
-  const prefix = `${entityId}|`
-  for (const mapKey of state.labels.keys())
-    if (mapKey.startsWith(prefix)) state.labels.delete(mapKey)
+  const bucket = state.labels_by_entity.get(entityId)
+  if (!bucket) return
+  for (const mapKey of [...bucket.keys()]) dropLabel(state, mapKey)
 }
 
 function labelKey(entityId: string, key: string, value: JsonValue): string {
