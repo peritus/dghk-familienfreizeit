@@ -563,13 +563,14 @@ function TraceDetailGroups({
         )
       } else if (match.person) {
         const selected = match.person.id === selectedPersonId
-        const person = (
+        const personContent = (
           <span
-            className={`font-bold underline underline-offset-2 ${item.strike_people ? 'line-through' : ''} ${selected ? 'rounded-sm bg-foreground px-1 text-background' : ''}`}
+            className={`font-bold underline underline-offset-2 ${selected ? 'rounded-sm bg-foreground px-1 text-background' : ''}`}
           >
             {match.person.name}
           </span>
         )
+        const person = item.strike_people ? <s>{personContent}</s> : personContent
         parts.push(
           onPersonId ? (
             <button
