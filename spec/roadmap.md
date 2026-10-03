@@ -54,10 +54,10 @@ Specification coverage: [authentication](application/authentication.md), [family
   authentication delivery intent. M10 may print the link in development, but
   does not render hosted messages, call provider transport, or record delivery
   outcomes.
-- Treat [issue 041](issues/open/041-authentication-family-access-security-readiness.md)
+- Treat [issue 041](issues/open/041-person-updated-cross-family-authorization.md)
   as a blocking gate: do not enable family login, family sessions, or family
-  writes until its cross-family authorization matrix, privacy projections, and
-  browser access checks pass.
+  writes until the `PersonUpdated` cross-family authorization fix and its
+  regression tests pass.
 - Render the shared profile-driven controls for families through the same
   definitions and ordinary event path, including deadline notices and assignment
   cards.
@@ -153,9 +153,6 @@ and cross-cutting frontend requirements.
 
 - Implement production migrations, secrets, bindings, backups, recovery,
   preview environments, health checks, and the pre-occasion runbook.
-- Close the hosted-environment and launch-verification portions of [issue 041](issues/open/041-authentication-family-access-security-readiness.md),
-  including canonical preview/production URLs, security headers, cleanup,
-  observability redaction, abuse limits, and session-revocation rehearsal.
 - Run dependency, security, privacy, performance, accessibility, deliverability,
   identity, and exported-log rehearsal checks.
 - Record the final cut-line decisions before deployment.
