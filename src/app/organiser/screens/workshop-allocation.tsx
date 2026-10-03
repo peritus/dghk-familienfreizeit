@@ -4,6 +4,7 @@ import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
+import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import {
   WorkshopScreenHeader,
   WorkshopSectionHeader,
@@ -24,6 +25,7 @@ import {
   WorkshopAllocationEmptyState,
   WorkshopAllocationGroupFilter,
   WorkshopAllocationSummary,
+  WorkshopAllocationStatus,
 } from '../../../modules/workshop-rankings/app/components/workshop-allocation.js'
 import {
   buildWorkshopAllocationProjection,
@@ -34,6 +36,82 @@ import {
 } from '../../../modules/workshop-rankings/app/workshop-allocation-view.js'
 
 type WorkshopAllocationView = 'answers' | 'demand' | 'trace'
+
+const rankLegendTones = ['bg-yellow-300', 'bg-orange-300', 'bg-red-300', 'bg-purple-300', 'bg-blue-300']
+
+function WorkshopAllocationTraceContext({
+  projection,
+  group,
+  selected_person_id: selectedPersonId,
+}: {
+  projection: WorkshopAllocationProjection
+  group: WorkshopAllocationGroup
+  selected_person_id?: string
+}) {
+  const people = projection.trace_people.filter(
+    (person) =>
+      group === 'all' ||
+      projection.answers.find((answer) => answer.id === person.id)?.group === group,
+  )
+  const selected = people.find((person) => person.id === selectedPersonId)
+  if (selected) {
+    const noWishes = selected.wish_count === 0
+    return (
+      <div className="rounded-base border-2 border-border bg-paper p-4">
+        <h3 className="font-heading text-lg">Kontext für {selected.name}</h3>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div>
+            <dt className="text-sm text-muted">Person</dt>
+            <dd className="font-bold">{selected.name}, {selected.age_label}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-muted">Passende Workshops</dt>
+            <dd className="font-bold tabular-nums">{selected.matching_workshop_count}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-muted">Leitet</dt>
+            <dd className="font-bold">{selected.leading_workshops.join(', ') || '—'}</dd>
+          </div>
+        </dl>
+        {noWishes ? (
+          <p className="mt-4 rounded-base border-2 border-border bg-background p-3 text-sm">
+            <strong>{selected.name} hat keine Wünsche.</strong>{' '}
+            {selected.status === 'Keine Präferenz'
+              ? 'Bewusst keine Präferenz.'
+              : selected.status === 'Keine Antwort'
+                ? 'Noch keine Antwort.'
+                : 'Keine Rangfolge abgegeben.'}
+            {selected.age_label !== 'erwachsen'
+              ? ' Plätze kommen nur aus freien Plätzen.'
+              : ' Erwachsene ohne Wünsche bekommen keine Plätze zugeteilt.'}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+  const ranked = people.filter((person) => person.wish_count > 0).length
+  const noPreference = people.filter((person) => person.status === 'Keine Präferenz').length
+  const noAnswer = people.filter((person) => person.status === 'Keine Antwort').length
+  return (
+    <div className="rounded-base border-2 border-border bg-paper p-4">
+      <h3 className="font-heading text-lg">Kontext</h3>
+      <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        {[
+          ['Personen', people.length],
+          ['mit Rangfolge', ranked],
+          ['Keine Präferenz', noPreference],
+          ['Keine Antwort', noAnswer],
+          ['ohne Zuordnung', projection.unassigned_person_ids.filter((id) => people.some((person) => person.id === id)).length],
+        ].map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-sm text-muted">{label}</dt>
+            <dd className="font-bold tabular-nums">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
 
 function allocationView(pathname: string): WorkshopAllocationView {
   if (pathname.split('?')[0]?.endsWith('/allocation/demand')) return 'demand'
@@ -120,6 +198,40 @@ export function WorkshopAllocation() {
         title="Wünsche"
         description="Was gewünscht wurde und wie die automatische Zuordnung daraus entsteht."
       />
+      <WorkflowStepper
+        aria_label="Ablauf der Workshopwahl"
+        steps={[
+          {
+            id: 'authoring',
+            label: 'Workshops anlegen',
+            state: projection.has_workshops ? 'complete' : 'current',
+            description: projection.has_workshops ? 'Workshopplan vorhanden' : 'Workshopplan vorbereiten',
+          },
+          {
+            id: 'choice',
+            label: 'Wahl öffnen',
+            state: projection.has_workshops ? 'complete' : 'upcoming',
+            description: projection.has_answers ? 'Antworten liegen vor' : 'Wünsche erfassen',
+          },
+          {
+            id: 'review',
+            label: 'Zuordnung prüfen',
+            state: projection.has_answers ? 'current' : 'upcoming',
+            description: 'Bedarf, Plätze und Konflikte kontrollieren',
+          },
+          {
+            id: 'fixed',
+            label: 'Festgelegt',
+            state: 'upcoming',
+            description: 'Plan veröffentlichen und Listen erzeugen',
+          },
+        ]}
+      />
+      <WorkshopAllocationStatus label={projection.has_answers ? 'Zuordnung prüfen' : 'Vorbereitung'}>
+        {projection.has_answers
+          ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte vor dem Festlegen.'
+          : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
+      </WorkshopAllocationStatus>
       <WorkshopAllocationConflictNotice projection={projection} />
       <TertiaryNavigation
         aria_label="Wünsche"
@@ -174,8 +286,13 @@ export function WorkshopAllocation() {
       {view === 'trace' ? (
         <section className="space-y-5" aria-labelledby="allocation-trace-heading">
           <WorkshopSectionHeader
-            title="Verlauf"
-            description="Warum Wünsche erfüllt, zurückgestellt oder nicht berücksichtigt wurden."
+            title="Was ist aus jedem Wunsch geworden?"
+            description="Runde für Runde, mit den Personen, die es betrifft."
+          />
+          <WorkshopAllocationTraceContext
+            projection={projection}
+            group={group}
+            selected_person_id={selectedPerson?.id}
           />
           <TraceControls
             mode={traceMode}
@@ -186,7 +303,10 @@ export function WorkshopAllocation() {
           />
           <TraceLegend
             items={[
-              { label: 'erfüllt', tone: 'bg-main' },
+              ...Array.from({ length: rankingLimit() }, (_, index) => ({
+                label: `${index + 1}. Wahl erfüllt`,
+                tone: rankLegendTones[index] ?? 'bg-main',
+              })),
               { label: 'voll', tone: 'bg-danger' },
               { label: 'Überschneidung', tone: 'bg-secondary-background' },
               { label: 'leitet selbst', tone: 'bg-paper' },
