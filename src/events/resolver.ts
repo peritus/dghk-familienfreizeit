@@ -3,8 +3,10 @@ import type {
   Entity,
   KernelConfig,
   Label,
+  LabelSchema,
   ResolverDescriptor,
 } from './fold.js'
+import type { JsonValue } from './types.js'
 
 export type ResolvedConstraint = {
   key: string
@@ -65,6 +67,39 @@ export function resolve(
   const derived = new Map<string, CapabilityDescriptor>(
     (config.capability_descriptors ?? []).map((item) => [item.key, item]),
   )
+  /**
+   * Per-entity `key -> first value` views, built once per entity on first use.
+   * `valid_for` and every capability descriptor call one of these, and each call
+   * used to scan that entity's labels again. First value wins, which is the
+   * order `labels` is already sorted in.
+   */
+  const viewCache = new Map<string, { label(key: string): JsonValue | undefined }>()
+  const viewFor = (entityId: string): { label(key: string): JsonValue | undefined } => {
+    const cached = viewCache.get(entityId)
+    if (cached) return cached
+    const values = new Map<string, JsonValue>()
+    for (const label of labelsByEntity.get(entityId) ?? [])
+      if (!values.has(label.key)) values.set(label.key, label.value)
+    const created = { label: (key: string): JsonValue | undefined => values.get(key) }
+    viewCache.set(entityId, created)
+    return created
+  }
+  /** Scoped schema and descriptor lookups, so a per-entity pass never walks the whole declaration set. */
+  const cardinalitySchemasByKind = new Map<string, LabelSchema[]>()
+  for (const schema of schemas.values()) {
+    if (schema.cardinality === undefined) continue
+    for (const scope of schema.scopes ?? []) bucketOf(cardinalitySchemasByKind, scope).push(schema)
+  }
+  const derivedByKind = new Map<string, CapabilityDescriptor[]>()
+  for (const descriptor of derived.values())
+    for (const scope of descriptor.scopes) bucketOf(derivedByKind, scope).push(descriptor)
+  /** `entity id -> label key -> live count`, for the cardinality pass. */
+  const countsByEntity = new Map<string, Map<string, number>>()
+  for (const label of labels) {
+    const counts = countsByEntity.get(label.entity_id) ?? new Map<string, number>()
+    counts.set(label.key, (counts.get(label.key) ?? 0) + 1)
+    countsByEntity.set(label.entity_id, counts)
+  }
   for (const label of labels) {
     const entity = entityById.get(label.entity_id)
     const schema = schemas.get(label.key)
@@ -102,7 +137,7 @@ export function resolve(
           `label ${label.key} is not valid for ${entity.kind}`,
         ),
       )
-    if (schema?.valid_for && entity && !schema.valid_for(labelView(entity.id, labelsByEntity)))
+    if (schema?.valid_for && entity && !schema.valid_for(viewFor(entity.id)))
       diagnostics.push(
         diagnostic(
           'kernel.valid-for',
@@ -192,10 +227,8 @@ export function resolve(
     }
   }
   for (const entity of entities)
-    for (const schema of schemas.values()) {
-      if (!schema.scopes?.includes(entity.kind) || schema.cardinality === undefined) continue
-      const count =
-        labelsByEntity.get(entity.id)?.filter((label) => label.key === schema.key).length ?? 0
+    for (const schema of cardinalitySchemasByKind.get(entity.kind) ?? []) {
+      const count = countsByEntity.get(entity.id)?.get(schema.key) ?? 0
       const invalid =
         (schema.cardinality === 'exactly-one' && count !== 1) ||
         (schema.cardinality === 'zero-or-one' && count > 1)
@@ -210,12 +243,8 @@ export function resolve(
         )
     }
   for (const entity of entities)
-    for (const descriptor of derived.values()) {
-      if (
-        !descriptor.scopes.includes(entity.kind) ||
-        !descriptor.derive?.(labelView(entity.id, labelsByEntity))
-      )
-        continue
+    for (const descriptor of derivedByKind.get(entity.kind) ?? []) {
+      if (!descriptor.derive?.(viewFor(entity.id))) continue
       capabilities.push({
         entity_id: entity.id,
         key: descriptor.key,
@@ -223,6 +252,15 @@ export function resolve(
         set_seq: entity.created_seq,
       })
     }
+  // Required relations indexed by holder and target, so detecting a
+  // contradiction is a lookup rather than a scan of every constraint.
+  const requiredRelations = new Set<string>()
+  for (const constraint of constraints)
+    if (
+      (constraint.key === 'groups-with' || constraint.key === 'separates-from') &&
+      constraint.strength === 'required'
+    )
+      requiredRelations.add(relationKey(constraint.holder_id, constraint.key, constraint.value))
   for (const constraint of constraints) {
     if (
       (constraint.key !== 'groups-with' && constraint.key !== 'separates-from') ||
@@ -230,15 +268,7 @@ export function resolve(
     )
       continue
     const opposite = constraint.key === 'groups-with' ? 'separates-from' : 'groups-with'
-    if (
-      constraints.some(
-        (other) =>
-          other.holder_id === constraint.holder_id &&
-          other.key === opposite &&
-          other.value === constraint.value &&
-          other.strength === 'required',
-      )
-    )
+    if (requiredRelations.has(relationKey(constraint.holder_id, opposite, constraint.value)))
       diagnostics.push(
         diagnostic(
           'kernel.contradiction',
@@ -279,10 +309,16 @@ export function resolve(
   }
 }
 
-function labelView(entityId: string, labelsByEntity: ReadonlyMap<string, readonly Label[]>) {
-  return {
-    label: (key: string) => labelsByEntity.get(entityId)?.find((label) => label.key === key)?.value,
-  }
+function bucketOf<T>(index: Map<string, T[]>, key: string): T[] {
+  const existing = index.get(key)
+  if (existing) return existing
+  const created: T[] = []
+  index.set(key, created)
+  return created
+}
+
+function relationKey(holderId: string, key: string, value: string): string {
+  return `${holderId}\u0000${key}\u0000${value}`
 }
 
 function referencesEntity(operator: string, key: string, value: string): boolean {
