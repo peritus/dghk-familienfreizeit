@@ -1,0 +1,39 @@
+import { lazy, Suspense } from 'react'
+import { Route, Switch, useLocation } from 'wouter'
+import { Shell } from './components/application/shell'
+import { NotFound, RouteBoundary, RouteLoading } from './components/application/route-states'
+import { Login } from './auth/login'
+import { Welcome } from './family-view/welcome'
+import type { ProfilePresentation } from '../config/presentation.js'
+
+const OrganiserApp = lazy(() => import('./organiser/organiser-app'))
+
+export function App({ profile }: { profile?: ProfilePresentation } = {}) {
+  const [location] = useLocation()
+
+  return (
+    <Shell profile={profile}>
+      <RouteBoundary reset_key={location}>
+        <Switch>
+          <Route path="/">
+            <Welcome profile={profile} />
+          </Route>
+          <Route path="/login">
+            <Login />
+          </Route>
+          <Route path="/family">
+            <Welcome profile={profile} />
+          </Route>
+          <Route path="/organiser" nest>
+            <Suspense fallback={<RouteLoading />}>
+              <OrganiserApp profile={profile} />
+            </Suspense>
+          </Route>
+          <Route>
+            <NotFound />
+          </Route>
+        </Switch>
+      </RouteBoundary>
+    </Shell>
+  )
+}
