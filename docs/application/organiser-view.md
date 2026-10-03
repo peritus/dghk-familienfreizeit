@@ -12,7 +12,9 @@ path before persistence.
 |---|---|
 | `/organiser` | Dashboard with family/person counts, diagnostics, and draft-change status |
 | `/organiser/families` | Derived family table and manual invitation staging from the header dialog |
-| `/organiser/families/:id` | Derived family detail, family identity editing, profile-driven preference controls, Add/Save/Delete person actions, and committed or draft event history |
+| `/organiser/families/:id` | Derived family detail shell; defaults to Zimmer and exposes the four family topics |
+| `/organiser/families/:id/:topic` | Family topic route for `zimmer`, `personen`, `essen`, or `workshops` |
+| `/organiser/families/:id/:topic/:person_id` | Person-scoped Personen, Essen, or Workshops route with an opaque person id |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
 | `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
@@ -42,6 +44,13 @@ the assignment summary, data cut, unplaced-family reasons, diagnostic findings, 
 room-by-room occupants and capacity. There is no separate report route or in-app
 print control; organisers use the browser's print command.
 
+Family detail keeps the shared `PrimaryNavigation` in the organiser app bar. It
+does not add a family-specific secondary navigation level: the four family
+topics use `FamilyTopicNavigation`, a thin wrapper around the shared
+`TertiaryNavigation`. Personen, Essen, and Workshops add a nested vertical
+person selector inside their topic panel; that selector is not another global
+navigation level.
+
 ## Local-first event workflow
 
 Screen actions add grouped ordinary event drafts to the shared draft reducer. The
@@ -60,8 +69,8 @@ Lucide cloud-with-pause icon and contains the numeric draft count. It explains t
 drafts are local to this browser; other organisers cannot see them until **Entwürfe
 anwenden** succeeds. **Entwürfe verwerfen** removes only browser-local drafts and exits
 drafting mode. Route navigation preserves the drafting policy; a reload resets it to
-immediate mode. Family history includes draft events and marks them as **Noch nicht
-angewendet** until persistence succeeds.
+immediate mode. Family list and detail projections include draft events and mark
+them as **Noch nicht angewendet** until persistence succeeds.
 
 Clicks made while an apply request is in flight stay after the submitted prefix. A
 successful response acknowledges only its own prefix. A stale head or other failure
@@ -81,16 +90,45 @@ The family detail screen renders the selected profile's `family-preferences`
 sections. Family-facing traits are grouped by their configured scope: family
 traits edit the family entity, person traits repeat for each family member, and
 module controls write the canonical labels supplied by their module. Organiser
-changes use the same ordinary `LabelSet` and `LabelCleared` drafts as the later
-family route. Accommodation and workshop sections show their configured
+changes use the same ordinary `LabelSet` and `LabelCleared` drafts as the
+family-facing route. Accommodation and workshop sections show their configured
 deadline and contact copy; a passed deadline is advisory and does not disable
 editing.
 
 The family identity field is separate from those generic labels. A changed,
 non-empty value stages `FamilyDisplayNameChanged`, which replaces only the
 family's display-name label after checking the recorded old value. A no-op does
-not create an event, and the event history renders the old and new names while
+not create an event, and the event payload preserves the old and new names while
 preserving the family id, people, memberships, and email label.
+
+The family list provides name, email, and person search; **Alle**,
+**Angaben offen**, and **Vollständig** filters; count/status badges; a manual
+invitation dialog; a responsive table that becomes labelled family cards; and a
+resettable empty result state. Invitation and identity forms use the shared
+dialog and ordinary draft workflow. There is no bulk import surface.
+
+The family detail shell renders the prototype's four independently addressable
+views:
+
+- **Zimmer** uses the generic profile-driven room controls, including the
+  explicit unanswered state, the sleeping-place count, infant bed toggles, and
+  the deferred family room note with save/discard actions.
+- **Personen** uses a person selector, add/edit form, role and birthdate fields,
+  and the shared destructive confirmation for `PersonWithdrawn`.
+- **Essen** uses the same person selector and the generic person-scoped
+  `diet` choice plus `food-note` free-text controls. Both write the configured
+  labels through the family-preferences control system; there is no screen-local
+  persisted food model or copied prototype data.
+- **Workshops** derives official workshops for the selected person, renders up
+  to three ranked wishes with reorder/remove actions, and separates assigned,
+  sign-up, and interest sections. The finder provides search, unsuitable-item
+  visibility, eligibility reasons, age/audience badges, capacity, and the
+  corresponding ordinary label events.
+
+All four views preserve the shared shell, URL-backed topic selection, accessible
+tabs, empty states, and responsive narrow layout. Prototype-only save-failure
+and artificial slow-save switches are not production controls, and the family
+detail screen adds no print/export path.
 
 ## Workshop behavior
 

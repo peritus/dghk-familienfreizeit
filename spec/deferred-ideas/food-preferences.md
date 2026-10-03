@@ -1,17 +1,20 @@
 # Food preferences
 
-This accepted module contract is deferred from the active roadmap. It is the
-canonical specification for a future promotion; it is not selected by the
-Familienfreizeit 2027 profile.
+This accepted module contract remains deferred from the active roadmap for its
+aggregation, reporting, and safety-sheet scope. The Familienfreizeit 2027
+profile already exposes person-scoped `diet` and `food-note` properties through
+the selected generic `family-preferences` controls; that organiser screen
+behavior is documented in
+[`docs/application/organiser-view.md`](../../docs/application/organiser-view.md).
+This document does not add a second food input model.
 
 Module id `food-preferences` · factory `foodPreferences`
 
 ## 1. Purpose and boundary
 
-Food preferences records, for each person, one diet and optional free-text
-allergies, and aggregates them for kitchen planning. It owns the per-person model,
-the cardinality rules, and the food reports. It does not plan menus, order food, or
-interpret allergy text.
+The deferred food contribution aggregates each person's diet and optional
+free-text food notes for kitchen planning. It owns the aggregation and food
+reports. It does not plan menus, order food, or interpret note text.
 
 The data belongs to the person, not the family. Family-level food tables are
 derived counts, never an alternative family-level model.
@@ -113,5 +116,6 @@ and own-family views.
 
 ## 13. When not selected
 
-No food traits can be defined; the food reports, columns, and chase-list entries are
-absent.
+The deferred food reports, columns, and chase-list entries are absent. Profiles
+may still use the generic family-preferences `choice` and `free-text` controls
+for person-scoped food properties when those traits are configured.

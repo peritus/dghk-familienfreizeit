@@ -1,7 +1,10 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, expect, test } from 'vitest'
 import { FamilyDetail } from '../../src/app/organiser/screens/family-detail.js'
-import { FixtureProvider } from '../../src/app/stories/organiser-fixtures.js'
+import {
+  FixtureProvider,
+  organiserFamilyDetailFixtureState,
+} from '../../src/app/stories/organiser-fixtures.js'
 
 afterEach(() => cleanup())
 
@@ -12,21 +15,16 @@ test('organiser can rename a family and edit profile-driven controls', () => {
     </FixtureProvider>,
   )
 
-  const displayName = screen.getByLabelText('Anzeigename')
+  fireEvent.click(screen.getByRole('button', { name: 'Familie bearbeiten' }))
+  const dialog = screen.getByRole('dialog')
+  const displayName = within(dialog).getByLabelText('Familienname')
   expect((displayName as HTMLInputElement).value).toBe('Familie Sonnenberg')
-  expect(screen.getAllByRole('note').every((note) => note.textContent?.includes('Frist bis'))).toBe(
-    true,
-  )
-  expect(screen.getAllByText('Schläft bei den Eltern')).toHaveLength(2)
-  expect(screen.getAllByText('Workshop-Wünsche')).toHaveLength(2)
 
   fireEvent.change(displayName, { target: { value: 'Familie Abendrot' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Familiennamen speichern' }))
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Änderungen speichern' }))
 
   expect(screen.getByRole('heading', { name: 'Familie Abendrot' })).toBeTruthy()
-  expect(
-    screen.getByText('Familienname geändert: Familie Sonnenberg → Familie Abendrot'),
-  ).toBeTruthy()
+  expect(screen.getByRole('tab', { name: 'Zimmer' }).getAttribute('aria-selected')).toBe('true')
 })
 
 test('organiser controls save their ordinary label events on change', () => {
@@ -36,8 +34,51 @@ test('organiser controls save their ordinary label events on change', () => {
     </FixtureProvider>,
   )
 
-  const sleepAtHome = screen.getAllByRole('checkbox')[0]!
-  fireEvent.click(sleepAtHome)
+  const privateBathroom = screen.getAllByRole('radio', { name: 'Unbedingt' })[0]!
+  fireEvent.click(privateBathroom)
 
-  expect((sleepAtHome as HTMLInputElement).checked).toBe(true)
+  expect((privateBathroom as HTMLInputElement).checked).toBe(true)
+})
+
+test('family detail renders the people view with its person selector and editor', () => {
+  render(
+    <FixtureProvider initialState={organiserFamilyDetailFixtureState}>
+      <FamilyDetail family_id="fam_sonnenberg" topic="personen" person_id="per_lena" />
+    </FixtureProvider>,
+  )
+
+  expect(screen.getByRole('tab', { name: /Lena Sonnenberg/ })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Person' })).toBeTruthy()
+  expect(screen.getByLabelText('Vorname')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Person entfernen' })).toBeTruthy()
+})
+
+test('family detail renders person food preferences through generic controls', () => {
+  render(
+    <FixtureProvider initialState={organiserFamilyDetailFixtureState}>
+      <FamilyDetail family_id="fam_sonnenberg" topic="essen" person_id="per_lena" />
+    </FixtureProvider>,
+  )
+
+  expect(screen.getByRole('group', { name: 'Was isst die Person?' })).toBeTruthy()
+  const vegetarian = screen.getByRole('radio', { name: 'Vegetarisch' })
+  expect((vegetarian as HTMLInputElement).checked).toBe(true)
+  expect(screen.getByRole('textbox', { name: /Hinweise zum Essen/ })).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('radio', { name: 'Vegan' }))
+  expect((screen.getByRole('radio', { name: 'Vegan' }) as HTMLInputElement).checked).toBe(true)
+})
+
+test('family detail renders workshop wishes and participation areas', () => {
+  render(
+    <FixtureProvider initialState={organiserFamilyDetailFixtureState}>
+      <FamilyDetail family_id="fam_sonnenberg" topic="workshops" person_id="per_lena" />
+    </FixtureProvider>,
+  )
+
+  expect(screen.getByRole('heading', { name: 'Wunschliste' })).toBeTruthy()
+  expect(screen.getByText('Keramik')).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Feste Anmeldungen' })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Interesse' })).toBeTruthy()
+  expect(screen.getAllByRole('button', { name: 'Workshops finden' }).length).toBeGreaterThan(0)
 })

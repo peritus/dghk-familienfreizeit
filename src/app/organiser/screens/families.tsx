@@ -142,12 +142,14 @@ export function Families() {
             error={inviteError}
           >
             <form className="mt-5 grid gap-4" noValidate onSubmit={invite}>
-              <label className="grid gap-1">
+              <label htmlFor="family-invite-name" className="grid gap-1">
                 <span className="font-bold">Familienname</span>
                 <span className="text-sm text-muted">
                   So erscheint die Familie in Listen und Zimmerplänen.
                 </span>
                 <input
+                  id="family-invite-name"
+                  aria-label="Familienname"
                   required
                   value={displayName}
                   onChange={(event) => {
@@ -157,9 +159,11 @@ export function Families() {
                   className="min-h-11 rounded-base border-2 border-border px-3"
                 />
               </label>
-              <label className="grid gap-1">
+              <label htmlFor="family-invite-email" className="grid gap-1">
                 <span className="font-bold">E-Mail</span>
                 <input
+                  id="family-invite-email"
+                  aria-label="E-Mail"
                   required
                   type="email"
                   value={email}

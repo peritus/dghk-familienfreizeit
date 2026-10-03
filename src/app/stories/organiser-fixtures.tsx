@@ -336,6 +336,66 @@ export const organiserWorkshopFixtureState = workshopCatalogueFixtureDrafts.redu
   organiserFixtureState,
 )
 
+const familyDetailFixtureLabels: readonly EventDraft[] = [
+  {
+    at: '2027-01-01T00:21:00Z',
+    actor,
+    subject: 'fam_sonnenberg',
+    type: 'LabelSet',
+    payload: {
+      entity_id: 'fam_sonnenberg',
+      key: 'needs-private-sanitary',
+      value: 'private-sanitary',
+      strength: 'preferred',
+      note: null,
+    },
+  },
+  {
+    at: '2027-01-01T00:22:00Z',
+    actor,
+    subject: 'per_lena',
+    type: 'LabelSet',
+    payload: {
+      entity_id: 'per_lena',
+      key: 'diet',
+      value: 'vegetarian',
+      strength: null,
+      note: null,
+    },
+  },
+  {
+    at: '2027-01-01T00:23:00Z',
+    actor,
+    subject: 'per_lena',
+    type: 'LabelSet',
+    payload: {
+      entity_id: 'per_lena',
+      key: 'food-note',
+      value: 'Vegetarische Optionen reichen.',
+      strength: null,
+      note: null,
+    },
+  },
+  {
+    at: '2027-01-01T00:24:00Z',
+    actor,
+    subject: 'per_lena',
+    type: 'LabelSet',
+    payload: {
+      entity_id: 'per_lena',
+      key: 'prefers-workshop',
+      value: { workshop_id: 'wks_keramik', rank: 1 },
+      strength: null,
+      note: null,
+    },
+  },
+]
+
+export const organiserFamilyDetailFixtureState = familyDetailFixtureLabels.reduce(
+  (state, event) => organiserReducer(state, { type: 'stage', events: [event] }),
+  organiserWorkshopFixtureState,
+)
+
 type AssignmentFixtureFamily = {
   family_id: string
   email: string

@@ -165,7 +165,7 @@ binding decisions, and reinsertion into an active roadmap milestone.
 
 - [Call for papers](deferred-ideas/call-for-papers.md)
 - [Change notifications](deferred-ideas/change-notifications.md)
-- [Food preferences](deferred-ideas/food-preferences.md)
+- [Food preferences](deferred-ideas/food-preferences.md) — aggregation, reporting, and safety-sheet scope
 - [Materials](deferred-ideas/materials.md)
 - [Self-organized workshops](deferred-ideas/self-organized-sessions.md)
 - [Sleeping parties](deferred-ideas/sleeping-parties.md)

@@ -73,6 +73,8 @@ The profile composition contract includes these independent fixtures:
 | Trait | Builder | Scope | Semantics |
 |---|---|---|---|
 | `role` | property | person | `adult`, `child`, or `infant`; stated in `PersonAdded`, not derived from birthdate |
+| `diet` | property | person | optional enum `vegetarian`, `vegan`, `meat`, or `other`; rendered by the generic `choice` control |
+| `food-note` | property | person | optional free text for food, intolerance, and service notes; rendered by the generic `free-text` control |
 | `does-not-need-a-bed` | property | person | default `false`; when true the person has no bed demand but remains in the family's placement unit; children and infants only |
 | `needs-private-sanitary` | requirement | family | satisfied by `private-sanitary`; weight 6; family-facing "Eigenes Bad" |
 | `needs-accessible` | requirement | family, person | satisfied by `accessible`; weight 8; family-facing; placed first |
@@ -153,8 +155,10 @@ not change automatically.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../ui/german-translation-guidelines.md). The
-preferences page has three sections: who is coming, room wishes, and workshops.
-Cross-family sharing wishes belong to the separate sleeping-parties module.
+preferences page has four sections: who is coming, room wishes, food, and
+workshops. Food is represented by the generic person-scoped profile traits above;
+it does not introduce a separate food entity or event family. Cross-family
+sharing wishes belong to the separate sleeping-parties module.
 
 Authentication invitations and reminders use the release-independent family login
 workflow. Communication and change emails remain deferred.

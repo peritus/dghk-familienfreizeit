@@ -3,6 +3,8 @@ import {
   composeOrganiserRouteDefinitions,
   familyIdFromRouteSegment,
   familyRouteSegment,
+  personIdFromRouteSegment,
+  personRouteSegment,
   isKnownOrganiserPath,
   isOrganiserPathActive,
   organiserNestedPath,
@@ -25,6 +27,8 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser',
     '/organiser/families',
     '/organiser/families/:id',
+    '/organiser/families/:id/:topic',
+    '/organiser/families/:id/:topic/:person_id',
     '/organiser/accommodation/inventory',
     '/organiser/accommodation/assignment',
     '/organiser/workshops/spaces',
@@ -46,6 +50,8 @@ test('module screens are composed only when their module is selected', () => {
     'organiser-dashboard',
     'organiser-families',
     'organiser-family-detail',
+    'organiser-family-detail-topic',
+    'organiser-family-detail-person-topic',
   ])
   expect(organiserRouteDefinitions.some(({ id }) => id === 'organiser-inventory')).toBe(true)
   expect(organiserScreenRegistry.filter(({ id }) => id === 'organiser-inventory')).toEqual([
@@ -113,6 +119,15 @@ test('family route IDs are opaque, URL-safe, and reversible', () => {
   expect(organiserUrls.family_detail(familyId)).toBe('/organiser/families/6b4b44137d724c1e')
   expect(familyIdFromRouteSegment(segment)).toBe(familyId)
   expect(segment).not.toContain('@')
+
+  const personId = 'per_7b4b44137d724c1e'
+  const personSegment = personRouteSegment(personId)
+  expect(personSegment).toBe('7b4b44137d724c1e')
+  expect(personIdFromRouteSegment(personSegment)).toBe(personId)
+  expect(organiserPaths.family_topic(familyId, 'zimmer')).toBe('/families/6b4b44137d724c1e/zimmer')
+  expect(organiserPaths.family_person_topic(familyId, 'essen', personId)).toBe(
+    '/families/6b4b44137d724c1e/essen/7b4b44137d724c1e',
+  )
 })
 
 test('invalid family IDs cannot leak labels into route URLs', () => {
@@ -128,6 +143,10 @@ test('known organiser path matching is driven by the route catalog', () => {
   expect(isKnownOrganiserPath('/organiser')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/families')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/families/6b4b44137d724c1e')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/families/6b4b44137d724c1e/zimmer')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/families/6b4b44137d724c1e/essen/7b4b44137d724c1e')).toBe(
+    true,
+  )
   expect(isKnownOrganiserPath('/organiser/accommodation')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/accommodation/inventory')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/spaces')).toBe(true)

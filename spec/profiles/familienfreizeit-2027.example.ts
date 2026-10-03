@@ -67,6 +67,45 @@ export default defineOccasionProfile({
       },
     }),
 
+    'diet': property({
+      title: { de: 'Essen', en: 'Food' },
+      scopes: ['person'],
+      value: enumOf(['vegetarian', 'vegan', 'meat', 'other']),
+      cardinality: 'zero-or-one',
+      family_facing: {
+        control: 'choice',
+        title: { de: 'Was isst die Person?', en: 'What does this person eat?' },
+        help: null,
+        scope: 'person',
+        strengths: null,
+        invert: false,
+      },
+      copy: {
+        vegetarian: { de: 'Vegetarisch', en: 'Vegetarian' },
+        vegan: { de: 'Vegan', en: 'Vegan' },
+        meat: { de: 'Mit Fleisch', en: 'With meat' },
+        other: { de: 'Anderes', en: 'Other' },
+      },
+    }),
+
+    'food-note': property({
+      title: { de: 'Hinweise zum Essen', en: 'Food notes' },
+      scopes: ['person'],
+      value: text({ max_length: 2000 }),
+      cardinality: 'zero-or-one',
+      family_facing: {
+        control: 'free-text',
+        title: { de: 'Hinweise zum Essen', en: 'Food notes' },
+        help: {
+          de: 'Zum Beispiel Allergien, Unverträglichkeiten, halal oder was im Notfall zu tun ist.',
+          en: 'For example allergies, intolerances, halal, or what to do in an emergency.',
+        },
+        scope: 'person',
+        strengths: null,
+        invert: false,
+      },
+    }),
+
     'does-not-need-a-bed': property({
       title: { de: 'Braucht kein eigenes Bett', en: 'Does not need a bed' },
       scopes: ['person'],
@@ -430,6 +469,13 @@ export default defineOccasionProfile({
           intro: null,
           traits: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
           deadline_scope: 'accommodation',
+        },
+        {
+          key: 'food',
+          title: { de: 'Essen', en: 'Food' },
+          intro: null,
+          traits: ['diet', 'food-note'],
+          deadline_scope: null,
         },
         {
           key: 'workshops',

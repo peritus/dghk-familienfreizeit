@@ -69,7 +69,7 @@ particular profile.
 | 26 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered current-cycle choices |
 | 27 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
 | 28 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred proposal intake |
-| 29 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred per-person diet and allergy text |
+| 29 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred food aggregation, reporting, and safety-sheet scope |
 | 30 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
 | 31 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
 | 32 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |

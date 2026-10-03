@@ -29,7 +29,7 @@ async function enableDraftMode() {
 }
 
 async function openFamilyInviteDialog() {
-  fireEvent.click(await screen.findByRole('button', { name: 'Familie einladen' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Familie hinzufügen' }))
   return within(await screen.findByRole('dialog'))
 }
 
@@ -508,28 +508,28 @@ test('organiser state survives client-side route and history navigation', async 
     target: { value: 'Neue Familie' },
   })
   fireEvent.change(inviteDialog.getByLabelText('E-Mail'), { target: { value: 'neu@example.test' } })
-  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie einladen' }))
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('3 Änderungen')
+  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie hinzufügen' }))
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: 'Bestehende Familie' }))
   expect(await screen.findByRole('heading', { name: 'Bestehende Familie' })).toBeTruthy()
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('3 Änderungen')
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: '← Familien' }))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Neue Familie' })).toBeTruthy()
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('3 Änderungen')
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: 'Dashboard' }))
   expect(
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('3 Änderungen')
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   window.history.pushState({}, '', '/organiser/families')
   fireEvent(window, new PopStateEvent('popstate'))
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('3 Änderungen')
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
   expect(
     fetchMock?.mock.calls.filter(([input]) => String(input).endsWith('/api/organiser/log')),
   ).toHaveLength(1)
@@ -576,18 +576,18 @@ test('organiser draft mode replaces the upload control with its workspace', asyn
   fireEvent.change(inviteDialog.getByLabelText('E-Mail'), {
     target: { value: 'neu@example.test' },
   })
-  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie einladen' }))
+  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie hinzufügen' }))
 
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('3 Änderungen')
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
   fireEvent.click(saveStatusTrigger())
   expect(
-    await screen.findByRole('heading', { name: '3 Änderungen nur in diesem Browser' }),
+    await screen.findByRole('heading', { name: '1 Änderung nur in diesem Browser' }),
   ).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Änderungen speichern' })).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Verwerfen …' })).toBeTruthy()
 
   fireEvent.click(screen.getByRole('button', { name: 'Verwerfen …' }))
-  expect(await screen.findByRole('heading', { name: '3 Änderungen verwerfen?' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: '1 Änderung verwerfen?' })).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Ja, verwerfen' }))
 
   expect(
@@ -615,12 +615,16 @@ test('family history includes staged events before they are applied', async () =
   fireEvent.click(await screen.findByRole('link', { name: 'Lokale Familie' }))
   expect(await screen.findByRole('heading', { name: 'Lokale Familie' })).toBeTruthy()
   await enableDraftMode()
-  fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Lokale' } })
-  fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Person' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Neue Person hinzufügen' }))
+  fireEvent.click(screen.getByRole('tab', { name: 'Personen' }))
+  const addPerson = await screen.findByRole('button', { name: 'Person hinzufügen' })
+  fireEvent.click(addPerson)
+  const personDialog = await screen.findByRole('dialog')
+  fireEvent.change(within(personDialog).getByLabelText('Vorname'), { target: { value: 'Lokale' } })
+  fireEvent.change(within(personDialog).getByLabelText('Nachname'), { target: { value: 'Person' } })
+  fireEvent.click(within(personDialog).getByRole('button', { name: 'Person hinzufügen' }))
 
-  expect(await screen.findByText('Noch nicht gespeichert')).toBeTruthy()
-  expect(screen.getByText('Person hinzugefügt')).toBeTruthy()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
+  expect(await screen.findByText('Lokale Person')).toBeTruthy()
 })
 
 test('immediate mode sends the same staged event through apply automatically', async () => {
@@ -634,7 +638,7 @@ test('immediate mode sends the same staged event through apply automatically', a
   fireEvent.change(inviteDialog.getByLabelText('E-Mail'), {
     target: { value: 'sofort@example.test' },
   })
-  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie einladen' }))
+  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie hinzufügen' }))
 
   expect(await screen.findByRole('link', { name: 'Sofort Familie' })).toBeTruthy()
   expect(fetchMock).toHaveBeenCalledWith(
@@ -675,27 +679,18 @@ test('family links use an opaque route ID and open the matching detail view', as
   }
   open('/organiser/families', [familyEvent, personEvent])
   const familyLink = await screen.findByRole('link', { name: 'Foo Familie' })
-  expect(screen.queryByLabelText('Familien suchen')).toBeNull()
+  expect(screen.getByLabelText('Familien durchsuchen')).toBeTruthy()
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
-  expect(screen.getByLabelText('Rolle der neuen Person')).toBeTruthy()
-  expect(screen.getByText('Familie eingeladen')).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Entfernen' })).toBeTruthy()
-  fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten' }))
-  expect((screen.getByLabelText('Rolle') as HTMLSelectElement).value).toBe('adult')
-  expect(screen.getByRole('button', { name: 'Person übernehmen' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Abbrechen' })).toBeTruthy()
-  fireEvent.change(screen.getByDisplayValue('Ada'), { target: { value: 'Ada Neu' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Person übernehmen' }))
-  expect(await screen.findByText('Ada Neu')).toBeTruthy()
-  expect(screen.getByText('Person geändert')).toBeTruthy()
+  fireEvent.click(screen.getByRole('tab', { name: 'Personen' }))
+  expect(await screen.findByRole('tab', { name: /Ada Beispiel/ })).toBeTruthy()
 })
 
 test('families keeps manual invitation without a bulk-import surface', async () => {
   open('/organiser/families')
 
-  expect(await screen.findByRole('button', { name: 'Familie einladen' })).toBeTruthy()
+  expect(await screen.findByRole('button', { name: 'Familie hinzufügen' })).toBeTruthy()
   expect(screen.queryByLabelText('Familienname')).toBeNull()
   expect(screen.queryByRole('heading', { name: 'Import' })).toBeNull()
   expect(screen.queryByRole('textbox', { name: 'CSV-Daten' })).toBeNull()
@@ -704,14 +699,14 @@ test('families keeps manual invitation without a bulk-import surface', async () 
 test('families validate invitations', async () => {
   open('/organiser/families')
   expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
-  expect(screen.queryByLabelText('Familien suchen')).toBeNull()
+  expect(screen.getByLabelText('Familien durchsuchen')).toBeTruthy()
 
   const inviteDialog = await openFamilyInviteDialog()
   fireEvent.change(inviteDialog.getByLabelText('Familienname'), {
     target: { value: 'Neue Familie' },
   })
   fireEvent.change(inviteDialog.getByLabelText('E-Mail'), { target: { value: 'ungültig' } })
-  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie einladen' }))
+  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie hinzufügen' }))
   expect(screen.getByRole('alert').textContent).toBe('Bitte gib eine gültige E-Mail-Adresse ein.')
 })
 

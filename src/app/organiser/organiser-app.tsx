@@ -18,7 +18,6 @@ import {
 } from './state.js'
 import { Dashboard } from './screens/dashboard.js'
 import { Families } from './screens/families.js'
-import { FamilyDetail } from './screens/family-detail.js'
 import { Inventory } from './screens/inventory.js'
 import { AssignmentBoardScreen } from '../../modules/room-assignment/app/screens/assignment-board.js'
 import {
@@ -62,6 +61,9 @@ const WorkshopAllocation = lazy(() =>
   import('./screens/workshop-allocation.js').then((module) => ({
     default: module.WorkshopAllocation,
   })),
+)
+const FamilyDetail = lazy(() =>
+  import('./screens/family-detail.js').then((module) => ({ default: module.FamilyDetail })),
 )
 
 export default function OrganiserApp() {

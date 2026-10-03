@@ -64,8 +64,9 @@ contiguous sequence number. Pass fixture files in dependency order; the example
 loads the DJH room inventory, workshop catalogue, and 49-family dataset as one
 stream. The generator can create another synthetic family count with
 `nix develop --command node scripts/generate-family-fixture.mjs --count 12`.
-Food preferences in the synthetic family fixture use the existing free-text
-`family-note` field because the active profile has no structured food trait.
+Food preferences in the active profile use person-scoped `diet` and `food-note`
+traits through the generic family-preferences label/control system. Synthetic
+fixtures may include those labels directly; they must not copy prototype data.
 It refuses to use a non-empty log by default. If a
 previous request failed, use `--resume` with the same fixture and credential;
 the importer checks that the server log is an exact fixture prefix and uploads

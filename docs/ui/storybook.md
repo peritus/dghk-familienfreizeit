@@ -72,6 +72,12 @@ When adding a component or screen:
    behavior tests in Vitest or the application Playwright suite as appropriate;
    the visual test is the final rendered-contract check.
 
+The family-detail screen has separate coverage entries and synthetic fixtures
+for Zimmer, Personen, Essen, and Workshops, plus the shared family topic
+navigation. The Essen and Workshops stories use populated derived states so the
+generic person controls and workshop finder are reviewable without prototype
+fixtures or a backend.
+
 Storybook is a development and review surface. It does not claim that an
 unimplemented screen is complete, and the coverage list deliberately contains
 only renderables that currently exist in `src/app`.

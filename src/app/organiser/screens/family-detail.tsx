@@ -167,21 +167,25 @@ function FamilyEditDialog({
           </p>
         ) : null}
         <form id="family-edit-form" className="mt-5 grid gap-4" onSubmit={submit}>
-          <label className="grid gap-1">
+          <label htmlFor="family-edit-name" className="grid gap-1">
             <span className="font-bold">Familienname</span>
             <span className="text-sm text-muted">
               So erscheint die Familie in Listen und Zimmerplänen.
             </span>
             <input
+              id="family-edit-name"
+              aria-label="Familienname"
               required
               value={nextName}
               onChange={(event) => setNextName(event.target.value)}
               className="min-h-11 rounded-base border-2 border-border px-3"
             />
           </label>
-          <label className="grid gap-1">
+          <label htmlFor="family-edit-email" className="grid gap-1">
             <span className="font-bold">E-Mail</span>
             <input
+              id="family-edit-email"
+              aria-label="E-Mail"
               required
               type="email"
               value={nextEmail}
@@ -283,6 +287,7 @@ function FamilyRoomView({
         stage={stage}
         section_keys={['room-wishes']}
         trait_keys={['needs-private-sanitary', 'needs-accessible', 'sole-occupancy']}
+        tri_state_no_answer
       />
       <Card className="bg-secondary-background">
         <CardHeader>
@@ -437,6 +442,7 @@ function PersonForm({
   actor,
   stage,
   on_done: onDone,
+  on_cancel: onCancel = onDone,
   is_new: isNew = false,
 }: {
   family_id: string
@@ -444,6 +450,7 @@ function PersonForm({
   actor: string
   stage: (events: readonly EventDraft[]) => void
   on_done: () => void
+  on_cancel?: () => void
   is_new?: boolean
 }) {
   const [givenName, setGivenName] = useState(person?.given_name ?? '')
@@ -539,7 +546,7 @@ function PersonForm({
         />
       </label>
       <div className="flex flex-wrap justify-end gap-2">
-        <Button type="button" variant="neutral" onClick={onDone}>
+        <Button type="button" variant="neutral" onClick={onCancel}>
           Abbrechen
         </Button>
         <Button type="submit">{isNew ? 'Person hinzufügen' : 'Speichern'}</Button>
@@ -564,6 +571,7 @@ function FamilyPeopleView({
   on_select: (personId: string) => void
 }) {
   const [adding, setAdding] = useState(false)
+  const [personFormVersion, setPersonFormVersion] = useState(0)
   const selected = persons.find((person) => person.entity.id === selectedPersonId) ?? persons[0]
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -625,12 +633,13 @@ function FamilyPeopleView({
           </CardHeader>
           <CardContent>
             <PersonForm
-              key={selected.entity.id}
+              key={`${selected.entity.id}-${personFormVersion}`}
               family_id={familyId}
               person={selected}
               actor={actor}
               stage={stage}
-              on_done={() => undefined}
+              on_done={() => setPersonFormVersion((version) => version + 1)}
+              on_cancel={() => setPersonFormVersion((version) => version + 1)}
             />
           </CardContent>
         </Card>
@@ -1291,7 +1300,7 @@ export function FamilyDetail({
         ← Familien
       </OrganiserLink>
       <OrganiserScreenHeader
-        title={`Familie ${displayName}`}
+        title={displayName}
         actions={
           <FamilyEditDialog
             family_id={selectedFamilyId}

@@ -224,6 +224,30 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/organiser/screens/family-detail.tsx',
   },
   {
+    id: 'screens-organiser-family-detail--zimmer',
+    area: 'screen',
+    subject: 'FamilyDetail Zimmer',
+    source: 'src/app/organiser/screens/family-detail.tsx',
+  },
+  {
+    id: 'screens-organiser-family-detail--personen',
+    area: 'screen',
+    subject: 'FamilyDetail Personen',
+    source: 'src/app/organiser/screens/family-detail.tsx',
+  },
+  {
+    id: 'screens-organiser-family-detail--essen',
+    area: 'screen',
+    subject: 'FamilyDetail Essen',
+    source: 'src/app/organiser/screens/family-detail.tsx',
+  },
+  {
+    id: 'screens-organiser-family-detail--workshops',
+    area: 'screen',
+    subject: 'FamilyDetail Workshops',
+    source: 'src/app/organiser/screens/family-detail.tsx',
+  },
+  {
     id: 'screens-organiser-family-detail--missing-family',
     area: 'screen',
     subject: 'FamilyDetail missing',
@@ -300,6 +324,18 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'component',
     subject: 'Tertiary navigation',
     source: 'src/app/components/shared/ui/tertiary-navigation.tsx',
+  },
+  {
+    id: 'application-organiser-family-navigation--topics',
+    area: 'component',
+    subject: 'Family topic navigation',
+    source: 'src/app/organiser/components/family-navigation.tsx',
+  },
+  {
+    id: 'application-organiser-family-detail-components--selected-person',
+    area: 'application',
+    subject: 'Family detail person sidebar',
+    source: 'src/app/organiser/screens/family-detail-components.stories.tsx',
   },
   {
     id: 'modules-room-assignment-screens-assignment-board--populated',

@@ -8,7 +8,9 @@ The route table is:
 | `/`, `/login`, `/family` | Public foundation welcome placeholder |
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with header-dialog invitation staging |
-| `/organiser/families/:id` | Read-only-by-default people list, explicit editing, lifecycle staging and human-readable changes |
+| `/organiser/families/:id` | Family detail shell with the Zimmer, Personen, Essen, and Workshops views |
+| `/organiser/families/:id/:topic` | URL-backed family topic route; `zimmer` is family-scoped |
+| `/organiser/families/:id/:topic/:person_id` | URL-backed person-scoped topic route for Personen, Essen, or Workshops |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/accommodation/assignment` | Read-only deterministic assignment review with browser-printable assignment output |
@@ -49,6 +51,12 @@ an application print or export control. Workshop allocation keeps the same organ
 and workshop navigation context and provides the URL-backed tertiary views **Antworten**,
 **Nachfrage**, and **Verlauf**. These views derive from the prospective world and plan,
 including conflict notices and person tracing, without adding a persistence boundary.
+
+Family routes reuse the organiser `PrimaryNavigation` and introduce no secondary
+navigation level. `FamilyTopicNavigation` wraps the shared `TertiaryNavigation`
+for the four sibling topics. The person picker inside Personen, Essen, and
+Workshops is a nested selector for the current family and does not change the
+global navigation hierarchy. Topic and person ids are opaque route segments.
 
 All organiser screens use the shared `OrganiserScreenHeader` for their primary
 heading and action row. Overview metrics use `StatsStrip`; quiet properties use

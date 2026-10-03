@@ -23,9 +23,12 @@ export type FamilyPreferencesControlsProps = {
   trait_keys?: readonly string[]
   person_id?: string
   defer_text?: boolean
+  tri_state_no_answer?: boolean
 }
 
 type Target = { id: string; kind: 'family' | 'person' }
+
+type TriStateValue = 'none' | 'indifferent' | 'required' | 'preferred'
 
 const eventTime = (): string => new Date().toISOString()
 
@@ -171,6 +174,7 @@ function TraitControl({
   stage,
   meta,
   defer_text: deferText,
+  tri_state_no_answer: triStateNoAnswer,
 }: {
   trait_key: string
   trait: Trait
@@ -183,6 +187,7 @@ function TraitControl({
   stage: Stage
   meta: OccasionProfile['meta']
   defer_text?: boolean
+  tri_state_no_answer?: boolean
 }) {
   const facing = trait.family_facing!
   const title = controlTitle(facing.title, meta)
@@ -203,17 +208,21 @@ function TraitControl({
       ? validity
       : 'Diese Angabe ist für diese Person derzeit nicht verfügbar.'
     : null
+  const [unpersistedTriState, setUnpersistedTriState] = useState<TriStateValue>(
+    current?.strength ?? (triStateNoAnswer ? 'none' : 'indifferent'),
+  )
 
   if (facing.control === 'tri-state') {
-    const selected = current?.strength ?? 'indifferent'
-    const choices = [
+    const selected = current?.strength ?? unpersistedTriState
+    const choices: readonly { value: TriStateValue; label: string }[] = [
+      ...(triStateNoAnswer ? [{ value: 'none' as const, label: 'Keine Angabe' }] : []),
       ...(facing.strengths?.includes('required')
-        ? [{ value: 'required', label: facing.invert ? 'Auf keinen Fall' : 'Unbedingt' }]
+        ? [{ value: 'required' as const, label: facing.invert ? 'Auf keinen Fall' : 'Unbedingt' }]
         : []),
       ...(facing.strengths?.includes('preferred')
-        ? [{ value: 'preferred', label: facing.invert ? 'Lieber nicht' : 'Gerne' }]
+        ? [{ value: 'preferred' as const, label: facing.invert ? 'Lieber nicht' : 'Gerne' }]
         : []),
-      { value: 'indifferent', label: facing.invert ? 'Gerne' : 'Egal' },
+      { value: 'indifferent' as const, label: facing.invert ? 'Gerne' : 'Egal' },
     ] as const
     return (
       <fieldset className="grid gap-2" disabled={disabled}>
@@ -228,7 +237,8 @@ function TraitControl({
                 name={`${target.id}-${traitKey}`}
                 checked={selected === choice.value}
                 onChange={() => {
-                  if (choice.value === 'indifferent') {
+                  setUnpersistedTriState(choice.value)
+                  if (choice.value === 'indifferent' || choice.value === 'none') {
                     if (current) stage([labelClear(actor, familyId, target, traitKey)])
                     return
                   }
@@ -619,6 +629,7 @@ export function FamilyPreferenceSection({
   person_id: personId,
   trait_keys: traitKeys,
   defer_text: deferText,
+  tri_state_no_answer: triStateNoAnswer,
 }: FamilyPreferencesControlsProps & {
   section: FamilyPreferencesParams['sections'][number]
 }) {
@@ -667,6 +678,7 @@ export function FamilyPreferenceSection({
                 stage={stage}
                 meta={profile.meta}
                 defer_text={deferText}
+                tri_state_no_answer={triStateNoAnswer}
               />
             ))
           })}
