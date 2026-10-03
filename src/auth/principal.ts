@@ -61,8 +61,10 @@ export async function currentPrincipal(
 }
 
 export function familyForEmail(world: World, email: string): string | null {
+  // Through the key index: this runs on every authenticated request, and
+  // scanning the whole label store to match one email grew with the log.
   return (
-    world.labels.find((label) => label.key === 'email' && label.value === email)?.entity_id ?? null
+    (world.labels_by_key['email'] ?? []).find((label) => label.value === email)?.entity_id ?? null
   )
 }
 async function refreshSession(
