@@ -1,7 +1,4 @@
-const logoUrl = new URL(
-  './familienfreizeit-2027-logo.svg',
-  (import.meta as ImportMeta & { readonly url: string }).url,
-).href
+import logoUrl from './familienfreizeit-2027-logo.svg'
 
 export const familienfreizeit2027Branding = {
   logo: logoUrl,
