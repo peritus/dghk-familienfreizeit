@@ -98,8 +98,8 @@ export function WorkshopAllocation() {
   const query = new URLSearchParams(location.split('?')[1] ?? '')
   const queryPersonId = query.get('person')
   const selectedPerson = projection.person_names.find(
-    (person) => person.id === queryPersonId || person.name === selectedPersonName,
-  )
+    (person) => person.name === selectedPersonName,
+  ) ?? projection.person_names.find((person) => person.id === queryPersonId)
   const people = projection.answers
     .filter((answer) => group === 'all' || answer.group === group)
     .map((answer) => answer.name)
