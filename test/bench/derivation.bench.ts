@@ -6,7 +6,9 @@ import { derive, type World } from '../../src/events/fold.js'
 import { projectFamilyWorld, projectSharedWorld } from '../../src/events/world.js'
 import { composeSolverContributions } from '../../src/solver/composition.js'
 import { buildSolverInput } from '../../src/solver/input.js'
+import { prepareEventBatch } from '../../src/events/prepare.js'
 import { orderStages, solve } from '../../src/solver/solve.js'
+import { deriveTransition } from '../../src/solver/transition.js'
 import type { Event } from '../../src/events/types.js'
 import type { SolverInput } from '../../src/solver/types.js'
 import { syntheticLog, syntheticScale } from './log.js'
@@ -34,7 +36,8 @@ const factors = (process.env.DGHK_BENCH_FACTORS ?? '1,2,4')
 const stages = new Set(
   (
     process.env.DGHK_BENCH_STAGES ??
-    'derive,buildSolverInput,solve,projectSharedWorld,projectFamilyWorld'
+    'derive,buildSolverInput,solve,projectSharedWorld,projectFamilyWorld,' +
+      'deriveTransition,prepareEventBatch'
   )
     .split(',')
     .map((value) => value.trim())
@@ -153,6 +156,58 @@ test('derivation pipeline cost by log size', () => {
       )
 
     const firstFamily = world.families[0]
+
+    // The two request paths. `deriveTransition` is what an organiser waits for
+    // on every draft batch — it folds twice and solves twice, and the draft
+    // world has never existed before, so no cache can serve it.
+    if (stages.has('deriveTransition') && firstFamily) {
+      const draft: Event = {
+        seq: events.length + 1,
+        at: '2027-01-01T00:00:00Z',
+        actor: 'organiser@example.test',
+        subject: null,
+        type: 'LabelSet',
+        payload: {
+          entity_id: firstFamily.id,
+          key: 'family-note',
+          value: 'typed',
+          strength: null,
+          note: null,
+        },
+      }
+      const prospective = [...events, draft]
+      lines.push(
+        row(
+          'deriveTransition',
+          events.length,
+          measure(() => void deriveTransition(events, prospective, contributions, solverConfig)),
+        ),
+      )
+      if (stages.has('prepareEventBatch'))
+        lines.push(
+          row(
+            'prepareEventBatch',
+            events.length,
+            measure(
+              () =>
+                void prepareEventBatch(
+                  events,
+                  [
+                    {
+                      at: draft.at,
+                      actor: draft.actor,
+                      subject: null,
+                      type: draft.type,
+                      payload: draft.payload,
+                    },
+                  ],
+                  profile.validation_view,
+                ),
+            ),
+          ),
+        )
+    }
+
     if (stages.has('projectFamilyWorld') && firstFamily)
       lines.push(
         row(
