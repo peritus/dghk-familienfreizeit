@@ -1,11 +1,11 @@
 ---
 id: "037"
 title: Fill-origin workshop assignments are not stable across a retention cycle
-status: needs-decision
+status: in-progress
 severity: contract-contradiction
 category: module:workshop-assignment
 source: full-scale prototype-dataset resolver check (test/solver/workshop-assignment-prototype-dataset.test.ts)
-related_decisions: [D4]
+related_decisions: [D4, D31]
 related_milestones: [M8]
 opened: 2026-09-30
 ---
@@ -17,15 +17,13 @@ opened: 2026-09-30
 D4 ("stable sorted greedy with bounded repair") and its stability contract
 (closed by [issue 006](../archived/006-solver-stability-repair-underspecified.md))
 require retaining a valid previous assignment unless coverage or repair
-justifies a move. `workshop-assignment`'s retention step honours this for
-*ranked*-choice placements, but not for *fill* placements — the automatic
-top-up used to reach `minimum_workshops` for someone with no ranked choice
-left. Re-deriving the exact same event log twice in a row (no new events at
-all) can change a fill-origin person's workshop assignment to a different,
-still-valid one. Because ranked and fill placements compete for the same
-per-slot/per-workshop capacity, the instability can cascade: a shuffled
-fill placement can free or consume capacity that changes which *ranked*
-choice succeeds for an unrelated person too.
+justifies a move. The implementation also has a fill path that assigns
+unchosen workshops to reach `minimum_workshops`. That path contradicts
+[D31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
+which requires every automatic assignment to come from the person's current
+ranking. Re-deriving the exact same event log can also change a fill-origin
+person's workshop assignment to a different, still-valid one, so the path is
+both outside the attendance contract and unstable.
 
 ## Evidence
 
@@ -55,29 +53,17 @@ choice succeeds for an unrelated person too.
 
 ## Recommendation
 
-Extend retention (or redesign the fill step) so that a fill-origin
-placement is retained whenever it is still feasible, the same way a
-ranked-origin one is — without requiring the person to now rank that
-workshop. The `hard.no-longer-ranked` check should apply only when the
-person's *ranked* choice actually changed, not to fill placements that were
-never rank-driven. Whatever the mechanism, the fill loop's own candidate
-selection needs to stop depending on cross-person occupancy state that
-differs between a fresh derive and a retained one, or fill needs its own
-retention-aware phase parallel to the ranked one.
-
-## Open questions
-
-1. Should a retained fill placement be re-validated against
-   `minimum_workshops`/`fairness_targets` each cycle, or does "still
-   feasible" alone justify keeping it indefinitely (mirroring how a ranked
-   retention is not re-scored against current rank weights)?
-2. Is the cascading effect on ranked placements (a shuffled fill freeing or
-   consuming capacity that changes an unrelated ranked outcome) acceptable
-   as long as hard constraints hold, or does it need its own guard?
+Remove the fill path from the solver, prototype, and projection surfaces.
+`minimum_workshops` may cause lower-ranked current choices to be considered,
+but it must never create an unchosen assignment. When ranked choices cannot
+produce an assignment, the person remains unassigned and the rejected choices
+remain explainable in the trace. Bounded repair must likewise use only current
+ranked choices for both the person being seated and the person being moved.
 
 ## Related files
 
 - [modules/workshop-assignment.md](../../modules/workshop-assignment.md)
 - [decisions.md#d4](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)
+- [decisions.md#d31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops)
 - [issue 006 (archived)](../archived/006-solver-stability-repair-underspecified.md)
 - [test/solver/workshop-assignment-prototype-dataset.test.ts](../../../test/solver/workshop-assignment-prototype-dataset.test.ts)

@@ -5,7 +5,7 @@ status: needs-decision
 severity: gap
 category: module:workshop-scheduling
 source: review of the workshop ranking, scheduling, and attendance solver pipeline
-related_decisions: [D4]
+related_decisions: [D4, D31]
 related_milestones: [M8]
 opened: 2026-10-02
 ---
@@ -83,8 +83,9 @@ information to produce a better feasible plan.
   [`src/modules/workshop-assignment/index.ts`](../../../src/modules/workshop-assignment/index.ts#L66-L88)
   and [`src/modules/workshop-rankings/index.ts`](../../../src/modules/workshop-rankings/index.ts#L92-L100).
 - The attendance algorithm processes people in id order, retains feasible prior
-  assignments, then tries ranked choices, fill placements, and bounded repairs.
-  None of those steps reschedules a workshop. See
+  assignments, then tries ranked choices and bounded repairs. Under D31, none
+  of those steps may introduce an unchosen workshop assignment, and none
+  reschedules a workshop. See
   [`src/modules/workshop-assignment/index.ts`](../../../src/modules/workshop-assignment/index.ts#L174-L358).
 - D4 requires hard constraints first, then maximum assigned coverage, retention,
   balanced opportunity priority, higher-ranked choices, and stable tie-breaking.
