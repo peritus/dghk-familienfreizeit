@@ -370,17 +370,29 @@ export function runRoomAssignment(
         const oldRoom = placements.get(occupant.family_id)!
         const targetRoom = roomsById.get(oldRoom)!
         placements.delete(occupant.family_id)
-        const alternatives = scoredRooms(occupant, placements, input, params, rules)
-        const target = scoredRooms(family, placements, input, params, rules).find(
-          ({ room }) => room.id === oldRoom,
-        )
-        const alternative = alternatives.find(({ room }) => room.id !== oldRoom)
-        const current = score(occupant, targetRoom, placements, input, params).score
-        if (target && alternative && target.score + alternative.score > current) {
-          place(family, target.room, 'repair', target)
-          place(occupant, alternative.room, 'repair', alternative)
-          repaired = true
-          break
+        // Test the vacated room for the unplaced family first. It costs one
+        // room, and when it fails — which is the common case, since most
+        // occupants sit in rooms this family cannot use at all — the occupant's
+        // alternatives never have to be searched.
+        const target = candidateFor(family, targetRoom, placements, input, params, rules)
+        const alternative = target
+          ? firstCandidate(
+              occupant,
+              placements,
+              input,
+              params,
+              rules,
+              (candidate) => candidate.id !== oldRoom,
+            )
+          : undefined
+        if (target && alternative) {
+          const current = score(occupant, targetRoom, placements, input, params).score
+          if (target.score + alternative.score > current) {
+            place(family, target.room, 'repair', target)
+            place(occupant, alternative.room, 'repair', alternative)
+            repaired = true
+            break
+          }
         }
         placements.set(occupant.family_id, oldRoom)
       }
@@ -662,6 +674,48 @@ function scoredRooms(
   rules: readonly Rule[],
 ): RoomScore[] {
   return evaluateRooms(family, placements, input, params, rules).candidates
+}
+
+/**
+ * One room, scored if the family can use it. Equivalent to sweeping every room
+ * and keeping this one, which is what the repair pass used to do to answer a
+ * question about a single vacated room.
+ */
+function candidateFor(
+  family: FamilyPlacementUnit,
+  room: RoomCandidate,
+  placements: ReadonlyMap<string, string>,
+  input: RoomAssignmentInput,
+  params: RoomAssignmentParams,
+  rules: readonly Rule[],
+): RoomScore | undefined {
+  const state = sweepState(family, placements, input, params)
+  return feasible(family, room, placements, input, params, rules, state).length === 0
+    ? score(family, room, placements, input, params, state)
+    : undefined
+}
+
+/**
+ * The first room in `input.rooms` order that the family can use and that
+ * `accept` admits. Scoring every room to then take the first match was the
+ * other half of the repair pass's cost; room order, and therefore the room
+ * chosen, is unchanged.
+ */
+function firstCandidate(
+  family: FamilyPlacementUnit,
+  placements: ReadonlyMap<string, string>,
+  input: RoomAssignmentInput,
+  params: RoomAssignmentParams,
+  rules: readonly Rule[],
+  accept: (room: RoomCandidate) => boolean,
+): RoomScore | undefined {
+  const state = sweepState(family, placements, input, params)
+  for (const room of input.rooms) {
+    if (!accept(room)) continue
+    if (feasible(family, room, placements, input, params, rules, state).length !== 0) continue
+    return score(family, room, placements, input, params, state)
+  }
+  return undefined
 }
 
 /**
