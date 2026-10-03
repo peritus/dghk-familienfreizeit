@@ -185,10 +185,11 @@ app.post('/api/organiser/apply', async (context) => {
   try {
     const now = new Date().toISOString()
     const drafts = body.events.map((candidate) => eventDraft(candidate, principal.email, now))
-    const events = tracing.enterSpan('events.prepare_and_validate', (span) => {
+    const prepared = tracing.enterSpan('events.prepare_and_validate', (span) => {
       span.setAttribute('event.count', drafts.length)
       return prepareEventBatch(existing, drafts, activeProfile.validation_view)
     })
+    const events = prepared.events
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
       span.setAttribute('event.count', events.length)
       return !authorizeEventBatch(
@@ -204,7 +205,12 @@ app.post('/api/organiser/apply', async (context) => {
       inputSeq,
       events.map(({ seq: _seq, ...event }) => event),
     )
-    const world = deriveEventWorld([...existing, ...appended])
+    // `appendEvents` re-derives each draft's seq from the head it asserted, so
+    // the appended events are the ones `prepareEventBatch` already folded and
+    // its world already describes them. The assertion below is what makes that
+    // safe to rely on rather than merely likely.
+    assertAppendedMatchesPrepared(appended, events)
+    const world = prepared.world
     return context.json({
       events: appended,
       head_seq: inputSeq + appended.length,
@@ -354,6 +360,19 @@ async function readEventLog(context: Context<{ Bindings: Env }>) {
     span.setAttribute('event.count', events.length)
     return events
   })
+}
+
+/** Guards the one assumption behind reusing the prepared world for the response. */
+function assertAppendedMatchesPrepared(
+  appended: readonly { seq: number; type: string }[],
+  prepared: readonly { seq: number; type: string }[],
+): void {
+  const matches =
+    appended.length === prepared.length &&
+    appended.every(
+      (event, index) => event.seq === prepared[index]?.seq && event.type === prepared[index]?.type,
+    )
+  if (!matches) throw new Error('appended batch does not match the prepared batch')
 }
 
 function deriveEventWorld(events: Parameters<typeof derive>[0]) {

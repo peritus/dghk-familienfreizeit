@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest'
+import { derive } from '../../src/events/fold.js'
 import { prepareEventBatch } from '../../src/events/prepare.js'
 import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import type { EventDraft } from '../../src/events/store.js'
@@ -12,7 +13,7 @@ const draft = (type: string, payload: EventDraft['payload']): EventDraft => ({
 })
 
 test('prepares and validates a complete prospective event stream', () => {
-  const events = prepareEventBatch(
+  const { events, world } = prepareEventBatch(
     [],
     [
       draft('FamilyInvited', {
@@ -33,6 +34,12 @@ test('prepares and validates a complete prospective event stream', () => {
   )
 
   expect(events.map(({ seq }) => seq)).toEqual([1, 2])
+
+  // The append handler serves this world as the result of the batch instead of
+  // folding the same events again, so it has to be the world those events
+  // produce — not merely a world.
+  expect(world).toEqual(derive(events))
+  expect(world.head_seq).toBe(2)
 })
 
 test('prepares a selected-profile module event through the composed schemas', () => {
