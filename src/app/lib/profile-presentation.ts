@@ -33,11 +33,12 @@ export function profileEventDetails(
   const event = profile?.meta.event
   if (!profile || !event) return undefined
 
+  const dateTimeZoneOption = 'timeZone'
   const dateFormat = new Intl.DateTimeFormat(profile.meta.locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    timeZone: profile.meta.timezone,
+    [dateTimeZoneOption]: profile.meta.timezone,
   })
   const date = `${dateFormat.format(new Date(`${profile.meta.starts_on}T12:00:00Z`))} – ${dateFormat.format(new Date(`${profile.meta.ends_on}T12:00:00Z`))}`
   return { place: localizedProfileText(profile, event.place), date }

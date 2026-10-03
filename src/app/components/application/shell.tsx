@@ -46,6 +46,9 @@ export function Shell({
                 />
                 {profileEventTitle(profile)}
               </Link>
+              <Link href="/login" className="inline-flex min-h-11 items-center underline">
+                Anmelden
+              </Link>
             </div>
           </header>
           <main id="content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-8 sm:px-8">

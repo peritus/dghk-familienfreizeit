@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
-import { activeProfilePresentation } from '../config/index.js'
+import { activeProfilePresentation } from './active-profile.js'
 import './globals.css'
 
 const root = document.getElementById('root')

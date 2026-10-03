@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 import { App } from '../../src/app/app'
+import { activeProfilePresentation } from '../../src/app/active-profile.js'
 import { RouteBoundary, RouteLoading } from '../../src/app/components/application/route-states'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
 import type { Event } from '../../src/events/types.js'
@@ -192,6 +193,15 @@ test.each(['/', '/family'])(
     expect(screen.queryByRole('textbox')).toBeNull()
   },
 )
+
+test('the active profile logo is inverted for dark mode', () => {
+  window.history.replaceState({}, '', '/')
+  render(<App profile={activeProfilePresentation} />)
+
+  const logo = document.querySelector('img[src*="familienfreizeit-2027-logo.svg"]')
+  expect(logo).toBeTruthy()
+  expect(logo?.className).toContain('dark:invert')
+})
 
 test('the login form requests a magic link and explains local delivery', async () => {
   const fetchMock = vi.fn(() =>
