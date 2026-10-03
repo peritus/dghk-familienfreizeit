@@ -478,17 +478,16 @@ function roomAssignmentStage(params: RoomAssignmentParams): SolverStage<RoomAssi
 export function roomAssignmentRules(): readonly Rule<
   FamilyPlacementUnit,
   RoomCandidate,
-  RoomAssignmentInput & { placements?: ReadonlyMap<string, string> }
+  RuleContext
 >[] {
   return [
     {
       id: 'hard.capacity',
-      evaluate: (
-        family: FamilyPlacementUnit,
-        room: RoomCandidate,
-        context: RoomAssignmentInput & { placements?: ReadonlyMap<string, string> },
-      ) =>
-        roomRemaining(room, context.placements ?? new Map(), context) >= family.bed_demand
+      evaluate: (family: FamilyPlacementUnit, room: RoomCandidate, context: RuleContext) =>
+        // `placement_index` is optional so an externally defined rule, or a
+        // caller that builds its own context, still works via the scan below.
+        roomRemaining(room, context.placements ?? new Map(), context, context.placement_index) >=
+        family.bed_demand
           ? 0
           : ('infeasible' as const),
       describe: () => 'not enough free places',
@@ -629,10 +628,10 @@ function evaluateRooms(
 ): { candidates: RoomScore[]; rejections: { target: string; rule: string }[] } {
   const candidates: RoomScore[] = []
   const rejections: { target: string; rule: string }[] = []
-  const sweep = familySweep(family, input, params)
+  const state = sweepState(family, placements, input, params)
   for (const room of input.rooms) {
-    const reasons = feasible(family, room, placements, input, params, rules, sweep)
-    if (reasons.length === 0) candidates.push(score(family, room, placements, input, params, sweep))
+    const reasons = feasible(family, room, placements, input, params, rules, state)
+    if (reasons.length === 0) candidates.push(score(family, room, placements, input, params, state))
     else for (const { rule } of reasons) rejections.push({ target: room.id, rule })
   }
   return { candidates, rejections }
@@ -646,6 +645,62 @@ function scoredRooms(
   rules: readonly Rule[],
 ): RoomScore[] {
   return evaluateRooms(family, placements, input, params, rules).candidates
+}
+
+/**
+ * Room occupancy derived from one `placements` map. Deriving it per sweep keeps
+ * `roomRemaining` and `roomFamilies` O(1) without maintaining mutable state
+ * across the stage: `place` snapshots `placements` and the repair pass mutates
+ * and rolls it back, so an incrementally maintained index would have to be
+ * rolled back in lockstep.
+ */
+export type PlacementIndex = {
+  occupancy: ReadonlyMap<string, number>
+  families_by_room: ReadonlyMap<string, readonly string[]>
+}
+
+export function placementIndex(
+  placements: ReadonlyMap<string, string>,
+  input: RoomAssignmentInput,
+): PlacementIndex {
+  const demand = new Map(input.families.map((family) => [family.family_id, family.bed_demand]))
+  const occupancy = new Map<string, number>()
+  const familiesByRoom = new Map<string, string[]>()
+  // Iterating `placements` preserves its order, which is the order the previous
+  // `[...placements.entries()].filter(...)` produced.
+  for (const [familyId, roomId] of placements) {
+    occupancy.set(roomId, (occupancy.get(roomId) ?? 0) + (demand.get(familyId) ?? 0))
+    const bucket = familiesByRoom.get(roomId)
+    if (bucket) bucket.push(familyId)
+    else familiesByRoom.set(roomId, [familyId])
+  }
+  return { occupancy, families_by_room: familiesByRoom }
+}
+
+type RuleContext = RoomAssignmentInput & {
+  placements?: ReadonlyMap<string, string>
+  placement_index?: PlacementIndex
+}
+
+/** Everything a room sweep can resolve before it starts iterating rooms. */
+type SweepState = {
+  family: FamilySweep
+  index: PlacementIndex
+  rule_context: RuleContext
+}
+
+function sweepState(
+  family: FamilyPlacementUnit,
+  placements: ReadonlyMap<string, string>,
+  input: RoomAssignmentInput,
+  params: RoomAssignmentParams,
+): SweepState {
+  const index = placementIndex(placements, input)
+  return {
+    family: familySweep(family, input, params),
+    index,
+    rule_context: { ...input, placements, placement_index: index },
+  }
 }
 
 /**
@@ -695,21 +750,21 @@ function feasible(
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
   rules: readonly Rule[],
-  sweep: FamilySweep = familySweep(family, input, params),
+  state: SweepState = sweepState(family, placements, input, params),
 ): Rejection[] {
   const rejections: Rejection[] = []
-  const ruleContext = { ...input, placements }
+  const sweep = state.family
   for (const result of evaluateRules(
-    rules as readonly Rule<FamilyPlacementUnit, RoomCandidate, typeof ruleContext>[],
+    rules as readonly Rule<FamilyPlacementUnit, RoomCandidate, RuleContext>[],
     family,
     room,
-    ruleContext,
+    state.rule_context,
   ))
     if (result.score === 'infeasible')
       rejections.push({ rule: result.id, text: result.text ?? result.id })
   if (
     sweep.requires_sole_occupancy &&
-    roomFamilies(room.id, placements).some((id) => id !== family.family_id)
+    roomFamilies(room.id, placements, state.index).some((id) => id !== family.family_id)
   )
     rejections.push({
       rule: 'hard.trait-requirements',
@@ -724,7 +779,9 @@ function feasible(
   for (const relation of sweep.keep_apart)
     if (
       relation.value &&
-      roomFamilies(room.id, placements).some((id) => familyOfTarget(relation.value!, input) === id)
+      roomFamilies(room.id, placements, state.index).some(
+        (id) => familyOfTarget(relation.value!, input) === id,
+      )
     )
       rejections.push({ rule: 'hard.keep-apart', text: `kept apart from ${relation.value}` })
   return rejections
@@ -736,9 +793,10 @@ function score(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
-  sweep: FamilySweep = familySweep(family, input, params),
+  state: SweepState = sweepState(family, placements, input, params),
 ): RoomScore {
-  const slack = roomRemaining(room, placements, input) - family.bed_demand
+  const sweep = state.family
+  const slack = roomRemaining(room, placements, input, state.index) - family.bed_demand
   const terms: [string, number][] = []
   if (slack === 0) terms.push(['exact-fit', params.weights.exact_fit])
   if (slack > 0 && slack <= Math.max(1, family.bed_demand))
@@ -748,10 +806,10 @@ function score(
   for (const requirement of sweep.preferred) {
     const satisfied =
       requirement.kind === 'structural' && requirement.structural === 'no-other-families'
-        ? roomFamilies(room.id, placements).every((id) => id === family.family_id)
+        ? roomFamilies(room.id, placements, state.index).every((id) => id === family.family_id)
         : requirement.kind === 'relation'
           ? !requirement.value ||
-            !roomFamilies(room.id, placements).some(
+            !roomFamilies(room.id, placements, state.index).some(
               (id) => familyOfTarget(requirement.value!, input) === id,
             )
           : requirement.capability_key
@@ -842,7 +900,9 @@ function roomRemaining(
   room: RoomCandidate,
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
+  index?: PlacementIndex,
 ): number {
+  if (index) return room.capacity - (index.occupancy.get(room.id) ?? 0)
   return (
     room.capacity -
     input.families
@@ -851,7 +911,12 @@ function roomRemaining(
   )
 }
 
-function roomFamilies(roomId: string, placements: ReadonlyMap<string, string>): readonly string[] {
+function roomFamilies(
+  roomId: string,
+  placements: ReadonlyMap<string, string>,
+  index?: PlacementIndex,
+): readonly string[] {
+  if (index) return index.families_by_room.get(roomId) ?? []
   return [...placements.entries()].filter(([, id]) => id === roomId).map(([familyId]) => familyId)
 }
 
