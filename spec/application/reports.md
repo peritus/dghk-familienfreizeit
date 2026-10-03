@@ -137,7 +137,7 @@ against bed occupancy; bed occupancy is the count of non-null place assignments.
 It may include operational room notes that are not family-facing.
 
 **Workshop rosters** provides one attendance list per workshop and slot,
-including leaders, capacity, assigned people, cancellations, and fill status. The
+including leaders, capacity, assigned people, cancellations, and capacity status. The
 organiser projection may include operational phone, emergency, health, or allergy
 contacts when authorization and profile sensitivity policy allow it; family/shared
 projections exclude those fields.
@@ -160,7 +160,7 @@ Plan inspection and comparison are accepted but deferred in
 They remain distinct from the scope-selected communication preview when promoted.
 
 **Capacity and accommodation cost overview** shows room and bed use, free
-capacity, workshop fill, and the configured accommodation cost estimate. It is a
+capacity, workshop utilization, and the configured accommodation cost estimate. It is a
 planning calculation, not an invoice or billing record.
 
 **Workshop-space inventory** is an organiser-only physical inventory report. It

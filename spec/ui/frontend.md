@@ -194,7 +194,7 @@ The current and later screens use the following component inventory.
 | Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms |
 | Combobox, Popover, Command | person picker, room picker |
 | Dialog, Alert Dialog | later organiser decisions, communicate confirmation, discard drafts |
-| Table, ScrollArea | families, plans, constraints, workshop fill |
+| Table, ScrollArea | families, plans, constraints, workshop capacity |
 | Tabs | building filter on the board, before and after communication in the family view |
 | Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
 | Sidebar, Sheet, Drawer, Breadcrumb | organiser navigation, mobile pickers |

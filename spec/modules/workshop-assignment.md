@@ -73,9 +73,8 @@ in five steps:
    seat a still-unassigned person, and explaining every movement in the trace.
 
 `minimum_workshops` can cause lower-ranked current choices to be considered,
-but it never creates an assignment outside the person's ranking. No automatic
-fill is permitted for children or adults; an eligible person with no feasible
-ranked choice remains unassigned.
+but it never creates an assignment outside the person's ranking. An eligible
+person with no feasible ranked choice remains unassigned.
 
 The output assigns at most one workshop to a person per slot, respects
 workshop capacity, records unassigned reasons, and emits traces for capacity,
@@ -107,7 +106,7 @@ type WorkshopAssignmentSection = {
     workshop_id: string
     slot_id: string
     rank: number | null
-    reason: 'fixed' | 'retained' | 'ranked' | 'fill' | 'repaired'
+    reason: 'fixed' | 'retained' | 'ranked' | 'repaired'
   }[]
   unassigned: readonly { person_id: string; workshop_id: string | null; reason: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
@@ -170,6 +169,3 @@ converted into automatic assignments in the first place.
   still-outstanding mechanism owned by
   [workshop scheduling](workshop-scheduling.md); this module only covers who
   attends, not where a workshop is scheduled.
-- Remove the legacy `fill_unassigned` implementation and its fill-origin
-  output from the production solver, prototype, and projection surfaces. This
-  is tracked in [issue 037](../issues/open/037-workshop-assignment-fill-retention-instability.md).

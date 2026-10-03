@@ -281,7 +281,6 @@ const defaultParams: WorkshopAssignmentParams = {
   rank_weights: [3, 2, 1],
   minimum_workshops: 1,
   fairness_targets: {},
-  fill_unassigned: true,
   max_repair_passes: 2,
 }
 
@@ -384,7 +383,7 @@ test('a stable re-derive retains a previously ranked assignment instead of recom
   ])
 })
 
-test('bounded repair reseats an unassigned person by relocating a non-fixed occupant', () => {
+test('bounded repair reseats a ranked person by relocating a non-fixed occupant', () => {
   const events = [
     venue('wsp_a', 1),
     venue('wsp_b', 2),
@@ -394,10 +393,11 @@ test('bounded repair reseats an unassigned person by relocating a non-fixed occu
     ...family('per_a', 'fam_a', 6),
     ...family('per_b', 'fam_b', 8),
     ranking('per_a', 'wks_1', 1, 10),
+    ranking('per_a', 'wks_2', 2, 11),
+    ranking('per_b', 'wks_1', 1, 12),
   ]
   const params: WorkshopAssignmentParams = {
     ...defaultParams,
-    fill_unassigned: false,
     max_repair_passes: 3,
   }
   const section = assignmentSection(events, params)
@@ -408,6 +408,20 @@ test('bounded repair reseats an unassigned person by relocating a non-fixed occu
       expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', reason: 'repaired' }),
     ]),
   )
+})
+
+test('a minimum never assigns a workshop outside the current ranking', () => {
+  const events = [
+    venue('wsp_a', 1),
+    slot(2),
+    workshop('wks_1', 1, 1, 3),
+    ...family('per_a', 'fam_a', 4),
+  ]
+  const section = assignmentSection(events, defaultParams)
+  expect(section.assignments).toEqual([])
+  expect(section.unassigned).toEqual([
+    { person_id: 'per_a', workshop_id: null, reason: 'no current workshop choice' },
+  ])
 })
 
 function twoCycles(

@@ -14,7 +14,7 @@ opened: 2026-09-30
 
 ## Problem
 
-While investigating [issue 037](037-workshop-assignment-fill-retention-instability.md)
+While investigating [issue 037](../archived/037-workshop-assignment-fill-retention-instability.md)
 (workshop-assignment's fill placements are not stable across a retention
 cycle), the same question was asked of `room-assignment`, which implements
 the analogous D4 stability contract closed by
@@ -72,4 +72,4 @@ what went wrong in issue 037, and it was not exercised here.
 - [modules/room-assignment.md](../../modules/room-assignment.md)
 - [decisions.md#d4](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)
 - [issue 006 (archived)](../archived/006-solver-stability-repair-underspecified.md)
-- [issue 037](037-workshop-assignment-fill-retention-instability.md)
+- [issue 037](../archived/037-workshop-assignment-fill-retention-instability.md)

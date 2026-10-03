@@ -44,7 +44,6 @@ const profile = defineOccasionProfile({
       rank_weights: [3, 2, 1],
       minimum_workshops: 1,
       fairness_targets: {},
-      fill_unassigned: true,
       max_repair_passes: 2,
     }),
   ],

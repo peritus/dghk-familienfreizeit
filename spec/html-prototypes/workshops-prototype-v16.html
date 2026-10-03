@@ -1057,15 +1057,6 @@ function compute() {
     });
   }
   const assignWs = ws.filter(w => w.source === 'off' && w.mode === 'assign' && place[w.id].slot);
-  const order = { ranked: 0, nopref: 1, pending: 2, none: 2 };
-  PEOPLE.filter(p => p.kid).sort((a, b) => order[resp[a.id].resp] - order[resp[b.id].resp] || cnt(a) - cnt(b)).forEach(p => {
-    while (cnt(p) < MIN_KIDS) {
-      const opts = assignWs.filter(w => !asg[p.id][place[w.id].slot] && eligible(p, w) && seatFree(w) && !resp[p.id].ranks.includes(w.id))
-        .sort((a, b) => (b.cap - ppl[b.id].length) - (a.cap - ppl[a.id].length) || slotIdx(place[a.id].slot) - slotIdx(place[b.id].slot));
-      if (!opts.length) break;
-      const w = opts[0]; ppl[w.id].push(p.id); asg[p.id][place[w.id].slot] = { w: w.id, got: null }; T(p, { t: 'fill', w: w.id, sid: place[w.id].slot });
-    }
-  });
   const kids = PEOPLE.filter(p => p.kid);
   const seats = assignWs.filter(w => w.target !== 'adults').reduce((a, w) => a + w.cap, 0), needed = kids.length * MIN_KIDS;
   const gap = seats < needed ? { seats, needed } : null;
@@ -1171,11 +1162,11 @@ const SEC = {
   rs: [['rooms', 'Räume'], ['slots', 'Slots']],
   prog: [['grid', 'Ganzes Programm'], ['unplaced', 'Nicht eingeplant'], ['overlap', 'Überschneidungen']],
   wish: [['ans', 'Antworten'], ['dem', 'Nachfrage'], ['flow', 'Verlauf']],
-  teil: [['people', 'Personen'], ['fill', 'Ohne Wunsch'], ['open', 'Offene Fälle']],
+  teil: [['people', 'Personen'], ['open', 'Offene Fälle']],
   lists: [['ws', 'Workshop'], ['p', 'Person'], ['f', 'Familie'], ['r', 'Raum']],
 };
 // Where the group control applies
-const GROUPED = { ws: ['list', 'lead'], prog: ['grid', 'unplaced', 'overlap'], wish: ['ans', 'dem', 'flow'], teil: ['people', 'fill'] };
+const GROUPED = { ws: ['list', 'lead'], prog: ['grid', 'unplaced', 'overlap'], wish: ['ans', 'dem', 'flow'], teil: ['people'] };
 const secOf = v => v === 'lists' ? S.list : S.sec[v];
 const secLabel = v => (SEC[v].find(([k]) => k === secOf(v)) || [, ''])[1];
 function secNav(v) {
@@ -1255,7 +1246,7 @@ function vRoomsSlots() {
   return viewHead('Räume und Slots', 'Der Rahmen, in den die Planung die Workshops setzt.') + checks + secNav('rs') + secPanel('rs', inner);
 }
 /* =========================================================
-   Programm: rooms x slots, with fill and demand per workshop
+   Programm: rooms x slots, with capacity and demand per workshop
    ========================================================= */
 function overlapPairs() {
   const pairs = {};
@@ -1304,17 +1295,6 @@ function groupRow(label, ps) {
 function vTeilnahme() {
   const sec = secOf('teil');
   let inner = '';
-  if (sec === 'fill') {
-    const rows = [];
-    PEOPLE.filter(inGroup).forEach(p => MD.SLOTS.forEach(s => { const a = MD.R.asg[p.id][s.id]; if (a && a.w && !a.got) rows.push({ p, s, w: MD.WS[a.w], r: MD.R.resp[p.id] }); }));
-    rows.sort((a, b) => a.p.name.localeCompare(b.p.name, 'de') || MD.SLOTS.indexOf(a.s) - MD.SLOTS.indexOf(b.s));
-    const why = r => r.resp === 'none' ? 'Keine Antwort' : r.resp === 'pending' ? 'Noch keine Antwort' : r.resp === 'nopref' ? 'Keine Präferenz' : `Aufgefüllt auf ${MIN_KIDS} Workshops`;
-    inner = rows.length ? `<p class="intro">${personen(new Set(rows.map(x => x.p.id)).size)} haben ${rows.length === 1 ? 'einen Platz' : rows.length + ' Plätze'} bekommen, die sie nicht gewählt haben.</p>
-      <div class="table-wrap"><table class="plain"><caption class="sr">Ohne Wunsch zugeordnet</caption><thead><tr><th scope="col">Person</th><th scope="col">Alter</th><th scope="col">Workshop</th><th scope="col">Slot</th><th scope="col">Warum ohne Wunsch</th></tr></thead><tbody>
-      ${rows.map(x => `<tr><th scope="row"><button type="button" class="pname plink" data-way="${x.p.id}">${esc(x.p.name)}<span class="sr">: Wünsche verfolgen</span></button></th><td>${x.p.kid ? x.p.age : 'erw.'}</td><td>${esc(x.w.title)}</td><td>${esc(sShort(x.s))}</td><td>${why(x.r)}</td></tr>`).join('')}</tbody></table></div>`
-      : success('Niemand hat einen Platz ohne Wunsch bekommen.');
-    return viewHead('Teilnahme', 'Wer nimmt woran teil, und wer leitet?') + standNotice() + secNav('teil') + secPanel('teil', inner);
-  }
   if (sec === 'open') {
     const openG = groupByPerson(openEntries());
     inner = openG.length ? `<p class="intro">Die Berechnung markiert freie Slots, wenn ein Kind weniger als ${MIN_KIDS} Workshops bekommt.</p><div class="table-wrap"><table class="plain"><caption class="sr">Offene Fälle</caption><thead><tr><th scope="col">Person</th><th scope="col">Workshops</th><th scope="col">Markierte Slots</th><th scope="col">Grund</th></tr></thead><tbody>
@@ -1346,12 +1326,12 @@ function vTeilnahme() {
   return viewHead('Teilnahme', 'Wer nimmt woran teil, und wer leitet?') + standNotice() + secNav('teil') + secPanel('teil', inner);
 }
 function cellFor(p, s) {
-  const a = MD.R.asg[p.id][s.id], r = MD.R.resp[p.id];
+  const a = MD.R.asg[p.id][s.id];
   if (!a) return '<td class="h free">frei</td>';
   if (a.lead) return `<td class="h lead"><span class="w">${esc(MD.WS[a.lead].title)}</span><span class="rk">leitet</span></td>`;
   if (a.signup) return `<td class="h su"><span class="w">${esc(MD.WS[a.signup].title)}</span><span class="rk">Anmeldung</span></td>`;
   if (a.open) return `<td class="h">${chip('Offen', 'attn')}<span class="rk" style="display:block;margin-top:2px">${esc(OPEN[a.open][0])}</span></td>`;
-  const rk = a.got ? `${a.got}. Wahl` : r.resp === 'ranked' ? 'nicht gewählt' : 'freier Platz';
+  const rk = a.got ? `${a.got}. Wahl` : 'nicht gewählt';
   return `<td class="h ${a.got ? 'r' + Math.min(a.got, 4) : ''}"><span class="w">${esc(MD.WS[a.w].title)}</span><span class="rk">${rk}</span></td>`;
 }
 function rankList(p) {
@@ -1372,7 +1352,7 @@ function tRanking() {
     return `<article class="pcard${open ? ' is-open' : ''}" id="pcard-${p.id}" tabindex="-1" aria-labelledby="pc-${p.id}"><h3 id="pc-${p.id}">${nameLink(p)} <span class="muted small" style="font-weight:500">· ${p.kid ? p.age + ' Jahre' : 'erwachsen'} · ${workshops(nWs(p))}</span></h3>
       ${respBadge(MD.R.resp[p.id]) ? `<div class="badges">${respBadge(MD.R.resp[p.id])}</div>` : ''}<h4>Zuordnung</h4><ul>${items}</ul><h4>Rangfolge</h4>${rankList(p)}</article>`; }).join('');
   return `<section aria-labelledby="h-rank"><div class="section-head"><h2 id="h-rank" class="sr">Personen</h2><p class="muted">Ein Name zeigt, was aus den Wünschen der Person geworden ist.</p></div>
-    <div class="legend" aria-hidden="true"><span><i class="sw" style="background:var(--r1)"></i>1. Wahl</span><span><i class="sw" style="background:var(--r2)"></i>2. Wahl</span><span><i class="sw" style="background:var(--r3)"></i>3. Wahl</span><span><i class="sw" style="background:var(--r4)"></i>4.–5. Wahl</span><span><i class="sw" style="background:#fff"></i>nicht gewählt oder freier Platz</span><span><i class="sw lead-sw"></i>leitet</span><span>${chip('Offen', 'attn')} markierter Fall</span></div>
+    <div class="legend" aria-hidden="true"><span><i class="sw" style="background:var(--r1)"></i>1. Wahl</span><span><i class="sw" style="background:var(--r2)"></i>2. Wahl</span><span><i class="sw" style="background:var(--r3)"></i>3. Wahl</span><span><i class="sw" style="background:var(--r4)"></i>4.–5. Wahl</span><span><i class="sw" style="background:#fff"></i>nicht gewählt</span><span><i class="sw lead-sw"></i>leitet</span><span>${chip('Offen', 'attn')} markierter Fall</span></div>
     <div class="wide-only"><div class="table-wrap"><table class="pt"><caption>Teilnahme <span>· ${personen(people.length)} · ${slotsTxt(MD.SLOTS.length)}</span></caption>
       <thead><tr><th scope="col">Person</th><th scope="col">Rangfolge</th><th scope="col">Work&shy;shops</th>${head}</tr></thead><tbody>${rows}</tbody></table></div></div>
     <div class="narrow-only"><div class="pcards">${cards}</div></div></section>`;
@@ -1497,9 +1477,6 @@ function tHow() {
         <label><input type="radio" name="tmode" value="only"${S.tmode === 'only' ? ' checked' : ''}> Nur diese Person</label></fieldset>
       ${sel ? `<div class="field"><label for="trace-person">Person suchen</label><input type="search" id="trace-person" list="people-list" value="${esc(sel.name)}" autocomplete="off"><datalist id="people-list">${people.map(p => `<option value="${esc(p.name)}">`).join('')}</datalist></div>
       <p class="print-only">Person: ${esc(sel.name)} (${only ? 'nur diese Person' : 'hervorgehoben'})</p>` : ''}</div>`;
-  const fills = src.filter(e => e.t === 'fill'); const fg = {}; fills.forEach(e => (fg[e.w] = fg[e.w] || []).push(e));
-  const freeTable = fills.length ? `<div class="table-wrap"><table class="plain"><caption class="sr">Freie Plätze ohne Wunsch</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Slot</th><th scope="col" class="num">Plätze</th><th scope="col">Personen</th></tr></thead><tbody>
-    ${Object.entries(fg).sort((a, b) => b[1].length - a[1].length).map(([k, es]) => `<tr><th scope="row">${T(k)}</th><td>${at(mPlace(k).slot)}</td><td class="num">${es.length}</td><td>${names(es, false, false)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Keine.</p>';
   const dist = people.reduce((d, p) => (d[nWs(p)] = (d[nWs(p)] || 0) + 1, d), {}), maxD = Math.max(1, ...Object.values(dist));
   const distTable = `<div class="table-wrap"><table class="plain"><caption class="sr">Workshops pro Person</caption><thead><tr><th scope="col">Workshops</th><th scope="col" class="num">Personen</th><th scope="col"><span class="sr">Anteil</span></th></tr></thead><tbody>
     ${Object.keys(dist).map(Number).sort((a, b) => b - a).map(n => `<tr><th scope="row">${n}</th><td class="num">${dist[n]}</td><td class="barcell"><div class="track slim"><span class="bs r1" style="width:${dist[n] / maxD * 100}%"></span></div></td></tr>`).join('')}</tbody></table></div>`;

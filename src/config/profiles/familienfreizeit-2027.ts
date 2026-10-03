@@ -282,7 +282,6 @@ export const familienfreizeit2027Profile = defineOccasionProfile({
       rank_weights: [3, 2, 1],
       minimum_workshops: 2,
       fairness_targets: { children: 2, adults: 1 },
-      fill_unassigned: true,
       max_repair_passes: 5,
     }),
     familyPreferences({

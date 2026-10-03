@@ -16,8 +16,8 @@ opened: 2026-09-19
 [`profiles/familienfreizeit-2027.example.ts:443-444`](../../profiles/familienfreizeit-2027.example.ts) calls `workshopAssignment({…})` with
 `co_assignment_trait: 'workshop-with'` and `cancel_under_subscribed: true`.
 [`modules/workshop-assignment.md:25-30`](../../modules/workshop-assignment.md) declares `WorkshopAssignmentParams` as
-exactly `objectives`, `top_n`, `rank_weights`, `fill_unassigned`; the
-validation table at `:38-43` lists the same four fields. [`modules/contract.md:147`](../../modules/contract.md)
+the documented workshop-assignment parameters; the
+validation table lists the same fields. [`modules/contract.md:147`](../../modules/contract.md)
 fails the build when "a parameter fails its schema", and
 [`profiles/contract.md:12-13`](../../profiles/contract.md) confirms "The builder validates the
 composition at build time." This is the only module-parameter mismatch in

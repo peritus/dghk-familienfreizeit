@@ -15,7 +15,6 @@ export type WorkshopAssignmentParams = {
   rank_weights: readonly number[]
   minimum_workshops: number
   fairness_targets: Readonly<Record<string, number>>
-  fill_unassigned: boolean
   max_repair_passes: number
 }
 
@@ -24,7 +23,7 @@ export type WorkshopAssignment = {
   workshop_id: string
   slot_id: string
   rank: number | null
-  reason: 'ranked' | 'fill' | 'fixed' | 'retained' | 'repaired'
+  reason: 'ranked' | 'fixed' | 'retained' | 'repaired'
 }
 
 export type WorkshopUnassigned = { person_id: string; workshop_id: string | null; reason: string }
@@ -166,7 +165,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       }
 
       // Step 1: apply feasible fixed attendance decisions first — they always
-      // take precedence over automatic (retained/ranked/fill) choices, so they
+      // take precedence over automatic (retained/ranked) choices, so they
       // claim capacity before anything else runs.
       const fixed = input.labels
         .filter((label) => label.key === 'workshop-attendance' && typeof label.value === 'string')
@@ -189,7 +188,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       }
 
       // Step 2: retain every still-feasible prior assignment for anyone with
-      // no fixed decision this cycle, before any new ranking/fill decision
+      // no fixed decision this cycle, before any new ranking decision
       // runs. A person may have retained more than one prior assignment
       // (e.g. minimum_workshops > 1) — every one of them is considered, not
       // just the first found.
@@ -242,7 +241,8 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           }
         }
 
-      // Steps 3–4: ranked choices, then fill remaining minimums.
+      // Step 3: process current ranked choices. A minimum only controls how
+      // many ranked choices are considered; it never creates a new choice.
       for (const person of assignedPeople) {
         const ranking = rankingByPerson.get(person.id)
         const rankedChoices =
@@ -270,39 +270,6 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           }
           assigned += 1
         }
-        if (assigned < params.minimum_workshops && params.fill_unassigned) {
-          const candidates = official.workshops
-            .filter(
-              (workshop) =>
-                workshop.mode === 'assigned' &&
-                !workshop.cancelled &&
-                eligibleRole(labelValue(input, person.id, 'role'), workshop) &&
-                !assignments.some(
-                  (item) =>
-                    item.person_id === person.id &&
-                    item.slot_id === placements.get(workshop.id)?.slot_id,
-                ),
-            )
-            .sort(
-              (a, b) =>
-                (counts.get(a.id) ?? 0) - (counts.get(b.id) ?? 0) ||
-                a.sort_key - b.sort_key ||
-                a.id.localeCompare(b.id),
-            )
-          for (const workshop of candidates) {
-            if (assigned >= params.minimum_workshops) break
-            if (place(person.id, workshop, null, 'fill')) {
-              assigned += 1
-              continue
-            }
-            traceRejection(
-              person.id,
-              workshop.id,
-              'fill-rejected',
-              rejectionReason(person.id, workshop) ?? 'hard.capacity',
-            )
-          }
-        }
       }
 
       // Step 5: bounded deterministic repair — try to seat a still-unassigned
@@ -321,13 +288,15 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       for (let pass = 0; pass < params.max_repair_passes; pass += 1) {
         let repaired = false
         for (const person of stillUnassigned()) {
-          const candidateWorkshops = official.workshops.filter(
-            (workshop) =>
-              workshop.mode === 'assigned' &&
-              !workshop.cancelled &&
-              eligibleRole(labelValue(input, person.id, 'role'), workshop),
-          )
-          for (const workshop of candidateWorkshops) {
+          const candidateChoices =
+            rankingByPerson
+              .get(person.id)
+              ?.choices.filter((choice) => choice.workshop_id && choice.rank !== null)
+              .slice()
+              .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)) ?? []
+          for (const candidateChoice of candidateChoices) {
+            const workshop = workshops.get(candidateChoice.workshop_id!)
+            if (!workshop) continue
             const occupant = assignments.find(
               (item) => item.workshop_id === workshop.id && item.reason !== 'fixed',
             )
@@ -340,21 +309,36 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
             // "occupied" to the overlap check, even when the alternative is
             // that same slot's other workshop.
             unplace(occupant)
-            const alternative = official.workshops.find(
-              (candidate) =>
+            const alternativeChoices =
+              rankingByPerson
+                .get(occupant.person_id)
+                ?.choices.filter((choice) => choice.workshop_id && choice.rank !== null)
+                .slice()
+                .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)) ?? []
+            const alternativeChoice = alternativeChoices.find((choice) => {
+              const candidate = workshops.get(choice.workshop_id!)
+              return (
+                candidate &&
                 candidate.id !== workshop.id &&
-                candidate.mode === 'assigned' &&
-                !candidate.cancelled &&
-                eligibleRole(labelValue(input, occupant.person_id, 'role'), candidate) &&
-                rejectionReason(occupant.person_id, candidate) === null,
-            )
-            if (
-              alternative &&
-              place(person.id, workshop, null, 'repaired') &&
-              place(occupant.person_id, alternative, occupantRank, 'repaired')
-            ) {
+                rejectionReason(occupant.person_id, candidate) === null
+              )
+            })
+            const alternative = alternativeChoice
+              ? workshops.get(alternativeChoice.workshop_id!)
+              : undefined
+            const seated =
+              alternative && place(person.id, workshop, candidateChoice.rank, 'repaired')
+            const relocated =
+              seated && place(occupant.person_id, alternative, alternativeChoice!.rank, 'repaired')
+            if (relocated) {
               repaired = true
               break
+            }
+            if (seated) {
+              const repairedAssignment = assignments.find(
+                (item) => item.person_id === person.id && item.workshop_id === workshop.id,
+              )
+              if (repairedAssignment) unplace(repairedAssignment)
             }
             // No usable alternative, or the repair could not be completed — re-seat the occupant.
             place(occupant.person_id, occupantWorkshop, occupantRank, occupantReason)
@@ -411,7 +395,6 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
     rank_weights: z.array(z.number().int()).min(1).default([3, 2, 1]),
     minimum_workshops: z.number().int().min(0).default(0),
     fairness_targets: z.record(z.string(), z.number().int().min(0)).default({}),
-    fill_unassigned: z.boolean().default(true),
     max_repair_passes: z.number().int().min(0).default(5),
   }),
   contribute: (params) => ({

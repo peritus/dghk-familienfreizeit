@@ -67,7 +67,7 @@ The current order can be locally valid while being globally poor:
   explicit recalculation/review behavior must be defined.
 
 This is related to, but distinct from, the retention instability documented in
-[issue 037](037-workshop-assignment-fill-retention-instability.md). Issue 037
+[issue 037](../archived/037-workshop-assignment-fill-retention-instability.md). Issue 037
 concerns repeatability when re-deriving the same schedule and attendance plan;
 this issue concerns whether the schedule itself uses the available preference
 information to produce a better feasible plan.
@@ -211,6 +211,6 @@ runtime executable rules.
 - [modules/workshop-rankings.md](../../modules/workshop-rankings.md)
 - [roadmap.md — M8](../../roadmap.md#m8--organiser-authored-workshop-programme)
 - [decisions.md — D4](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)
-- [issue 037](037-workshop-assignment-fill-retention-instability.md)
+- [issue 037](../archived/037-workshop-assignment-fill-retention-instability.md)
 - [docs/modules/workshop-scheduling.md](../../../docs/modules/workshop-scheduling.md)
 - [docs/modules/workshop-assignment.md](../../../docs/modules/workshop-assignment.md)

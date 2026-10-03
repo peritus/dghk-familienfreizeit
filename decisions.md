@@ -750,8 +750,8 @@ coverage goals look like consent.
 The same choice-boundary applies to every person and every automatic path;
 different role-based filling would preserve the underlying agency violation.
 
-*Consequence:* the solver, prototypes, projections, and review surfaces must
-remove implicit fill outcomes. If ranked choices cannot produce an assignment,
-the person remains unassigned and the rejected choices remain explainable in
-the trace. The existing fill implementation is non-conforming and remains
-tracked in [issue 037](spec/issues/open/037-workshop-assignment-fill-retention-instability.md).
+*Consequence:* the solver, prototypes, projections, and review surfaces have
+no implicit fill outcomes. If ranked choices cannot produce an assignment, the
+person remains unassigned and the rejected choices remain explainable in the
+trace. Explicit organiser-authored `workshop-attendance` decisions remain the
+only non-ranking exception.

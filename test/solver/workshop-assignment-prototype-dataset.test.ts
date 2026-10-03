@@ -13,7 +13,10 @@ import {
   type WorkshopSchedulingSection,
 } from '../../src/modules/workshop-scheduling/index.js'
 import { workshopSpace } from '../../src/modules/workshop-space/index.js'
-import { workshopRankings } from '../../src/modules/workshop-rankings/index.js'
+import {
+  workshopRankings,
+  workshopRankingsWorld,
+} from '../../src/modules/workshop-rankings/index.js'
 import {
   workshopAssignment,
   type WorkshopAssignmentSection,
@@ -54,7 +57,6 @@ const profile = defineOccasionProfile({
       rank_weights: [3, 2, 1],
       minimum_workshops: 2,
       fairness_targets: { children: 2, adults: 1 },
-      fill_unassigned: true,
       max_repair_passes: 5,
     }),
   ],
@@ -87,7 +89,7 @@ const assignmentKey = (section: WorkshopAssignmentSection) =>
   section.assignments.map((item) => `${item.person_id}|${item.workshop_id}|${item.slot_id}`).sort()
 
 test('the resolver produces a constraint-valid, deterministic plan over the full prototype dataset', () => {
-  const { plan, input } = solveFixture()
+  const { plan, input, world } = solveFixture()
   const official = input.module_inputs['official-workshops'] as OfficialWorkshopsSummary
   const schedule = plan.sections['workshop-scheduling'] as WorkshopSchedulingSection
   const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection
@@ -101,6 +103,9 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
   const workshopsById = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
   const placementsById = new Map(
     schedule.placements.map((placement) => [placement.workshop_id, placement]),
+  )
+  const rankingsByPerson = new Map(
+    workshopRankingsWorld(world).rankings.map((ranking) => [ranking.person_id, ranking]),
   )
   const unscheduledIds = new Set(schedule.unscheduled.map(({ workshop_id: id }) => id))
   // 'wks_schmieden' needs 'Esse', which no room in the dataset provides —
@@ -143,6 +148,13 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
     const role = roleOf(assignment.person_id)
     if (workshop!.audience === 'children') expect(role).toBe('child')
     if (workshop!.audience === 'adults') expect(role).toBe('adult')
+    expect(
+      rankingsByPerson
+        .get(assignment.person_id)
+        ?.choices.some(
+          (choice) => choice.workshop_id === assignment.workshop_id && choice.rank !== null,
+        ),
+    ).toBe(true)
   }
 
   // No person is placed into a different workshop during a slot where they
@@ -172,12 +184,9 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
   const attendanceAgain = again.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
   expect(assignmentKey(attendanceAgain)).toEqual(assignmentKey(attendance))
 
-  // Retaining against the previous plan (no new events) is *not* yet
-  // guaranteed to reproduce the identical placement set — see issue 037,
-  // filed from this exact finding: fill-origin placements (and, by a
-  // cascading effect through shared capacity/slots, some ranked ones too)
-  // can shift to a different-but-still-valid outcome. What must still hold
-  // is that the retained run stays constraint-valid on its own terms.
+  // Retaining against the previous plan remains constraint-valid and choice-
+  // bound. Repair may still reconsider ranked placements when occupancy has
+  // changed, but it cannot introduce an unchosen workshop.
   const retained = solveFixture(plan)
   const attendanceRetained = retained.plan.sections[
     'workshop-assignment'
@@ -196,6 +205,13 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
     const role = roleOf(assignment.person_id)
     if (workshop.audience === 'children') expect(role).toBe('child')
     if (workshop.audience === 'adults') expect(role).toBe('adult')
+    expect(
+      rankingsByPerson
+        .get(assignment.person_id)
+        ?.choices.some(
+          (choice) => choice.workshop_id === assignment.workshop_id && choice.rank !== null,
+        ),
+    ).toBe(true)
   }
 })
 

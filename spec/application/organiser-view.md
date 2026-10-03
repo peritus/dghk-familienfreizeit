@@ -16,7 +16,7 @@ that host.
 |---|---|---|
 | `/organiser/accommodation/inventory` | Inventory | Buildings, rooms, beds, capacity, and room capabilities |
 | `/organiser/accommodation/assignment` | The board | Whole-family room placement and browser-printable assignment output |
-| `/organiser/workshops` | Workshops | Authoring, one current choice cycle, demand, schedule, capacity, fill, rankings, and fairness |
+| `/organiser/workshops` | Workshops | Authoring, one current choice cycle, demand, schedule, capacity, utilization, rankings, and fairness |
 | `/organiser/workshops/programme` | Programme | One placement per workshop, conflicts, and unscheduled cases |
 | `/organiser/workshops/slots` | Slots | Event-backed slot maintenance and overlap validation |
 | `/organiser/workshops/spaces` | Workshop spaces | Physical spaces, schedule context, capabilities, and per-slot blocks |

@@ -365,7 +365,8 @@ Use the ordinary KDL fixtures and module/integration tests for these cases:
   the active fixture contract;
   workshop groups never merge room placement units.
 - Workshop decisions preserve eligibility, capacity, and per-period uniqueness
-  through manual cancellation and fill. Cancelled required targets are reported.
+  through manual cancellation and unassigned outcomes. Cancelled required
+  targets are reported.
 - A ranking can be written before any schedule exists; demand contains no person
   assignments, scheduling returns placements or blocking unscheduled outcomes, and
   attendance consumes placements without rewriting ranking facts.

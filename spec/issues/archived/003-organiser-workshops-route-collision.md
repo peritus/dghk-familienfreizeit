@@ -62,14 +62,14 @@ Changes made:
    `route` while wording its docs correctly.
 2. [`modules/workshop-rankings.md:142`](../../modules/workshop-rankings.md) reworded: the heatmap is now described
    as a panel within the workshops screen, owned by `workshops`.
-3. [`modules/workshop-assignment.md:295`](../../modules/workshop-assignment.md) reworded: intake/fill/cancellations/
+3. [`modules/workshop-assignment.md:295`](../../modules/workshop-assignment.md) reworded: intake/capacity/cancellations/
    fairness are now described as panels within the workshops screen, owned
    by `workshops`. "Workshop rows in the plan diff" is unchanged (unrelated
    surface).
 4. [`ui/screens/workshops.md:7`](../../ui/screens/workshops.md) reworded from "Governing specs: workshops,
    workshop-rankings, and workshop-assignment" (implied co-equal ownership)
    to name `workshops` as the owning spec and the other two as contributing
-   the heatmap / intake-fill-fairness data shown on it.
+   the heatmap / intake-capacity-fairness data shown on it.
 
 `modules/workshops.md:256`'s own Screen row needed no change — it is the
 legitimate sole owner of `/organiser/workshops`.

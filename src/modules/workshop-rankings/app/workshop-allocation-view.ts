@@ -42,7 +42,6 @@ export type WorkshopAllocationTraceOutcome =
   | 'unprocessed'
   | 'retained'
   | 'dropped'
-  | 'fill'
   | 'fixed'
   | 'repaired'
   | 'open'
@@ -50,7 +49,6 @@ export type WorkshopAllocationTraceOutcome =
 export type WorkshopAllocationTracePhase =
   | 'round'
   | 'retention'
-  | 'fill'
   | 'repair'
   | 'fixed'
   | 'result'
@@ -240,7 +238,6 @@ function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
   const outcomeByReason: Record<string, WorkshopAllocationTraceOutcome> = {
     ranked: 'fulfilled',
     retained: 'retained',
-    fill: 'fill',
     fixed: 'fixed',
     repaired: 'repaired',
   }
@@ -259,7 +256,6 @@ function outcomeLabel(outcome: WorkshopAllocationTraceOutcome): string {
     unprocessed: 'noch offen',
     retained: 'übernommen',
     dropped: 'nicht mehr passend',
-    fill: 'aufgefüllt',
     fixed: 'fest zugeordnet',
     repaired: 'repariert',
     open: 'offen',
@@ -301,7 +297,6 @@ function traceDetailText(event: WorkshopAllocationTraceEvent): string {
       return `${event.workshop_title}: ${event.person_name}${rank} · ohne Termin`
     case 'fulfilled':
     case 'retained':
-    case 'fill':
     case 'fixed':
     case 'repaired':
       return `${event.workshop_title}: ${event.person_name}${rank}${slot ? ` · ${slot.slice(3)}` : ''}`
@@ -327,8 +322,6 @@ function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): 
       return `Übernommen · ${wishes}`
     case 'dropped':
       return `Nicht mehr passend · ${wishes}`
-    case 'fill':
-      return `Aufgefüllt · ${count} ${count === 1 ? 'Person' : 'Personen'}`
     case 'fixed':
       return `Fest zugeordnet · ${count} ${count === 1 ? 'Person' : 'Personen'}`
     case 'repaired':
@@ -399,7 +392,6 @@ function slotLabel(
 
 function tracePhase(reason: string): WorkshopAllocationTracePhase {
   if (reason === 'retained') return 'retention'
-  if (reason === 'fill') return 'fill'
   if (reason === 'repaired') return 'repair'
   if (reason === 'fixed') return 'fixed'
   return 'round'
@@ -508,13 +500,11 @@ export function buildWorkshopAllocationProjection(
       phase: tracePhase(item.reason),
       outcome: assignmentOutcome(item.reason),
       detail:
-        item.reason === 'fill'
-          ? 'Ohne Wunsch aufgefüllt.'
-          : item.reason === 'fixed'
-            ? 'Feste Zuordnung.'
-            : item.reason === 'repaired'
-              ? 'Durch Reparatur zugeordnet.'
-              : 'Zuordnung übernommen.',
+        item.reason === 'fixed'
+          ? 'Feste Zuordnung.'
+          : item.reason === 'repaired'
+            ? 'Durch Reparatur zugeordnet.'
+            : 'Zuordnung übernommen.',
       slot_label: slotLabel(item.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
@@ -629,7 +619,7 @@ export function buildWorkshopAllocationProjection(
       leading_workshops: leadingWorkshops,
       wish_count: ranking?.choices.filter((choice) => choice.workshop_id !== null).length ?? 0,
       fulfilled_count: personEvents.filter((event) =>
-        ['fulfilled', 'retained', 'fill', 'fixed', 'repaired'].includes(event.outcome),
+        ['fulfilled', 'retained', 'fixed', 'repaired'].includes(event.outcome),
       ).length,
     }
   })
@@ -717,7 +707,6 @@ export function buildWorkshopAllocationTraceStages(
       'fulfilled',
       'retained',
       'dropped',
-      'fill',
       'fixed',
       'repaired',
       'open',
@@ -788,7 +777,7 @@ export function buildWorkshopAllocationTraceStages(
   }
   const counts = (items: readonly WorkshopAllocationTraceEvent[]) => ({
     fulfilled: items.filter((event) =>
-      ['fulfilled', 'retained', 'fill', 'fixed', 'repaired'].includes(event.outcome),
+      ['fulfilled', 'retained', 'fixed', 'repaired'].includes(event.outcome),
     ).length,
     capacity: items.filter((event) => event.outcome === 'capacity').length,
     overlap: items.filter((event) => event.outcome === 'overlap').length,
