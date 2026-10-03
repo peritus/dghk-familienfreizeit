@@ -6,8 +6,9 @@ import { derive, type World } from '../../src/events/fold.js'
 import { projectFamilyWorld, projectSharedWorld } from '../../src/events/world.js'
 import { composeSolverContributions } from '../../src/solver/composition.js'
 import { buildSolverInput } from '../../src/solver/input.js'
-import { solve } from '../../src/solver/solve.js'
+import { orderStages, solve } from '../../src/solver/solve.js'
 import type { Event } from '../../src/events/types.js'
+import type { SolverInput } from '../../src/solver/types.js'
 import { syntheticLog, syntheticScale } from './log.js'
 
 const profile = familienfreizeit2027Profile
@@ -55,10 +56,45 @@ function measure(run: () => void): { median: number; runs: number } {
   return { median: samples[Math.floor(samples.length / 2)] ?? 0, runs: samples.length }
 }
 
+/**
+ * Times the preflight pass and each solver stage separately, mirroring how
+ * `solve` orders stages and hands each one only the upstream outputs it
+ * declares (`src/solver/solve.ts`). `solve`'s single total hides which stage
+ * spends the time, which is the only thing worth knowing about it.
+ */
+function stageRows(input: SolverInput, events: number): readonly string[] {
+  const rows: string[] = []
+  const checks = (contributions.preflight_checks ?? [])
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))
+  rows.push(
+    row(
+      '  preflight',
+      events,
+      measure(() => void checks.flatMap((check) => check.run(input, solverConfig))),
+    ),
+  )
+  const outputs: Record<string, unknown> = {}
+  for (const stage of orderStages(contributions.stages ?? [])) {
+    const upstream = Object.freeze(
+      Object.fromEntries(stage.reads.filter((id) => id in outputs).map((id) => [id, outputs[id]])),
+    )
+    rows.push(
+      row(
+        `  ${stage.id}`,
+        events,
+        measure(() => void stage.run(input, upstream, solverConfig)),
+      ),
+    )
+    outputs[stage.id] = stage.run(input, upstream, solverConfig).output
+  }
+  return rows
+}
+
 function row(stage: string, events: number, result: { median: number; runs: number }): string {
   const perEvent = (result.median * 1000) / events
   return [
-    stage.padEnd(22),
+    stage.padEnd(32),
     String(events).padStart(7),
     `${result.median.toFixed(1).padStart(10)} ms`,
     `${perEvent.toFixed(2).padStart(8)} us/ev`,
@@ -104,6 +140,7 @@ test('derivation pipeline cost by log size', () => {
           measure(() => void solve(input, contributions, solverConfig)),
         ),
       )
+      for (const line of stageRows(input, events.length)) lines.push(line)
     }
 
     if (stages.has('projectSharedWorld'))
