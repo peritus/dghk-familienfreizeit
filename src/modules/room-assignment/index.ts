@@ -240,9 +240,18 @@ export function runRoomAssignment(
   const placements = new Map<string, string>()
   const rules = input.rules ?? roomAssignmentRules()
   const trace: PlacementTrace[] = []
+  // `scoredRooms` against no placements is a pure function of the family, so
+  // each family's candidate count is computed once here instead of twice per
+  // comparison inside the sort: O(F) room sweeps rather than O(F log F).
+  const unplacedCandidateCounts = new Map<string, number>(
+    input.families.map((family) => [
+      family.family_id,
+      scoredRooms(family, new Map<string, string>(), input, params, rules).length,
+    ]),
+  )
   const families = input.families
     .slice()
-    .sort((left, right) => compareFamily(left, right, params, input, rules))
+    .sort((left, right) => compareFamily(left, right, params, unplacedCandidateCounts))
   const place = (
     family: FamilyPlacementUnit,
     room: RoomCandidate,
@@ -843,18 +852,18 @@ function compareEntity(
   return left.sort_key - right.sort_key || left.id.localeCompare(right.id)
 }
 
+/** Orders families by how constrained they are. `candidateCounts` holds each
+ * family's feasible-room count against no placements, precomputed by the
+ * caller — the comparator must stay cheap because it runs O(F log F) times. */
 function compareFamily(
   left: FamilyPlacementUnit,
   right: FamilyPlacementUnit,
   params: RoomAssignmentParams,
-  input: RoomAssignmentInput,
-  rules: readonly Rule[],
+  candidateCounts: ReadonlyMap<string, number>,
 ): number {
-  const placements = new Map<string, string>()
   return (
     priority(right, params) - priority(left, params) ||
-    scoredRooms(left, placements, input, params, rules).length -
-      scoredRooms(right, placements, input, params, rules).length ||
+    (candidateCounts.get(left.family_id) ?? 0) - (candidateCounts.get(right.family_id) ?? 0) ||
     right.bed_demand - left.bed_demand ||
     left.sort_key - right.sort_key ||
     left.family_id.localeCompare(right.family_id)
