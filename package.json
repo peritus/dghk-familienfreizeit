@@ -19,6 +19,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "vitest run",
+    "bench": "vitest run -c vitest.bench.config.ts",
     "test:room-assignment:coverage": "vitest run --project kernel --coverage",
     "test:build": "node --test test/build/*.test.mjs",
     "test:browser": "playwright test",
