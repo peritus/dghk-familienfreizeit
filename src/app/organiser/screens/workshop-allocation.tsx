@@ -97,9 +97,9 @@ export function WorkshopAllocation() {
   const answers = workshopAllocationPeople(projection, group)
   const query = new URLSearchParams(location.split('?')[1] ?? '')
   const queryPersonId = query.get('person')
-  const selectedPerson = projection.person_names.find(
-    (person) => person.name === selectedPersonName,
-  ) ?? projection.person_names.find((person) => person.id === queryPersonId)
+  const selectedPerson =
+    projection.person_names.find((person) => person.name === selectedPersonName) ??
+    projection.person_names.find((person) => person.id === queryPersonId)
   const people = projection.answers
     .filter((answer) => group === 'all' || answer.group === group)
     .map((answer) => answer.name)

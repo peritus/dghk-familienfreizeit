@@ -178,8 +178,7 @@ app.post('/api/organiser/apply', async (context) => {
           ),
       )
     })
-    if (forbidden)
-      return context.json({ error: 'forbidden' }, 403)
+    if (forbidden) return context.json({ error: 'forbidden' }, 403)
     const appended = await appendEventBatch(
       context,
       inputSeq,
@@ -257,8 +256,7 @@ app.post('/api/events', async (context) => {
         (event) => !canAppendEvent(principal, event, world, activeProfile.validation_view),
       )
     })
-    if (forbidden)
-      throw new Error('forbidden')
+    if (forbidden) throw new Error('forbidden')
     tracing.enterSpan('events.validate_world', () =>
       assertAppendableWorld(deriveEventWorld([...existing, ...events])),
     )

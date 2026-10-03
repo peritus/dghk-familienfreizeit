@@ -149,11 +149,7 @@ function entity(world: World, kind: string, id: string): Entity | undefined {
   return world.entities_by_kind[kind]?.find((candidate) => candidate.id === id)
 }
 
-function validateBuilding(
-  world: World,
-  payload: JsonValue,
-  updating: boolean,
-): string | null {
+function validateBuilding(world: World, payload: JsonValue, updating: boolean): string | null {
   const value = payload as z.infer<typeof buildingPayload>
   const current = entity(world, 'building', value.building_id)
   if (updating ? !current : current)
