@@ -519,6 +519,18 @@ export function roomAssignmentPreflight(
     subjects: readonly string[]
     text: string
   }[] = []
+  // Inventory totals and the rule set are the same for every family; deriving
+  // them per family made preflight cost families x rooms x requirements.
+  const totalCapacity = roomInput.rooms.reduce((total, room) => total + room.capacity, 0)
+  const capacityByCapability = new Map<string, number>()
+  for (const room of roomInput.rooms)
+    for (const capability of room.capabilities)
+      capacityByCapability.set(
+        capability,
+        (capacityByCapability.get(capability) ?? 0) + room.capacity,
+      )
+  const rules = roomInput.rules ?? roomAssignmentRules()
+  const emptyPlacements = new Map<string, string>()
   for (const family of roomInput.families) {
     const capacityFinding = (text: string, subjects: readonly string[]) =>
       findings.push({
@@ -527,7 +539,7 @@ export function roomAssignmentPreflight(
         subjects,
         text,
       })
-    if (roomInput.rooms.reduce((total, room) => total + room.capacity, 0) < family.bed_demand)
+    if (totalCapacity < family.bed_demand)
       capacityFinding(
         family.family_id +
           ' needs ' +
@@ -535,13 +547,9 @@ export function roomAssignmentPreflight(
           ' places but the inventory has insufficient capacity',
         [family.family_id],
       )
-    for (const requirement of family.requirements.filter(
-      ({ strength }) => strength === 'required',
-    )) {
-      if (requirement.capability_key) {
-        const satisfyingCapacity = roomInput.rooms
-          .filter(({ capabilities }) => capabilities.has(requirement.capability_key!))
-          .reduce((total, room) => total + room.capacity, 0)
+    for (const requirement of family.requirements) {
+      if (requirement.strength === 'required' && requirement.capability_key) {
+        const satisfyingCapacity = capacityByCapability.get(requirement.capability_key) ?? 0
         if (satisfyingCapacity < family.bed_demand)
           capacityFinding(
             family.family_id +
@@ -553,9 +561,10 @@ export function roomAssignmentPreflight(
           )
       }
     }
-    const rules = roomInput.rules ?? roomAssignmentRules()
+    // One sweep state for this family's whole room pass.
+    const state = sweepState(family, emptyPlacements, roomInput, params)
     const rejected = roomInput.rooms.map((room) =>
-      feasible(family, room, new Map(), roomInput, params, rules),
+      feasible(family, room, emptyPlacements, roomInput, params, rules, state),
     )
     const unresolvedRoomDecision = roomInput.room_constraints?.some(
       ({ family_id: familyId, room_ids: roomIds }) =>
