@@ -49,11 +49,19 @@ per-person pass and are now resolved once per run. It went from 383 ms to 3 ms
 at 2 367 events and is linear in the log. See
 [workshop assignment](../../../docs/modules/workshop-assignment.md#attendance-cost).
 
-What remains in `solve` is the search itself: families times rooms in
-`room-assignment.place`, which is 837 ms of the 855 ms total at 2 367 events.
-That product is the algorithm, not waste, and reducing it means changing what
-the solver searches — candidate pruning, or a different placement strategy —
-which is a design question rather than a cost one.
+The repair pass was then narrowed the same way: it was scoring every room
+twice per (unplaced family, occupant) pair to answer questions about one room,
+which is where the remaining quadratic term lived. `solve` went from 855 ms to
+210 ms at 2 367 events, and placement rule evaluations from 170 800 to 31 408 at
+1 196 events.
+
+What remains is the search itself: families times rooms in
+`room-assignment.place`, 201 ms of the 210 ms total. Roughly five full room
+sweeps per family remain — the ordering key, preflight, the forced pass, the
+greedy pass, and the trace inside each placement — and they could be reduced to
+about three by sharing sweeps between consecutive passes. Beyond that, reducing
+cost means changing what the solver searches rather than how often it rescans,
+which is a design question.
 
 Cost is now guarded rather than only measured:
 [solver cost gates](../../../docs/engineering/testing.md#solver-cost-gates) run
@@ -82,10 +90,10 @@ Growth exponent, consecutive factors: before 2.13 → 2.41 → 3.39; after 0.94 
 |---|---|---|---|
 | 611 | 195.9 ms | 52.8 ms | 3.7× |
 | 1 196 | 1 926.3 ms | 276.3 ms | 7.0× |
-| 2 367 | 23 442.3 ms | 855.1 ms | 27.4× |
+| 2 367 | 23 442.3 ms | 209.5 ms | 112× |
 
-Per stage at 2 367 events after the change: `room-assignment.place` 837 ms,
-`preflight` 9 ms, `workshop-assignment.attendance` 3 ms,
+Per stage at 2 367 events after the change: `room-assignment.place` 201 ms,
+`preflight` 10 ms, `workshop-assignment.attendance` 3 ms,
 `workshop-scheduling.placement` 0.7 ms, `workshop-rankings.demand` 0.1 ms.
 
 ## Recommendation
@@ -97,11 +105,16 @@ already enforces — room number within building, bed label within room — as
 indexes beside the existing ones, so a duplicate check is a lookup. Contained
 within `room-inventory` and the fold's state, no decision review needed.
 
-**Decide whether the placement search itself needs to change.** It is now 98%
-of `solve` and there is no rescanning left in it. Pruning candidates before
-scoring — skipping rooms that cannot hold the family's bed demand — is the
-obvious next lever and preserves determinism as long as the predicate is total.
-That changes what the solver examines, so it wants a decision rather than a
+**Measure the organiser keystroke, not the occasion.** `deriveTransition`
+derives two worlds and runs two solves per draft batch, and the draft world can
+never be cached, so that path carries roughly twice the `solve` cost on every
+edit. It has never been measured, and it is the only place this cost is
+actually waited on. A full occasion plan at 210 ms is not a problem for anyone.
+
+**Then decide whether the search itself needs to change.** Sharing sweeps
+between the ordering, forced and greedy passes is answer-preserving and worth
+perhaps another 40%. Past that — candidate pruning, a different placement
+strategy — changes what the solver examines and wants a decision rather than a
 measurement.
 
 **Snapshot and tail replay, if the fold still needs to be faster.** `derive` is
@@ -125,9 +138,9 @@ review before any specification text changes.
 1. Is a discardable, content-keyed world snapshot acceptable under the "no
    tables that store folded domain state" rule, or does that rule stand as
    written and the fold has to stay fully recomputed?
-2. `solve` is still an order of magnitude more expensive than the fold (855 ms
-   against 74 ms at 2 367 events), and what remains is the search. Does the
-   snapshot question stay open until the search strategy is decided?
+2. `solve` is now 210 ms against the fold's 74 ms at 2 367 events, so neither
+   dominates. Does the snapshot question stay open, given that the organiser
+   keystroke path has still not been measured?
 
 ## Related files
 

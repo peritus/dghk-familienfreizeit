@@ -51,6 +51,23 @@ and the measured effect was an order of magnitude:
 - Room occupancy and room membership come from an index derived from the
   `placements` map at the start of each sweep. They were derived by scanning
   every family, from the innermost rule.
+- Bed demand per family and each family's `excludes` constraints are derived
+  once per solve and memoised on the input's identity, rather than rebuilt per
+  sweep.
+
+The repair pass was the largest single consumer. For every (unplaced family,
+occupant) pair it scored every room twice: once to ask whether the unplaced
+family could use the one room the occupant would vacate, and once to find the
+occupant somewhere else. It now tests the vacated room on its own, and only
+searches for an alternative when that test passes — which it usually does not,
+because most occupants sit in rooms the unplaced family cannot use at all. The
+alternative search stops at its first match instead of scoring every room to
+then take the first.
+
+That alternative search must exclude the room just vacated. It is feasible for
+the occupant precisely because they were removed from it, so admitting it
+relocates the occupant into the room being handed to the unplaced family and
+double-books it. The exclusion was always there; it is now covered by a test.
 
 The occupancy index is deliberately derived per sweep rather than maintained
 across the stage. `place` snapshots `placements` and the repair pass mutates and
