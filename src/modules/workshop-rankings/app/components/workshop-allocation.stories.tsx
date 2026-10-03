@@ -33,6 +33,7 @@ const projection: WorkshopAllocationProjection = {
   answers,
   demand: fullDemandRows,
   trace_events: [],
+  trace_people: [],
   person_names: answers.map(({ id, name }) => ({ id, name })),
   unassigned_person_ids: ['noah'],
   fixed_violation_count: 0,

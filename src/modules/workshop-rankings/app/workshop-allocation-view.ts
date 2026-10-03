@@ -42,21 +42,52 @@ export type WorkshopAllocationTraceOutcome =
   | 'unprocessed'
   | 'retained'
   | 'dropped'
+  | 'fill'
+  | 'fixed'
+  | 'repaired'
+  | 'open'
+
+export type WorkshopAllocationTracePhase =
+  | 'round'
+  | 'retention'
+  | 'fill'
+  | 'repair'
+  | 'fixed'
+  | 'result'
 
 export type WorkshopAllocationTraceEvent = {
   id: string
   person_id: string
+  person_name: string
   workshop_id: string
   workshop_title: string
   rank: number | null
+  phase: WorkshopAllocationTracePhase
   outcome: WorkshopAllocationTraceOutcome
   detail: string
+  slot_label: string | null
+  capacity: number | null
+  competing_workshop_title: string | null
+  queue_position: number | null
+  queue_size: number | null
+}
+
+export type WorkshopAllocationTracePerson = {
+  id: string
+  name: string
+  age_label: string
+  status: WorkshopAllocationAnswer['status']
+  matching_workshop_count: number
+  leading_workshops: readonly string[]
+  wish_count: number
+  fulfilled_count: number
 }
 
 export type WorkshopAllocationProjection = {
   answers: readonly WorkshopAllocationAnswer[]
   demand: readonly WorkshopAllocationDemand[]
   trace_events: readonly WorkshopAllocationTraceEvent[]
+  trace_people: readonly WorkshopAllocationTracePerson[]
   person_names: readonly { id: string; name: string }[]
   unassigned_person_ids: readonly string[]
   fixed_violation_count: number
@@ -69,13 +100,19 @@ export type WorkshopAllocationTraceStage = {
   id: string
   label: string
   description: string
+  phase: WorkshopAllocationTracePhase | 'answers'
+  rank: number | null
   fulfilled: number
   capacity: number
   overlap: number
   leader: number
   unscheduled: number
+  eligibility: number
+  cancellation: number
+  unprocessed: number
   open: number
   details?: string
+  detail_items: readonly string[]
   selected_summary?: string
 }
 
@@ -160,7 +197,11 @@ function audienceLabel(value: string): string {
 }
 
 function traceReason(entry: TraceEntry | undefined): WorkshopAllocationTraceOutcome {
-  const reason = entry?.detail?.chosen?.terms?.[0]?.[0]
+  const reason = entry?.detail?.chosen?.terms?.find(([term]) => term.startsWith('hard.'))?.[0]
+  return reasonOutcome(reason)
+}
+
+function reasonOutcome(reason: string | undefined): WorkshopAllocationTraceOutcome {
   switch (reason) {
     case 'hard.capacity':
       return 'capacity'
@@ -179,8 +220,19 @@ function traceReason(entry: TraceEntry | undefined): WorkshopAllocationTraceOutc
   }
 }
 
+function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
+  const outcomeByReason: Record<string, WorkshopAllocationTraceOutcome> = {
+    ranked: 'fulfilled',
+    retained: 'retained',
+    fill: 'fill',
+    fixed: 'fixed',
+    repaired: 'repaired',
+  }
+  return outcomeByReason[reason] ?? 'unprocessed'
+}
+
 function outcomeLabel(outcome: WorkshopAllocationTraceOutcome): string {
-  return {
+  const labels: Record<WorkshopAllocationTraceOutcome, string> = {
     fulfilled: 'erfüllt',
     capacity: 'voll',
     overlap: 'Überschneidung',
@@ -191,7 +243,12 @@ function outcomeLabel(outcome: WorkshopAllocationTraceOutcome): string {
     unprocessed: 'noch offen',
     retained: 'übernommen',
     dropped: 'nicht mehr passend',
-  }[outcome]
+    fill: 'aufgefüllt',
+    fixed: 'fest zugeordnet',
+    repaired: 'repariert',
+    open: 'offen',
+  }
+  return labels[outcome]
 }
 
 function traceText(outcome: WorkshopAllocationTraceOutcome, entry?: TraceEntry): string {
@@ -199,6 +256,19 @@ function traceText(outcome: WorkshopAllocationTraceOutcome, entry?: TraceEntry):
   if (outcome === 'retained') return 'Aus der vorherigen Berechnung übernommen.'
   if (outcome === 'dropped') return entry?.text ?? 'Aus der vorherigen Berechnung entfernt.'
   return entry?.text ?? outcomeLabel(outcome)
+}
+
+function reasonText(outcome: WorkshopAllocationTraceOutcome): string {
+  const labels: Partial<Record<WorkshopAllocationTraceOutcome, string>> = {
+    capacity: 'voll',
+    overlap: 'Überschneidung',
+    leader: 'leitet selbst',
+    unscheduled: 'ohne Termin',
+    eligibility: 'passt nicht',
+    cancellation: 'abgesagt',
+    unprocessed: 'noch offen',
+  }
+  return labels[outcome] ?? outcomeLabel(outcome)
 }
 
 function answerRankings(
@@ -231,6 +301,25 @@ function placementLabel(
   return slot
     ? `${dateLabel(slot.starts_at, timeZone)} ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}`
     : 'Im Programm platziert'
+}
+
+function slotLabel(
+  workshopId: string,
+  placements: ReadonlyMap<string, { slot_id: string; space_id: string }>,
+  slots: ReadonlyMap<string, { starts_at: string; ends_at: string }>,
+  timeZone: string,
+): string | null {
+  const placement = placements.get(workshopId)
+  const slot = placement ? slots.get(placement.slot_id) : undefined
+  return slot ? `${dateLabel(slot.starts_at, timeZone)} ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}` : null
+}
+
+function tracePhase(reason: string): WorkshopAllocationTracePhase {
+  if (reason === 'retained') return 'retention'
+  if (reason === 'fill') return 'fill'
+  if (reason === 'repaired') return 'repair'
+  if (reason === 'fixed') return 'fixed'
+  return 'round'
 }
 
 export function buildWorkshopAllocationProjection(
@@ -272,6 +361,20 @@ export function buildWorkshopAllocationProjection(
     if (target) traceByChoice.set(`${entry.subject}|${target}`, entry)
   }
   const traceEvents: WorkshopAllocationTraceEvent[] = []
+  const eventIds = new Set<string>()
+  const assignmentAtSlot = (personId: string, slotId: string | undefined, workshopId: string) =>
+    slotId
+      ? assignment.assignments.find(
+          (item) =>
+            item.person_id === personId &&
+            item.slot_id === slotId &&
+            item.workshop_id !== workshopId,
+        )
+      : undefined
+  const addEvent = (event: WorkshopAllocationTraceEvent): void => {
+    traceEvents.push(event)
+    eventIds.add(event.id)
+  }
   for (const person of people) {
     const ranking = rankingsByPerson.get(person.id)
     for (const choice of ranking?.choices ?? []) {
@@ -280,31 +383,81 @@ export function buildWorkshopAllocationProjection(
       const key = `${person.id}|${choice.workshop_id}`
       const placed = assignmentByChoice.get(key)
       const trace = traceByChoice.get(key)
-      const outcome: WorkshopAllocationTraceOutcome = placed
-        ? placed.reason === 'retained'
-          ? 'retained'
-          : 'fulfilled'
-        : traceReason(trace)
-      traceEvents.push({
+      const outcome = placed ? assignmentOutcome(placed.reason) : traceReason(trace)
+      const placement = placements.get(choice.workshop_id)
+      const competing = assignmentAtSlot(person.id, placement?.slot_id, choice.workshop_id)
+      addEvent({
         id: `${person.id}-${choice.workshop_id}-${choice.rank}`,
         person_id: person.id,
+        person_name: person.name,
         workshop_id: choice.workshop_id,
         workshop_title: workshop?.title ?? choice.workshop_id,
         rank: choice.rank,
+        phase: placed ? tracePhase(placed.reason) : 'round',
         outcome,
-        detail: traceText(outcome, trace),
+        detail: placed
+          ? outcome === 'fulfilled'
+            ? `${choice.rank}. Wunsch erfüllt.`
+            : traceText(outcome, trace)
+          : reasonText(outcome),
+        slot_label: slotLabel(choice.workshop_id, placements, slots, input.time_zone),
+        capacity: workshop?.capacity ?? null,
+        competing_workshop_title: competing
+          ? workshops.get(competing.workshop_id)?.title ?? competing.workshop_id
+          : null,
+        queue_position: null,
+        queue_size: null,
       })
     }
   }
+  for (const item of assignment.assignments) {
+    if (item.rank !== null) continue
+    const workshop = workshops.get(item.workshop_id)
+    const eventId = `${item.reason}-${item.person_id}-${item.workshop_id}-${item.slot_id}`
+    if (eventIds.has(eventId)) continue
+    addEvent({
+      id: eventId,
+      person_id: item.person_id,
+      person_name: personName(input.world, item.person_id),
+      workshop_id: item.workshop_id,
+      workshop_title: workshop?.title ?? item.workshop_id,
+      rank: null,
+      phase: tracePhase(item.reason),
+      outcome: assignmentOutcome(item.reason),
+      detail:
+        item.reason === 'fill'
+          ? 'Ohne Wunsch aufgefüllt.'
+          : item.reason === 'fixed'
+            ? 'Feste Zuordnung.'
+            : item.reason === 'repaired'
+              ? 'Durch Reparatur zugeordnet.'
+              : 'Zuordnung übernommen.',
+      slot_label: slotLabel(item.workshop_id, placements, slots, input.time_zone),
+      capacity: workshop?.capacity ?? null,
+      competing_workshop_title: null,
+      queue_position: null,
+      queue_size: null,
+    })
+  }
   for (const drop of assignment.retention_drops) {
-    traceEvents.push({
+    const slot = slots.get(drop.slot_id)
+    addEvent({
       id: `drop-${drop.person_id}-${drop.workshop_id}-${drop.slot_id}`,
       person_id: drop.person_id,
+      person_name: personName(input.world, drop.person_id),
       workshop_id: drop.workshop_id,
       workshop_title: workshops.get(drop.workshop_id)?.title ?? drop.workshop_id,
       rank: null,
+      phase: 'retention',
       outcome: 'dropped',
-      detail: drop.reason,
+      detail: `Nicht mehr übernommen: ${reasonText(reasonOutcome(drop.reason))}`,
+      slot_label: slot
+        ? `${dateLabel(slot.starts_at, input.time_zone)} ${timeLabel(slot.starts_at, slot.ends_at, input.time_zone)}`
+        : null,
+      capacity: workshops.get(drop.workshop_id)?.capacity ?? null,
+      competing_workshop_title: null,
+      queue_position: null,
+      queue_size: null,
     })
   }
   const answers = people.map((person) => {
@@ -329,6 +482,72 @@ export function buildWorkshopAllocationProjection(
         .sort((left, right) => (left.rank ?? 0) - (right.rank ?? 0))
         .map((choice) => workshops.get(choice.workshop_id!)?.title ?? choice.workshop_id!),
       group: person.group,
+    }
+  })
+  for (const violation of assignment.fixed_violations) {
+    const workshop = workshops.get(violation.workshop_id)
+    addEvent({
+      id: `fixed-violation-${violation.person_id}-${violation.workshop_id}`,
+      person_id: violation.person_id,
+      person_name: personName(input.world, violation.person_id),
+      workshop_id: violation.workshop_id,
+      workshop_title: workshop?.title ?? violation.workshop_id,
+      rank: null,
+      phase: 'fixed',
+      outcome: reasonOutcome(violation.reasons[0]),
+      detail: `Feste Zuordnung nicht möglich: ${reasonText(reasonOutcome(violation.reasons[0]))}.`,
+      slot_label: slotLabel(violation.workshop_id, placements, slots, input.time_zone),
+      capacity: workshop?.capacity ?? null,
+      competing_workshop_title: null,
+      queue_position: null,
+      queue_size: null,
+    })
+  }
+  for (const item of assignment.unassigned) {
+    addEvent({
+      id: `unassigned-${item.person_id}`,
+      person_id: item.person_id,
+      person_name: personName(input.world, item.person_id),
+      workshop_id: item.workshop_id ?? '',
+      workshop_title: item.workshop_id
+        ? workshops.get(item.workshop_id)?.title ?? item.workshop_id
+        : 'Keine Zuordnung',
+      rank: null,
+      phase: 'result',
+      outcome: 'open',
+      detail: `Keine Zuordnung: ${item.reason}.`,
+      slot_label: null,
+      capacity: null,
+      competing_workshop_title: null,
+      queue_position: null,
+      queue_size: null,
+    })
+  }
+  const tracePeople = people.map((person): WorkshopAllocationTracePerson => {
+    const ranking = rankingsByPerson.get(person.id)
+    const matchingWorkshopCount = official.workshops.filter(
+      (workshop) =>
+        workshop.mode === 'assigned' &&
+        !workshop.cancelled &&
+        placements.has(workshop.id) &&
+        (workshop.audience === 'all' ||
+          (workshop.audience === 'children') === (person.group === 'children')),
+    ).length
+    const leadingWorkshops = official.workshops
+      .filter((workshop) => workshop.leader_ids.includes(person.id))
+      .map((workshop) => workshop.title)
+    const personEvents = traceEvents.filter((event) => event.person_id === person.id)
+    return {
+      id: person.id,
+      name: person.name,
+      age_label: person.age_label,
+      status: answers.find((answer) => answer.id === person.id)!.status,
+      matching_workshop_count: matchingWorkshopCount,
+      leading_workshops: leadingWorkshops,
+      wish_count: ranking?.choices.filter((choice) => choice.workshop_id !== null).length ?? 0,
+      fulfilled_count: personEvents.filter((event) =>
+        ['fulfilled', 'retained', 'fill', 'fixed', 'repaired'].includes(event.outcome),
+      ).length,
     }
   })
   const rankedPeople = people.filter((person) => {
@@ -365,6 +584,7 @@ export function buildWorkshopAllocationProjection(
     answers,
     demand,
     trace_events: traceEvents,
+    trace_people: tracePeople,
     person_names: people.map(({ id, name }) => ({ id, name })),
     unassigned_person_ids: assignment.unassigned.map(({ person_id: personId }) => personId),
     fixed_violation_count: assignment.fixed_violations.length,
@@ -395,64 +615,105 @@ export function buildWorkshopAllocationTraceStages(
       (!onlySelected || event.person_id === selectedPersonId)
     )
   })
-  const total = events.filter((event) => event.rank !== null).length
+  const rankedEvents = events.filter((event) => event.rank !== null)
+  const total = rankedEvents.length
+  const detailItems = (items: readonly WorkshopAllocationTraceEvent[]): readonly string[] => {
+    const groups = new Map<string, string[]>()
+    for (const event of items) {
+      const extra = [
+        event.slot_label,
+        event.competing_workshop_title
+          ? `schon ${event.competing_workshop_title}`
+          : null,
+      ].filter((value): value is string => Boolean(value))
+      const text = `${event.workshop_title}: ${event.person_name}${event.rank ? ` (${event.rank}. Wahl)` : ''}${extra.length ? ` · ${extra.join(' · ')}` : ''}`
+      const list = groups.get(outcomeLabel(event.outcome)) ?? []
+      list.push(text)
+      groups.set(outcomeLabel(event.outcome), list)
+    }
+    return [...groups].map(([label, items]) => `${label}: ${items.join(', ')}`)
+  }
+  const counts = (items: readonly WorkshopAllocationTraceEvent[]) => ({
+    fulfilled: items.filter((event) =>
+      ['fulfilled', 'retained', 'fill', 'fixed', 'repaired'].includes(event.outcome),
+    ).length,
+    capacity: items.filter((event) => event.outcome === 'capacity').length,
+    overlap: items.filter((event) => event.outcome === 'overlap').length,
+    leader: items.filter((event) => event.outcome === 'leader').length,
+    unscheduled: items.filter((event) => event.outcome === 'unscheduled').length,
+    eligibility: items.filter((event) => event.outcome === 'eligibility').length,
+    cancellation: items.filter((event) => event.outcome === 'cancellation').length,
+    unprocessed: items.filter((event) => event.outcome === 'unprocessed').length,
+  })
   const stages: WorkshopAllocationTraceStage[] = [
     {
       id: 'answers',
       label: 'Wünsche abgegeben',
-      description: `von ${new Set(events.map((event) => event.person_id)).size} Personen`,
+      description: `von ${new Set(rankedEvents.map((event) => event.person_id)).size} Personen`,
+      phase: 'answers',
+      rank: null,
       fulfilled: 0,
       capacity: 0,
       overlap: 0,
       leader: 0,
       unscheduled: 0,
+      eligibility: 0,
+      cancellation: 0,
+      unprocessed: 0,
       open: total,
+      detail_items: [],
     },
   ]
-  const maxRank = Math.max(0, ...events.map((event) => event.rank ?? 0))
-  let processed = 0
+  const retentionEvents = events.filter((event) => event.phase === 'retention')
+  let processed = retentionEvents.filter((event) => event.outcome === 'retained').length
+  if (retentionEvents.length) {
+    const retentionCounts = counts(retentionEvents)
+    stages.push({
+      id: 'retention',
+      label: 'Übernommen',
+      description: 'aus der vorherigen Berechnung',
+      phase: 'retention',
+      rank: null,
+      ...retentionCounts,
+      open: Math.max(0, total - processed),
+      details: retentionEvents.some((event) => event.outcome === 'dropped')
+        ? `${retentionEvents.filter((event) => event.outcome === 'dropped').length} Wunsch nicht mehr passend`
+        : undefined,
+      detail_items: detailItems(retentionEvents),
+    })
+  }
+  const maxRank = Math.max(0, ...rankedEvents.map((event) => event.rank ?? 0))
   for (let rank = 1; rank <= maxRank; rank += 1) {
-    const round = events.filter((event) => event.rank === rank)
-    const count = (outcome: WorkshopAllocationTraceOutcome) =>
-      round.filter((event) => event.outcome === outcome).length
-    const fulfilled = count('fulfilled') + count('retained')
-    const capacity = count('capacity')
-    const overlap = count('overlap')
-    const leader = count('leader')
-    const unscheduled = count('unscheduled')
-    processed += fulfilled + capacity + overlap + leader + unscheduled
-    const examples = round
-      .filter((event) => event.outcome !== 'fulfilled')
-      .slice(0, 2)
-      .map((event) => `${event.workshop_title}: ${outcomeLabel(event.outcome)}`)
-      .join(' · ')
+    const round = events.filter((event) => event.phase === 'round' && event.rank === rank)
+    const roundCounts = counts(round)
+    processed += Object.values(roundCounts).reduce((sum, value) => sum + value, 0)
     stages.push({
       id: `round-${rank}`,
       label: `Runde ${rank}`,
       description: `${rank === 1 ? 'Erstwünsche' : `${rank}. Wünsche`} · ${round.length} Wünsche`,
-      fulfilled,
-      capacity,
-      overlap,
-      leader,
-      unscheduled,
+      phase: 'round',
+      rank,
+      ...roundCounts,
       open: Math.max(0, total - processed),
-      details: examples || undefined,
+      details: detailItems(round).slice(0, 2).join(' · ') || undefined,
+      detail_items: detailItems(round),
     })
   }
-  const retained = events.filter((event) => event.outcome === 'retained').length
-  const dropped = events.filter((event) => event.outcome === 'dropped').length
-  if (retained || dropped) {
-    stages.splice(1, 0, {
-      id: 'retention',
-      label: 'Übernommen',
-      description: 'aus der vorherigen Berechnung',
-      fulfilled: retained,
-      capacity: 0,
-      overlap: 0,
-      leader: 0,
-      unscheduled: 0,
-      open: Math.max(0, total - retained),
-      details: dropped ? `${dropped} Wunsch nicht mehr passend` : undefined,
+  const resultEvents = events.filter(
+    (event) => event.rank === null && event.phase !== 'retention',
+  )
+  if (resultEvents.length) {
+    const resultCounts = counts(resultEvents)
+    stages.push({
+      id: 'result',
+      label: 'Ergebnis',
+      description: 'Auffüllen, feste Zuordnungen und offene Fälle',
+      phase: 'result',
+      rank: null,
+      ...resultCounts,
+      open: resultEvents.filter((event) => event.outcome === 'open').length,
+      details: detailItems(resultEvents).slice(0, 2).join(' · ') || undefined,
+      detail_items: detailItems(resultEvents),
     })
   }
   if (selectedPersonId) {
@@ -462,8 +723,9 @@ export function buildWorkshopAllocationTraceStages(
       const stageEvents = selectedEvents.filter((event) => {
         if (stage.id === 'answers') return true
         if (stage.id === 'retention')
-          return event.outcome === 'retained' || event.outcome === 'dropped'
-        return event.rank === Number(stage.id.replace('round-', ''))
+          return event.phase === 'retention'
+        if (stage.id === 'result') return event.rank === null && event.phase !== 'retention'
+        return event.phase === 'round' && event.rank === stage.rank
       })
       stage.selected_summary =
         stage.id === 'answers'
