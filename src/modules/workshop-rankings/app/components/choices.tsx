@@ -283,7 +283,7 @@ export function TraceControls({
       role="group"
       aria-label="Personen im Verlauf"
     >
-      <fieldset className="flex flex-wrap gap-1" aria-label="Darstellung">
+      <fieldset className="flex flex-wrap gap-1 max-sm:flex-col" aria-label="Darstellung">
         <legend className="sr-only">Darstellung</legend>
         {(
           [
@@ -294,7 +294,7 @@ export function TraceControls({
         ).map(([value, label]) => (
           <label
             key={value}
-            className="flex min-h-11 items-center gap-2 border-2 border-border bg-secondary-background px-3 font-bold first:rounded-l-base last:rounded-r-base has-[:checked]:bg-main"
+            className="flex min-h-11 items-center gap-2 border-2 border-l-0 border-border bg-secondary-background px-3 font-bold first:rounded-l-base first:border-l-2 last:rounded-r-base max-sm:border-l-2 max-sm:border-t-0 max-sm:first:rounded-l-none max-sm:first:rounded-t-base max-sm:last:rounded-r-none max-sm:last:rounded-b-base has-[:checked]:bg-main"
           >
             <input
               type="radio"
@@ -361,6 +361,16 @@ export type TraceStageView = {
   cancellation?: number
   unprocessed?: number
   detail_items?: readonly string[]
+  detail_groups?: readonly {
+    id: string
+    heading: string
+    items: readonly {
+      id: string
+      person_id: string | null
+      people: readonly { id: string; name: string }[]
+      text: string
+    }[]
+  }[]
   details?: ReactNode
   selected_summary?: ReactNode
 }
@@ -374,15 +384,25 @@ type TraceSegment = {
 }
 
 const rankColors: Record<number, string> = {
-  1: '#facc15',
-  2: '#fb923c',
-  3: '#f87171',
-  4: '#c084fc',
-  5: '#60a5fa',
+  1: 'hsl(33 100% 76%)',
+  2: 'hsl(33 100% 83%)',
+  3: 'hsl(33 100% 88%)',
+  4: 'hsl(33 70% 94%)',
+  5: 'hsl(33 60% 96%)',
 }
 
-function stageSegments(stage: TraceStageView): TraceSegment[] {
+function stageSegments(
+  stage: TraceStageView,
+  stageIndex: number,
+  currentIndex: number | null,
+): TraceSegment[] {
   const segments: TraceSegment[] = []
+  const state =
+    currentIndex === null
+      ? ''
+      : stageIndex === currentIndex
+        ? ' font-extrabold'
+        : ' opacity-50 font-medium'
   const add = (
     id: string,
     value: number,
@@ -390,7 +410,8 @@ function stageSegments(stage: TraceStageView): TraceSegment[] {
     className?: string,
     style?: CSSProperties,
   ) => {
-    if (value > 0) segments.push({ id, value, label, className, style })
+    if (value > 0)
+      segments.push({ id, value, label, className: `${className ?? ''}${state}`, style })
   }
 
   if (stage.fulfilled) {
@@ -403,35 +424,60 @@ function stageSegments(stage: TraceStageView): TraceSegment[] {
       rankColor ? { ['backgroundColor']: rankColor } : undefined,
     )
   }
-  add(`${stage.id}-capacity`, stage.capacity, 'voll', 'bg-danger')
-  add(`${stage.id}-overlap`, stage.overlap, 'Überschneidung', 'bg-secondary-background')
-  add(`${stage.id}-leader`, stage.leader, 'leitet selbst', 'bg-paper')
-  add(`${stage.id}-unscheduled`, stage.unscheduled, 'ohne Termin', 'bg-background')
+  add(`${stage.id}-capacity`, stage.capacity, 'voll', 'bg-danger', {
+    ['backgroundImage']: 'repeating-linear-gradient(135deg, #fff 0 4px, #b9b3ab 4px 6px)',
+  })
+  add(`${stage.id}-overlap`, stage.overlap, 'Überschneidung', 'bg-secondary-background', {
+    ['backgroundColor']: 'hsl(30 10% 74%)',
+  })
+  add(`${stage.id}-leader`, stage.leader, 'leitet selbst', 'bg-paper', {
+    ['backgroundImage']: 'repeating-linear-gradient(90deg, #fff 0 4px, #8a847c 4px 6px)',
+  })
+  add(`${stage.id}-unscheduled`, stage.unscheduled, 'ohne Termin', 'bg-background', {
+    ['backgroundImage']: 'radial-gradient(#6b645c 1px, transparent 1.4px)',
+  })
   return segments
 }
 
 export function TraceProgressBar({
   stages,
   index,
+  current = true,
 }: {
   stages: readonly TraceStageView[]
   index: number
+  current?: boolean
 }) {
   const visibleStages = stages.slice(0, index + 1)
   const stage = stages[index]
-  const segments = visibleStages.flatMap(stageSegments)
+  const currentIndex = current ? index : null
+  const segments = visibleStages.flatMap((visibleStage, visibleIndex) =>
+    stageSegments(visibleStage, visibleIndex, currentIndex),
+  )
   if (stage?.open) {
     segments.push({
       id: `${stage.id}-open`,
       value: stage.open,
       label: 'noch offen',
-      className: 'bg-secondary-background',
+      className: `bg-secondary-background${currentIndex === index ? ' cur' : ''}`,
+      style: { ['backgroundColor']: '#fff' },
     })
   }
   const total = Math.max(
     segments.reduce((sum, segment) => sum + segment.value, 0),
     1,
   )
+  if (!segments.length) {
+    return (
+      <div
+        className="flex h-7 items-center justify-center overflow-hidden rounded-base border-2 border-border bg-white text-sm text-muted"
+        role="img"
+        aria-label={`${stage?.label ?? 'Verlauf'}: keine Wünsche`}
+      >
+        keine Wünsche
+      </div>
+    )
+  }
   return (
     <div
       className="flex h-7 overflow-hidden rounded-base border-2 border-border bg-secondary-background"
@@ -444,7 +490,64 @@ export function TraceProgressBar({
           className={segment.className}
           style={{ width: `${(segment.value / total) * 100}%`, ...segment.style }}
           title={`${segment.value} ${segment.label}`}
-        />
+        >
+          {segment.value / total >= 0.035 ? segment.value : null}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function TraceDetailGroups({
+  groups,
+  on_person_id: onPersonId,
+}: {
+  groups: readonly {
+    id: string
+    heading: string
+    items: readonly {
+      id: string
+      person_id: string | null
+      people: readonly { id: string; name: string }[]
+      text: string
+    }[]
+  }[]
+  on_person_id?: (personId: string) => void
+}) {
+  const renderItem = (item: (typeof groups)[number]['items'][number]) => {
+    if (!onPersonId || !item.people.length) return item.text
+    const parts: ReactNode[] = []
+    let cursor = 0
+    item.people.forEach((person, index) => {
+      const position = item.text.indexOf(person.name, cursor)
+      if (position < cursor) return
+      parts.push(item.text.slice(cursor, position))
+      parts.push(
+        <button
+          key={`${item.id}-${person.id}-${index}`}
+          type="button"
+          className="font-bold underline underline-offset-2"
+          onClick={() => onPersonId(person.id)}
+        >
+          {person.name}
+        </button>,
+      )
+      cursor = position + person.name.length
+    })
+    parts.push(item.text.slice(cursor))
+    return parts
+  }
+  return (
+    <div className="space-y-3">
+      {groups.map((group) => (
+        <section key={group.id}>
+          <h4 className="text-sm font-bold">{group.heading}</h4>
+          <ul className="mt-1 space-y-1">
+            {group.items.map((item) => (
+              <li key={item.id}>{renderItem(item)}</li>
+            ))}
+          </ul>
+        </section>
       ))}
     </div>
   )
@@ -454,49 +557,60 @@ export function TraceStageRow({
   stage,
   stages,
   index,
+  show_detail_rows: showDetailRows,
   selected_person_label: selectedPersonLabel,
+  on_person_id: onPersonId,
 }: {
   stage: TraceStageView
   stages: readonly TraceStageView[]
   index: number
+  show_detail_rows: boolean
   selected_person_label?: string
+  on_person_id?: (personId: string) => void
 }) {
   return (
-    <tr className="border-b border-border/30 align-top">
-      <th scope="row" className="p-3">
-        <span className="block font-heading">{stage.label}</span>
-        <span className="text-sm font-normal text-muted">{stage.description}</span>
-      </th>
-      <td className="min-w-64 p-3">
-        <TraceProgressBar stages={stages} index={index} />
-        {stage.details ? <div className="mt-2 text-sm text-muted">{stage.details}</div> : null}
-        {stage.detail_items?.length ? (
-          <ul className="mt-2 space-y-1 text-sm text-muted">
-            {stage.detail_items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+    <>
+      <tr className="border-b border-border/30 align-top">
+        <th scope="row" className="p-3">
+          <span className="block font-heading">{stage.label}</span>
+          <span className="text-sm font-normal text-muted">{stage.description}</span>
+        </th>
+        <td className="min-w-64 p-3">
+          <TraceProgressBar stages={stages} index={index} current={stage.id !== 'result'} />
+        </td>
+        <td className="p-3 text-right">{stage.fulfilled}</td>
+        <td className="p-3 text-right">{stage.capacity}</td>
+        <td className="p-3 text-right">{stage.overlap}</td>
+        <td className="p-3 text-right">{stage.leader}</td>
+        <td className="p-3 text-right">{stage.unscheduled}</td>
+        <td className="p-3 text-right font-bold">{stage.open}</td>
+        {selectedPersonLabel ? (
+          <td className="bg-paper p-3 text-sm">{stage.selected_summary ?? '—'}</td>
         ) : null}
-      </td>
-      <td className="p-3 text-right">{stage.fulfilled}</td>
-      <td className="p-3 text-right">{stage.capacity}</td>
-      <td className="p-3 text-right">{stage.overlap}</td>
-      <td className="p-3 text-right">{stage.leader}</td>
-      <td className="p-3 text-right">{stage.unscheduled}</td>
-      <td className="p-3 text-right font-bold">{stage.open}</td>
-      {selectedPersonLabel ? (
-        <td className="bg-paper p-3 text-sm">{stage.selected_summary ?? '—'}</td>
+      </tr>
+      {showDetailRows && stage.detail_groups?.length ? (
+        <tr className="border-b border-border/30 align-top">
+          <td aria-hidden="true" />
+          <td colSpan={7} className="p-3 pt-0 text-sm text-muted">
+            <TraceDetailGroups groups={stage.detail_groups} on_person_id={onPersonId} />
+          </td>
+          {selectedPersonLabel ? <td className="bg-paper" aria-hidden="true" /> : null}
+        </tr>
       ) : null}
-    </tr>
+    </>
   )
 }
 
 export function ChoiceTraceTable({
   stages,
   selected_person_label: selectedPersonLabel,
+  show_detail_rows: showDetailRows = true,
+  on_person_id: onPersonId,
 }: {
   stages: readonly TraceStageView[]
   selected_person_label?: string
+  show_detail_rows?: boolean
+  on_person_id?: (personId: string) => void
 }) {
   const table = (
     <WorkshopDataTable
@@ -520,7 +634,9 @@ export function ChoiceTraceTable({
           stage={stage}
           stages={stages}
           index={stages.indexOf(stage)}
+          show_detail_rows={showDetailRows}
           selected_person_label={selectedPersonLabel}
+          on_person_id={onPersonId}
         />
       )}
     />
@@ -551,13 +667,10 @@ export function ChoiceTraceTable({
               </div>
             ))}
           </dl>
-          {stage.details ? <p className="mt-3 text-sm text-muted">{stage.details}</p> : null}
-          {stage.detail_items?.length ? (
-            <ul className="mt-3 space-y-1 text-sm text-muted">
-              {stage.detail_items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+          {stage.detail_groups?.length ? (
+            <div className="mt-3 text-sm text-muted">
+              <TraceDetailGroups groups={stage.detail_groups} on_person_id={onPersonId} />
+            </div>
           ) : null}
           {selectedPersonLabel ? (
             <p className="mt-3 rounded-base border-2 border-black bg-paper p-2 text-sm">

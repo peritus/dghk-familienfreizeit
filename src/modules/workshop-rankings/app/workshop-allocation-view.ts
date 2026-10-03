@@ -113,7 +113,21 @@ export type WorkshopAllocationTraceStage = {
   open: number
   details?: string
   detail_items: readonly string[]
+  detail_groups?: readonly WorkshopAllocationTraceDetailGroup[]
   selected_summary?: string
+}
+
+export type WorkshopAllocationTraceDetailGroup = {
+  id: string
+  heading: string
+  items: readonly WorkshopAllocationTraceDetailItem[]
+}
+
+export type WorkshopAllocationTraceDetailItem = {
+  id: string
+  person_id: string | null
+  people: readonly { id: string; name: string }[]
+  text: string
 }
 
 type AllocationPerson = {
@@ -269,6 +283,59 @@ function reasonText(outcome: WorkshopAllocationTraceOutcome): string {
     unprocessed: 'noch offen',
   }
   return labels[outcome] ?? outcomeLabel(outcome)
+}
+
+function traceDetailText(event: WorkshopAllocationTraceEvent): string {
+  const rank = event.rank ? ` (${event.rank}. Wahl)` : ''
+  const slot = event.slot_label ? ` · ${event.slot_label}` : ''
+  switch (event.outcome) {
+    case 'capacity':
+      return `${event.workshop_title}${event.capacity ? ` (nur ${event.capacity} Plätze${event.slot_label ? `, ${event.slot_label}` : ''})` : ''}, daher nicht erfüllt für ${event.person_name}`
+    case 'overlap':
+      return `${event.person_name}: ${event.workshop_title}${rank} nicht erfüllt, weil ${event.slot_label ?? 'der Slot'} schon ${event.competing_workshop_title ?? 'ein anderer Workshop'} belegt ist`
+    case 'leader':
+      return `${event.person_name}: ${event.workshop_title}${rank} nicht erfüllt, weil ${event.slot_label ?? 'der Slot'} selbst ${event.competing_workshop_title ?? 'ein anderer Workshop'} geleitet wird`
+    case 'unscheduled':
+      return `${event.workshop_title}: ${event.person_name}${rank} · ohne Termin`
+    case 'fulfilled':
+    case 'retained':
+    case 'fill':
+    case 'fixed':
+    case 'repaired':
+      return `${event.workshop_title}: ${event.person_name}${rank}${slot ? ` · ${slot.slice(3)}` : ''}`
+    default:
+      return `${event.person_name}: ${event.workshop_title}${rank} · ${event.detail}`
+  }
+}
+
+function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): string {
+  const wishes = `${count} ${count === 1 ? 'Wunsch' : 'Wünsche'}`
+  switch (outcome) {
+    case 'capacity':
+      return `Voll · ${wishes} nicht erfüllt`
+    case 'overlap':
+      return `Überschneidung · ${wishes} nicht erfüllt`
+    case 'leader':
+      return `Leitet selbst · ${wishes} nicht erfüllt`
+    case 'unscheduled':
+      return `Ohne Termin · ${wishes} nicht erfüllt`
+    case 'fulfilled':
+      return `Erfüllt · ${wishes}`
+    case 'retained':
+      return `Übernommen · ${wishes}`
+    case 'dropped':
+      return `Nicht mehr passend · ${wishes}`
+    case 'fill':
+      return `Aufgefüllt · ${count} ${count === 1 ? 'Person' : 'Personen'}`
+    case 'fixed':
+      return `Fest zugeordnet · ${count} ${count === 1 ? 'Person' : 'Personen'}`
+    case 'repaired':
+      return `Repariert · ${count} ${count === 1 ? 'Person' : 'Personen'}`
+    case 'open':
+      return `Offen · ${count} ${count === 1 ? 'Fall' : 'Fälle'}`
+    default:
+      return `${outcomeLabel(outcome)} · ${wishes}`
+  }
 }
 
 function answerRankings(
@@ -619,19 +686,87 @@ export function buildWorkshopAllocationTraceStages(
   })
   const rankedEvents = events.filter((event) => event.rank !== null)
   const total = rankedEvents.length
-  const detailItems = (items: readonly WorkshopAllocationTraceEvent[]): readonly string[] => {
-    const groups = new Map<string, string[]>()
+  const detailGroups = (
+    items: readonly WorkshopAllocationTraceEvent[],
+  ): readonly WorkshopAllocationTraceDetailGroup[] => {
+    const groups = new Map<WorkshopAllocationTraceOutcome, WorkshopAllocationTraceEvent[]>()
     for (const event of items) {
-      const extra = [
-        event.slot_label,
-        event.competing_workshop_title ? `schon ${event.competing_workshop_title}` : null,
-      ].filter((value): value is string => Boolean(value))
-      const text = `${event.workshop_title}: ${event.person_name}${event.rank ? ` (${event.rank}. Wahl)` : ''}${extra.length ? ` · ${extra.join(' · ')}` : ''}`
-      const list = groups.get(outcomeLabel(event.outcome)) ?? []
-      list.push(text)
-      groups.set(outcomeLabel(event.outcome), list)
+      const list = groups.get(event.outcome) ?? []
+      list.push(event)
+      groups.set(event.outcome, list)
     }
-    return [...groups].map(([label, items]) => `${label}: ${items.join(', ')}`)
+    const detailOrder: WorkshopAllocationTraceOutcome[] = [
+      'capacity',
+      'overlap',
+      'leader',
+      'unscheduled',
+      'fulfilled',
+      'retained',
+      'dropped',
+      'fill',
+      'fixed',
+      'repaired',
+      'open',
+      'eligibility',
+      'cancellation',
+      'unprocessed',
+    ]
+    return detailOrder.flatMap((outcome) => {
+      const groupedItems = groups.get(outcome)
+      return groupedItems
+        ? [
+            {
+              id: outcome,
+              heading: detailHeading(outcome, groupedItems.length),
+              items: detailItemsForOutcome(outcome, groupedItems),
+            },
+          ]
+        : []
+    })
+  }
+  const detailItemsForOutcome = (
+    outcome: WorkshopAllocationTraceOutcome,
+    items: readonly WorkshopAllocationTraceEvent[],
+  ): readonly WorkshopAllocationTraceDetailItem[] => {
+    const canGroup = ['fulfilled', 'retained', 'capacity', 'unscheduled'].includes(outcome)
+    if (!canGroup) {
+      return items.map((event) => ({
+        id: event.id,
+        person_id: event.person_id,
+        people: [{ id: event.person_id, name: event.person_name }],
+        text: traceDetailText(event),
+      }))
+    }
+    const grouped = new Map<string, WorkshopAllocationTraceEvent[]>()
+    for (const event of items) {
+      const key = `${event.workshop_id}|${event.slot_label ?? ''}`
+      const group = grouped.get(key) ?? []
+      group.push(event)
+      grouped.set(key, group)
+    }
+    return [...grouped].map(([id, events]) => {
+      const first = events[0]
+      if (!first) return { id, person_id: null, people: [], text: '' }
+      const names = events.map((event) => event.person_name).join(', ')
+      const slot = first.slot_label ? ` (${first.slot_label})` : ''
+      const text =
+        outcome === 'capacity'
+          ? `${first.workshop_title}${first.capacity ? ` (nur ${first.capacity} Plätze${first.slot_label ? `, ${first.slot_label}` : ''})` : ''}, daher nicht erfüllt für ${names}`
+          : outcome === 'unscheduled'
+            ? `${first.workshop_title}: ${names}`
+            : `${first.workshop_title}${slot}: ${names}`
+      return {
+        id,
+        person_id: events.length === 1 ? first.person_id : null,
+        people: events.map((event) => ({ id: event.person_id, name: event.person_name })),
+        text,
+      }
+    })
+  }
+  const detailItems = (items: readonly WorkshopAllocationTraceEvent[]): readonly string[] => {
+    return detailGroups(items).map(
+      (group) => `${group.heading}: ${group.items.map((item) => item.text).join(', ')}`,
+    )
   }
   const counts = (items: readonly WorkshopAllocationTraceEvent[]) => ({
     fulfilled: items.filter((event) =>
@@ -680,6 +815,7 @@ export function buildWorkshopAllocationTraceStages(
         ? `${retentionEvents.filter((event) => event.outcome === 'dropped').length} Wunsch nicht mehr passend`
         : undefined,
       detail_items: detailItems(retentionEvents),
+      detail_groups: detailGroups(retentionEvents),
     })
   }
   const maxRank = Math.max(0, ...rankedEvents.map((event) => event.rank ?? 0))
@@ -697,6 +833,7 @@ export function buildWorkshopAllocationTraceStages(
       open: Math.max(0, total - processed),
       details: detailItems(round).slice(0, 2).join(' · ') || undefined,
       detail_items: detailItems(round),
+      detail_groups: detailGroups(round),
     })
   }
   const resultEvents = events.filter((event) => event.rank === null && event.phase !== 'retention')
@@ -712,6 +849,7 @@ export function buildWorkshopAllocationTraceStages(
       open: resultEvents.filter((event) => event.outcome === 'open').length,
       details: detailItems(resultEvents).slice(0, 2).join(' · ') || undefined,
       detail_items: detailItems(resultEvents),
+      detail_groups: detailGroups(resultEvents),
     })
   }
   if (selectedPersonId) {

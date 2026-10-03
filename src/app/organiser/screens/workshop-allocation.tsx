@@ -340,7 +340,12 @@ export function WorkshopAllocation() {
           </WorkshopAllocationEmptyState>
           {projection.has_answers ? (
             <div id="allocation-trace-heading">
-              <ChoiceTraceTable stages={stages} selected_person_label={selectedLabel} />
+              <ChoiceTraceTable
+                stages={stages}
+                selected_person_label={selectedLabel}
+                show_detail_rows={traceMode !== 'only'}
+                on_person_id={(personId) => openTrace({ id: personId })}
+              />
             </div>
           ) : null}
         </section>
