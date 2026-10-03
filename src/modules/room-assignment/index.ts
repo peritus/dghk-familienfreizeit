@@ -676,11 +676,52 @@ export type PlacementIndex = {
   families_by_room: ReadonlyMap<string, readonly string[]>
 }
 
+/**
+ * Lookups that depend only on the input, not on the family being placed or on
+ * the placements so far. Memoised on the input's identity: `buildSolverInput`
+ * produces a fresh, immutable input per solve, so an entry is valid for every
+ * sweep of that run and unreachable once the run is over.
+ *
+ * Without this, each sweep rebuilt the bed-demand map from every family and
+ * re-filtered every constraint in the occasion — work proportional to the whole
+ * input, repeated once per sweep.
+ */
+type InputIndex = {
+  bed_demand_by_family: ReadonlyMap<string, number>
+  excludes_by_family: ReadonlyMap<string, readonly RoomAssignmentInput['constraints'][number][]>
+}
+
+const inputIndexCache = new WeakMap<RoomAssignmentInput, InputIndex>()
+
+function inputIndex(input: RoomAssignmentInput): InputIndex {
+  const cached = inputIndexCache.get(input)
+  if (cached) return cached
+  const bedDemandByFamily = new Map(
+    input.families.map((family) => [family.family_id, family.bed_demand]),
+  )
+  const excludesByFamily = new Map<string, RoomAssignmentInput['constraints'][number][]>()
+  for (const constraint of input.constraints) {
+    if (constraint.key !== 'excludes' || constraint.strength !== 'required') continue
+    // A constraint held by a person applies to that person's family, which is
+    // what `holderMatches` resolved per candidate pair.
+    const familyId = input.person_family[constraint.holder_id] ?? constraint.holder_id
+    const bucket = excludesByFamily.get(familyId)
+    if (bucket) bucket.push(constraint)
+    else excludesByFamily.set(familyId, [constraint])
+  }
+  const built: InputIndex = {
+    bed_demand_by_family: bedDemandByFamily,
+    excludes_by_family: excludesByFamily,
+  }
+  inputIndexCache.set(input, built)
+  return built
+}
+
 export function placementIndex(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
 ): PlacementIndex {
-  const demand = new Map(input.families.map((family) => [family.family_id, family.bed_demand]))
+  const demand = inputIndex(input).bed_demand_by_family
   const occupancy = new Map<string, number>()
   const familiesByRoom = new Map<string, string[]>()
   // Iterating `placements` preserves its order, which is the order the previous
@@ -743,10 +784,7 @@ function familySweep(
       ({ strength, kind, structural }) =>
         strength === 'required' && kind === 'structural' && structural === 'no-other-families',
     ),
-    excluded: input.constraints.filter(
-      ({ holder_id: holderId, key, strength }) =>
-        holderMatches(holderId, family, input) && key === 'excludes' && strength === 'required',
-    ),
+    excluded: inputIndex(input).excludes_by_family.get(family.family_id) ?? [],
     keep_apart: family.requirements.filter(
       ({ kind, strength, trait_key: traitKey }) =>
         kind === 'relation' &&
@@ -952,14 +990,6 @@ function sameRequirement(left: ResolvedRequirement, right: ResolvedRequirement):
     left.value === right.value &&
     left.strength === right.strength
   )
-}
-
-function holderMatches(
-  holderId: string,
-  family: FamilyPlacementUnit,
-  input: RoomAssignmentInput,
-): boolean {
-  return holderId === family.family_id || input.person_family[holderId] === family.family_id
 }
 
 function familyOfTarget(target: string, input: RoomAssignmentInput): string {
