@@ -4,6 +4,7 @@ import { OrganiserLink } from '../../components/application/organiser-link.js'
 import type { World } from '../../../events/fold.js'
 import type { EventDraft, JsonValue } from '../../../events/types.js'
 import { Button } from '../../components/shared/ui/button.js'
+import { Badge } from '../../components/shared/ui/badge.js'
 import { SegmentedControl } from '../../components/shared/ui/segmented-control.js'
 import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
 import {
@@ -31,6 +32,11 @@ import { familyTopicLabel, FamilyTopicNavigation } from '../components/family-na
 import { organiserPaths, type FamilyTopic } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
+import {
+  officialWorkshopsWorld,
+  type WorkshopMode,
+  type WorkshopRecord,
+} from '../../../modules/official-workshops/index.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
 import { CollectionCreateAction } from '../components/collection-create-action.js'
 
@@ -60,6 +66,22 @@ function labelEvent(
         type: 'LabelSet',
         payload: { entity_id: entityId, key, value, strength: null, note: null },
       }
+}
+
+function clearLabelValueEvent(
+  actor: string,
+  familyId: string,
+  entityId: string,
+  key: string,
+  value: JsonValue,
+): EventDraft {
+  return {
+    at: eventTime(),
+    actor,
+    subject: entityId === familyId ? familyId : entityId,
+    type: 'LabelCleared',
+    payload: { entity_id: entityId, key, value },
+  }
 }
 
 function FamilyEditDialog({
@@ -706,6 +728,515 @@ function FamilyFoodView({
   )
 }
 
+function workshopAgeLabel(workshop: WorkshopRecord): string {
+  if (workshop.age_min === 0 && workshop.age_max >= 120) return 'Alle Altersgruppen'
+  if (workshop.age_min === 0) return `Bis ${workshop.age_max} Jahre`
+  if (workshop.age_max >= 120) return `Ab ${workshop.age_min} Jahren`
+  return `${workshop.age_min}–${workshop.age_max} Jahre`
+}
+
+function workshopEligibility(
+  person: ReturnType<typeof familyPeople>[number],
+  workshop: WorkshopRecord,
+): { ok: boolean; reason?: string } {
+  if (person.role === 'infant') return { ok: false, reason: 'Babys können hier nicht teilnehmen.' }
+  const age = personAge(person.birthdate)
+  if (age !== null && age < workshop.age_min)
+    return { ok: false, reason: `Ab ${workshop.age_min} Jahren. ${person.given_name} ist ${age}.` }
+  if (age !== null && age > workshop.age_max)
+    return { ok: false, reason: `Bis ${workshop.age_max} Jahre. ${person.given_name} ist ${age}.` }
+  if (workshop.audience === 'children' && person.role === 'adult')
+    return { ok: false, reason: 'Dieser Workshop ist für Kinder.' }
+  if (workshop.audience === 'adults' && person.role !== 'adult')
+    return { ok: false, reason: 'Dieser Workshop ist für Erwachsene.' }
+  return { ok: true }
+}
+
+function workshopRankings(world: World, personId: string): readonly string[] {
+  return (world.labels_by_entity[personId] ?? [])
+    .filter((label) => label.key === 'prefers-workshop')
+    .map((label) => {
+      if (typeof label.value !== 'object' || label.value === null || Array.isArray(label.value))
+        return null
+      const workshopId = label.value.workshop_id
+      const rank = label.value.rank
+      return typeof workshopId === 'string' && typeof rank === 'number'
+        ? { workshop_id: workshopId, rank }
+        : null
+    })
+    .filter((value): value is { workshop_id: string; rank: number } => value !== null)
+    .sort((a, b) => a.rank - b.rank)
+    .map(({ workshop_id: workshopId }) => workshopId)
+}
+
+function personWorkshopValues(world: World, personId: string, key: string): readonly string[] {
+  return (world.labels_by_entity[personId] ?? [])
+    .filter((label) => label.key === key && typeof label.value === 'string')
+    .map((label) => label.value as string)
+}
+
+function workshopAttendance(world: World, workshopId: string): number {
+  return Object.values(world.labels_by_entity).reduce(
+    (count, labels) =>
+      count +
+      labels.filter((label) => label.key === 'signed-up-for' && label.value === workshopId).length,
+    0,
+  )
+}
+
+function replaceRankings(
+  actor: string,
+  familyId: string,
+  personId: string,
+  workshopIds: readonly string[],
+  stage: (events: readonly EventDraft[]) => void,
+) {
+  const events: EventDraft[] = [labelEvent(actor, familyId, personId, 'prefers-workshop', null)]
+  workshopIds.forEach((workshopId, index) => {
+    events.push(
+      labelEvent(actor, familyId, personId, 'prefers-workshop', {
+        workshop_id: workshopId,
+        rank: index + 1,
+      }),
+    )
+  })
+  stage(events)
+}
+
+function WorkshopFinder({
+  family_id: familyId,
+  person,
+  world,
+  actor,
+  stage,
+  mode,
+  on_back: onBack,
+}: {
+  family_id: string
+  person: ReturnType<typeof familyPeople>[number]
+  world: World
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+  mode: WorkshopMode
+  on_back: () => void
+}) {
+  const [query, setQuery] = useState('')
+  const [showAll, setShowAll] = useState(false)
+  const workshops = officialWorkshopsWorld(world).workshops.filter(
+    (workshop) => workshop.mode === mode,
+  )
+  const matching = workshops.filter((workshop) => {
+    const eligibility = workshopEligibility(person, workshop)
+    const text = `${workshop.title} ${workshop.description}`.toLocaleLowerCase('de')
+    return (showAll || eligibility.ok) && text.includes(query.trim().toLocaleLowerCase('de'))
+  })
+  const unsuitable = workshops.filter(
+    (workshop) => !workshopEligibility(person, workshop).ok,
+  ).length
+  const ranking = workshopRankings(world, person.entity.id)
+  const signup = personWorkshopValues(world, person.entity.id, 'signed-up-for')
+  const interest = personWorkshopValues(world, person.entity.id, 'interested-in')
+  const title =
+    mode === 'assigned'
+      ? 'Workshops, die über die Wunschliste vergeben werden'
+      : mode === 'sign-up'
+        ? 'Workshops mit fester Anmeldung'
+        : 'Workshops nach Interesse'
+
+  function toggle(workshop: WorkshopRecord) {
+    const eligible = workshopEligibility(person, workshop).ok
+    if (!eligible) return
+    if (mode === 'assigned') {
+      if (ranking.includes(workshop.id)) {
+        replaceRankings(
+          actor,
+          familyId,
+          person.entity.id,
+          ranking.filter((id) => id !== workshop.id),
+          stage,
+        )
+      } else if (ranking.length < 3) {
+        replaceRankings(actor, familyId, person.entity.id, [...ranking, workshop.id], stage)
+      }
+    } else if (mode === 'sign-up') {
+      if (signup.includes(workshop.id))
+        stage([
+          clearLabelValueEvent(actor, familyId, person.entity.id, 'signed-up-for', workshop.id),
+        ])
+      else if (workshopAttendance(world, workshop.id) < workshop.capacity)
+        stage([labelEvent(actor, familyId, person.entity.id, 'signed-up-for', workshop.id)])
+    } else if (interest.includes(workshop.id)) {
+      stage([clearLabelValueEvent(actor, familyId, person.entity.id, 'interested-in', workshop.id)])
+    } else {
+      stage([labelEvent(actor, familyId, person.entity.id, 'interested-in', workshop.id)])
+    }
+  }
+
+  return (
+    <div className="grid gap-4">
+      <Button type="button" variant="neutral" className="justify-self-start" onClick={onBack}>
+        ← Zurück
+      </Button>
+      <h3 className="text-xl">{title}</h3>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="grid gap-1">
+          <span className="font-bold">Suchen</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Titel oder Stichwort"
+            autoComplete="off"
+            className="min-h-11 rounded-base border-2 border-border px-3"
+          />
+        </label>
+        {unsuitable ? (
+          <label className="flex min-h-11 items-center gap-3 self-end font-bold">
+            <input
+              type="checkbox"
+              checked={showAll}
+              onChange={(event) => setShowAll(event.target.checked)}
+            />
+            Auch zeigen, was nicht zu {person.given_name} passt
+          </label>
+        ) : null}
+      </div>
+      <p className="text-sm font-bold" aria-live="polite">
+        {matching.length} {matching.length === 1 ? 'Workshop' : 'Workshops'}
+      </p>
+      {matching.length ? (
+        <ul className="grid gap-4 md:grid-cols-2" aria-label="Workshops">
+          {matching.map((workshop) => {
+            const eligibility = workshopEligibility(person, workshop)
+            const rankedAt = ranking.indexOf(workshop.id)
+            const joined = signup.includes(workshop.id)
+            const interested = interest.includes(workshop.id)
+            const remaining = workshop.capacity - workshopAttendance(world, workshop.id)
+            return (
+              <li
+                key={workshop.id}
+                className={`grid content-start gap-3 rounded-base border-2 border-border p-4 shadow-shadow ${eligibility.ok ? 'bg-secondary-background' : 'border-dashed bg-paper shadow-none'}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h4 className="text-lg font-bold">{workshop.title}</h4>
+                  {!eligibility.ok ? <Badge tone="neutral">✕ Passt nicht</Badge> : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge>{workshopAgeLabel(workshop)}</Badge>
+                  <Badge>
+                    {workshop.audience === 'all'
+                      ? 'Alle'
+                      : workshop.audience === 'children'
+                        ? 'Kinder'
+                        : 'Erwachsene'}
+                  </Badge>
+                </div>
+                <p>{workshop.description}</p>
+                {!eligibility.ok ? (
+                  <p className="border-l-4 border-muted pl-3 text-sm">
+                    <strong>Warum nicht?</strong> {eligibility.reason}
+                  </p>
+                ) : null}
+                {mode === 'sign-up' ? (
+                  <div className="grid gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <strong>
+                        {remaining === 0
+                          ? 'Keine Plätze frei'
+                          : `Noch ${remaining} ${remaining === 1 ? 'Platz' : 'Plätze'} frei`}
+                      </strong>
+                      {workshop.capacity <= 12 ? (
+                        <span className="flex gap-1" aria-hidden="true">
+                          {Array.from({ length: workshop.capacity }, (_, index) => (
+                            <span
+                              key={index}
+                              className={`size-3 rounded-sm border-2 border-border ${index < workshopAttendance(world, workshop.id) ? 'bg-foreground' : 'bg-secondary-background'}`}
+                            />
+                          ))}
+                        </span>
+                      ) : null}
+                    </div>
+                    <Button
+                      type="button"
+                      variant={joined ? 'neutral' : 'default'}
+                      disabled={!eligibility.ok || (!joined && remaining <= 0)}
+                      onClick={() => toggle(workshop)}
+                    >
+                      {joined ? 'Abmelden' : remaining <= 0 ? 'Ausgebucht' : 'Anmelden'}
+                    </Button>
+                  </div>
+                ) : mode === 'interest' ? (
+                  <Button
+                    type="button"
+                    variant={interested ? 'neutral' : 'default'}
+                    disabled={!eligibility.ok}
+                    aria-pressed={interested}
+                    onClick={() => toggle(workshop)}
+                  >
+                    {interested ? '✓ Interesse markiert' : 'Interesse markieren'}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant={rankedAt >= 0 ? 'neutral' : 'default'}
+                    disabled={!eligibility.ok || (rankedAt < 0 && ranking.length >= 3)}
+                    onClick={() => toggle(workshop)}
+                  >
+                    {rankedAt >= 0
+                      ? `★ Wunsch Platz ${rankedAt + 1} · Entfernen`
+                      : ranking.length >= 3
+                        ? 'Wunschliste voll'
+                        : 'Auf Wunschliste setzen'}
+                  </Button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <div className="grid justify-items-start gap-3 rounded-base border-2 border-dashed border-muted p-5">
+          <p>
+            {query
+              ? 'Zur Suche passt kein Workshop.'
+              : `Für ${person.given_name} passt hier gerade kein Workshop.`}
+          </p>
+          {query ? (
+            <Button type="button" variant="neutral" onClick={() => setQuery('')}>
+              Suche leeren
+            </Button>
+          ) : null}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function FamilyWorkshopView({
+  family_id: familyId,
+  persons,
+  world,
+  actor,
+  stage,
+  selected_person_id: selectedPersonId,
+  on_select: onSelect,
+}: {
+  family_id: string
+  persons: ReturnType<typeof familyPeople>
+  world: World
+  actor: string
+  stage: (events: readonly EventDraft[]) => void
+  selected_person_id?: string
+  on_select: (personId: string) => void
+}) {
+  const [adding, setAdding] = useState(false)
+  const [finder, setFinder] = useState<WorkshopMode | null>(null)
+  const selected = persons.find((person) => person.entity.id === selectedPersonId) ?? persons[0]
+  if (!selected) {
+    return (
+      <p className="rounded-base border-2 border-dashed border-muted p-5">
+        Noch niemand eingetragen. Personen kommen unter „Personen“ dazu.
+      </p>
+    )
+  }
+  if (finder) {
+    return (
+      <WorkshopFinder
+        family_id={familyId}
+        person={selected}
+        world={world}
+        actor={actor}
+        stage={stage}
+        mode={finder}
+        on_back={() => setFinder(null)}
+      />
+    )
+  }
+  const selectedId = selected.entity.id
+  const ranking = workshopRankings(world, selectedId)
+  const assigned = officialWorkshopsWorld(world).workshops.filter(
+    (workshop) => workshop.mode === 'assigned',
+  )
+  const eligibleTarget = Math.min(
+    3,
+    assigned.filter((workshop) => workshopEligibility(selected, workshop).ok).length,
+  )
+  const signup = personWorkshopValues(world, selectedId, 'signed-up-for')
+  const interest = personWorkshopValues(world, selectedId, 'interested-in')
+  function reorder(workshopId: string, nextIndex: number) {
+    const next = ranking.filter((id) => id !== workshopId)
+    next.splice(nextIndex, 0, workshopId)
+    replaceRankings(actor, familyId, selectedId, next, stage)
+  }
+
+  function remove(workshopId: string) {
+    replaceRankings(
+      actor,
+      familyId,
+      selectedId,
+      ranking.filter((id) => id !== workshopId),
+      stage,
+    )
+  }
+
+  const selectedWorkshops = officialWorkshopsWorld(world).workshops
+  const displayWorkshop = (id: string) => selectedWorkshops.find((workshop) => workshop.id === id)
+  return (
+    <div className="grid gap-5 lg:grid-cols-[minmax(13rem,23%)_minmax(0,1fr)]">
+      <FamilyPersonSidebar
+        family_id={familyId}
+        topic="workshops"
+        persons={persons}
+        selected_person_id={selected.entity.id}
+        on_select={onSelect}
+        adding={adding}
+        on_add_change={setAdding}
+        actor={actor}
+        stage={stage}
+      />
+      <div className="grid min-w-0 gap-5">
+        <section
+          className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4 shadow-shadow"
+          aria-labelledby="workshop-wishes-title"
+        >
+          <div>
+            <h3 id="workshop-wishes-title" className="text-xl">
+              Wunschliste
+            </h3>
+            <p className="text-sm text-muted">Bis zu 3 Workshops, geordnet nach Wunsch.</p>
+          </div>
+          {eligibleTarget === 0 && ranking.length === 0 ? (
+            <p>
+              Für {selected.given_name} gibt es keinen Workshop mit Wunschliste. Anmeldungen und
+              Interesse sind trotzdem möglich.
+            </p>
+          ) : (
+            <ol className="grid gap-2" aria-label={`Wunschliste von ${personName(selected)}`}>
+              {Array.from({ length: Math.max(eligibleTarget, ranking.length) }, (_, index) => {
+                const workshop = displayWorkshop(ranking[index] ?? '')
+                return (
+                  <li
+                    key={index}
+                    className={`grid gap-3 rounded-base border-2 p-3 sm:grid-cols-[2.5rem_1fr] ${workshop ? 'border-border bg-secondary-background' : 'border-dashed border-muted'}`}
+                  >
+                    <span className="grid size-9 place-items-center rounded-full border-2 border-border bg-main font-bold">
+                      {index + 1}
+                    </span>
+                    {workshop ? (
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <strong>{workshop.title}</strong>
+                          <span className="block text-sm text-muted">
+                            {workshopAgeLabel(workshop)}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {ranking.length > 1 ? (
+                            <div
+                              className="flex flex-wrap gap-1"
+                              role="group"
+                              aria-label={`Platz für ${workshop.title}`}
+                            >
+                              {ranking.map((_, rank) => (
+                                <button
+                                  key={rank}
+                                  type="button"
+                                  aria-pressed={rank === index}
+                                  onClick={() => reorder(workshop.id, rank)}
+                                  className="size-10 rounded-base border-2 border-border px-2 font-bold aria-pressed:bg-foreground aria-pressed:text-background"
+                                >
+                                  {rank + 1}
+                                </button>
+                              ))}
+                            </div>
+                          ) : null}
+                          <Button
+                            type="button"
+                            variant="neutral"
+                            onClick={() => remove(workshop.id)}
+                          >
+                            Entfernen
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center justify-between gap-3 text-muted">
+                        <span>Platz {index + 1} ist frei.</span>
+                        {index === ranking.length ? (
+                          <Button type="button" onClick={() => setFinder('assigned')}>
+                            Workshop finden
+                          </Button>
+                        ) : null}
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+          )}
+        </section>
+        {(['sign-up', 'interest'] as const).map((mode) => {
+          const ids = mode === 'sign-up' ? signup : interest
+          const title = mode === 'sign-up' ? 'Feste Anmeldungen' : 'Interesse'
+          const hint =
+            mode === 'sign-up'
+              ? 'Mit der Anmeldung ist der Platz sofort reserviert.'
+              : 'Unverbindlich, ohne Platzreservierung.'
+          return (
+            <section
+              key={mode}
+              className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4 shadow-shadow"
+            >
+              <div>
+                <h3 className="text-xl">{title}</h3>
+                <p className="text-sm text-muted">{hint}</p>
+              </div>
+              {ids.length ? (
+                <ul className="grid gap-2">
+                  {ids.map((id) => (
+                    <li
+                      key={id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-base border-2 border-border p-2"
+                    >
+                      <strong>{displayWorkshop(id)?.title ?? id}</strong>
+                      <Button
+                        type="button"
+                        variant="neutral"
+                        onClick={() =>
+                          stage([
+                            clearLabelValueEvent(
+                              actor,
+                              familyId,
+                              selectedId,
+                              mode === 'sign-up' ? 'signed-up-for' : 'interested-in',
+                              id,
+                            ),
+                          ])
+                        }
+                      >
+                        {mode === 'sign-up' ? 'Abmelden' : 'Zurücknehmen'}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted">{mode === 'sign-up' ? 'Keine.' : 'Keins.'}</p>
+              )}
+              <Button
+                type="button"
+                variant="neutral"
+                className="justify-self-start"
+                onClick={() => setFinder(mode)}
+              >
+                Workshops finden
+              </Button>
+            </section>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export function FamilyDetail({
   family_id: familyId,
   topic: requestedTopic = 'zimmer',
@@ -803,6 +1334,16 @@ export function FamilyDetail({
               persons={people}
               actor={state.principal_email}
               world={world!}
+              stage={stage}
+              selected_person_id={detailPersonId}
+              on_select={selectPerson}
+            />
+          ) : topic === 'workshops' ? (
+            <FamilyWorkshopView
+              family_id={selectedFamilyId}
+              persons={people}
+              world={world!}
+              actor={state.principal_email}
               stage={stage}
               selected_person_id={detailPersonId}
               on_select={selectPerson}
