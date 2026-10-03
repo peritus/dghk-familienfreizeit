@@ -8,7 +8,7 @@ import type {
   WorkshopRecord,
 } from '../official-workshops/index.js'
 import type { WorkshopSchedulingSection } from '../workshop-scheduling/index.js'
-import type { WorkshopRanking } from '../workshop-rankings/index.js'
+import type { WorkshopChoice, WorkshopRanking } from '../workshop-rankings/index.js'
 
 export type WorkshopAssignmentParams = {
   top_n: number
@@ -49,10 +49,6 @@ export type WorkshopAssignmentSection = {
   retention_drops: readonly WorkshopRetentionDrop[]
 }
 
-function labelValue(input: SolverInput, entityId: string, key: string): JsonValue | undefined {
-  return input.labels.find((label) => label.entity_id === entityId && label.key === key)?.value
-}
-
 function eligibleRole(personRole: JsonValue | undefined, workshop: WorkshopRecord): boolean {
   if (workshop.audience === 'children') return personRole === 'child'
   if (workshop.audience === 'adults') return personRole === 'adult'
@@ -85,9 +81,38 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       const rankingByPerson = new Map(
         rankingOutput.rankings.map((ranking) => [ranking.person_id, ranking]),
       )
+      // `rejectionReason` runs once per candidate pair and asks for the
+      // person's role every time; resolving that through `input.labels` meant
+      // scanning every label in the occasion on each call.
+      const roleByPerson = new Map<string, JsonValue>()
+      for (const label of input.labels)
+        if (label.key === 'role' && !roleByPerson.has(label.entity_id))
+          roleByPerson.set(label.entity_id, label.value)
+      // Ranked choices, filtered and ordered once per person: the retention and
+      // repair passes re-derived this list on every iteration.
+      const rankedChoicesByPerson = new Map<string, readonly WorkshopChoice[]>(
+        rankingOutput.rankings.map((ranking) => [
+          ranking.person_id,
+          Object.freeze(
+            ranking.choices
+              .filter((choice) => choice.workshop_id && choice.rank !== null)
+              .slice()
+              .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)),
+          ),
+        ]),
+      )
       const previous = input.previous_plan?.sections['workshop-assignment'] as
         | WorkshopAssignmentSection
         | undefined
+      // Prior assignments grouped by person, preserving their order in the
+      // section, so retention does not re-filter the whole previous plan per
+      // person.
+      const priorByPerson = new Map<string, WorkshopAssignment[]>()
+      for (const assignment of previous?.assignments ?? []) {
+        const bucket = priorByPerson.get(assignment.person_id)
+        if (bucket) bucket.push(assignment)
+        else priorByPerson.set(assignment.person_id, [assignment])
+      }
       // A person leading any workshop cannot also attend a different one in
       // the same slot. Built from static leader/placement data, not
       // assignment order, so it applies uniformly to every placement path.
@@ -158,7 +183,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         if (!placement) return 'hard.unscheduled'
         if (workshop.mode !== 'assigned') return 'hard.mode-not-assigned'
         if (leaderSlots.get(personId)?.has(placement.slot_id)) return 'hard.leader-conflict'
-        if (!eligibleRole(labelValue(input, personId, 'role'), workshop)) return 'hard.eligibility'
+        if (!eligibleRole(roleByPerson.get(personId), workshop)) return 'hard.eligibility'
         if ((counts.get(workshop.id) ?? 0) >= workshop.capacity) return 'hard.capacity'
         if (usedBySlot.get(placement.slot_id)?.has(personId)) return 'hard.overlap'
         return null
@@ -211,9 +236,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       if (previous)
         for (const person of assignedPeople) {
           if (fixedPersonIds.has(person.id)) continue
-          const priorAssignments = previous.assignments.filter(
-            ({ person_id: personId }) => personId === person.id,
-          )
+          const priorAssignments = priorByPerson.get(person.id) ?? []
           for (const prior of priorAssignments) {
             const priorWorkshop = workshops.get(prior.workshop_id)
             if (!priorWorkshop) {
@@ -288,12 +311,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       for (let pass = 0; pass < params.max_repair_passes; pass += 1) {
         let repaired = false
         for (const person of stillUnassigned()) {
-          const candidateChoices =
-            rankingByPerson
-              .get(person.id)
-              ?.choices.filter((choice) => choice.workshop_id && choice.rank !== null)
-              .slice()
-              .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)) ?? []
+          const candidateChoices = rankedChoicesByPerson.get(person.id) ?? []
           for (const candidateChoice of candidateChoices) {
             const workshop = workshops.get(candidateChoice.workshop_id!)
             if (!workshop) continue
@@ -309,12 +327,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
             // "occupied" to the overlap check, even when the alternative is
             // that same slot's other workshop.
             unplace(occupant)
-            const alternativeChoices =
-              rankingByPerson
-                .get(occupant.person_id)
-                ?.choices.filter((choice) => choice.workshop_id && choice.rank !== null)
-                .slice()
-                .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)) ?? []
+            const alternativeChoices = rankedChoicesByPerson.get(occupant.person_id) ?? []
             const alternativeChoice = alternativeChoices.find((choice) => {
               const candidate = workshops.get(choice.workshop_id!)
               return (
