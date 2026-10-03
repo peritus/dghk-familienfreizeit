@@ -118,7 +118,9 @@ them is a deployment, reviewed through the plan diff before communicating.
 | | `max_rank` | `3` |
 | | `allow_no_preference` | `true` |
 | `workshop-assignment` | `top_n`, `rank_weights`, `minimum_workshops`, `fairness_targets` | `2`, `[3, 2, 1]`, `2`, `{ children: 2, adults: 1 }` |
-| | `fill_unassigned` | `true` |
+
+Workshop attendance is choice-bound: `minimum_workshops` can prioritize a
+person's ranked choices but never authorizes assigning an unchosen workshop.
 
 Children may lead workshops. Leadership does not consume participant capacity, and
 not every children's workshop needs a leader.
