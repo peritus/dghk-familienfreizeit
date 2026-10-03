@@ -305,9 +305,10 @@ type MutableWorld = {
 }
 
 export function derive(events: readonly Event[], config: KernelConfig = {}): World {
-  const validatedEvents = normalizeEvents(events, config)
-  const state = createMutableWorld()
-  for (const event of validatedEvents) applyEvent(state, event, config)
+  // `normalizeEvents` already folds the log to run each event's validator
+  // against the state before it. Folding a second time here doubled the cost of
+  // every derive for an identical result.
+  const { state } = normalizeEvents(events, config)
   const world = worldFromState(state, config)
   const summaries = Object.fromEntries(
     (config.world_summaries ?? []).map((definition) => [
@@ -345,7 +346,10 @@ export function assertAppendableWorld(world: World): void {
     )
 }
 
-function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[] {
+function normalizeEvents(
+  events: readonly Event[],
+  config: KernelConfig,
+): { events: readonly Event[]; state: MutableWorld } {
   const schemas = eventPayloadSchemas(config)
   const validatedEvents = events.map((event) => parseEvent(event, schemas))
   let expectedSeq = 1
@@ -371,7 +375,7 @@ function normalizeEvents(events: readonly Event[], config: KernelConfig): Event[
     }
     applyEvent(state, event, config)
   }
-  return validatedEvents
+  return { events: validatedEvents, state }
 }
 
 function validationWorld(state: MutableWorld): ValidationWorld {
