@@ -259,15 +259,14 @@ export function runRoomAssignment(
     score?: RoomScore,
   ): void => {
     const before = new Map(placements)
-    const candidates = scoredRooms(family, before, input, params, rules).sort(compareScore)
+    // One sweep for both halves of the trace detail. Scoring the candidates and
+    // collecting the rejections used to walk every room twice against the same
+    // snapshot, on every placement.
+    const evaluated = evaluateRooms(family, before, input, params, rules)
+    const candidates = evaluated.candidates.slice().sort(compareScore)
     const selected = score ?? candidates.find(({ room: candidate }) => candidate.id === room.id)
-    const rejected = input.rooms
-      .flatMap((candidate) =>
-        feasible(family, candidate, before, input, params, rules).map(({ rule }) => ({
-          target: candidate.id,
-          rule,
-        })),
-      )
+    const rejected = evaluated.rejections
+      .slice()
       .sort(
         (left, right) =>
           left.target.localeCompare(right.target) || left.rule.localeCompare(right.rule),
@@ -614,6 +613,28 @@ function toRoomCandidate(
   }
 }
 
+/**
+ * One pass over the rooms, returning both the scored feasible candidates and
+ * the per-room rejections. A placement's trace needs both halves, and deriving
+ * them separately meant evaluating every rule against every room twice.
+ */
+function evaluateRooms(
+  family: FamilyPlacementUnit,
+  placements: ReadonlyMap<string, string>,
+  input: RoomAssignmentInput,
+  params: RoomAssignmentParams,
+  rules: readonly Rule[],
+): { candidates: RoomScore[]; rejections: { target: string; rule: string }[] } {
+  const candidates: RoomScore[] = []
+  const rejections: { target: string; rule: string }[] = []
+  for (const room of input.rooms) {
+    const reasons = feasible(family, room, placements, input, params, rules)
+    if (reasons.length === 0) candidates.push(score(family, room, placements, input, params))
+    else for (const { rule } of reasons) rejections.push({ target: room.id, rule })
+  }
+  return { candidates, rejections }
+}
+
 function scoredRooms(
   family: FamilyPlacementUnit,
   placements: ReadonlyMap<string, string>,
@@ -621,12 +642,7 @@ function scoredRooms(
   params: RoomAssignmentParams,
   rules: readonly Rule[],
 ): RoomScore[] {
-  return input.rooms
-    .map((room) => {
-      const rejection = feasible(family, room, placements, input, params, rules)
-      return rejection.length === 0 ? score(family, room, placements, input, params) : null
-    })
-    .filter((candidate): candidate is RoomScore => candidate !== null)
+  return evaluateRooms(family, placements, input, params, rules).candidates
 }
 
 function feasible(
