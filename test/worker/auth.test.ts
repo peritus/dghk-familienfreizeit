@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import { env } from 'cloudflare:workers'
 import { activeProfile } from '../../src/config/index.js'
-import app from '../../src/worker/index.js'
+import { app } from '../../src/worker/index.js'
 import { currentPrincipal } from '../../src/auth/principal.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 
@@ -15,7 +15,7 @@ describe('authentication boundary', () => {
     }
     try {
       const response = await app.request(
-        'https://example.invalid/api/login',
+        'http://127.0.0.1/api/login',
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -31,10 +31,10 @@ describe('authentication boundary', () => {
       )
       const output = String(log.mock.calls[0]?.[0])
       expect(output).toMatch(
-        /^\[DANGEROUS DEBUG\] magic link for organiser@example\.test: https:\/\/example\.invalid\/auth\//,
+        /^\[DANGEROUS DEBUG\] magic link for organiser@example\.test: http:\/\/127\.0\.0\.1\/auth\//,
       )
 
-      const link = new URL(output.slice(output.indexOf('https://')))
+      const link = new URL(output.slice(output.indexOf('http://')))
       const redeemed = await app.request(link.pathname, {}, localEnv)
       expect(redeemed.status).toBe(302)
       expect(redeemed.headers.get('location')).toBe('/organiser')
@@ -55,7 +55,7 @@ describe('authentication boundary', () => {
     }
     try {
       const response = await app.request(
-        'http://preview.tailnet.ts.net/api/login',
+        'http://127.0.0.1/api/login',
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -155,7 +155,11 @@ describe('authentication boundary', () => {
       '/api/events',
       {
         method: 'POST',
-        headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+        headers: {
+          cookie: `sid=${session?.session}`,
+          origin: 'http://localhost',
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({
           expected_head: 1,
           events: [
@@ -184,7 +188,11 @@ describe('authentication boundary', () => {
       '/api/events',
       {
         method: 'POST',
-        headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+        headers: {
+          cookie: `sid=${session?.session}`,
+          origin: 'http://localhost',
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({
           expected_head: 2,
           events: [
@@ -248,7 +256,11 @@ describe('authentication boundary', () => {
       '/api/events',
       {
         method: 'POST',
-        headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+        headers: {
+          cookie: `sid=${session?.session}`,
+          origin: 'http://localhost',
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({
           expected_head: 3,
           events: [
@@ -303,7 +315,11 @@ describe('authentication boundary', () => {
         '/api/events',
         {
           method: 'POST',
-          headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+          headers: {
+            cookie: `sid=${session?.session}`,
+            origin: 'http://localhost',
+            'content-type': 'application/json',
+          },
           body: JSON.stringify({ expected_head, events: [] }),
         },
         env,
@@ -353,7 +369,11 @@ describe('authentication boundary', () => {
       '/api/events',
       {
         method: 'POST',
-        headers: { cookie: `sid=${session?.session}`, 'content-type': 'application/json' },
+        headers: {
+          cookie: `sid=${session?.session}`,
+          origin: 'http://localhost',
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({
           expected_head: 1,
           events: [

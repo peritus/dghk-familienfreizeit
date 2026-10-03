@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { env } from 'cloudflare:workers'
-import app from '../../src/worker/index.js'
+import { app } from '../../src/worker/index.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
 
@@ -38,7 +38,7 @@ test('organiser apply validates the prospective batch and returns its world', as
     '/api/organiser/apply',
     {
       method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
+      headers: { cookie, origin: 'http://localhost', 'content-type': 'application/json' },
       body: JSON.stringify({
         input_seq: 0,
         build_revision: buildRevision,
@@ -76,7 +76,7 @@ test('organiser apply validates the prospective batch and returns its world', as
     '/api/organiser/apply',
     {
       method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
+      headers: { cookie, origin: 'http://localhost', 'content-type': 'application/json' },
       body: JSON.stringify({
         input_seq: 2,
         build_revision: buildRevision,
@@ -110,7 +110,7 @@ test('organiser log replays selected-profile module events', async () => {
     '/api/organiser/apply',
     {
       method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
+      headers: { cookie, origin: 'http://localhost', 'content-type': 'application/json' },
       body: JSON.stringify({
         input_seq: 0,
         build_revision: buildRevision,
@@ -146,7 +146,7 @@ test('organiser apply reports intervening events for a stale head', async () => 
     '/api/organiser/apply',
     {
       method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
+      headers: { cookie, origin: 'http://localhost', 'content-type': 'application/json' },
       body: JSON.stringify({
         input_seq: 0,
         build_revision: buildRevision,
@@ -172,7 +172,7 @@ test('organiser apply reports intervening events for a stale head', async () => 
     '/api/organiser/apply',
     {
       method: 'POST',
-      headers: { cookie, 'content-type': 'application/json' },
+      headers: { cookie, origin: 'http://localhost', 'content-type': 'application/json' },
       body: JSON.stringify({
         input_seq: 0,
         build_revision: buildRevision,

@@ -1,7 +1,7 @@
 import { env, exports } from 'cloudflare:workers'
 import { afterEach, expect, test, vi } from 'vitest'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
-import app from '../../src/worker'
+import { app } from '../../src/worker'
 
 afterEach(() => vi.restoreAllMocks())
 

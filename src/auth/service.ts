@@ -8,21 +8,26 @@ export type LoginResult = { accepted: true; token: string | null }
 
 const fifteenMinutes = 15 * 60 * 1000
 const oneHour = 60 * 60 * 1000
-const familySession = 30 * 24 * 60 * 60 * 1000
-const organiserSession = 7 * 24 * 60 * 60 * 1000
+export const sessionPolicy = {
+  familyIdleMs: 30 * 24 * 60 * 60 * 1000,
+  familyAbsoluteMs: 90 * 24 * 60 * 60 * 1000,
+  organiserIdleMs: 7 * 24 * 60 * 60 * 1000,
+  organiserAbsoluteMs: 30 * 24 * 60 * 60 * 1000,
+} as const
 
 export async function issueMagicLink(
   db: D1Database,
   submittedEmail: string,
   ip: string | null,
   familyExists: boolean,
-  options: AuthOptions,
+  options: AuthOptions & { rateLimitsConsumed?: boolean },
 ): Promise<LoginResult> {
   const email = canonicalEmail(submittedEmail)
   const now = (options.now ?? (() => new Date().toISOString()))()
-  const addressAllowed = await consumeRateLimit(db, `email:${email}`, 5, oneHour, now)
-  const ipAllowed = await consumeRateLimit(db, `ip:${ip ?? 'unknown'}`, 20, oneHour, now)
-  if (!addressAllowed || !ipAllowed || (!familyExists && !options.isOrganiser(email)))
+  if (
+    (!options.rateLimitsConsumed && !(await consumeLoginRateLimits(db, email, ip, now))) ||
+    (!familyExists && !options.isOrganiser(email))
+  )
     return { accepted: true, token: null }
   const token = randomToken()
   await db
@@ -49,7 +54,7 @@ export async function redeemMagicLink(
   const session = randomToken()
   const expiresAt = addMilliseconds(
     now,
-    options.isOrganiser(email) ? organiserSession : familySession,
+    options.isOrganiser(email) ? sessionPolicy.organiserIdleMs : sessionPolicy.familyIdleMs,
   )
   await db
     .prepare(
@@ -60,7 +65,18 @@ export async function redeemMagicLink(
   return { session, email, expires_at: expiresAt }
 }
 
-async function consumeRateLimit(
+export async function consumeLoginRateLimits(
+  db: D1Database,
+  email: string,
+  ip: string | null,
+  now: string,
+): Promise<boolean> {
+  const addressAllowed = await consumeRateLimit(db, `email:${email}`, 5, oneHour, now)
+  const ipAllowed = await consumeRateLimit(db, `ip:${ip ?? 'unknown'}`, 20, oneHour, now)
+  return addressAllowed && ipAllowed
+}
+
+export async function consumeRateLimit(
   db: D1Database,
   bucket: string,
   limit: number,
@@ -68,17 +84,25 @@ async function consumeRateLimit(
   now: string,
 ): Promise<boolean> {
   const expiresAt = addMilliseconds(now, duration)
-  await db
+  const row = await db
     .prepare(
-      'INSERT INTO rate_limit(bucket, count, expires_at) VALUES (?1, 1, ?2) ON CONFLICT(bucket) DO UPDATE SET count = CASE WHEN expires_at <= ?3 THEN 1 ELSE count + 1 END, expires_at = CASE WHEN expires_at <= ?3 THEN ?2 ELSE expires_at END',
+      'INSERT INTO rate_limit(bucket, count, expires_at) VALUES (?1, 1, ?2) ON CONFLICT(bucket) DO UPDATE SET count = CASE WHEN expires_at <= ?3 THEN 1 ELSE count + 1 END, expires_at = CASE WHEN expires_at <= ?3 THEN ?2 ELSE expires_at END RETURNING count',
     )
     .bind(bucket, expiresAt, now)
-    .run()
-  const row = await db
-    .prepare('SELECT count FROM rate_limit WHERE bucket = ?1')
-    .bind(bucket)
     .first<{ count: number }>()
   return (row?.count ?? limit + 1) <= limit
+}
+
+export async function revokeSession(db: D1Database, raw: string): Promise<void> {
+  await db.prepare('DELETE FROM session WHERE token_hash = ?1').bind(await hash(raw)).run()
+}
+
+export async function cleanupOperationalRows(db: D1Database, now: string): Promise<void> {
+  await db.batch([
+    db.prepare('DELETE FROM magic_link WHERE expires_at < ?1').bind(now),
+    db.prepare('DELETE FROM session WHERE expires_at < ?1').bind(now),
+    db.prepare('DELETE FROM rate_limit WHERE expires_at < ?1').bind(now),
+  ])
 }
 
 export async function hash(value: string): Promise<string> {

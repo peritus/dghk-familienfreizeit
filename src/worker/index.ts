@@ -11,10 +11,23 @@ import { organiserAllowlist } from '../auth/allowlist.js'
 import { canAppendEvent } from '../auth/authorization.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
-import { issueMagicLink, redeemMagicLink } from '../auth/service.js'
+import {
+  cleanupOperationalRows,
+  consumeLoginRateLimits,
+  consumeRateLimit,
+  issueMagicLink,
+  redeemMagicLink,
+  revokeSession,
+} from '../auth/service.js'
 import { organiserScreenRegistry } from '../organiser/registry.js'
 
 const app = new Hono<{ Bindings: Env }>()
+const maxJsonBodyBytes = 256 * 1024
+const maxEventsPerBatch = 100
+const maxJsonDepth = 10
+const maxJsonStringLength = 4096
+const familyEventLimit = 120
+const eventRateLimitDuration = 60 * 60 * 1000
 
 const isOrganiser = (email: string): boolean => organiserAllowlist.has(email)
 
@@ -24,6 +37,7 @@ let warnedInsecureSessionCookies = false
 app.use('*', async (context, next) => {
   warnDangerousDevelopmentBindings(context.env)
   await next()
+  applySecurityHeaders(context)
 })
 
 app.post('/api/login', async (context) => {
@@ -38,15 +52,19 @@ app.post('/api/login', async (context) => {
     })
     .catch(() => null)
   if (!email) return context.json({ accepted: true })
+  const now = new Date().toISOString()
+  const ip = context.req.header('CF-Connecting-IP') ?? null
+  if (!(await consumeLoginRateLimits(context.env.DB, email, ip, now)))
+    return context.json({ accepted: true })
   const events = await readEventLog(context)
   const world = deriveEventWorld(events)
   const familyExists = familyForEmail(world, email) !== null
   const result = await issueMagicLink(
     context.env.DB,
     email,
-    context.req.header('CF-Connecting-IP') ?? null,
+    ip,
     familyExists,
-    { isOrganiser },
+    { isOrganiser, now: () => now, rateLimitsConsumed: true },
   )
   if (result.token && shouldShowMagicLinkOnConsole(context)) {
     const magicLink = new URL(`/auth/${result.token}`, context.req.url)
@@ -91,10 +109,18 @@ app.get('/api/health', async (context) => {
 app.get('/api/me', async (context) => {
   const principal = await principalFromContext(context)
   if (!principal) {
-    context.header('Set-Cookie', expiredSessionCookie())
+    context.header('Set-Cookie', expiredSessionCookie(!shouldAllowInsecureSessionCookies(context)))
     return context.json({ error: 'unauthorized' }, 401)
   }
   return context.json({ principal })
+})
+
+app.post('/api/logout', async (context) => {
+  if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
+  const raw = getCookie(context, 'sid')
+  if (raw) await revokeSession(context.env.DB, raw)
+  context.header('Set-Cookie', expiredSessionCookie(!shouldAllowInsecureSessionCookies(context)))
+  return context.json({ ok: true })
 })
 
 app.get('/api/organiser/log', async (context) => {
@@ -115,20 +141,21 @@ app.post('/api/organiser/apply', async (context) => {
   const principal = await principalFromContext(context)
   if (!principal || principal.kind !== 'organiser')
     return context.json({ error: 'unauthorized' }, 401)
+  if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
 
-  const body = await context.req
-    .json<{
+  const body = await readJsonBody<{
       input_seq?: unknown
       events?: unknown
       build_revision?: unknown
       compatibility_revision?: unknown
-    }>()
-    .catch(() => null)
+    }>(context)
   if (
     !body ||
     !Number.isSafeInteger(body.input_seq) ||
     (body.input_seq as number) < 0 ||
     !Array.isArray(body.events) ||
+    body.events.length > maxEventsPerBatch ||
+    !isBoundedJsonValue(body.events) ||
     typeof body.build_revision !== 'string' ||
     !Number.isSafeInteger(body.compatibility_revision)
   )
@@ -212,20 +239,35 @@ app.post('/api/organiser/apply', async (context) => {
 app.post('/api/events', async (context) => {
   const principal = await principalFromContext(context)
   if (!principal) return context.json({ error: 'unauthorized' }, 401)
-  const body = await context.req
-    .json<{
+  if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
+  const body = await readJsonBody<{
       expected_head?: number
       events?: Array<{ type: string; subject?: string | null; payload?: unknown }>
-    }>()
-    .catch(() => null)
+    }>(context)
   if (
     !body ||
     typeof body.expected_head !== 'number' ||
     !Number.isSafeInteger(body.expected_head) ||
     body.expected_head < 0 ||
-    !Array.isArray(body.events)
+    !Array.isArray(body.events) ||
+    body.events.length > maxEventsPerBatch ||
+    !isBoundedJsonValue(body.events)
   )
     return context.json({ error: 'invalid_request' }, 400)
+  const now = new Date().toISOString()
+  if (
+    principal.kind === 'family' &&
+    !(await consumeRateLimit(
+      context.env.DB,
+      `events:${principal.email}`,
+      familyEventLimit,
+      eventRateLimitDuration,
+      now,
+    ))
+  ) {
+    context.header('Retry-After', '3600')
+    return context.json({ error: 'rate_limited' }, 429)
+  }
   const expectedHead: number = body.expected_head
   const existing = await readEventLog(context)
   if (expectedHead !== existing.length)
@@ -239,7 +281,6 @@ app.post('/api/events', async (context) => {
       409,
     )
   const world = deriveEventWorld(existing)
-  const now = new Date().toISOString()
   try {
     const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
     const schemas = eventPayloadSchemas(activeProfile.validation_view)
@@ -292,7 +333,14 @@ app.get('/api/organiser', async (context) => {
 
 app.notFound((context) => context.json({ error: 'not_found' }, 404))
 
-export default app
+export { app }
+
+export default {
+  fetch: app.fetch.bind(app),
+  scheduled: async (_controller: ScheduledController, env: Env) => {
+    await cleanupOperationalRows(env.DB, new Date().toISOString())
+  },
+}
 
 async function principalFromContext(
   context: Context<{ Bindings: Env }>,
@@ -337,18 +385,69 @@ async function appendEventBatch(
 }
 
 function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): boolean {
-  const hostname = new URL(context.req.url).hostname
-  return (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '::1' ||
-    hostname === '[::1]' ||
-    context.env.DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE === 'true'
-  )
+  return isLoopback(new URL(context.req.url).hostname)
 }
 
 function shouldAllowInsecureSessionCookies(context: Context<{ Bindings: Env }>): boolean {
-  return context.env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true'
+  return (
+    context.env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true' &&
+    isLoopback(new URL(context.req.url).hostname)
+  )
+}
+
+function isLoopback(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]'
+}
+
+function hasTrustedOrigin(context: Context<{ Bindings: Env }>): boolean {
+  const origin = context.req.header('Origin')
+  if (!origin) return false
+  try {
+    return new URL(origin).origin === new URL(context.req.url).origin
+  } catch {
+    return false
+  }
+}
+
+async function readJsonBody<T>(
+  context: Context<{ Bindings: Env }>,
+  maxBytes = maxJsonBodyBytes,
+): Promise<T | null> {
+  const contentLength = Number(context.req.header('Content-Length'))
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) return null
+  const text = await context.req.text().catch(() => null)
+  if (text === null || new TextEncoder().encode(text).byteLength > maxBytes) return null
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    return null
+  }
+}
+
+function isBoundedJsonValue(value: unknown, depth = 0): boolean {
+  if (depth > maxJsonDepth) return false
+  if (typeof value === 'string') return value.length <= maxJsonStringLength
+  if (value === null || typeof value === 'boolean' || typeof value === 'number') return true
+  if (Array.isArray(value))
+    return value.length <= maxEventsPerBatch && value.every((item) => isBoundedJsonValue(item, depth + 1))
+  if (typeof value !== 'object') return false
+  const entries = Object.entries(value)
+  return (
+    entries.length <= maxEventsPerBatch &&
+    entries.every(([key, item]) => key.length <= maxJsonStringLength && isBoundedJsonValue(item, depth + 1))
+  )
+}
+
+function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
+  const url = new URL(context.req.url)
+  context.header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+  context.header('X-Content-Type-Options', 'nosniff')
+  context.header('X-Frame-Options', 'DENY')
+  context.header('Referrer-Policy', 'no-referrer')
+  context.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  if (url.protocol === 'https:') context.header('Strict-Transport-Security', 'max-age=31536000')
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/'))
+    context.header('Cache-Control', 'no-store')
 }
 
 function warnDangerousDevelopmentBindings(env: Env): void {
