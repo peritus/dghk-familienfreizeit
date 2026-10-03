@@ -23,8 +23,10 @@ import { Inventory } from './screens/inventory.js'
 import { AssignmentBoardScreen } from '../../modules/room-assignment/app/screens/assignment-board.js'
 import {
   familyIdFromRouteSegment,
+  isFamilyTopic,
   organiserPaths,
   organiserRoutePaths,
+  personIdFromRouteSegment,
 } from '../../organiser/routes.js'
 import { organiserScreenRegistry } from '../../organiser/registry.js'
 
@@ -274,6 +276,39 @@ export default function OrganiserApp() {
             </Route>
             <Route path={organiserRoutePaths.families}>
               <Families />
+            </Route>
+            <Route path={organiserRoutePaths.family_person_topic}>
+              {(params) => {
+                try {
+                  if (!isFamilyTopic(params.topic) || params.topic === 'zimmer') {
+                    return <NotFound />
+                  }
+                  return (
+                    <FamilyDetail
+                      family_id={familyIdFromRouteSegment(params.id)}
+                      topic={params.topic}
+                      person_id={personIdFromRouteSegment(params.person_id)}
+                    />
+                  )
+                } catch {
+                  return <NotFound />
+                }
+              }}
+            </Route>
+            <Route path={organiserRoutePaths.family_topic}>
+              {(params) => {
+                try {
+                  if (!isFamilyTopic(params.topic)) return <NotFound />
+                  return (
+                    <FamilyDetail
+                      family_id={familyIdFromRouteSegment(params.id)}
+                      topic={params.topic}
+                    />
+                  )
+                } catch {
+                  return <NotFound />
+                }
+              }}
             </Route>
             <Route path={organiserRoutePaths.family_detail}>
               {(params) => {

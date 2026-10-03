@@ -7,7 +7,7 @@ import { DestructiveActionDialog } from '../../components/shared/ui/destructive-
 import { Card, CardContent, CardHeader } from '../../components/shared/ui/card'
 import { useOrganiser } from '../context.js'
 import { findFamily, labelValue } from '../family-data.js'
-import { organiserPaths } from '../../../organiser/routes.js'
+import { organiserPaths, type FamilyTopic } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
@@ -164,7 +164,13 @@ function PersonEditor({
   )
 }
 
-export function FamilyDetail({ family_id: familyId }: { family_id?: string }) {
+export function FamilyDetail({
+  family_id: familyId,
+}: {
+  family_id?: string
+  topic?: FamilyTopic
+  person_id?: string
+}) {
   const { state, world, stage } = useOrganiser()
   const family = familyId ? findFamily(world!, familyId) : null
   const [givenName, setGivenName] = useState('')

@@ -15,6 +15,8 @@ export const organiserRoutePaths = {
   dashboard: '/',
   families: '/families',
   family_detail: '/families/:id',
+  family_topic: '/families/:id/:topic',
+  family_person_topic: '/families/:id/:topic/:person_id',
   accommodation: '/accommodation',
   inventory: '/accommodation/inventory',
   assignment_board: '/accommodation/assignment',
@@ -51,6 +53,20 @@ export const kernelOrganiserRouteDefinitions = [
     relative_path: organiserRoutePaths.family_detail,
     absolute_path: `${organiserBasePath}${organiserRoutePaths.family_detail}`,
     test_path: `${organiserBasePath}${organiserRoutePaths.families}/6b4b44137d724c1e`,
+    label: 'Familie',
+  },
+  {
+    id: 'organiser-family-detail-topic',
+    relative_path: organiserRoutePaths.family_topic,
+    absolute_path: `${organiserBasePath}${organiserRoutePaths.family_topic}`,
+    test_path: `${organiserBasePath}${organiserRoutePaths.families}/6b4b44137d724c1e/zimmer`,
+    label: 'Familie',
+  },
+  {
+    id: 'organiser-family-detail-person-topic',
+    relative_path: organiserRoutePaths.family_person_topic,
+    absolute_path: `${organiserBasePath}${organiserRoutePaths.family_person_topic}`,
+    test_path: `${organiserBasePath}${organiserRoutePaths.families}/6b4b44137d724c1e/essen/7b4b44137d724c1e`,
     label: 'Familie',
   },
 ] as const
@@ -129,6 +145,14 @@ export function organiserPathWithHash(path: OrganiserPath, hash: string): Organi
 
 const familyRouteIdPattern = /^[a-zA-Z0-9_-]+$/
 
+export const familyTopics = ['zimmer', 'personen', 'essen', 'workshops'] as const
+
+export type FamilyTopic = (typeof familyTopics)[number]
+
+export function isFamilyTopic(value: string | undefined): value is FamilyTopic {
+  return value !== undefined && familyTopics.includes(value as FamilyTopic)
+}
+
 /**
  * Family identities stay durable domain values (`fam_<opaque-id>`), while the
  * browser route carries only the opaque part. Email addresses and other
@@ -149,11 +173,36 @@ export function familyIdFromRouteSegment(segment: string): string {
   return `fam_${routeId}`
 }
 
+export function personRouteSegment(personId: string): string {
+  if (!personId.startsWith('per_')) throw new Error('person id must use the per_ prefix')
+  const routeId = personId.slice('per_'.length)
+  if (!routeId || !familyRouteIdPattern.test(routeId))
+    throw new Error('person id contains characters that cannot be used in a route')
+  return encodeURIComponent(routeId)
+}
+
+export function personIdFromRouteSegment(segment: string): string {
+  const routeId = decodeURIComponent(segment)
+  if (!routeId || !familyRouteIdPattern.test(routeId))
+    throw new Error('person route segment is invalid')
+  return `per_${routeId}`
+}
+
 export const organiserPaths = {
   dashboard: (): OrganiserPath => nestedPath(organiserRoutePaths.dashboard),
   families: (): OrganiserPath => nestedPath(organiserRoutePaths.families),
   family_detail: (familyId: string): OrganiserPath =>
     nestedPath(`${organiserRoutePaths.families}/${familyRouteSegment(familyId)}`),
+  family_topic: (familyId: string, topic: FamilyTopic): OrganiserPath =>
+    nestedPath(`${organiserRoutePaths.families}/${familyRouteSegment(familyId)}/${topic}`),
+  family_person_topic: (
+    familyId: string,
+    topic: Exclude<FamilyTopic, 'zimmer'>,
+    personId: string,
+  ): OrganiserPath =>
+    nestedPath(
+      `${organiserRoutePaths.families}/${familyRouteSegment(familyId)}/${topic}/${personRouteSegment(personId)}`,
+    ),
   accommodation: (): OrganiserPath => nestedPath(organiserRoutePaths.accommodation),
   inventory: (): OrganiserPath => nestedPath(organiserRoutePaths.inventory),
   assignment_board: (): OrganiserPath => nestedPath(organiserRoutePaths.assignment_board),
