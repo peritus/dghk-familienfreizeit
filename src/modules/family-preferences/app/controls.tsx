@@ -315,6 +315,52 @@ function TraitControl({
     )
   }
 
+  if (facing.control === 'choice') {
+    const choices = trait.value.kind === 'enum' ? trait.value.values : []
+    const selected = typeof current?.value === 'string' ? current.value : ''
+    return (
+      <fieldset className="grid gap-2" disabled={disabled}>
+        <legend className="font-bold">{title}</legend>
+        {help ? <p className="text-sm">{help}</p> : null}
+        <div className="flex flex-wrap gap-2">
+          <label className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border px-3 font-bold">
+            <input
+              type="radio"
+              name={`${target.id}-${traitKey}`}
+              checked={selected === ''}
+              onChange={() => current && stage([labelClear(actor, familyId, target, traitKey)])}
+            />
+            Keine Angabe
+          </label>
+          {choices.map((choice) => {
+            const copy = trait.kind === 'property' ? trait.copy?.[choice] : undefined
+            const label = copy ? controlTitle(copy, meta) : choice
+            return (
+              <label
+                key={choice}
+                className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border px-3 font-bold"
+              >
+                <input
+                  type="radio"
+                  name={`${target.id}-${traitKey}`}
+                  checked={selected === choice}
+                  onChange={() => {
+                    if (selected !== choice)
+                      stage([labelSet(actor, familyId, target, traitKey, choice, null)])
+                  }}
+                />
+                {label}
+              </label>
+            )
+          })}
+        </div>
+        {selected === 'other' ? (
+          <p className="text-sm">Was genau, gerne unten bei den Hinweisen.</p>
+        ) : null}
+      </fieldset>
+    )
+  }
+
   if (facing.control === 'family-picker') {
     const selected = new Set(
       labelValues(labels, traitKey).filter((value): value is string => typeof value === 'string'),

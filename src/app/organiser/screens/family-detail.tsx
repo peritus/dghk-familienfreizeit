@@ -651,6 +651,61 @@ function FamilyPeopleView({
   )
 }
 
+function FamilyFoodView({
+  family_id: familyId,
+  persons,
+  actor,
+  world,
+  stage,
+  selected_person_id: selectedPersonId,
+  on_select: onSelect,
+}: {
+  family_id: string
+  persons: ReturnType<typeof familyPeople>
+  actor: string
+  world: World
+  stage: (events: readonly EventDraft[]) => void
+  selected_person_id?: string
+  on_select: (personId: string) => void
+}) {
+  const [adding, setAdding] = useState(false)
+  const selected = persons.find((person) => person.entity.id === selectedPersonId) ?? persons[0]
+  return (
+    <div className="grid gap-5 lg:grid-cols-[minmax(13rem,23%)_minmax(0,1fr)]">
+      <FamilyPersonSidebar
+        family_id={familyId}
+        topic="essen"
+        persons={persons}
+        selected_person_id={selected?.entity.id}
+        on_select={onSelect}
+        adding={adding}
+        on_add_change={setAdding}
+        actor={actor}
+        stage={stage}
+      />
+      {selected ? (
+        <FamilyPreferencesControls
+          profile={activeProfile}
+          family_id={familyId}
+          persons={persons.map((person) => person.entity)}
+          world={world}
+          actor={actor}
+          stage={stage}
+          section_keys={['food']}
+          person_id={selected.entity.id}
+          defer_text
+        />
+      ) : (
+        <Card className="bg-secondary-background">
+          <CardContent className="p-5">
+            <p>Noch niemand eingetragen. Mit „Person hinzufügen“ geht es los.</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
 export function FamilyDetail({
   family_id: familyId,
   topic: requestedTopic = 'zimmer',
@@ -742,11 +797,19 @@ export function FamilyDetail({
               selected_person_id={detailPersonId}
               on_select={selectPerson}
             />
+          ) : topic === 'essen' ? (
+            <FamilyFoodView
+              family_id={selectedFamilyId}
+              persons={people}
+              actor={state.principal_email}
+              world={world!}
+              stage={stage}
+              selected_person_id={detailPersonId}
+              on_select={selectPerson}
+            />
           ) : (
             <p className="rounded-base border-2 border-dashed border-muted p-5">
-              {topic === 'essen' || topic === 'workshops'
-                ? 'Dieser Bereich wird noch aufgebaut.'
-                : 'Keine Person ausgewählt.'}
+              Dieser Bereich wird noch aufgebaut.
             </p>
           )}
         </div>
