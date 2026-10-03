@@ -16,7 +16,15 @@
         default = let
           pkgs = nixpkgs.legacyPackages.${system};
         in pkgs.mkShell {
-          packages = [ pkgs.nodejs_22 ] ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.chromium;
+          packages = [
+            pkgs.bash
+            pkgs.coreutils
+            pkgs.curl
+            pkgs.gnumake
+            pkgs.jq
+            pkgs.nodejs_22
+            pkgs.wrangler
+          ] ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.chromium;
           shellHook = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
             export PLAYWRIGHT_EXECUTABLE_PATH="$(command -v chromium)"
           '';
