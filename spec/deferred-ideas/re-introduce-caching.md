@@ -33,6 +33,31 @@ release previews and ordinary apply. Do not assume saves are fold-only or that c
 misses occur only once per communication. This proposal is outside the active
 architecture; release control introduces no persisted cache.
 
+## What the measurements changed about this plan
+
+This document was written before anything was measured, and two of its premises
+were wrong.
+
+"Always refold (it's cheap)" was an assumption. `derive` was quadratic in the
+length of the log: 3.2 s at 2 367 events and 3 min 45 s at 9 393. Refolding was
+never cheap, and no cache keyed on the plan identity would have helped, because
+every append changes `input_seq` and so misses by construction. The fold is now
+close to linear — 73 ms and 731 ms at those two sizes — which is what makes
+"always refold" a true statement rather than a hopeful one.
+
+The benchmark this plan made the D1 revision conditional on now exists as
+`npm run bench`; see [testing](../../docs/engineering/testing.md#derivation-benchmarks).
+It also shows where the cost actually sits, and it is not the fold: at 2 367
+events `solve` is 23 442 ms against the fold's 72 ms. A plan cache would hide
+that from a repeat reader at an unchanged head, and from nobody else — not a
+cold isolate, not a new `build_revision`, and not `deriveTransition`, which
+solves two worlds per organiser keystroke batch and whose draft world has never
+existed before and can never be in any cache.
+
+So the store choice below is still open, but it is no longer the first question.
+[Issue 041](../issues/open/041-incremental-derivation.md) carries the costs that
+remain and the options for them.
+
 ## Why a cache here needs no invalidation
 
 `derive` is pure (D3), so a plan is fully identified by
@@ -57,8 +82,8 @@ removed projection tables.
 1. **Cache only the solve output**, not the whole world:
    `derive_cache(key TEXT PRIMARY KEY, value TEXT NOT NULL, created_at TEXT NOT NULL)`.
    `key = "plan:" || input_seq || ":" || build_revision || ":" || compatibility_revision`,
-   `value` = canonical JSON of plan + trace. Always refold (it's cheap), which keeps
-   parse cost small and keeps entities and labels out of storage.
+   `value` = canonical JSON of plan + trace. Always refold, which keeps parse cost
+   small and keeps entities and labels out of storage.
 2. **Rules** (added to 01 and AGENTS.md):
    - The cache is operational, not domain state. The solver never reads it.
    - Emptying it at any time must be correct.

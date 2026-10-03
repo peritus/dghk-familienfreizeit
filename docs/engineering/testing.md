@@ -51,6 +51,33 @@ aliases are configured in `components.json`. Attribution is in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). M0 checks semantic focus/error/loading behavior
 in jsdom, not pixel appearance or real-browser keyboard layout.
 
+## Derivation benchmarks
+
+`npm run bench` runs `test/bench/` under its own
+[Vitest configuration](../../vitest.bench.config.ts). It is deliberately outside
+`npm run ci`: it measures cost rather than asserting behavior, and wall-clock
+timings from a shared runner are not a gate anyone should block a merge on.
+
+`test/bench/log.ts` generates a deterministic event log valid for the
+`familienfreizeit-2027` profile. It scales what grows between occasions —
+rooms, beds, workshops, families, persons, rankings and stated needs — and holds
+the programme grid fixed, because slots and spaces are bounded by the length of
+the occasion rather than by attendance. Rooms carry both their `exactly-one`
+traits so measurements are not distorted by thousands of cardinality
+diagnostics.
+
+Two environment variables select the run:
+
+- `DGHK_BENCH_FACTORS=1,2,4` — the scale factors to sweep (default `1,2,4`).
+- `DGHK_BENCH_STAGES=derive` — which stages to time. `solve` costs orders of
+  magnitude more than the others and grows faster, so measuring the fold at a
+  large log size means leaving it out.
+
+Each sweep reports a growth exponent between consecutive factors: a linear stage
+tracks the event growth and reports roughly `1.0`, a quadratic one reports
+roughly `2.0`. That number, not a single absolute timing, is what makes a
+complexity regression visible on a machine whose absolute speed is unknown.
+
 ## Browser route and link gate
 
 `npm run test:browser` runs the Playwright Chromium suite against a local
