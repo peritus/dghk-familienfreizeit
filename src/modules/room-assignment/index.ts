@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { World } from '../../events/fold.js'
+import type { Entity, World } from '../../events/fold.js'
 import type { ResolvedRequirement } from '../../events/resolver.js'
 import { evaluateRules } from '../../solver/index.js'
 import type { Rule, SolverInput, SolverStage, TraceEntry } from '../../solver/types.js'
@@ -155,19 +155,29 @@ export function buildRoomAssignmentInput(
     const familyId = labelValue(world, person.id, 'member-of')
     if (typeof familyId === 'string') personFamily[person.id] = familyId
   }
+  // Families keyed by id, and persons grouped by the family they belong to.
+  // The requirement and room-decision passes each scanned every family per row,
+  // and the family projection below scanned every person per family.
+  const familyIds = new Set(world.families.map(({ id }) => id))
+  const personsByFamily = new Map<string, Entity[]>()
+  for (const person of world.persons) {
+    const familyId = personFamily[person.id]
+    if (familyId === undefined) continue
+    const bucket = personsByFamily.get(familyId)
+    if (bucket) bucket.push(person)
+    else personsByFamily.set(familyId, [person])
+  }
   const requirementsByFamily = new Map<string, ResolvedRequirement[]>()
   for (const requirement of world.requirements) {
     const familyId = personFamily[requirement.holder_id] ?? requirement.holder_id
-    if (!world.families.some((family) => family.id === familyId)) continue
+    if (!familyIds.has(familyId)) continue
     const current = requirementsByFamily.get(familyId) ?? []
     if (requirement.value === `${familyId}_room`) continue
     if (!current.some((item) => sameRequirement(item, requirement))) current.push(requirement)
     requirementsByFamily.set(familyId, current)
   }
   const families = world.families.map((family) => {
-    const persons = world.persons
-      .filter((person) => personFamily[person.id] === family.id)
-      .sort(compareEntity)
+    const persons = (personsByFamily.get(family.id) ?? []).slice().sort(compareEntity)
     const bedDemand = persons.filter(
       (person) => labelValue(world, person.id, params.no_bed_trait ?? '') !== true,
     ).length
@@ -204,7 +214,7 @@ export function buildRoomAssignmentInput(
         .sort()
       return { family_id: familyId, room_ids: Object.freeze(roomIds) }
     })
-    .filter(({ family_id: familyId }) => world.families.some((family) => family.id === familyId))
+    .filter(({ family_id: familyId }) => familyIds.has(familyId))
   const fixedAssignments = roomConstraints.flatMap(({ family_id: familyId, room_ids: roomIds }) =>
     roomIds.length === 1 ? [{ family_id: familyId, room_id: roomIds[0]! }] : [],
   )
