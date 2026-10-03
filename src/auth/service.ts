@@ -9,10 +9,10 @@ export type LoginResult = { accepted: true; token: string | null }
 const fifteenMinutes = 15 * 60 * 1000
 const oneHour = 60 * 60 * 1000
 export const sessionPolicy = {
-  familyIdleMs: 30 * 24 * 60 * 60 * 1000,
-  familyAbsoluteMs: 90 * 24 * 60 * 60 * 1000,
-  organiserIdleMs: 7 * 24 * 60 * 60 * 1000,
-  organiserAbsoluteMs: 30 * 24 * 60 * 60 * 1000,
+  family_idle_ms: 30 * 24 * 60 * 60 * 1000,
+  family_absolute_ms: 90 * 24 * 60 * 60 * 1000,
+  organiser_idle_ms: 7 * 24 * 60 * 60 * 1000,
+  organiser_absolute_ms: 30 * 24 * 60 * 60 * 1000,
 } as const
 
 export async function issueMagicLink(
@@ -20,12 +20,12 @@ export async function issueMagicLink(
   submittedEmail: string,
   ip: string | null,
   familyExists: boolean,
-  options: AuthOptions & { rateLimitsConsumed?: boolean },
+  options: AuthOptions & { rate_limits_consumed?: boolean },
 ): Promise<LoginResult> {
   const email = canonicalEmail(submittedEmail)
   const now = (options.now ?? (() => new Date().toISOString()))()
   if (
-    (!options.rateLimitsConsumed && !(await consumeLoginRateLimits(db, email, ip, now))) ||
+    (!options.rate_limits_consumed && !(await consumeLoginRateLimits(db, email, ip, now))) ||
     (!familyExists && !options.isOrganiser(email))
   )
     return { accepted: true, token: null }
@@ -54,7 +54,7 @@ export async function redeemMagicLink(
   const session = randomToken()
   const expiresAt = addMilliseconds(
     now,
-    options.isOrganiser(email) ? sessionPolicy.organiserIdleMs : sessionPolicy.familyIdleMs,
+    options.isOrganiser(email) ? sessionPolicy.organiser_idle_ms : sessionPolicy.family_idle_ms,
   )
   await db
     .prepare(
@@ -94,7 +94,10 @@ export async function consumeRateLimit(
 }
 
 export async function revokeSession(db: D1Database, raw: string): Promise<void> {
-  await db.prepare('DELETE FROM session WHERE token_hash = ?1').bind(await hash(raw)).run()
+  await db
+    .prepare('DELETE FROM session WHERE token_hash = ?1')
+    .bind(await hash(raw))
+    .run()
 }
 
 export async function cleanupOperationalRows(db: D1Database, now: string): Promise<void> {

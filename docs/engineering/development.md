@@ -141,13 +141,15 @@ To exercise the organiser browser locally, run the preview and open
 `http://127.0.0.1:5173/login`. Submit `organiser@example.test`, watch the Worker
 terminal for the clearly marked dangerous-debug magic link, and open it in the
 browser. Loopback links are printed automatically; no `.dev.vars` setup is
-needed. If a non-loopback preview must use the same flow, explicitly set
-`DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true` in that preview's
-environment and remove it immediately afterward.
+needed. A non-loopback Station preview must also set
+`DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST` to the exact exposed hostname; the preview
+task supplies that value from `DGHK_PREVIEW_HOST` and removes its temporary
+`.dev.vars` file afterward.
 
-The `dev-preview` task supplies that one variable from its process environment.
-Wrangler explicitly allowlists it as a local Worker binding; no `.env` file is
-read, and no other process environment values are exposed to the Worker.
+The `dev-preview` task supplies the three explicit local-preview bindings from
+its process environment. Wrangler explicitly allowlists them as local Worker
+bindings; no `.env` file is read, and no other process environment values are
+exposed to the Worker.
 Because the Station preview uses plain HTTP on the Tailscale network, the task
 also supplies `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true`.
 That alarming local-only binding removes the `Secure` attribute from the session

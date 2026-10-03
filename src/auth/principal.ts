@@ -18,13 +18,15 @@ export async function currentPrincipal(
   if (!raw) return null
   const now = (options.now ?? (() => new Date().toISOString()))()
   const row = await db
-    .prepare('SELECT email, created_at, expires_at FROM session WHERE token_hash = ?1 AND expires_at > ?2')
+    .prepare(
+      'SELECT email, created_at, expires_at FROM session WHERE token_hash = ?1 AND expires_at > ?2',
+    )
     .bind(await hash(raw), now)
     .first<{ email: string; created_at: string; expires_at: string }>()
   if (!row) return null
   const email = canonicalEmail(row.email)
   if (options.isOrganiser(email)) {
-    if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.organiserAbsoluteMs)) {
+    if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.organiser_absolute_ms)) {
       await revokeSession(db, raw)
       return null
     }
@@ -33,16 +35,16 @@ export async function currentPrincipal(
       raw,
       email,
       now,
-      sessionPolicy.organiserIdleMs,
+      sessionPolicy.organiser_idle_ms,
       row.created_at,
-      sessionPolicy.organiserAbsoluteMs,
+      sessionPolicy.organiser_absolute_ms,
     )
     return { kind: 'organiser', email }
   }
   const world = derive(await readEvents(db, config), config)
   const familyId = familyForEmail(world, email)
   if (!familyId) return null
-  if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.familyAbsoluteMs)) {
+  if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.family_absolute_ms)) {
     await revokeSession(db, raw)
     return null
   }
@@ -51,9 +53,9 @@ export async function currentPrincipal(
     raw,
     email,
     now,
-    sessionPolicy.familyIdleMs,
+    sessionPolicy.family_idle_ms,
     row.created_at,
-    sessionPolicy.familyAbsoluteMs,
+    sessionPolicy.family_absolute_ms,
   )
   return { kind: 'family', email, family_id: familyId }
 }
@@ -78,12 +80,7 @@ async function refreshSession(
     .prepare(
       'UPDATE session SET last_seen_at = ?1, expires_at = ?2 WHERE token_hash = ?3 AND email = ?4',
     )
-    .bind(
-      now,
-      new Date(Math.min(idleExpiry, absoluteExpiry)).toISOString(),
-      await hash(raw),
-      email,
-    )
+    .bind(now, new Date(Math.min(idleExpiry, absoluteExpiry)).toISOString(), await hash(raw), email)
     .run()
 }
 

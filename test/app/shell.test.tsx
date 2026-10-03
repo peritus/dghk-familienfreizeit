@@ -185,6 +185,7 @@ test.each(['/', '/family'])(
       'Willkommen zur Familienfreizeit',
     )
     expect(screen.getByText('Anmeldung noch nicht freigeschaltet')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Anmelden' }).getAttribute('href')).toBe('/login')
     expect(screen.getByRole('main').id).toBe('content')
     expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')
     expect(screen.queryByRole('link', { name: /Organisationsteam/ })).toBeNull()
@@ -205,7 +206,10 @@ test('the login form requests a magic link and explains local delivery', async (
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
 
-  expect(await screen.findByText('Magic Link angefordert')).toBeTruthy()
+  expect(await screen.findByText('Magic Link gesendet')).toBeTruthy()
+  expect(
+    (screen.getByRole('button', { name: /Erneut anfordern in/ }) as HTMLButtonElement).disabled,
+  ).toBe(true)
   expect(fetchMock).toHaveBeenCalledWith(
     '/api/login',
     expect.objectContaining({
@@ -220,6 +224,25 @@ test('a direct organiser URL loads the lazy route', async () => {
   expect(
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Abmelden' })).toBeTruthy()
+})
+
+test('an unauthenticated organiser URL returns to the login screen', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ error: 'unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    ),
+  )
+  window.history.replaceState({}, '', '/organiser')
+  render(<App />)
+
+  expect(await screen.findByRole('heading', { name: 'Mit Magic Link anmelden' })).toBeTruthy()
 })
 
 test('ordinary route navigation preserves the user-controlled focus', async () => {

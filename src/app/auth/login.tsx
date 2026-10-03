@@ -1,10 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'wouter'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { Button } from '../components/shared/ui/button'
 import { Card, CardContent, CardHeader } from '../components/shared/ui/card'
 
 type LoginStatus = 'idle' | 'sending' | 'sent' | 'error'
+const resendCooldownSeconds = 60
 
 function expiredLink(): boolean {
   return new URLSearchParams(window.location.search).get('error') === 'expired'
@@ -13,9 +14,19 @@ function expiredLink(): boolean {
 export function Login() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<LoginStatus>('idle')
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
+
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return
+    const timer = window.setInterval(() => {
+      setCooldownRemaining((remaining) => Math.max(0, remaining - 1))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [cooldownRemaining])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (cooldownRemaining > 0) return
     setStatus('sending')
     try {
       const response = await fetch('/api/login', {
@@ -25,6 +36,7 @@ export function Login() {
       })
       if (!response.ok) throw new Error('login request failed')
       setStatus('sent')
+      setCooldownRemaining(resendCooldownSeconds)
     } catch {
       setStatus('error')
     }
@@ -44,10 +56,10 @@ export function Login() {
           </Alert>
         ) : null}
         {status === 'sent' ? (
-          <Alert>
-            <AlertTitle>Magic Link angefordert</AlertTitle>
+          <Alert aria-live="polite">
+            <AlertTitle>Magic Link gesendet</AlertTitle>
             <AlertDescription>
-              <p>Prüfe Dein Postfach und öffne den Link.</p>
+              <p>Bitte prüfe Dein Postfach und öffne den Link.</p>
             </AlertDescription>
           </Alert>
         ) : null}
@@ -69,8 +81,12 @@ export function Login() {
               className="min-h-11 rounded border-2 border-border px-3"
             />
           </label>
-          <Button type="submit" disabled={status === 'sending'}>
-            {status === 'sending' ? 'Wird angefordert …' : 'Magic Link anfordern'}
+          <Button type="submit" disabled={status === 'sending' || cooldownRemaining > 0}>
+            {status === 'sending'
+              ? 'Wird angefordert …'
+              : cooldownRemaining > 0
+                ? `Erneut anfordern in ${cooldownRemaining} s`
+                : 'Magic Link anfordern'}
           </Button>
         </form>
         <Link href="~/" className="underline">

@@ -26,9 +26,12 @@ export function Shell({ children }: { children: ReactNode }) {
       ) : (
         <>
           <header className="border-b-2 border-border bg-secondary-background px-4 py-4 sm:px-8">
-            <div className="mx-auto max-w-5xl">
+            <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
               <Link href="~/" className="inline-flex min-h-11 items-center text-xl font-heading">
                 Familienfreizeit
+              </Link>
+              <Link href="/login" className="inline-flex min-h-11 items-center underline">
+                Anmelden
               </Link>
             </div>
           </header>

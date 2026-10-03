@@ -41,16 +41,14 @@ app.use('*', async (context, next) => {
 })
 
 app.post('/api/login', async (context) => {
-  const email = await context.req
-    .json<{ email?: string }>()
-    .then((body) => {
-      try {
-        return canonicalEmail(body.email ?? '')
-      } catch {
-        return null
-      }
-    })
-    .catch(() => null)
+  const body = await readJsonBody<{ email?: string }>(context)
+  const email = (() => {
+    try {
+      return canonicalEmail(body?.email ?? '')
+    } catch {
+      return null
+    }
+  })()
   if (!email) return context.json({ accepted: true })
   const now = new Date().toISOString()
   const ip = context.req.header('CF-Connecting-IP') ?? null
@@ -59,13 +57,11 @@ app.post('/api/login', async (context) => {
   const events = await readEventLog(context)
   const world = deriveEventWorld(events)
   const familyExists = familyForEmail(world, email) !== null
-  const result = await issueMagicLink(
-    context.env.DB,
-    email,
-    ip,
-    familyExists,
-    { isOrganiser, now: () => now, rateLimitsConsumed: true },
-  )
+  const result = await issueMagicLink(context.env.DB, email, ip, familyExists, {
+    isOrganiser,
+    now: () => now,
+    rate_limits_consumed: true,
+  })
   if (result.token && shouldShowMagicLinkOnConsole(context)) {
     const magicLink = new URL(`/auth/${result.token}`, context.req.url)
     console.log(`[DANGEROUS DEBUG] magic link for ${email}: ${magicLink}`)
@@ -144,11 +140,11 @@ app.post('/api/organiser/apply', async (context) => {
   if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
 
   const body = await readJsonBody<{
-      input_seq?: unknown
-      events?: unknown
-      build_revision?: unknown
-      compatibility_revision?: unknown
-    }>(context)
+    input_seq?: unknown
+    events?: unknown
+    build_revision?: unknown
+    compatibility_revision?: unknown
+  }>(context)
   if (
     !body ||
     !Number.isSafeInteger(body.input_seq) ||
@@ -241,9 +237,9 @@ app.post('/api/events', async (context) => {
   if (!principal) return context.json({ error: 'unauthorized' }, 401)
   if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
   const body = await readJsonBody<{
-      expected_head?: number
-      events?: Array<{ type: string; subject?: string | null; payload?: unknown }>
-    }>(context)
+    expected_head?: number
+    events?: Array<{ type: string; subject?: string | null; payload?: unknown }>
+  }>(context)
   if (
     !body ||
     typeof body.expected_head !== 'number' ||
@@ -385,18 +381,33 @@ async function appendEventBatch(
 }
 
 function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): boolean {
-  return isLoopback(new URL(context.req.url).hostname)
+  const url = new URL(context.req.url)
+  return (
+    isLoopback(url.hostname) ||
+    (context.env.DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE === 'true' &&
+      context.env.DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST === url.hostname)
+  )
 }
 
 function shouldAllowInsecureSessionCookies(context: Context<{ Bindings: Env }>): boolean {
   return (
     context.env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true' &&
-    isLoopback(new URL(context.req.url).hostname)
+    isLocalPreviewRequest(context)
   )
 }
 
+function isLocalPreviewRequest(context: Context<{ Bindings: Env }>): boolean {
+  const hostname = new URL(context.req.url).hostname
+  return isLoopback(hostname) || context.env.DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST === hostname
+}
+
 function isLoopback(hostname: string): boolean {
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]'
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '::1' ||
+    hostname === '[::1]'
+  )
 }
 
 function hasTrustedOrigin(context: Context<{ Bindings: Env }>): boolean {
@@ -415,8 +426,32 @@ async function readJsonBody<T>(
 ): Promise<T | null> {
   const contentLength = Number(context.req.header('Content-Length'))
   if (Number.isFinite(contentLength) && contentLength > maxBytes) return null
-  const text = await context.req.text().catch(() => null)
-  if (text === null || new TextEncoder().encode(text).byteLength > maxBytes) return null
+  const body = context.req.raw.body
+  if (!body) return null
+  const reader = body.getReader()
+  const chunks: Uint8Array[] = []
+  let totalBytes = 0
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      totalBytes += value.byteLength
+      if (totalBytes > maxBytes) {
+        await reader.cancel()
+        return null
+      }
+      chunks.push(value)
+    }
+  } catch {
+    return null
+  }
+  const bytes = new Uint8Array(totalBytes)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  const text = new TextDecoder().decode(bytes)
   try {
     return JSON.parse(text) as T
   } catch {
@@ -429,18 +464,26 @@ function isBoundedJsonValue(value: unknown, depth = 0): boolean {
   if (typeof value === 'string') return value.length <= maxJsonStringLength
   if (value === null || typeof value === 'boolean' || typeof value === 'number') return true
   if (Array.isArray(value))
-    return value.length <= maxEventsPerBatch && value.every((item) => isBoundedJsonValue(item, depth + 1))
+    return (
+      value.length <= maxEventsPerBatch &&
+      value.every((item) => isBoundedJsonValue(item, depth + 1))
+    )
   if (typeof value !== 'object') return false
   const entries = Object.entries(value)
   return (
     entries.length <= maxEventsPerBatch &&
-    entries.every(([key, item]) => key.length <= maxJsonStringLength && isBoundedJsonValue(item, depth + 1))
+    entries.every(
+      ([key, item]) => key.length <= maxJsonStringLength && isBoundedJsonValue(item, depth + 1),
+    )
   )
 }
 
 function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
   const url = new URL(context.req.url)
-  context.header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+  context.header(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  )
   context.header('X-Content-Type-Options', 'nosniff')
   context.header('X-Frame-Options', 'DENY')
   context.header('Referrer-Policy', 'no-referrer')

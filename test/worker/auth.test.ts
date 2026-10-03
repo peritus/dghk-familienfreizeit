@@ -52,10 +52,11 @@ describe('authentication boundary', () => {
       ...env,
       DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
       DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES: 'true' as const,
+      DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST: 'preview.tailnet.ts.net',
     }
     try {
       const response = await app.request(
-        'http://127.0.0.1/api/login',
+        'http://preview.tailnet.ts.net/api/login',
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -281,7 +282,9 @@ describe('authentication boundary', () => {
       env,
     )
     expect(response.status).toBe(403)
-    expect(await env.DB.prepare('SELECT COUNT(*) AS count FROM event').first<{ count: number }>()).toEqual({ count: 3 })
+    expect(
+      await env.DB.prepare('SELECT COUNT(*) AS count FROM event').first<{ count: number }>(),
+    ).toEqual({ count: 3 })
     expect(
       (await env.DB.prepare('SELECT payload FROM event WHERE seq = 3').first<{ payload: string }>())
         ?.payload,
@@ -393,5 +396,45 @@ describe('authentication boundary', () => {
       env,
     )
     expect(response.status).toBe(403)
+  })
+
+  test('logout revokes the session and mutating requests require a same-origin header', async () => {
+    const options = {
+      now: () => '2027-01-01T00:00:00.000Z',
+      isOrganiser: (email: string) => email === 'organiser@example.test',
+    }
+    const link = await issueMagicLink(env.DB, 'organiser@example.test', null, false, options)
+    const session = await redeemMagicLink(env.DB, link.token!, options)
+    const cookie = `sid=${session?.session}`
+    const missingOrigin = await app.request(
+      '/api/logout',
+      { method: 'POST', headers: { cookie } },
+      env,
+    )
+    expect(missingOrigin.status).toBe(403)
+    const foreignOrigin = await app.request(
+      '/api/logout',
+      { method: 'POST', headers: { cookie, origin: 'https://attacker.example' } },
+      env,
+    )
+    expect(foreignOrigin.status).toBe(403)
+
+    const loggedOut = await app.request(
+      '/api/logout',
+      { method: 'POST', headers: { cookie, origin: 'http://localhost' } },
+      env,
+    )
+    expect(loggedOut.status).toBe(200)
+    expect(loggedOut.headers.get('set-cookie')).toContain('Max-Age=0')
+    expect(
+      await currentPrincipal(env.DB, session?.session, options, activeProfile.validation_view),
+    ).toBeNull()
+  })
+
+  test('worker responses include browser security headers', async () => {
+    const response = await app.request('/api/health', {}, env)
+    expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'none'")
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff')
+    expect(response.headers.get('cache-control')).toBe('no-store')
   })
 })

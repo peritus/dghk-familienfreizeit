@@ -352,7 +352,7 @@ TypeScript, KDL, and these documents:
 | Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
 | Vocabulary identifiers: label and trait keys, enum and trait values, module ids, entity kinds, resolver operators, controls, rule ids | `kebab-case` | `apart-from`, `needs-private-sanitary`, `shared-floor`, `room-inventory`, `material-request`, `needs-provides`, `tri-state`, `hard.trait-requirements` |
 | Entity ids | kind prefix, `_`, then a free suffix | `fam_27`, `per_peter`, `slot_sat-morning` |
-| Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `PUBLIC_URL`, `DB` |
+| Environment variables and bindings | `SCREAMING_SNAKE_CASE` | `DGHK_PREVIEW_HOST`, `DB` |
 | Files and directories | `kebab-case` | `solver-input.ts`, `src/modules/room-inventory/`, `trait-requirements.ts` |
 | Human-readable copy | free text from the profile | `Eigenes Bad` |
 

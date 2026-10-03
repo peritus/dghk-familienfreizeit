@@ -78,7 +78,7 @@ by setting no deadline for it; the family-preferences module maps controls to sc
 The server computes passed/upcoming status for display, but the status never changes
 append validation, authorisation, replay, or the event log.
 
-`PUBLIC_URL`, `EMAIL_FROM`, and secrets are deployment facts, not profile metadata,
+`EMAIL_FROM` and secrets are deployment facts, not profile metadata,
 and are not part of the built profile identity ([deployment](../engineering/deployment.md)).
 
 ## 2. Kernel labels

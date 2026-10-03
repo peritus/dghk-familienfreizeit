@@ -20,7 +20,7 @@
         "--command",
         "sh",
         "-c",
-        "export DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true; _created_dev_vars=false; if [ ! -e .dev.vars ]; then printf 'DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=%s\\nDGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=%s\\n' \"$DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE\" \"$DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES\" > .dev.vars; _created_dev_vars=true; fi; trap '[ \"$_created_dev_vars\" = true ] && rm -f .dev.vars' EXIT; npm ci && env CI=1 npm run dev"
+        "export DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true; _created_dev_vars=false; if [ ! -e .dev.vars ]; then printf 'DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=%s\\nDGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=%s\\nDGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST=%s\\n' \"$DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE\" \"$DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES\" \"${DGHK_PREVIEW_HOST:-}\" > .dev.vars; _created_dev_vars=true; fi; trap '[ \"$_created_dev_vars\" = true ] && rm -f .dev.vars' EXIT; npm ci && env CI=1 npm run dev"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,

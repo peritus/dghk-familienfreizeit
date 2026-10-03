@@ -30,7 +30,6 @@ Durable Objects.
   ],
 
   "vars": {
-    "PUBLIC_URL": "https://dghk-familienfreizeit.example.de",
     "EMAIL_FROM": "Configured event <wochenende@example.de>"
   },
 
@@ -46,7 +45,6 @@ Durable Objects.
       "d1_databases": [
         { "binding": "DB", "database_name": "dghk-familienfreizeit-preview", "database_id": "…" }
       ],
-      "vars": { "PUBLIC_URL": "https://dghk-familienfreizeit-preview.workers.dev" }
     }
   }
 }
@@ -85,8 +83,10 @@ present.
 
 The occasion dates, scoped deadline schedule, and occasion-facing name belong in the
 occasion profile's `meta` ([occasion profiles](../profiles/contract.md)) because they are solver
-or UI inputs. `PUBLIC_URL` and `EMAIL_FROM` remain deployment facts and must not
-enter `build_revision` and `compatibility_revision`.
+or UI inputs. `EMAIL_FROM` remains a deployment fact and must not enter
+`build_revision` and `compatibility_revision`. Authentication links use the
+origin of the request handled by the Worker, so local, preview, and production
+origins require no duplicated public-URL setting.
 
 ### The application bundles
 

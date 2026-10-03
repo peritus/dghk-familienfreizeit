@@ -88,11 +88,7 @@ export default function OrganiserApp() {
       .then(([me, log]) => {
         if (cancelled) return
         if (me.principal?.kind !== 'organiser' || !me.principal.email) {
-          dispatch({
-            type: 'failed',
-            status: 'unauthorized',
-            error: 'Bitte melde Dich als Organisationsteam an.',
-          })
+          redirectToLogin()
           return
         }
         if (
@@ -116,6 +112,10 @@ export default function OrganiserApp() {
       })
       .catch((error: unknown) => {
         if (cancelled) return
+        if (error instanceof OrganiserApiError && error.status === 401) {
+          redirectToLogin()
+          return
+        }
         dispatch({
           type: 'failed',
           status:
@@ -407,4 +407,9 @@ export default function OrganiserApp() {
       </OrganiserFrame>
     </OrganiserContext.Provider>
   )
+}
+
+function redirectToLogin(): void {
+  window.history.replaceState({}, '', '/login')
+  window.dispatchEvent(new PopStateEvent('popstate'))
 }

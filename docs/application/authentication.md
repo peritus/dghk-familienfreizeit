@@ -13,32 +13,26 @@ link for known identities. The response is uniform and does not reveal whether
 an address is invited.
 
 During local development, requests served on `localhost`, `127.0.0.1`, or
-`::1` print the link to the Worker terminal. A deliberate non-loopback override
-is available only through the alarming binding
-`DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true`; it must never be
-enabled on a shared or production deployment. The binding is optional; when it
-is unset, the loopback-only default remains in force. Real email delivery
+`::1` print the link to the Worker terminal. A non-loopback Station preview may
+do so only when the exact preview hostname is supplied through
+`DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST` together with the two alarming debug
+bindings. The hostname gate prevents those bindings from silently enabling
+token logging or insecure cookies on another deployment. Real email delivery
 remains a separate deployment concern.
-When the override is enabled, the Worker emits a `WARN` message once per
-isolate explaining that authentication tokens will be printed to its logs and
-that the setting is unsafe for production.
 
-Session cookies are always `Secure`, except when the separate alarming local-only
-binding `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` is set.
-The Station Tailscale preview uses it because browsers reject `Secure` cookies
-over its plain-HTTP URL. Shared and deployed environments must leave it unset.
-The binding is optional and leaving it unset preserves the secure default.
-When the override is enabled, the Worker emits a `WARN` message once per
-isolate explaining that cookies will not require HTTPS and that the setting is
-unsafe for production.
+Session cookies are always `Secure`, except when the exact local-preview host
+and `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` are both
+configured. Shared and deployed environments must leave these bindings unset.
 
 `GET /auth/:token` atomically deletes an unexpired token with `DELETE … RETURNING`,
 creates a hashed session, and redirects to the application. Reusing or expiring a
 token redirects to the invalid-link screen.
 
-Family sessions last 30 days; organiser sessions last 7 days. The secure,
-HttpOnly, SameSite=Lax cookie contains the raw session token while D1 stores only
-its SHA-256 hash.
+Family sessions idle-expire after 30 days and organiser sessions idle-expire
+after 7 days. Absolute lifetimes are 90 days for families and 30 days for
+organisers. The secure, HttpOnly, SameSite=Lax cookie contains the raw session
+token while D1 stores only its SHA-256 hash. `POST /api/logout` revokes the
+hashed session immediately.
 
 ## Request authorization
 
@@ -51,13 +45,19 @@ without session cleanup.
 JSON 401 to unauthenticated or non-organiser requests; the base `/api/organiser`
 route intentionally returns JSON 404 to conceal the organiser surface. `/api/me`
 exposes only the current principal kind and identity needed by the shell.
-`POST /api/events` sets the verified actor server-side, rejects stale heads, and
-permits family principals only to append events about their own family or people;
-organiser principals may append setup events.
+`POST /api/events` sets the verified actor server-side, requires a same-origin
+`Origin`, rejects stale heads, bounds request size and batch shape, rate-limits
+family writes, and permits family principals only to append events about their
+own family or people; organiser principals may append setup events.
+
+Cookie-authenticated mutations require a same-origin `Origin` header. Worker
+responses set browser security headers, and authentication/API responses are
+not cacheable. Expired magic links, sessions, and rate-limit buckets are removed
+by the scheduled cleanup handler.
 
 ## Limits
 
 The allowlist currently contains the development organiser identity
 `organiser@example.test`; production deployment must replace it deliberately.
-Email delivery, organiser UI, family forms, CSRF origin enforcement, and hosted
-secrets remain deployment/application work outside this M1 slice.
+Email delivery, family forms, and hosted secrets remain separate deployment
+work.

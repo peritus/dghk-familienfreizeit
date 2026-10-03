@@ -47,9 +47,9 @@ export function canAppendEvent(
         ? (event as unknown as PersonAdded | PersonUpdated).payload.family_id
         : event.type === 'PersonUpdated'
           ? (event as unknown as PersonUpdated).payload.person_id
-        : event.type === 'PersonWithdrawn'
-          ? (event as unknown as PersonWithdrawn).payload.person_id
-          : (event as unknown as LabelSet | LabelCleared).payload.entity_id
+          : event.type === 'PersonWithdrawn'
+            ? (event as unknown as PersonWithdrawn).payload.person_id
+            : (event as unknown as LabelSet | LabelCleared).payload.entity_id
   return familyForEntity(world, entityId) === principal.family_id
 }
 
