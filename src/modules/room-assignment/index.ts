@@ -239,6 +239,14 @@ export function runRoomAssignment(
 } {
   const placements = new Map<string, string>()
   const rules = input.rules ?? roomAssignmentRules()
+  // Keyed lookups for the three collections the passes below search by id.
+  const roomsById = new Map(input.rooms.map((room) => [room.id, room]))
+  // `assignments` holds one row per person, so a family appears several times.
+  // First row wins, matching the `find` this replaced.
+  const previousRooms = new Map<string, string>()
+  for (const { family_id: familyId, room_id: roomId } of previous?.assignments ?? [])
+    if (!previousRooms.has(familyId)) previousRooms.set(familyId, roomId)
+  const familiesById = new Map(input.families.map((family) => [family.family_id, family] as const))
   const trace: PlacementTrace[] = []
   // `scoredRooms` against no placements is a pure function of the family, so
   // each family's candidate count is computed once here instead of twice per
@@ -300,8 +308,8 @@ export function runRoomAssignment(
   const fixedAssignments = input.fixed_assignments ?? []
   const fixedFamilyIds = new Set(fixedAssignments.map(({ family_id: familyId }) => familyId))
   for (const fixed of fixedAssignments) {
-    const family = families.find(({ family_id: familyId }) => familyId === fixed.family_id)
-    const room = roomById(input.rooms, fixed.room_id)
+    const family = familiesById.get(fixed.family_id)
+    const room = roomsById.get(fixed.room_id)
     if (family && room) place(family, room, 'fixed')
     else if (family)
       trace.push({
@@ -320,9 +328,9 @@ export function runRoomAssignment(
 
   for (const family of families) {
     if (fixedFamilyIds.has(family.family_id)) continue
-    const retainedRoom = previousRoom(previous, family.family_id)
-    if (retainedRoom && input.rooms.some(({ id }) => id === retainedRoom)) {
-      const current = roomById(input.rooms, retainedRoom)
+    const retainedRoom = previousRooms.get(family.family_id) ?? null
+    if (retainedRoom) {
+      const current = roomsById.get(retainedRoom)
       if (current && feasible(family, current, placements, input, params, rules).length === 0) {
         place(family, current, 'retain')
       }
@@ -360,7 +368,7 @@ export function runRoomAssignment(
         placements.has(familyId),
       )) {
         const oldRoom = placements.get(occupant.family_id)!
-        const targetRoom = roomById(input.rooms, oldRoom)!
+        const targetRoom = roomsById.get(oldRoom)!
         placements.delete(occupant.family_id)
         const alternatives = scoredRooms(occupant, placements, input, params, rules)
         const target = scoredRooms(family, placements, input, params, rules).find(
@@ -396,8 +404,8 @@ export function runRoomAssignment(
     })
   const assignments = assignRoomPlaces(families, placements, input)
   const fixedViolations = fixedAssignments.flatMap((fixed) => {
-    const family = families.find(({ family_id: familyId }) => familyId === fixed.family_id)
-    const room = roomById(input.rooms, fixed.room_id)
+    const family = familiesById.get(fixed.family_id)
+    const room = roomsById.get(fixed.room_id)
     if (!family) return []
     if (!room)
       return [
@@ -927,13 +935,6 @@ function roomFamilies(
 ): readonly string[] {
   if (index) return index.families_by_room.get(roomId) ?? []
   return [...placements.entries()].filter(([, id]) => id === roomId).map(([familyId]) => familyId)
-}
-
-function previousRoom(previous: RoomAssignmentSection | null, familyId: string): string | null {
-  return (
-    previous?.assignments.find(({ family_id: previousFamilyId }) => previousFamilyId === familyId)
-      ?.room_id ?? null
-  )
 }
 
 function roomById(rooms: readonly RoomCandidate[], id: string): RoomCandidate | undefined {
