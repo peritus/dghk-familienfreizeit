@@ -54,6 +54,10 @@ Specification coverage: [authentication](application/authentication.md), [family
   authentication delivery intent. M10 may print the link in development, but
   does not render hosted messages, call provider transport, or record delivery
   outcomes.
+- Treat [issue 041](issues/open/041-authentication-family-access-security-readiness.md)
+  as a blocking gate: do not enable family login, family sessions, or family
+  writes until its cross-family authorization matrix, privacy projections, and
+  browser access checks pass.
 - Render the shared profile-driven controls for families through the same
   definitions and ordinary event path, including deadline notices and assignment
   cards.
@@ -71,7 +75,8 @@ through the M10 authentication workflow, inspect its permitted derived
 information, correct its own display name, save permitted controls, and see only
 coherent communicated arrangements. Hosted invitation and reminder delivery
 begins in M14. Organisers can preview and atomically communicate selected scopes
-without exposing drafts.
+without exposing drafts. Issue 041 is closed or explicitly accepted before this
+family-access acceptance is declared complete.
 
 ## M11 — Reports and browser-printing host
 
@@ -148,6 +153,9 @@ and cross-cutting frontend requirements.
 
 - Implement production migrations, secrets, bindings, backups, recovery,
   preview environments, health checks, and the pre-occasion runbook.
+- Close the hosted-environment and launch-verification portions of [issue 041](issues/open/041-authentication-family-access-security-readiness.md),
+  including canonical preview/production URLs, security headers, cleanup,
+  observability redaction, abuse limits, and session-revocation rehearsal.
 - Run dependency, security, privacy, performance, accessibility, deliverability,
   identity, and exported-log rehearsal checks.
 - Record the final cut-line decisions before deployment.
