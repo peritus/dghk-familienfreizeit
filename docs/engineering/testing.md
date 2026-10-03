@@ -73,6 +73,11 @@ Two environment variables select the run:
   magnitude more than the others and grows faster, so measuring the fold at a
   large log size means leaving it out.
 
+When `solve` is timed, each solver stage and the preflight pass are timed
+separately as well, in the order `solve` itself runs them. The total on its own
+does not say which stage spends the time, and the stages differ by more than two
+orders of magnitude.
+
 Each sweep reports a growth exponent between consecutive factors: a linear stage
 tracks the event growth and reports roughly `1.0`, a quadratic one reports
 roughly `2.0`. That number, not a single absolute timing, is what makes a

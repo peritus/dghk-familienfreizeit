@@ -50,10 +50,11 @@ about:
   a room's number within its building, and a bed's label within its room. These
   are quadratic in rooms and in beds, not in events, and they dominate the fold
   once an inventory passes a few hundred rooms.
-- `solve` costs orders of magnitude more than `derive` and grows faster. Its
-  stages are greedy searches over families against rooms, and workshops against
-  slots and spaces, so cost tracks the product of those populations rather than
-  the length of the log.
+- `solve` still costs more than `derive` and grows faster, because its stages
+  are greedy searches whose cost tracks the product of two populations rather
+  than the length of the log. What was removed from it was rescanning, not
+  searching — see [room assignment](../modules/room-assignment.md#placement-cost).
+  `workshop-assignment.attendance` is now its largest remaining term.
 
 Both are recorded in
 [issue 041](../../spec/issues/open/041-incremental-derivation.md) together with

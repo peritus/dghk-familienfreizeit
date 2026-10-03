@@ -28,6 +28,46 @@ preflight checks, stage dependencies, outputs, traces, and diagnostics are
 composed by pure functions in [`src/solver/`](../../src/solver/). Stage order is
 deterministic and cycles are rejected.
 
+## Placement cost
+
+Placement is a greedy search: each family is scored against each candidate room,
+so cost tracks families times rooms and grows faster than the event log does.
+That product is the algorithm; what used to sit on top of it was rescanning.
+
+Four things are now resolved once per sweep instead of once per candidate room,
+and the measured effect was an order of magnitude:
+
+- Each family's feasible-room count, which orders the families, is computed once
+  per family. It was previously computed twice per comparison inside the sort's
+  comparator, so ordering a hundred families meant thousands of full room
+  sweeps.
+- A placement's trace needs both the scored candidates and the per-room
+  rejections. Both come from one pass; they were two.
+- The family-dependent parts of a feasibility check — its `excludes`
+  constraints, its requirements partitioned by strength and kind, and its room
+  decision — are resolved before the room loop rather than inside it. The
+  constraint filter in particular ran over every resolved constraint in the
+  occasion, per candidate pair.
+- Room occupancy and room membership come from an index derived from the
+  `placements` map at the start of each sweep. They were derived by scanning
+  every family, from the innermost rule.
+
+The occupancy index is deliberately derived per sweep rather than maintained
+across the stage. `place` snapshots `placements` and the repair pass mutates and
+rolls it back, so an incrementally maintained index would have to be rolled back
+in step with it; per-sweep derivation is linear in the placements and cannot
+drift. `roomRemaining` and `roomFamilies` take it as an optional argument and
+fall back to scanning, so a rule defined outside this module keeps working.
+
+Preflight resolves inventory totals and capacity-per-capability once for the
+whole run instead of per family, and reuses one feasibility sweep per family.
+
+None of this changes a placement, a score, a rejection or a trace entry.
+[`test/solver/placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
+pins a digest of the whole plan — both passes, including retention and repair —
+against the value recorded before the change, and separately pins the
+candidate-count tiebreak, which the digest occasion does not exercise.
+
 ## Profile and fixtures
 
 The executable family-freizeit profile selects room inventory and room

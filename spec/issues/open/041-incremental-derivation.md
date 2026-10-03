@@ -1,6 +1,6 @@
 ---
 id: "041"
-title: Derivation and solve cost above a few thousand events
+title: Derivation cost above a few thousand events
 status: needs-decision
 severity: gap
 category: kernel
@@ -10,7 +10,7 @@ related_milestones: []
 opened: 2026-10-03
 ---
 
-# Derivation and solve cost above a few thousand events
+# Derivation cost above a few thousand events
 
 ## Problem
 
@@ -37,12 +37,18 @@ within a room, each candidate costing a label lookup. Cost tracks rooms² and
 beds², not events². Measured growth exponent returns to 1.98 between 9 393 and
 18 762 events, where beds reach 2 400.
 
-**2. `solve` costs orders of magnitude more than `derive` and grows faster.**
-At 2 367 events `derive` is 72 ms and `solve` is 23 442 ms. The stages are
-greedy searches — families against rooms in `room-assignment.place`, workshops
-against slots and spaces in `workshop-scheduling.placement` — so cost tracks the
-product of those populations. This now dominates every other cost in the
-pipeline by more than two orders of magnitude.
+**2. `solve` grows faster than the fold.** Addressed for the stage that
+dominated it. `room-assignment.place` was rescanning families, rooms and
+constraints inside its innermost loops; removing that took `solve` from
+23 442 ms to 1 607 ms at 2 367 events, with the plan output unchanged. See
+[room assignment](../../../docs/modules/room-assignment.md#placement-cost).
+
+What remains in `solve` is the search itself — families times rooms, workshops
+times slots times spaces — which is the algorithm rather than waste.
+`workshop-assignment.attendance` is now its largest single term (424 ms of
+1 607 ms at 2 367 events) and has not been examined; its five-step algorithm
+with up to `max_repair_passes` relocation passes is the obvious place to look
+next, and it should be measured before it is changed.
 
 ## Evidence
 
@@ -61,8 +67,17 @@ profile. `derive` before and after the fold fixes:
 Growth exponent, consecutive factors: before 2.13 → 2.41 → 3.39; after 0.94 →
 1.39 → 1.62 → 1.98.
 
-`solve` at the same sizes: 196.9 ms at 611 events, 1 922.1 ms at 1 196,
-23 442.3 ms at 2 367. Unchanged by this work.
+`solve`, before and after the placement work:
+
+| events | before | after | factor |
+|---|---|---|---|
+| 611 | 195.9 ms | 52.8 ms | 3.7× |
+| 1 196 | 1 926.3 ms | 276.3 ms | 7.0× |
+| 2 367 | 23 442.3 ms | 1 607.3 ms | 14.6× |
+
+Per stage at 2 367 events after the change: `room-assignment.place` 1 158 ms,
+`workshop-assignment.attendance` 424 ms, `preflight` 12 ms,
+`workshop-scheduling.placement` 0.7 ms, `workshop-rankings.demand` 0.1 ms.
 
 ## Recommendation
 
@@ -73,12 +88,9 @@ already enforces — room number within building, bed label within room — as
 indexes beside the existing ones, so a duplicate check is a lookup. Contained
 within `room-inventory` and the fold's state, no decision review needed.
 
-**Treat `solve` as the real remaining bottleneck.** Measure which stage and
-which rule dominates before changing an algorithm. A greedy search whose cost is
-the product of two populations is not obviously wrong for an occasion of this
-size; what is wrong is that nobody knows which part of it is expensive. This
-needs its own investigation, not a cache: `deriveTransition` runs it twice per
-organiser keystroke batch on a world that has never existed before.
+**Examine `workshop-assignment.attendance`**, now the largest term in `solve`.
+As with placement, measure first: the per-stage benchmark isolates it, and the
+question is whether its cost is the search or rescanning on top of the search.
 
 **Snapshot and tail replay, if the fold still needs to be faster.** `derive` is
 a prefix fold over an append-only log: persist a serialised world at seq *N*,
@@ -101,9 +113,9 @@ review before any specification text changes.
 1. Is a discardable, content-keyed world snapshot acceptable under the "no
    tables that store folded domain state" rule, or does that rule stand as
    written and the fold has to stay fully recomputed?
-2. Should `solve` be investigated before the snapshot question is settled? It is
-   currently more than two orders of magnitude more expensive than the fold, so
-   making the fold faster still changes little end to end.
+2. `solve` is still an order of magnitude more expensive than the fold
+   (1 607 ms against 74 ms at 2 367 events), so a faster fold changes little end
+   to end. Does the snapshot question stay open until `solve` is addressed?
 
 ## Related files
 
