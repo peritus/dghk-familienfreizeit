@@ -20,13 +20,6 @@ export function profileEventTitle(profile: ProfilePresentation | undefined): str
   return localizedProfileText(profile, profile?.meta.event?.title) || 'Familienfreizeit'
 }
 
-export function profileEventSubheading(profile: ProfilePresentation | undefined): string {
-  return (
-    localizedProfileText(profile, profile?.meta.event?.subheading) ||
-    'Willkommen zur Familienfreizeit'
-  )
-}
-
 export function profileEventDetails(
   profile: ProfilePresentation | undefined,
 ): { place: string; date: string } | undefined {
