@@ -2,13 +2,19 @@ import type { ProfileMeta } from '../../define.js'
 
 export const luebben2027Meta = {
   id: 'familienfreizeit-2027',
-  name: { de: 'Familienfreizeit 2027', en: 'Family retreat 2027' },
+  name: {
+    de: 'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',
+    en: 'DGHK Berlin-Brandenburg family retreat Lübben 2027',
+  },
   description: {
-    de: 'Ausführbares Unterkunfts- und Workshopprofil für die Familienfreizeit 2027.',
-    en: 'Executable accommodation and workshop profile for the 2027 family retreat.',
+    de: 'Ausführbares Unterkunfts- und Workshopprofil für die DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027.',
+    en: 'Executable accommodation and workshop profile for the DGHK Berlin-Brandenburg family retreat in Lübben 2027.',
   },
   event: {
-    title: { de: 'Familienfreizeit 2027', en: 'Family retreat 2027' },
+    title: {
+      de: 'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',
+      en: 'DGHK Berlin-Brandenburg family retreat Lübben 2027',
+    },
     subheading: {
       de: 'Willkommen zur Familienfreizeit',
       en: 'Welcome to the family retreat',

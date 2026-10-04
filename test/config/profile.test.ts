@@ -20,6 +20,12 @@ const meta = {
 
 describe('occasion profile', () => {
   test('the active profile defines only active and blocked room statuses', () => {
+    expect(luebben2027Profile.meta.name.de).toBe(
+      'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',
+    )
+    expect(luebben2027Profile.meta.event?.title.de).toBe(
+      'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',
+    )
     expect(luebben2027Profile.traits['room-status']).toEqual(
       expect.objectContaining({
         kind: 'property',
