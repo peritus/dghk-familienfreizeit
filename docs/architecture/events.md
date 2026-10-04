@@ -8,12 +8,13 @@ events into typed family/person entities and generic labels.
 
 Migration `0001_m1_kernel.sql` creates the append-only `event` table and the
 operational authentication tables. `defineOccasionProfile` composes kernel and
-selected-module payload schemas into its validation view. `readEvents` and
-`appendEvents` receive that selected `KernelConfig`, so stored JSON and new
-drafts use the same profile-aware payload schemas. `appendEvents` assigns
-contiguous sequence numbers and uses a compare-and-swap predicate in one D1
-batch. A stale or forward-moving head is rejected, and a failed batch does not
-partially append.
+selected-module payload schemas into its validation view. `readEvents` receives
+that selected `KernelConfig`, so stored JSON is parsed with the selected
+profile's payload schemas. The Worker prepares and validates a complete, parsed
+`Event[]` with contiguous sequence numbers, then passes that canonical batch to
+`appendEvents`. Storage writes those exact events and uses a compare-and-swap
+predicate in one D1 batch. A stale or forward-moving head is rejected, and a
+failed batch does not partially append.
 
 No folded domain state is stored. `derive(events, config)` reconstructs the
 current profile world in memory; sessions, magic links, rate limits, and email
@@ -60,9 +61,9 @@ Two properties hold that:
 - `prepareEventBatch` returns the world it folded. That world describes
   `committed + batch`, which is what the response has to report once the append
   succeeds, so the handler serves it instead of folding the same events again.
-  The handler asserts that the appended events match the prepared ones before
-  relying on this; `appendEvents` derives each event's sequence from the head it
-  asserted, so they agree whenever the append is not rejected.
+  The same parsed event objects are passed to `appendEvents`, so persistence
+  cannot create a second, divergent representation between preparation and the
+  response.
 
 Authorization sees the pre-batch world, so every event in one batch is judged
 against the same state. That was true of the per-event version too; changing it
