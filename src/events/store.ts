@@ -3,7 +3,6 @@ import {
   eventPayloadSchemas,
   parseEvent,
   type Event,
-  type EventDraft,
   type JsonValue,
 } from './types.js'
 import type { KernelConfig } from './fold.js'
@@ -67,16 +66,13 @@ export async function eventHead(db: D1Database): Promise<number> {
 export async function appendEvents(
   db: D1Database,
   expectedHead: number,
-  drafts: readonly EventDraft[],
-  config: KernelConfig,
+  events: readonly Event[],
 ): Promise<Event[]> {
-  if (drafts.length === 0) return []
+  if (events.length === 0) return []
   const actual = await eventHead(db)
   if (actual !== expectedHead) throw new StaleHeadError(expectedHead, actual)
-  const schemas = eventPayloadSchemas(config)
-  const events = drafts.map((draft, index) =>
-    parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
-  )
+  if (events.some((event, index) => event.seq !== expectedHead + index + 1))
+    throw new Error('event batch sequence does not match expected head')
   const statements = events.map((event) =>
     db
       .prepare(
@@ -100,5 +96,5 @@ export async function appendEvents(
     if (error instanceof StaleHeadError) throw error
     throw error
   }
-  return events
+  return [...events]
 }
