@@ -28,11 +28,21 @@ function countingWorld(world: World, onRead: () => void): World {
         return Reflect.get(target, property, receiver) as unknown
       },
     })
+  const labelsByKey = {
+    ...world.labels_by_key,
+    email: proxy(world.labels_by_key.email ?? []),
+  }
+  const entitiesByKind = {
+    ...world.entities_by_kind,
+    family: proxy(world.entities_by_kind.family ?? []),
+  }
   return {
     ...world,
     labels: proxy(world.labels),
     families: proxy(world.families),
     persons: proxy(world.persons),
+    labels_by_key: labelsByKey,
+    entities_by_kind: entitiesByKind,
   }
 }
 
@@ -79,6 +89,7 @@ const budgets = {
 test('authorizing an append batch does not scan the log per event', () => {
   const world = derive(syntheticLog(syntheticScale(2)), profile.validation_view)
   const family = world.families[world.families.length - 1]!
+  expect(world.entity_kind_by_id[family.id]).toBe('family')
   const member = (world.labels_by_key['member-of'] ?? []).find(
     (label) => label.value === family.id,
   )!
@@ -109,6 +120,7 @@ test('resolving a family by email does not scan the log', () => {
   const counting = countingWorld(world, () => (reads += 1))
 
   const last = world.families.length - 1
+  expect(world.family_id_by_email[`f${last}@example.test`]).toBe(`fam_${last}`)
   expect(familyForEmail(counting, `f${last}@example.test`)).toBe(`fam_${last}`)
 
   process.stderr.write(`REQUEST family_for_email reads: ${reads}\n`)

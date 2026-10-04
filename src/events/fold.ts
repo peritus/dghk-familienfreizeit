@@ -71,6 +71,10 @@ export type World = {
   head_seq: number
   labels_by_entity: Readonly<Record<string, readonly Label[]>>
   labels_by_key: Readonly<Record<string, readonly Label[]>>
+  /** Exact entity-kind lookup for authorization and other identity-boundary checks. */
+  entity_kind_by_id: Readonly<Record<string, EntityKind>>
+  /** Exact family lookup for canonical email authentication. */
+  family_id_by_email: Readonly<Record<string, string>>
   constraints: readonly ResolvedConstraint[]
   requirements: readonly ResolvedRequirement[]
   capabilities: readonly ResolvedCapability[]
@@ -451,6 +455,7 @@ function worldFromState(state: MutableWorld, config: KernelConfig): World {
     ...state.persons.values(),
     ...state.module_entities.values(),
   ].sort(sortEntities)
+  const entityKindById = entityKindsById(entities)
   const resolved = resolve(labels, entities, config)
   return {
     families: [...state.families.values()].sort(sortEntities),
@@ -459,6 +464,8 @@ function worldFromState(state: MutableWorld, config: KernelConfig): World {
     head_seq: state.head_seq,
     labels_by_entity: indexLabels(labels, (label) => label.entity_id),
     labels_by_key: indexLabels(labels, (label) => label.key),
+    entity_kind_by_id: entityKindById,
+    family_id_by_email: familyIdsByEmail(labels, entityKindById),
     constraints: resolved.constraints,
     requirements: resolved.requirements,
     capabilities: resolved.capabilities,
@@ -471,6 +478,27 @@ function worldFromState(state: MutableWorld, config: KernelConfig): World {
 function entitiesByKind(entities: readonly Entity[]): Readonly<Record<string, readonly Entity[]>> {
   const index: Record<string, Entity[]> = {}
   for (const item of entities) (index[item.kind] ??= []).push(item)
+  return index
+}
+
+function entityKindsById(entities: readonly Entity[]): Readonly<Record<string, EntityKind>> {
+  const index: Record<string, EntityKind> = {}
+  for (const entity of entities) index[entity.id] = entity.kind
+  return index
+}
+
+function familyIdsByEmail(
+  labels: readonly Label[],
+  entityKindById: Readonly<Record<string, EntityKind>>,
+): Readonly<Record<string, string>> {
+  const index: Record<string, string> = {}
+  for (const label of labels)
+    if (
+      label.key === 'email' &&
+      typeof label.value === 'string' &&
+      entityKindById[label.entity_id] === 'family'
+    )
+      index[label.value] = label.entity_id
   return index
 }
 

@@ -87,8 +87,7 @@ function isFamilyWritable(config: KernelConfig, key: string): boolean {
 function familyForEntity(world: World, entityId: string): string | null {
   // Both lookups go through indexes. This is called once per event in an
   // authorized batch, and it used to scan every family and then every label.
-  if ((world.entities_by_kind['family'] ?? []).some((family) => family.id === entityId))
-    return entityId
+  if (world.entity_kind_by_id[entityId] === 'family') return entityId
   const memberOf = (world.labels_by_entity[entityId] ?? []).find(
     (label) => label.key === 'member-of',
   )

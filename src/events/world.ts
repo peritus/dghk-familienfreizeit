@@ -87,6 +87,8 @@ function project(
     labels: [...labels],
     labels_by_entity: index(labels, (label) => label.entity_id),
     labels_by_key: index(labels, (label) => label.key),
+    entity_kind_by_id: entityKindsById(entities),
+    family_id_by_email: familyIdsByEmail(labels, entities),
     constraints: world.constraints.filter((constraint) => visible.has(constraint.holder_id)),
     requirements: world.requirements.filter((requirement) => visible.has(requirement.holder_id)),
     capabilities: world.capabilities.filter((capability) => visible.has(capability.entity_id)),
@@ -100,6 +102,26 @@ function index<T>(
 ): Readonly<Record<string, readonly T[]>> {
   const result: Record<string, T[]> = {}
   for (const item of items) (result[key(item)] ??= []).push(item)
+  return result
+}
+
+function entityKindsById(entities: readonly Entity[]): Readonly<Record<string, Entity['kind']>> {
+  const result: Record<string, Entity['kind']> = {}
+  for (const entity of entities) result[entity.id] = entity.kind
+  return result
+}
+
+function familyIdsByEmail(
+  labels: readonly Label[],
+  entities: readonly Entity[],
+): Readonly<Record<string, string>> {
+  const familyIds = new Set(
+    entities.filter((entity) => entity.kind === 'family').map((entity) => entity.id),
+  )
+  const result: Record<string, string> = {}
+  for (const label of labels)
+    if (label.key === 'email' && typeof label.value === 'string' && familyIds.has(label.entity_id))
+      result[label.value] = label.entity_id
   return result
 }
 
