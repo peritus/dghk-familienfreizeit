@@ -29,7 +29,7 @@ const kernelSetupOwnedLabelKeys = new Set([
   'member-of',
   'given-name',
   'family-name',
-  'birthdate',
+  'age',
   'role',
 ])
 
@@ -705,7 +705,7 @@ function updatePerson(state: MutableWorld, event: Extract<Event, { type: 'Person
   )?.value
   if (currentFamilyId !== event.payload.family_id)
     throw new Error(`person ${event.payload.person_id} cannot change family during an update`)
-  for (const key of ['member-of', 'given-name', 'family-name', 'birthdate', 'role'])
+  for (const key of ['member-of', 'given-name', 'family-name', 'age', 'role'])
     replaceLabels(state, event.payload.person_id, key)
   writePersonLabels(state, event)
 }
@@ -719,13 +719,13 @@ function writePersonLabels(
     family_id: familyId,
     given_name: givenName,
     family_name: familyName,
-    birthdate,
+    age,
     role,
   } = event.payload
   setLabel(state, event, personId, 'member-of', familyId, null, null)
   setLabel(state, event, personId, 'given-name', givenName, null, null)
   setLabel(state, event, personId, 'family-name', familyName, null, null)
-  setLabel(state, event, personId, 'birthdate', birthdate, null, null)
+  setLabel(state, event, personId, 'age', age, null, null)
   setLabel(state, event, personId, 'role', role, null, null)
 }
 

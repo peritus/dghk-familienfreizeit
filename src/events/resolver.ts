@@ -114,7 +114,7 @@ export function resolve(
       'member-of',
       'given-name',
       'family-name',
-      'birthdate',
+      'age',
       'role',
     ].includes(label.key)
     if (!schema && !descriptor && !fixed && !kernel) {

@@ -11,7 +11,7 @@ export type FamilyPerson = {
   entity: Entity
   given_name: string
   family_name: string
-  birthdate: string | null
+  age: number | null
   role: string
 }
 
@@ -28,6 +28,11 @@ export function labelValue(labels: readonly Label[], key: string): string | null
 export function labelBoolean(labels: readonly Label[], key: string): boolean | null {
   const value = labels.find((label) => label.key === key)?.value
   return typeof value === 'boolean' ? value : null
+}
+
+export function labelNumber(labels: readonly Label[], key: string): number | null {
+  const value = labels.find((label) => label.key === key)?.value
+  return typeof value === 'number' && Number.isSafeInteger(value) ? value : null
 }
 
 const roleLabels: Record<string, string> = {
@@ -54,25 +59,13 @@ export function personView(world: World, person: Entity): FamilyPerson {
     entity: person,
     given_name: labelValue(labels, 'given-name') ?? '',
     family_name: labelValue(labels, 'family-name') ?? '',
-    birthdate: labelValue(labels, 'birthdate'),
+    age: labelNumber(labels, 'age'),
     role: labelValue(labels, 'role') ?? 'adult',
   }
 }
 
 export function personName(person: Pick<FamilyPerson, 'given_name' | 'family_name'>): string {
   return `${person.given_name} ${person.family_name}`.trim()
-}
-
-export function personAge(birthdate: string | null, today = new Date()): number | null {
-  if (!birthdate) return null
-  const date = new Date(`${birthdate}T00:00:00`)
-  if (Number.isNaN(date.valueOf())) return null
-  let age = today.getFullYear() - date.getFullYear()
-  const beforeBirthday =
-    today.getMonth() < date.getMonth() ||
-    (today.getMonth() === date.getMonth() && today.getDate() < date.getDate())
-  if (beforeBirthday) age -= 1
-  return age >= 0 ? age : null
 }
 
 export function familyPeople(world: World, familyId: string): readonly FamilyPerson[] {
@@ -106,7 +99,7 @@ export function familyStatus(world: World, row: FamilyRow): FamilyStatus {
   if (row.persons.length === 0) open.push('Personen')
   for (const person of row.persons.map((entity) => personView(world, entity))) {
     const name = personName(person) || person.entity.id
-    if (person.role === 'child' && !person.birthdate) open.push(`${name}: Alter`)
+    if (person.role === 'child' && person.age === null) open.push(`${name}: Alter`)
     if (!world.labels_by_entity[person.entity.id]?.some((label) => label.key === 'diet')) {
       open.push(`${name}: Essen`)
     }

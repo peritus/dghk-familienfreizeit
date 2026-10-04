@@ -25,7 +25,6 @@ import {
   findFamily,
   labelBoolean,
   labelValue,
-  personAge,
   personName,
 } from '../family-data.js'
 import { familyTopicLabel, FamilyTopicNavigation } from '../components/family-navigation.js'
@@ -381,7 +380,7 @@ export function FamilyPersonSidebar({
           className="grid gap-2"
         >
           {persons.map((person) => {
-            const age = personAge(person.birthdate)
+            const age = person.age
             const selected = person.entity.id === selectedPersonId
             return (
               <button
@@ -456,7 +455,9 @@ function PersonForm({
   const [givenName, setGivenName] = useState(person?.given_name ?? '')
   const [familyName, setFamilyName] = useState(person?.family_name ?? '')
   const [role, setRole] = useState(person?.role ?? 'adult')
-  const [birthdate, setBirthdate] = useState(person?.birthdate ?? '')
+  const [age, setAge] = useState(
+    person?.age === null || person?.age === undefined ? '' : String(person.age),
+  )
   const [error, setError] = useState<string | null>(null)
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -467,8 +468,14 @@ function PersonForm({
       setError('Bitte gib Vor- und Nachnamen ein.')
       return
     }
-    const nextBirthdate =
-      role === 'adult' || role === 'infant' ? birthdate || null : birthdate || null
+    const nextAge = role === 'child' && age.trim() ? Number(age) : null
+    if (
+      role === 'child' &&
+      (nextAge === null || !Number.isSafeInteger(nextAge) || nextAge < 1 || nextAge > 17)
+    ) {
+      setError('Bitte gib für Kinder ein Alter zwischen 1 und 17 Jahren ein.')
+      return
+    }
     if (isNew) {
       stage([
         {
@@ -481,7 +488,7 @@ function PersonForm({
             family_id: familyId,
             given_name: given,
             family_name: family,
-            birthdate: nextBirthdate,
+            age: nextAge,
             role,
           },
         },
@@ -498,7 +505,7 @@ function PersonForm({
             family_id: familyId,
             given_name: given,
             family_name: family,
-            birthdate: nextBirthdate,
+            age: nextAge,
             role,
           },
         },
@@ -536,15 +543,21 @@ function PersonForm({
           />
         </label>
       </div>
-      <label className="grid max-w-xs gap-1">
-        <span className="font-bold">Geburtsdatum</span>
-        <input
-          type="date"
-          value={birthdate}
-          onChange={(event) => setBirthdate(event.target.value)}
-          className="min-h-11 rounded-base border-2 border-border px-3"
-        />
-      </label>
+      {role === 'child' ? (
+        <label className="grid max-w-xs gap-1">
+          <span className="font-bold">Alter</span>
+          <input
+            type="number"
+            min="1"
+            max="17"
+            step="1"
+            inputMode="numeric"
+            value={age}
+            onChange={(event) => setAge(event.target.value)}
+            className="min-h-11 rounded-base border-2 border-border px-3"
+          />
+        </label>
+      ) : null}
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="neutral" onClick={onCancel}>
           Abbrechen
@@ -626,9 +639,9 @@ function FamilyPeopleView({
                 ? 'Erwachsene(r)'
                 : selected.role === 'infant'
                   ? 'Baby'
-                  : personAge(selected.birthdate) === null
+                  : selected.age === null
                     ? 'Kind · Alter fehlt'
-                    : `Kind · ${personAge(selected.birthdate)} Jahre`}
+                    : `Kind · ${selected.age} Jahre`}
             </p>
           </CardHeader>
           <CardContent>
@@ -749,7 +762,7 @@ function workshopEligibility(
   workshop: WorkshopRecord,
 ): { ok: boolean; reason?: string } {
   if (person.role === 'infant') return { ok: false, reason: 'Babys können hier nicht teilnehmen.' }
-  const age = personAge(person.birthdate)
+  const age = person.age
   if (age !== null && age < workshop.age_min)
     return { ok: false, reason: `Ab ${workshop.age_min} Jahren. ${person.given_name} ist ${age}.` }
   if (age !== null && age > workshop.age_max)

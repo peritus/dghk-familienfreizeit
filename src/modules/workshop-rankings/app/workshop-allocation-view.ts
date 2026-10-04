@@ -145,6 +145,11 @@ function labelValue(labels: readonly Label[], key: string): string | null {
   return typeof value === 'string' ? value : null
 }
 
+function labelNumber(labels: readonly Label[], key: string): number | null {
+  const value = labels.find((label) => label.key === key)?.value
+  return typeof value === 'number' && Number.isSafeInteger(value) ? value : null
+}
+
 function personName(world: World, personId: string): string {
   const labels = world.labels_by_entity[personId] ?? []
   return (
@@ -160,19 +165,11 @@ function personGroup(world: World, personId: string): Exclude<WorkshopAllocation
     : 'children'
 }
 
-function ageLabel(world: World, personId: string, eventDate: string): string {
+function ageLabel(world: World, personId: string): string {
   const labels = world.labels_by_entity[personId] ?? []
-  const birthdate = labelValue(labels, 'birthdate')
+  const age = labelNumber(labels, 'age')
   const role = labelValue(labels, 'role')
-  if (!birthdate) return role === 'adult' ? 'erwachsen' : 'Kind'
-  const birth = new globalThis.Date(`${birthdate}T00:00:00Z`)
-  const event = new globalThis.Date(`${eventDate}T00:00:00Z`)
-  let age = event.getUTCFullYear() - birth.getUTCFullYear()
-  const beforeBirthday =
-    event.getUTCMonth() < birth.getUTCMonth() ||
-    (event.getUTCMonth() === birth.getUTCMonth() && event.getUTCDate() < birth.getUTCDate())
-  if (beforeBirthday) age -= 1
-  return age >= 0 ? `${age} Jahre` : role === 'adult' ? 'erwachsen' : 'Kind'
+  return age === null ? (role === 'adult' ? 'erwachsen' : 'Kind') : `${age} Jahre`
 }
 
 function dateLabel(value: string, timeZone: string): string {
@@ -401,7 +398,7 @@ export function buildWorkshopAllocationProjection(
       id: person.id,
       name: personName(input.world, person.id),
       group: personGroup(input.world, person.id),
-      age_label: ageLabel(input.world, person.id, input.event_date),
+      age_label: ageLabel(input.world, person.id),
     }))
     .sort((left, right) => left.name.localeCompare(right.name, 'de'))
   const rankingsByPerson = answerRankings(rankings, input.max_rank)

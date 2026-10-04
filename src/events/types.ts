@@ -43,7 +43,7 @@ export type PersonAdded = {
     family_id: string
     given_name: string
     family_name: string
-    birthdate: string | null
+    age: number | null
     role: string
   }
 }
@@ -55,7 +55,7 @@ export type PersonUpdated = {
     family_id: string
     given_name: string
     family_name: string
-    birthdate: string | null
+    age: number | null
     role: string
   }
 }
@@ -138,7 +138,7 @@ export const kernelPayloadSchemas: {
     family_id: z.string().min(1),
     given_name: z.string().min(1),
     family_name: z.string().min(1),
-    birthdate: z.string().date().nullable(),
+    age: z.number().int().nonnegative().nullable(),
     role: roleSchema,
   }),
   PersonUpdated: z.object({
@@ -146,7 +146,7 @@ export const kernelPayloadSchemas: {
     family_id: z.string().min(1),
     given_name: z.string().min(1),
     family_name: z.string().min(1),
-    birthdate: z.string().date().nullable(),
+    age: z.number().int().nonnegative().nullable(),
     role: roleSchema,
   }),
   PersonWithdrawn: z.object({ person_id: z.string().min(1), reason: z.string().nullable() }),
