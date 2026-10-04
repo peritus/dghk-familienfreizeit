@@ -34,7 +34,11 @@ async function openFamilyInviteDialog() {
   return within(await screen.findByRole('dialog'))
 }
 
-function open(path: string, events: readonly Event[] = []) {
+function open(
+  path: string,
+  events: readonly Event[] = [],
+  profile: typeof activeProfilePresentation = activeProfilePresentation,
+) {
   let fetchMock: ReturnType<typeof vi.fn> | undefined
   if (path.startsWith('/organiser')) {
     fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -83,7 +87,7 @@ function open(path: string, events: readonly Event[] = []) {
     vi.stubGlobal('fetch', fetchMock)
   }
   window.history.replaceState({}, '', path)
-  return { fetchMock, view: render(<App />) }
+  return { fetchMock, view: render(<App profile={profile} />) }
 }
 
 function workshopFixtureEvents(): readonly Event[] {
@@ -190,6 +194,24 @@ test('the root renders an organiser-focused public shell', () => {
   expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')
   expect(screen.queryByRole('link', { name: /Organisationsteam/ })).toBeNull()
   expect(screen.queryByRole('textbox')).toBeNull()
+})
+
+test('the root renders the active profile landing copy', () => {
+  const profile = {
+    ...activeProfilePresentation,
+    meta: {
+      ...activeProfilePresentation.meta,
+      public_landing: {
+        heading: 'Profile-specific heading',
+        intro: 'Profile-specific intro',
+      },
+    },
+  }
+  window.history.replaceState({}, '', '/')
+  render(<App profile={profile} />)
+
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Profile-specific heading')
+  expect(screen.getByText('Profile-specific intro')).toBeTruthy()
 })
 
 test('the active profile logo is inverted for dark mode', () => {
@@ -636,7 +658,9 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('link', { name: 'Familienfreizeit' }))
+  fireEvent.click(
+    screen.getByRole('link', { name: 'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027' }),
+  )
   expect(await screen.findByRole('heading', { name: 'Lübben 2027' })).toBeTruthy()
 
   window.history.pushState({}, '', '/organiser')

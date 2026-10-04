@@ -2,6 +2,7 @@ import { DraftingCompassIcon } from '../components/shared/icons/drafting-compass
 import type { ProfilePresentation } from '../../config/presentation.js'
 import { ProfileBrand } from '../components/application/profile-brand.js'
 import { buttonVariants } from '../components/shared/ui/button'
+import { localizedProfileText } from '../lib/profile-presentation.js'
 import { Link } from 'wouter'
 
 export function OrganiserLanding({ profile }: { profile?: ProfilePresentation }) {
@@ -17,10 +18,10 @@ export function OrganiserLanding({ profile }: { profile?: ProfilePresentation })
               id="organiser-landing-title"
               className="max-w-xl text-4xl leading-tight sm:text-5xl"
             >
-              Lübben 2027
+              {localizedProfileText(profile, profile?.meta.public_landing.heading)}
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed">
-              Planungswerkzeug für die Familienfreizeit.
+              {localizedProfileText(profile, profile?.meta.public_landing.intro)}
             </p>
 
             <div className="mt-8">

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { activeProfilePresentation } from '../active-profile.js'
 import { OrganiserLanding } from './organiser-landing.js'
 
 const meta = {
@@ -17,4 +18,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  args: { profile: activeProfilePresentation },
+}
