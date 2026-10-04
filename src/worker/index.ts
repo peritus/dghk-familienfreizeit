@@ -4,8 +4,15 @@ import { tracing } from 'cloudflare:workers'
 import { assertAppendableWorld, derive } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
-import { appendEvents, readEvents, StaleHeadError, type EventDraft } from '../events/store.js'
-import { canonicalEmail, eventPayloadSchemas, parseEvent, type JsonValue } from '../events/types.js'
+import { appendEvents, readEvents, StaleHeadError } from '../events/store.js'
+import {
+  canonicalEmail,
+  eventPayloadSchemas,
+  parseEvent,
+  type Event,
+  type EventDraft,
+  type JsonValue,
+} from '../events/types.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
 import { authorizeEventBatch } from '../auth/authorization.js'
@@ -200,16 +207,7 @@ app.post('/api/organiser/apply', async (context) => {
       )
     })
     if (forbidden) return context.json({ error: 'forbidden' }, 403)
-    const appended = await appendEventBatch(
-      context,
-      inputSeq,
-      events.map(({ seq: _seq, ...event }) => event),
-    )
-    // `appendEvents` re-derives each draft's seq from the head it asserted, so
-    // the appended events are the ones `prepareEventBatch` already folded and
-    // its world already describes them. The assertion below is what makes that
-    // safe to rely on rather than merely likely.
-    assertAppendedMatchesPrepared(appended, events)
+    const appended = await appendEventBatch(context, inputSeq, events)
     const world = prepared.world
     return context.json({
       events: appended,
@@ -298,11 +296,7 @@ app.post('/api/events', async (context) => {
     tracing.enterSpan('events.validate_world', () =>
       assertAppendableWorld(deriveEventWorld([...existing, ...events])),
     )
-    await appendEventBatch(
-      context,
-      expectedHead,
-      events.map(({ seq: _seq, ...event }) => event),
-    )
+    await appendEventBatch(context, expectedHead, events)
     return context.json({ head: expectedHead + events.length }, 201)
   } catch (error) {
     if (error instanceof Error && error.message === 'forbidden')
@@ -362,19 +356,6 @@ async function readEventLog(context: Context<{ Bindings: Env }>) {
   })
 }
 
-/** Guards the one assumption behind reusing the prepared world for the response. */
-function assertAppendedMatchesPrepared(
-  appended: readonly { seq: number; type: string }[],
-  prepared: readonly { seq: number; type: string }[],
-): void {
-  const matches =
-    appended.length === prepared.length &&
-    appended.every(
-      (event, index) => event.seq === prepared[index]?.seq && event.type === prepared[index]?.type,
-    )
-  if (!matches) throw new Error('appended batch does not match the prepared batch')
-}
-
 function deriveEventWorld(events: Parameters<typeof derive>[0]) {
   return tracing.enterSpan('events.derive_world', (span) => {
     span.setAttribute('event.count', events.length)
@@ -385,12 +366,12 @@ function deriveEventWorld(events: Parameters<typeof derive>[0]) {
 async function appendEventBatch(
   context: Context<{ Bindings: Env }>,
   expectedHead: number,
-  drafts: readonly EventDraft[],
+  events: readonly Event[],
 ) {
   return tracing.enterSpan('events.append_batch', async (span) => {
-    span.setAttribute('event.count', drafts.length)
+    span.setAttribute('event.count', events.length)
     span.setAttribute('event.expected_head', expectedHead)
-    return appendEvents(context.env.DB, expectedHead, drafts, activeProfile.validation_view)
+    return appendEvents(context.env.DB, expectedHead, events)
   })
 }
 

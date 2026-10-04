@@ -3,6 +3,8 @@ import { env } from 'cloudflare:workers'
 import { app } from '../../src/worker/index.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
+import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { readEvents } from '../../src/events/store.js'
 
 async function organiserCookie(): Promise<string> {
   const options = {
@@ -70,7 +72,17 @@ test('organiser apply validates the prospective batch and returns its world', as
     env,
   )
   expect(response.status).toBe(200)
-  expect(await response.json()).toMatchObject({ head_seq: 2, world: { head_seq: 2 } })
+  const result = (await response.json()) as {
+    events: unknown
+    head_seq: number
+    world: { head_seq: number }
+  }
+  expect(result).toMatchObject({ head_seq: 2, world: { head_seq: 2 } })
+  expect(result.events).toEqual(
+    JSON.parse(
+      JSON.stringify(await readEvents(env.DB, familienfreizeit2027Profile.validation_view)),
+    ),
+  )
 
   const invalid = await app.request(
     '/api/organiser/apply',
