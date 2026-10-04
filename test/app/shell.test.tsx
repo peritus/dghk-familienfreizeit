@@ -110,7 +110,7 @@ function workshopFixtureEvents(): readonly Event[] {
         family_id: 'fam_stein',
         given_name: 'Mira',
         family_name: 'Stein',
-        birthdate: '1988-04-12',
+        age: 39,
         role: 'adult',
       },
     },
@@ -732,7 +732,7 @@ test('family links use an opaque route ID and open the matching detail view', as
       family_id: 'fam_6b4b44137d724c1e',
       given_name: 'Ada',
       family_name: 'Beispiel',
-      birthdate: null,
+      age: null,
       role: 'adult',
     },
   }

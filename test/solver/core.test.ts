@@ -15,9 +15,9 @@ const config = {
 
 const fixture = `
 FamilyInvited family_id="fam_a" email="a@example.test" display_name="A" locale="de"
-PersonAdded person_id="per_a" family_id="fam_a" given_name="A" family_name="A" birthdate=#null role="adult"
+PersonAdded person_id="per_a" family_id="fam_a" given_name="A" family_name="A" age=#null role="adult"
 FamilyInvited family_id="fam_b" email="b@example.test" display_name="B" locale="de"
-PersonAdded person_id="per_b" family_id="fam_b" given_name="B" family_name="B" birthdate=#null role="adult"
+PersonAdded person_id="per_b" family_id="fam_b" given_name="B" family_name="B" age=#null role="adult"
 LabelSet entity_id="fam_a" key=excludes value="rm_a" strength=required note=#null
 LabelSet entity_id="fam_b" key=excludes value="rm_b" strength=required note=#null
 `.trim()

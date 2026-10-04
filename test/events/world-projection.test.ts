@@ -37,7 +37,7 @@ function person(id: string, familyId: string): readonly [string, JsonValue] {
       family_id: familyId,
       given_name: 'Ada',
       family_name: 'Test',
-      birthdate: '1990-01-01',
+      age: 37,
       role: 'adult',
     },
   ]

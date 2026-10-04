@@ -213,7 +213,7 @@ export function syntheticLog(scale: SyntheticScale): Event[] {
         family_id: familyId,
         given_name: `Vorname ${personIndex}`,
         family_name: `Familie ${index}`,
-        birthdate: member === 0 ? '1986-06-15' : '2017-06-15',
+        age: member === 0 ? 41 : 10,
         role: member === 0 ? 'adult' : 'child',
       })
       personIndex += 1

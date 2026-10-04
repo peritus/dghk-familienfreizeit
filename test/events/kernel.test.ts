@@ -28,7 +28,7 @@ const events: Event[] = [
       family_id: 'fam_1',
       given_name: 'Ada',
       family_name: 'Example',
-      birthdate: null,
+      age: null,
       role: 'adult',
     },
   },
@@ -47,7 +47,7 @@ describe('event kernel', () => {
   })
   test('loads restricted KDL and rejects duplicate properties', () => {
     const loaded = loadKdl(
-      'FamilyInvited family_id=fam_1 email="family@example.test" display_name="Family One" locale=de\nPersonAdded person_id=per_1 family_id=fam_1 given_name=Ada family_name=Example birthdate=#null role=adult',
+      'FamilyInvited family_id=fam_1 email="family@example.test" display_name="Family One" locale=de\nPersonAdded person_id=per_1 family_id=fam_1 given_name=Ada family_name=Example age=#null role=adult',
     )
     expect(loaded).toHaveLength(2)
     expect(() =>

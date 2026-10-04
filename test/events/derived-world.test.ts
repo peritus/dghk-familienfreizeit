@@ -134,7 +134,7 @@ test('PersonWithdrawn hard-removes the person and their labels instead of tombst
       family_id: 'fam_1',
       given_name: 'Peter',
       family_name: 'A',
-      birthdate: null,
+      age: null,
       role: 'adult',
     },
   }

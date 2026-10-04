@@ -35,7 +35,7 @@ export const organiserFixtureDrafts: readonly EventDraft[] = [
       family_id: 'fam_sonnenberg',
       given_name: 'Lena',
       family_name: 'Sonnenberg',
-      birthdate: '2014-06-12',
+      age: 13,
       role: 'child',
     },
   },
@@ -49,7 +49,7 @@ export const organiserFixtureDrafts: readonly EventDraft[] = [
       family_id: 'fam_sonnenberg',
       given_name: 'Martin',
       family_name: 'Sonnenberg',
-      birthdate: null,
+      age: null,
       role: 'adult',
     },
   },
@@ -404,7 +404,7 @@ type AssignmentFixtureFamily = {
     person_id: string
     given_name: string
     family_name: string
-    birthdate: string | null
+    age: number | null
     role: string
   }[]
   requirement?: {
@@ -424,35 +424,35 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
         person_id: 'per_seidel_mara',
         given_name: 'Mara',
         family_name: 'Seidel',
-        birthdate: '1988-04-12',
+        age: 39,
         role: 'adult',
       },
       {
         person_id: 'per_seidel_jonas',
         given_name: 'Jonas',
         family_name: 'Seidel',
-        birthdate: '1987-09-03',
+        age: 40,
         role: 'adult',
       },
       {
         person_id: 'per_seidel_lina',
         given_name: 'Lina',
         family_name: 'Seidel',
-        birthdate: '2014-06-19',
+        age: 13,
         role: 'child',
       },
       {
         person_id: 'per_seidel_emil',
         given_name: 'Emil',
         family_name: 'Seidel',
-        birthdate: '2017-01-22',
+        age: 10,
         role: 'child',
       },
       {
         person_id: 'per_seidel_noa',
         given_name: 'Noa',
         family_name: 'Seidel',
-        birthdate: '2020-11-05',
+        age: 6,
         role: 'child',
       },
     ],
@@ -467,14 +467,14 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
         person_id: 'per_morgan_alex',
         given_name: 'Alex',
         family_name: 'Morgan',
-        birthdate: '1989-02-14',
+        age: 38,
         role: 'adult',
       },
       {
         person_id: 'per_morgan_jamie',
         given_name: 'Jamie',
         family_name: 'Morgan',
-        birthdate: '2018-08-30',
+        age: 9,
         role: 'child',
       },
     ],
@@ -493,21 +493,21 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
         person_id: 'per_rivera_sam',
         given_name: 'Sam',
         family_name: 'Rivera',
-        birthdate: '1985-07-11',
+        age: 42,
         role: 'adult',
       },
       {
         person_id: 'per_rivera_kim',
         given_name: 'Kim',
         family_name: 'Rivera',
-        birthdate: '1986-12-17',
+        age: 40,
         role: 'adult',
       },
       {
         person_id: 'per_rivera_toni',
         given_name: 'Toni',
         family_name: 'Rivera',
-        birthdate: '2015-03-28',
+        age: 12,
         role: 'child',
       },
     ],
@@ -521,7 +521,7 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
         person_id: 'per_lang_robin',
         given_name: 'Robin',
         family_name: 'Lang',
-        birthdate: '1992-10-08',
+        age: 34,
         role: 'adult',
       },
     ],
@@ -596,7 +596,7 @@ const assignmentFixtureGeneratedFamilies: readonly AssignmentFixtureFamily[] =
             (familyIndex + personIndex) % assignmentFixtureGivenNames.length
           ]!,
         family_name: surname,
-        birthdate: null,
+        age: null,
         role: personIndex < 2 ? 'adult' : 'child',
       })),
     }

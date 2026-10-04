@@ -158,7 +158,7 @@ describe('narrowed validation view', () => {
         family_id: 'fam_1',
         given_name: 'Ada',
         family_name: 'Eins',
-        birthdate: '1990-01-01',
+        age: 37,
         role: 'adult',
       },
     ] as const

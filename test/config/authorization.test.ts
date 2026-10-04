@@ -46,7 +46,7 @@ const personUpdated: Event = {
     family_id: 'fam_1',
     given_name: 'Updated',
     family_name: 'Person',
-    birthdate: null,
+    age: null,
     role: 'adult',
   },
 }
@@ -64,7 +64,7 @@ const personEvents: Event[] = [
       family_id: 'fam_1',
       given_name: 'A',
       family_name: 'Person',
-      birthdate: null,
+      age: null,
       role: 'adult',
     },
   },

@@ -436,7 +436,7 @@ describe('room inventory', () => {
             family_id: 'fam_empty',
             given_name: 'Empty',
             family_name: 'Person',
-            birthdate: null,
+            age: null,
             role: 'adult',
           },
           4,
