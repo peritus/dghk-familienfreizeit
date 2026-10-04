@@ -18,6 +18,7 @@ describe('authentication boundary', () => {
       ...env,
       DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
       DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS: 'organiser@example.test' as const,
+      DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN: 'true' as const,
     }
     try {
       const response = await app.request(
@@ -30,6 +31,10 @@ describe('authentication boundary', () => {
         localEnv,
       )
       expect(response.status).toBe(200)
+      expect(await response.json()).toMatchObject({
+        accepted: true,
+        magic_link: expect.stringMatching(/^http:\/\/127\.0\.0\.1\/auth\//),
+      })
       expect(warn).toHaveBeenCalledWith(
         expect.stringContaining(
           'DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE is enabled: magic links will be printed to Worker logs',

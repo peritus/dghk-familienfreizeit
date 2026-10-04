@@ -228,6 +228,32 @@ test('the login form requests a magic link and explains local delivery', async (
   )
 })
 
+test('the login form renders a dangerous demo link when the Worker returns one', async () => {
+  const fetchMock = vi.fn(() =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify({
+          accepted: true,
+          magic_link: 'http://127.0.0.1/auth/demo-token',
+        }),
+        { status: 200 },
+      ),
+    ),
+  )
+  vi.stubGlobal('fetch', fetchMock)
+  window.history.replaceState({}, '', '/login')
+  render(<App />)
+
+  fireEvent.change(screen.getByLabelText('E-Mail-Adresse'), {
+    target: { value: 'demo-organiser@example.invalid' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
+
+  const link = await screen.findByRole('link', { name: 'Als Organiser anmelden' })
+  expect(link.getAttribute('href')).toBe('http://127.0.0.1/auth/demo-token')
+  expect(screen.getByText('Demo-Magic-Link bereit')).toBeTruthy()
+})
+
 test('a direct organiser URL loads the lazy route', async () => {
   open('/organiser')
   expect(

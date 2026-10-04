@@ -38,6 +38,7 @@ const eventRateLimitDuration = 60 * 60 * 1000
 
 let warnedMagicLinkConsole = false
 let warnedInsecureSessionCookies = false
+let warnedDemoLogin = false
 
 app.use('*', async (context, next) => {
   warnDangerousDevelopmentBindings(context.env)
@@ -72,7 +73,15 @@ app.post('/api/login', async (context) => {
     const magicLink = new URL(`/auth/${result.token}`, context.req.url)
     console.log(`[DANGEROUS DEBUG] magic link for ${email}: ${magicLink}`)
   }
-  return context.json({ accepted: true })
+  const response: { accepted: true; magic_link?: string } = { accepted: true }
+  if (
+    result.token &&
+    isOrganiser(email) &&
+    context.env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true'
+  ) {
+    response.magic_link = new URL(`/auth/${result.token}`, context.req.url).toString()
+  }
+  return context.json(response)
 })
 
 app.get('/auth/:token', async (context) => {
@@ -494,6 +503,15 @@ function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
 }
 
 function warnDangerousDevelopmentBindings(env: Env): void {
+  if (
+    env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true' &&
+    !warnedDemoLogin
+  ) {
+    console.warn(
+      '[WARN] DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN is enabled: organiser magic links will be returned to the browser. Never enable it for real user authentication.',
+    )
+    warnedDemoLogin = true
+  }
   if (
     env.DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE === 'true' &&
     !warnedMagicLinkConsole

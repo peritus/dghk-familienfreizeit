@@ -15,6 +15,7 @@ export function Login() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<LoginStatus>('idle')
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
+  const [magicLink, setMagicLink] = useState<string | null>(null)
 
   useEffect(() => {
     if (cooldownRemaining <= 0) return
@@ -28,6 +29,7 @@ export function Login() {
     event.preventDefault()
     if (cooldownRemaining > 0) return
     setStatus('sending')
+    setMagicLink(null)
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -35,6 +37,8 @@ export function Login() {
         body: JSON.stringify({ email }),
       })
       if (!response.ok) throw new Error('login request failed')
+      const body = (await response.json()) as { magic_link?: unknown }
+      setMagicLink(typeof body.magic_link === 'string' ? body.magic_link : null)
       setStatus('sent')
       setCooldownRemaining(resendCooldownSeconds)
     } catch {
@@ -55,7 +59,18 @@ export function Login() {
             <AlertDescription>Fordere einen neuen Magic Link an.</AlertDescription>
           </Alert>
         ) : null}
-        {status === 'sent' ? (
+        {status === 'sent' && magicLink ? (
+          <Alert aria-live="polite">
+            <AlertTitle>Demo-Magic-Link bereit</AlertTitle>
+            <AlertDescription>
+              <p>Öffne den Link, um Dich als Organiser anzumelden.</p>
+              <a href={magicLink} className="break-all underline">
+                Als Organiser anmelden
+              </a>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {status === 'sent' && !magicLink ? (
           <Alert aria-live="polite">
             <AlertTitle>Magic Link gesendet</AlertTitle>
             <AlertDescription>
