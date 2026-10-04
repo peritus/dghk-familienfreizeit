@@ -3,9 +3,11 @@
 The UI plans are [request login link](../ui/screens/login.md) and [invalid or expired
 link](../ui/screens/login-link-invalid.md).
 
-Magic link, no passwords, invite-only. One login per family. Organiser access is a
-code-level allowlist of verified email addresses, exposed through a separate
-organiser URL and UI.
+Magic link, no passwords, invite-only. One login per family. Organiser access is
+an optional comma-separated runtime allowlist of verified email addresses,
+exposed through a separate organiser URL and UI. A dangerous demo adapter may
+return the single-use organiser link in the normal login JSON response when
+explicitly enabled; absent configuration must not create an organiser identity.
 
 Every email address uses one canonical identity form: Unicode NFC normalization,
 trimming surrounding whitespace, and locale-independent lowercasing. Syntax is
@@ -55,12 +57,12 @@ registration closed.
 ┌── request ──────────────────────────────────────────────────┐
 │ POST /api/login { email }                                   │
 │   rate-limit check                                          │
-│   resolve email: organiser allowlist, or family in derive(log)  │
+│   resolve email: runtime organiser allowlist, or family in derive(log) │
 │   if found:                                                 │
 │     token = base64url(crypto.getRandomValues(32 bytes))     │
 │     INSERT magic_link (sha256(token), email, now+15min)     │
 │     send email containing https://…/auth/{token}            │
-│   ALWAYS return the same 200 response                       │
+│   ALWAYS return the same 200 response; demo link only when explicitly enabled │
 └─────────────────────────────────────────────────────────────┘
 
 ┌── redeem ───────────────────────────────────────────────────┐
@@ -107,9 +109,12 @@ column: the lookup *is* the verification.
 
 ## 3. Non-negotiable rules
 
-Organiser authorization is checked against the verified login email and allowlist on
-every organiser request. The special URL is routing, not a credential; knowing it
-never grants access.
+Organiser authorization is checked against the verified login email and runtime
+allowlist on every organiser request. The special URL is routing, not a
+credential; knowing it never grants access. The demo adapter is controlled by
+`DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN=true`; it only exposes links for addresses
+in `DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS`, and both variables are
+optional. No configured allowlist means no organiser identities.
 
 Follow all of these. Each has a failure mode that is
 not obvious from reading the happy path.
@@ -152,9 +157,10 @@ granting access on the next request. There is no session cleanup to forget.
 No tokens, no hashes, no session ids, not even `LoginSucceeded`. The event log is
 domain decisions; these are operational secrets with a deletion policy.
 
-**10 — Organiser status is checked per request from the allowlist.**
-Not from the cookie, a JWT claim, or a family label. Changing the allowlist
-requires a deploy for now, and the lookup uses the verified session identity.
+**10 — Organiser status is checked per request from the runtime allowlist.**
+Not from the cookie, a JWT claim, or a family label. The comma-separated
+`DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS` binding is optional and is the
+complete allowlist; the lookup uses the verified session identity.
 
 **11 — Email identity is canonical before comparison or storage.**
 Requests canonicalize and validate the address before rate limiting, family lookup,

@@ -56,6 +56,23 @@ describe('authentication boundary', () => {
     }
   })
 
+  test('demo login never returns a link without the runtime organiser allowlist', async () => {
+    const response = await app.request(
+      'http://127.0.0.1/api/login',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'organiser@example.test' }),
+      },
+      {
+        ...env,
+        DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN: 'true' as const,
+      },
+    )
+
+    expect(await response.json()).toEqual({ accepted: true })
+  })
+
   test('the explicit dangerous development flag permits an insecure session cookie', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})

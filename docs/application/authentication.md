@@ -8,9 +8,18 @@ sessions, and rate-limit buckets.
 
 The `/login` form submits to `POST /api/login`. The Worker canonicalizes the
 submitted email, applies address and IP limits, checks the family-derived world
-or the code-level organiser allowlist, and creates a 15-minute single-use magic
-link for known identities. The response is uniform and does not reveal whether
-an address is invited.
+or the comma-separated runtime organiser allowlist in
+`DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS`, and creates a 15-minute
+single-use magic link for known identities. The variable is the complete
+organiser allowlist: when it is absent or empty, no organiser identities are
+configured. The response is uniform and does not reveal whether an address is
+invited.
+
+When `DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN=true` is also configured, an
+allowlisted organiser receives the single-use link as `magic_link` in the same
+JSON response. The login form labels this as a demo link and offers it as an
+“Als Organiser anmelden” link. This is a dangerous development adapter, not an
+email-delivery replacement; it must be unset for real user authentication.
 
 During local development, requests served on `localhost`, `127.0.0.1`, or
 `::1` print the link to the Worker terminal. A non-loopback Station preview may
@@ -37,7 +46,7 @@ hashed session immediately.
 ## Request authorization
 
 Every request resolves the session email again. Organiser status is checked from
-the code-level allowlist on every request. Family status is resolved from the
+the runtime allowlist on every request. Family status is resolved from the
 current folded event world, so a family email change invalidates the old address
 without session cleanup.
 
@@ -57,7 +66,11 @@ by the scheduled cleanup handler.
 
 ## Limits
 
-The allowlist currently contains the development organiser identity
-`organiser@example.test`; production deployment must replace it deliberately.
-Email delivery, family forms, and hosted secrets remain separate deployment
-work.
+The runtime allowlist is optional and has no built-in organiser identity.
+`DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS` must be configured deliberately
+where a demo organiser is needed, and `DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN`
+must remain unset outside that demo. The local `dev-preview` task creates a
+temporary ignored `.dev.vars` file with the synthetic identity
+`demo-organiser@example.invalid`; it does not put these values in committed
+Wrangler configuration. Email delivery, family forms, and hosted secrets remain
+separate deployment work.

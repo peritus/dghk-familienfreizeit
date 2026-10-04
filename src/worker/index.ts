@@ -503,10 +503,7 @@ function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
 }
 
 function warnDangerousDevelopmentBindings(env: Env): void {
-  if (
-    env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true' &&
-    !warnedDemoLogin
-  ) {
+  if (env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true' && !warnedDemoLogin) {
     console.warn(
       '[WARN] DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN is enabled: organiser magic links will be returned to the browser. Never enable it for real user authentication.',
     )

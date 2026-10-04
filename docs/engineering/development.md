@@ -33,7 +33,9 @@ This lets the Worker validate and append the fixture atomically, including when
 an intermediate prefix is not itself a valid world.
 
 For local development, start the preview and request a magic link for the
-organiser identity. The local Worker prints the single-use link in its terminal:
+synthetic demo identity `demo-organiser@example.invalid`. The local Worker
+prints the single-use link in its terminal, and the login form also shows it as
+a demo link:
 
 ```sh
 nix develop --command npm run dev
@@ -138,18 +140,22 @@ organiser log/apply boundaries. `/` and `/login` are public organiser foundation
 routes; organiser routes require an organiser session. There is no family login route.
 
 To exercise the organiser browser locally, run the preview and open
-`http://127.0.0.1:5173/login`. Submit `organiser@example.test`, watch the Worker
-terminal for the clearly marked dangerous-debug magic link, and open it in the
-browser. Loopback links are printed automatically; no `.dev.vars` setup is
-needed. A non-loopback Station preview must also set
+`http://127.0.0.1:5173/login`. Submit `demo-organiser@example.invalid`, then
+open the `Als Organiser anmelden` link shown by the login form. The Worker also
+prints the clearly marked dangerous-debug magic link in its terminal. Loopback
+links are enabled by the `dev-preview` task's temporary ignored `.dev.vars`
+file. A non-loopback Station preview must also set
 `DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST` to the exact exposed hostname; the preview
 task supplies that value from `DGHK_PREVIEW_HOST` and removes its temporary
 `.dev.vars` file afterward.
 
-The `dev-preview` task supplies the three explicit local-preview bindings from
-its process environment. Wrangler explicitly allowlists them as local Worker
-bindings; no `.env` file is read, and no other process environment values are
-exposed to the Worker.
+The `dev-preview` task supplies five explicit local-preview bindings from its
+process environment and temporary `.dev.vars` file, including the dangerous
+demo-login adapter and its synthetic organiser allowlist. Wrangler explicitly
+allowlists them as local Worker bindings; no `.env` file is read, and no other
+process environment values are exposed to the Worker. These values are not
+committed to `wrangler.jsonc`, so a hosted deployment does not inherit the demo
+adapter accidentally.
 Because the Station preview uses plain HTTP on the Tailscale network, the task
 also supplies `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true`.
 That alarming local-only binding removes the `Secure` attribute from the session
