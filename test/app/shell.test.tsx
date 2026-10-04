@@ -183,9 +183,9 @@ test('the root renders an organiser-focused public shell', () => {
   expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
     'Arbeitsbereich für die Organisation',
   )
-  expect(
-    screen.getByRole('link', { name: 'Als Organisator anmelden' }).getAttribute('href'),
-  ).toBe('/login')
+  expect(screen.getByRole('link', { name: 'Als Organisator anmelden' }).getAttribute('href')).toBe(
+    '/login',
+  )
   expect(screen.queryByRole('link', { name: 'Anmelden' })).toBeNull()
   expect(screen.getByRole('main').id).toBe('content')
   expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')

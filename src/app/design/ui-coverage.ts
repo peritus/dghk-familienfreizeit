@@ -200,10 +200,10 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/auth/login.tsx',
   },
   {
-    id: 'screens-family-view-welcome--default',
+    id: 'screens-public-organiser-landing--default',
     area: 'screen',
-    subject: 'Welcome',
-    source: 'src/app/family-view/welcome.tsx',
+    subject: 'Organiser landing',
+    source: 'src/app/public-view/organiser-landing.tsx',
   },
   {
     id: 'screens-organiser-dashboard--healthy',
