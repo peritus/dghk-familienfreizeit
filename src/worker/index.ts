@@ -4,7 +4,7 @@ import { tracing } from 'cloudflare:workers'
 import { assertAppendableWorld, derive } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
-import { appendEvents, readEvents, StaleHeadError } from '../events/store.js'
+import { appendCanonicalEvents, readEvents, StaleHeadError } from '../events/store.js'
 import {
   canonicalEmail,
   eventPayloadSchemas,
@@ -371,7 +371,7 @@ async function appendEventBatch(
   return tracing.enterSpan('events.append_batch', async (span) => {
     span.setAttribute('event.count', events.length)
     span.setAttribute('event.expected_head', expectedHead)
-    return appendEvents(context.env.DB, expectedHead, events)
+    return appendCanonicalEvents(context.env.DB, expectedHead, events)
   })
 }
 

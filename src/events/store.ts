@@ -3,6 +3,7 @@ import {
   eventPayloadSchemas,
   parseEvent,
   type Event,
+  type EventDraft,
   type JsonValue,
 } from './types.js'
 import type { KernelConfig } from './fold.js'
@@ -64,6 +65,21 @@ export async function eventHead(db: D1Database): Promise<number> {
 }
 
 export async function appendEvents(
+  db: D1Database,
+  expectedHead: number,
+  drafts: readonly EventDraft[],
+  config: KernelConfig,
+): Promise<Event[]> {
+  if (drafts.length === 0) return []
+  const schemas = eventPayloadSchemas(config)
+  const events = drafts.map((draft, index) =>
+    parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
+  )
+  return appendCanonicalEvents(db, expectedHead, events)
+}
+
+/** Persists events that have already crossed the parse/validation boundary. */
+export async function appendCanonicalEvents(
   db: D1Database,
   expectedHead: number,
   events: readonly Event[],
