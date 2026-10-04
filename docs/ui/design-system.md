@@ -1,7 +1,7 @@
 # Implemented design system
 
 [The shell](../../src/app/components/application/shell.tsx) contains a German skip link and
-focusable main content on every route. On public routes (`/`, `/login`, `/family`) it
+focusable main content on every route. On public routes (`/`, `/login`) it
 also renders its own brand header and `<main id="content">`. On `/organiser*` routes
 it renders neither -- the organiser section owns a single app bar and
 `<main id="content">` pair of its own (see [Frontend](frontend.md) and
@@ -23,8 +23,8 @@ buttons and whole-card links, with an `::after` overlay that keeps the original 
 area clickable while the element slides 4px into its shadow on press. Information-only
 cards and navigation links stay flat.
 
-The public family welcome view uses a responsive hero card with a clear
-registration status and a small inline drafting-compass illustration.
+The public organiser landing uses a responsive hero card with event details, a prominent
+organiser login action, and a small inline drafting-compass illustration.
 
 Workshop screens reuse the same neobrutalist language at every viewport width:
 thick semantic outlines, offset shadows for actionable controls, flat information
