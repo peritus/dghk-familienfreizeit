@@ -21,6 +21,11 @@ export type ProfileEvent = {
   place?: LocalizedText | null
 }
 
+export type ProfilePublicLanding = {
+  heading: LocalizedText
+  intro: LocalizedText
+}
+
 export type EntityScope = 'family' | 'person' | (string & {})
 
 export type Cardinality = 'zero-or-one' | 'exactly-one' | 'zero-or-more'
@@ -153,6 +158,7 @@ export type ProfileMeta = {
   locale: string
   fallback_locale: string
   description: LocalizedText
+  public_landing: ProfilePublicLanding
   event?: ProfileEvent
   deadlines?: Readonly<Record<string, string>>
 }
