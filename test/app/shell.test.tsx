@@ -178,21 +178,20 @@ function workshopFixtureEvents(): readonly Event[] {
   return drafts.map((event, index) => ({ ...event, seq: index + 1 }))
 }
 
-test.each(['/', '/family'])(
-  '%s renders a public, German shell without an organiser navigation',
-  async (path) => {
-    open(path)
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
-      'Willkommen zur Familienfreizeit',
-    )
-    expect(screen.getByText('Anmeldung noch nicht freigeschaltet')).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Anmelden' }).getAttribute('href')).toBe('/login')
-    expect(screen.getByRole('main').id).toBe('content')
-    expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')
-    expect(screen.queryByRole('link', { name: /Organisationsteam/ })).toBeNull()
-    expect(screen.queryByRole('textbox')).toBeNull()
-  },
-)
+test('the root renders an organiser-focused public shell', () => {
+  open('/')
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
+    'Arbeitsbereich für die Organisation',
+  )
+  expect(
+    screen.getByRole('link', { name: 'Als Organisator anmelden' }).getAttribute('href'),
+  ).toBe('/login')
+  expect(screen.queryByRole('link', { name: 'Anmelden' })).toBeNull()
+  expect(screen.getByRole('main').id).toBe('content')
+  expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')
+  expect(screen.queryByRole('link', { name: /Organisationsteam/ })).toBeNull()
+  expect(screen.queryByRole('textbox')).toBeNull()
+})
 
 test('the active profile logo is inverted for dark mode', () => {
   window.history.replaceState({}, '', '/')
@@ -252,7 +251,7 @@ test('an unauthenticated organiser URL returns to the login screen', async () =>
   window.history.replaceState({}, '', '/organiser')
   render(<App />)
 
-  expect(await screen.findByRole('heading', { name: 'Mit Magic Link anmelden' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Als Organisator anmelden' })).toBeTruthy()
 })
 
 test('ordinary route navigation preserves the user-controlled focus', async () => {
@@ -576,7 +575,7 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
 
   fireEvent.click(screen.getByRole('link', { name: 'Familienfreizeit' }))
   expect(
-    await screen.findByRole('heading', { name: 'Willkommen zur Familienfreizeit' }),
+    await screen.findByRole('heading', { name: 'Arbeitsbereich für die Organisation' }),
   ).toBeTruthy()
 
   window.history.pushState({}, '', '/organiser')
@@ -743,14 +742,14 @@ test('families validate invitations', async () => {
   expect(screen.getByRole('alert').textContent).toBe('Bitte gib eine gültige E-Mail-Adresse ein.')
 })
 
-test.each(['/unknown', '/organiser/unknown'])(
+test.each(['/family', '/unknown', '/organiser/unknown'])(
   '%s has a recoverable not-found state',
   async (path) => {
     open(path)
     expect(await screen.findByRole('heading', { name: 'Diese Seite gibt es nicht' })).toBeTruthy()
     fireEvent.click(screen.getByRole('link', { name: 'Zur Startseite' }))
     expect(
-      await screen.findByRole('heading', { name: 'Willkommen zur Familienfreizeit' }),
+      await screen.findByRole('heading', { name: 'Arbeitsbereich für die Organisation' }),
     ).toBeTruthy()
   },
 )
