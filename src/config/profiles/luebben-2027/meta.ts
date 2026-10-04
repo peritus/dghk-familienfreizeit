@@ -10,6 +10,13 @@ export const luebben2027Meta = {
     de: 'Ausführbares Unterkunfts- und Workshopprofil für die DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027.',
     en: 'Executable accommodation and workshop profile for the DGHK Berlin-Brandenburg family retreat in Lübben 2027.',
   },
+  public_landing: {
+    heading: { de: 'Lübben 2027', en: 'Lübben 2027' },
+    intro: {
+      de: 'Planungswerkzeug für die Familienfreizeit.',
+      en: 'Planning tool for the family retreat.',
+    },
+  },
   event: {
     title: {
       de: 'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',

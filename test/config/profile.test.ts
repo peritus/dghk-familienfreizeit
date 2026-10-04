@@ -26,6 +26,13 @@ describe('occasion profile', () => {
     expect(luebben2027Profile.meta.event?.title.de).toBe(
       'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',
     )
+    expect(luebben2027Profile.meta.public_landing).toEqual({
+      heading: { de: 'Lübben 2027', en: 'Lübben 2027' },
+      intro: {
+        de: 'Planungswerkzeug für die Familienfreizeit.',
+        en: 'Planning tool for the family retreat.',
+      },
+    })
     expect(luebben2027Profile.traits['room-status']).toEqual(
       expect.objectContaining({
         kind: 'property',
