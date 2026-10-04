@@ -1,18 +1,16 @@
 import { DraftingCompassIcon } from '../components/shared/icons/drafting-compass-icon'
 import type { ProfilePresentation } from '../../config/presentation.js'
 import { ProfileBrand } from '../components/application/profile-brand.js'
-import {
-  profileEventDetails,
-  profileEventSubheading,
-  profileEventTitle,
-} from '../lib/profile-presentation.js'
+import { buttonVariants } from '../components/shared/ui/button'
+import { Link } from 'wouter'
+import { profileEventDetails, profileEventTitle } from '../lib/profile-presentation.js'
 
-export function Welcome({ profile }: { profile?: ProfilePresentation }) {
+export function OrganiserLanding({ profile }: { profile?: ProfilePresentation }) {
   const details = profileEventDetails(profile)
   return (
     <div className="mx-auto max-w-4xl">
       <section
-        aria-labelledby="welcome-title"
+        aria-labelledby="organiser-landing-title"
         className="overflow-hidden rounded-base border-2 border-border bg-secondary-background shadow-[6px_6px_0_0_var(--shadow-c)]"
       >
         <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
@@ -20,11 +18,15 @@ export function Welcome({ profile }: { profile?: ProfilePresentation }) {
             <p className="mb-5 inline-flex items-center border-2 border-border bg-main px-3 py-1 text-sm font-bold uppercase tracking-wide shadow-[3px_3px_0_0_var(--shadow-c)]">
               {profileEventTitle(profile)}
             </p>
-            <h1 id="welcome-title" className="max-w-xl text-4xl leading-tight sm:text-5xl">
-              {profileEventSubheading(profile)}
+            <h1
+              id="organiser-landing-title"
+              className="max-w-xl text-4xl leading-tight sm:text-5xl"
+            >
+              Arbeitsbereich für die Organisation
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed">
-              Hier findest Du bald die Angaben und Informationen für Deine Familie.
+              Hier organisiert das Team die Familienfreizeit – mit Familien, Unterkunft und
+              Workshops an einem Ort.
             </p>
 
             {details ? (
@@ -40,19 +42,10 @@ export function Welcome({ profile }: { profile?: ProfilePresentation }) {
               </dl>
             ) : null}
 
-            <div className="mt-8 flex max-w-lg items-start gap-3 border-t-2 border-border pt-5">
-              <span className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-main">
-                <span
-                  className="size-3 rounded-full border-2 border-border bg-secondary-background"
-                  aria-hidden="true"
-                />
-              </span>
-              <div>
-                <p className="font-bold">Anmeldung noch nicht freigeschaltet</p>
-                <p className="mt-1 text-sm">
-                  Das Organisationsteam informiert Dich, sobald es losgeht.
-                </p>
-              </div>
+            <div className="mt-8">
+              <Link href="/login" className={buttonVariants({ size: 'lg' })}>
+                Als Organisator anmelden
+              </Link>
             </div>
           </div>
 

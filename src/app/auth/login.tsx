@@ -46,7 +46,7 @@ export function Login() {
     <Card className="mx-auto max-w-xl bg-secondary-background">
       <CardHeader>
         <p className="text-sm font-bold uppercase tracking-wide">Zugang</p>
-        <h1 className="text-2xl">Mit Magic Link anmelden</h1>
+        <h1 className="text-2xl">Als Organisator anmelden</h1>
       </CardHeader>
       <CardContent className="space-y-5">
         {expiredLink() ? (

@@ -35,7 +35,7 @@ export function Shell({
       ) : (
         <>
           <header className="border-b-2 border-border bg-secondary-background px-4 py-4 sm:px-8">
-            <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
+            <div className="mx-auto flex max-w-5xl items-center gap-4">
               <Link
                 href="~/"
                 className="inline-flex min-h-11 items-center gap-2 text-xl font-heading"
@@ -45,9 +45,6 @@ export function Shell({
                   className="size-8 shrink-0 object-contain"
                 />
                 {profileEventTitle(profile)}
-              </Link>
-              <Link href="/login" className="inline-flex min-h-11 items-center underline">
-                Anmelden
               </Link>
             </div>
           </header>
