@@ -3,7 +3,7 @@ import { buildSolverInput } from '../../src/solver/input.js'
 import { composeSolverContributions, solve } from '../../src/solver/index.js'
 import { derive } from '../../src/events/fold.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { defineOccasionProfile } from '../../src/config/define.js'
 import { officialWorkshops } from '../../src/modules/official-workshops/index.js'
 import { workshopScheduling } from '../../src/modules/workshop-scheduling/index.js'
@@ -98,13 +98,13 @@ test('places one workshop and allocates a ranked person through the composed sta
       6,
     ),
   ]
-  const world = derive(events, familienfreizeit2027Profile.validation_view)
-  const contributions = composeSolverContributions(familienfreizeit2027Profile)
+  const world = derive(events, luebben2027Profile.validation_view)
+  const contributions = composeSolverContributions(luebben2027Profile)
   const plan = solve(buildSolverInput(world, contributions), contributions, {
     build_revision: 'test',
     compatibility_revision: 1,
     event_date: '2027-04-30',
-    profile: familienfreizeit2027Profile,
+    profile: luebben2027Profile,
     seed: null,
   })
   const placement = plan.sections['workshop-scheduling'] as {

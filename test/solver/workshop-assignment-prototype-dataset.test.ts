@@ -28,7 +28,7 @@ import {
 import type { Plan, SolverInput } from '../../src/solver/types.js'
 
 // Same module selection and parameters as the real familienfreizeit-2027
-// profile's workshop modules (src/config/profiles/familienfreizeit-2027.ts),
+// profile's workshop modules (src/config/profiles/luebben-2027/index.ts),
 // so this exercises the resolver against production configuration, not
 // arbitrary test values.
 const profile = defineOccasionProfile({

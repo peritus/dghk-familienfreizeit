@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { env } from 'cloudflare:workers'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import {
   appendCanonicalEvents,
   appendEvents,
@@ -51,7 +51,7 @@ describe('D1 event source', () => {
       },
     } satisfies EventDraft
     await expect(
-      appendEvents(env.DB, 0, [draft], familienfreizeit2027Profile.validation_view),
+      appendEvents(env.DB, 0, [draft], luebben2027Profile.validation_view),
     ).rejects.toThrow()
     expect(await eventHead(env.DB)).toBe(0)
   })
@@ -74,7 +74,7 @@ describe('D1 event source', () => {
     expect(events).toEqual([event])
     expect(events[0]?.seq).toBe(1)
     expect(
-      (await readEvents(env.DB, familienfreizeit2027Profile.validation_view))[0]?.payload,
+      (await readEvents(env.DB, luebben2027Profile.validation_view))[0]?.payload,
     ).toMatchObject({ family_id: 'fam_d1' })
   })
 
@@ -98,11 +98,11 @@ describe('D1 event source', () => {
       env.DB,
       await eventHead(env.DB),
       [draft],
-      familienfreizeit2027Profile.validation_view,
+      luebben2027Profile.validation_view,
     )
 
     expect(
-      (await readEvents(env.DB, familienfreizeit2027Profile.validation_view))[0],
+      (await readEvents(env.DB, luebben2027Profile.validation_view))[0],
     ).toMatchObject({
       type: 'BuildingAdded',
       payload: { building_id: 'bld_d1', name: 'D1 House', sort_key: 1 },

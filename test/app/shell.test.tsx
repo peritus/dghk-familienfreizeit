@@ -198,7 +198,7 @@ test('the active profile logo is inverted for dark mode', () => {
   window.history.replaceState({}, '', '/')
   render(<App profile={activeProfilePresentation} />)
 
-  const logo = document.querySelector('img[src*="familienfreizeit-2027-logo.svg"]')
+  const logo = document.querySelector('img[src*="luebben-2027"]')
   expect(logo).toBeTruthy()
   expect(logo?.className).toContain('dark:invert')
 })

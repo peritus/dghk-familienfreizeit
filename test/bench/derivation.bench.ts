@@ -1,7 +1,7 @@
 import process from 'node:process'
 import { performance } from 'node:perf_hooks'
 import { expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive, type World } from '../../src/events/fold.js'
 import { projectFamilyWorld, projectSharedWorld } from '../../src/events/world.js'
 import { composeSolverContributions } from '../../src/solver/composition.js'
@@ -13,7 +13,7 @@ import type { Event } from '../../src/events/types.js'
 import type { SolverInput } from '../../src/solver/types.js'
 import { syntheticLog, syntheticScale } from './log.js'
 
-const profile = familienfreizeit2027Profile
+const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
 const solverConfig = {
   build_revision: 'bench',

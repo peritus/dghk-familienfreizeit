@@ -2,7 +2,7 @@
 
 This document records the occasion-profile requirements. The
 implemented runtime profile is
-[`src/config/profiles/familienfreizeit-2027.ts`](../../src/config/profiles/familienfreizeit-2027.ts)
+[`src/config/profiles/luebben-2027/index.ts`](../../src/config/profiles/luebben-2027/index.ts)
 and its delivered accommodation and workshop-planning behavior is documented in
 [implemented room inventory](../../docs/modules/room-inventory.md) and
 [implemented room assignment](../../docs/modules/room-assignment.md),
@@ -38,7 +38,7 @@ The active occasion selects these modules ([modules](../modules/contract.md) §5
 
 The inventory portion is implemented and documented in
 [implemented room inventory](../../docs/modules/room-inventory.md). The active
-profile source is [familienfreizeit-2027.ts](../../src/config/profiles/familienfreizeit-2027.ts)
+profile source is [index.ts](../../src/config/profiles/luebben-2027/index.ts)
 and its canonical event fixture is
 [djh-luebben.kdl](../../test/fixtures/room-inventory/djh-luebben.kdl).
 

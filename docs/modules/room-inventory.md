@@ -3,7 +3,7 @@
 The selected `room-inventory` module is implemented in
 [`src/modules/room-inventory/index.ts`](../../src/modules/room-inventory/index.ts)
 and selected by the executable
-[`familienfreizeit2027Profile`](../../src/config/profiles/familienfreizeit-2027.ts).
+[`luebben2027Profile`](../../src/config/profiles/luebben-2027/index.ts).
 It is the first real module exercised by the runtime module boundary.
 
 ## Derived inventory

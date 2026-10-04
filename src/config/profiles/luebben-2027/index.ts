@@ -9,19 +9,19 @@ import {
   relation,
   requirement,
   text,
-} from '../define.js'
-import { familyPreferences } from '../../modules/family-preferences/index.js'
-import { roomInventory } from '../../modules/room-inventory/index.js'
-import { roomAssignment } from '../../modules/room-assignment/index.js'
-import { officialWorkshops } from '../../modules/official-workshops/index.js'
-import { workshopAssignment } from '../../modules/workshop-assignment/index.js'
-import { workshopRankings } from '../../modules/workshop-rankings/index.js'
-import { workshopScheduling } from '../../modules/workshop-scheduling/index.js'
-import { workshopSpace } from '../../modules/workshop-space/index.js'
-import { familienfreizeit2027Meta } from './luebben-2027/meta.js'
+} from '../../define.js'
+import { familyPreferences } from '../../../modules/family-preferences/index.js'
+import { roomInventory } from '../../../modules/room-inventory/index.js'
+import { roomAssignment } from '../../../modules/room-assignment/index.js'
+import { officialWorkshops } from '../../../modules/official-workshops/index.js'
+import { workshopAssignment } from '../../../modules/workshop-assignment/index.js'
+import { workshopRankings } from '../../../modules/workshop-rankings/index.js'
+import { workshopScheduling } from '../../../modules/workshop-scheduling/index.js'
+import { workshopSpace } from '../../../modules/workshop-space/index.js'
+import { luebben2027Meta } from './meta.js'
 
-export const familienfreizeit2027Profile = defineOccasionProfile({
-  meta: familienfreizeit2027Meta,
+export const luebben2027Profile = defineOccasionProfile({
+  meta: luebben2027Meta,
   traits: {
     role: property({
       title: { de: 'Rolle', en: 'Role' },

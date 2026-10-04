@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive } from '../../src/events/fold.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
 
@@ -13,7 +13,7 @@ import type { Event, JsonValue } from '../../src/events/types.js'
  * Each case below drives a clear/restate/retire sequence and then asserts an
  * acceptance or rejection that is only correct if the indexes kept step.
  */
-const config = familienfreizeit2027Profile.validation_view
+const config = luebben2027Profile.validation_view
 
 function log(...entries: readonly (readonly [string, JsonValue])[]): Event[] {
   return entries.map(([type, payload], index) => ({

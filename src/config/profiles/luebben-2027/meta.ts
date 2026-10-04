@@ -1,6 +1,6 @@
 import type { ProfileMeta } from '../../define.js'
 
-export const familienfreizeit2027Meta = {
+export const luebben2027Meta = {
   id: 'familienfreizeit-2027',
   name: { de: 'Familienfreizeit 2027', en: 'Family retreat 2027' },
   description: {

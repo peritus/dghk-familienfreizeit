@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive } from '../../src/events/fold.js'
 import { canonicalJson } from '../../src/events/types.js'
 import { composeSolverContributions } from '../../src/solver/composition.js'
@@ -30,7 +30,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  */
 const baselineDigest = '1e68767b8881518cadc065670a1b9536318837dc8eb35bc42d6880a53b849d32'
 
-const profile = familienfreizeit2027Profile
+const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
 const solverConfig = {
   build_revision: 'equivalence',

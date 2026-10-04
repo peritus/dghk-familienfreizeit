@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive } from '../../src/events/fold.js'
 import { canonicalJson } from '../../src/events/types.js'
 import { buildSolverInput } from '../../src/solver/input.js'
@@ -11,7 +11,7 @@ import type { Event, JsonValue } from '../../src/events/types.js'
  * solver's determinism contract, so it is pinned here: a value's canonical form
  * orders it, not its author's key order and not its insertion order.
  */
-const config = familienfreizeit2027Profile.validation_view
+const config = luebben2027Profile.validation_view
 
 function log(...entries: readonly (readonly [string, JsonValue])[]): Event[] {
   return entries.map(([type, payload], index) => ({

@@ -1,6 +1,6 @@
 import process from 'node:process'
 import { expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive } from '../../src/events/fold.js'
 import { roomAssignmentRules } from '../../src/modules/room-assignment/index.js'
 import { composeSolverContributions } from '../../src/solver/composition.js'
@@ -33,7 +33,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * change to how the search works, and in the second case the number gets
  * updated in the same commit as the code.
  */
-const profile = familienfreizeit2027Profile
+const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
 const solverConfig = {
   build_revision: 'budgets',

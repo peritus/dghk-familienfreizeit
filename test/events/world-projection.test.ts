@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive } from '../../src/events/fold.js'
 import { projectFamilyWorld, projectSharedWorld } from '../../src/events/world.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
@@ -9,7 +9,7 @@ import type { Event, JsonValue } from '../../src/events/types.js'
  * scanning. These cases pin what membership means, so the faster lookups cannot
  * quietly widen or narrow what crosses the boundary.
  */
-const config = familienfreizeit2027Profile.validation_view
+const config = luebben2027Profile.validation_view
 
 function log(...entries: readonly (readonly [string, JsonValue])[]): Event[] {
   return entries.map(([type, payload], index) => ({

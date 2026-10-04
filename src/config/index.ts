@@ -1,6 +1,6 @@
-import { familienfreizeit2027Profile } from './profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from './profiles/luebben-2027/index.js'
 
 /** The deployment selects exactly one statically composed occasion profile. */
-export const activeProfile = familienfreizeit2027Profile
+export const activeProfile = luebben2027Profile
 
 export type ActiveProfile = typeof activeProfile

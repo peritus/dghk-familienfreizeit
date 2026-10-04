@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { describe, expect, test } from 'vitest'
 import { capability, defineOccasionProfile, enumOf, property } from '../../src/config/define.js'
 import { kernelProfile } from '../../src/config/profiles/kernel.js'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { defineModule } from '../../src/modules/define.js'
 import { familyPreferences } from '../../src/modules/family-preferences/index.js'
 import { derive } from '../../src/events/fold.js'
@@ -20,21 +20,21 @@ const meta = {
 
 describe('occasion profile', () => {
   test('the active profile defines only active and blocked room statuses', () => {
-    expect(familienfreizeit2027Profile.traits['room-status']).toEqual(
+    expect(luebben2027Profile.traits['room-status']).toEqual(
       expect.objectContaining({
         kind: 'property',
         default: 'active',
         value: { kind: 'enum', values: ['active', 'blocked'] },
       }),
     )
-    expect(familienfreizeit2027Profile.meta.deadlines).toEqual({
+    expect(luebben2027Profile.meta.deadlines).toEqual({
       accommodation: '2027-03-31T21:59:59Z',
       workshops: '2027-04-15T21:59:59Z',
     })
-    expect(familienfreizeit2027Profile.traits['needs-private-sanitary'].family_facing).toEqual(
+    expect(luebben2027Profile.traits['needs-private-sanitary'].family_facing).toEqual(
       expect.objectContaining({ control: 'tri-state', scope: 'family' }),
     )
-    expect(familienfreizeit2027Profile.modules.at(-1)?.id).toBe('family-preferences')
+    expect(luebben2027Profile.modules.at(-1)?.id).toBe('family-preferences')
   })
 
   test('validates family-facing traits and their configured sections', () => {

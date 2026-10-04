@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { derive } from '../../src/events/fold.js'
 import { prepareEventBatch } from '../../src/events/prepare.js'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import type { EventDraft } from '../../src/events/store.js'
 
 const draft = (type: string, payload: EventDraft['payload']): EventDraft => ({
@@ -47,7 +47,7 @@ test('prepares a selected-profile module event through the composed schemas', ()
     prepareEventBatch(
       [],
       [draft('BuildingAdded', { building_id: 'bld_test', name: 'Test', sort_key: 1 })],
-      familienfreizeit2027Profile.validation_view,
+      luebben2027Profile.validation_view,
     ),
   ).not.toThrow()
 })

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { decimal, defineOccasionProfile, enumOf, property } from '../../src/config/define.js'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { assertAppendableWorld, derive } from '../../src/events/fold.js'
 import { loadKdl } from '../../src/events/kdl.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
@@ -497,8 +497,8 @@ describe('room inventory', () => {
       new URL('../fixtures/room-inventory/djh-luebben.kdl', import.meta.url),
       'utf8',
     )
-    const events = loadKdl(text, familienfreizeit2027Profile.validation_view)
-    const summary = inventoryWorld(derive(events, familienfreizeit2027Profile.validation_view))
+    const events = loadKdl(text, luebben2027Profile.validation_view)
+    const summary = inventoryWorld(derive(events, luebben2027Profile.validation_view))
     expect(summary.rooms).toHaveLength(38)
     expect(summary.places).toHaveLength(162)
     expect(summary.cost_eur).toBe(15236)
