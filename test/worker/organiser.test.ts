@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers'
 import { app } from '../../src/worker/index.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { readEvents } from '../../src/events/store.js'
 
 const organiserEnv = {
@@ -84,9 +84,7 @@ test('organiser apply validates the prospective batch and returns its world', as
   }
   expect(result).toMatchObject({ head_seq: 2, world: { head_seq: 2 } })
   expect(result.events).toEqual(
-    JSON.parse(
-      JSON.stringify(await readEvents(env.DB, familienfreizeit2027Profile.validation_view)),
-    ),
+    JSON.parse(JSON.stringify(await readEvents(env.DB, luebben2027Profile.validation_view))),
   )
 
   const invalid = await app.request(

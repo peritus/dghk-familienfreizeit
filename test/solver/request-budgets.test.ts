@@ -1,6 +1,6 @@
 import process from 'node:process'
 import { expect, test } from 'vitest'
-import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { authorizeEventBatch } from '../../src/auth/authorization.js'
 import { derive } from '../../src/events/fold.js'
 import { familyForEmail } from '../../src/auth/principal.js'
@@ -17,7 +17,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * authenticated request, one per event in an append batch — so both counts grew
  * with the occasion's history rather than with the work being asked for.
  */
-const profile = familienfreizeit2027Profile
+const profile = luebben2027Profile
 
 /** Counts element reads, so a scan of the whole array costs its length. */
 function countingWorld(world: World, onRead: () => void): World {

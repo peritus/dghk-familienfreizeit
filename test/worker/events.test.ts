@@ -101,7 +101,7 @@ describe('D1 event source', () => {
       )
       .run()
 
-    const events = await readEvents(env.DB, familienfreizeit2027Profile.validation_view)
+    const events = await readEvents(env.DB, luebben2027Profile.validation_view)
     expect(events.find((event) => event.seq === seq)?.payload).toMatchObject({ age: 36 })
     const row = await env.DB.prepare('SELECT payload FROM event WHERE seq = ?1')
       .bind(seq)
@@ -125,12 +125,7 @@ describe('D1 event source', () => {
       type: event.type,
       payload: event.payload,
     }
-    await appendEvents(
-      env.DB,
-      await eventHead(env.DB),
-      [draft],
-      luebben2027Profile.validation_view,
-    )
+    await appendEvents(env.DB, await eventHead(env.DB), [draft], luebben2027Profile.validation_view)
 
     expect((await readEvents(env.DB, luebben2027Profile.validation_view))[0]).toMatchObject({
       type: 'BuildingAdded',
