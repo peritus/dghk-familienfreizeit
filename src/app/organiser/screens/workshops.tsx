@@ -195,6 +195,12 @@ function slotLabel(startsAt: string, endsAt?: string): string {
   return `${day} ${time}${endTime ? `–${endTime}` : ''}`
 }
 
+function slotDurationMinutes(startsAt: string, endsAt: string): number {
+  return Math.round(
+    (new globalThis.Date(endsAt).getTime() - new globalThis.Date(startsAt).getTime()) / 60_000,
+  )
+}
+
 export function WorkshopNavigation() {
   return (
     <SecondaryNavigation
@@ -1052,15 +1058,16 @@ export function WorkshopSlots() {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const startsDate = new globalThis.Date(String(data.get('starts_at')))
-    const endsDate = new globalThis.Date(String(data.get('ends_at')))
-    if (!Number.isFinite(startsDate.getTime()) || !Number.isFinite(endsDate.getTime())) {
-      setSlotError('Beginn und Ende müssen gültige Zeitpunkte sein.')
+    const durationMinutes = Number(data.get('duration_minutes'))
+    if (
+      !Number.isFinite(startsDate.getTime()) ||
+      !Number.isSafeInteger(durationMinutes) ||
+      durationMinutes <= 0
+    ) {
+      setSlotError('Beginn und Dauer müssen gültig sein.')
       return
     }
-    if (startsDate >= endsDate) {
-      setSlotError('Das Ende muss nach dem Beginn liegen.')
-      return
-    }
+    const endsDate = new globalThis.Date(startsDate.getTime() + durationMinutes * 60_000)
     if (
       summary.slots.some(
         (slot) =>
@@ -1099,7 +1106,7 @@ export function WorkshopSlots() {
           <CollectionCreateAction
             label="Slot hinzufügen"
             title={editingSlot ? 'Slot bearbeiten' : 'Slot hinzufügen'}
-            description="Lege ein Zeitfenster für das Workshopprogramm an."
+            description="Lege Beginn und Dauer für ein Zeitfenster des Workshopprogramms an."
             open={addingSlot || editingSlot !== null}
             on_open_change={(open) => {
               setAddingSlot(open)
@@ -1116,7 +1123,10 @@ export function WorkshopSlots() {
                 editingSlot
                   ? {
                       starts_at: dateTimeLocal(editingSlot.starts_at),
-                      ends_at: dateTimeLocal(editingSlot.ends_at),
+                      duration_minutes: slotDurationMinutes(
+                        editingSlot.starts_at,
+                        editingSlot.ends_at,
+                      ),
                     }
                   : undefined
               }

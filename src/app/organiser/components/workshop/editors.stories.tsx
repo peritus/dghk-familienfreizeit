@@ -76,8 +76,7 @@ export const Forms: Story = {
           default_values={{
             day: 'Freitag',
             starts_at: '2026-07-17T14:00',
-            ends_at: '2026-07-17T15:30',
-            capacity: 12,
+            duration_minutes: 90,
           }}
         />
         <SpaceEditorForm

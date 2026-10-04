@@ -432,8 +432,7 @@ export function ExternalLeaderEditorForm({
 export type SlotEditorValues = {
   day?: string
   starts_at?: string
-  ends_at?: string
-  capacity?: number
+  duration_minutes?: number
 }
 
 export function SlotEditorForm({
@@ -465,18 +464,13 @@ export function SlotEditorForm({
             required
           />
           <WorkshopField
-            label="Ende"
-            name="ends_at"
-            type="datetime-local"
-            defaultValue={defaultValues.ends_at}
-            required
-          />
-          <WorkshopField
-            label="Plätze"
-            name="capacity"
+            label="Dauer (Minuten)"
+            name="duration_minutes"
             type="number"
-            min="0"
-            defaultValue={defaultValues.capacity ?? 8}
+            min="1"
+            step="1"
+            defaultValue={defaultValues.duration_minutes}
+            required
           />
           <div className="sm:col-span-2">
             <Button type="submit">{submitLabel}</Button>

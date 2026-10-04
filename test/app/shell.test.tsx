@@ -335,6 +335,40 @@ test('workshop navigation exposes the intended areas and switches resource views
   expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
 })
 
+test('slot editing uses a duration and does not offer slot capacity', async () => {
+  const { fetchMock } = open('/organiser/workshops/slots')
+  expect(await screen.findByRole('heading', { name: 'Slots' })).toBeTruthy()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Slot hinzufügen' }))
+  expect(screen.getByRole('heading', { name: 'Slot hinzufügen' })).toBeTruthy()
+  expect(screen.getByLabelText('Beginn')).toBeTruthy()
+  expect(screen.getByLabelText('Dauer (Minuten)')).toBeTruthy()
+  expect(screen.queryByLabelText(/^Plätze/)).toBeNull()
+
+  fireEvent.change(screen.getByLabelText('Beginn'), {
+    target: { value: '2027-05-14T11:30' },
+  })
+  fireEvent.change(screen.getByLabelText('Dauer (Minuten)'), { target: { value: '120' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Slot anlegen' }))
+
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith('/api/organiser/apply', expect.anything()),
+  )
+  const applyCall = fetchMock?.mock.calls.find(([input]) =>
+    String(input).endsWith('/api/organiser/apply'),
+  )
+  const body = JSON.parse(String(applyCall?.[1]?.body ?? '{}')) as {
+    events?: readonly { type?: string; payload?: Record<string, unknown> }[]
+  }
+  expect(body.events?.[0]).toMatchObject({
+    type: 'WorkshopSlotAdded',
+    payload: {
+      starts_at: '2027-05-14T11:30:00.000Z',
+      ends_at: '2027-05-14T13:30:00.000Z',
+    },
+  })
+})
+
 test('workshop allocation exposes three URL-backed Wunsch views', async () => {
   open('/organiser/workshops/allocation', workshopFixtureEvents())
   expect(await screen.findByRole('heading', { name: 'Wünsche' })).toBeTruthy()
