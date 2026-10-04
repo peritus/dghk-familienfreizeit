@@ -6,6 +6,7 @@ import {
   type EventDraft,
   type JsonValue,
 } from './types.js'
+import { ageFromBirthdate } from './age.js'
 import type { KernelConfig } from './fold.js'
 
 export type { EventDraft } from './types.js'
@@ -42,19 +43,23 @@ export async function readEvents(
     untilSeq === undefined
       ? await db.prepare(query).all<EventRow>()
       : await db.prepare(query).bind(untilSeq).all<EventRow>()
-  return result.results.map((row) =>
-    parseEvent(
+  return result.results.map((row) => {
+    const payload = JSON.parse(row.payload) as Record<string, unknown>
+    if (payload.birthdate !== undefined) {
+      payload.age = ageFromBirthdate(payload.birthdate as string | null, '2027-10-04')
+    }
+    return parseEvent(
       {
         seq: row.seq,
         at: row.at,
         actor: row.actor,
         type: row.type,
         subject: row.subject,
-        payload: JSON.parse(row.payload),
+        payload,
       },
       schemas,
-    ),
-  )
+    )
+  })
 }
 
 export async function eventHead(db: D1Database): Promise<number> {

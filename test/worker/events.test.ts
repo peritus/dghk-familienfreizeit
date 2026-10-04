@@ -78,6 +78,37 @@ describe('D1 event source', () => {
     ).toMatchObject({ family_id: 'fam_d1' })
   })
 
+  test('reads a legacy person birthdate as age without rewriting the event', async () => {
+    const seq = (await eventHead(env.DB)) + 1
+    const payload = {
+      person_id: 'per_legacy',
+      family_id: 'fam_legacy',
+      given_name: 'Legacy',
+      family_name: 'Person',
+      birthdate: '1990-10-05',
+      role: 'adult',
+    }
+    await env.DB.prepare(
+      'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (?1, ?2, ?3, ?4, ?5, ?6)',
+    )
+      .bind(
+        seq,
+        '2027-01-01T00:00:00.000Z',
+        'fixture',
+        'PersonAdded',
+        null,
+        JSON.stringify(payload),
+      )
+      .run()
+
+    const events = await readEvents(env.DB, familienfreizeit2027Profile.validation_view)
+    expect(events.find((event) => event.seq === seq)?.payload).toMatchObject({ age: 36 })
+    const row = await env.DB.prepare('SELECT payload FROM event WHERE seq = ?1')
+      .bind(seq)
+      .first<{ payload: string }>()
+    expect(JSON.parse(row!.payload)).toHaveProperty('birthdate', '1990-10-05')
+  })
+
   test('appends and replays a selected-profile module event', async () => {
     const event: Event = {
       seq: 1,
