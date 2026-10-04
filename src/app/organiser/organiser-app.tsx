@@ -18,8 +18,14 @@ import {
 } from './state.js'
 import { Dashboard } from './screens/dashboard.js'
 import { Families } from './screens/families.js'
-import { Inventory } from './screens/inventory.js'
-import { AssignmentBoardScreen } from '../../modules/room-assignment/app/screens/assignment-board.js'
+const Inventory = lazy(() =>
+  import('./screens/inventory.js').then((module) => ({ default: module.Inventory })),
+)
+const AssignmentBoardScreen = lazy(() =>
+  import('../../modules/room-assignment/app/screens/assignment-board.js').then((module) => ({
+    default: module.AssignmentBoardScreen,
+  })),
+)
 import {
   familyIdFromRouteSegment,
   isFamilyTopic,

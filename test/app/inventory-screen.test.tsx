@@ -63,6 +63,7 @@ function open(events: readonly Event[] = []) {
 
 test('empty state offers only the first step, no stats strip', async () => {
   open()
+  fireEvent.click(await screen.findByRole('button', { name: 'Gebäude hinzufügen' }))
   expect(await screen.findByText('Noch keine Unterkunft angelegt')).toBeTruthy()
   expect(screen.queryByText('Schlafplätze')).toBeNull()
   expect(screen.queryByText('Gebäude')).toBeNull()
@@ -70,6 +71,7 @@ test('empty state offers only the first step, no stats strip', async () => {
 
 test('adding a building, then a room with a duplicate number, is rejected', async () => {
   open()
+  fireEvent.click(await screen.findByRole('button', { name: 'Gebäude hinzufügen' }))
   await screen.findByText('Noch keine Unterkunft angelegt')
   fireEvent.change(screen.getByLabelText('Name des Gebäudes'), {
     target: { value: 'Haupthaus' },
@@ -78,7 +80,7 @@ test('adding a building, then a room with a duplicate number, is rejected', asyn
 
   expect(await screen.findByRole('heading', { name: 'Haupthaus' })).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: '+ Zimmer hinzufügen' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Zimmer hinzufügen' }))
   fireEvent.click(screen.getByRole('button', { name: 'Zimmer anlegen' }))
   expect(await screen.findByText('Gib eine Nummer oder einen Namen ein.')).toBeTruthy()
 
@@ -94,7 +96,7 @@ test('adding a building, then a room with a duplicate number, is rejected', asyn
   expect(await screen.findByText(/Noch keine Betten/)).toBeTruthy()
 
   // A second room with the same number in the same building is rejected.
-  fireEvent.click(screen.getByRole('button', { name: '+ Zimmer hinzufügen' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Zimmer hinzufügen' }))
   fireEvent.change(screen.getByLabelText('Nummer oder Name'), { target: { value: '101' } })
   fireEvent.change(screen.getByLabelText('Bad'), { target: { value: 'private' } })
   fireEvent.change(screen.getByLabelText('Preis pro Schlafplatz'), { target: { value: '20' } })
@@ -131,15 +133,20 @@ test('apartment rooms group added beds by Schlafraum, with a "+ Neuer Schlafraum
   fireEvent.click(await screen.findByRole('button', { name: /35/ }))
   // First bed: no Schlafraum exists yet, defaults to "Schlafraum 1".
   fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
+  const firstBedDialog = await screen.findByRole('dialog')
+  fireEvent.click(within(firstBedDialog).getByRole('button', { name: 'Bett hinzufügen' }))
   expect(await screen.findByRole('heading', { name: 'Schlafraum 1' })).toBeTruthy()
 
   // Second bed: create a new Schlafraum via "+ Neuer Schlafraum".
+  fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
   fireEvent.click(
-    within(screen.getByRole('group', { name: 'Schlafraum' })).getByRole('button', {
+    within(await screen.findByRole('dialog')).getByRole('button', {
       name: '+ Neuer Schlafraum',
     }),
   )
-  fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
+  fireEvent.click(
+    within(await screen.findByRole('dialog')).getByRole('button', { name: 'Bett hinzufügen' }),
+  )
   expect(await screen.findByRole('heading', { name: 'Schlafraum 2' })).toBeTruthy()
 }, 20000)
 
@@ -194,15 +201,17 @@ test('adding a bunk bed shows the age hint and the Oben/Unten slots, and updates
   expect(await screen.findByText('Keine Betten')).toBeTruthy()
 
   fireEvent.click(screen.getByRole('button', { name: /101/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
+  const bedDialog = await screen.findByRole('dialog')
   fireEvent.click(
-    within(screen.getByRole('group', { name: 'Bettart' })).getByRole('button', {
+    within(within(bedDialog).getByRole('group', { name: 'Bettart' })).getByRole('button', {
       name: 'Etagenbett',
     }),
   )
   // D35: the "Oben erst ab 6 Jahren" age hint is deliberately not shown —
   // no assignment logic exists yet to act on it.
   expect(screen.queryByText(/Oben erst ab 6 Jahren/)).toBeNull()
-  fireEvent.click(screen.getByRole('button', { name: 'Bett hinzufügen' }))
+  fireEvent.click(within(bedDialog).getByRole('button', { name: 'Bett hinzufügen' }))
 
   expect(await screen.findByText('Oben')).toBeTruthy()
   expect(screen.getByText('Unten')).toBeTruthy()
@@ -296,6 +305,7 @@ test('deleting an empty building asks for confirmation via the AlertDialog', asy
   expect(within(dialog).getByRole('button', { name: 'Behalten' })).toBeTruthy()
   fireEvent.click(within(dialog).getByRole('button', { name: 'Ja, entfernen' }))
   expect(screen.queryByRole('alertdialog')).toBeNull()
+  fireEvent.click(screen.getByRole('button', { name: 'Gebäude hinzufügen' }))
   expect(await screen.findByText('Noch keine Unterkunft angelegt')).toBeTruthy()
 }, 20000)
 
