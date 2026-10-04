@@ -23,15 +23,16 @@ CREATE INDEX event_type_idx ON event(type, seq);
 Migration `0001_m1_kernel.sql` creates this table on D1. `src/events/store.ts`
 implements the write side: `readEvents(db, config, untilSeq?)` selects rows in
 `seq` order (optionally bounded by `untilSeq`) and parses each through
-`parseEvent` using the selected profile's composed payload schemas. The Worker
-passes `appendEvents` the already-parsed canonical `Event[]` from
+`parseEvent` using the selected profile's composed payload schemas. The public
+`appendEvents` adapter parses draft events, while the Worker passes
+`appendCanonicalEvents` the already-parsed canonical `Event[]` from
 `prepareEventBatch`, including its assigned sequence numbers, so storage and
-the response use the same event representation. `appendEvents` submits one
+the response use the same event representation. `appendCanonicalEvents` submits one
 conditional `INSERT ... WHERE
 (SELECT MAX(seq) FROM event) = <prior seq>` per event in a single D1 batch. If
 the head moved between the caller's read and the append, the batch's
 `WHERE` clauses match no row, `changes !== 1` for at least one statement, and
-`appendEvents` throws `StaleHeadError` — nothing is written. `event.seq` being
+`appendCanonicalEvents` throws `StaleHeadError` — nothing is written. `event.seq` being
 the primary key stops the pathological case that the conditional `WHERE`
 already forbids: a batch can never itself resurrect a stale row. `payload` is
 canonical JSON (`canonicalJson`), so byte-identical values always append as

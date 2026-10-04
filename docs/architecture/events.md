@@ -12,9 +12,10 @@ selected-module payload schemas into its validation view. `readEvents` receives
 that selected `KernelConfig`, so stored JSON is parsed with the selected
 profile's payload schemas. The Worker prepares and validates a complete, parsed
 `Event[]` with contiguous sequence numbers, then passes that canonical batch to
-`appendEvents`. Storage writes those exact events and uses a compare-and-swap
-predicate in one D1 batch. A stale or forward-moving head is rejected, and a
-failed batch does not partially append.
+`appendCanonicalEvents`. The public `appendEvents` adapter retains the draft
+parsing and validation boundary for other callers. Storage writes the canonical
+events with a compare-and-swap predicate in one D1 batch. A stale or
+forward-moving head is rejected, and a failed batch does not partially append.
 
 No folded domain state is stored. `derive(events, config)` reconstructs the
 current profile world in memory; sessions, magic links, rate limits, and email
@@ -61,19 +62,20 @@ Two properties hold that:
 - `prepareEventBatch` returns the world it folded. That world describes
   `committed + batch`, which is what the response has to report once the append
   succeeds, so the handler serves it instead of folding the same events again.
-  The same parsed event objects are passed to `appendEvents`, so persistence
-  cannot create a second, divergent representation between preparation and the
-  response.
+  The same parsed event objects are passed to `appendCanonicalEvents`, so
+  persistence cannot create a second, divergent representation between
+  preparation and the response. Draft callers continue to use `appendEvents`,
+  which parses and validates before delegating to that canonical primitive.
 
 Authorization sees the pre-batch world, so every event in one batch is judged
 against the same state. That was true of the per-event version too; changing it
 would be a policy decision rather than a cost one.
 
-Family resolution during authorization goes through the derived indexes —
-`labels_by_key` for an email, `labels_by_entity` and `entities_by_kind` for an
-entity's family — rather than scanning the label store. Those lookups run once
-per request and once per event in a batch, so a scan there grew with the
-occasion's whole history. The
+Family resolution during authorization goes through exact derived indexes —
+`family_id_by_email` for an email and `entity_kind_by_id` plus
+`labels_by_entity` for an entity's family — rather than scanning bucket arrays
+or the label store. Those lookups run once per request and once per event in a
+batch, so their cost is independent of the occasion's family count. The
 [solver cost gates](../engineering/testing.md#solver-cost-gates) budget this.
 
 ## Limits
