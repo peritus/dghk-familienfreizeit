@@ -180,9 +180,8 @@ function workshopFixtureEvents(): readonly Event[] {
 
 test('the root renders an organiser-focused public shell', () => {
   open('/')
-  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
-    'Arbeitsbereich für die Organisation',
-  )
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Lübben 2027')
+  expect(screen.getByText('Planungswerkzeug für die Familienfreizeit.')).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Als Organisator anmelden' }).getAttribute('href')).toBe(
     '/login',
   )
@@ -604,9 +603,7 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
   ).toBeTruthy()
 
   fireEvent.click(screen.getByRole('link', { name: 'Familienfreizeit' }))
-  expect(
-    await screen.findByRole('heading', { name: 'Arbeitsbereich für die Organisation' }),
-  ).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Lübben 2027' })).toBeTruthy()
 
   window.history.pushState({}, '', '/organiser')
   fireEvent(window, new PopStateEvent('popstate'))
@@ -778,9 +775,7 @@ test.each(['/family', '/unknown', '/organiser/unknown'])(
     open(path)
     expect(await screen.findByRole('heading', { name: 'Diese Seite gibt es nicht' })).toBeTruthy()
     fireEvent.click(screen.getByRole('link', { name: 'Zur Startseite' }))
-    expect(
-      await screen.findByRole('heading', { name: 'Arbeitsbereich für die Organisation' }),
-    ).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Lübben 2027' })).toBeTruthy()
   },
 )
 

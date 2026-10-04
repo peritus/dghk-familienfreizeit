@@ -3,10 +3,8 @@ import type { ProfilePresentation } from '../../config/presentation.js'
 import { ProfileBrand } from '../components/application/profile-brand.js'
 import { buttonVariants } from '../components/shared/ui/button'
 import { Link } from 'wouter'
-import { profileEventDetails, profileEventTitle } from '../lib/profile-presentation.js'
 
 export function OrganiserLanding({ profile }: { profile?: ProfilePresentation }) {
-  const details = profileEventDetails(profile)
   return (
     <div className="mx-auto max-w-4xl">
       <section
@@ -15,32 +13,15 @@ export function OrganiserLanding({ profile }: { profile?: ProfilePresentation })
       >
         <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
           <div className="p-6 sm:p-10 lg:p-12">
-            <p className="mb-5 inline-flex items-center border-2 border-border bg-main px-3 py-1 text-sm font-bold uppercase tracking-wide shadow-[3px_3px_0_0_var(--shadow-c)]">
-              {profileEventTitle(profile)}
-            </p>
             <h1
               id="organiser-landing-title"
               className="max-w-xl text-4xl leading-tight sm:text-5xl"
             >
-              Arbeitsbereich für die Organisation
+              Lübben 2027
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed">
-              Hier organisiert das Team die Familienfreizeit – mit Familien, Unterkunft und
-              Workshops an einem Ort.
+              Planungswerkzeug für die Familienfreizeit.
             </p>
-
-            {details ? (
-              <dl className="mt-6 grid max-w-lg gap-3 border-y-2 border-border py-4 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="font-bold uppercase tracking-wide text-muted">Ort</dt>
-                  <dd className="mt-1">{details.place}</dd>
-                </div>
-                <div>
-                  <dt className="font-bold uppercase tracking-wide text-muted">Termin</dt>
-                  <dd className="mt-1">{details.date}</dd>
-                </div>
-              </dl>
-            ) : null}
 
             <div className="mt-8">
               <Link href="/login" className={buttonVariants({ size: 'lg' })}>

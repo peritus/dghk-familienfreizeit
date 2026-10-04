@@ -5,7 +5,7 @@ The route table is:
 
 | Route | Implemented behavior |
 |---|---|
-| `/` | Public organiser landing with event details and organiser login link |
+| `/` | Public organiser landing with organiser login link |
 | `/login` | Public organiser magic-link login |
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with header-dialog invitation staging |

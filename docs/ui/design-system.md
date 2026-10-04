@@ -23,8 +23,8 @@ buttons and whole-card links, with an `::after` overlay that keeps the original 
 area clickable while the element slides 4px into its shadow on press. Information-only
 cards and navigation links stay flat.
 
-The public organiser landing uses a responsive hero card with event details, a prominent
-organiser login action, and a small inline drafting-compass illustration.
+The public organiser landing uses a responsive hero card with a prominent organiser login
+action and a small inline drafting-compass illustration.
 
 Workshop screens reuse the same neobrutalist language at every viewport width:
 thick semantic outlines, offset shadows for actionable controls, flat information
