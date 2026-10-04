@@ -17,8 +17,9 @@ invited.
 
 When `DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN=true` is also configured, an
 allowlisted organiser receives the single-use link as `magic_link` in the same
-JSON response. The login form labels this as a demo link and offers it as an
-“Als Organiser anmelden” link. This is a dangerous development adapter, not an
+JSON response. The login form replaces the input and submit button with a
+highlighted orange demo panel offering an “Als Organisator anmelden” link. This
+is a dangerous development adapter, not an
 email-delivery replacement; it must be unset for real user authentication.
 
 During local development, requests served on `localhost`, `127.0.0.1`, or

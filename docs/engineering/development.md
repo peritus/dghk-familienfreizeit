@@ -141,7 +141,7 @@ routes; organiser routes require an organiser session. There is no family login 
 
 To exercise the organiser browser locally, run the preview and open
 `http://127.0.0.1:5173/login`. Submit `demo-organiser@example.invalid`, then
-open the `Als Organiser anmelden` link shown by the login form. The Worker also
+open the `Als Organisator anmelden` link shown by the login form. The Worker also
 prints the clearly marked dangerous-debug magic link in its terminal. Loopback
 links are enabled by the `dev-preview` task's temporary ignored `.dev.vars`
 file. A non-loopback Station preview must also set

@@ -60,12 +60,15 @@ export function Login() {
           </Alert>
         ) : null}
         {status === 'sent' && magicLink ? (
-          <Alert aria-live="polite">
+          <Alert aria-live="polite" className="bg-main text-main-foreground">
             <AlertTitle>Demo-Magic-Link bereit</AlertTitle>
             <AlertDescription>
-              <p>Öffne den Link, um Dich als Organiser anzumelden.</p>
-              <a href={magicLink} className="break-all underline">
-                Als Organiser anmelden
+              <p>Klicke auf den Link, um Dich als Organisator anzumelden.</p>
+              <a
+                href={magicLink}
+                className="inline-flex min-h-11 items-center rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-bold text-foreground shadow-shadow"
+              >
+                Als Organisator anmelden
               </a>
             </AlertDescription>
           </Alert>
@@ -84,26 +87,28 @@ export function Login() {
             <AlertDescription>Bitte versuche es später erneut.</AlertDescription>
           </Alert>
         ) : null}
-        <form onSubmit={submit} className="grid gap-4">
-          <label className="grid gap-1">
-            E-Mail-Adresse
-            <input
-              required
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="min-h-11 rounded border-2 border-border px-3"
-            />
-          </label>
-          <Button type="submit" disabled={status === 'sending' || cooldownRemaining > 0}>
-            {status === 'sending'
-              ? 'Wird angefordert …'
-              : cooldownRemaining > 0
-                ? `Erneut anfordern in ${cooldownRemaining} s`
-                : 'Magic Link anfordern'}
-          </Button>
-        </form>
+        {status === 'sent' && magicLink ? null : (
+          <form onSubmit={submit} className="grid gap-4">
+            <label className="grid gap-1">
+              E-Mail-Adresse
+              <input
+                required
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="min-h-11 rounded border-2 border-border px-3"
+              />
+            </label>
+            <Button type="submit" disabled={status === 'sending' || cooldownRemaining > 0}>
+              {status === 'sending'
+                ? 'Wird angefordert …'
+                : cooldownRemaining > 0
+                  ? `Erneut anfordern in ${cooldownRemaining} s`
+                  : 'Magic Link anfordern'}
+            </Button>
+          </form>
+        )}
         <Link href="~/" className="underline">
           Zur Startseite
         </Link>

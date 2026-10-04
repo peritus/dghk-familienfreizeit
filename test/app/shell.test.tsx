@@ -249,9 +249,13 @@ test('the login form renders a dangerous demo link when the Worker returns one',
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
 
-  const link = await screen.findByRole('link', { name: 'Als Organiser anmelden' })
+  const link = await screen.findByRole('link', { name: 'Als Organisator anmelden' })
   expect(link.getAttribute('href')).toBe('http://127.0.0.1/auth/demo-token')
   expect(screen.getByText('Demo-Magic-Link bereit')).toBeTruthy()
+  expect(screen.getByText('Klicke auf den Link, um Dich als Organisator anzumelden.')).toBeTruthy()
+  expect(screen.getByRole('alert').className).toContain('bg-main')
+  expect(screen.queryByLabelText('E-Mail-Adresse')).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Magic Link anfordern' })).toBeNull()
 })
 
 test('a direct organiser URL loads the lazy route', async () => {
