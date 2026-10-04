@@ -92,7 +92,8 @@ the pure parts of `src/modules/**`.
 
 ### R4 — No `Date.now()`, no `new Date()` without an argument
 
-The occasion date arrives in the config. Age is `ageAt(birthdate, config.event_date)`.
+The occasion date arrives in the config. Person age is supplied as the integer
+`age` label; solver rules must use that value directly and never read a clock.
 
 *How it breaks:* someone adds a "registered recently" tiebreak and reaches for
 the clock. The correct move is to use the `created_at` already in the solver input,

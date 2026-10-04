@@ -52,7 +52,7 @@ The first token is the event type.
 
 ```kdl
 FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
-PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role=adult
+PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" age=#null role=adult
 ```
 
 Unless a fixture explicitly supplies `seq`, `at`, `actor`, or `subject` as a

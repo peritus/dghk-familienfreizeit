@@ -84,7 +84,7 @@ and are not part of the built profile identity ([deployment](../engineering/depl
 ## 2. Kernel labels
 
 The kernel owns the person and family keys set by its events: `member-of`,
-`given-name`, `family-name`, `birthdate`, `display-name`, `email`, and `locale`.
+`given-name`, `family-name`, `age`, `display-name`, `email`, and `locale`.
 The profile supplies the value vocabulary for `role` with a `property` trait named
 `role`, because modules refer to role values in their parameters.
 

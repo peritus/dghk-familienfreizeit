@@ -72,7 +72,7 @@ The profile composition contract includes these independent fixtures:
 
 | Trait | Builder | Scope | Semantics |
 |---|---|---|---|
-| `role` | property | person | `adult`, `child`, or `infant`; stated in `PersonAdded`, not derived from birthdate |
+| `role` | property | person | `adult`, `child`, or `infant`; stated in `PersonAdded`, not derived from age |
 | `diet` | property | person | optional enum `vegetarian`, `vegan`, `meat`, or `other`; rendered by the generic `choice` control |
 | `food-note` | property | person | optional free text for food, intolerance, and service notes; rendered by the generic `free-text` control |
 | `does-not-need-a-bed` | property | person | default `false`; when true the person has no bed demand but remains in the family's placement unit; children and infants only |

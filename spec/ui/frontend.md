@@ -332,5 +332,5 @@ auditable by someone who does not know this stack. React never reaches into it.
 | An ORM | Only the event log and operational tables are stored; see [data model](../architecture/data-model.md) |
 | An auth library | See [authentication](../application/authentication.md) |
 | A solver or LP library | Reviewability beats optimality here |
-| A date library | One function, `ageAt()`, over ISO strings |
+| A date library | Person age is stored as an integer; scheduling uses native datetime values |
 | A CSS-in-JS library | Tailwind and the registry's tokens |

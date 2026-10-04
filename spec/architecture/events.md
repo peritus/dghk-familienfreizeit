@@ -39,7 +39,7 @@ properties are the payload fields.
 
 ```kdl
 FamilyInvited family_id=fam_a email="family_a@example.com" display_name="The A's" locale="de"
-PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" birthdate=#null role=adult
+PersonAdded person_id=per_peter family_id=fam_a given_name="Peter" family_name="A" age=#null role=adult
 ```
 
 The project accepts a restricted KDL profile: one event node per line, no
@@ -69,7 +69,7 @@ discover the problem in the solver.
 ## Rules for payloads
 
 1. **Payloads carry values, not references to mutable state.** `PersonAdded`
-   carries the birthdate. It does not carry "look up the birthdate from an
+   carries the age. It does not carry "look up the age from an
    external file". Replaying the log must not require anything but the log.
 
 2. **Payloads are complete, not deltas.** `PersonUpdated` and ranked-preference
@@ -105,7 +105,7 @@ The kernel mappings are:
 | `FamilyInvited` | `family_id` | `display_name` → `display-name`; `email` → `email`; `locale` → `locale` | creates the family |
 | `FamilyDisplayNameChanged` | `family_id` | `new_display_name` → `display-name` | `old_display_name` is history-only; replaces the current display-name label |
 | `FamilyEmailChanged` | `family_id` | `new_email` → `email` | `old_email` is history-only; replaces the current email label |
-| `PersonAdded` | `person_id` | `family_id` → `member-of`; `given_name` → `given-name`; `family_name` → `family-name`; `birthdate` → `birthdate`; `role` → `role` | creates the person |
+| `PersonAdded` | `person_id` | `family_id` → `member-of`; `given_name` → `given-name`; `family_name` → `family-name`; `age` → `age`; `role` → `role` | creates the person |
 | `PersonUpdated` | `person_id` | the same mappings as `PersonAdded` | full replacement of setup-owned person labels |
 | `PersonWithdrawn` | `person_id` | none | `reason` is history-only; withdrawal is lifecycle state |
 
@@ -161,16 +161,16 @@ so its sessions lose access without a cleanup step
 {
   person_id: string, family_id: string,
   given_name: string, family_name: string,
-  birthdate: string | null,
+  age: number | null,
   role: string                  // values are validated by the active profile
 }
 ```
 Emitted by the family or by an allowlisted organiser, on the family's behalf
-(D24). Folds to `member-of`, `given-name`, `family-name`, `birthdate`, and
+(D24). Folds to `member-of`, `given-name`, `family-name`, `age`, and
 `role`. Everything else about a person — bed demand, accessibility, diet — is
 an ordinary label set by the module or profile trait that owns it.
 
-*Note on `role`:* it is stated, not derived from birthdate. A 17-year-old may be
+*Note on `role`:* it is stated, not derived from age. A 17-year-old may be
 registered as an adult by their family and that is their call. Modules use `role`
 for role-based rules; no module turns role into a bed exception.
 

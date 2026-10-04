@@ -113,7 +113,7 @@ views:
 - **Zimmer** uses the generic profile-driven room controls, including the
   explicit unanswered state, the sleeping-place count, infant bed toggles, and
   the deferred family room note with save/discard actions.
-- **Personen** uses a person selector, add/edit form, role and birthdate fields,
+- **Personen** uses a person selector, add/edit form, role and integer age fields,
   and the shared destructive confirmation for `PersonWithdrawn`.
 - **Essen** uses the same person selector and the generic person-scoped
   `diet` choice plus `food-note` free-text controls. Both write the configured

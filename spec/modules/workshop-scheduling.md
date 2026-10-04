@@ -28,6 +28,11 @@ Timestamps are canonical instants, `starts_at < ends_at`, and live slots may
 not overlap or touch. Retiring a slot preserves identity and causes affected
 placements to produce diagnostics rather than silently moving.
 
+The persisted slot has no capacity. The organiser UI accepts `starts_at` as a
+local start datetime and a positive integer `duration_minutes`, derives
+`ends_at`, and stages only the canonical start/end event fields. Workshop
+capacity remains on workshops; physical capacity remains on workshop spaces.
+
 The scheduling boundary also records explicit space-slot blocking/unblocking
 facts. The space screen exposes these as a simple per-slot availability editor;
 the resolver and scheduler consume them as typed constraints.

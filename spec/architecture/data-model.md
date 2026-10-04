@@ -100,7 +100,7 @@ Examples:
 
 ```text
 person:123  role=<profile-defined role>
-person:123  birthdate="YYYY-MM-DD"
+person:123  age=12
 person:123  <profile-defined property>=<value>
 person:123  needs=<profile-defined capability>
 
