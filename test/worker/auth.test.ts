@@ -5,6 +5,11 @@ import { app } from '../../src/worker/index.js'
 import { currentPrincipal } from '../../src/auth/principal.js'
 import { issueMagicLink, redeemMagicLink } from '../../src/auth/service.js'
 
+const organiserEnv = {
+  ...env,
+  DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS: 'organiser@example.test' as const,
+}
+
 describe('authentication boundary', () => {
   test('local login mode prints a magic link and redeems it to the organiser host', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -12,6 +17,7 @@ describe('authentication boundary', () => {
     const localEnv = {
       ...env,
       DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
+      DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS: 'organiser@example.test' as const,
     }
     try {
       const response = await app.request(
@@ -53,6 +59,7 @@ describe('authentication boundary', () => {
       DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE: 'true' as const,
       DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES: 'true' as const,
       DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST: 'preview.tailnet.ts.net',
+      DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS: 'organiser@example.test' as const,
     }
     try {
       const response = await app.request(
@@ -178,7 +185,7 @@ describe('authentication boundary', () => {
           ],
         }),
       },
-      env,
+      organiserEnv,
     )
     expect(response.status).toBe(201)
     expect(
@@ -211,7 +218,7 @@ describe('authentication boundary', () => {
           ],
         }),
       },
-      env,
+      organiserEnv,
     )
     expect(forbidden.status).toBe(403)
   })
@@ -279,7 +286,7 @@ describe('authentication boundary', () => {
           ],
         }),
       },
-      env,
+      organiserEnv,
     )
     expect(response.status).toBe(403)
     expect(
@@ -325,7 +332,7 @@ describe('authentication boundary', () => {
           },
           body: JSON.stringify({ expected_head, events: [] }),
         },
-        env,
+        organiserEnv,
       )
 
     const lower = await request(0)
@@ -393,7 +400,7 @@ describe('authentication boundary', () => {
           ],
         }),
       },
-      env,
+      organiserEnv,
     )
     expect(response.status).toBe(403)
   })
@@ -409,20 +416,20 @@ describe('authentication boundary', () => {
     const missingOrigin = await app.request(
       '/api/logout',
       { method: 'POST', headers: { cookie } },
-      env,
+      organiserEnv,
     )
     expect(missingOrigin.status).toBe(403)
     const foreignOrigin = await app.request(
       '/api/logout',
       { method: 'POST', headers: { cookie, origin: 'https://attacker.example' } },
-      env,
+      organiserEnv,
     )
     expect(foreignOrigin.status).toBe(403)
 
     const loggedOut = await app.request(
       '/api/logout',
       { method: 'POST', headers: { cookie, origin: 'http://localhost' } },
-      env,
+      organiserEnv,
     )
     expect(loggedOut.status).toBe(200)
     expect(loggedOut.headers.get('set-cookie')).toContain('Max-Age=0')

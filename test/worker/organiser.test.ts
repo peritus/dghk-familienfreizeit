@@ -6,6 +6,11 @@ import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
 import { familienfreizeit2027Profile } from '../../src/config/profiles/familienfreizeit-2027.js'
 import { readEvents } from '../../src/events/store.js'
 
+const organiserEnv = {
+  ...env,
+  DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS: 'organiser@example.test' as const,
+}
+
 async function organiserCookie(): Promise<string> {
   const options = {
     now: () => '2027-01-01T00:00:00.000Z',
@@ -21,7 +26,7 @@ test('organiser log is authenticated and exposes the selected-profile registry',
   const response = await app.request(
     '/api/organiser/log',
     { headers: { cookie: await organiserCookie() } },
-    env,
+    organiserEnv,
   )
   expect(response.status).toBe(200)
   expect(await response.json()).toMatchObject({
@@ -69,7 +74,7 @@ test('organiser apply validates the prospective batch and returns its world', as
         ],
       }),
     },
-    env,
+    organiserEnv,
   )
   expect(response.status).toBe(200)
   const result = (await response.json()) as {
@@ -108,7 +113,7 @@ test('organiser apply validates the prospective batch and returns its world', as
         ],
       }),
     },
-    env,
+    organiserEnv,
   )
   expect(invalid.status).toBe(400)
   expect(
@@ -135,11 +140,11 @@ test('organiser log replays selected-profile module events', async () => {
         ],
       }),
     },
-    env,
+    organiserEnv,
   )
   expect(applied.status).toBe(200)
 
-  const log = await app.request('/api/organiser/log', { headers: { cookie } }, env)
+  const log = await app.request('/api/organiser/log', { headers: { cookie } }, organiserEnv)
   expect(log.status).toBe(200)
   expect(await log.json()).toMatchObject({
     head_seq: 1,
@@ -176,7 +181,7 @@ test('organiser apply reports intervening events for a stale head', async () => 
         ],
       }),
     },
-    env,
+    organiserEnv,
   )
   expect(first.status).toBe(200)
 
@@ -192,7 +197,7 @@ test('organiser apply reports intervening events for a stale head', async () => 
         events: [],
       }),
     },
-    env,
+    organiserEnv,
   )
   expect(stale.status).toBe(409)
   expect(await stale.json()).toMatchObject({ error: 'stale_head', actual_head: 1 })

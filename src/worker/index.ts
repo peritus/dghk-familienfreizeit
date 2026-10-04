@@ -36,8 +36,6 @@ const maxJsonStringLength = 4096
 const familyEventLimit = 120
 const eventRateLimitDuration = 60 * 60 * 1000
 
-const isOrganiser = (email: string): boolean => organiserAllowlist.has(email)
-
 let warnedMagicLinkConsole = false
 let warnedInsecureSessionCookies = false
 
@@ -64,6 +62,7 @@ app.post('/api/login', async (context) => {
   const events = await readEventLog(context)
   const world = deriveEventWorld(events)
   const familyExists = familyForEmail(world, email) !== null
+  const isOrganiser = organiserPredicate(context.env)
   const result = await issueMagicLink(context.env.DB, email, ip, familyExists, {
     isOrganiser,
     now: () => now,
@@ -77,6 +76,7 @@ app.post('/api/login', async (context) => {
 })
 
 app.get('/auth/:token', async (context) => {
+  const isOrganiser = organiserPredicate(context.env)
   let result
   try {
     result = await redeemMagicLink(context.env.DB, context.req.param('token'), { isOrganiser })
@@ -340,12 +340,17 @@ async function principalFromContext(
     const principal = await currentPrincipal(
       context.env.DB,
       getCookie(context, 'sid'),
-      { isOrganiser },
+      { isOrganiser: organiserPredicate(context.env) },
       activeProfile.validation_view,
     )
     if (principal) span.setAttribute('auth.kind', principal.kind)
     return principal
   })
+}
+
+function organiserPredicate(env: Env): (email: string) => boolean {
+  const allowlist = organiserAllowlist(env)
+  return (email) => allowlist.has(email)
 }
 
 async function readEventLog(context: Context<{ Bindings: Env }>) {
