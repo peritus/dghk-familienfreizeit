@@ -53,6 +53,21 @@ type WorkshopPlacement = {
 There is no additional placement entity. A workshop without a feasible placement remains a
 visible unscheduled outcome with a blocking diagnostic.
 
+An organiser may add one `fixed-placement` label to a workshop. Its value is a
+structured reference to the selected slot and space:
+
+```ts
+type FixedWorkshopPlacement = {
+  slot_id: string
+  space_id: string
+}
+```
+
+The label is an ordinary event-backed organiser decision and may carry the
+optional `LabelSet.note`. Clearing the label removes the fixed decision. The
+solver derives the decision from the current world; it does not persist a
+placement result or create a second placement identity.
+
 Hard checks cover slot overlap, space availability and capacity, explicit
 space-slot blocks, leader availability/conflicts, workshop needs/provided
 capabilities, cancellation, and organiser-fixed placement decisions. Demand and
@@ -60,11 +75,16 @@ profile-defined scoring terms are deterministic soft inputs.
 
 ## 3. Organiser review
 
-Automatic placement is the initial UI path. The domain also accepts typed
-organiser decisions for fixed workshop placement, with resolver diagnostics and
-precedence. A reviewed calculation records the input sequence and compatibility
-context, so a later ranking edit does not alter the reviewed result until an
-explicit recalculation/review.
+Automatic placement and fixed placement are both derived from the same current
+world. A valid fixed decision claims its selected slot/space before the
+automatic pass. An invalid fixed decision remains visible as a blocking
+diagnostic and is not silently replaced by an automatic choice. Review shows the
+fixed result beside the automatic-only result it overrides; both are derived in
+memory from the same solver input.
+
+A reviewed calculation records the input sequence and compatibility context, so
+a later ranking edit does not alter the reviewed result until an explicit
+recalculation/review.
 
 Released/effective schedule composition belongs to M10 release control and is not
 part of the M8 organiser review surface.
@@ -76,5 +96,6 @@ part of the M8 organiser review surface.
 - Space-slot blocks exclude only the blocked pair and remain inspectable.
 - Every workshop receives at most one placement.
 - Availability, capacity, needs/provides, leader conflicts, cancellation,
-  fixed placement, unscheduled diagnostics, and deterministic traces are tested.
+  fixed placement, invalid fixed placement, unscheduled diagnostics, and
+  deterministic traces are tested.
 - Late ranking edits leave a reviewed calculation stable until explicit review.

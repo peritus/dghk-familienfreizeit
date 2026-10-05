@@ -129,9 +129,10 @@ type WorkshopAssignmentSection = {
 ```
 
 `fixed` lists every declared fixed decision verbatim; `fixed_violations` names
-the ones that could not be honoured this cycle and why. Diff/review surfaces
-that explain fixed-over-automatic precedence to organisers remain outstanding
-(§13).
+the ones that could not be honoured this cycle and why. Review surfaces explain
+fixed-over-automatic precedence by showing the fixed-aware result beside the
+automatic-only result. Both are derived in memory and do not add a workshop
+state store.
 
 ## 11. Screens, controls, reports, and emails
 
@@ -165,9 +166,10 @@ converted into automatic assignments in the first place.
 ## Outstanding
 
 - Review/precedence-explanation UI: an organiser-facing surface that shows a
-  fixed decision alongside the automatic outcome it overrides, and explains
-  why. The data model above already carries everything such a surface would
-  need (`fixed`, `fixed_violations`, and each assignment's `reason`).
+  fixed attendance decision alongside the automatic outcome it overrides, and
+  explains why. The data model carries the fixed result and violations; the
+  automatic-only comparison is derived by running the same pure stage without
+  fixed labels.
 - Organiser review surfaces for current and prospective attendance (part of
   [M8](../roadmap.md#m8--workshop-planning-completion)); released/effective
   attendance belongs to M10 release control.
