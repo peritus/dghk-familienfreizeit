@@ -403,17 +403,4 @@ export const fullTraceStages = [
     open: 220,
     details: 'Schmieden: kein passender Raum',
   },
-  {
-    id: 'repair',
-    label: 'Reparatur',
-    description: 'Konflikte und Kapazität',
-    fulfilled: 9,
-    capacity: 2,
-    overlap: 1,
-    leader: 0,
-    unscheduled: 1,
-    not_needed: 0,
-    open: 211,
-    details: '1 Person bleibt zur Prüfung offen',
-  },
 ]

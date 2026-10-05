@@ -41,8 +41,6 @@ const profile = defineOccasionProfile({
     workshopRankings({ ranking_trait: 'prefers-workshop', max_rank: 3, allow_no_preference: true }),
     workshopAssignment({
       workshops_per_person: 1,
-      rank_weights: [3, 2, 1],
-      max_repair_passes: 2,
     }),
   ],
 })

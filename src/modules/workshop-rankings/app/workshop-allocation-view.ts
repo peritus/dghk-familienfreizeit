@@ -41,11 +41,10 @@ export type WorkshopAllocationTraceOutcome =
   | 'cancellation'
   | 'unprocessed'
   | 'fixed'
-  | 'repaired'
   | 'not-needed'
   | 'open'
 
-export type WorkshopAllocationTracePhase = 'round' | 'repair' | 'fixed' | 'result'
+export type WorkshopAllocationTracePhase = 'round' | 'fixed' | 'result'
 
 export type WorkshopAllocationTraceEvent = {
   id: string
@@ -225,7 +224,6 @@ function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
   const outcomeByReason: Record<string, WorkshopAllocationTraceOutcome> = {
     ranked: 'fulfilled',
     fixed: 'fixed',
-    repaired: 'repaired',
   }
   return outcomeByReason[reason] ?? 'unprocessed'
 }
@@ -241,7 +239,6 @@ function outcomeLabel(outcome: WorkshopAllocationTraceOutcome): string {
     cancellation: 'abgesagt',
     unprocessed: 'noch offen',
     fixed: 'fest zugeordnet',
-    repaired: 'repariert',
     'not-needed': 'nicht benötigt',
     open: 'offen',
   }
@@ -276,7 +273,6 @@ function traceDetailText(event: WorkshopAllocationTraceEvent): string {
       return `${event.workshop_title}: ${event.person_name}${rank} · ohne Termin`
     case 'fulfilled':
     case 'fixed':
-    case 'repaired':
       return `${event.workshop_title}: ${event.person_name}${rank}${slot ? ` · ${slot.slice(3)}` : ''}`
     case 'not-needed':
       return `${event.person_name}: ${event.workshop_title}${rank} nicht mehr benötigt, Ziel bereits erreicht`
@@ -300,8 +296,6 @@ function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): 
       return `Erfüllt · ${wishes}`
     case 'fixed':
       return `Fest zugeordnet · ${count} ${count === 1 ? 'Person' : 'Personen'}`
-    case 'repaired':
-      return `Repariert · ${count} ${count === 1 ? 'Person' : 'Personen'}`
     case 'not-needed':
       return `Ziel erreicht · ${wishes} nicht benötigt`
     case 'open':
@@ -369,7 +363,6 @@ function slotLabel(
 }
 
 function tracePhase(reason: string): WorkshopAllocationTracePhase {
-  if (reason === 'repaired') return 'repair'
   if (reason === 'fixed') return 'fixed'
   return 'round'
 }
@@ -462,52 +455,9 @@ export function buildWorkshopAllocationProjection(
       rank: null,
       phase: tracePhase(item.reason),
       outcome: assignmentOutcome(item.reason),
-      detail:
-        item.reason === 'fixed'
-          ? 'Feste Zuordnung.'
-          : item.reason === 'repaired'
-            ? 'Durch Reparatur zugeordnet.'
-            : 'Automatisch zugeordnet.',
+      detail: item.reason === 'fixed' ? 'Feste Zuordnung.' : 'Automatisch zugeordnet.',
       slot_label: slotLabel(item.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
-      competing_workshop_title: null,
-      queue_position: null,
-      queue_size: null,
-    })
-  }
-  for (const repair of assignment.repairs) {
-    const repairedWorkshop = workshops.get(repair.workshop_id)
-    const seatedPerson = peopleById.get(repair.person_id)
-    addEvent({
-      id: `repair-seat-${repair.person_id}-${repair.workshop_id}-${repair.rank}`,
-      person_id: repair.person_id,
-      person_name: seatedPerson?.name ?? personName(input.world, repair.person_id),
-      workshop_id: repair.workshop_id,
-      workshop_title: repairedWorkshop?.title ?? repair.workshop_id,
-      rank: repair.rank,
-      phase: 'repair',
-      outcome: 'repaired',
-      detail: 'Durch Reparatur zugeordnet.',
-      slot_label: slotLabel(repair.workshop_id, placements, slots, input.time_zone),
-      capacity: repairedWorkshop?.capacity ?? null,
-      competing_workshop_title: null,
-      queue_position: null,
-      queue_size: null,
-    })
-    const movedWorkshop = workshops.get(repair.displaced_to_workshop_id)
-    const displacedPerson = peopleById.get(repair.displaced_person_id)
-    addEvent({
-      id: `repair-move-${repair.displaced_person_id}-${repair.displaced_to_workshop_id}-${repair.displaced_rank ?? 'none'}`,
-      person_id: repair.displaced_person_id,
-      person_name: displacedPerson?.name ?? personName(input.world, repair.displaced_person_id),
-      workshop_id: repair.displaced_to_workshop_id,
-      workshop_title: movedWorkshop?.title ?? repair.displaced_to_workshop_id,
-      rank: repair.displaced_rank,
-      phase: 'repair',
-      outcome: 'repaired',
-      detail: `Durch Reparatur aus ${repairedWorkshop?.title ?? repair.workshop_id} verschoben.`,
-      slot_label: slotLabel(repair.displaced_to_workshop_id, placements, slots, input.time_zone),
-      capacity: movedWorkshop?.capacity ?? null,
       competing_workshop_title: null,
       queue_position: null,
       queue_size: null,
@@ -599,7 +549,7 @@ export function buildWorkshopAllocationProjection(
       leading_workshops: leadingWorkshops,
       wish_count: ranking?.choices.filter((choice) => choice.workshop_id !== null).length ?? 0,
       fulfilled_count: personEvents.filter((event) =>
-        ['fulfilled', 'fixed', 'repaired'].includes(event.outcome),
+        ['fulfilled', 'fixed'].includes(event.outcome),
       ).length,
     }
   })
@@ -683,9 +633,8 @@ export function buildWorkshopAllocationTraceStages(
       groups.set(event.outcome, list)
     }
     const detailOrder: WorkshopAllocationTraceOutcome[] = [
-      'fulfilled',
       'fixed',
-      'repaired',
+      'fulfilled',
       'capacity',
       'overlap',
       'leader',
@@ -760,8 +709,7 @@ export function buildWorkshopAllocationTraceStages(
     )
   }
   const counts = (items: readonly WorkshopAllocationTraceEvent[]) => ({
-    fulfilled: items.filter((event) => ['fulfilled', 'fixed', 'repaired'].includes(event.outcome))
-      .length,
+    fulfilled: items.filter((event) => ['fulfilled', 'fixed'].includes(event.outcome)).length,
     capacity: items.filter((event) => event.outcome === 'capacity').length,
     overlap: items.filter((event) => event.outcome === 'overlap').length,
     leader: items.filter((event) => event.outcome === 'leader').length,
@@ -810,13 +758,13 @@ export function buildWorkshopAllocationTraceStages(
       detail_groups: detailGroups(round),
     })
   }
-  const resultEvents = events.filter((event) => event.phase === 'repair' || event.rank === null)
+  const resultEvents = events.filter((event) => event.rank === null)
   if (resultEvents.length) {
     const resultCounts = counts(resultEvents)
     stages.push({
       id: 'result',
       label: 'Ergebnis',
-      description: 'Feste Zuordnungen, Reparaturen und offene Fälle',
+      description: 'Feste Zuordnungen und offene Fälle',
       phase: 'result',
       rank: null,
       ...resultCounts,
@@ -832,7 +780,7 @@ export function buildWorkshopAllocationTraceStages(
     for (const stage of stages) {
       const stageEvents = selectedEvents.filter((event) => {
         if (stage.id === 'answers') return true
-        if (stage.id === 'result') return event.phase === 'repair' || event.rank === null
+        if (stage.id === 'result') return event.rank === null
         return event.phase === 'round' && event.rank === stage.rank
       })
       stage.selected_summary =

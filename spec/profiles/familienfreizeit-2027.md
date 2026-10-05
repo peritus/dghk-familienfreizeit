@@ -119,7 +119,7 @@ them is a deployment, reviewed before communicating.
 | `workshop-rankings` | `ranking_trait` | `prefers-workshop` |
 | | `max_rank` | `3` |
 | | `allow_no_preference` | `true` |
-| `workshop-assignment` | `workshops_per_person`, `rank_weights`, `max_repair_passes` | `2`, `[3, 2, 1]`, `5` |
+| `workshop-assignment` | `workshops_per_person` | `2` |
 
 Workshop attendance is choice-bound: `workshops_per_person` caps automatic
 assignments and all choices remain ranked choices; it never authorizes assigning

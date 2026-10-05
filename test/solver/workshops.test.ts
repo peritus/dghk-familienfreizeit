@@ -279,8 +279,6 @@ function assignmentSection(
 
 const defaultParams: WorkshopAssignmentParams = {
   workshops_per_person: 1,
-  rank_weights: [3, 2, 1],
-  max_repair_passes: 2,
 }
 
 test('a fixed attendance decision takes precedence over a ranked choice for the same workshop', () => {
@@ -471,7 +469,7 @@ test('a stable re-derive recomputes the same current assignment without prior-pl
   ])
 })
 
-test('bounded repair reseats a ranked person by relocating a non-fixed occupant', () => {
+test('strict rounds do not displace an earlier assignment for later coverage', () => {
   const events = [
     venue('wsp_a', 1),
     venue('wsp_b', 2),
@@ -484,32 +482,22 @@ test('bounded repair reseats a ranked person by relocating a non-fixed occupant'
     ranking('per_a', 'wks_2', 2, 11),
     ranking('per_b', 'wks_1', 1, 12),
   ]
-  const params: WorkshopAssignmentParams = {
-    ...defaultParams,
-    max_repair_passes: 3,
-  }
-  const section = assignmentSection(events, params)
-  expect(section.unassigned).toEqual([])
-  expect(section.assignments).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ person_id: 'per_b', workshop_id: 'wks_1', reason: 'repaired' }),
-      expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', reason: 'repaired' }),
-    ]),
-  )
-  expect(section.repairs).toEqual([
+  const section = assignmentSection(events, defaultParams)
+  expect(section.assignments).toEqual([
     {
-      person_id: 'per_b',
+      person_id: 'per_a',
       workshop_id: 'wks_1',
+      slot_id: 'slot_morning',
       rank: 1,
-      displaced_person_id: 'per_a',
-      displaced_from_workshop_id: 'wks_1',
-      displaced_to_workshop_id: 'wks_2',
-      displaced_rank: 2,
+      reason: 'ranked',
     },
+  ])
+  expect(section.unassigned).toEqual([
+    { person_id: 'per_b', workshop_id: null, reason: 'no eligible capacity' },
   ])
 })
 
-test('a minimum never assigns a workshop outside the current ranking', () => {
+test('automatic allocation never assigns a workshop outside the current ranking', () => {
   const events = [
     venue('wsp_a', 1),
     slot(2),

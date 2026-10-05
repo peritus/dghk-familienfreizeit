@@ -308,8 +308,6 @@ export const luebben2027Profile = defineOccasionProfile({
     }),
     workshopAssignment({
       workshops_per_person: workshopsPerPerson,
-      rank_weights: [3, 2, 1],
-      max_repair_passes: 5,
     }),
     familyPreferences({
       sections: [

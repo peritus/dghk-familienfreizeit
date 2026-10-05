@@ -448,8 +448,6 @@ export default defineOccasionProfile({
 
     workshopAssignment({
       workshops_per_person: 2,
-      rank_weights: [3, 2, 1],
-      max_repair_passes: 5,
     }),
 
     familyPreferences({

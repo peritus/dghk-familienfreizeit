@@ -54,8 +54,6 @@ const profile = defineOccasionProfile({
     workshopRankings({ ranking_trait: 'prefers-workshop', max_rank: 3, allow_no_preference: true }),
     workshopAssignment({
       workshops_per_person: 2,
-      rank_weights: [3, 2, 1],
-      max_repair_passes: 5,
     }),
   ],
 })
@@ -286,23 +284,11 @@ test('the trace has one event per choice and never repeats a person in a detail 
     ),
   )
   for (const assignment of section.assignments) {
-    if (assignment.reason === 'repaired') {
-      expect(
-        section.repairs.some(
-          (repair) =>
-            (repair.person_id === assignment.person_id &&
-              repair.workshop_id === assignment.workshop_id) ||
-            (repair.displaced_person_id === assignment.person_id &&
-              repair.displaced_to_workshop_id === assignment.workshop_id),
-        ),
-      ).toBe(true)
-    } else {
-      expect(
-        snapshotKeys.has(
-          `${assignment.person_id}|${assignment.workshop_id}|${assignment.slot_id}|${assignment.reason}`,
-        ),
-      ).toBe(true)
-    }
+    expect(
+      snapshotKeys.has(
+        `${assignment.person_id}|${assignment.workshop_id}|${assignment.slot_id}|${assignment.reason}`,
+      ),
+    ).toBe(true)
   }
   for (const round of section.rounds) {
     const occupied = new Set<string>()

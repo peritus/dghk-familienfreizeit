@@ -29,7 +29,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * something different or its explicit explanation contract changed — update it
  * only with that intent.
  */
-const baselineDigest = '3ebba3ae58d6c1ebe57017324edd0136c65e21a96fa8bac92739f3fddd1824ed'
+const baselineDigest = 'c4037fc846b76cc4ef48a3bfc6e283cf2dfd57022b338c2e77f23889fe905b34'
 
 const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)

@@ -67,8 +67,16 @@ complaint is `solve(solverInputAt(input_seq))`.
 ## D4 — Stable sorted greedy with bounded repair, not integer programming
 
 *Chosen.* A documented sort order, a scored greedy pass for unresolved claims,
-then capped pairwise swaps. The current derived world is the complete solver
-input; a solve has no hidden plan from an earlier run.
+then capped pairwise swaps where the selected module contract permits them. The
+current derived world is the complete solver input; a solve has no hidden plan
+from an earlier run.
+
+Strict Wahlrunde attendance is a module-level specialization: fixed decisions
+are applied first, ranked choices are processed round by round, and an earlier
+round assignment is never displaced by a later round. Its trace therefore
+describes the exact allocation path without a post-round repair pass. Room
+placement retains the bounded repair step because it has a different placement
+contract and trace.
 
 The allocation priority is:
 

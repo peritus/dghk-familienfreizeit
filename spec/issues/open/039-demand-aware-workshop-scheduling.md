@@ -82,9 +82,10 @@ available preference information to produce a better feasible plan.
   only `rankingOutput.rankings` and never reads `rankingOutput.demand`. See
   [`src/modules/workshop-assignment/index.ts`](../../../src/modules/workshop-assignment/index.ts#L66-L88)
   and [`src/modules/workshop-rankings/index.ts`](../../../src/modules/workshop-rankings/index.ts#L92-L100).
-- The attendance algorithm processes ranked choices and bounded repairs from
-  the current input. Under D31, none of those steps may introduce an unchosen
-  workshop assignment, and none reschedules a workshop. See
+- The attendance algorithm processes ranked choices in stable Wahlrunde order
+  from the current input and never displaces an earlier-round assignment.
+  Under D31, none of those steps may introduce an unchosen workshop assignment,
+  and none reschedules a workshop. See
   [`src/modules/workshop-assignment/index.ts`](../../../src/modules/workshop-assignment/index.ts#L174-L358).
 - D4 requires hard constraints first, then maximum assigned coverage, configured
   opportunity priority, higher-ranked choices, and stable tie-breaking.
@@ -119,10 +120,9 @@ The recommended shape is:
      compete with one another;
    - avoidable leader conflicts or concentration of programme load, where those
      are not already hard constraints.
-5. After placement, run attendance allocation and calculate the resulting
-   objective. A bounded repair pass may reconsider a small number of workshop
-   placements when doing so improves the objective without violating fixed
-   decisions or hard constraints.
+5. After placement, run the strict Wahlrunde attendance allocation and calculate
+   the resulting objective. A placement change requires a fresh allocation from
+   the current schedule; attendance does not perform a post-round repair pass.
 6. Emit trace terms that explain why a workshop was assigned to its slot and
    which demand/co-selection trade-offs were considered.
 

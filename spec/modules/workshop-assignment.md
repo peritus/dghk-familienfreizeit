@@ -24,8 +24,6 @@ Requires `official-workshops`, `workshop-rankings`, and `workshop-scheduling`.
 ```ts
 type WorkshopAssignmentParams = {
   workshops_per_person: number
-  rank_weights: readonly number[]
-  max_repair_passes: number
 }
 ```
 
@@ -57,17 +55,16 @@ person is fixed into for the current cycle. No trait roles.
 ## 7. Solver input and stages
 
 One stage, `workshop-assignment.attendance`, reading
-`workshop-scheduling.placement` and `workshop-rankings.demand`. It follows D4
-in three steps:
+`workshop-scheduling.placement` and `workshop-rankings.demand`. It follows the
+round-based attendance specialization of D4 in two steps:
 
 1. apply feasible fixed attendance decisions first — they always take
    precedence over every automatic outcome, so they claim capacity and slot
    occupancy before anything else runs;
 2. process every configured ranked choice in Wahlrunde order, respecting the
-   per-person assignment target and rank weights;
-3. perform bounded deterministic repair (up to `max_repair_passes`) using only
-   current ranked choices, moving at most one non-fixed occupant per repair to
-   seat a still-unassigned person, and explaining every movement in the trace.
+   per-person assignment target. An earlier-round assignment
+   is never displaced by a later round; a person without a feasible ranked
+   choice remains unassigned.
 
 Every configured ranked choice is considered in order. `workshops_per_person`
 limits automatic assignments but never creates an assignment outside the
@@ -77,17 +74,17 @@ unassigned.
 The output assigns at most one workshop to a person per slot, respects
 workshop capacity, records unassigned reasons, and emits traces for capacity,
 overlap, leader-conflict, eligibility, cancellation, and unscheduled cases. A
-repair pass never moves a `'fixed'` assignment or creates an unchosen
-assignment.
+later round never moves an earlier assignment or creates an unchosen assignment.
 
 ## 8. Rules and scoring
 
 Hard constraints (cancellation, participation mode, leader conflict,
 eligibility, capacity, and same-slot overlap) are evaluated inline by the
 stage rather than declared as a separate `Rule[]`; every rejection carries one
-of the `hard.*` reason codes used in traces and violations. Ranked choices
-score by `rank_weights`; fixed, ranked, and repaired placements are the only
-assignment origins. There is no fill score or fill assignment.
+of the `hard.*` reason codes used in traces and violations. Ranked choices are
+processed in ascending Wahlrunde order with stable person-id order inside each
+round; fixed and ranked placements are the only assignment origins. There is no
+fill score, fill assignment, or post-round repair.
 
 ## 9. Preflight checks
 
@@ -117,16 +114,7 @@ type WorkshopAssignmentSection = {
     workshop_id: string
     slot_id: string
     rank: number | null
-    reason: 'fixed' | 'ranked' | 'repaired'
-  }[]
-  repairs: readonly {
-    person_id: string
-    workshop_id: string
-    rank: number
-    displaced_person_id: string
-    displaced_from_workshop_id: string
-    displaced_to_workshop_id: string
-    displaced_rank: number | null
+    reason: 'fixed' | 'ranked'
   }[]
   unassigned: readonly { person_id: string; workshop_id: string | null; reason: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
@@ -153,8 +141,8 @@ No screens or controls. Reports: `workshop-roster`, `workshop-person-plan`,
 ## 12. Tests
 
 - Deterministic allocation on the current derived input, repeated-solve
-  stability, rank weighting, per-person targets without implicit assignment, bounded
-  repair, round snapshots, and stable traces.
+  stability, Wahlrunde ordering, per-person targets without implicit assignment,
+  strict round snapshots, and stable traces.
 - No automatic assignment targets a workshop outside the person's current
   ranking, for either children or adults.
 - A fixed attendance decision takes precedence over a ranked choice for the
