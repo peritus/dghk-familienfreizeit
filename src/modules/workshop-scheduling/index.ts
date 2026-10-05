@@ -32,6 +32,7 @@ export type SpaceSlotBlock = {
 export type WorkshopSchedulingSummary = {
   slots: readonly WorkshopSlot[]
   space_slot_blocks: readonly SpaceSlotBlock[]
+  fixed_placements: readonly FixedWorkshopPlacement[]
 }
 
 export type WorkshopPlacement = {
@@ -40,9 +41,21 @@ export type WorkshopPlacement = {
   space_id: string
 }
 
+export type FixedWorkshopPlacement = WorkshopPlacement & {
+  note: string | null
+}
+
+export type FixedWorkshopPlacementViolation = FixedWorkshopPlacement & {
+  reasons: readonly string[]
+}
+
 export type WorkshopSchedulingSection = {
   placements: readonly WorkshopPlacement[]
   unscheduled: readonly { workshop_id: string; reason: string }[]
+  automatic_placements: readonly WorkshopPlacement[]
+  automatic_unscheduled: readonly { workshop_id: string; reason: string }[]
+  fixed: readonly FixedWorkshopPlacement[]
+  fixed_violations: readonly FixedWorkshopPlacementViolation[]
 }
 
 type ScheduleSolverInput = WorkshopSchedulingSummary & {
@@ -58,6 +71,7 @@ type ScheduleSolverInput = WorkshopSchedulingSummary & {
 const slotId = z.string().regex(/^slot_[a-zA-Z0-9_-]+$/)
 const blockId = z.string().regex(/^blk_[a-zA-Z0-9_-]+$/)
 const spaceId = z.string().regex(/^wsp_[a-zA-Z0-9_-]+$/)
+const fixedPlacementValue = z.object({ slot_id: slotId, space_id: spaceId })
 const slotPayload = z.object({
   slot_id: slotId,
   starts_at: z.string().datetime({ offset: true }),
@@ -71,6 +85,12 @@ const blockPayload = z.object({
   slot_id: slotId,
   reason: z.string().nullable(),
 })
+
+function validateFixedPlacement(value: JsonValue): string | null {
+  return fixedPlacementValue.safeParse(value).success
+    ? null
+    : 'fixed-placement must contain a valid slot_id and space_id'
+}
 
 function entity(world: ValidationWorld, kind: string, id: string): Entity | undefined {
   return world.findEntity(kind, id)
@@ -171,9 +191,31 @@ function summary(world: World): WorkshopSchedulingSummary {
       (a, b) =>
         a.space_id.localeCompare(b.space_id) ||
         a.slot_id.localeCompare(b.slot_id) ||
-        a.id.localeCompare(b.id),
+      a.id.localeCompare(b.id),
     )
-  return { slots, space_slot_blocks: blocks }
+  const fixed_placements = (world.entities_by_kind.workshop ?? [])
+    .flatMap((workshop) => {
+      const label = world.labels_by_entity[workshop.id]?.find(
+        (candidate) => candidate.key === 'fixed-placement',
+      )
+      const parsed = label ? fixedPlacementValue.safeParse(label.value) : null
+      if (!label || !parsed?.success) return []
+      return [
+        {
+          workshop_id: workshop.id,
+          slot_id: parsed.data.slot_id,
+          space_id: parsed.data.space_id,
+          note: label.note,
+        },
+      ]
+    })
+    .sort(
+      (a, b) =>
+        a.workshop_id.localeCompare(b.workshop_id) ||
+        a.slot_id.localeCompare(b.slot_id) ||
+        a.space_id.localeCompare(b.space_id),
+    )
+  return { slots, space_slot_blocks: blocks, fixed_placements }
 }
 
 function solverInput(world: World): ScheduleSolverInput {
@@ -199,7 +241,43 @@ function solverInput(world: World): ScheduleSolverInput {
   }
 }
 
-function placementStage(): SolverStage<WorkshopSchedulingSection> {
+type PlacementRejection = { target: string; rule: string }
+
+function placementRejections(
+  workshop: WorkshopRecord,
+  slot: WorkshopSlot | undefined,
+  space: ScheduleSolverInput['spaces'][number] | undefined,
+  schedule: ScheduleSolverInput,
+  used: ReadonlySet<string>,
+  leaderSlots: ReadonlySet<string>,
+): readonly PlacementRejection[] {
+  if (!slot) return [{ target: 'unknown-slot', rule: 'hard.slot-unavailable' }]
+  if (!space) return [{ target: 'unknown-space', rule: 'hard.space-unavailable' }]
+  const target = `${slot.id}/${space.id}`
+  const rejected: PlacementRejection[] = []
+  if (used.has(target)) rejected.push({ target, rule: 'hard.space-occupied' })
+  if (space.capacity < workshop.capacity)
+    rejected.push({ target, rule: 'hard.space-capacity' })
+  if (
+    !space.availability_windows.some(
+      (window) => window.starts_at <= slot.starts_at && window.ends_at >= slot.ends_at,
+    )
+  )
+    rejected.push({ target, rule: 'hard.space-unavailable' })
+  if (
+    schedule.space_slot_blocks.some(
+      (block) => block.space_id === space.id && block.slot_id === slot.id,
+    )
+  )
+    rejected.push({ target, rule: 'hard.space-slot-blocked' })
+  if (workshop.needs.some((need) => !space.capabilities.includes(need)))
+    rejected.push({ target, rule: 'hard.missing-capability' })
+  if (workshop.leader_ids.some((leader) => leaderSlots.has(`${slot.id}/${leader}`)))
+    rejected.push({ target, rule: 'hard.leader-conflict' })
+  return rejected
+}
+
+function placementStage(includeComparison = true): SolverStage<WorkshopSchedulingSection> {
   return {
     id: 'workshop-scheduling.placement',
     after: [],
@@ -213,45 +291,95 @@ function placementStage(): SolverStage<WorkshopSchedulingSection> {
       const unscheduled: { workshop_id: string; reason: string }[] = []
       const trace: TraceEntry[] = []
       const diagnostics: PreflightFinding[] = []
+      const fixed = schedule.fixed_placements.slice().sort(
+        (a, b) => a.workshop_id.localeCompare(b.workshop_id),
+      )
+      const fixedViolations: WorkshopSchedulingSection['fixed_violations'][number][] = []
+      const fixedWorkshopIds = new Set(fixed.map(({ workshop_id }) => workshop_id))
+      const workshopsById = new Map(schedule.workshops.map((workshop) => [workshop.id, workshop]))
+      const slotsById = new Map(schedule.slots.map((slot) => [slot.id, slot]))
+      const spacesById = new Map(schedule.spaces.map((space) => [space.id, space]))
       const workshops = schedule.workshops
         .slice()
         .sort((a, b) => a.sort_key - b.sort_key || a.id.localeCompare(b.id))
+
+      for (const decision of fixed) {
+        const workshop = workshopsById.get(decision.workshop_id)
+        const slot = slotsById.get(decision.slot_id)
+        const space = spacesById.get(decision.space_id)
+        const rejected = workshop
+          ? placementRejections(workshop, slot, space, schedule, used, leaderSlots)
+          : [{ target: decision.workshop_id, rule: 'hard.workshop-unavailable' }]
+        if (rejected.length > 0 || !workshop || !slot || !space) {
+          const reasons = rejected.map(({ rule }) => rule)
+          const violation = { ...decision, reasons: Object.freeze(reasons) }
+          fixedViolations.push(violation)
+          unscheduled.push({
+            workshop_id: decision.workshop_id,
+            reason: reasons[0] ?? 'hard.fixed-invalid',
+          })
+          diagnostics.push({
+            check: 'workshop-scheduling.fixed-invalid',
+            severity: 'error',
+            subjects: [decision.workshop_id, decision.slot_id, decision.space_id],
+            text: `${decision.workshop_id} fixed in ${decision.slot_id}/${decision.space_id}: ${reasons.join(', ')}`,
+          })
+          trace.push({
+            stage: 'workshop-scheduling.placement',
+            step: 'fixed-invalid',
+            subject: decision.workshop_id,
+            text: `${decision.workshop_id}: fixed placement invalid`,
+            detail: {
+              chosen: {
+                target: `${decision.slot_id}/${decision.space_id}`,
+                score: 0,
+                terms: [['fixed-invalid', 0]],
+              },
+              rejected,
+            },
+          })
+          continue
+        }
+        const placement = {
+          workshop_id: decision.workshop_id,
+          slot_id: decision.slot_id,
+          space_id: decision.space_id,
+        }
+        placements.push(placement)
+        used.add(`${placement.slot_id}/${placement.space_id}`)
+        workshop.leader_ids.forEach((leader) => leaderSlots.add(`${placement.slot_id}/${leader}`))
+        trace.push({
+          stage: 'workshop-scheduling.placement',
+          step: 'fixed',
+          subject: workshop.id,
+          text: `${workshop.id} fixed → ${placement.slot_id}/${placement.space_id}`,
+          detail: {
+            chosen: {
+              target: `${placement.slot_id}/${placement.space_id}`,
+              score: 0,
+              terms: [['fixed', 0]],
+            },
+            rejected: [],
+          },
+        })
+      }
+
       for (const workshop of workshops) {
+        if (fixedWorkshopIds.has(workshop.id)) continue
         let selected: WorkshopPlacement | null = null
-        const rejected: { target: string; rule: string }[] = []
+        const rejected: PlacementRejection[] = []
         for (const slot of schedule.slots) {
           for (const space of schedule.spaces) {
-            const target = `${slot.id}/${space.id}`
-            if (used.has(target)) {
-              rejected.push({ target, rule: 'hard.space-occupied' })
-              continue
-            }
-            if (space.capacity < workshop.capacity) {
-              rejected.push({ target, rule: 'hard.space-capacity' })
-              continue
-            }
-            if (
-              !space.availability_windows.some(
-                (window) => window.starts_at <= slot.starts_at && window.ends_at >= slot.ends_at,
-              )
-            ) {
-              rejected.push({ target, rule: 'hard.space-unavailable' })
-              continue
-            }
-            if (
-              schedule.space_slot_blocks.some(
-                (block) => block.space_id === space.id && block.slot_id === slot.id,
-              )
-            ) {
-              rejected.push({ target, rule: 'hard.space-slot-blocked' })
-              continue
-            }
-            if (workshop.needs.some((need) => !space.capabilities.includes(need))) {
-              rejected.push({ target, rule: 'hard.missing-capability' })
-              continue
-            }
-            if (workshop.leader_ids.some((leader) => leaderSlots.has(`${slot.id}/${leader}`))) {
-              rejected.push({ target, rule: 'hard.leader-conflict' })
+            const candidateRejections = placementRejections(
+              workshop,
+              slot,
+              space,
+              schedule,
+              used,
+              leaderSlots,
+            )
+            if (candidateRejections.length > 0) {
+              rejected.push(...candidateRejections)
               continue
             }
             selected = { workshop_id: workshop.id, slot_id: slot.id, space_id: space.id }
@@ -295,7 +423,30 @@ function placementStage(): SolverStage<WorkshopSchedulingSection> {
           },
         })
       }
-      return { output: { placements, unscheduled }, trace, diagnostics }
+      const automaticOnly = includeComparison
+        ? placementStage(false).run(
+            {
+              ...input,
+              module_inputs: {
+                ...input.module_inputs,
+                'workshop-scheduling': { ...schedule, fixed_placements: [] },
+              },
+            },
+            {},
+          ).output
+        : null
+      return {
+        output: {
+          placements,
+          unscheduled,
+          automatic_placements: automaticOnly?.placements ?? placements,
+          automatic_unscheduled: automaticOnly?.unscheduled ?? unscheduled,
+          fixed,
+          fixed_violations: Object.freeze(fixedViolations),
+        },
+        trace,
+        diagnostics,
+      }
     },
   }
 }
@@ -316,6 +467,7 @@ export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
     label_keys: [
       { key: 'starts-at', scopes: ['workshop-slot'], cardinality: 'exactly-one' },
       { key: 'ends-at', scopes: ['workshop-slot'], cardinality: 'exactly-one' },
+      { key: 'fixed-placement', scopes: ['workshop'], cardinality: 'zero-or-one', validate: validateFixedPlacement },
       { key: 'blocked-space', scopes: ['space-slot-block'], cardinality: 'exactly-one' },
       { key: 'blocked-slot', scopes: ['space-slot-block'], cardinality: 'exactly-one' },
       { key: 'block-reason', scopes: ['space-slot-block'], cardinality: 'zero-or-one' },

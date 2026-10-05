@@ -13,6 +13,7 @@ import {
   workshopAssignment,
   type WorkshopAssignmentSection,
 } from '../../src/modules/workshop-assignment/index.js'
+import type { WorkshopSchedulingSection } from '../../src/modules/workshop-scheduling/index.js'
 import type { WorkshopAssignmentParams } from '../../src/modules/workshop-assignment/index.js'
 
 function event(type: string, payload: JsonValue, seq: number): Event {
@@ -229,14 +230,14 @@ function fixedAttendance(personId: string, workshopIds: readonly string[], seq: 
   return event('WorkshopAttendanceFixed', { person_id: personId, workshop_ids: workshopIds }, seq)
 }
 
-function venue(spaceId: string, seq: number): Event {
+function venue(spaceId: string, seq: number, capacity = 10): Event {
   return event(
     'WorkshopSpaceAdded',
     {
       workshop_space_id: spaceId,
       name: spaceId,
       location_description: spaceId,
-      capacity: 10,
+      capacity,
       availability_windows: [
         { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-04-30T18:00:00Z' },
       ],
@@ -258,6 +259,136 @@ function slot(seq: number): Event {
     seq,
   )
 }
+
+function fixedPlacement(
+  workshopId: string,
+  slotId: string,
+  spaceId: string,
+  seq: number,
+  note: string | null = null,
+): Event {
+  return event(
+    'LabelSet',
+    {
+      entity_id: workshopId,
+      key: 'fixed-placement',
+      value: { slot_id: slotId, space_id: spaceId },
+      strength: null,
+      note,
+    },
+    seq,
+  )
+}
+
+function schedulingSection(events: Event[]): WorkshopSchedulingSection {
+  const profile = testProfile(defaultParams)
+  const world = derive(events, profile.validation_view)
+  const contributions = composeSolverContributions(profile)
+  const plan = solve(buildSolverInput(world, contributions), contributions, {
+    build_revision: 'test',
+    compatibility_revision: 1,
+    event_date: '2027-04-30',
+    profile,
+    seed: null,
+  })
+  return plan.sections['workshop-scheduling'] as WorkshopSchedulingSection
+}
+
+test('a fixed workshop placement takes precedence over the automatic choice', () => {
+  const section = schedulingSection([
+    venue('wsp_a', 1),
+    event(
+      'WorkshopSpaceAdded',
+      {
+        workshop_space_id: 'wsp_b',
+        name: 'Nebenraum',
+        location_description: 'Obergeschoss',
+        capacity: 10,
+        availability_windows: [
+          { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-04-30T18:00:00Z' },
+        ],
+        sort_key: 2,
+      },
+      2,
+    ),
+    slot(3),
+    event(
+      'WorkshopSlotAdded',
+      {
+        slot_id: 'slot_afternoon',
+        starts_at: '2027-04-30T15:00:00Z',
+        ends_at: '2027-04-30T17:00:00Z',
+        sort_key: 2,
+      },
+      4,
+    ),
+    workshop('wks_fixed', 8, 1, 5),
+    fixedPlacement('wks_fixed', 'slot_afternoon', 'wsp_b', 6, 'Leitung am Nachmittag'),
+  ])
+
+  expect(section.placements).toEqual([
+    { workshop_id: 'wks_fixed', slot_id: 'slot_afternoon', space_id: 'wsp_b' },
+  ])
+  expect(section.fixed).toEqual([
+    {
+      workshop_id: 'wks_fixed',
+      slot_id: 'slot_afternoon',
+      space_id: 'wsp_b',
+      note: 'Leitung am Nachmittag',
+    },
+  ])
+  expect(section.fixed_violations).toEqual([])
+  expect(section.automatic_placements).toEqual([
+    { workshop_id: 'wks_fixed', slot_id: 'slot_morning', space_id: 'wsp_a' },
+  ])
+})
+
+test('an invalid fixed placement is blocking and does not fall back automatically', () => {
+  const section = schedulingSection([
+    venue('wsp_small', 1, 4),
+    venue('wsp_large', 2, 10),
+    slot(3),
+    workshop('wks_fixed', 8, 1, 4),
+    fixedPlacement('wks_fixed', 'slot_morning', 'wsp_small', 5),
+  ])
+
+  expect(section.placements).toEqual([])
+  expect(section.unscheduled).toEqual([
+    { workshop_id: 'wks_fixed', reason: 'hard.space-capacity' },
+  ])
+  expect(section.fixed_violations).toEqual([
+    expect.objectContaining({
+      workshop_id: 'wks_fixed',
+      slot_id: 'slot_morning',
+      space_id: 'wsp_small',
+      reasons: ['hard.space-capacity'],
+    }),
+  ])
+  expect(section.automatic_placements).toEqual([
+    { workshop_id: 'wks_fixed', slot_id: 'slot_morning', space_id: 'wsp_large' },
+  ])
+})
+
+test('fixed placements colliding for one space remain deterministic and explain the loser', () => {
+  const section = schedulingSection([
+    venue('wsp_a', 1),
+    slot(2),
+    workshop('wks_first', 8, 1, 3),
+    workshop('wks_second', 8, 2, 4),
+    fixedPlacement('wks_second', 'slot_morning', 'wsp_a', 5),
+    fixedPlacement('wks_first', 'slot_morning', 'wsp_a', 6),
+  ])
+
+  expect(section.placements).toEqual([
+    { workshop_id: 'wks_first', slot_id: 'slot_morning', space_id: 'wsp_a' },
+  ])
+  expect(section.fixed_violations).toEqual([
+    expect.objectContaining({
+      workshop_id: 'wks_second',
+      reasons: ['hard.space-occupied'],
+    }),
+  ])
+})
 
 function assignmentSection(
   events: Event[],
@@ -306,6 +437,15 @@ test('a fixed attendance decision takes precedence over a ranked choice for the 
   ])
   expect(section.fixed).toEqual([{ person_id: 'per_a', workshop_id: 'wks_1' }])
   expect(section.fixed_violations).toEqual([])
+  expect(section.automatic_assignments).toEqual([
+    {
+      person_id: 'per_b',
+      workshop_id: 'wks_1',
+      slot_id: 'slot_morning',
+      rank: 1,
+      reason: 'ranked',
+    },
+  ])
 })
 
 test('every configured choice round is processed and automatic assignments stop at the target', () => {

@@ -120,6 +120,65 @@ describe('workshop domain events', () => {
     expect(officialWorkshopsWorld(world).external_leaders.map(({ id }) => id)).toEqual(['ext_anna'])
   })
 
+  test('derives and clears a fixed workshop placement label', () => {
+    const fixed = event(
+      'LabelSet',
+      {
+        entity_id: 'wks_ceramics',
+        key: 'fixed-placement',
+        value: { slot_id: 'slot_morning', space_id: 'wsp_hall' },
+        strength: null,
+        note: 'Nähe zum Eingang',
+      },
+      5,
+    )
+    const world = derive([...baseEvents, fixed], profile.validation_view)
+    expect(workshopSchedulingWorld(world).fixed_placements).toEqual([
+      {
+        workshop_id: 'wks_ceramics',
+        slot_id: 'slot_morning',
+        space_id: 'wsp_hall',
+        note: 'Nähe zum Eingang',
+      },
+    ])
+
+    const cleared = derive(
+      [
+        ...baseEvents,
+        fixed,
+        event(
+          'LabelCleared',
+          { entity_id: 'wks_ceramics', key: 'fixed-placement', value: null },
+          6,
+        ),
+      ],
+      profile.validation_view,
+    )
+    expect(workshopSchedulingWorld(cleared).fixed_placements).toEqual([])
+  })
+
+  test('rejects malformed fixed workshop placement labels', () => {
+    expect(() =>
+      derive(
+        [
+          ...baseEvents,
+          event(
+            'LabelSet',
+            {
+              entity_id: 'wks_ceramics',
+              key: 'fixed-placement',
+              value: { slot_id: 'slot_morning' },
+              strength: null,
+              note: null,
+            },
+            5,
+          ),
+        ],
+        profile.validation_view,
+      ),
+    ).toThrow(/fixed-placement/)
+  })
+
   test('cancellation keeps the workshop in labelled history and out of active planning', () => {
     const world = derive(
       [

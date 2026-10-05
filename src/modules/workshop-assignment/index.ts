@@ -48,6 +48,8 @@ export type WorkshopAssignmentSection = {
   rounds: readonly WorkshopAssignmentRound[]
   assignments: readonly WorkshopAssignment[]
   unassigned: readonly WorkshopUnassigned[]
+  automatic_assignments: readonly WorkshopAssignment[]
+  automatic_unassigned: readonly WorkshopUnassigned[]
   signups: readonly { person_id: string; workshop_id: string }[]
   interests: readonly { person_id: string; workshop_id: string }[]
   fixed: readonly WorkshopFixed[]
@@ -60,7 +62,10 @@ function eligibleRole(personRole: JsonValue | undefined, workshop: WorkshopRecor
   return true
 }
 
-function assignmentStage(params: WorkshopAssignmentParams): SolverStage<WorkshopAssignmentSection> {
+function assignmentStage(
+  params: WorkshopAssignmentParams,
+  includeComparison = true,
+): SolverStage<WorkshopAssignmentSection> {
   return {
     id: 'workshop-assignment.attendance',
     after: ['workshop-scheduling.placement', 'workshop-rankings.demand'],
@@ -327,6 +332,24 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       const interests = input.labels
         .filter((label) => label.key === 'interested-in' && typeof label.value === 'string')
         .map((label) => ({ person_id: label.entity_id, workshop_id: String(label.value) }))
+      const automaticOnly = includeComparison
+        ? assignmentStage(params, false).run(
+            {
+              ...input,
+              labels: input.labels.filter((label) => label.key !== 'workshop-attendance'),
+            },
+            {
+              ...upstream,
+              'workshop-scheduling.placement': {
+                ...schedule,
+                placements: schedule.automatic_placements,
+                unscheduled: schedule.automatic_unscheduled,
+                fixed: [],
+                fixed_violations: [],
+              } satisfies WorkshopSchedulingSection,
+            },
+          ).output
+        : null
       return {
         output: {
           initial_assignments: Object.freeze(
@@ -335,6 +358,8 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           rounds: Object.freeze(rounds),
           assignments,
           unassigned,
+          automatic_assignments: automaticOnly?.assignments ?? assignments,
+          automatic_unassigned: automaticOnly?.unassigned ?? unassigned,
           signups,
           interests,
           fixed: Object.freeze(fixed),
@@ -380,6 +405,8 @@ export function workshopAssignmentSection(plan: {
       rounds: [],
       assignments: [],
       unassigned: [],
+      automatic_assignments: [],
+      automatic_unassigned: [],
       signups: [],
       interests: [],
       fixed: [],
