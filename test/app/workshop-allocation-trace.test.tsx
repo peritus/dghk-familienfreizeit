@@ -5,6 +5,11 @@ import {
   TraceStageRow,
   type TraceStageView,
 } from '../../src/modules/workshop-rankings/app/components/choices.js'
+import {
+  buildWorkshopAllocationTraceStages,
+  type WorkshopAllocationProjection,
+  type WorkshopAllocationTraceEvent,
+} from '../../src/modules/workshop-rankings/app/workshop-allocation-view.js'
 
 afterEach(cleanup)
 
@@ -89,4 +94,60 @@ test('places trace detail headings in the left rail', () => {
   expect(screen.getByTitle('1 Wunsch 1').className).toContain('items-center')
   expect(screen.getByTitle('1 Wunsch 1').className).toContain('justify-center')
   expect(screen.queryByRole('heading', { name: 'Erfüllt · 1 Wunsch' })).toBeNull()
+})
+
+test('numbers selected rankings and includes the choice rank in summaries', () => {
+  const traceEvent = (
+    id: string,
+    rank: number,
+    workshopTitle: string,
+  ): WorkshopAllocationTraceEvent => ({
+    id,
+    person_id: 'alex',
+    person_name: 'Alex Morgan',
+    workshop_id: id,
+    workshop_title: workshopTitle,
+    rank,
+    phase: 'round',
+    outcome: 'fulfilled',
+    detail: '',
+    slot_label: null,
+    capacity: null,
+    competing_workshop_title: null,
+    queue_position: null,
+    queue_size: null,
+  })
+  const projection: WorkshopAllocationProjection = {
+    max_rank: 2,
+    answers: [
+      {
+        id: 'alex',
+        name: 'Alex Morgan',
+        age_label: '11 Jahre',
+        status: 'Rangfolge',
+        ranks: ['Erste Hilfe am Kind', 'Wanderung', 'Tanzen'],
+        group: 'children',
+      },
+    ],
+    demand: [],
+    trace_events: [
+      traceEvent('first-aid', 1, 'Erste Hilfe am Kind'),
+      traceEvent('hike', 2, 'Wanderung'),
+    ],
+    trace_people: [],
+    person_names: [{ id: 'alex', name: 'Alex Morgan' }],
+    unassigned_person_ids: [],
+    fixed_violation_count: 0,
+    unassigned_count: 0,
+    has_workshops: true,
+    has_answers: true,
+  }
+
+  const stages = buildWorkshopAllocationTraceStages(projection, 'all', 'alex')
+
+  expect(stages[0]?.selected_summary).toBe(
+    'Rangfolge: (1) Erste Hilfe am Kind · (2) Wanderung · (3) Tanzen',
+  )
+  expect(stages[1]?.selected_summary).toBe('Erste Hilfe am Kind (1. Wahl): erfüllt')
+  expect(stages[2]?.selected_summary).toBe('Wanderung (2. Wahl): erfüllt')
 })

@@ -245,6 +245,15 @@ function outcomeLabel(outcome: WorkshopAllocationTraceOutcome): string {
   return labels[outcome]
 }
 
+function selectedRankingLabel(ranks: readonly string[]): string {
+  return `Rangfolge: ${ranks.map((rank, index) => `(${index + 1}) ${rank}`).join(' · ')}`
+}
+
+function selectedEventLabel(event: WorkshopAllocationTraceEvent): string {
+  const rank = event.rank ? ` (${event.rank}. Wahl)` : ''
+  return `${event.workshop_title}${rank}: ${outcomeLabel(event.outcome)}`
+}
+
 function reasonText(outcome: WorkshopAllocationTraceOutcome): string {
   const labels: Partial<Record<WorkshopAllocationTraceOutcome, string>> = {
     capacity: 'voll',
@@ -786,12 +795,10 @@ export function buildWorkshopAllocationTraceStages(
       stage.selected_summary =
         stage.id === 'answers'
           ? selected?.ranks.length
-            ? `Rangfolge: ${selected.ranks.join(' · ')}`
+            ? selectedRankingLabel(selected.ranks)
             : selected?.status
           : stageEvents.length
-            ? stageEvents
-                .map((event) => `${event.workshop_title}: ${outcomeLabel(event.outcome)}`)
-                .join(' · ')
+            ? stageEvents.map(selectedEventLabel).join(' · ')
             : '—'
     }
   }
