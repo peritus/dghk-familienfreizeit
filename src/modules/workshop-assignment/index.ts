@@ -14,7 +14,6 @@ export type WorkshopAssignmentParams = {
   top_n: number
   rank_weights: readonly number[]
   minimum_workshops: number
-  fairness_targets: Readonly<Record<string, number>>
   max_repair_passes: number
 }
 
@@ -407,7 +406,6 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
     top_n: z.number().int().min(1).default(2),
     rank_weights: z.array(z.number().int()).min(1).default([3, 2, 1]),
     minimum_workshops: z.number().int().min(0).default(0),
-    fairness_targets: z.record(z.string(), z.number().int().min(0)).default({}),
     max_repair_passes: z.number().int().min(0).default(5),
   }),
   contribute: (params) => ({
