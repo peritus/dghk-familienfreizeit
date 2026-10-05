@@ -493,14 +493,14 @@ export function TraceProgressBar({
   }
   return (
     <div
-      className="flex h-10 w-full overflow-hidden rounded-base border-2 border-border bg-secondary-background"
+      className="flex h-10 w-full items-stretch overflow-hidden rounded-base border-2 border-border bg-secondary-background"
       role="img"
       aria-label={`${stage?.label ?? 'Verlauf'}: ${segments.map((segment) => `${segment.value} ${segment.label}`).join(', ')}`}
     >
       {segments.map((segment) => (
         <span
           key={segment.id}
-          className={segment.className}
+          className={`flex items-center justify-center text-center ${segment.className ?? ''}`}
           style={{ width: `${(segment.value / total) * 100}%`, ...segment.style }}
           title={`${segment.value} ${segment.label}`}
         >
@@ -643,13 +643,6 @@ export function TraceStageRow({
         <td className="min-w-[32rem] p-3">
           <TraceProgressBar stages={stages} index={index} current={stage.id !== 'result'} />
         </td>
-        <td className="p-3 text-right">{stage.fulfilled}</td>
-        <td className="p-3 text-right">{stage.capacity}</td>
-        <td className="p-3 text-right">{stage.overlap}</td>
-        <td className="p-3 text-right">{stage.leader}</td>
-        <td className="p-3 text-right">{stage.unscheduled}</td>
-        <td className="p-3 text-right">{stage.not_needed ?? 0}</td>
-        <td className="p-3 text-right font-bold">{stage.open}</td>
         {selectedPersonLabel ? (
           <td className="bg-paper p-3 text-sm">{stage.selected_summary ?? '—'}</td>
         ) : null}
@@ -660,7 +653,7 @@ export function TraceStageRow({
               <th scope="row" className="w-52 min-w-52 p-3 pt-0 text-sm text-muted">
                 {group.heading}
               </th>
-              <td colSpan={8} className="p-3 pt-0 text-sm text-muted">
+              <td colSpan={1} className="p-3 pt-0 text-sm text-muted">
                 <TraceDetailItems
                   groups={[group]}
                   on_person_id={onPersonId}
@@ -694,13 +687,6 @@ export function ChoiceTraceTable({
       columns={[
         { key: 'stage', label: 'Schritt' },
         { key: 'bar', label: 'Verlauf aller Wünsche' },
-        { key: 'fulfilled', label: 'erfüllt', numeric: true },
-        { key: 'capacity', label: 'voll', numeric: true },
-        { key: 'overlap', label: 'Überschneidung', numeric: true },
-        { key: 'leader', label: 'leitet selbst', numeric: true },
-        { key: 'unscheduled', label: 'ohne Termin', numeric: true },
-        { key: 'not-needed', label: 'Ziel erreicht', numeric: true },
-        { key: 'open', label: 'noch offen', numeric: true },
         ...(selectedPersonLabel ? [{ key: 'selected', label: selectedPersonLabel }] : []),
       ]}
       rows={stages}
