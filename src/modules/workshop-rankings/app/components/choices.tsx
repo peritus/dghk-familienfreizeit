@@ -398,6 +398,7 @@ function stageSegments(
   stage: TraceStageView,
   stageIndex: number,
   currentIndex: number | null,
+  fulfilledOnly = false,
 ): TraceSegment[] {
   const segments: TraceSegment[] = []
   const state =
@@ -427,6 +428,8 @@ function stageSegments(
       rankColor ? { ['backgroundColor']: rankColor } : undefined,
     )
   }
+  if (fulfilledOnly) return segments
+
   add(`${stage.id}-capacity`, stage.capacity, 'voll', 'bg-danger', {
     ['backgroundImage']: 'repeating-linear-gradient(135deg, #fff 0 4px, #b9b3ab 4px 6px)',
   })
@@ -454,12 +457,16 @@ export function TraceProgressBar({
   index: number
   current?: boolean
 }) {
-  const visibleStages = stages.slice(0, index + 1)
   const stage = stages[index]
   const currentIndex = current ? index : null
-  const segments = visibleStages.flatMap((visibleStage, visibleIndex) =>
-    stageSegments(visibleStage, visibleIndex, currentIndex),
-  )
+  const segments = [
+    ...stages
+      .slice(0, index)
+      .flatMap((visibleStage, visibleIndex) =>
+        stageSegments(visibleStage, visibleIndex, currentIndex, true),
+      ),
+    ...(stage ? [stageSegments(stage, index, currentIndex)] : []),
+  ].flat()
   if (stage?.open) {
     segments.push({
       id: `${stage.id}-open`,
