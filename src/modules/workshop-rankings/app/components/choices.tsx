@@ -511,11 +511,10 @@ export function TraceProgressBar({
   )
 }
 
-function TraceDetailGroups({
+function TraceDetailItems({
   groups,
   on_person_id: onPersonId,
   selected_person_id: selectedPersonId,
-  show_headings: showHeadings = true,
 }: {
   groups: readonly {
     id: string
@@ -531,7 +530,6 @@ function TraceDetailGroups({
   }[]
   on_person_id?: (personId: string) => void
   selected_person_id?: string
-  show_headings?: boolean
 }) {
   const renderItem = (item: (typeof groups)[number]['items'][number]) => {
     const parts: ReactNode[] = []
@@ -610,25 +608,11 @@ function TraceDetailGroups({
     return parts
   }
   return (
-    <div className="space-y-3">
-      {groups.map((group) => (
-        <section
-          key={group.id}
-          className={
-            showHeadings
-              ? 'grid gap-x-6 sm:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)]'
-              : undefined
-          }
-        >
-          {showHeadings ? <h4 className="text-sm font-bold">{group.heading}</h4> : null}
-          <ul className="mt-1 space-y-1">
-            {group.items.map((item) => (
-              <li key={item.id}>{renderItem(item)}</li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
+    <ul className="space-y-1">
+      {groups.flatMap((group) =>
+        group.items.map((item) => <li key={`${group.id}-${item.id}`}>{renderItem(item)}</li>),
+      )}
+    </ul>
   )
 }
 
@@ -656,7 +640,7 @@ export function TraceStageRow({
           <span className="block font-heading">{stage.label}</span>
           <span className="text-sm font-normal text-muted">{stage.description}</span>
         </th>
-        <td className="min-w-64 p-3">
+        <td className="min-w-[32rem] p-3">
           <TraceProgressBar stages={stages} index={index} current={stage.id !== 'result'} />
         </td>
         <td className="p-3 text-right">{stage.fulfilled}</td>
@@ -677,11 +661,10 @@ export function TraceStageRow({
                 {group.heading}
               </th>
               <td colSpan={8} className="p-3 pt-0 text-sm text-muted">
-                <TraceDetailGroups
+                <TraceDetailItems
                   groups={[group]}
                   on_person_id={onPersonId}
                   selected_person_id={selectedPersonId}
-                  show_headings={false}
                 />
               </td>
               {selectedPersonLabel ? <td className="bg-paper" aria-hidden="true" /> : null}
@@ -765,11 +748,21 @@ export function ChoiceTraceTable({
           </dl>
           {stage.detail_groups?.length ? (
             <div className="mt-3 text-sm text-muted">
-              <TraceDetailGroups
-                groups={stage.detail_groups}
-                on_person_id={onPersonId}
-                selected_person_id={selectedPersonId}
-              />
+              <div className="space-y-3">
+                {stage.detail_groups.map((group) => (
+                  <section
+                    key={group.id}
+                    className="grid gap-x-6 sm:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)]"
+                  >
+                    <h4 className="text-sm font-bold">{group.heading}</h4>
+                    <TraceDetailItems
+                      groups={[group]}
+                      on_person_id={onPersonId}
+                      selected_person_id={selectedPersonId}
+                    />
+                  </section>
+                ))}
+              </div>
             </div>
           ) : null}
           {selectedPersonLabel ? (

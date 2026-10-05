@@ -83,5 +83,7 @@ test('places trace detail headings in the left rail', () => {
   const heading = screen.getByRole('rowheader', { name: 'Erfüllt · 1 Wunsch' })
   expect(heading.className).toContain('min-w-52')
   expect(heading.parentElement?.textContent).toContain('Keramik: Alex Morgan')
+  expect(screen.getByRole('img').className).toContain('h-10')
+  expect(screen.getByRole('img').parentElement?.className).toContain('min-w-[32rem]')
   expect(screen.queryByRole('heading', { name: 'Erfüllt · 1 Wunsch' })).toBeNull()
 })
