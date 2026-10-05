@@ -443,8 +443,7 @@ export function buildWorkshopAllocationProjection(
         workshop_id: decision.workshop_id,
         workshop_title: workshop?.title ?? decision.workshop_id,
         rank: decision.rank,
-        phase:
-          outcome === 'retained' ? 'retention' : outcome === 'fixed' ? 'fixed' : 'round',
+        phase: outcome === 'retained' ? 'retention' : outcome === 'fixed' ? 'fixed' : 'round',
         outcome,
         detail:
           outcome === 'fulfilled'
@@ -459,8 +458,7 @@ export function buildWorkshopAllocationProjection(
         slot_label: slotLabel(decision.workshop_id, placements, slots, input.time_zone),
         capacity: workshop?.capacity ?? null,
         competing_workshop_title: decision.competing_workshop_id
-          ? (workshops.get(decision.competing_workshop_id)?.title ??
-            decision.competing_workshop_id)
+          ? (workshops.get(decision.competing_workshop_id)?.title ?? decision.competing_workshop_id)
           : null,
         queue_position: null,
         queue_size: null,
@@ -727,11 +725,11 @@ export function buildWorkshopAllocationTraceStages(
       'unscheduled',
       'fulfilled',
       'retained',
-    'dropped',
-    'fixed',
-    'repaired',
-    'not-needed',
-    'open',
+      'dropped',
+      'fixed',
+      'repaired',
+      'not-needed',
+      'open',
       'eligibility',
       'cancellation',
       'unprocessed',
@@ -783,9 +781,9 @@ export function buildWorkshopAllocationTraceStages(
           ? `${first.workshop_title}${first.capacity ? ` (nur ${first.capacity} Plätze${first.slot_label ? `, ${first.slot_label}` : ''})` : ''}, daher nicht erfüllt für ${names}`
           : outcome === 'unscheduled'
             ? `${first.workshop_title}: ${names}`
-          : outcome === 'not-needed'
-            ? `${first.workshop_title}${slot}: ${names} · Ziel bereits erreicht`
-            : `${first.workshop_title}${slot}: ${names}`
+            : outcome === 'not-needed'
+              ? `${first.workshop_title}${slot}: ${names} · Ziel bereits erreicht`
+              : `${first.workshop_title}${slot}: ${names}`
       return {
         id,
         person_id: events.length === 1 ? first.person_id : null,
@@ -835,9 +833,7 @@ export function buildWorkshopAllocationTraceStages(
     },
   ]
   const retentionEvents = events.filter((event) => event.phase === 'retention')
-  const fixedRankedEvents = events.filter(
-    (event) => event.phase === 'fixed' && event.rank !== null,
-  )
+  const fixedRankedEvents = events.filter((event) => event.phase === 'fixed' && event.rank !== null)
   let processed =
     retentionEvents.filter((event) => event.outcome === 'retained').length +
     fixedRankedEvents.length

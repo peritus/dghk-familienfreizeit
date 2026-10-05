@@ -262,8 +262,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           rankingByPerson
             .get(assignment.person_id)
             ?.choices.some(
-              (choice) =>
-                choice.workshop_id === assignment.workshop_id && choice.rank !== null,
+              (choice) => choice.workshop_id === assignment.workshop_id && choice.rank !== null,
             )
         )
           fixedChoiceKeys.add(`${assignment.person_id}|${assignment.workshop_id}`)
@@ -413,7 +412,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         )
       }
 
-      // Step 5: bounded deterministic repair — try to seat a still-unassigned
+      // Step 4: bounded deterministic repair — try to seat a still-unassigned
       // person by moving one non-fixed occupant to a different eligible
       // workshop with spare capacity. Never touches a 'fixed' assignment.
       const unplace = (item: WorkshopAssignment): void => {

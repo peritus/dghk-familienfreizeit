@@ -387,7 +387,12 @@ test('every configured choice round is processed and automatic assignments stop 
 })
 
 test.each([2, 3, 5])('profile max_rank=%s produces that many allocation rounds', (maxRank) => {
-  const events = [venue('wsp_a', 1), slot(2), workshop('wks_1', 1, 1, 3), ...family('per_a', 'fam_a', 4)]
+  const events = [
+    venue('wsp_a', 1),
+    slot(2),
+    workshop('wks_1', 1, 1, 3),
+    ...family('per_a', 'fam_a', 4),
+  ]
   const section = assignmentSection(events, defaultParams, maxRank)
   expect(section.rounds.map((round) => round.rank)).toEqual(
     Array.from({ length: maxRank }, (_, index) => index + 1),

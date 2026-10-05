@@ -90,9 +90,7 @@ function demandStage(maxRank: number): SolverStage<WorkshopRankingsDemand> {
     after: [],
     before: [],
     reads: [],
-    run: (
-      input: SolverInput,
-    ): StageResult<WorkshopRankingsDemand> => {
+    run: (input: SolverInput): StageResult<WorkshopRankingsDemand> => {
       const rankings = input.module_inputs['workshop-rankings'] as readonly WorkshopRanking[]
       const demand: Record<string, number> = {}
       for (const ranking of rankings)
@@ -130,7 +128,9 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
       },
     ],
     family_controls: [{ key: params.ranking_trait, control: 'ranking' }],
-    solver_input: [{ id: 'workshop-rankings', build: (world) => workshopRankingsFromWorld(world, params) }],
+    solver_input: [
+      { id: 'workshop-rankings', build: (world) => workshopRankingsFromWorld(world, params) },
+    ],
     stages: [demandStage(params.max_rank)],
     world_summaries: [
       {

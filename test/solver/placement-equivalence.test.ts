@@ -24,11 +24,12 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * scoring, retention, repair, preflight and trace paths together.
  */
 /**
- * Recorded at `quadratic-fold-fixes` (99e78e2e), before the placement stage
- * stopped rescanning inside its loops. A change to this value means the solver
- * now decides something different — update it only with that intent.
+ * This digest includes the current workshop allocation round snapshots and
+ * trace contract. A change to this value means the solver now decides
+ * something different or its explicit explanation contract changed — update it
+ * only with that intent.
  */
-const baselineDigest = '1e68767b8881518cadc065670a1b9536318837dc8eb35bc42d6880a53b849d32'
+const baselineDigest = 'e47cc1109ef83b230c45f2f149f06604b1676f8eb22ff180fb4cb253d37fa7fe'
 
 const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
