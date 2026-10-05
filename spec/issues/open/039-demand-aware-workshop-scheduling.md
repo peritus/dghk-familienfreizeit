@@ -136,7 +136,8 @@ number. A proposed initial ordering is:
    workshop;
 4. maximize the number of fulfilled ranked wishes, with first choices ahead of
    second and later choices according to configured weights;
-5. maximize the number of people reaching `minimum_workshops`;
+5. maximize the number of people reaching the configured
+   `workshops_per_person` target;
 6. preserve valid previous placements and assignments when no objective
    improvement requires moving them;
 7. use stable ids to resolve all remaining ties.
@@ -182,10 +183,10 @@ runtime executable rules.
    it jointly search placement and attendance outcomes? Placement-only scoring
    is simpler, while joint evaluation measures the actual user-facing result
    but has a larger search space.
-2. Should demand include all configured ranks or only the ranks considered by
-   attendance (`top_n` in the active profile)? The answer changes whether a
-   lower-ranked choice can influence placement even when it cannot currently
-   win attendance directly.
+2. Should demand include all configured ranks or only ranks that can still
+   produce an assignment before a person's configured target is reached? The
+   attendance solver processes every configured rank, but placement may still
+   choose a narrower demand horizon.
 3. Should pairwise co-selection be enough, or should the calculation include
    larger frequently selected groups? Pairwise scoring is easier to explain and
    bound; larger groups may better represent real preference patterns.
@@ -197,10 +198,7 @@ runtime executable rules.
 6. Does a ranking edit invalidate the current reviewed placement/attendance
    calculation, or should demand-aware recalculation always be an explicit
    organiser action with a visible plan diff?
-7. Should the existing `fairness_targets` parameter participate in the same
-   objective, and if so, does fairness take precedence over total fulfilled
-   wishes or act only as a tie-breaker?
-8. Is this work part of M8's workshop planning completion, or should the
+7. Is this work part of M8's workshop planning completion, or should the
    demand-aware calculation become a separately scoped milestone because it
    changes the scheduling/attendance contract?
 

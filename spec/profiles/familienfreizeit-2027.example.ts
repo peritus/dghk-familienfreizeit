@@ -447,11 +447,9 @@ export default defineOccasionProfile({
     }),
 
     workshopAssignment({
-      objectives: ['min-people-without-top-n', 'min-people-without-any-choice', 'max-rank-weight'],
-      top_n: 2,
+      workshops_per_person: 2,
       rank_weights: [3, 2, 1],
-      minimum_workshops: 2,
-      fairness_targets: { children: 2, adults: 1 },
+      max_repair_passes: 5,
     }),
 
     familyPreferences({

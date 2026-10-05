@@ -31,7 +31,7 @@ The active occasion selects these modules ([modules](../modules/contract.md) §5
 | [`official-workshops`](../modules/official-workshops.md) | organiser-authored workshops, audience, participation modes, leaders, and cancellation |
 | [`workshop-scheduling`](../modules/workshop-scheduling.md) | event-backed slots, one placement per workshop, and schedule release |
 | [`workshop-rankings`](../modules/workshop-rankings.md) | current-cycle ordered per-person workshop rankings |
-| [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, fairness, and allocation traces |
+| [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, assignment, and allocation traces |
 | [`family-preferences`](../modules/family-preferences.md) | the separate family-facing preferences projection |
 
 ## 2. Room inventory
@@ -119,10 +119,11 @@ them is a deployment, reviewed through the plan diff before communicating.
 | `workshop-rankings` | `ranking_trait` | `prefers-workshop` |
 | | `max_rank` | `3` |
 | | `allow_no_preference` | `true` |
-| `workshop-assignment` | `top_n`, `rank_weights`, `minimum_workshops`, `fairness_targets` | `2`, `[3, 2, 1]`, `2`, `{ children: 2, adults: 1 }` |
+| `workshop-assignment` | `workshops_per_person`, `rank_weights`, `max_repair_passes` | `2`, `[3, 2, 1]`, `5` |
 
-Workshop attendance is choice-bound: `minimum_workshops` can prioritize a
-person's ranked choices but never authorizes assigning an unchosen workshop.
+Workshop attendance is choice-bound: `workshops_per_person` caps automatic
+assignments and all choices remain ranked choices; it never authorizes assigning
+an unchosen workshop.
 
 Children may lead workshops. Leadership does not consume participant capacity, and
 not every children's workshop needs a leader.

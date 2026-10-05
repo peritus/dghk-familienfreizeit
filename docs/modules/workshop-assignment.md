@@ -8,11 +8,10 @@ choices; fixed, retained, ranked, and repaired assignments are the valid
 origins. Sign-up and interest lists remain separate outputs and are not
 converted into automatic assignments.
 
-The active profile uses top two ranked choices, weights `[3, 2, 1]`, a minimum of
-two workshops, configured child/adult fairness targets, and five repair passes.
+The active profile accepts three ranked choices, targets up to two automatic
+workshops per person, uses weights `[3, 2, 1]`, and allows five repair passes.
 The stage emits assignments, unassigned outcomes, sign-ups, interests, fixed
-decisions, fixed violations, and explainable traces. The minimum is a ranked
-choice target only; it does not authorize assigning an unchosen workshop.
+decisions, fixed violations, round snapshots, and explainable traces.
 
 ## Verified business logic
 
@@ -39,8 +38,8 @@ the underlying data model and resolver mechanics above are fully event-backed.
 
 ## Attendance cost
 
-Attendance is resolved in one pass per person over that person's ranked
-choices, so its cost tracks people times choices. Three lookups used to be
+Attendance is resolved in deterministic Wahlrunde order over each person's
+ranked choices, so its cost tracks people times choices. Three lookups used to be
 resolved inside that pass and are now resolved once per stage run:
 
 - A person's `role`, which every eligibility check needs. It was read by

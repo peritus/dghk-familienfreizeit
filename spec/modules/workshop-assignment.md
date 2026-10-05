@@ -23,10 +23,8 @@ Requires `official-workshops`, `workshop-rankings`, and `workshop-scheduling`.
 
 ```ts
 type WorkshopAssignmentParams = {
-  top_n: number
+  workshops_per_person: number
   rank_weights: readonly number[]
-  minimum_workshops: number
-  fairness_targets: Readonly<Record<string, number>>
   max_repair_passes: number
 }
 ```
@@ -60,21 +58,23 @@ person is fixed into for the current cycle. No trait roles.
 
 One stage, `workshop-assignment.attendance`, reading
 `workshop-scheduling.placement` and `workshop-rankings.demand`. It follows D4
-in five steps:
+in four steps:
 
 1. apply feasible fixed attendance decisions first — they always take
    precedence over every automatic outcome, so they claim capacity and slot
    occupancy before anything else runs;
 2. retain a still-feasible prior assignment (from the previous derived plan)
    for anyone with no fixed decision this cycle;
-3. process ranked choices with configured fairness and rank weights;
+3. process every configured ranked choice in Wahlrunde order, respecting the
+   per-person assignment target and rank weights;
 4. perform bounded deterministic repair (up to `max_repair_passes`) using only
    current ranked choices, moving at most one non-fixed occupant per repair to
    seat a still-unassigned person, and explaining every movement in the trace.
 
-`minimum_workshops` can cause lower-ranked current choices to be considered,
-but it never creates an assignment outside the person's ranking. An eligible
-person with no feasible ranked choice remains unassigned.
+Every configured ranked choice is considered in order. `workshops_per_person`
+limits automatic assignments but never creates an assignment outside the
+person's ranking. An eligible person with no feasible ranked choice remains
+unassigned.
 
 The output assigns at most one workshop to a person per slot, respects
 workshop capacity, records unassigned reasons, and emits traces for capacity,
@@ -101,12 +101,34 @@ by the stage itself as a `workshop-assignment.fixed-invalid` diagnostic
 
 ```ts
 type WorkshopAssignmentSection = {
+  initial_assignments: readonly WorkshopAssignment[]
+  rounds: readonly {
+    rank: number
+    decisions: readonly {
+      person_id: string
+      workshop_id: string
+      rank: number
+      outcome: 'assigned' | 'retained' | 'fixed' | 'rejected' | 'not-needed'
+      reason: string
+      competing_workshop_id: string | null
+    }[]
+    assignments: readonly WorkshopAssignment[]
+  }[]
   assignments: readonly {
     person_id: string
     workshop_id: string
     slot_id: string
     rank: number | null
     reason: 'fixed' | 'retained' | 'ranked' | 'repaired'
+  }[]
+  repairs: readonly {
+    person_id: string
+    workshop_id: string
+    rank: number
+    displaced_person_id: string
+    displaced_from_workshop_id: string
+    displaced_to_workshop_id: string
+    displaced_rank: number | null
   }[]
   unassigned: readonly { person_id: string; workshop_id: string | null; reason: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
@@ -132,9 +154,9 @@ No screens or controls. Reports: `workshop-roster`, `workshop-person-plan`,
 
 ## 12. Tests
 
-- Deterministic allocation, retention across a stable re-derive, fairness,
-  rank weighting, minimum targets without implicit assignment, bounded repair,
-  and stable traces.
+- Deterministic allocation, retention across a stable re-derive,
+  rank weighting, per-person targets without implicit assignment, bounded
+  repair, round snapshots, and stable traces.
 - No automatic assignment targets a workshop outside the person's current
   ranking, for either children or adults.
 - A fixed attendance decision takes precedence over a ranked choice for the

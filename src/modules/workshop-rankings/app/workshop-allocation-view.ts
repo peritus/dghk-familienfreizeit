@@ -707,7 +707,9 @@ export function buildWorkshopAllocationTraceStages(
       (!onlySelected || event.person_id === selectedPersonId)
     )
   })
-  const rankedEvents = events.filter((event) => event.rank !== null)
+  const rankedEvents = events.filter(
+    (event) => event.rank !== null && ['round', 'retention', 'fixed'].includes(event.phase),
+  )
   const total = rankedEvents.length
   const detailGroups = (
     items: readonly WorkshopAllocationTraceEvent[],

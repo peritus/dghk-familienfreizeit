@@ -18,7 +18,7 @@ D4 ("stable sorted greedy with bounded repair") and its stability contract
 (closed by [issue 006](../archived/006-solver-stability-repair-underspecified.md))
 require retaining a valid previous assignment unless coverage or repair
 justifies a move. The implementation also had a fill path that assigned
-unchosen workshops to reach `minimum_workshops`. That path contradicted
+unchosen workshops to reach the configured assignment target. That path contradicted
 [D31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
 which requires every automatic assignment to come from the person's current
 ranking. Re-deriving the exact same event log could also change a fill-origin
@@ -54,8 +54,8 @@ both outside the attendance contract and unstable.
 ## Resolution
 
 The fill path was removed from the solver, prototype, and projection surfaces.
-`minimum_workshops` now only allows additional current ranked choices to be
-considered. Bounded repair likewise uses only current ranked choices for both
+`workshops_per_person` now caps automatic assignments. Bounded repair likewise
+uses only current ranked choices for both
 the person being seated and the person being moved. People without a feasible
 chosen workshop remain unassigned, for both children and adults.
 
