@@ -304,4 +304,41 @@ test('the retained trace has one event per choice and never repeats a person in 
     (stage.detail_groups ?? []).flatMap((group) => group.items),
   ))
     expect(new Set(item.people.map((person) => person.id)).size).toBe(item.people.length)
+
+  const section = retained.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+  const snapshotAssignments = [
+    ...section.initial_assignments,
+    ...section.rounds.flatMap((round) => round.assignments),
+  ]
+  const snapshotKeys = new Set(
+    snapshotAssignments.map(
+      (assignment) =>
+        `${assignment.person_id}|${assignment.workshop_id}|${assignment.slot_id}|${assignment.reason}`,
+    ),
+  )
+  for (const assignment of section.assignments) {
+    if (assignment.reason === 'repaired') {
+      expect(
+        section.repairs.some(
+          (repair) =>
+            repair.person_id === assignment.person_id &&
+            repair.workshop_id === assignment.workshop_id,
+        ),
+      ).toBe(true)
+    } else {
+      expect(
+        snapshotKeys.has(
+          `${assignment.person_id}|${assignment.workshop_id}|${assignment.slot_id}|${assignment.reason}`,
+        ),
+      ).toBe(true)
+    }
+  }
+  for (const round of section.rounds) {
+    const occupied = new Set<string>()
+    for (const assignment of round.assignments) {
+      const key = `${assignment.person_id}|${assignment.slot_id}`
+      expect(occupied.has(key)).toBe(false)
+      occupied.add(key)
+    }
+  }
 })
