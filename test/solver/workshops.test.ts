@@ -356,6 +356,7 @@ test('every configured choice round is processed and automatic assignments stop 
       rank: 1,
       outcome: 'rejected',
       reason: 'hard.capacity',
+      competing_workshop_id: null,
     },
   ])
   expect(section.rounds[1]?.decisions).toEqual([
@@ -365,6 +366,7 @@ test('every configured choice round is processed and automatic assignments stop 
       rank: 2,
       outcome: 'assigned',
       reason: 'ranked',
+      competing_workshop_id: null,
     },
   ])
   expect(section.rounds[2]?.decisions).toEqual([
@@ -374,6 +376,7 @@ test('every configured choice round is processed and automatic assignments stop 
       rank: 3,
       outcome: 'not-needed',
       reason: 'policy.target-reached',
+      competing_workshop_id: null,
     },
   ])
   expect(section.assignments).toEqual(
@@ -488,6 +491,17 @@ test('bounded repair reseats a ranked person by relocating a non-fixed occupant'
       expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', reason: 'repaired' }),
     ]),
   )
+  expect(section.repairs).toEqual([
+    {
+      person_id: 'per_b',
+      workshop_id: 'wks_1',
+      rank: 1,
+      displaced_person_id: 'per_a',
+      displaced_from_workshop_id: 'wks_1',
+      displaced_to_workshop_id: 'wks_2',
+      displaced_rank: 2,
+    },
+  ])
 })
 
 test('a minimum never assigns a workshop outside the current ranking', () => {

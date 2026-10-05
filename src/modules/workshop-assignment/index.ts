@@ -28,14 +28,25 @@ export type WorkshopAssignmentRoundDecision = {
   person_id: string
   workshop_id: string
   rank: number
-  outcome: 'assigned' | 'rejected' | 'not-needed'
+  outcome: 'assigned' | 'retained' | 'fixed' | 'rejected' | 'not-needed'
   reason: string
+  competing_workshop_id: string | null
 }
 
 export type WorkshopAssignmentRound = {
   rank: number
   decisions: readonly WorkshopAssignmentRoundDecision[]
   assignments: readonly WorkshopAssignment[]
+}
+
+export type WorkshopAssignmentRepair = {
+  person_id: string
+  workshop_id: string
+  rank: number
+  displaced_person_id: string
+  displaced_from_workshop_id: string
+  displaced_to_workshop_id: string
+  displaced_rank: number | null
 }
 
 export type WorkshopUnassigned = { person_id: string; workshop_id: string | null; reason: string }
@@ -55,6 +66,7 @@ export type WorkshopAssignmentSection = {
   initial_assignments: readonly WorkshopAssignment[]
   rounds: readonly WorkshopAssignmentRound[]
   assignments: readonly WorkshopAssignment[]
+  repairs: readonly WorkshopAssignmentRepair[]
   unassigned: readonly WorkshopUnassigned[]
   signups: readonly { person_id: string; workshop_id: string }[]
   interests: readonly { person_id: string; workshop_id: string }[]
@@ -203,6 +215,17 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         if (usedBySlot.get(placement.slot_id)?.has(personId)) return 'hard.overlap'
         return null
       }
+      const competingWorkshopId = (personId: string, workshopId: string): string | null => {
+        const slotId = placements.get(workshopId)?.slot_id
+        return (
+          assignments.find(
+            (assignment) =>
+              assignment.person_id === personId &&
+              assignment.slot_id === slotId &&
+              assignment.workshop_id !== workshopId,
+          )?.workshop_id ?? null
+        )
+      }
 
       // Step 1: apply feasible fixed attendance decisions first — they always
       // take precedence over automatic (retained/ranked) choices, so they
@@ -232,7 +255,21 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       // runs. A person may have retained more than one prior assignment —
       // every one of them is considered, not just the first found.
       const fixedPersonIds = new Set(fixed.map(({ person_id: personId }) => personId))
+      const fixedChoiceKeys = new Set<string>()
+      for (const assignment of assignments) {
+        if (assignment.reason !== 'fixed') continue
+        if (
+          rankingByPerson
+            .get(assignment.person_id)
+            ?.choices.some(
+              (choice) =>
+                choice.workshop_id === assignment.workshop_id && choice.rank !== null,
+            )
+        )
+          fixedChoiceKeys.add(`${assignment.person_id}|${assignment.workshop_id}`)
+      }
       const retentionDrops: WorkshopRetentionDrop[] = []
+      const retainedChoiceKeys = new Set<string>()
       const drop = (personId: string, workshopId: string, slotId: string, reason: string): void => {
         retentionDrops.push({
           person_id: personId,
@@ -274,12 +311,15 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
             if (!place(person.id, priorWorkshop, null, 'retained')) {
               const failure = rejectionReason(person.id, priorWorkshop) ?? 'hard.capacity'
               drop(person.id, prior.workshop_id, prior.slot_id, failure)
+            } else {
+              retainedChoiceKeys.add(`${person.id}|${prior.workshop_id}`)
             }
           }
         }
 
       const initialAssignments = assignments.map((assignment) => ({ ...assignment }))
       const rounds: WorkshopAssignmentRound[] = []
+      const repairs: WorkshopAssignmentRepair[] = []
 
       // Step 3: process every configured ranked choice in Wahlrunde order. A
       // person may receive at most the configured number of automatic
@@ -290,6 +330,29 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           for (const choice of rankedChoicesByPerson.get(person.id) ?? []) {
             if (choice.rank !== rank || !choice.workshop_id) continue
             const workshopId = choice.workshop_id
+            const choiceKey = `${person.id}|${workshopId}`
+            if (fixedChoiceKeys.has(choiceKey)) {
+              decisions.push({
+                person_id: person.id,
+                workshop_id: workshopId,
+                rank,
+                outcome: 'fixed',
+                reason: 'fixed',
+                competing_workshop_id: null,
+              })
+              continue
+            }
+            if (retainedChoiceKeys.has(choiceKey)) {
+              decisions.push({
+                person_id: person.id,
+                workshop_id: workshopId,
+                rank,
+                outcome: 'retained',
+                reason: 'retained',
+                competing_workshop_id: null,
+              })
+              continue
+            }
             if ((assignedCount.get(person.id) ?? 0) >= params.workshops_per_person) {
               traceRejection(person.id, workshopId, 'ranked-skipped', 'policy.target-reached')
               decisions.push({
@@ -298,6 +361,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
                 rank,
                 outcome: 'not-needed',
                 reason: 'policy.target-reached',
+                competing_workshop_id: null,
               })
               continue
             }
@@ -310,6 +374,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
                 rank,
                 outcome: 'rejected',
                 reason: 'hard.cancellation',
+                competing_workshop_id: null,
               })
               continue
             }
@@ -322,6 +387,8 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
                 rank,
                 outcome: 'rejected',
                 reason,
+                competing_workshop_id:
+                  reason === 'hard.overlap' ? competingWorkshopId(person.id, workshopId) : null,
               })
               continue
             }
@@ -331,16 +398,19 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
               rank,
               outcome: 'assigned',
               reason: 'ranked',
+              competing_workshop_id: null,
             })
           }
         }
-        rounds.push({
-          rank,
-          decisions: Object.freeze(decisions.map((decision) => Object.freeze(decision))),
-          assignments: Object.freeze(
-            assignments.map((assignment) => Object.freeze({ ...assignment })),
-          ),
-        })
+        rounds.push(
+          Object.freeze({
+            rank,
+            decisions: Object.freeze(decisions.map((decision) => Object.freeze(decision))),
+            assignments: Object.freeze(
+              assignments.map((assignment) => Object.freeze({ ...assignment })),
+            ),
+          }),
+        )
       }
 
       // Step 5: bounded deterministic repair — try to seat a still-unassigned
@@ -392,6 +462,15 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
             const relocated =
               seated && place(occupant.person_id, alternative, alternativeChoice!.rank, 'repaired')
             if (relocated) {
+              repairs.push({
+                person_id: person.id,
+                workshop_id: workshop.id,
+                rank: candidateChoice.rank!,
+                displaced_person_id: occupant.person_id,
+                displaced_from_workshop_id: occupantWorkshop.id,
+                displaced_to_workshop_id: alternative!.id,
+                displaced_rank: alternativeChoice!.rank,
+              })
               repaired = true
               break
             }
@@ -431,6 +510,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           ),
           rounds: Object.freeze(rounds),
           assignments,
+          repairs: Object.freeze(repairs),
           unassigned,
           signups,
           interests,
@@ -479,6 +559,7 @@ export function workshopAssignmentSection(plan: {
       initial_assignments: [],
       rounds: [],
       assignments: [],
+      repairs: [],
       unassigned: [],
       signups: [],
       interests: [],
