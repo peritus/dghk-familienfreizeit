@@ -30,6 +30,7 @@ const answers: readonly WorkshopAllocationAnswer[] = fullChoiceAnswers.map((answ
 }))
 
 const projection: WorkshopAllocationProjection = {
+  max_rank: 3,
   answers,
   demand: fullDemandRows,
   trace_events: [],

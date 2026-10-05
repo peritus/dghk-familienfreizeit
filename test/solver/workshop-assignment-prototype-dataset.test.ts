@@ -272,3 +272,36 @@ test('the workshop allocation projection exposes answers, demand, and trace from
       .every((item) => item.people.every((person) => person.id === selectedId)),
   ).toBe(true)
 })
+
+test('the retained trace has one event per choice and never repeats a person in a detail group', () => {
+  const first = solveFixture()
+  const retained = solveFixture(first.plan)
+  const projection = buildWorkshopAllocationProjection({
+    world: retained.world,
+    plan: retained.plan,
+    event_date: '2027-05-14',
+    time_zone: 'Europe/Berlin',
+    max_rank: 3,
+  })
+  const choiceEvents = projection.trace_events.filter(
+    (event) => event.rank !== null && ['round', 'retention', 'fixed'].includes(event.phase),
+  )
+  const choiceKeys = choiceEvents.map(
+    (event) => `${event.person_id}|${event.workshop_id}|${event.rank}`,
+  )
+  expect(new Set(choiceKeys).size).toBe(choiceKeys.length)
+
+  const stages = buildWorkshopAllocationTraceStages(projection, 'all')
+  expect(stages.map((stage) => stage.id)).toEqual([
+    'answers',
+    'retention',
+    'round-1',
+    'round-2',
+    'round-3',
+    'result',
+  ])
+  for (const item of stages.flatMap((stage) =>
+    (stage.detail_groups ?? []).flatMap((group) => group.items),
+  ))
+    expect(new Set(item.people.map((person) => person.id)).size).toBe(item.people.length)
+})

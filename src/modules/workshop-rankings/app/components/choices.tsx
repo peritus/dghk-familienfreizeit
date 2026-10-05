@@ -360,6 +360,7 @@ export type TraceStageView = {
   eligibility?: number
   cancellation?: number
   unprocessed?: number
+  not_needed?: number
   detail_items?: readonly string[]
   detail_groups?: readonly {
     id: string
@@ -437,6 +438,9 @@ function stageSegments(
   })
   add(`${stage.id}-unscheduled`, stage.unscheduled, 'ohne Termin', 'bg-background', {
     ['backgroundImage']: 'radial-gradient(#6b645c 1px, transparent 1.4px)',
+  })
+  add(`${stage.id}-not-needed`, stage.not_needed ?? 0, 'Ziel erreicht', 'bg-paper', {
+    ['backgroundImage']: 'repeating-linear-gradient(45deg, #fff 0 4px, #d2ccc4 4px 6px)',
   })
   return segments
 }
@@ -644,6 +648,7 @@ export function TraceStageRow({
         <td className="p-3 text-right">{stage.overlap}</td>
         <td className="p-3 text-right">{stage.leader}</td>
         <td className="p-3 text-right">{stage.unscheduled}</td>
+        <td className="p-3 text-right">{stage.not_needed ?? 0}</td>
         <td className="p-3 text-right font-bold">{stage.open}</td>
         {selectedPersonLabel ? (
           <td className="bg-paper p-3 text-sm">{stage.selected_summary ?? '—'}</td>
@@ -652,7 +657,7 @@ export function TraceStageRow({
       {showDetailRows && stage.detail_groups?.length ? (
         <tr className="border-b border-border/30 align-top">
           <td aria-hidden="true" />
-          <td colSpan={7} className="p-3 pt-0 text-sm text-muted">
+          <td colSpan={8} className="p-3 pt-0 text-sm text-muted">
             <TraceDetailGroups
               groups={stage.detail_groups}
               on_person_id={onPersonId}
@@ -690,6 +695,7 @@ export function ChoiceTraceTable({
         { key: 'overlap', label: 'Überschneidung', numeric: true },
         { key: 'leader', label: 'leitet selbst', numeric: true },
         { key: 'unscheduled', label: 'ohne Termin', numeric: true },
+        { key: 'not-needed', label: 'Ziel erreicht', numeric: true },
         { key: 'open', label: 'noch offen', numeric: true },
         ...(selectedPersonLabel ? [{ key: 'selected', label: selectedPersonLabel }] : []),
       ]}
@@ -727,6 +733,7 @@ export function ChoiceTraceTable({
               ['Überschneidung', stage.overlap],
               ['leitet selbst', stage.leader],
               ['ohne Termin', stage.unscheduled],
+              ['Ziel erreicht', stage.not_needed ?? 0],
               ['noch offen', stage.open],
             ].map(([label, value]) => (
               <div key={label}>
