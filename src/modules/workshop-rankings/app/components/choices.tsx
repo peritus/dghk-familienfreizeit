@@ -483,7 +483,7 @@ export function TraceProgressBar({
   if (!segments.length) {
     return (
       <div
-        className="flex h-7 items-center justify-center overflow-hidden rounded-base border-2 border-border bg-white text-sm text-muted"
+        className="flex h-10 w-full items-center justify-center overflow-hidden rounded-base border-2 border-border bg-white text-sm text-muted"
         role="img"
         aria-label={`${stage?.label ?? 'Verlauf'}: keine Wünsche`}
       >
@@ -493,7 +493,7 @@ export function TraceProgressBar({
   }
   return (
     <div
-      className="flex h-7 overflow-hidden rounded-base border-2 border-border bg-secondary-background"
+      className="flex h-10 w-full overflow-hidden rounded-base border-2 border-border bg-secondary-background"
       role="img"
       aria-label={`${stage?.label ?? 'Verlauf'}: ${segments.map((segment) => `${segment.value} ${segment.label}`).join(', ')}`}
     >
@@ -515,6 +515,7 @@ function TraceDetailGroups({
   groups,
   on_person_id: onPersonId,
   selected_person_id: selectedPersonId,
+  show_headings: showHeadings = true,
 }: {
   groups: readonly {
     id: string
@@ -530,6 +531,7 @@ function TraceDetailGroups({
   }[]
   on_person_id?: (personId: string) => void
   selected_person_id?: string
+  show_headings?: boolean
 }) {
   const renderItem = (item: (typeof groups)[number]['items'][number]) => {
     const parts: ReactNode[] = []
@@ -610,8 +612,15 @@ function TraceDetailGroups({
   return (
     <div className="space-y-3">
       {groups.map((group) => (
-        <section key={group.id}>
-          <h4 className="text-sm font-bold">{group.heading}</h4>
+        <section
+          key={group.id}
+          className={
+            showHeadings
+              ? 'grid gap-x-6 sm:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)]'
+              : undefined
+          }
+        >
+          {showHeadings ? <h4 className="text-sm font-bold">{group.heading}</h4> : null}
           <ul className="mt-1 space-y-1">
             {group.items.map((item) => (
               <li key={item.id}>{renderItem(item)}</li>
@@ -643,7 +652,7 @@ export function TraceStageRow({
   return (
     <>
       <tr className="border-b border-border/30 align-top">
-        <th scope="row" className="p-3">
+        <th scope="row" className="w-52 min-w-52 p-3">
           <span className="block font-heading">{stage.label}</span>
           <span className="text-sm font-normal text-muted">{stage.description}</span>
         </th>
@@ -661,19 +670,24 @@ export function TraceStageRow({
           <td className="bg-paper p-3 text-sm">{stage.selected_summary ?? '—'}</td>
         ) : null}
       </tr>
-      {showDetailRows && stage.detail_groups?.length ? (
-        <tr className="border-b border-border/30 align-top">
-          <td aria-hidden="true" />
-          <td colSpan={8} className="p-3 pt-0 text-sm text-muted">
-            <TraceDetailGroups
-              groups={stage.detail_groups}
-              on_person_id={onPersonId}
-              selected_person_id={selectedPersonId}
-            />
-          </td>
-          {selectedPersonLabel ? <td className="bg-paper" aria-hidden="true" /> : null}
-        </tr>
-      ) : null}
+      {showDetailRows && stage.detail_groups?.length
+        ? stage.detail_groups.map((group) => (
+            <tr key={`${stage.id}-${group.id}`} className="border-b border-border/30 align-top">
+              <th scope="row" className="w-52 min-w-52 p-3 pt-0 text-sm text-muted">
+                {group.heading}
+              </th>
+              <td colSpan={8} className="p-3 pt-0 text-sm text-muted">
+                <TraceDetailGroups
+                  groups={[group]}
+                  on_person_id={onPersonId}
+                  selected_person_id={selectedPersonId}
+                  show_headings={false}
+                />
+              </td>
+              {selectedPersonLabel ? <td className="bg-paper" aria-hidden="true" /> : null}
+            </tr>
+          ))
+        : null}
     </>
   )
 }
