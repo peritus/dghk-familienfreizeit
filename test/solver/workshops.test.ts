@@ -127,7 +127,7 @@ test('places one workshop and allocates a ranked person through the composed sta
   ])
 })
 
-function testProfile(assignmentParams: WorkshopAssignmentParams) {
+function testProfile(assignmentParams: WorkshopAssignmentParams, maxRank = 3) {
   return defineOccasionProfile({
     meta: {
       id: 'workshop-fixture',
@@ -150,7 +150,7 @@ function testProfile(assignmentParams: WorkshopAssignmentParams) {
       workshopScheduling({ placement_policy: 'automatic-with-fixed-decisions' }),
       workshopRankings({
         ranking_trait: 'prefers-workshop',
-        max_rank: 3,
+        max_rank: maxRank,
         allow_no_preference: true,
       }),
       workshopAssignment(assignmentParams),
@@ -262,8 +262,9 @@ function slot(seq: number): Event {
 function assignmentSection(
   events: Event[],
   params: WorkshopAssignmentParams,
+  maxRank = 3,
 ): WorkshopAssignmentSection {
-  const profile = testProfile(params)
+  const profile = testProfile(params, maxRank)
   const world = derive(events, profile.validation_view)
   const contributions = composeSolverContributions(profile)
   const plan = solve(buildSolverInput(world, contributions), contributions, {
@@ -277,9 +278,8 @@ function assignmentSection(
 }
 
 const defaultParams: WorkshopAssignmentParams = {
-  top_n: 2,
+  workshops_per_person: 1,
   rank_weights: [3, 2, 1],
-  minimum_workshops: 1,
   max_repair_passes: 2,
 }
 
@@ -308,6 +308,87 @@ test('a fixed attendance decision takes precedence over a ranked choice for the 
   ])
   expect(section.fixed).toEqual([{ person_id: 'per_a', workshop_id: 'wks_1' }])
   expect(section.fixed_violations).toEqual([])
+})
+
+test('every configured choice round is processed and automatic assignments stop at the target', () => {
+  const events = [
+    venue('wsp_a', 1),
+    venue('wsp_b', 2),
+    venue('wsp_c', 3),
+    slot(4),
+    event(
+      'WorkshopSlotAdded',
+      {
+        slot_id: 'slot_afternoon',
+        starts_at: '2027-04-30T15:00:00Z',
+        ends_at: '2027-04-30T17:00:00Z',
+        sort_key: 2,
+      },
+      5,
+    ),
+    event(
+      'WorkshopSlotAdded',
+      {
+        slot_id: 'slot_evening',
+        starts_at: '2027-04-30T19:00:00Z',
+        ends_at: '2027-04-30T21:00:00Z',
+        sort_key: 3,
+      },
+      6,
+    ),
+    workshop('wks_1', 1, 1, 7),
+    workshop('wks_2', 1, 2, 8),
+    workshop('wks_3', 1, 3, 9),
+    ...family('per_taken', 'fam_taken', 10),
+    ...family('per_a', 'fam_a', 12),
+    fixedAttendance('per_taken', ['wks_1'], 14),
+    ranking('per_a', 'wks_1', 1, 15),
+    ranking('per_a', 'wks_2', 2, 16),
+    ranking('per_a', 'wks_3', 3, 17),
+  ]
+  const section = assignmentSection(events, { ...defaultParams, workshops_per_person: 1 })
+
+  expect(section.rounds.map((round) => round.rank)).toEqual([1, 2, 3])
+  expect(section.rounds[0]?.decisions).toEqual([
+    {
+      person_id: 'per_a',
+      workshop_id: 'wks_1',
+      rank: 1,
+      outcome: 'rejected',
+      reason: 'hard.capacity',
+    },
+  ])
+  expect(section.rounds[1]?.decisions).toEqual([
+    {
+      person_id: 'per_a',
+      workshop_id: 'wks_2',
+      rank: 2,
+      outcome: 'assigned',
+      reason: 'ranked',
+    },
+  ])
+  expect(section.rounds[2]?.decisions).toEqual([
+    {
+      person_id: 'per_a',
+      workshop_id: 'wks_3',
+      rank: 3,
+      outcome: 'not-needed',
+      reason: 'policy.target-reached',
+    },
+  ])
+  expect(section.assignments).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', rank: 2 }),
+    ]),
+  )
+})
+
+test.each([2, 3, 5])('profile max_rank=%s produces that many allocation rounds', (maxRank) => {
+  const events = [venue('wsp_a', 1), slot(2), workshop('wks_1', 1, 1, 3), ...family('per_a', 'fam_a', 4)]
+  const section = assignmentSection(events, defaultParams, maxRank)
+  expect(section.rounds.map((round) => round.rank)).toEqual(
+    Array.from({ length: maxRank }, (_, index) => index + 1),
+  )
 })
 
 test('conflicting fixed decisions surface as fixed_violations instead of throwing', () => {
@@ -583,8 +664,7 @@ test('every prior assignment for a person is considered for retention, not just 
   ]
   const params: WorkshopAssignmentParams = {
     ...defaultParams,
-    top_n: 2,
-    minimum_workshops: 2,
+    workshops_per_person: 2,
   }
   const { section1, section2 } = twoCycles(cycle1, cycle1, params)
   expect(section1.assignments).toHaveLength(2)

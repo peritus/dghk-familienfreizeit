@@ -19,6 +19,12 @@ export type WorkshopDemand = Readonly<Record<string, number>>
 /** Read-only ranked choices for organiser projections such as programme conflict review. */
 export type WorkshopRankingsSummary = { rankings: readonly WorkshopRanking[] }
 
+export type WorkshopRankingsDemand = {
+  rankings: readonly WorkshopRanking[]
+  demand: WorkshopDemand
+  max_rank: number
+}
+
 // Accepts either the object form { workshop_id, rank } or a compact
 // "wks_id:rank" string (e.g. from a KDL fixture, where a LabelSet value
 // can only be a scalar) — the compact form is transformed into the object
@@ -78,10 +84,7 @@ function buildRankings(world: World): readonly WorkshopRanking[] {
     .sort((a, b) => a.person_id.localeCompare(b.person_id))
 }
 
-function demandStage(): SolverStage<{
-  rankings: readonly WorkshopRanking[]
-  demand: WorkshopDemand
-}> {
+function demandStage(maxRank: number): SolverStage<WorkshopRankingsDemand> {
   return {
     id: 'workshop-rankings.demand',
     after: [],
@@ -89,14 +92,14 @@ function demandStage(): SolverStage<{
     reads: [],
     run: (
       input: SolverInput,
-    ): StageResult<{ rankings: readonly WorkshopRanking[]; demand: WorkshopDemand }> => {
+    ): StageResult<WorkshopRankingsDemand> => {
       const rankings = input.module_inputs['workshop-rankings'] as readonly WorkshopRanking[]
       const demand: Record<string, number> = {}
       for (const ranking of rankings)
         for (const choice of ranking.choices)
           if (choice.workshop_id) demand[choice.workshop_id] = (demand[choice.workshop_id] ?? 0) + 1
       return {
-        output: { rankings, demand },
+        output: { rankings, demand, max_rank: maxRank },
         trace: rankings.map((ranking) => ({
           stage: 'workshop-rankings.demand',
           step: 'count',
@@ -127,8 +130,8 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
       },
     ],
     family_controls: [{ key: params.ranking_trait, control: 'ranking' }],
-    solver_input: [{ id: 'workshop-rankings', build: (world) => buildRankings(world) }],
-    stages: [demandStage()],
+    solver_input: [{ id: 'workshop-rankings', build: (world) => workshopRankingsFromWorld(world, params) }],
+    stages: [demandStage(params.max_rank)],
     world_summaries: [
       {
         id: 'workshop-rankings',

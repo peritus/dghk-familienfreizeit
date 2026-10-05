@@ -53,9 +53,8 @@ const profile = defineOccasionProfile({
     workshopScheduling({ placement_policy: 'automatic-with-fixed-decisions' }),
     workshopRankings({ ranking_trait: 'prefers-workshop', max_rank: 3, allow_no_preference: true }),
     workshopAssignment({
-      top_n: 2,
+      workshops_per_person: 2,
       rank_weights: [3, 2, 1],
-      minimum_workshops: 2,
       max_repair_passes: 5,
     }),
   ],

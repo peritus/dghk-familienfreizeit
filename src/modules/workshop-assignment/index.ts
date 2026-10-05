@@ -11,9 +11,8 @@ import type { WorkshopSchedulingSection } from '../workshop-scheduling/index.js'
 import type { WorkshopChoice, WorkshopRanking } from '../workshop-rankings/index.js'
 
 export type WorkshopAssignmentParams = {
-  top_n: number
+  workshops_per_person: number
   rank_weights: readonly number[]
-  minimum_workshops: number
   max_repair_passes: number
 }
 
@@ -23,6 +22,20 @@ export type WorkshopAssignment = {
   slot_id: string
   rank: number | null
   reason: 'ranked' | 'fixed' | 'retained' | 'repaired'
+}
+
+export type WorkshopAssignmentRoundDecision = {
+  person_id: string
+  workshop_id: string
+  rank: number
+  outcome: 'assigned' | 'rejected' | 'not-needed'
+  reason: string
+}
+
+export type WorkshopAssignmentRound = {
+  rank: number
+  decisions: readonly WorkshopAssignmentRoundDecision[]
+  assignments: readonly WorkshopAssignment[]
 }
 
 export type WorkshopUnassigned = { person_id: string; workshop_id: string | null; reason: string }
@@ -39,6 +52,8 @@ export type WorkshopRetentionDrop = {
 }
 
 export type WorkshopAssignmentSection = {
+  initial_assignments: readonly WorkshopAssignment[]
+  rounds: readonly WorkshopAssignmentRound[]
   assignments: readonly WorkshopAssignment[]
   unassigned: readonly WorkshopUnassigned[]
   signups: readonly { person_id: string; workshop_id: string }[]
@@ -64,6 +79,7 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       const schedule = upstream['workshop-scheduling.placement'] as WorkshopSchedulingSection
       const rankingOutput = upstream['workshop-rankings.demand'] as {
         rankings: readonly WorkshopRanking[]
+        max_rank: number
       }
       const official = input.module_inputs['official-workshops'] as OfficialWorkshopsSummary
       const workshops = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
@@ -87,8 +103,8 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
       for (const label of input.labels)
         if (label.key === 'role' && !roleByPerson.has(label.entity_id))
           roleByPerson.set(label.entity_id, label.value)
-      // Ranked choices, filtered and ordered once per person: the retention and
-      // repair passes re-derived this list on every iteration.
+      // Ranked choices, filtered and ordered once per person: retention and
+      // repair use the same choice objects as the round loop.
       const rankedChoicesByPerson = new Map<string, readonly WorkshopChoice[]>(
         rankingOutput.rankings.map((ranking) => [
           ranking.person_id,
@@ -213,9 +229,8 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
 
       // Step 2: retain every still-feasible prior assignment for anyone with
       // no fixed decision this cycle, before any new ranking decision
-      // runs. A person may have retained more than one prior assignment
-      // (e.g. minimum_workshops > 1) — every one of them is considered, not
-      // just the first found.
+      // runs. A person may have retained more than one prior assignment —
+      // every one of them is considered, not just the first found.
       const fixedPersonIds = new Set(fixed.map(({ person_id: personId }) => personId))
       const retentionDrops: WorkshopRetentionDrop[] = []
       const drop = (personId: string, workshopId: string, slotId: string, reason: string): void => {
@@ -263,35 +278,69 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
           }
         }
 
-      // Step 3: process current ranked choices. A minimum only controls how
-      // many ranked choices are considered; it never creates a new choice.
-      for (const person of assignedPeople) {
-        const ranking = rankingByPerson.get(person.id)
-        const rankedChoices =
-          ranking?.choices
-            .filter((choice) => choice.workshop_id && choice.rank !== null)
-            .slice()
-            .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)) ?? []
-        let assigned = assignedCount.get(person.id) ?? 0
-        for (const choice of rankedChoices) {
-          if (assigned >= params.minimum_workshops && (choice.rank ?? 0) > params.top_n) break
-          const workshopId = choice.workshop_id!
-          const workshop = workshops.get(workshopId)
-          if (!workshop) {
-            traceRejection(person.id, workshopId, 'ranked-rejected', 'hard.cancellation')
-            continue
+      const initialAssignments = assignments.map((assignment) => ({ ...assignment }))
+      const rounds: WorkshopAssignmentRound[] = []
+
+      // Step 3: process every configured ranked choice in Wahlrunde order. A
+      // person may receive at most the configured number of automatic
+      // assignments, but every lower-ranked choice remains explainable.
+      for (let rank = 1; rank <= rankingOutput.max_rank; rank += 1) {
+        const decisions: WorkshopAssignmentRoundDecision[] = []
+        for (const person of assignedPeople) {
+          for (const choice of rankedChoicesByPerson.get(person.id) ?? []) {
+            if (choice.rank !== rank || !choice.workshop_id) continue
+            const workshopId = choice.workshop_id
+            if ((assignedCount.get(person.id) ?? 0) >= params.workshops_per_person) {
+              traceRejection(person.id, workshopId, 'ranked-skipped', 'policy.target-reached')
+              decisions.push({
+                person_id: person.id,
+                workshop_id: workshopId,
+                rank,
+                outcome: 'not-needed',
+                reason: 'policy.target-reached',
+              })
+              continue
+            }
+            const workshop = workshops.get(workshopId)
+            if (!workshop) {
+              traceRejection(person.id, workshopId, 'ranked-rejected', 'hard.cancellation')
+              decisions.push({
+                person_id: person.id,
+                workshop_id: workshopId,
+                rank,
+                outcome: 'rejected',
+                reason: 'hard.cancellation',
+              })
+              continue
+            }
+            if (!place(person.id, workshop, choice.rank, 'ranked')) {
+              const reason = rejectionReason(person.id, workshop) ?? 'hard.capacity'
+              traceRejection(person.id, workshopId, 'ranked-rejected', reason)
+              decisions.push({
+                person_id: person.id,
+                workshop_id: workshopId,
+                rank,
+                outcome: 'rejected',
+                reason,
+              })
+              continue
+            }
+            decisions.push({
+              person_id: person.id,
+              workshop_id: workshopId,
+              rank,
+              outcome: 'assigned',
+              reason: 'ranked',
+            })
           }
-          if (!place(person.id, workshop, choice.rank, 'ranked')) {
-            traceRejection(
-              person.id,
-              workshopId,
-              'ranked-rejected',
-              rejectionReason(person.id, workshop) ?? 'hard.capacity',
-            )
-            continue
-          }
-          assigned += 1
         }
+        rounds.push({
+          rank,
+          decisions: Object.freeze(decisions.map((decision) => Object.freeze(decision))),
+          assignments: Object.freeze(
+            assignments.map((assignment) => Object.freeze({ ...assignment })),
+          ),
+        })
       }
 
       // Step 5: bounded deterministic repair — try to seat a still-unassigned
@@ -377,6 +426,10 @@ function assignmentStage(params: WorkshopAssignmentParams): SolverStage<Workshop
         .map((label) => ({ person_id: label.entity_id, workshop_id: String(label.value) }))
       return {
         output: {
+          initial_assignments: Object.freeze(
+            initialAssignments.map((assignment) => Object.freeze({ ...assignment })),
+          ),
+          rounds: Object.freeze(rounds),
           assignments,
           unassigned,
           signups,
@@ -403,9 +456,8 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
   id: 'workshop-assignment',
   requires: ['official-workshops', 'workshop-rankings', 'workshop-scheduling'],
   params: z.object({
-    top_n: z.number().int().min(1).default(2),
+    workshops_per_person: z.number().int().min(1).default(2),
     rank_weights: z.array(z.number().int()).min(1).default([3, 2, 1]),
-    minimum_workshops: z.number().int().min(0).default(0),
     max_repair_passes: z.number().int().min(0).default(5),
   }),
   contribute: (params) => ({
@@ -424,6 +476,8 @@ export function workshopAssignmentSection(plan: {
 }): WorkshopAssignmentSection {
   return (
     (plan.sections['workshop-assignment'] as WorkshopAssignmentSection | undefined) ?? {
+      initial_assignments: [],
+      rounds: [],
       assignments: [],
       unassigned: [],
       signups: [],

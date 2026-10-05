@@ -20,6 +20,9 @@ import { workshopScheduling } from '../../../modules/workshop-scheduling/index.j
 import { workshopSpace } from '../../../modules/workshop-space/index.js'
 import { luebben2027Meta } from './meta.js'
 
+const workshopChoiceRounds = 3
+const workshopsPerPerson = 2
+
 export const luebben2027Profile = defineOccasionProfile({
   meta: luebben2027Meta,
   traits: {
@@ -298,11 +301,14 @@ export const luebben2027Profile = defineOccasionProfile({
       excluded_roles: ['infant'],
     }),
     workshopScheduling({ placement_policy: 'automatic-with-fixed-decisions' }),
-    workshopRankings({ ranking_trait: 'prefers-workshop', max_rank: 3, allow_no_preference: true }),
+    workshopRankings({
+      ranking_trait: 'prefers-workshop',
+      max_rank: workshopChoiceRounds,
+      allow_no_preference: true,
+    }),
     workshopAssignment({
-      top_n: 2,
+      workshops_per_person: workshopsPerPerson,
       rank_weights: [3, 2, 1],
-      minimum_workshops: 2,
       max_repair_passes: 5,
     }),
     familyPreferences({
@@ -342,8 +348,8 @@ export const luebben2027Profile = defineOccasionProfile({
           section: 'workshops',
           title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
           help: {
-            de: 'Bis zu drei Wünsche, der wichtigste zuerst.',
-            en: 'Up to three choices, most important first.',
+            de: `Bis zu ${workshopChoiceRounds} Wünsche, der wichtigste zuerst.`,
+            en: `Up to ${workshopChoiceRounds} choices, most important first.`,
           },
         },
         {
