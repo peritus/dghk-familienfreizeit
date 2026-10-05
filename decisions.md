@@ -64,19 +64,18 @@ so a future comparison can attribute every move to its cause without changing
 the solver contract. Regression testing is a hash comparison. Reproducing a
 complaint is `solve(solverInputAt(input_seq))`.
 
-## D4 — Stable sorted greedy with bounded repair, not integer programming
+## D4 — Stable sorted greedy, not integer programming
 
-*Chosen.* A documented sort order, a scored greedy pass for unresolved claims,
-then capped pairwise swaps where the selected module contract permits them. The
-current derived world is the complete solver input; a solve has no hidden plan
-from an earlier run.
+*Chosen.* A documented sort order and a scored greedy pass for unresolved
+claims. The current derived world is the complete solver input; a solve has no
+hidden plan from an earlier run.
 
 Strict Wahlrunde attendance is a module-level specialization: fixed decisions
 are applied first, ranked choices are processed round by round, and an earlier
 round assignment is never displaced by a later round. Its trace therefore
 describes the exact allocation path without a post-round repair pass. Room
-placement retains the bounded repair step because it has a different placement
-contract and trace.
+placement uses the same deterministic greedy boundary and leaves families
+unplaced when no room is selected for them.
 
 The allocation priority is:
 
@@ -86,9 +85,9 @@ The allocation priority is:
 4. prefer higher-ranked choices;
 5. terminate every tie with stable entity ids.
 
-Every displacement identifies the constraint, coverage need, or bounded repair
-that required it. Repeating a solve with the same input therefore produces the
-same plan without consulting a result from the earlier solve.
+Every selected placement identifies its score terms and rejected alternatives.
+Repeating a solve with the same input therefore produces the same plan without
+consulting a result from the earlier solve.
 
 *Rejected alternative:* an ILP or CP-SAT solver. It would produce better plans by
 a few percent and would be completely unreviewable. An organiser cannot look at a
@@ -354,7 +353,7 @@ TypeScript, KDL, and these documents:
 
 | Kind of name | Case | Examples |
 |---|---|---|
-| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `max_repair_passes` |
+| Data fields: SQL columns, event payloads, KDL properties, API JSON, derived shapes (`World`, `Plan`, trace), profile and module configuration objects, fixtures | `snake_case` | `family_id`, `input_seq`, `bed_demand`, `family_facing`, `max_rank` |
 | Code identifiers: variables, parameters, functions, methods, module factories | `camelCase` | `ageAt`, `buildSolverInput`, `roomInventory()` |
 | Types, interfaces, classes, React components | `PascalCase` | `SolverInput`, `RoomInventoryParams`, `FamilyView` |
 | Event types | `PascalCase` | `PersonAdded`, `LabelSet` |
@@ -721,8 +720,8 @@ displacement, or reassignment is triggered by a capacity edit.
 *Rejected alternative:* recompute and displace or reassign affected people using
 fairness rules. This would silently move people who were never touched by the
 capacity edit, and it conflicts with fixed attendance decisions being meant to
-take precedence over automatic ones ([D4](#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)):
-an automatic displacement pass has no principled way to leave fixed decisions
+take precedence over automatic ones ([D4](#d4--stable-sorted-greedy-not-integer-programming)):
+an automatic reassignment pass has no principled way to leave fixed decisions
 alone while still resolving the overflow.
 
 *Rejected alternative:* select the reduction behavior through occasion-profile

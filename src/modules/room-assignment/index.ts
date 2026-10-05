@@ -12,7 +12,6 @@ export type RoomAssignmentParams = {
   no_bed_trait: string | null
   priority_trait: string | null
   scarce_capabilities: Readonly<Record<string, number>>
-  max_repair_passes: number
 }
 
 export type RoomCandidate = {
@@ -104,7 +103,6 @@ const paramsSchema = z.object({
   no_bed_trait: z.string().nullable().default(null),
   priority_trait: z.string().nullable().default(null),
   scarce_capabilities: z.record(z.string(), z.number().int().max(0)).default({}),
-  max_repair_passes: z.number().int().min(0).default(5),
 })
 
 const defaultRoomAssignmentParams = paramsSchema.parse({})
@@ -248,7 +246,7 @@ export function runRoomAssignment(
 } {
   const placements = new Map<string, string>()
   const rules = input.rules ?? roomAssignmentRules()
-  // Keyed lookups for the three collections the passes below search by id.
+  // Keyed lookups for the collections the stage resolves by id.
   const roomsById = new Map(input.rooms.map((room) => [room.id, room]))
   const familiesById = new Map(input.families.map((family) => [family.family_id, family] as const))
   const trace: PlacementTrace[] = []
@@ -270,11 +268,9 @@ export function runRoomAssignment(
     step: string,
     score?: RoomScore,
   ): void => {
-    const before = new Map(placements)
-    // One sweep for both halves of the trace detail. Scoring the candidates and
-    // collecting the rejections used to walk every room twice against the same
-    // snapshot, on every placement.
-    const evaluated = evaluateRooms(family, before, input, params, rules)
+    // One sweep provides both halves of the trace detail: scored candidates and
+    // per-room rejections.
+    const evaluated = evaluateRooms(family, placements, input, params, rules)
     const candidates = evaluated.candidates.slice().sort(compareScore)
     const selected = score ?? candidates.find(({ room: candidate }) => candidate.id === room.id)
     const rejected = evaluated.rejections
@@ -352,46 +348,6 @@ export function runRoomAssignment(
     const candidates = scoredRooms(family, placements, input, params, rules)
     const sorted = candidates.slice().sort(compareScore)
     if (sorted[0]) place(family, sorted[0].room, 'greedy', sorted[0])
-  }
-
-  for (let pass = 0; pass < params.max_repair_passes; pass += 1) {
-    let repaired = false
-    for (const family of unplaced()) {
-      for (const occupant of families.filter(({ family_id: familyId }) =>
-        placements.has(familyId),
-      )) {
-        const oldRoom = placements.get(occupant.family_id)!
-        const targetRoom = roomsById.get(oldRoom)!
-        placements.delete(occupant.family_id)
-        // Test the vacated room for the unplaced family first. It costs one
-        // room, and when it fails — which is the common case, since most
-        // occupants sit in rooms this family cannot use at all — the occupant's
-        // alternatives never have to be searched.
-        const target = candidateFor(family, targetRoom, placements, input, params, rules)
-        const alternative = target
-          ? firstCandidate(
-              occupant,
-              placements,
-              input,
-              params,
-              rules,
-              (candidate) => candidate.id !== oldRoom,
-            )
-          : undefined
-        if (target && alternative) {
-          const current = score(occupant, targetRoom, placements, input, params).score
-          if (target.score + alternative.score > current) {
-            place(family, target.room, 'repair', target)
-            place(occupant, alternative.room, 'repair', alternative)
-            repaired = true
-            break
-          }
-        }
-        placements.set(occupant.family_id, oldRoom)
-      }
-      if (repaired) break
-    }
-    if (!repaired) break
   }
 
   const unplacedFamilies = unplaced().map((family) => ({
@@ -667,53 +623,9 @@ function scoredRooms(
 }
 
 /**
- * One room, scored if the family can use it. Equivalent to sweeping every room
- * and keeping this one, which is what the repair pass used to do to answer a
- * question about a single vacated room.
- */
-function candidateFor(
-  family: FamilyPlacementUnit,
-  room: RoomCandidate,
-  placements: ReadonlyMap<string, string>,
-  input: RoomAssignmentInput,
-  params: RoomAssignmentParams,
-  rules: readonly Rule[],
-): RoomScore | undefined {
-  const state = sweepState(family, placements, input, params)
-  return feasible(family, room, placements, input, params, rules, state).length === 0
-    ? score(family, room, placements, input, params, state)
-    : undefined
-}
-
-/**
- * The first room in `input.rooms` order that the family can use and that
- * `accept` admits. Scoring every room to then take the first match was the
- * other half of the repair pass's cost; room order, and therefore the room
- * chosen, is unchanged.
- */
-function firstCandidate(
-  family: FamilyPlacementUnit,
-  placements: ReadonlyMap<string, string>,
-  input: RoomAssignmentInput,
-  params: RoomAssignmentParams,
-  rules: readonly Rule[],
-  accept: (room: RoomCandidate) => boolean,
-): RoomScore | undefined {
-  const state = sweepState(family, placements, input, params)
-  for (const room of input.rooms) {
-    if (!accept(room)) continue
-    if (feasible(family, room, placements, input, params, rules, state).length !== 0) continue
-    return score(family, room, placements, input, params, state)
-  }
-  return undefined
-}
-
-/**
  * Room occupancy derived from one `placements` map. Deriving it per sweep keeps
- * `roomRemaining` and `roomFamilies` O(1) without maintaining mutable state
- * across the stage: `place` snapshots `placements` and the repair pass mutates
- * and rolls it back, so an incrementally maintained index would have to be
- * rolled back in lockstep.
+ * `roomRemaining` and `roomFamilies` O(1) without maintaining a second mutable
+ * index across the stage, so the index cannot drift from the placement map.
  */
 export type PlacementIndex = {
   occupancy: ReadonlyMap<string, number>

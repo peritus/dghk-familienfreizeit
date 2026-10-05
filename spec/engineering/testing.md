@@ -60,8 +60,8 @@ Repeated-solve tests use the same current solver input and must prove:
 
 - identical inputs produce identical plans and traces;
 - an unrelated change is handled by the documented current-input allocation;
-- invalidation or capacity loss moves no more people than necessary under the
-  documented bounded-repair procedure;
+- invalidation or capacity loss follows the documented deterministic allocation
+  procedure without a hidden repair pass;
 - a new person does not displace an existing person when another feasible place
   exists;
 - every move has one deterministic reason in the solver trace.

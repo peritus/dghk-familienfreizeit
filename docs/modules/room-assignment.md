@@ -53,40 +53,25 @@ and the measured effect was an order of magnitude:
   once per solve and memoised on the input's identity, rather than rebuilt per
   sweep.
 
-The repair pass was the largest single consumer. For every (unplaced family,
-occupant) pair it scored every room twice: once to ask whether the unplaced
-family could use the one room the occupant would vacate, and once to find the
-occupant somewhere else. It now tests the vacated room on its own, and only
-searches for an alternative when that test passes — which it usually does not,
-because most occupants sit in rooms the unplaced family cannot use at all. The
-alternative search stops at its first match instead of scoring every room to
-then take the first.
-
-That alternative search must exclude the room just vacated. It is feasible for
-the occupant precisely because they were removed from it, so admitting it
-relocates the occupant into the room being handed to the unplaced family and
-double-books it. The exclusion was always there; it is now covered by a test.
-
 The occupancy index is deliberately derived per sweep rather than maintained
-across the stage. `place` snapshots `placements` and the repair pass mutates and
-rolls it back, so an incrementally maintained index would have to be rolled back
-in step with it; per-sweep derivation is linear in the placements and cannot
-drift. `roomRemaining` and `roomFamilies` take it as an optional argument and
-fall back to scanning, so a rule defined outside this module keeps working.
+across the stage. Per-sweep derivation is linear in the placements and cannot
+drift from the placement map. `roomRemaining` and `roomFamilies` take it as an
+optional argument and fall back to scanning, so a rule defined outside this
+module keeps working.
 
 Preflight resolves inventory totals and capacity-per-capability once for the
 whole run instead of per family, and reuses one feasibility sweep per family.
 
 The placement stage remains deterministic and its output is covered directly.
 [`test/solver/placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
-pins a digest of the whole current plan, including repair, and separately pins the
-candidate-count tiebreak, which the digest occasion does not exercise.
+pins a digest of the whole current plan and separately pins the candidate-count
+tiebreak, which the digest occasion does not exercise.
 
 ## Profile and fixtures
 
 The executable family-freizeit profile selects room inventory and room
 assignment with explicit scoring weights, relation and no-bed roles, priority,
-scarce-capability penalties, and repair-pass limits. The KDL fixtures in
+and scarce-capability penalties. The KDL fixtures in
 [`test/fixtures/room-assignment/`](../../test/fixtures/room-assignment/) cover
 real inventory derivation, deterministic placement, normalized
 requirements, and pure-function edge cases.

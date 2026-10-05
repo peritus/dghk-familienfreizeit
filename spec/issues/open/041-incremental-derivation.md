@@ -51,19 +51,15 @@ per-person pass and are now resolved once per run. It went from 383 ms to 3 ms
 at 2 367 events and is linear in the log. See
 [workshop assignment](../../../docs/modules/workshop-assignment.md#attendance-cost).
 
-The repair pass was then narrowed the same way: it was scoring every room
-twice per (unplaced family, occupant) pair to answer questions about one room,
-which is where the remaining quadratic term lived. `solve` went from 855 ms to
-210 ms at 2 367 events, and placement rule evaluations from 170 800 to 31 408 at
-1 196 events.
+Room placement has no post-greedy repair pass. It performs deterministic
+forced and greedy placement from the current derived input and reports families
+that remain unplaced instead of mutating earlier placements.
 
 What remains is the search itself: families times rooms in
-`room-assignment.place`, 201 ms of the 210 ms total. Roughly five full room
-sweeps per family remain — the ordering key, preflight, the forced pass, the
-greedy pass, and the trace inside each placement — and they could be reduced to
-about three by sharing sweeps between consecutive passes. Beyond that, reducing
-cost means changing what the solver searches rather than how often it rescans,
-which is a design question.
+`room-assignment.place`. The ordering key, preflight, forced pass, greedy pass,
+and trace each inspect the current room candidates. Beyond reducing those
+sweeps, reducing cost means changing what the solver searches rather than how
+often it rescans, which is a design question.
 
 Cost is now guarded rather than only measured:
 [solver cost gates](../../../docs/engineering/testing.md#solver-cost-gates) run

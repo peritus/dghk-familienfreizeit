@@ -36,9 +36,9 @@ This can create avoidable conflicts. For example, if many people choose
 workshops A and B together, placing A and B in the same slot means each person
 can receive at most one of those wishes. If the same workshops could instead be
 placed in different slots, the number of fulfilled wishes could increase
-without changing any person's submitted ranking. The current allocator can
-repair some unassigned people after placement, but it cannot move workshops to
-resolve a high-volume slot conflict.
+without changing any person's submitted ranking. The current allocator does
+not rearrange rooms, workshops, or attendance after its deterministic passes,
+so it cannot resolve a high-volume slot conflict.
 
 The specification already describes demand and profile-defined scoring as
 deterministic soft inputs to scheduling in
@@ -91,7 +91,7 @@ available preference information to produce a better feasible plan.
   opportunity priority, higher-ranked choices, and stable tie-breaking.
   A demand-aware scheduler would need to explain how placement scoring fits
   those priorities rather than silently changing them. See
-  [`D4`](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming).
+  [`D4`](../../../decisions.md#d4--stable-sorted-greedy-not-integer-programming).
 - The prototype calculation already sketches relevant signals: individual
   demand, overlap with other highly ranked workshops in a candidate slot,
   leader conflicts, and per-slot load. See the prototype's
@@ -139,7 +139,7 @@ number. A proposed initial ordering is:
    `workshops_per_person` target;
 6. use stable ids to resolve all remaining ties.
 
-The final choice of objective ordering, score weights, repair bounds, and review
+The final choice of objective ordering, score weights, movement policy, and review
 boundary must be recorded as an accepted decision before implementation. The
 active profile should own those parameters; they should not be supplied as
 runtime executable rules.
@@ -160,7 +160,7 @@ runtime executable rules.
   leader conflicts, room capabilities, availability, blocks, cancellation,
   and fixed placement/attendance precedence remain enforced.
 - Fixed placement decisions and fixed attendance decisions are never moved by
-  demand-aware repair. Their conflicts remain explainable diagnostics.
+  demand-aware reassignment. Their conflicts remain explainable diagnostics.
 - Re-solving the same derived input is deterministic, including placement,
   attendance, objective values, traces, and tie-breaking.
 - A valid reviewed plan remains stable when rankings change until an organiser
@@ -190,8 +190,8 @@ runtime executable rules.
 4. How should capacity affect placement priority? A high-demand workshop whose
    capacity is already sufficient may matter less than a smaller workshop with
    severe demand pressure.
-5. What is the permitted movement budget for demand-aware repair, and how is it
-   reconciled with D4's bounded-repair contract?
+5. What movement budget is permitted for a future demand-aware placement search,
+   and how is it reconciled with D4's deterministic placement contract?
 6. Does a ranking edit invalidate the current reviewed placement/attendance
    calculation, or should demand-aware recalculation always be an explicit
    organiser action with a visible plan diff?
@@ -205,7 +205,7 @@ runtime executable rules.
 - [modules/workshop-assignment.md](../../modules/workshop-assignment.md)
 - [modules/workshop-rankings.md](../../modules/workshop-rankings.md)
 - [roadmap.md — M8](../../roadmap.md#m8--organiser-authored-workshop-programme)
-- [decisions.md — D4](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)
+- [decisions.md — D4](../../../decisions.md#d4--stable-sorted-greedy-not-integer-programming)
 - [issue 037](../archived/037-workshop-assignment-fill-retention-instability.md)
 - [docs/modules/workshop-scheduling.md](../../../docs/modules/workshop-scheduling.md)
 - [docs/modules/workshop-assignment.md](../../../docs/modules/workshop-assignment.md)

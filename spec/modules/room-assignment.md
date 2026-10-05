@@ -23,8 +23,8 @@ profile, solver, board, report, and fixture update.
 
 ## 8. Rules and scoring
 
-The verified hard rules, scoring terms, deterministic ordering, and
-bounded repair behavior are implemented in the linked documentation. Future
+The verified hard rules, scoring terms, and deterministic ordering are
+implemented in the linked documentation. Future
 placement modules must consume the normalized solver boundary rather than
 interpreting raw profile labels or event payloads.
 

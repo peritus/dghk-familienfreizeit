@@ -200,7 +200,7 @@ regression tests.
 
 Every selected stage consumes the resolver's applicable decisions: positive
 requirements, exclusions, separation, and workshop constraints. Required
-decisions constrain every placement path, including forced placement and repair.
+decisions constrain every placement path, including forced and greedy placement.
 A decision that cannot be honoured is reported with its
 source labels; it is never silently bypassed. Preferred decisions retain the
 mechanism's configured soft behavior, and do not become forced placements.

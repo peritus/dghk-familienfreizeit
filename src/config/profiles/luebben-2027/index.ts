@@ -292,7 +292,6 @@ export const luebben2027Profile = defineOccasionProfile({
       no_bed_trait: 'does-not-need-a-bed',
       priority_trait: 'needs-accessible',
       scarce_capabilities: { accessible: -3 },
-      max_repair_passes: 5,
     }),
     workshopSpace({}),
     officialWorkshops({

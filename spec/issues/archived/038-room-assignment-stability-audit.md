@@ -29,7 +29,7 @@ tie-breaking.
 
 ## Related files
 
-- [decisions.md#d4](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)
+- [decisions.md#d4](../../../decisions.md#d4--stable-sorted-greedy-not-integer-programming)
 - [docs/modules/room-assignment.md](../../../docs/modules/room-assignment.md)
 - [modules/room-assignment.md](../../modules/room-assignment.md)
 - [test/solver/placement-equivalence.test.ts](../../../test/solver/placement-equivalence.test.ts)

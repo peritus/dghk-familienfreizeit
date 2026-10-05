@@ -62,7 +62,7 @@ chosen workshop remain unassigned, for both children and adults.
 ## Related files
 
 - [modules/workshop-assignment.md](../../modules/workshop-assignment.md)
-- [decisions.md#d4](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming)
+- [decisions.md#d4](../../../decisions.md#d4--stable-sorted-greedy-not-integer-programming)
 - [decisions.md#d31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops)
 - [issue 006 (archived)](../archived/006-solver-stability-repair-underspecified.md)
 - [test/solver/workshop-assignment-prototype-dataset.test.ts](../../../test/solver/workshop-assignment-prototype-dataset.test.ts)

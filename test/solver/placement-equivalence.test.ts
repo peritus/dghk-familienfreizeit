@@ -17,11 +17,8 @@ import type { JsonValue } from '../../src/events/types.js'
 import { syntheticLog, syntheticScale } from '../bench/log.js'
 
 /**
- * A whole plan, digested. The placement stage was rewritten to stop rescanning
- * families, rooms and constraints inside its innermost loops; none of that may
- * change a single assignment, score, rejection or trace entry. A digest over
- * the canonical plan is the cheapest statement of that, and it covers the
- * scoring, repair, preflight and trace paths together.
+ * A whole plan, digested. The placement stage must not change a single
+ * assignment, score, rejection or trace entry without an explicit intent.
  */
 /**
  * This digest includes the current workshop allocation round snapshots and
@@ -64,7 +61,6 @@ const params = {
   no_bed_trait: null,
   priority_trait: null,
   scarce_capabilities: {},
-  max_repair_passes: 5,
 }
 
 function room(id: string, sortKey: number, capacity: number, accessible: boolean): RoomCandidate {
@@ -135,86 +131,4 @@ test('the candidate-count tiebreak decides which family picks first', () => {
   // pushes fam_p into rm_x.
   expect(rooms.get('fam_p')).toBe('rm_y')
   expect(rooms.get('fam_q')).toBe('rm_z')
-})
-
-/**
- * A repair vacates an occupant's room so an unplaced family can use it, then
- * finds the occupant somewhere else. "Somewhere else" has to exclude the room
- * just vacated — it is feasible for the occupant precisely because they were
- * removed from it, so an alternative search that admits it relocates the
- * occupant into the room it is simultaneously handing to the unplaced family,
- * and both end up there.
- *
- * The capacity invariant is asserted here directly.
- */
-test('a repaired occupant is relocated out of the room it vacated', () => {
-  const priorityParams = { ...params, priority_trait: 'priority' }
-  const priority = (familyId: string): FamilyRequirement => ({
-    trait_key: 'priority',
-    holder_id: familyId,
-    capability_key: null,
-    kind: 'profile-requirement',
-    structural: null,
-    value: 'high',
-    strength: 'required',
-    weight: 5,
-    penalty: null,
-    set_seq: 1,
-    family_id: familyId,
-  })
-  const accessible = (familyId: string): FamilyRequirement => ({
-    trait_key: 'needs-accessible',
-    holder_id: familyId,
-    capability_key: 'accessible',
-    kind: 'profile-requirement',
-    structural: null,
-    value: 'accessible',
-    strength: 'required',
-    weight: null,
-    penalty: null,
-    set_seq: 1,
-    family_id: familyId,
-  })
-
-  // fam_a and fam_b outrank fam_need and take both accessible rooms, leaving it
-  // unplaced with two candidates — so the forced pass cannot claim it early.
-  const input: RoomAssignmentInput = {
-    rooms: [room('rm_1', 1, 2, true), room('rm_2', 2, 2, true), room('rm_3', 3, 2, false)],
-    families: [
-      family('fam_a', 1, [priority('fam_a')]),
-      family('fam_b', 2, [priority('fam_b')]),
-      family('fam_need', 3, [accessible('fam_need')]),
-    ],
-    constraints: [],
-    person_family: {
-      fam_a_a: 'fam_a',
-      fam_a_b: 'fam_a',
-      fam_b_a: 'fam_b',
-      fam_b_b: 'fam_b',
-      fam_need_a: 'fam_need',
-      fam_need_b: 'fam_need',
-    },
-  }
-
-  const result = runRoomAssignment(input, priorityParams)
-  const rooms = new Map(
-    result.section.assignments.map(({ family_id: familyId, room_id: roomId }) => [
-      familyId,
-      roomId,
-    ]),
-  )
-
-  expect(result.trace.filter(({ step }) => step === 'repair')).toHaveLength(2)
-  expect(rooms.get('fam_need')).toBe('rm_1')
-  // fam_a moved out of rm_1 entirely rather than staying in it.
-  expect(rooms.get('fam_a')).toBe('rm_3')
-  expect(rooms.get('fam_b')).toBe('rm_2')
-
-  // The invariant the exclusion exists to protect.
-  const demand = new Map(input.families.map((unit) => [unit.family_id, unit.bed_demand]))
-  const occupancy = new Map<string, number>()
-  for (const [familyId, roomId] of rooms)
-    occupancy.set(roomId, (occupancy.get(roomId) ?? 0) + (demand.get(familyId) ?? 0))
-  for (const candidate of input.rooms)
-    expect(occupancy.get(candidate.id) ?? 0).toBeLessThanOrEqual(candidate.capacity)
 })

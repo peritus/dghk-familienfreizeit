@@ -113,7 +113,6 @@ const profile = defineOccasionProfile({
       no_bed_trait: 'does-not-need-a-bed',
       priority_trait: 'needs-accessible',
       scarce_capabilities: { accessible: -3 },
-      max_repair_passes: 2,
     }),
   ],
 })
@@ -142,7 +141,6 @@ const params = {
   no_bed_trait: 'does-not-need-a-bed',
   priority_trait: 'needs-accessible',
   scarce_capabilities: { accessible: -3 },
-  max_repair_passes: 2,
 } as const
 
 function room(id: string, capacity: number, capabilities: readonly string[] = []): RoomCandidate {
@@ -224,6 +222,42 @@ describe('room assignment business logic', () => {
     )
     expect(section.unplaced).toEqual([])
     expect(first.trace.some(({ text }) => text.includes('fam_access'))).toBe(true)
+  })
+
+  test('leaves a blocked family unplaced instead of moving an existing family', () => {
+    const accessible = (familyId: string): FamilyRequirement => ({
+      trait_key: 'needs-accessible',
+      holder_id: familyId,
+      capability_key: 'accessible',
+      kind: 'profile-requirement',
+      structural: null,
+      value: 'accessible',
+      strength: 'required',
+      weight: null,
+      penalty: null,
+      set_seq: 1,
+      family_id: familyId,
+    })
+    const result = runRoomAssignment(
+      assignmentInput(
+        [room('rm_1', 2, ['accessible']), room('rm_2', 2, ['accessible']), room('rm_3', 2)],
+        [
+          family('fam_a', 2, [accessible('fam_a')]),
+          family('fam_b', 2, [accessible('fam_b')]),
+          family('fam_need', 2, [accessible('fam_need')]),
+        ],
+      ),
+      params,
+    )
+
+    expect(result.section.assignments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ family_id: 'fam_a', room_id: 'rm_1' }),
+        expect.objectContaining({ family_id: 'fam_b', room_id: 'rm_2' }),
+      ]),
+    )
+    expect(result.section.unplaced.map(({ family_id: familyId }) => familyId)).toEqual(['fam_need'])
+    expect(result.trace.some(({ step }) => step === 'repair')).toBe(false)
   })
 
   test('is invariant under room and family input permutations', () => {

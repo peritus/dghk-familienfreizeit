@@ -90,9 +90,9 @@ Budgets are tripwires, not targets. Tripping one means either a regression or a
 deliberate change to how the search works; in the second case the budget is
 updated in the same change as the code, with the new measurement recorded beside
 it. The margins are wide. Reintroducing one per-candidate constraint scan took
-`constraint_reads` from 64 to 27904 against a budget of 192; before the repair
-pass stopped scoring every room to ask about one, `rule_evaluations` was 25100
-against a budget of 11000.
+`constraint_reads` from 64 to 27904 against a budget of 192; an accidental
+candidate-room scan previously took `rule_evaluations` to 25100 against a
+budget of 11000.
 
 ## Derivation benchmarks
 

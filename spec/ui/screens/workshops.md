@@ -80,8 +80,8 @@ capacity, leaders, and demand. Fixed attendance and fixed placement decisions
 are supported by the domain and diagnostics even when the first UI exposes
 automatic allocation only.
 
-Rank count, assignment target, rank weights, repair bounds, unfulfilled-choice
-handling, and rank weights come from profile/module configuration. The UI
+Rank count, assignment target, and unfulfilled-choice handling come from
+profile/module configuration. The UI
 renders those values and never embeds prototype constants. Per
 [D31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
 unfulfilled choices remain unassigned rather than being filled with an

@@ -103,7 +103,6 @@ separate sleeping-parties module.
 | | `keep_apart_trait` | `apart-from` | |
 | | `priority_trait` | `needs-accessible` | accessible needs claim scarce places first |
 | | `scarce_capabilities` | `accessible: −3` | use accessible rooms for others only when it helps |
-| | `max_repair_passes` | `5` | module default |
 
 Trait weights and penalties (§3) and these parameters are starting values; changing
 them is a deployment, reviewed before communicating.
