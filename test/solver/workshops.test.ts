@@ -353,9 +353,7 @@ test('an invalid fixed placement is blocking and does not fall back automaticall
   ])
 
   expect(section.placements).toEqual([])
-  expect(section.unscheduled).toEqual([
-    { workshop_id: 'wks_fixed', reason: 'hard.space-capacity' },
-  ])
+  expect(section.unscheduled).toEqual([{ workshop_id: 'wks_fixed', reason: 'hard.space-capacity' }])
   expect(section.fixed_violations).toEqual([
     expect.objectContaining({
       workshop_id: 'wks_fixed',

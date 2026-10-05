@@ -1,6 +1,13 @@
 import type { WorkshopRecord } from '../../official-workshops/index.js'
 import type { WorkshopRanking } from '../../workshop-rankings/index.js'
-import type { SpaceSlotBlock, WorkshopPlacement, WorkshopSlot } from '../index.js'
+import { compareFixedDecisions } from '../../../solver/fixed-decision.js'
+import type {
+  FixedWorkshopPlacement,
+  FixedWorkshopPlacementViolation,
+  SpaceSlotBlock,
+  WorkshopPlacement,
+  WorkshopSlot,
+} from '../index.js'
 import type { WorkshopSpace } from '../../workshop-space/index.js'
 
 export type ProgrammeCellProjection = {
@@ -12,6 +19,8 @@ export type ProgrammeCellProjection = {
   leaders?: string
   capacity_label?: string
   demand_label?: string
+  fixed?: boolean
+  fixed_invalid?: boolean
 }
 
 export type ProgrammeRowProjection = {
@@ -41,6 +50,13 @@ export type ProgrammeViewProjection = {
   rows: readonly ProgrammeRowProjection[]
   unplaced: readonly UnplacedWorkshopProjection[]
   overlaps: readonly WorkshopOverlapProjection[]
+  fixed_reviews: readonly {
+    id: string
+    subject: string
+    fixed_target: string
+    automatic_targets: readonly string[]
+    status: 'same' | 'overrides' | 'no-automatic' | 'invalid'
+  }[]
 }
 
 export type ProgrammeProjectionInput = {
@@ -49,6 +65,9 @@ export type ProgrammeProjectionInput = {
   spaces: readonly WorkshopSpace[]
   blocks: readonly SpaceSlotBlock[]
   placements: readonly WorkshopPlacement[]
+  fixed_placements?: readonly FixedWorkshopPlacement[]
+  automatic_placements?: readonly WorkshopPlacement[]
+  fixed_placement_violations?: readonly FixedWorkshopPlacementViolation[]
   unscheduled: readonly { workshop_id: string; reason: string }[]
   demand: Readonly<Record<string, number>>
   assignments: readonly { person_id: string; workshop_id: string }[]
@@ -119,6 +138,16 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
   const placements = new Map(
     input.placements.map((placement) => [placement.workshop_id, placement]),
   )
+  const fixedPlacements = input.fixed_placements ?? []
+  const fixedByWorkshop = new Map(
+    fixedPlacements.map((placement) => [placement.workshop_id, placement]),
+  )
+  const automaticPlacements = input.automatic_placements ?? input.placements
+  const invalidFixed = new Set(
+    (input.fixed_placement_violations ?? []).map(
+      (placement) => `${placement.workshop_id}|${placement.slot_id}/${placement.space_id}`,
+    ),
+  )
   const slots = new Map(input.slots.map((slot) => [slot.id, slot]))
   const unscheduled = new Map(input.unscheduled.map((item) => [item.workshop_id, item.reason]))
   const attendance = new Map<string, number>()
@@ -165,6 +194,8 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
         demand_label: input.demand[workshop.id]
           ? `${input.demand[workshop.id]} Wünsche`
           : undefined,
+        fixed: fixedByWorkshop.has(workshop.id),
+        fixed_invalid: false,
       }
     }),
   }))
@@ -226,5 +257,39 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
         first.workshops.localeCompare(second.workshops, 'de'),
     )
 
-  return { rooms, rows, unplaced, overlaps }
+  const placementTarget = (placement: WorkshopPlacement): string => {
+    const slot = slots.get(placement.slot_id)
+    const space = input.spaces.find(({ id }) => id === placement.space_id)
+    return `${slot ? timeLabel(slot.starts_at, slot.ends_at, input.time_zone) : placement.slot_id} · ${space?.name ?? placement.space_id}`
+  }
+  const fixedReviews = compareFixedDecisions(
+    fixedPlacements.map((placement) => ({
+      subject_id: placement.workshop_id,
+      target_id: `${placement.slot_id}/${placement.space_id}`,
+    })),
+    automaticPlacements.map((placement) => ({
+      subject_id: placement.workshop_id,
+      target_id: `${placement.slot_id}/${placement.space_id}`,
+    })),
+    invalidFixed,
+  ).map((review) => ({
+    id: `fixed-${review.subject_id}-${review.fixed_target_id}`,
+    subject: workshops.get(review.subject_id)?.title ?? review.subject_id,
+    fixed_target: placementTarget({
+      workshop_id: review.subject_id,
+      slot_id: review.fixed_target_id.split('/')[0] ?? '',
+      space_id: review.fixed_target_id.split('/')[1] ?? '',
+    }),
+    automatic_targets: review.automatic_target_ids.map((target) => {
+      const [slotId, spaceId] = target.split('/')
+      return placementTarget({
+        workshop_id: review.subject_id,
+        slot_id: slotId ?? '',
+        space_id: spaceId ?? '',
+      })
+    }),
+    status: review.status,
+  }))
+
+  return { rooms, rows, unplaced, overlaps, fixed_reviews: fixedReviews }
 }

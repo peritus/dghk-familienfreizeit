@@ -26,6 +26,7 @@ import {
 } from '../components/workshop/editors.js'
 import {
   WorkshopEmptyState,
+  FixedDecisionReview,
   WorkshopPhaseNotice,
   WorkshopList,
   WorkshopScreenHeader,
@@ -79,6 +80,20 @@ type SchedulingUnscheduled = { workshop_id: string; reason: string }
 type WorkshopPlan = {
   placements: readonly Placement[]
   unscheduled: readonly SchedulingUnscheduled[]
+  fixed_placements: readonly {
+    workshop_id: string
+    slot_id: string
+    space_id: string
+    note: string | null
+  }[]
+  automatic_placements: readonly Placement[]
+  fixed_placement_violations: readonly {
+    workshop_id: string
+    slot_id: string
+    space_id: string
+    note: string | null
+    reasons: readonly string[]
+  }[]
   demand: Readonly<Record<string, number>>
   assignments: readonly { person_id: string; workshop_id: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
@@ -134,7 +149,13 @@ function solveWorkshopPlan(world: World): WorkshopPlan {
     seed: null,
   })
   const scheduling = plan.sections['workshop-scheduling'] as
-    | { placements?: readonly Placement[]; unscheduled?: readonly SchedulingUnscheduled[] }
+    | {
+        placements?: readonly Placement[]
+        unscheduled?: readonly SchedulingUnscheduled[]
+        fixed?: WorkshopPlan['fixed_placements']
+        automatic_placements?: readonly Placement[]
+        fixed_violations?: WorkshopPlan['fixed_placement_violations']
+      }
     | undefined
   const rankings = plan.sections['workshop-rankings'] as
     | { demand?: Readonly<Record<string, number>> }
@@ -149,6 +170,9 @@ function solveWorkshopPlan(world: World): WorkshopPlan {
   return {
     placements: scheduling?.placements ?? [],
     unscheduled: scheduling?.unscheduled ?? [],
+    fixed_placements: scheduling?.fixed ?? [],
+    automatic_placements: scheduling?.automatic_placements ?? scheduling?.placements ?? [],
+    fixed_placement_violations: scheduling?.fixed_violations ?? [],
     demand: rankings?.demand ?? {},
     assignments: attendance?.assignments ?? [],
     signups: attendance?.signups ?? [],
@@ -900,6 +924,9 @@ export function WorkshopProgramme() {
     spaces,
     blocks: schedule.space_slot_blocks,
     placements: plan.placements,
+    fixed_placements: plan.fixed_placements,
+    automatic_placements: plan.automatic_placements,
+    fixed_placement_violations: plan.fixed_placement_violations,
     unscheduled: plan.unscheduled,
     demand: plan.demand,
     assignments: plan.assignments,
@@ -966,6 +993,11 @@ export function WorkshopProgramme() {
           { value: 'unplaced', label: 'Nicht eingeplant' },
           { value: 'overlaps', label: 'Überschneidungen' },
         ]}
+      />
+      <FixedDecisionReview
+        items={programme.fixed_reviews}
+        title="Feste Platzierungen prüfen"
+        description="Festgelegte Platzierungen werden mit dem automatischen Programmvergleich erklärt."
       />
       {view === 'programme' ? (
         programme.rows.length && programme.rooms.length ? (

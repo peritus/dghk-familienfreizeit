@@ -94,6 +94,65 @@ export function WorkshopStatusBadge({
   )
 }
 
+export type FixedDecisionReviewItem = {
+  id: string
+  subject: string
+  fixed_target: string
+  automatic_targets: readonly string[]
+  status: 'same' | 'overrides' | 'no-automatic' | 'invalid'
+}
+
+export function FixedDecisionReview({
+  items,
+  title = 'Feste Entscheidungen prüfen',
+  description = 'Der Vergleich zeigt, was die automatische Berechnung ohne feste Entscheidungen ergeben hätte.',
+}: {
+  items: readonly FixedDecisionReviewItem[]
+  title?: string
+  description?: string
+}) {
+  if (!items.length) return null
+  const status = {
+    same: { label: 'gleich', tone: 'success' as const },
+    overrides: { label: 'ersetzt automatisch', tone: 'attention' as const },
+    'no-automatic': { label: 'keine automatische Zuordnung', tone: 'neutral' as const },
+    invalid: { label: 'nicht erfüllbar', tone: 'danger' as const },
+  }
+  return (
+    <section className="space-y-3" aria-labelledby="fixed-decision-review-heading">
+      <div>
+        <h2 id="fixed-decision-review-heading" className="text-2xl font-heading">
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-muted">{description}</p>
+      </div>
+      <WorkshopList>
+        {items.map((item) => {
+          const state = status[item.status]
+          return (
+            <WorkshopListRow key={item.id}>
+              <div className="flex flex-wrap items-center gap-2">
+                <strong>{item.subject}</strong>
+                <WorkshopStatusBadge tone={state.tone}>{state.label}</WorkshopStatusBadge>
+              </div>
+              <p className="mt-1 text-sm">
+                Fest: <strong>{item.fixed_target}</strong>
+                {' · '}
+                Automatisch:{' '}
+                {item.automatic_targets.length ? (
+                  <strong>{item.automatic_targets.join(', ')}</strong>
+                ) : (
+                  <span className="text-muted">keine Zuordnung</span>
+                )}
+              </p>
+            </WorkshopListRow>
+          )
+        })}
+      </WorkshopList>
+    </section>
+  )
+}
+
 export function WorkshopPropertyTags({ items }: { items: readonly string[] }) {
   return (
     <div className="flex flex-wrap gap-2">

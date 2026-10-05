@@ -191,9 +191,9 @@ function summary(world: World): WorkshopSchedulingSummary {
       (a, b) =>
         a.space_id.localeCompare(b.space_id) ||
         a.slot_id.localeCompare(b.slot_id) ||
-      a.id.localeCompare(b.id),
+        a.id.localeCompare(b.id),
     )
-  const fixed_placements = (world.entities_by_kind.workshop ?? [])
+  const fixedPlacements = (world.entities_by_kind.workshop ?? [])
     .flatMap((workshop) => {
       const label = world.labels_by_entity[workshop.id]?.find(
         (candidate) => candidate.key === 'fixed-placement',
@@ -215,7 +215,7 @@ function summary(world: World): WorkshopSchedulingSummary {
         a.slot_id.localeCompare(b.slot_id) ||
         a.space_id.localeCompare(b.space_id),
     )
-  return { slots, space_slot_blocks: blocks, fixed_placements }
+  return { slots, space_slot_blocks: blocks, fixed_placements: fixedPlacements }
 }
 
 function solverInput(world: World): ScheduleSolverInput {
@@ -256,8 +256,7 @@ function placementRejections(
   const target = `${slot.id}/${space.id}`
   const rejected: PlacementRejection[] = []
   if (used.has(target)) rejected.push({ target, rule: 'hard.space-occupied' })
-  if (space.capacity < workshop.capacity)
-    rejected.push({ target, rule: 'hard.space-capacity' })
+  if (space.capacity < workshop.capacity) rejected.push({ target, rule: 'hard.space-capacity' })
   if (
     !space.availability_windows.some(
       (window) => window.starts_at <= slot.starts_at && window.ends_at >= slot.ends_at,
@@ -283,7 +282,7 @@ function placementStage(includeComparison = true): SolverStage<WorkshopSchedulin
     after: [],
     before: [],
     reads: [],
-    run: (input: SolverInput): StageResult<WorkshopSchedulingSection> => {
+    run: (input: SolverInput, _upstream, config): StageResult<WorkshopSchedulingSection> => {
       const schedule = input.module_inputs['workshop-scheduling'] as ScheduleSolverInput
       const used = new Set<string>()
       const leaderSlots = new Set<string>()
@@ -291,11 +290,11 @@ function placementStage(includeComparison = true): SolverStage<WorkshopSchedulin
       const unscheduled: { workshop_id: string; reason: string }[] = []
       const trace: TraceEntry[] = []
       const diagnostics: PreflightFinding[] = []
-      const fixed = schedule.fixed_placements.slice().sort(
-        (a, b) => a.workshop_id.localeCompare(b.workshop_id),
-      )
+      const fixed = schedule.fixed_placements
+        .slice()
+        .sort((left, right) => left.workshop_id.localeCompare(right.workshop_id))
       const fixedViolations: WorkshopSchedulingSection['fixed_violations'][number][] = []
-      const fixedWorkshopIds = new Set(fixed.map(({ workshop_id }) => workshop_id))
+      const fixedWorkshopIds = new Set(fixed.map((placement) => placement.workshop_id))
       const workshopsById = new Map(schedule.workshops.map((workshop) => [workshop.id, workshop]))
       const slotsById = new Map(schedule.slots.map((slot) => [slot.id, slot]))
       const spacesById = new Map(schedule.spaces.map((space) => [space.id, space]))
@@ -429,10 +428,11 @@ function placementStage(includeComparison = true): SolverStage<WorkshopSchedulin
               ...input,
               module_inputs: {
                 ...input.module_inputs,
-                'workshop-scheduling': { ...schedule, fixed_placements: [] },
+                ['workshop-scheduling']: { ...schedule, fixed_placements: [] },
               },
             },
             {},
+            config,
           ).output
         : null
       return {
@@ -467,7 +467,12 @@ export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
     label_keys: [
       { key: 'starts-at', scopes: ['workshop-slot'], cardinality: 'exactly-one' },
       { key: 'ends-at', scopes: ['workshop-slot'], cardinality: 'exactly-one' },
-      { key: 'fixed-placement', scopes: ['workshop'], cardinality: 'zero-or-one', validate: validateFixedPlacement },
+      {
+        key: 'fixed-placement',
+        scopes: ['workshop'],
+        cardinality: 'zero-or-one',
+        validate: validateFixedPlacement,
+      },
       { key: 'blocked-space', scopes: ['space-slot-block'], cardinality: 'exactly-one' },
       { key: 'blocked-slot', scopes: ['space-slot-block'], cardinality: 'exactly-one' },
       { key: 'block-reason', scopes: ['space-slot-block'], cardinality: 'zero-or-one' },

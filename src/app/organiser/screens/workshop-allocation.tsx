@@ -8,6 +8,7 @@ import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import {
   WorkshopScreenHeader,
   WorkshopSectionHeader,
+  FixedDecisionReview,
 } from '../../components/shared/workshop/shared.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
@@ -173,6 +174,11 @@ export function WorkshopAllocation() {
           : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
       </WorkshopAllocationStatus>
       <WorkshopAllocationConflictNotice projection={projection} />
+      <FixedDecisionReview
+        items={projection.fixed_reviews ?? []}
+        title="Feste Teilnahmen prüfen"
+        description="Festgelegte Teilnahmen werden mit der automatischen Zuordnung ohne diese Entscheidungen verglichen."
+      />
       <TertiaryNavigation
         aria_label="Wünsche"
         value={view}

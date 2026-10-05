@@ -117,6 +117,14 @@ type WorkshopAssignmentSection = {
     reason: 'fixed' | 'ranked'
   }[]
   unassigned: readonly { person_id: string; workshop_id: string | null; reason: string }[]
+  automatic_assignments: readonly {
+    person_id: string
+    workshop_id: string
+    slot_id: string
+    rank: number | null
+    reason: 'fixed' | 'ranked'
+  }[]
+  automatic_unassigned: readonly { person_id: string; workshop_id: string | null; reason: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
   interests: readonly { person_id: string; workshop_id: string }[]
   fixed: readonly { person_id: string; workshop_id: string }[]
@@ -165,17 +173,8 @@ converted into automatic assignments in the first place.
 
 ## Outstanding
 
-- Review/precedence-explanation UI: an organiser-facing surface that shows a
-  fixed attendance decision alongside the automatic outcome it overrides, and
-  explains why. The data model carries the fixed result and violations; the
-  automatic-only comparison is derived by running the same pure stage without
-  fixed labels.
 - Organiser review surfaces for current and prospective attendance (part of
   [M8](../roadmap.md#m8--workshop-planning-completion)); released/effective
   attendance belongs to M10 release control.
 - Roster, heatmap, and finding views without a second workshop state store
   (part of M8).
-- Fixed *placement* decisions (which slot a workshop runs in) are a separate,
-  still-outstanding mechanism owned by
-  [workshop scheduling](workshop-scheduling.md); this module only covers who
-  attends, not where a workshop is scheduled.

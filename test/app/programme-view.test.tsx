@@ -149,4 +149,35 @@ describe('buildProgrammeView', () => {
       },
     ])
   })
+
+  test('projects fixed placement precedence beside the automatic-only result', () => {
+    const view = buildProgrammeView({
+      ...baseInput,
+      fixed_placements: [
+        {
+          workshop_id: 'wks_ceramics',
+          slot_id: 'slot_morning',
+          space_id: 'wsp_atelier',
+          note: 'Nähe zum Eingang',
+        },
+      ],
+      automatic_placements: [
+        { workshop_id: 'wks_ceramics', slot_id: 'slot_morning', space_id: 'wsp_halle' },
+      ],
+      fixed_placement_violations: [],
+    })
+
+    expect(view.rows[0]?.cells[0]).toEqual(
+      expect.objectContaining({ fixed: true, fixed_invalid: false }),
+    )
+    expect(view.fixed_reviews).toEqual([
+      {
+        id: 'fixed-wks_ceramics-slot_morning/wsp_atelier',
+        subject: 'Keramik',
+        fixed_target: '09:00–11:00 · Atelier',
+        automatic_targets: ['09:00–11:00 · Halle'],
+        status: 'overrides',
+      },
+    ])
+  })
 })

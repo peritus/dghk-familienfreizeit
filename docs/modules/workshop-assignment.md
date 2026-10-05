@@ -11,7 +11,8 @@ converted into automatic assignments.
 The active profile accepts three ranked choices and targets up to two automatic
 workshops per person.
 The stage emits assignments, unassigned outcomes, sign-ups, interests, fixed
-decisions, fixed violations, round snapshots, and explainable traces.
+decisions, fixed violations, automatic-only assignments and unassigned outcomes,
+round snapshots, and explainable traces.
 
 ## Verified business logic
 
@@ -28,9 +29,11 @@ decisions, fixed violations, round snapshots, and explainable traces.
   order. A successful earlier-round assignment is never displaced by a later
   round; a person without a feasible ranked choice remains unassigned.
 
-No review UI exists yet for a fixed decision's precedence over the automatic
-outcome it overrides — the initial surface remains automatic-only, even though
-the underlying data model and resolver mechanics above are fully event-backed.
+The allocation review shows each fixed attendance decision beside the automatic
+counterfactual produced from the same current derived input. It labels decisions
+that are unchanged, replace an automatic choice, have no automatic counterpart,
+or are invalid. The projection is read-only and is recalculated for prospective
+local-first organiser drafts.
 
 ## Attendance cost
 

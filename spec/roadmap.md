@@ -27,8 +27,6 @@ implemented. Event-backed fixed attendance decisions and their resolver
 mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md));
 remaining active work is limited to the unresolved planning contract:
 
-- add event-backed fixed placement decisions, and the review controls that
-  explain a fixed decision's precedence over the automatic choice it overrides;
 - complete organiser review surfaces for current and prospective programme and
   allocation contexts; released/effective contexts belong to M10 release control;
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy

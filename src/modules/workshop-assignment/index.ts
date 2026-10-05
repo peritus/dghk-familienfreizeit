@@ -71,7 +71,7 @@ function assignmentStage(
     after: ['workshop-scheduling.placement', 'workshop-rankings.demand'],
     before: [],
     reads: ['workshop-scheduling.placement', 'workshop-rankings.demand'],
-    run: (input: SolverInput, upstream): StageResult<WorkshopAssignmentSection> => {
+    run: (input: SolverInput, upstream, config): StageResult<WorkshopAssignmentSection> => {
       const schedule = upstream['workshop-scheduling.placement'] as WorkshopSchedulingSection
       const rankingOutput = upstream['workshop-rankings.demand'] as {
         rankings: readonly WorkshopRanking[]
@@ -338,16 +338,16 @@ function assignmentStage(
               ...input,
               labels: input.labels.filter((label) => label.key !== 'workshop-attendance'),
             },
-            {
-              ...upstream,
-              'workshop-scheduling.placement': {
+            Object.assign({}, upstream, {
+              ['workshop-scheduling.placement']: {
                 ...schedule,
                 placements: schedule.automatic_placements,
                 unscheduled: schedule.automatic_unscheduled,
                 fixed: [],
                 fixed_violations: [],
               } satisfies WorkshopSchedulingSection,
-            },
+            }),
+            config,
           ).output
         : null
       return {

@@ -19,5 +19,11 @@ at `/organiser/workshops/programme`. Its companion views are
 `/organiser/workshops/programme/unplaced` for infeasible workshops and
 `/organiser/workshops/programme/overlaps` for ranked choices that share a slot.
 Slot retirement preserves event history and removes the slot from current planning.
-Fixed placement decisions are a supported future extension of the event-backed
-contract; the initial organiser surface is automatic-only.
+
+An organiser can set one event-backed `fixed-placement` label on a workshop with
+`{ slot_id, space_id }` and an optional note. The solver applies valid fixed
+placements before the automatic pass, keeps invalid decisions as blocking
+diagnostics, and does not silently fall back to another placement. It also emits
+an automatic-only counterfactual from the same derived input. The programme
+review marks fixed cells and shows the fixed placement beside that
+counterfactual, including collision and capacity explanations.

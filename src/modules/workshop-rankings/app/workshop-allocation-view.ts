@@ -1,5 +1,6 @@
 import type { World, Label } from '../../../events/fold.js'
 import type { Plan } from '../../../solver/types.js'
+import { compareFixedDecisions } from '../../../solver/fixed-decision.js'
 import { officialWorkshopsWorld } from '../../official-workshops/index.js'
 import { workshopAssignmentSection } from '../../workshop-assignment/index.js'
 import { workshopRankingsWorld, type WorkshopRanking } from '../index.js'
@@ -83,6 +84,13 @@ export type WorkshopAllocationProjection = {
   person_names: readonly { id: string; name: string }[]
   unassigned_person_ids: readonly string[]
   fixed_violation_count: number
+  fixed_reviews?: readonly {
+    id: string
+    subject: string
+    fixed_target: string
+    automatic_targets: readonly string[]
+    status: 'same' | 'overrides' | 'no-automatic' | 'invalid'
+  }[]
   unassigned_count: number
   has_workshops: boolean
   has_answers: boolean
@@ -403,6 +411,29 @@ export function buildWorkshopAllocationProjection(
   const unscheduled = new Map(
     (scheduling?.unscheduled ?? []).map((item) => [item.workshop_id, item.reason]),
   )
+  const fixedReview = compareFixedDecisions(
+    assignment.fixed.map((decision) => ({
+      subject_id: decision.person_id,
+      target_id: decision.workshop_id,
+    })),
+    assignment.automatic_assignments.map((decision) => ({
+      subject_id: decision.person_id,
+      target_id: decision.workshop_id,
+    })),
+    new Set(
+      assignment.fixed_violations.map(
+        (decision) => `${decision.person_id}|${decision.workshop_id}`,
+      ),
+    ),
+  ).map((review) => ({
+    id: `fixed-${review.subject_id}-${review.fixed_target_id}`,
+    subject: personName(input.world, review.subject_id),
+    fixed_target: workshops.get(review.fixed_target_id)?.title ?? review.fixed_target_id,
+    automatic_targets: review.automatic_target_ids.map(
+      (workshopId) => workshops.get(workshopId)?.title ?? workshopId,
+    ),
+    status: review.status,
+  }))
   const traceEvents: WorkshopAllocationTraceEvent[] = []
   const eventIds = new Set<string>()
   const addEvent = (event: WorkshopAllocationTraceEvent): void => {
@@ -601,6 +632,7 @@ export function buildWorkshopAllocationProjection(
     person_names: people.map(({ id, name }) => ({ id, name })),
     unassigned_person_ids: assignment.unassigned.map(({ person_id: personId }) => personId),
     fixed_violation_count: assignment.fixed_violations.length,
+    fixed_reviews: fixedReview,
     unassigned_count: assignment.unassigned.length,
     has_workshops: official.workshops.length > 0,
     has_answers: rankings.length > 0,

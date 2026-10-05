@@ -120,6 +120,10 @@ The board does not use `blueprint` or a paper background to mark fixed
 assignments: those tokens are reserved for browser-local draft state. Fixed
 assignments are ordinary event-backed organiser decisions and use the shared
 badge border language instead.
+Fixed decision comparisons use the shared `FixedDecisionReview` pattern: the
+event-backed fixed result, the automatic-only counterfactual, and an explicit
+status are presented together. Domain modules supply only their labels and
+identities; the comparison semantics are shared.
 
 Editing is read-only by default: existing family people show their values as
 plain text with **Bearbeiten** and **Entfernen** actions. **Bearbeiten** opens

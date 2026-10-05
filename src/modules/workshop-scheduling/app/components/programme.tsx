@@ -44,6 +44,9 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
       {cell.leaders ? <span className="mt-1 block text-sm text-muted">{cell.leaders}</span> : null}
       {cell.capacity_label || cell.demand_label ? (
         <span className="mt-2 flex flex-wrap gap-2 text-sm">
+          {cell.fixed ? (
+            <WorkshopStatusBadge variant="pinned">Festgelegt</WorkshopStatusBadge>
+          ) : null}
           {cell.capacity_label ? (
             <WorkshopStatusBadge variant="free">{cell.capacity_label}</WorkshopStatusBadge>
           ) : null}

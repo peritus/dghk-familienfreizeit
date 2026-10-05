@@ -143,7 +143,12 @@ typed internal and existing external leader identities. The overview resolves
 audience and participation labels, leader names, demand counts, and one derived
 placement per workshop. The programme review derives one slot and one physical
 space per workshop and keeps unscheduled workshops visible with a reason; its cells
-show the actual day and do not expose a no-op action.
+show the actual day, mark fixed placements, and compare them with the automatic-only
+counterfactual. Invalid fixed placements remain visible as blocking findings and do
+not fall back silently. The allocation review applies the same shared comparison
+to fixed attendance decisions, so organisers can see whether a fixed choice is
+unchanged, overrides an automatic choice, has no automatic counterpart, or is
+invalid. Both comparisons are derived from the current prospective world.
 Slots derive occupancy counts, reject client-visible reversed/overlapping edits before
 staging, and use the shared confirmation dialog for retirement. Space cards preserve
 profile-derived capabilities and readable blocked-slot labels; capability editing is
