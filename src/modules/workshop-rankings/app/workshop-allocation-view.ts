@@ -683,13 +683,13 @@ export function buildWorkshopAllocationTraceStages(
       groups.set(event.outcome, list)
     }
     const detailOrder: WorkshopAllocationTraceOutcome[] = [
+      'fulfilled',
+      'fixed',
+      'repaired',
       'capacity',
       'overlap',
       'leader',
       'unscheduled',
-      'fulfilled',
-      'fixed',
-      'repaired',
       'not-needed',
       'open',
       'eligibility',

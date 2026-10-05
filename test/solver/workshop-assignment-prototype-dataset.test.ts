@@ -223,6 +223,7 @@ test('the workshop allocation projection exposes answers, demand, and trace from
   expect(stages.some((stage) => stage.detail_items.length > 0)).toBe(true)
   expect(stages.at(-1)).toEqual(expect.objectContaining({ label: 'Ergebnis' }))
   const firstRound = stages.find((stage) => stage.id === 'round-1')
+  expect(firstRound?.detail_groups?.[0]?.id).toBe('fulfilled')
   const capacityDetails = firstRound?.detail_groups?.find((group) => group.id === 'capacity')
   expect(capacityDetails?.items[0]).toEqual(
     expect.objectContaining({

@@ -26,8 +26,13 @@ organiser drafts are visible immediately.
 
 The trace view presents the allocation as a cumulative funnel. It shows the
 answer intake, one stage per configured ranking, and a final result stage for
-fixed or repaired assignments and open cases. Each stage includes the people and
-workshops affected plus structured reasons such as capacity, slot overlap,
+fixed or repaired assignments and open cases. Within each stage, the
+presentation lists fulfilled, fixed, and repaired wishes before rejected or
+unprocessed wishes, so the trace starts with positive progress even though the
+solver may have produced those outcomes in another order. This is a UI-only
+ordering decision: it does not change solver decisions, round snapshots,
+counts, or explanations. Each stage includes the people and workshops affected
+plus structured reasons such as capacity, slot overlap,
 leader conflicts, eligibility, cancellation, or no schedule. The sticky
 controls support all-person, highlighted-person, and single-person views; the
 single-person context also reports matching workshops, leaderships, wish
