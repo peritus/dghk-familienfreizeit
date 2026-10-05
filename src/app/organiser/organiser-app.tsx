@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/ale
 import { Button } from '../components/shared/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
-import { composeSolverContributions, deriveTransition } from '../../solver/index.js'
+import { buildSolverInput, composeSolverContributions, solve } from '../../solver/index.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveWorld,
@@ -157,24 +157,25 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     }
   }, [state])
 
-  const transition = useMemo(() => {
+  const currentPlan = useMemo(() => {
     if (
       state.status === 'loading' ||
       state.status === 'unauthorized' ||
       state.status === 'load_error' ||
+      !derivation.world ||
       !state.build_revision ||
       state.compatibility_revision === null
     )
       return null
-    const events = [...state.committed, ...materializeDraftEvents(state)]
-    return deriveTransition(state.committed, events, composeSolverContributions(activeProfile), {
+    const contributions = composeSolverContributions(activeProfile)
+    return solve(buildSolverInput(derivation.world, contributions), contributions, {
       build_revision: state.build_revision,
       compatibility_revision: state.compatibility_revision,
       event_date: activeProfile.meta.starts_on,
       profile: activeProfile,
       seed: null,
     })
-  }, [state])
+  }, [derivation.world, state])
 
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
@@ -273,8 +274,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         dispatch,
         stage,
         apply,
-        previous_plan: transition?.before ?? null,
-        current_plan: transition?.after ?? null,
+        current_plan: currentPlan,
       }}
     >
       <OrganiserFrame profile={profile}>

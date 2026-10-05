@@ -428,7 +428,7 @@ test('conflicting fixed decisions surface as fixed_violations instead of throwin
   ])
 })
 
-test('a stable re-derive retains a previously ranked assignment instead of recomputing it', () => {
+test('a stable re-derive recomputes the same current assignment without prior-plan state', () => {
   const events = [
     venue('wsp_a', 1),
     slot(2),
@@ -458,15 +458,15 @@ test('a stable re-derive retains a previously ranked assignment instead of recom
     },
   ])
 
-  const plan2 = solve(buildSolverInput(world, contributions, plan1), contributions, config)
+  const plan2 = solve(buildSolverInput(world, contributions), contributions, config)
   const section2 = plan2.sections['workshop-assignment'] as WorkshopAssignmentSection
   expect(section2.assignments).toEqual([
     {
       person_id: 'per_a',
       workshop_id: 'wks_1',
       slot_id: 'slot_morning',
-      rank: null,
-      reason: 'retained',
+      rank: 1,
+      reason: 'ranked',
     },
   ])
 })
@@ -521,179 +521,6 @@ test('a minimum never assigns a workshop outside the current ranking', () => {
   expect(section.unassigned).toEqual([
     { person_id: 'per_a', workshop_id: null, reason: 'no current workshop choice' },
   ])
-})
-
-function twoCycles(
-  cycle1: readonly Event[],
-  cycle2: readonly Event[],
-  params: WorkshopAssignmentParams,
-): { section1: WorkshopAssignmentSection; section2: WorkshopAssignmentSection } {
-  const profile = testProfile(params)
-  const contributions = composeSolverContributions(profile)
-  const config = {
-    build_revision: 'test',
-    compatibility_revision: 1,
-    event_date: '2027-04-30',
-    profile,
-    seed: null,
-  }
-  const world1 = derive(cycle1, profile.validation_view)
-  const plan1 = solve(buildSolverInput(world1, contributions), contributions, config)
-  const section1 = plan1.sections['workshop-assignment'] as WorkshopAssignmentSection
-  const world2 = derive(cycle2, profile.validation_view)
-  const plan2 = solve(buildSolverInput(world2, contributions, plan1), contributions, config)
-  const section2 = plan2.sections['workshop-assignment'] as WorkshopAssignmentSection
-  return { section1, section2 }
-}
-
-test('a cancelled workshop drops retention with a specific reason', () => {
-  const cycle1 = [
-    venue('wsp_a', 1),
-    slot(2),
-    workshop('wks_1', 1, 1, 3),
-    ...family('per_a', 'fam_a', 4),
-    ranking('per_a', 'wks_1', 1, 6),
-  ]
-  const cycle2 = [...cycle1, event('WorkshopCancelled', { workshop_id: 'wks_1', reason: null }, 7)]
-  const { section1, section2 } = twoCycles(cycle1, cycle2, defaultParams)
-  expect(section1.assignments).toEqual([
-    {
-      person_id: 'per_a',
-      workshop_id: 'wks_1',
-      slot_id: 'slot_morning',
-      rank: 1,
-      reason: 'ranked',
-    },
-  ])
-  expect(section2.retention_drops).toEqual([
-    {
-      person_id: 'per_a',
-      workshop_id: 'wks_1',
-      slot_id: 'slot_morning',
-      reason: 'hard.cancellation',
-    },
-  ])
-  expect(section2.assignments).toEqual([])
-})
-
-test('a workshop rescheduled to a different slot drops retention instead of silently moving', () => {
-  const cycle1 = [
-    venue('wsp_a', 1),
-    slot(2),
-    event(
-      'WorkshopSlotAdded',
-      {
-        slot_id: 'slot_afternoon',
-        starts_at: '2027-04-30T15:00:00Z',
-        ends_at: '2027-04-30T17:00:00Z',
-        sort_key: 2,
-      },
-      3,
-    ),
-    workshop('wks_1', 1, 5, 4),
-    ...family('per_a', 'fam_a', 5),
-    ranking('per_a', 'wks_1', 1, 7),
-  ]
-  const cycle2 = [...cycle1, workshop('wks_0', 1, 1, 8)]
-  const { section1, section2 } = twoCycles(cycle1, cycle2, defaultParams)
-  expect(section1.assignments).toEqual([
-    {
-      person_id: 'per_a',
-      workshop_id: 'wks_1',
-      slot_id: 'slot_morning',
-      rank: 1,
-      reason: 'ranked',
-    },
-  ])
-  expect(section2.retention_drops).toEqual([
-    {
-      person_id: 'per_a',
-      workshop_id: 'wks_1',
-      slot_id: 'slot_morning',
-      reason: 'hard.schedule-changed',
-    },
-  ])
-  expect(section2.assignments).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        person_id: 'per_a',
-        workshop_id: 'wks_1',
-        slot_id: 'slot_afternoon',
-        reason: 'ranked',
-      }),
-    ]),
-  )
-})
-
-test('a person who no longer ranks their retained workshop drops it with a specific reason', () => {
-  const cycle1 = [
-    venue('wsp_a', 1),
-    slot(2),
-    workshop('wks_1', 1, 1, 3),
-    ...family('per_a', 'fam_a', 4),
-    ranking('per_a', 'wks_1', 1, 6),
-  ]
-  const cycle2 = [
-    ...cycle1,
-    event(
-      'LabelCleared',
-      { entity_id: 'per_a', key: 'prefers-workshop', value: { workshop_id: 'wks_1', rank: 1 } },
-      7,
-    ),
-  ]
-  const { section1, section2 } = twoCycles(cycle1, cycle2, defaultParams)
-  expect(section1.assignments).toEqual([
-    {
-      person_id: 'per_a',
-      workshop_id: 'wks_1',
-      slot_id: 'slot_morning',
-      rank: 1,
-      reason: 'ranked',
-    },
-  ])
-  expect(section2.retention_drops).toEqual([
-    {
-      person_id: 'per_a',
-      workshop_id: 'wks_1',
-      slot_id: 'slot_morning',
-      reason: 'hard.no-longer-ranked',
-    },
-  ])
-})
-
-test('every prior assignment for a person is considered for retention, not just the first', () => {
-  const cycle1 = [
-    venue('wsp_a', 1),
-    slot(2),
-    event(
-      'WorkshopSlotAdded',
-      {
-        slot_id: 'slot_afternoon',
-        starts_at: '2027-04-30T15:00:00Z',
-        ends_at: '2027-04-30T17:00:00Z',
-        sort_key: 2,
-      },
-      3,
-    ),
-    workshop('wks_1', 1, 1, 4),
-    workshop('wks_2', 1, 2, 5),
-    ...family('per_a', 'fam_a', 6),
-    ranking('per_a', 'wks_1', 1, 8),
-    ranking('per_a', 'wks_2', 2, 9),
-  ]
-  const params: WorkshopAssignmentParams = {
-    ...defaultParams,
-    workshops_per_person: 2,
-  }
-  const { section1, section2 } = twoCycles(cycle1, cycle1, params)
-  expect(section1.assignments).toHaveLength(2)
-  expect(section2.retention_drops).toEqual([])
-  expect(section2.assignments).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_1', reason: 'retained' }),
-      expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_2', reason: 'retained' }),
-    ]),
-  )
 })
 
 test('a workshop leader cannot also attend a different workshop in their own leading slot', () => {

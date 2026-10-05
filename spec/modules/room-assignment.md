@@ -23,15 +23,15 @@ profile, solver, board, report, and fixture update.
 
 ## 8. Rules and scoring
 
-The verified hard rules, scoring terms, deterministic ordering, retention, and
+The verified hard rules, scoring terms, deterministic ordering, and
 bounded repair behavior are implemented in the linked documentation. Future
 placement modules must consume the normalized solver boundary rather than
 interpreting raw profile labels or event payloads.
 
 ## 10. Output and diff
 
-The implemented plan output and transition diff are documented with the solver
-behavior. Plan comparison and release-scoped communication are separate future
+The implemented plan output is documented with the solver behavior. Explicit
+plan comparison and release-scoped communication are separate future
 consumers; the current board is an organiser-only current-state projection.
 
 ## 11. Remaining consumers

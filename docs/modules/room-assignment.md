@@ -17,8 +17,6 @@ hard rules, and a requirement preflight check. No placement result is persisted.
   and required keep-apart relations reject rooms.
 - Preferred requirements and relations, exact fit, near fit, orphan beds, and
   scarce capabilities contribute deterministic integer score terms.
-- A previous feasible placement is retained before forced placement, greedy
-  scoring, and bounded pairwise repair are attempted.
 - All families are processed deterministically. Placement traces include the
   selected score terms, rejected alternatives, and runners-up; unplaced families
   get a blocking-rule diagnostic and closest near-miss trace.
@@ -79,10 +77,9 @@ fall back to scanning, so a rule defined outside this module keeps working.
 Preflight resolves inventory totals and capacity-per-capability once for the
 whole run instead of per family, and reuses one feasibility sweep per family.
 
-None of this changes a placement, a score, a rejection or a trace entry.
+The placement stage remains deterministic and its output is covered directly.
 [`test/solver/placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
-pins a digest of the whole plan — both passes, including retention and repair —
-against the value recorded before the change, and separately pins the
+pins a digest of the whole current plan, including repair, and separately pins the
 candidate-count tiebreak, which the digest occasion does not exercise.
 
 ## Profile and fixtures
@@ -91,7 +88,7 @@ The executable family-freizeit profile selects room inventory and room
 assignment with explicit scoring weights, relation and no-bed roles, priority,
 scarce-capability penalties, and repair-pass limits. The KDL fixtures in
 [`test/fixtures/room-assignment/`](../../test/fixtures/room-assignment/) cover
-real inventory derivation, deterministic placement, retention, normalized
+real inventory derivation, deterministic placement, normalized
 requirements, and pure-function edge cases.
 
 Run the domain coverage gate with:

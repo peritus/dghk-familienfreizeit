@@ -53,20 +53,18 @@ This single test catches almost every violation of the determinism contract in
 - an unsorted collection someone added and forgot to sort — **caught**
 - a tiebreak that falls through to input order — **caught**
 - `filter(...)[0]` where two candidates score equally — **caught**
+- a `Set` or `Map` iterated where insertion order was accidental — **caught**
+- floating-point comparison producing different winners — **caught**
 
-Stable transition tests additionally derive a `before` plan from a committed
-event-log prefix and an `after` plan from prospective events. They must prove:
+Repeated-solve tests use the same current solver input and must prove:
 
-- unchanged inputs retain all valid previous assignments;
-- an unrelated change does not move unaffected people;
+- identical inputs produce identical plans and traces;
+- an unrelated change is handled by the documented current-input allocation;
 - invalidation or capacity loss moves no more people than necessary under the
   documented bounded-repair procedure;
 - a new person does not displace an existing person when another feasible place
   exists;
-- every move has one deterministic reason in the transition diff and trace;
-- the absence of a previous plan uses the initial-allocation path.
-- a `Set` or `Map` iterated where insertion order was accidental — **caught**
-- floating-point comparison producing different winners — **caught**
+- every move has one deterministic reason in the solver trace.
 
 Fifty seeds is arbitrary and enough; a real order dependence fails within a
 handful. It runs in well under a second.

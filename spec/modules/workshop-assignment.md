@@ -58,16 +58,14 @@ person is fixed into for the current cycle. No trait roles.
 
 One stage, `workshop-assignment.attendance`, reading
 `workshop-scheduling.placement` and `workshop-rankings.demand`. It follows D4
-in four steps:
+in three steps:
 
 1. apply feasible fixed attendance decisions first — they always take
    precedence over every automatic outcome, so they claim capacity and slot
    occupancy before anything else runs;
-2. retain a still-feasible prior assignment (from the previous derived plan)
-   for anyone with no fixed decision this cycle;
-3. process every configured ranked choice in Wahlrunde order, respecting the
+2. process every configured ranked choice in Wahlrunde order, respecting the
    per-person assignment target and rank weights;
-4. perform bounded deterministic repair (up to `max_repair_passes`) using only
+3. perform bounded deterministic repair (up to `max_repair_passes`) using only
    current ranked choices, moving at most one non-fixed occupant per repair to
    seat a still-unassigned person, and explaining every movement in the trace.
 
@@ -88,8 +86,8 @@ Hard constraints (cancellation, participation mode, leader conflict,
 eligibility, capacity, and same-slot overlap) are evaluated inline by the
 stage rather than declared as a separate `Rule[]`; every rejection carries one
 of the `hard.*` reason codes used in traces and violations. Ranked choices
-score by `rank_weights`; fixed, retained, ranked, and repaired placements are
-the only assignment origins. There is no fill score or fill assignment.
+score by `rank_weights`; fixed, ranked, and repaired placements are the only
+assignment origins. There is no fill score or fill assignment.
 
 ## 9. Preflight checks
 
@@ -108,7 +106,7 @@ type WorkshopAssignmentSection = {
       person_id: string
       workshop_id: string
       rank: number
-      outcome: 'assigned' | 'retained' | 'fixed' | 'rejected' | 'not-needed'
+      outcome: 'assigned' | 'fixed' | 'rejected' | 'not-needed'
       reason: string
       competing_workshop_id: string | null
     }[]
@@ -119,7 +117,7 @@ type WorkshopAssignmentSection = {
     workshop_id: string
     slot_id: string
     rank: number | null
-    reason: 'fixed' | 'retained' | 'ranked' | 'repaired'
+    reason: 'fixed' | 'ranked' | 'repaired'
   }[]
   repairs: readonly {
     person_id: string
@@ -154,8 +152,8 @@ No screens or controls. Reports: `workshop-roster`, `workshop-person-plan`,
 
 ## 12. Tests
 
-- Deterministic allocation, retention across a stable re-derive,
-  rank weighting, per-person targets without implicit assignment, bounded
+- Deterministic allocation on the current derived input, repeated-solve
+  stability, rank weighting, per-person targets without implicit assignment, bounded
   repair, round snapshots, and stable traces.
 - No automatic assignment targets a workshop outside the person's current
   ranking, for either children or adults.

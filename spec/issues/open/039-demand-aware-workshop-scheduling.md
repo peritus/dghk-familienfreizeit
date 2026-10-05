@@ -66,11 +66,11 @@ The current order can be locally valid while being globally poor:
   the meaning of the existing attendance plan, so the calculation boundary and
   explicit recalculation/review behavior must be defined.
 
-This is related to, but distinct from, the retention instability documented in
-[issue 037](../archived/037-workshop-assignment-fill-retention-instability.md). Issue 037
-concerns repeatability when re-deriving the same schedule and attendance plan;
-this issue concerns whether the schedule itself uses the available preference
-information to produce a better feasible plan.
+This is related to, but distinct from, the historical fill-origin instability
+documented in [issue 037](../archived/037-workshop-assignment-fill-retention-instability.md).
+The current attendance solver is stateless and recomputes from the current
+derived input; this issue concerns whether the schedule itself uses the
+available preference information to produce a better feasible plan.
 
 ## Evidence
 
@@ -82,13 +82,12 @@ information to produce a better feasible plan.
   only `rankingOutput.rankings` and never reads `rankingOutput.demand`. See
   [`src/modules/workshop-assignment/index.ts`](../../../src/modules/workshop-assignment/index.ts#L66-L88)
   and [`src/modules/workshop-rankings/index.ts`](../../../src/modules/workshop-rankings/index.ts#L92-L100).
-- The attendance algorithm processes people in id order, retains feasible prior
-  assignments, then tries ranked choices and bounded repairs. Under D31, none
-  of those steps may introduce an unchosen workshop assignment, and none
-  reschedules a workshop. See
+- The attendance algorithm processes ranked choices and bounded repairs from
+  the current input. Under D31, none of those steps may introduce an unchosen
+  workshop assignment, and none reschedules a workshop. See
   [`src/modules/workshop-assignment/index.ts`](../../../src/modules/workshop-assignment/index.ts#L174-L358).
-- D4 requires hard constraints first, then maximum assigned coverage, retention,
-  balanced opportunity priority, higher-ranked choices, and stable tie-breaking.
+- D4 requires hard constraints first, then maximum assigned coverage, configured
+  opportunity priority, higher-ranked choices, and stable tie-breaking.
   A demand-aware scheduler would need to explain how placement scoring fits
   those priorities rather than silently changing them. See
   [`D4`](../../../decisions.md#d4--stable-sorted-greedy-with-bounded-repair-not-integer-programming).
@@ -138,9 +137,7 @@ number. A proposed initial ordering is:
    second and later choices according to configured weights;
 5. maximize the number of people reaching the configured
    `workshops_per_person` target;
-6. preserve valid previous placements and assignments when no objective
-   improvement requires moving them;
-7. use stable ids to resolve all remaining ties.
+6. use stable ids to resolve all remaining ties.
 
 The final choice of objective ordering, score weights, repair bounds, and review
 boundary must be recorded as an accepted decision before implementation. The
@@ -194,7 +191,7 @@ runtime executable rules.
    capacity is already sufficient may matter less than a smaller workshop with
    severe demand pressure.
 5. What is the permitted movement budget for demand-aware repair, and how is it
-   reconciled with D4's retention priority and issue 037's stability concerns?
+   reconciled with D4's bounded-repair contract?
 6. Does a ranking edit invalidate the current reviewed placement/attendance
    calculation, or should demand-aware recalculation always be an explicit
    organiser action with a visible plan diff?

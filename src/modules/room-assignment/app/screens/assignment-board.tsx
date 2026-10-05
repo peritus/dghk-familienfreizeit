@@ -207,9 +207,9 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
 }
 
 export function AssignmentBoardScreen() {
-  const { world, previous_plan: previousPlan } = useOrganiser()
+  const { world } = useOrganiser()
   if (!world) return null
-  const review = deriveAssignmentReview(world, previousPlan ?? null)
+  const review = deriveAssignmentReview(world)
   return (
     <>
       <SecondaryNavigation

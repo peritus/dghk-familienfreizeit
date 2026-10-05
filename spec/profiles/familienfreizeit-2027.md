@@ -106,7 +106,7 @@ separate sleeping-parties module.
 | | `max_repair_passes` | `5` | module default |
 
 Trait weights and penalties (§3) and these parameters are starting values; changing
-them is a deployment, reviewed through the plan diff before communicating.
+them is a deployment, reviewed before communicating.
 
 ## 6. Workshop policy
 

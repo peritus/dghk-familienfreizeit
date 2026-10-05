@@ -1,7 +1,6 @@
 import { canonicalJson, type JsonValue } from '../events/types.js'
 import type { World } from '../events/fold.js'
 import type {
-  Plan,
   SolverContributions,
   SolverFamily,
   SolverInput,
@@ -12,7 +11,6 @@ import type {
 export function buildSolverInput(
   world: World,
   contributions: SolverContributions = {},
-  previousPlan: Plan | null = null,
 ): SolverInput {
   const familyIds = new Set(world.families.map(({ id }) => id))
   const persons = world.persons
@@ -81,7 +79,6 @@ export function buildSolverInput(
       (contributions.rules ?? []).slice().sort((left, right) => left.id.localeCompare(right.id)),
     ),
     module_inputs: Object.freeze(moduleInputs),
-    previous_plan: previousPlan,
   }
 }
 
@@ -100,7 +97,7 @@ function compareEntity(
  * Sorts labels on a canonical form computed once per label rather than inside
  * the comparator. Canonicalizing during comparison re-serialized the same value
  * on every one of the O(n log n) comparisons across the whole label store — and
- * `deriveTransition` builds two solver inputs per organiser keystroke.
+ * The organiser builds one solver input for the current derived world.
  */
 function sortedLabels(labels: readonly SolverLabel[]): readonly SolverLabel[] {
   const keyed = labels.map((label) => ({ label, canonical: canonicalJson(label.value) }))

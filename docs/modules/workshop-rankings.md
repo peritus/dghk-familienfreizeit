@@ -17,7 +17,7 @@ the scheduling output, and the workshop-assignment solver section. It exposes th
 URL-backed views shown in the German UI as **Wünsche · Antworten**, **Wünsche · Nachfrage**,
 and **Wünsche · Verlauf**. Answers preserve explicit no-preference and no-response
 states; demand combines first-choice and ranked counts with configured capacity and
-placement; trace stages preserve solver reasons, retention, drops, fixed violations,
+placement; trace stages preserve solver reasons, fixed violations,
 and unassigned outcomes. The trace presenter reads the solver's round snapshots
 and adds only display labels; it does not reconstruct assignment events. The
 projection adds no folded table, relationship store, or screen-local domain
@@ -25,9 +25,8 @@ rule. It is recalculated for the prospective local-first world so unapplied
 organiser drafts are visible immediately.
 
 The trace view presents the allocation as a cumulative funnel. It shows the
-answer intake, retained assignments when a previous calculation exists, one
-stage per configured ranking, and a final result stage for fixed or repaired
-assignments and open cases. Each stage includes the people and
+answer intake, one stage per configured ranking, and a final result stage for
+fixed or repaired assignments and open cases. Each stage includes the people and
 workshops affected plus structured reasons such as capacity, slot overlap,
 leader conflicts, eligibility, cancellation, or no schedule. The sticky
 controls support all-person, highlighted-person, and single-person views; the

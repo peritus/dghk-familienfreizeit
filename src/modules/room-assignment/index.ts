@@ -236,7 +236,6 @@ export function buildRoomAssignmentInput(
 export function runRoomAssignment(
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
-  previous: RoomAssignmentSection | null = null,
 ): {
   section: RoomAssignmentSection
   trace: readonly TraceEntry[]
@@ -251,11 +250,6 @@ export function runRoomAssignment(
   const rules = input.rules ?? roomAssignmentRules()
   // Keyed lookups for the three collections the passes below search by id.
   const roomsById = new Map(input.rooms.map((room) => [room.id, room]))
-  // `assignments` holds one row per person, so a family appears several times.
-  // First row wins, matching the `find` this replaced.
-  const previousRooms = new Map<string, string>()
-  for (const { family_id: familyId, room_id: roomId } of previous?.assignments ?? [])
-    if (!previousRooms.has(familyId)) previousRooms.set(familyId, roomId)
   const familiesById = new Map(input.families.map((family) => [family.family_id, family] as const))
   const trace: PlacementTrace[] = []
   // `scoredRooms` against no placements is a pure function of the family, so
@@ -334,17 +328,6 @@ export function runRoomAssignment(
           rejected: [{ target: fixed.room_id, rule: 'hard.room-unavailable' }],
         },
       })
-  }
-
-  for (const family of families) {
-    if (fixedFamilyIds.has(family.family_id)) continue
-    const retainedRoom = previousRooms.get(family.family_id) ?? null
-    if (retainedRoom) {
-      const current = roomsById.get(retainedRoom)
-      if (current && feasible(family, current, placements, input, params, rules).length === 0) {
-        place(family, current, 'retain')
-      }
-    }
   }
 
   const unplaced = (): FamilyPlacementUnit[] =>
@@ -496,10 +479,7 @@ function roomAssignmentStage(params: RoomAssignmentParams): SolverStage<RoomAssi
     run: (input: SolverInput) => {
       const roomInput = input.module_inputs['room-assignment'] as RoomAssignmentInput
       const scopedInput = { ...roomInput, rules: input.rules }
-      const previous = input.previous_plan?.sections['room-assignment'] as
-        | RoomAssignmentSection
-        | undefined
-      const result = runRoomAssignment(scopedInput, params, previous ?? null)
+      const result = runRoomAssignment(scopedInput, params)
       return { output: result.section, trace: result.trace, diagnostics: result.diagnostics }
     },
   }

@@ -65,14 +65,14 @@ const fixture = readFileSync(
   'utf-8',
 )
 
-function solveFixture(previousPlan: Plan | null = null): {
+function solveFixture(): {
   plan: Plan
   input: SolverInput
   world: ReturnType<typeof derive>
 } {
   const world = derive(loadKdl(fixture, profile.validation_view), profile.validation_view)
   const contributions = composeSolverContributions(profile)
-  const input = buildSolverInput(world, contributions, previousPlan)
+  const input = buildSolverInput(world, contributions)
   const plan = solve(input, contributions, {
     build_revision: 'test',
     compatibility_revision: 1,
@@ -181,36 +181,6 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
   const again = solveFixture()
   const attendanceAgain = again.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
   expect(assignmentKey(attendanceAgain)).toEqual(assignmentKey(attendance))
-
-  // Retaining against the previous plan remains constraint-valid and choice-
-  // bound. Repair may still reconsider ranked placements when occupancy has
-  // changed, but it cannot introduce an unchosen workshop.
-  const retained = solveFixture(plan)
-  const attendanceRetained = retained.plan.sections[
-    'workshop-assignment'
-  ] as WorkshopAssignmentSection
-  const retainedCountByWorkshop = new Map<string, number>()
-  for (const assignment of attendanceRetained.assignments)
-    retainedCountByWorkshop.set(
-      assignment.workshop_id,
-      (retainedCountByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
-    )
-  for (const [workshopId, count] of retainedCountByWorkshop)
-    expect(count).toBeLessThanOrEqual(workshopsById.get(workshopId)!.capacity)
-  for (const assignment of attendanceRetained.assignments) {
-    const workshop = workshopsById.get(assignment.workshop_id)!
-    expect(leaderSlots.get(assignment.person_id)?.has(assignment.slot_id)).not.toBe(true)
-    const role = roleOf(assignment.person_id)
-    if (workshop.audience === 'children') expect(role).toBe('child')
-    if (workshop.audience === 'adults') expect(role).toBe('adult')
-    expect(
-      rankingsByPerson
-        .get(assignment.person_id)
-        ?.choices.some(
-          (choice) => choice.workshop_id === assignment.workshop_id && choice.rank !== null,
-        ),
-    ).toBe(true)
-  }
 })
 
 test('the workshop allocation projection exposes answers, demand, and trace from the solved world', () => {
@@ -273,18 +243,17 @@ test('the workshop allocation projection exposes answers, demand, and trace from
   ).toBe(true)
 })
 
-test('the retained trace has one event per choice and never repeats a person in a detail group', () => {
-  const first = solveFixture()
-  const retained = solveFixture(first.plan)
+test('the trace has one event per choice and never repeats a person in a detail group', () => {
+  const current = solveFixture()
   const projection = buildWorkshopAllocationProjection({
-    world: retained.world,
-    plan: retained.plan,
+    world: current.world,
+    plan: current.plan,
     event_date: '2027-05-14',
     time_zone: 'Europe/Berlin',
     max_rank: 3,
   })
   const choiceEvents = projection.trace_events.filter(
-    (event) => event.rank !== null && ['round', 'retention', 'fixed'].includes(event.phase),
+    (event) => event.rank !== null && ['round', 'fixed'].includes(event.phase),
   )
   const choiceKeys = choiceEvents.map(
     (event) => `${event.person_id}|${event.workshop_id}|${event.rank}`,
@@ -294,7 +263,6 @@ test('the retained trace has one event per choice and never repeats a person in 
   const stages = buildWorkshopAllocationTraceStages(projection, 'all')
   expect(stages.map((stage) => stage.id)).toEqual([
     'answers',
-    'retention',
     'round-1',
     'round-2',
     'round-3',
@@ -305,7 +273,7 @@ test('the retained trace has one event per choice and never repeats a person in 
   ))
     expect(new Set(item.people.map((person) => person.id)).size).toBe(item.people.length)
 
-  const section = retained.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+  const section = current.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
   const snapshotAssignments = [
     ...section.initial_assignments,
     ...section.rounds.flatMap((round) => round.assignments),
@@ -321,8 +289,10 @@ test('the retained trace has one event per choice and never repeats a person in 
       expect(
         section.repairs.some(
           (repair) =>
-            repair.person_id === assignment.person_id &&
-            repair.workshop_id === assignment.workshop_id,
+            (repair.person_id === assignment.person_id &&
+              repair.workshop_id === assignment.workshop_id) ||
+            (repair.displaced_person_id === assignment.person_id &&
+              repair.displaced_to_workshop_id === assignment.workshop_id),
         ),
       ).toBe(true)
     } else {

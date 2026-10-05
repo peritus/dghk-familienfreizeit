@@ -251,7 +251,7 @@ describe('room assignment business logic', () => {
     }
   })
 
-  test('moves only the affected family when room configuration changes', () => {
+  test('recomputes all placements from the current room configuration', () => {
     const beforeInput = assignmentInput(
       [room('rm_1', 2, ['accessible']), room('rm_2', 2), room('rm_3', 2)],
       [
@@ -266,7 +266,7 @@ describe('room assignment business logic', () => {
       [room('rm_1', 2), room('rm_2', 2), room('rm_3', 2, ['accessible'])],
       beforeInput.families,
     )
-    const after = runRoomAssignment(afterInput, params, before.section)
+    const after = runRoomAssignment(afterInput, params)
 
     expect(before.section.assignments).toEqual(
       expect.arrayContaining([
@@ -277,7 +277,7 @@ describe('room assignment business logic', () => {
     expect(after.section.assignments).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ family_id: 'fam_1', room_id: 'rm_3' }),
-        expect.objectContaining({ family_id: 'fam_2', room_id: 'rm_2' }),
+        expect.objectContaining({ family_id: 'fam_2', room_id: 'rm_1' }),
       ]),
     )
     expect(after.trace.filter(({ subject }) => subject === 'fam_2')).toHaveLength(1)
@@ -302,14 +302,6 @@ describe('room assignment business logic', () => {
         }),
       }),
     )
-  })
-
-  test('pure room assignment accepts a previous plan for retention', () => {
-    const world = derive(loadKdl(fixture, profile.validation_view), profile.validation_view)
-    const input = buildSolverInput(world, contributions).module_inputs['room-assignment']
-    const first = runRoomAssignment(input as RoomAssignmentInput, params)
-    const retained = runRoomAssignment(input as RoomAssignmentInput, params, first.section)
-    expect(retained.trace.filter(({ step }) => step === 'retain')).toHaveLength(2)
   })
 
   test('keeps fixed assignments ahead of automatic placement and reports violations', () => {
@@ -430,7 +422,7 @@ describe('room assignment business logic', () => {
     ])
   })
 
-  test('handles relations, exclusions, preference scoring, and repair deterministically', () => {
+  test('handles relations, exclusions, and preference scoring deterministically', () => {
     const target = family('fam_1', 1)
     const apart = family('fam_2', 1, [
       familyRequirement('fam_2', {
@@ -485,26 +477,6 @@ describe('room assignment business logic', () => {
     )
     expect(excluded.section.unplaced).toEqual([])
     expect(excluded.section.assignments[0]?.room_id).toBe('rm_2')
-
-    const repair = runRoomAssignment(
-      assignmentInput(
-        [room('rm_1', 1, ['required']), room('rm_2', 1)],
-        [
-          family('fam_1', 1),
-          family('fam_2', 1, [
-            familyRequirement('fam_2', { capability_key: 'required', strength: 'required' }),
-          ]),
-        ],
-      ),
-      params,
-      {
-        assignments: [
-          { family_id: 'fam_1', person_id: 'fam_1-person-0', room_id: 'rm_1', place_id: null },
-        ],
-        unplaced: [],
-      },
-    )
-    expect(repair.trace.filter(({ step }) => step === 'repair')).toHaveLength(2)
 
     const preferred = runRoomAssignment(
       assignmentInput(

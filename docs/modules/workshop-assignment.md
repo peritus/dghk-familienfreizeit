@@ -4,7 +4,7 @@ Attendance assignment consumes the derived current-cycle demand, one-placement
 schedule, workshop modes, person roles, capacities, and profile configuration.
 Under [D31](../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
 automatic assigned-mode attendance is limited to a person's current ranked
-choices; fixed, retained, ranked, and repaired assignments are the valid
+choices; fixed, ranked, and repaired assignments are the valid
 origins. Sign-up and interest lists remain separate outputs and are not
 converted into automatic assignments.
 
@@ -24,10 +24,6 @@ decisions, fixed violations, round snapshots, and explainable traces.
   another fixed decision) never throws and is never silently dropped — it is
   recorded in `fixed_violations` with its reason and reported as a
   `workshop-assignment.fixed-invalid` diagnostic.
-- Anyone without a fixed decision this cycle first retains their previous
-  derived assignment if it is still feasible, before ranked choices run — a
-  re-derive with no new events preserves the assignment origin as `retained`
-  instead of recomputing it as `ranked`.
 - Bounded repair (up to `max_repair_passes`) relocates at most one non-fixed
   occupant per repair to seat a still-unassigned person using current ranked
   choices only, and never moves a `'fixed'` assignment.
@@ -44,10 +40,8 @@ resolved inside that pass and are now resolved once per stage run:
 
 - A person's `role`, which every eligibility check needs. It was read by
   scanning the whole label array, once per candidate pair.
-- A person's prior assignments, which retention needs. They were found by
-  filtering the entire previous plan, once per person.
-- A person's ranked choices, filtered and ordered. The retention and repair
-  passes rebuilt that list on each iteration.
+- A person's ranked choices, filtered and ordered. The ranked pass and repair
+  pass reuse that list rather than rebuilding it for each iteration.
 
 The measured effect was two orders of magnitude, and the stage is now linear in
 the log: at 2 367 events it costs about 3 ms, against 383 ms before. See the

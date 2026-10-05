@@ -26,9 +26,11 @@ fold is close to linear and the measured improvement at 9 393 events is 307×.
 See [derived world](../../../docs/architecture/derived-world.md#derivation-cost).
 
 Two superlinear costs remain, and neither is addressed by caching, because a
-cache cannot help the paths that matter here: a cold isolate, a new
-`build_revision`, and `deriveTransition`, which solves two worlds per organiser
-keystroke batch of which the draft one is novel by construction.
+cache cannot help the paths that matter here: a cold isolate and a new
+`build_revision`. The organiser currently derives the prospective world and
+solves that current input once per keystroke batch. Explicit before/after
+comparison remains a separate future feature rather than an implicit solver
+input.
 
 **1. Uniqueness validators are quadratic in their entity kind.**
 `validateRoom` scans every live room to reject a duplicate number within a
@@ -106,9 +108,8 @@ indexes beside the existing ones, so a duplicate check is a lookup. Contained
 within `room-inventory` and the fold's state, no decision review needed.
 
 **The organiser keystroke is now measured, and it is the remaining cost.**
-`deriveTransition` is 547 ms at 2 367 events — two folds and two solves, with
-the draft world novel by construction so no cache can serve it. Everything else
-on the request path is now cheap: an append folds twice regardless of batch size
+The current path folds and solves the prospective world once per batch.
+Everything else on the request path is now cheap: an append folds once regardless of batch size
 ([append cost](../../../docs/architecture/events.md#append-cost)), and
 authorization resolves families through the derived indexes.
 

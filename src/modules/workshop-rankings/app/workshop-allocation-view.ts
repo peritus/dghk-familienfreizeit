@@ -40,14 +40,12 @@ export type WorkshopAllocationTraceOutcome =
   | 'eligibility'
   | 'cancellation'
   | 'unprocessed'
-  | 'retained'
-  | 'dropped'
   | 'fixed'
   | 'repaired'
   | 'not-needed'
   | 'open'
 
-export type WorkshopAllocationTracePhase = 'round' | 'retention' | 'repair' | 'fixed' | 'result'
+export type WorkshopAllocationTracePhase = 'round' | 'repair' | 'fixed' | 'result'
 
 export type WorkshopAllocationTraceEvent = {
   id: string
@@ -226,7 +224,6 @@ function reasonOutcome(reason: string | undefined): WorkshopAllocationTraceOutco
 function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
   const outcomeByReason: Record<string, WorkshopAllocationTraceOutcome> = {
     ranked: 'fulfilled',
-    retained: 'retained',
     fixed: 'fixed',
     repaired: 'repaired',
   }
@@ -243,8 +240,6 @@ function outcomeLabel(outcome: WorkshopAllocationTraceOutcome): string {
     eligibility: 'passt nicht',
     cancellation: 'abgesagt',
     unprocessed: 'noch offen',
-    retained: 'übernommen',
-    dropped: 'nicht mehr passend',
     fixed: 'fest zugeordnet',
     repaired: 'repariert',
     'not-needed': 'nicht benötigt',
@@ -280,7 +275,6 @@ function traceDetailText(event: WorkshopAllocationTraceEvent): string {
     case 'unscheduled':
       return `${event.workshop_title}: ${event.person_name}${rank} · ohne Termin`
     case 'fulfilled':
-    case 'retained':
     case 'fixed':
     case 'repaired':
       return `${event.workshop_title}: ${event.person_name}${rank}${slot ? ` · ${slot.slice(3)}` : ''}`
@@ -304,10 +298,6 @@ function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): 
       return `Ohne Termin · ${wishes} nicht erfüllt`
     case 'fulfilled':
       return `Erfüllt · ${wishes}`
-    case 'retained':
-      return `Übernommen · ${wishes}`
-    case 'dropped':
-      return `Nicht mehr passend · ${wishes}`
     case 'fixed':
       return `Fest zugeordnet · ${count} ${count === 1 ? 'Person' : 'Personen'}`
     case 'repaired':
@@ -322,7 +312,7 @@ function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): 
 }
 
 function detailBoldPrefix(event: WorkshopAllocationTraceEvent): string | undefined {
-  return ['fulfilled', 'retained', 'capacity', 'unscheduled', 'not-needed'].includes(event.outcome)
+  return ['fulfilled', 'capacity', 'unscheduled', 'not-needed'].includes(event.outcome)
     ? event.workshop_title
     : undefined
 }
@@ -379,7 +369,6 @@ function slotLabel(
 }
 
 function tracePhase(reason: string): WorkshopAllocationTracePhase {
-  if (reason === 'retained') return 'retention'
   if (reason === 'repaired') return 'repair'
   if (reason === 'fixed') return 'fixed'
   return 'round'
@@ -428,13 +417,11 @@ export function buildWorkshopAllocationProjection(
       const outcome =
         decision.outcome === 'assigned'
           ? 'fulfilled'
-          : decision.outcome === 'retained'
-            ? 'retained'
-            : decision.outcome === 'fixed'
-              ? 'fixed'
-              : decision.outcome === 'not-needed'
-                ? 'not-needed'
-                : reasonOutcome(decision.reason)
+          : decision.outcome === 'fixed'
+            ? 'fixed'
+            : decision.outcome === 'not-needed'
+              ? 'not-needed'
+              : reasonOutcome(decision.reason)
       roundChoiceKeys.add(`${decision.person_id}|${decision.workshop_id}`)
       addEvent({
         id: `choice-${decision.person_id}-${decision.workshop_id}-${decision.rank}`,
@@ -443,18 +430,16 @@ export function buildWorkshopAllocationProjection(
         workshop_id: decision.workshop_id,
         workshop_title: workshop?.title ?? decision.workshop_id,
         rank: decision.rank,
-        phase: outcome === 'retained' ? 'retention' : outcome === 'fixed' ? 'fixed' : 'round',
+        phase: outcome === 'fixed' ? 'fixed' : 'round',
         outcome,
         detail:
           outcome === 'fulfilled'
             ? `${decision.rank}. Wunsch erfüllt.`
-            : outcome === 'retained'
-              ? 'Aus der vorherigen Berechnung übernommen.'
-              : outcome === 'fixed'
-                ? 'Feste Zuordnung.'
-                : outcome === 'not-needed'
-                  ? 'Ziel bereits erreicht.'
-                  : reasonText(outcome),
+            : outcome === 'fixed'
+              ? 'Feste Zuordnung.'
+              : outcome === 'not-needed'
+                ? 'Ziel bereits erreicht.'
+                : reasonText(outcome),
         slot_label: slotLabel(decision.workshop_id, placements, slots, input.time_zone),
         capacity: workshop?.capacity ?? null,
         competing_workshop_title: decision.competing_workshop_id
@@ -482,7 +467,7 @@ export function buildWorkshopAllocationProjection(
           ? 'Feste Zuordnung.'
           : item.reason === 'repaired'
             ? 'Durch Reparatur zugeordnet.'
-            : 'Zuordnung übernommen.',
+            : 'Automatisch zugeordnet.',
       slot_label: slotLabel(item.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
@@ -523,27 +508,6 @@ export function buildWorkshopAllocationProjection(
       detail: `Durch Reparatur aus ${repairedWorkshop?.title ?? repair.workshop_id} verschoben.`,
       slot_label: slotLabel(repair.displaced_to_workshop_id, placements, slots, input.time_zone),
       capacity: movedWorkshop?.capacity ?? null,
-      competing_workshop_title: null,
-      queue_position: null,
-      queue_size: null,
-    })
-  }
-  for (const drop of assignment.retention_drops) {
-    const slot = slots.get(drop.slot_id)
-    addEvent({
-      id: `drop-${drop.person_id}-${drop.workshop_id}-${drop.slot_id}`,
-      person_id: drop.person_id,
-      person_name: personName(input.world, drop.person_id),
-      workshop_id: drop.workshop_id,
-      workshop_title: workshops.get(drop.workshop_id)?.title ?? drop.workshop_id,
-      rank: null,
-      phase: 'retention',
-      outcome: 'dropped',
-      detail: `Nicht mehr übernommen: ${reasonText(reasonOutcome(drop.reason))}`,
-      slot_label: slot
-        ? `${dateLabel(slot.starts_at, input.time_zone)} ${timeLabel(slot.starts_at, slot.ends_at, input.time_zone)}`
-        : null,
-      capacity: workshops.get(drop.workshop_id)?.capacity ?? null,
       competing_workshop_title: null,
       queue_position: null,
       queue_size: null,
@@ -635,7 +599,7 @@ export function buildWorkshopAllocationProjection(
       leading_workshops: leadingWorkshops,
       wish_count: ranking?.choices.filter((choice) => choice.workshop_id !== null).length ?? 0,
       fulfilled_count: personEvents.filter((event) =>
-        ['fulfilled', 'retained', 'fixed', 'repaired'].includes(event.outcome),
+        ['fulfilled', 'fixed', 'repaired'].includes(event.outcome),
       ).length,
     }
   })
@@ -706,7 +670,7 @@ export function buildWorkshopAllocationTraceStages(
     )
   })
   const rankedEvents = events.filter(
-    (event) => event.rank !== null && ['round', 'retention', 'fixed'].includes(event.phase),
+    (event) => event.rank !== null && ['round', 'fixed'].includes(event.phase),
   )
   const total = rankedEvents.length
   const detailGroups = (
@@ -724,8 +688,6 @@ export function buildWorkshopAllocationTraceStages(
       'leader',
       'unscheduled',
       'fulfilled',
-      'retained',
-      'dropped',
       'fixed',
       'repaired',
       'not-needed',
@@ -751,9 +713,7 @@ export function buildWorkshopAllocationTraceStages(
     outcome: WorkshopAllocationTraceOutcome,
     items: readonly WorkshopAllocationTraceEvent[],
   ): readonly WorkshopAllocationTraceDetailItem[] => {
-    const canGroup = ['fulfilled', 'retained', 'capacity', 'unscheduled', 'not-needed'].includes(
-      outcome,
-    )
+    const canGroup = ['fulfilled', 'capacity', 'unscheduled', 'not-needed'].includes(outcome)
     if (!canGroup) {
       return items.map((event) => ({
         id: event.id,
@@ -800,9 +760,8 @@ export function buildWorkshopAllocationTraceStages(
     )
   }
   const counts = (items: readonly WorkshopAllocationTraceEvent[]) => ({
-    fulfilled: items.filter((event) =>
-      ['fulfilled', 'retained', 'fixed', 'repaired'].includes(event.outcome),
-    ).length,
+    fulfilled: items.filter((event) => ['fulfilled', 'fixed', 'repaired'].includes(event.outcome))
+      .length,
     capacity: items.filter((event) => event.outcome === 'capacity').length,
     overlap: items.filter((event) => event.outcome === 'overlap').length,
     leader: items.filter((event) => event.outcome === 'leader').length,
@@ -832,28 +791,8 @@ export function buildWorkshopAllocationTraceStages(
       detail_items: [],
     },
   ]
-  const retentionEvents = events.filter((event) => event.phase === 'retention')
   const fixedRankedEvents = events.filter((event) => event.phase === 'fixed' && event.rank !== null)
-  let processed =
-    retentionEvents.filter((event) => event.outcome === 'retained').length +
-    fixedRankedEvents.length
-  if (retentionEvents.length) {
-    const retentionCounts = counts(retentionEvents)
-    stages.push({
-      id: 'retention',
-      label: 'Übernommen',
-      description: 'aus der vorherigen Berechnung',
-      phase: 'retention',
-      rank: null,
-      ...retentionCounts,
-      open: Math.max(0, total - processed),
-      details: retentionEvents.some((event) => event.outcome === 'dropped')
-        ? `${retentionEvents.filter((event) => event.outcome === 'dropped').length} Wunsch nicht mehr passend`
-        : undefined,
-      detail_items: detailItems(retentionEvents),
-      detail_groups: detailGroups(retentionEvents),
-    })
-  }
+  let processed = fixedRankedEvents.length
   for (let rank = 1; rank <= projection.max_rank; rank += 1) {
     const round = events.filter((event) => event.phase === 'round' && event.rank === rank)
     const roundCounts = counts(round)
@@ -871,9 +810,7 @@ export function buildWorkshopAllocationTraceStages(
       detail_groups: detailGroups(round),
     })
   }
-  const resultEvents = events.filter(
-    (event) => event.phase === 'repair' || (event.rank === null && event.phase !== 'retention'),
-  )
+  const resultEvents = events.filter((event) => event.phase === 'repair' || event.rank === null)
   if (resultEvents.length) {
     const resultCounts = counts(resultEvents)
     stages.push({
@@ -895,9 +832,7 @@ export function buildWorkshopAllocationTraceStages(
     for (const stage of stages) {
       const stageEvents = selectedEvents.filter((event) => {
         if (stage.id === 'answers') return true
-        if (stage.id === 'retention') return event.phase === 'retention'
-        if (stage.id === 'result')
-          return event.phase === 'repair' || (event.rank === null && event.phase !== 'retention')
+        if (stage.id === 'result') return event.phase === 'repair' || event.rank === null
         return event.phase === 'round' && event.rank === stage.rank
       })
       stage.selected_summary =

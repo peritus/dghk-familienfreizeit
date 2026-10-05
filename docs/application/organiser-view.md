@@ -156,7 +156,7 @@ Workshop allocation is a read-only projection over the current derived world and
 solver plan. Antworten shows ranked, no-preference, and missing-answer states;
 Nachfrage compares first choices and ranked demand with configured capacity and
 placement; Verlauf shows deterministic stages and explanations for capacity, overlap,
-leader, eligibility, cancellation, unscheduled, retention, and dropped cases. Group
+leader, eligibility, cancellation, unscheduled, and dropped cases. Group
 filters, person tracing, responsive tables/cards, keyboard tertiary navigation, and
 browser print use shared workshop components. Fixed violations and unassigned people
 remain visible as review notices; the views do not create attendance or roster events.

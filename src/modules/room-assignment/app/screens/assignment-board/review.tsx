@@ -8,7 +8,6 @@ import type {
 } from '../../../../../modules/room-assignment/index.js'
 import { buildSolverInput, solve } from '../../../../../solver/index.js'
 import { composeSolverContributions } from '../../../../../solver/index.js'
-import type { Plan } from '../../../../../solver/types.js'
 import type { SolverContributions } from '../../../../../solver/types.js'
 import type {
   AssignmentPrintView,
@@ -276,11 +275,10 @@ function findingViews(world: World, plan: ReturnType<typeof solve>): readonly Fi
 
 export function deriveAssignmentReview(
   world: World,
-  previousPlan: Plan | null = null,
   generatedAt = 'Im Browser erzeugt',
 ): AssignmentReview {
   const solverContributions = contributions()
-  const input = buildSolverInput(world, solverContributions, previousPlan)
+  const input = buildSolverInput(world, solverContributions)
   const plan = solve(input, solverContributions, {
     build_revision: buildRevision,
     compatibility_revision: compatibilityRevision,

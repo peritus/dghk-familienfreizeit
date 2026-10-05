@@ -10,7 +10,6 @@ export type OrganiserContextValue = {
   dispatch: Dispatch<OrganiserAction>
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>
-  previous_plan?: Plan | null
   current_plan?: Plan | null
 }
 

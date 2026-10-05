@@ -21,7 +21,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * families, rooms and constraints inside its innermost loops; none of that may
  * change a single assignment, score, rejection or trace entry. A digest over
  * the canonical plan is the cheapest statement of that, and it covers the
- * scoring, retention, repair, preflight and trace paths together.
+ * scoring, repair, preflight and trace paths together.
  */
 /**
  * This digest includes the current workshop allocation round snapshots and
@@ -29,7 +29,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * something different or its explicit explanation contract changed — update it
  * only with that intent.
  */
-const baselineDigest = 'e47cc1109ef83b230c45f2f149f06604b1676f8eb22ff180fb4cb253d37fa7fe'
+const baselineDigest = '3ebba3ae58d6c1ebe57017324edd0136c65e21a96fa8bac92739f3fddd1824ed'
 
 const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
@@ -44,12 +44,9 @@ const solverConfig = {
 test('the placement plan is unchanged for a full occasion', () => {
   const events = syntheticLog(syntheticScale(2))
   const world = derive(events, profile.validation_view)
-  const first = solve(buildSolverInput(world, contributions), contributions, solverConfig)
-  // Second pass with the first plan as the previous one, so retention and the
-  // repair pass are part of what the digest covers.
-  const second = solve(buildSolverInput(world, contributions, first), contributions, solverConfig)
+  const plan = solve(buildSolverInput(world, contributions), contributions, solverConfig)
   const digest = createHash('sha256')
-    .update(canonicalJson({ first, second } as unknown as JsonValue))
+    .update(canonicalJson(plan as unknown as JsonValue))
     .digest('hex')
   expect(digest).toBe(baselineDigest)
 })
@@ -148,8 +145,7 @@ test('the candidate-count tiebreak decides which family picks first', () => {
  * occupant into the room it is simultaneously handing to the unplaced family,
  * and both end up there.
  *
- * No test covered that before, in either the current or the previous
- * implementation, so the capacity invariant is asserted here directly.
+ * The capacity invariant is asserted here directly.
  */
 test('a repaired occupant is relocated out of the room it vacated', () => {
   const priorityParams = { ...params, priority_trait: 'priority' }

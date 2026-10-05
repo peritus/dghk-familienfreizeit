@@ -35,7 +35,6 @@ export type SolverInput = Readonly<{
   requirements: readonly ResolvedRequirement[]
   rules: readonly Rule[]
   module_inputs: Readonly<Record<string, unknown>>
-  previous_plan?: Plan | null
 }>
 
 export type SolverConfig = Readonly<{
@@ -114,14 +113,4 @@ export type Plan = {
   preflight: readonly PreflightFinding[]
   sections: Readonly<Record<string, unknown>>
   trace: readonly TraceEntry[]
-}
-
-export type PlanDiff = {
-  changes: readonly {
-    kind: string
-    subject: string
-    before?: string
-    after?: string
-    reason: string
-  }[]
 }
