@@ -140,6 +140,12 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
     ],
     screens: [
       {
+        id: 'organiser-workshop-participation',
+        route: '/organiser/workshops/participation',
+        label: 'Teilnahme',
+        audience: 'organiser',
+      },
+      {
         id: 'organiser-workshop-allocation',
         route: '/organiser/workshops/allocation',
         label: 'Wünsche',

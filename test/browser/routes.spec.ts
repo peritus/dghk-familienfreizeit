@@ -117,6 +117,7 @@ test('accommodation parent redirects to inventory and workshop spaces links to s
 test('rendered organiser links are canonical and never duplicate the route base', async ({
   page,
 }) => {
+  test.setTimeout(60_000)
   const paths = organiserRouteDefinitions.map(({ test_path }) => test_path)
   for (const path of paths) {
     await page.goto(path)

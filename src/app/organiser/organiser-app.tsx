@@ -69,6 +69,11 @@ const WorkshopAllocation = lazy(() =>
     default: module.WorkshopAllocation,
   })),
 )
+const WorkshopParticipation = lazy(() =>
+  import('./screens/workshop-participation.js').then((module) => ({
+    default: module.WorkshopParticipationScreen,
+  })),
+)
 const WorkshopLists = lazy(() =>
   import('./screens/workshop-reports.js').then((module) => ({ default: module.WorkshopLists })),
 )
@@ -383,6 +388,11 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-allocation') ? (
               <Route path={organiserRoutePaths.workshop_allocation}>
                 <WorkshopAllocation />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshop-participation') ? (
+              <Route path={organiserRoutePaths.workshop_participation}>
+                <WorkshopParticipation />
               </Route>
             ) : null}
             {organiserScreenRegistry.some(

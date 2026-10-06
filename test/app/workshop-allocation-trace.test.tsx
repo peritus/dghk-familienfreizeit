@@ -129,6 +129,7 @@ test('numbers selected rankings and includes the choice rank in summaries', () =
         group: 'children',
       },
     ],
+    participation: { slots: [], people: [] },
     demand: [],
     trace_events: [
       traceEvent('first-aid', 1, 'Erste Hilfe am Kind'),

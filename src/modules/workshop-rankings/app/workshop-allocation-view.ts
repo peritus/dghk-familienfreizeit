@@ -3,7 +3,7 @@ import type { Plan } from '../../../solver/types.js'
 import { compareFixedDecisions } from '../../../solver/fixed-decision.js'
 import { officialWorkshopsWorld } from '../../official-workshops/index.js'
 import { workshopAssignmentSection } from '../../workshop-assignment/index.js'
-import { workshopRankingsWorld, type WorkshopRanking } from '../index.js'
+import { workshopRankingsWorld, type WorkshopChoice, type WorkshopRanking } from '../index.js'
 import {
   workshopSchedulingWorld,
   type WorkshopSchedulingSection,
@@ -251,7 +251,7 @@ function timeLabel(startsAt: string, endsAt: string, timeZone: string): string {
 
 function weekdayLabel(value: string, timeZone: string): string {
   return new globalThis.Date(value)
-    .toLocaleDateString('de-DE', { weekday: 'short', timeZone })
+    .toLocaleDateString('de-DE', { weekday: 'short', ['timeZone']: timeZone })
     .replace(/\.$/u, '')
 }
 
@@ -259,7 +259,7 @@ function clockLabel(value: string, timeZone: string): string {
   return new globalThis.Date(value).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
 }
 
@@ -657,7 +657,10 @@ export function buildWorkshopAllocationProjection(
     .slice()
     .sort(
       (left, right) =>
-        left.starts_at.localeCompare(right.starts_at) || left.id.localeCompare(right.id),
+        left.sort_key - right.sort_key ||
+        new globalThis.Date(left.starts_at).getTime() -
+          new globalThis.Date(right.starts_at).getTime() ||
+        left.id.localeCompare(right.id),
     )
     .map((slot) => ({
       id: slot.id,
@@ -726,9 +729,10 @@ export function buildWorkshopAllocationProjection(
       reason: 'interest',
     })
   }
+  const unassignedPersonIds = new Set(assignment.unassigned.map((item) => item.person_id))
   for (const round of assignment.rounds)
     for (const decision of round.decisions) {
-      if (decision.outcome !== 'rejected') continue
+      if (decision.outcome !== 'rejected' || !unassignedPersonIds.has(decision.person_id)) continue
       const placement = placements.get(decision.workshop_id)
       if (!placement) continue
       slotEntries(decision.person_id, placement.slot_id).open.push({
@@ -740,7 +744,6 @@ export function buildWorkshopAllocationProjection(
       })
     }
   const answerById = new Map(answers.map((answer) => [answer.id, answer]))
-  const unassignedPersonIds = new Set(assignment.unassigned.map((item) => item.person_id))
   const participationPeople: WorkshopParticipationPerson[] = people
     .map((person) => {
       const answer = answerById.get(person.id)!
@@ -764,8 +767,7 @@ export function buildWorkshopAllocationProjection(
       const cells: WorkshopParticipationCell[] = participationSlots.map((slot) => {
         const entries = slotEntriesByPerson.get(person.id)?.get(slot.id)
         if (entries?.leaders.length) return { kind: 'leader', entries: entries.leaders }
-        if (entries?.assignments.length)
-          return { kind: 'assignment', entries: entries.assignments }
+        if (entries?.assignments.length) return { kind: 'assignment', entries: entries.assignments }
         if (entries?.signups.length) return { kind: 'sign-up', entries: entries.signups }
         if (entries?.interests.length) return { kind: 'interest', entries: entries.interests }
         if (entries?.open.length) return { kind: 'open', entries: entries.open }
@@ -783,7 +785,8 @@ export function buildWorkshopAllocationProjection(
           assignment.assignments.filter((item) => item.person_id === person.id).length +
           assignment.signups.filter((item) => item.person_id === person.id).length,
         has_open_case:
-          unassignedPersonIds.has(person.id) || cells.some((cell) => cell.kind === 'open'),
+          unassignedPersonIds.has(person.id) &&
+          (ranking?.choices.some((choice) => choice.workshop_id !== null) ?? false),
         cells,
       }
     })

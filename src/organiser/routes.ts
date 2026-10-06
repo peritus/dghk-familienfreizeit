@@ -26,6 +26,7 @@ export const organiserRoutePaths = {
   workshop_programme: '/workshops/programme',
   workshop_programme_unplaced: '/workshops/programme/unplaced',
   workshop_programme_overlaps: '/workshops/programme/overlaps',
+  workshop_participation: '/workshops/participation',
   workshop_allocation: '/workshops/allocation',
   workshop_allocation_demand: '/workshops/allocation/demand',
   workshop_allocation_trace: '/workshops/allocation/trace',
@@ -229,6 +230,8 @@ export const organiserPaths = {
     nestedPath(organiserRoutePaths.workshop_programme_unplaced),
   workshop_programme_overlaps: (): OrganiserPath =>
     nestedPath(organiserRoutePaths.workshop_programme_overlaps),
+  workshop_participation: (): OrganiserPath =>
+    nestedPath(organiserRoutePaths.workshop_participation),
   workshop_allocation: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_allocation),
   workshop_allocation_demand: (): OrganiserPath =>
     nestedPath(organiserRoutePaths.workshop_allocation_demand),
@@ -265,6 +268,8 @@ export const organiserUrls = {
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_programme_unplaced()}`),
   workshop_programme_overlaps: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_programme_overlaps()}`),
+  workshop_participation: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_participation()}`),
   workshop_allocation: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_allocation()}`),
   workshop_allocation_demand: (): OrganiserUrl =>

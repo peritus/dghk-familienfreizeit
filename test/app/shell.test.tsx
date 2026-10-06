@@ -347,7 +347,7 @@ test('workshop navigation exposes the intended areas and switches resource views
     within(navigation)
       .getAllByRole('link')
       .map((link) => link.textContent),
-  ).toEqual(['Workshops', 'Programm', 'Wünsche', 'Räume und Slots', 'Listen'])
+  ).toEqual(['Workshops', 'Programm', 'Teilnahme', 'Wünsche', 'Räume und Slots', 'Listen'])
   expect(
     within(navigation).getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current'),
   ).toBe('page')
@@ -355,6 +355,30 @@ test('workshop navigation exposes the intended areas and switches resource views
   expect(screen.getByRole('tab', { name: 'Slots' }).getAttribute('aria-selected')).toBe('true')
   fireEvent.click(screen.getByRole('tab', { name: 'Räume' }))
   expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
+})
+
+test('workshop participation shows the responsive person overview and links to wish traces', async () => {
+  open('/organiser/workshops/participation', workshopFixtureEvents())
+  expect(await screen.findByRole('heading', { name: 'Teilnahme' })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Personen' })).toBeTruthy()
+  expect(screen.queryByText('4.–5. Wahl')).toBeNull()
+  const table = document.querySelector('.workshop-participation__table')
+  expect(table?.querySelector('tbody tr th')?.textContent).toContain('erwachsen')
+  expect(table?.querySelector('thead th:nth-child(3)')?.textContent).toContain('Work­shops')
+  expect(table?.querySelector('caption')?.textContent).toMatch(
+    /Teilnahme · \d+ Person(?:en)? · \d+ Slots?/u,
+  )
+  const firstSlotHeading = table?.querySelector('thead th:nth-child(4)')
+  expect(firstSlotHeading?.textContent).toContain('Fr 11:00')
+  expect(firstSlotHeading?.querySelector('.workshop-participation__slot-end')?.textContent).toBe(
+    'bis 13:00',
+  )
+  expect(screen.getAllByRole('link', { name: /Wünsche verfolgen/u }).length).toBeGreaterThan(0)
+  expect(
+    screen
+      .getByRole('navigation', { name: 'Workshopbereiche' })
+      .querySelector('[aria-current="page"]')?.textContent,
+  ).toBe('Teilnahme')
 })
 
 test('slot editing uses a duration and does not offer slot capacity', async () => {

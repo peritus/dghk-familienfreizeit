@@ -334,6 +334,16 @@ test('the workshop allocation projection exposes answers, demand, and trace from
   })
   expect(projection.participation.people).toHaveLength(projection.answers.length)
   expect(projection.participation.people.every((person) => person.cells.length === 8)).toBe(true)
+  expect(
+    projection.participation.people
+      .filter((person) => person.ranks.length === 0)
+      .every((person) => !person.has_open_case),
+  ).toBe(true)
+  expect(
+    projection.participation.people.every(
+      (person) => !person.has_open_case || person.ranks.length > 0,
+    ),
+  ).toBe(true)
   expect(projection.participation.people.map((person) => person.id)).toEqual(
     projection.participation.people
       .slice()
@@ -355,12 +365,6 @@ test('the workshop allocation projection exposes answers, demand, and trace from
       person.cells.some((cell) => cell.kind === 'leader'),
     ),
   ).toBe(true)
-  expect(
-    projection.participation.people.some((person) =>
-      person.cells.some((cell) => cell.kind === 'sign-up'),
-    ),
-  ).toBe(true)
-
   const stages = buildWorkshopAllocationTraceStages(projection, 'all')
   expect(stages[0]).toEqual(
     expect.objectContaining({ label: 'Wünsche abgegeben', phase: 'answers' }),

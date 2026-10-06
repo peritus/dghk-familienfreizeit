@@ -249,6 +249,11 @@ export function WorkshopNavigation() {
           label: 'Programm',
         },
         {
+          href: organiserPaths.workshop_participation(),
+          active_paths: [organiserPaths.workshop_participation()],
+          label: 'Teilnahme',
+        },
+        {
           href: organiserPaths.workshop_allocation(),
           active_paths: [
             organiserPaths.workshop_allocation(),
