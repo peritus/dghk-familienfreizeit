@@ -393,6 +393,38 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
       { id: 'workshop-family-plan' },
       { id: 'workshop-space-plan' },
     ],
+    screens: [
+      {
+        id: 'organiser-workshop-lists',
+        route: '/organiser/workshops/lists',
+        label: 'Listen',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-list-workshops',
+        route: '/organiser/workshops/lists/workshops',
+        label: 'Workshoplisten',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-list-persons',
+        route: '/organiser/workshops/lists/persons',
+        label: 'Personenpläne',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-list-families',
+        route: '/organiser/workshops/lists/families',
+        label: 'Familienpläne',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-workshop-list-rooms',
+        route: '/organiser/workshops/lists/rooms',
+        label: 'Raumpläne',
+        audience: 'organiser',
+      },
+    ],
   }),
 })
 

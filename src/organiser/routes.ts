@@ -31,6 +31,11 @@ export const organiserRoutePaths = {
   workshop_allocation_trace: '/workshops/allocation/trace',
   workshop_slots: '/workshops/slots',
   workshop_spaces: '/workshops/spaces',
+  workshop_lists: '/workshops/lists',
+  workshop_workshop_list: '/workshops/lists/workshops',
+  workshop_person_list: '/workshops/lists/persons',
+  workshop_family_list: '/workshops/lists/families',
+  workshop_room_list: '/workshops/lists/rooms',
 } as const
 
 export const kernelOrganiserRouteDefinitions = [
@@ -222,6 +227,12 @@ export const organiserPaths = {
     nestedPath(organiserRoutePaths.workshop_allocation_trace),
   workshop_slots: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_slots),
   workshop_spaces: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_spaces),
+  workshop_lists: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_lists),
+  workshop_workshop_list: (): OrganiserPath =>
+    nestedPath(organiserRoutePaths.workshop_workshop_list),
+  workshop_person_list: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_person_list),
+  workshop_family_list: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_family_list),
+  workshop_room_list: (): OrganiserPath => nestedPath(organiserRoutePaths.workshop_room_list),
 } as const
 
 export const organiserUrls = {
@@ -255,6 +266,16 @@ export const organiserUrls = {
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_slots()}`),
   workshop_spaces: (): OrganiserUrl =>
     publicUrl(`${organiserBasePath}${organiserPaths.workshop_spaces()}`),
+  workshop_lists: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_lists()}`),
+  workshop_workshop_list: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_workshop_list()}`),
+  workshop_person_list: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_person_list()}`),
+  workshop_family_list: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_family_list()}`),
+  workshop_room_list: (): OrganiserUrl =>
+    publicUrl(`${organiserBasePath}${organiserPaths.workshop_room_list()}`),
 } as const
 
 export function isKnownOrganiserPath(pathname: string): boolean {

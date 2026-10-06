@@ -262,6 +262,17 @@ export function WorkshopNavigation() {
           active_paths: [organiserPaths.workshop_spaces(), organiserPaths.workshop_slots()],
           label: 'Räume und Slots',
         },
+        {
+          href: organiserPaths.workshop_lists(),
+          active_paths: [
+            organiserPaths.workshop_lists(),
+            organiserPaths.workshop_workshop_list(),
+            organiserPaths.workshop_person_list(),
+            organiserPaths.workshop_family_list(),
+            organiserPaths.workshop_room_list(),
+          ],
+          label: 'Listen',
+        },
       ]}
     />
   )
