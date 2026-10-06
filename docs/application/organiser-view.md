@@ -159,7 +159,7 @@ profile-derived capabilities and readable blocked-slot labels; capability editin
 still owned by the selected profile/module contract rather than a screen-local field.
 Browser print is the only print path; these screens add no export or print button.
 External leader contacts are organiser-only, and cancelled workshops leave active
-planning while remaining available to historical reports.
+planning. No organiser screen cancels a workshop or lists cancelled workshops.
 
 Workshop allocation is a read-only projection over the current derived world and
 solver plan. Antworten shows ranked, no-preference, and missing-answer states;

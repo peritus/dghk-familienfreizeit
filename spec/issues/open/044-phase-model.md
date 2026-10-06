@@ -18,9 +18,9 @@ opened: 2026-10-06
 Blocked by [043 — module-contributed feature model](043-feature-model.md): a
 phase activates features, so the feature contract must be accepted first.
 
-The cleanup in [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
-is independent and does not block this design or implementation. This issue owns
-the phase-dependent workflow, deadline and status paths directly.
+The independent cleanup in [042 — unsupported workflow promises and orphaned UI](../archived/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
+is resolved and did not touch phase state. This issue owns the phase-dependent
+workflow, deadline and status paths directly.
 
 ## Problem
 
@@ -62,14 +62,14 @@ commitment.** There is no `Communicated` event in the source at all, although
 specifies one. Every "öffnen", "schließen", "festlegen", "veröffentlichen" and
 "kommunizieren" string the product renders is therefore unbacked by
 construction. Phase-specific workflow and deadline behavior belongs here;
-[042](042-remove-unsupported-workflow-promises-and-orphaned-ui.md) covers the
+[042](../archived/042-remove-unsupported-workflow-promises-and-orphaned-ui.md) resolved the
 independent copy, orphaned-UI and visual-coverage cleanup.
 
 ## Phase-dependent implementation scope
 
-Issue 042 covers cleanup that does not depend on the phase contract. This issue
-owns the following behavior and documentation because their correct replacement
-depends on the phase decisions below; none is a prerequisite for starting 042.
+Issue 042 resolved the cleanup that does not depend on the phase contract. This
+issue owns the following behavior and documentation because their correct
+replacement depends on the phase decisions below.
 
 | Concern | Retained scope | Required outcome |
 |---|---|---|
@@ -529,7 +529,7 @@ lies, and how a reopened phase must be re-derivable rather than tombstoned.
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
 - [ui/screens/family-preferences.md](../../ui/screens/family-preferences.md)
 - [043 — module-contributed feature model](043-feature-model.md)
-- [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
+- [042 — unsupported workflow promises and orphaned UI](../archived/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](031-family-projection-privacy-boundary.md)
 - [archived 008 — milestone ordering and release-control prerequisites](../archived/008-milestone-ordering-release-control-prereqs.md)
 - [archived 009 — deadline concept fields underspecified](../archived/009-deadline-concept-fields-underspecified.md)

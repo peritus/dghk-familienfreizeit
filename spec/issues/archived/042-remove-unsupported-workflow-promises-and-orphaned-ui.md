@@ -1,7 +1,7 @@
 ---
 id: "042"
 title: Remove unsupported workflow promises and orphaned UI
-status: open
+status: resolved
 severity: drift
 category: ui
 source: repository-wide review of unsupported workflow copy and unreachable UI surfaces
@@ -16,8 +16,8 @@ opened: 2026-10-05
 
 This cleanup has no prerequisite. It removes misleading copy, unreachable UI
 surfaces and inaccurate visual-coverage claims without choosing a feature or
-phase contract. [043](043-feature-model.md) remains an independent feature-model
-design, and [044](044-phase-model.md) depends on 043 alone.
+phase contract. [043](../open/043-feature-model.md) remains an independent feature-model
+design, and [044](../open/044-phase-model.md) depends on 043 alone.
 
 Phase-dependent stepper, deadline and projection behavior belongs to 044. Those
 items are itemized in its implementation scope so this issue can be completed
@@ -61,7 +61,7 @@ but mean something else. It exists to prevent collateral damage.
 
 Stepper state, local status calculations, deadline configuration and
 phase-derived copy are intentionally outside this issue. See
-[044's phase-dependent implementation scope](044-phase-model.md#phase-dependent-implementation-scope)
+[044's phase-dependent implementation scope](../open/044-phase-model.md#phase-dependent-implementation-scope)
 for the retained implementation scope and acceptance criteria.
 
 ### remove
@@ -86,7 +86,7 @@ the advertising and the registry claims. Each row states which side it falls on.
 |---|---|---|
 | [`reports.tsx`](../../../src/app/organiser/components/workshop/reports.tsx) | thirteen exports: rosters, per-person, per-family and per-room plan tables and documents, and a list-kind switcher — the whole "Listen erzeugen" capability | No production importer. **Keep the components** for the M11/M13 reports host; remove the coverage entries and the stepper copy that promises them |
 | [`participation.tsx`](../../../src/modules/workshop-assignment/app/components/participation.tsx) | ten exports: attendance matrix, group distribution, unrequested assignments, and an open-cases worklist with a "Nächster Schritt" column | No production importer, and the owning module contributes no screen. **Keep the components**; remove the `Familie erinnern` action copy, which promises a notification path that does not exist anywhere |
-| [`src/app/organiser/components/workshop/index.ts`](../../../src/app/organiser/components/workshop/index.ts) | a barrel re-exporting both files | **Remove.** It has zero importers and is the only thing making the two files appear reachable |
+| `src/app/organiser/components/workshop/index.ts` (deleted) | a barrel re-exporting both files | **Remove.** It has zero importers and is the only thing making the two files appear reachable |
 | [`shared.tsx`](../../../src/app/components/shared/workshop/shared.tsx) | `WorkshopListPicker`, `WorkshopPrintDocument`, `WorkshopConfidentialityNotice` | Reachable only through `reports.tsx`. **Keep**; they are the print primitives the reports host needs |
 | [`surface.tsx`](../../../src/modules/room-assignment/app/components/assignment-board/surface.tsx) | a seven-member findings-and-decisions cluster referenced by nothing, not even a story | **Remove.** Its screens now live as deferred-idea examples outside the build |
 
@@ -205,6 +205,48 @@ this catalog.
 7. **Comment drift.** The kernel event union is described in a neighbouring
    comment as seven types; it has eight.
 
+## Resolution
+
+Every row is resolved; the phase-dependent rows remain with
+[044](../open/044-phase-model.md#phase-dependent-implementation-scope), and
+D28's four-step summary and stepper labels are unchanged.
+
+- **Production copy.** The overview description, the `Wahl öffnen` step
+  description, the external-leader empty state, the cancelled-workshop history
+  line, and the three "vor dem Festlegen" review notices in
+  [`workshops.tsx`](../../../src/app/organiser/screens/workshops.tsx),
+  [`workshop-allocation.tsx`](../../../src/app/organiser/screens/workshop-allocation.tsx)
+  and the [allocation module component](../../../src/modules/workshop-rankings/app/components/workshop-allocation.tsx)
+  now describe only available behavior.
+  [`workshop-workflow-copy.test.tsx`](../../../test/app/workshop-workflow-copy.test.tsx)
+  asserts the corrected copy against the prototype dataset.
+- **Story phantoms.** The `Wahl schließen` `next_action` examples, the
+  `Wahlphase schließen?` dialog copy, the participation action texts, the
+  allocation commitment line, the `Entwurf`/`Zurückgehalten` badges and the
+  card publication claim are removed or replaced with illustrative copy. The
+  draft and held badge tones remain as a labeled tone sample.
+- **Orphaned code.** The workshop barrel is deleted. The assignment-board
+  [`surface.tsx`](../../../src/modules/room-assignment/app/components/assignment-board/surface.tsx)
+  keeps `ScreenFrame`, which the routed assignment board imports; the seven
+  unreferenced members are deleted.
+- **Reports.** Since this issue was filed, the workshop list screen
+  ([`workshop-reports.tsx`](../../../src/app/organiser/screens/workshop-reports.tsx))
+  became the production host for `reports.tsx` and the shared print primitives.
+  Their coverage entries and snapshots therefore remain. Participation keeps its
+  components and stories, registered with a snapshot exemption because no route
+  renders it.
+- **Visual coverage.** [`ui-coverage.ts`](../../../src/app/design/ui-coverage.ts)
+  registers every Storybook story exactly once, with the renderable as its
+  source. The [Storybook visual test](../../../test/storybook/style-guide.spec.ts)
+  rejects unregistered stories and stale entries, and
+  [`ui-coverage.test.tsx`](../../../test/app/ui-coverage.test.tsx) rejects
+  duplicate ids, missing or story-file sources and unexplained snapshot
+  exemptions. The four duplicate ids, the fourteen snapshots without a story and
+  the two participation snapshots are removed; the five uncovered story files,
+  the remaining uncovered stories and a new routed allocation screen story are
+  registered and baselined. The rule is documented in
+  [docs/ui/storybook.md](../../../docs/ui/storybook.md).
+
 ## Related files
 
 - [decisions.md](../../../decisions.md)
@@ -216,7 +258,6 @@ this catalog.
 - [src/app/design/ui-coverage.ts](../../../src/app/design/ui-coverage.ts)
 - [src/app/organiser/screens/workshops.tsx](../../../src/app/organiser/screens/workshops.tsx)
 - [src/app/organiser/screens/workshop-allocation.tsx](../../../src/app/organiser/screens/workshop-allocation.tsx)
-- [src/app/organiser/components/workshop/index.ts](../../../src/app/organiser/components/workshop/index.ts)
 - [src/app/organiser/components/workshop/reports.tsx](../../../src/app/organiser/components/workshop/reports.tsx)
 - [src/modules/room-assignment/app/components/assignment-board/surface.tsx](../../../src/modules/room-assignment/app/components/assignment-board/surface.tsx)
 - [src/modules/workshop-assignment/app/components/participation.tsx](../../../src/modules/workshop-assignment/app/components/participation.tsx)
