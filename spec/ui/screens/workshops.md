@@ -8,6 +8,7 @@ remain separate URLs with page-local workshop navigation:
 | View | Route | Purpose |
 |---|---|---|
 | Workshop overview | `/organiser/workshops` | authoring, lifecycle summary, modes, demand headline, and attention items |
+| Teilnahme · Personen | `/organiser/workshops/participation` | read-only person-by-slot matrix of the current plan, linked to each person's trace |
 | Externe Leitungen | `/organiser/workshops/externe` | create and edit external leaders, their organiser-only contact metadata, linked workshops, and slot availability |
 | Räume und Slots | `/organiser/workshops/spaces` | physical spaces, capacities, capabilities, and per-slot blocking |
 | Slots | `/organiser/workshops/slots` | direct event-backed slot creation, retirement, and overlap validation; linked from Räume und Slots |
@@ -19,12 +20,12 @@ remain separate URLs with page-local workshop navigation:
 | Familienpläne | `/organiser/workshops/lists/families` | one selected family's member-by-slot workshop plan |
 | Raumpläne | `/organiser/workshops/lists/rooms` | one selected room's scheduled workshops, audience, and leaders |
 
-The section navigation contains **Workshops**, **Programm**, **Wünsche**, **Räume und Slots**, and **Listen**. The
+The section navigation contains **Workshops**, **Teilnahme**, **Wünsche**, **Räume und Slots**, and **Listen**. The
 workshop overview groups **Workshops**, **Leitungen**, and **Externe Leitungen** as
-local tabs, while **Programm** groups the three programme review URLs (**Ganzes
-Programm**, **Nicht eingeplant**, and **Überschneidungen**) as page-local tabs, and
-Räume und Slots groups the space and slot resource routes. The
-The **Wünsche** entry is selected for all three allocation URLs and its tertiary
+local tabs. **Teilnahme** has shared third-level tabs for **Personen** and
+**Programm**; Programm groups the three programme review URLs (**Ganzes
+Programm**, **Nicht eingeplant**, and **Überschneidungen**) as page-local tabs.
+Räume und Slots groups the space and slot resource routes. The **Wünsche** entry is selected for all three allocation URLs and its tertiary
 navigation contains **Antworten**, **Nachfrage**, and **Verlauf**. **Listen** has
 the four URL-backed views above and defaults to the workshop roster.
 
