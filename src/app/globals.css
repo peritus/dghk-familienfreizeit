@@ -160,10 +160,6 @@ main:has(> .workshop-participation-page) {
   background: var(--secondary-background);
 }
 
-.workshop-participation__table tr.is-open > th[scope='row'] {
-  box-shadow: inset 6px 0 0 var(--main);
-}
-
 .workshop-participation__quiet,
 .workshop-participation__age,
 .workshop-participation__cell-detail {
@@ -272,12 +268,6 @@ main:has(> .workshop-participation-page) {
   box-shadow: inset 0 0 0 2px var(--border);
 }
 
-.workshop-participation__open-cell {
-  display: grid;
-  justify-items: start;
-  gap: 0.25rem;
-}
-
 .workshop-participation__cell-detail {
   font-size: 0.8125rem;
   line-height: 1.3;
@@ -297,10 +287,6 @@ main:has(> .workshop-participation-page) {
   border: 2px solid var(--border);
   border-radius: 5px;
   background: var(--secondary-background);
-}
-
-.workshop-participation__card.is-open {
-  border-left: 10px solid var(--main);
 }
 
 .workshop-participation__card h3 {
@@ -466,10 +452,6 @@ main:has(> .workshop-participation-page) {
 
   .workshop-participation__table tbody tr {
     break-inside: avoid;
-  }
-
-  .workshop-participation__table tr.is-open > th[scope='row'] {
-    box-shadow: none;
   }
 
   .workshop-participation__table th[scope='row'],

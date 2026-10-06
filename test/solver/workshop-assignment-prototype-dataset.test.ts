@@ -335,23 +335,14 @@ test('the workshop allocation projection exposes answers, demand, and trace from
   expect(projection.participation.people).toHaveLength(projection.answers.length)
   expect(projection.participation.people.every((person) => person.cells.length === 8)).toBe(true)
   expect(
-    projection.participation.people
-      .filter((person) => person.ranks.length === 0)
-      .every((person) => !person.has_open_case),
-  ).toBe(true)
-  expect(
-    projection.participation.people.every(
-      (person) => !person.has_open_case || person.ranks.length > 0,
-    ),
-  ).toBe(true)
+    projection.participation.people.flatMap((person) => person.cells.map((cell) => cell.kind)),
+  ).not.toContain('open')
   expect(projection.participation.people.map((person) => person.id)).toEqual(
     projection.participation.people
       .slice()
       .sort(
         (left, right) =>
-          Number(right.has_open_case) - Number(left.has_open_case) ||
-          left.name.localeCompare(right.name, 'de') ||
-          left.id.localeCompare(right.id),
+          left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id),
       )
       .map((person) => person.id),
   )

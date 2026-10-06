@@ -174,13 +174,13 @@ remain visible as review notices; the views do not create attendance or roster e
 The **Teilnahme** route presents a person-by-slot overview derived from the same
 prospective world and solver plan. Its accessible table has one person column and
 equal-width slot columns. Cells show workshop titles with their rank, leader, sign-up,
-interest, fixed-assignment, unresolved-choice, or free-slot state; a dash marks a
-free slot. It sorts solver-reported unassigned people with ranked choices first, then
-sorts by German name. Names link to the person's allocation trace. Narrow layouts
-show one card per person; browser print switches back to the semantic table on A4
-landscape, repeats the header and fixed date/revision footer, and keeps rows
-together. The view follows the shared light and dark theme tokens. It adds no print
-or export action and creates no attendance events.
+interest, fixed-assignment, or free-slot state; a dash marks a free slot. Rejected
+choices stay in the allocation review, while this matrix shows the resulting
+programme. People sort by German name, and names link to the person's allocation
+trace. Narrow layouts show one card per person; browser print switches back to the
+semantic table on A4 landscape, repeats the header and fixed date/revision footer,
+and keeps rows together. The view follows the shared light and dark theme tokens.
+It adds no print or export action and creates no attendance events.
 
 Workshop list reports are read-only projections over the same world and plan as
 every other organiser screen; there is no separate data context to select. They

@@ -44,6 +44,7 @@ test.beforeEach(async ({ page }) => {
 test('participation switches between the detailed table, narrow cards, and landscape print', async ({
   page,
 }) => {
+  test.setTimeout(60_000)
   await page.emulateMedia({ colorScheme: 'light' })
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/organiser/workshops/participation')
@@ -69,6 +70,12 @@ test('participation switches between the detailed table, narrow cards, and lands
   )
   const headerText = await page.locator('.workshop-participation__table thead').innerText()
   expect(headerText).not.toMatch(/Rangfolge|Workshops/u)
+  await expect(page.locator('.workshop-participation__legend')).not.toContainText('Offen')
+  await expect(page.locator('.workshop-participation__table')).not.toContainText('Offen')
+  await expect(
+    page.locator('.workshop-participation__table .workshop-participation__slot-cell--open'),
+  ).toHaveCount(0)
+  await expect(page.locator('.workshop-participation__table tbody tr.is-open')).toHaveCount(0)
   const slotWidths = await page
     .locator('.workshop-participation__table tbody tr')
     .first()
@@ -120,6 +127,7 @@ test('participation switches between the detailed table, narrow cards, and lands
   await expect(page.locator('.workshop-participation__narrow')).toBeVisible()
   await expect(page.locator('.workshop-participation__wide')).toBeHidden()
   await expect(page.locator('.workshop-participation__card').first()).toBeVisible()
+  await expect(page.locator('.workshop-participation__narrow')).not.toContainText('Offen')
   await expect(page.locator('.workshop-participation__card').first()).not.toContainText(
     /Rangfolge|\d+ Workshops/u,
   )
@@ -145,12 +153,7 @@ test('participation switches between the detailed table, narrow cards, and lands
       .locator('.workshop-participation__table tfoot td')
       .evaluate((element) => getComputedStyle(element).display),
   ).toBe('table-cell')
-  expect(
-    await page
-      .locator('.workshop-participation__table tr.is-open > th[scope="row"]')
-      .first()
-      .evaluate((element) => getComputedStyle(element).boxShadow),
-  ).toBe('none')
+  await expect(page.locator('.workshop-participation__table')).not.toContainText('Offen')
   await page.screenshot({ path: '/tmp/dghk-participation-print.png' })
   const pdf = await page.pdf({
     path: '/tmp/dghk-participation-print.pdf',

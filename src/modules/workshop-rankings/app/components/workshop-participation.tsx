@@ -60,26 +60,6 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
         <span className="sr-only">freier Platz</span>
       </span>
     )
-  if (cell.kind === 'open')
-    return (
-      <div className="workshop-participation__open-cell">
-        <span className="workshop-participation__badge workshop-participation__badge--attention">
-          Offen
-        </span>
-        {cell.entries.map((entry) => (
-          <div className="workshop-participation__cell-entry" key={entry.workshop_id}>
-            <span className="workshop-participation__cell-title">{entry.title}</span>
-            {entry.rank ? (
-              <>
-                <br />
-                <span className="workshop-participation__cell-detail">{entry.rank}. Wahl</span>
-              </>
-            ) : null}
-          </div>
-        ))}
-      </div>
-    )
-
   return (
     <div className="workshop-participation__cell-entries">
       {cell.entries.map((entry) => (
@@ -145,12 +125,6 @@ function Legend({ max_rank: maxRank }: { max_rank: number }) {
         />
         leitet
       </span>
-      <span>
-        <b className="workshop-participation__badge workshop-participation__badge--attention">
-          Offen
-        </b>
-        markierter Fall
-      </span>
     </div>
   )
 }
@@ -184,7 +158,7 @@ function WideTable({ participation }: { participation: WorkshopParticipationView
           </thead>
           <tbody>
             {participation.people.map((person) => (
-              <tr className={person.has_open_case ? 'is-open' : undefined} key={person.id}>
+              <tr key={person.id}>
                 <th scope="row">
                   <WishesLink person={person} />
                   <span className="workshop-participation__age">
@@ -221,7 +195,7 @@ function PersonCards({ participation }: { participation: WorkshopParticipationVi
         {participation.people.map((person) => (
           <article
             aria-labelledby={`workshop-participation-person-${person.id}`}
-            className={`workshop-participation__card${person.has_open_case ? ' is-open' : ''}`}
+            className="workshop-participation__card"
             key={person.id}
           >
             <h3 id={`workshop-participation-person-${person.id}`}>

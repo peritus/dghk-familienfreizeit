@@ -74,10 +74,10 @@ expose no application print, download, or export control.
 **Teilnahme** presents a derived person-by-slot matrix. The semantic table includes
 each person in the derived world and every configured workshop slot. Assigned
 choices show the workshop title and rank in the cell; rank colors distinguish the
-configured choices. Leadership, sign-up, interest, fixed attendance, unresolved
-unassigned choices, and free slots have visible text labels as well. Free cells use
-a dash. Slot columns have equal widths, with a wider person column. People with
-unresolved ranked choices appear first, then names sort in German locale order.
+configured choices. Leadership, sign-up, interest, fixed attendance, and free slots
+have visible text labels as well. Free cells use a dash. Rejected choices are left
+to **Wünsche · Verlauf**, so the matrix shows the resulting programme. Slot columns
+have equal widths, with a wider person column; people sort in German locale order.
 Selecting a name opens that person's **Wünsche · Verlauf** trace with the person
 preselected.
 

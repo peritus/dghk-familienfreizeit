@@ -86,12 +86,11 @@ export type WorkshopParticipationEntry = {
   workshop_id: string
   title: string
   rank: number | null
-  reason: 'ranked' | 'fixed' | 'leader' | 'sign-up' | 'interest' | 'open'
-  detail?: string
+  reason: 'ranked' | 'fixed' | 'leader' | 'sign-up' | 'interest'
 }
 
 export type WorkshopParticipationCell = {
-  kind: 'free' | 'assignment' | 'leader' | 'sign-up' | 'interest' | 'open'
+  kind: 'free' | 'assignment' | 'leader' | 'sign-up' | 'interest'
   entries: readonly WorkshopParticipationEntry[]
 }
 
@@ -111,7 +110,6 @@ export type WorkshopParticipationPerson = {
   response_tone?: WorkshopAllocationAnswer['status_tone']
   ranks: readonly WorkshopParticipationRank[]
   workshop_count: number
-  has_open_case: boolean
   cells: readonly WorkshopParticipationCell[]
 }
 
@@ -673,7 +671,6 @@ export function buildWorkshopAllocationProjection(
     leaders: WorkshopParticipationEntry[]
     signups: WorkshopParticipationEntry[]
     interests: WorkshopParticipationEntry[]
-    open: WorkshopParticipationEntry[]
   }
   const slotEntriesByPerson = new Map<string, Map<string, SlotEntries>>()
   const slotEntries = (personId: string, slotId: string): SlotEntries => {
@@ -684,7 +681,6 @@ export function buildWorkshopAllocationProjection(
       leaders: [],
       signups: [],
       interests: [],
-      open: [],
     }
     personSlots.set(slotId, entries)
     return entries
@@ -729,20 +725,6 @@ export function buildWorkshopAllocationProjection(
       reason: 'interest',
     })
   }
-  const unassignedPersonIds = new Set(assignment.unassigned.map((item) => item.person_id))
-  for (const round of assignment.rounds)
-    for (const decision of round.decisions) {
-      if (decision.outcome !== 'rejected' || !unassignedPersonIds.has(decision.person_id)) continue
-      const placement = placements.get(decision.workshop_id)
-      if (!placement) continue
-      slotEntries(decision.person_id, placement.slot_id).open.push({
-        workshop_id: decision.workshop_id,
-        title: workshops.get(decision.workshop_id)?.title ?? decision.workshop_id,
-        rank: decision.rank,
-        reason: 'open',
-        detail: reasonText(reasonOutcome(decision.reason)),
-      })
-    }
   const answerById = new Map(answers.map((answer) => [answer.id, answer]))
   const participationPeople: WorkshopParticipationPerson[] = people
     .map((person) => {
@@ -770,7 +752,6 @@ export function buildWorkshopAllocationProjection(
         if (entries?.assignments.length) return { kind: 'assignment', entries: entries.assignments }
         if (entries?.signups.length) return { kind: 'sign-up', entries: entries.signups }
         if (entries?.interests.length) return { kind: 'interest', entries: entries.interests }
-        if (entries?.open.length) return { kind: 'open', entries: entries.open }
         return { kind: 'free', entries: [] }
       })
       return {
@@ -784,17 +765,11 @@ export function buildWorkshopAllocationProjection(
         workshop_count:
           assignment.assignments.filter((item) => item.person_id === person.id).length +
           assignment.signups.filter((item) => item.person_id === person.id).length,
-        has_open_case:
-          unassignedPersonIds.has(person.id) &&
-          (ranking?.choices.some((choice) => choice.workshop_id !== null) ?? false),
         cells,
       }
     })
     .sort(
-      (left, right) =>
-        Number(right.has_open_case) - Number(left.has_open_case) ||
-        left.name.localeCompare(right.name, 'de') ||
-        left.id.localeCompare(right.id),
+      (left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id),
     )
   const participation: WorkshopParticipationView = {
     slots: participationSlots,
