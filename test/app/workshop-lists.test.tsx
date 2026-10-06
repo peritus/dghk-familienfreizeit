@@ -11,6 +11,7 @@ import { derive } from '../../src/events/fold.js'
 import { loadKdl } from '../../src/events/kdl.js'
 import { organiserFixtureState } from '../../src/app/stories/organiser-fixtures.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
+import { closedResults } from '../../src/config/phases.js'
 import type { WorkshopAssignmentSection } from '../../src/modules/workshop-assignment/index.js'
 
 afterEach(() => cleanup())
@@ -30,13 +31,13 @@ const plan = solve(buildSolverInput(world, contributions), contributions, {
   seed: null,
 })
 
-function renderLists(path: string) {
+function renderLists(path: string, listWorld = world) {
   const location = memoryLocation({ path, record: true })
   render(
     <OrganiserContext.Provider
       value={{
         state: organiserFixtureState,
-        world,
+        world: listWorld,
         dispatch: () => undefined,
         stage: () => undefined,
         apply: async () => undefined,
@@ -134,4 +135,39 @@ test('the lists close with a dated footer', () => {
   renderLists('/workshops/lists/rooms')
   const footer = screen.getByRole('contentinfo')
   expect(footer.textContent).toMatch(/^Stand \d{1,2}\. \p{L}+ \d{4}, \d{2}:\d{2} Uhr · v\d+$/u)
+})
+
+test('a closed workshop area prints its closed result and names the closing time', () => {
+  const events = loadKdl(fixture, activeProfile.validation_view)
+  const payload = {
+    ...closedResults(activeProfile.modules).get('workshops')!.compute({ world, plan }),
+    build_revision: 'test',
+    compatibility_revision: 1,
+  }
+  const closedWorld = derive(
+    [
+      ...events,
+      {
+        seq: events.length + 1,
+        at: '2027-04-20T08:00:00Z',
+        actor: 'organiser@example.test',
+        subject: null,
+        type: 'WorkshopChoiceOpened',
+        payload: {},
+      },
+      {
+        seq: events.length + 2,
+        at: '2027-04-20T08:00:00Z',
+        actor: 'organiser@example.test',
+        subject: null,
+        type: 'WorkshopsClosed',
+        payload,
+      },
+    ],
+    activeProfile.validation_view,
+  )
+  renderLists('/workshops/lists/workshops', closedWorld)
+  expect(document.querySelector('.workshop-print-stamp')?.textContent).toMatch(
+    /^Festgelegt am 20\. April 2027, \d{2}:\d{2} Uhr · Stand /,
+  )
 })

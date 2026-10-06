@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useSearch } from 'wouter'
+import { deriveAreaView } from '../../../derive/phases.js'
+import { workshopsClosedResult } from '../../../modules/workshop-assignment/closed-result.js'
+import { planWithWorkshopsClosedResult } from '../../../modules/workshop-assignment/app/print-closed-result.js'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
@@ -177,19 +180,32 @@ function personMetadata(person: WorkshopReportPerson): ReactNode[] {
   ]
 }
 
-function printStamp(date: Date, revision: number, drafts: number): string {
+function dayAndTime(date: Date): string {
   const day = date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })
   const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  return `Stand ${day}, ${time} Uhr · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
+  return `${day}, ${time} Uhr`
+}
+
+function printStamp(date: Date, revision: number, drafts: number, closedAt: string | null): string {
+  const closed = closedAt ? `Festgelegt am ${dayAndTime(new Date(closedAt))} · ` : ''
+  return `${closed}Stand ${dayAndTime(date)} · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
 }
 
 /**
  * Date, time and revision of the printed data; refreshed right before printing. On
  * screen it closes the page; on paper it is fixed to the foot of every sheet.
  */
-function PrintStamp({ revision, drafts }: { revision: number; drafts: number }) {
+function PrintStamp({
+  revision,
+  drafts,
+  closed_at: closedAt,
+}: {
+  revision: number
+  drafts: number
+  closed_at: string | null
+}) {
   const [printedAt, setPrintedAt] = useState(() => new Date())
-  const stamp = printStamp(printedAt, revision, drafts)
+  const stamp = printStamp(printedAt, revision, drafts, closedAt)
   useEffect(() => {
     const refresh = () => setPrintedAt(new Date())
     window.addEventListener('beforeprint', refresh)
@@ -208,6 +224,12 @@ export function WorkshopLists() {
   const [location, navigate] = useLocation()
   const search = useSearch()
   const { state, world, current_plan: currentPlan } = useOrganiser()
+  // A closed workshop area prints its closed result, so paper matches what families see.
+  const closing = world ? deriveAreaView(world, 'workshops') : null
+  const closedResult =
+    closing?.closed && workshopsClosedResult(closing.closings.at(-1)?.payload ?? null)
+      ? closing.closings.at(-1)!
+      : null
   const kind = listKind(location)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const focusDocument = useRef(false)
@@ -216,11 +238,13 @@ export function WorkshopLists() {
       world && currentPlan
         ? buildWorkshopReportsProjection({
             world,
-            plan: currentPlan,
+            plan: closedResult
+              ? planWithWorkshopsClosedResult(currentPlan, closedResult.payload)
+              : currentPlan,
             time_zone: activeProfile.meta.timezone,
           })
         : null,
-    [currentPlan, world],
+    [closedResult, currentPlan, world],
   )
 
   const query = new URLSearchParams(search)
@@ -357,7 +381,11 @@ export function WorkshopLists() {
         />
       </div>
       <div className="workshop-list-body mt-6 mb-10">{selectedDocument}</div>
-      <PrintStamp revision={state.head_seq} drafts={draftCount(state)} />
+      <PrintStamp
+        revision={state.head_seq}
+        drafts={draftCount(state)}
+        closed_at={closedResult?.at ?? null}
+      />
     </div>
   )
 }

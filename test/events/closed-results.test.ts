@@ -11,6 +11,7 @@ import { loadKdl } from '../../src/events/kdl.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
 import { defineModule } from '../../src/modules/define.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
+import { planWithWorkshopsClosedResult } from '../../src/modules/workshop-assignment/app/print-closed-result.js'
 
 const config = activeProfile.validation_view
 const contributions = composeSolverContributions(activeProfile)
@@ -246,5 +247,36 @@ describe('closed results', () => {
     expect(() =>
       defineOccasionProfile({ meta, traits: {}, modules: [owner('one', ['oneClosed'])] }),
     ).toThrow(/names oneReopened, which one does not define/)
+  })
+})
+
+describe('printing a closed workshop result', () => {
+  test('replaces planned placements and attendance and keeps sign-ups live', () => {
+    const plan = planOf(workshopWorld)
+    const payload = {
+      ...results.get('workshops')!.compute({ world: workshopWorld, plan }),
+      ...revisions,
+    } as {
+      placements: { workshop_id: string; slot_id: string; space_id: string }[]
+      attendance: { person_id: string; workshop_id: string }[]
+      unassigned: { person_id: string }[]
+    }
+    const [dropped, ...kept] = payload.attendance
+    const closed = { ...payload, attendance: kept, unassigned: [{ person_id: dropped!.person_id }] }
+    const printed = planWithWorkshopsClosedResult(plan, closed)
+    const attendance = printed.sections['workshop-assignment'] as {
+      assignments: { person_id: string; workshop_id: string; slot_id: string }[]
+      unassigned: { person_id: string; reason: string }[]
+      signups: unknown[]
+    }
+    expect(
+      attendance.assignments.map(({ person_id, workshop_id }) => ({ person_id, workshop_id })),
+    ).toEqual(kept)
+    expect(attendance.assignments.every(({ slot_id }) => slot_id !== '')).toBe(true)
+    expect(attendance.unassigned.map(({ person_id }) => person_id)).toEqual([dropped!.person_id])
+    expect(attendance.signups).toEqual(
+      (plan.sections['workshop-assignment'] as { signups: unknown[] }).signups,
+    )
+    expect(planWithWorkshopsClosedResult(plan, {})).toBe(plan)
   })
 })
