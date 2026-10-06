@@ -70,6 +70,7 @@ stream. The generator can create another synthetic family count with
 Food preferences in the active profile use person-scoped `diet` and `food-note`
 traits through the generic family-preferences label/control system. Synthetic
 fixtures may include those labels directly; they must not copy prototype data.
+The importer refuses a non-empty log by default.
 Each request is appended atomically, but the complete import can partially
 finish if a later request fails. The importer reports event progress; rerun
 with `--resume` and the same fixture and credential to continue after an exact
