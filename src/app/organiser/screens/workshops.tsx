@@ -643,7 +643,7 @@ export function Workshops() {
       <WorkshopScreenHeader
         eyebrow="Workshops"
         title="Workshopübersicht"
-        description="Anlegen, Wahl öffnen, Zuordnung prüfen und den aktuellen Plan festlegen."
+        description="Workshops anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten."
         action={
           <Button
             onClick={() => {
@@ -670,7 +670,6 @@ export function Workshops() {
             id: 'choice',
             label: 'Wahl öffnen',
             state: summary.workshops.length ? 'current' : 'upcoming',
-            description: 'Die nächste manuelle Freigabe für Familien',
           },
           {
             id: 'review',
@@ -886,15 +885,10 @@ export function Workshops() {
             </ul>
           ) : (
             <WorkshopEmptyState title="Keine externen Leitungen">
-              Externe Leitungen werden bei der Workshopplanung ergänzt.
+              Noch keine Person außerhalb der Veranstaltung leitet einen Workshop.
             </WorkshopEmptyState>
           )}
         </section>
-      ) : null}
-      {summary.cancelled.length ? (
-        <p className="text-sm text-muted">
-          {summary.cancelled.length} abgesagte Workshops bleiben in der Historie sichtbar.
-        </p>
       ) : null}
     </div>
   )
@@ -984,7 +978,7 @@ export function WorkshopProgramme() {
         details={
           programme.unplaced.length
             ? `${programme.unplaced.length} Workshop${programme.unplaced.length === 1 ? '' : 's'} ohne passenden Platz.`
-            : 'Prüfe Bedarf, Plätze und Überschneidungen, bevor der Plan festgelegt wird.'
+            : 'Alle Workshops haben einen Platz. Prüfe Bedarf, Plätze und Überschneidungen.'
         }
       >
         {programme.unplaced.length

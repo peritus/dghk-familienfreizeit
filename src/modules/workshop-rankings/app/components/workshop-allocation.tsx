@@ -106,7 +106,7 @@ export function WorkshopAllocationConflictNotice({
     <WorkshopPhaseNotice
       label="Prüfung nötig"
       tone="attention"
-      details="Die Zuordnung bleibt eine abgeleitete Vorschau. Prüfe die markierten Fälle vor dem Festlegen."
+      details="Die Zuordnung bleibt eine abgeleitete Vorschau. Prüfe die markierten Fälle."
     >
       {projection.fixed_violation_count
         ? `${projection.fixed_violation_count} feste Entscheidung${projection.fixed_violation_count === 1 ? '' : 'en'} konnte${projection.fixed_violation_count === 1 ? '' : 'n'} nicht erfüllt werden.`

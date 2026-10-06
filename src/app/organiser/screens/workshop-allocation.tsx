@@ -171,7 +171,7 @@ export function WorkshopAllocation() {
         label={projection.has_answers ? 'Zuordnung prüfen' : 'Vorbereitung'}
       >
         {projection.has_answers
-          ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte vor dem Festlegen.'
+          ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte.'
           : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
       </WorkshopAllocationStatus>
       <WorkshopAllocationConflictNotice projection={projection} />
