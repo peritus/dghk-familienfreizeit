@@ -34,6 +34,7 @@ type FamilyPreferencesParams = {
     title: LocalizedText
     intro: LocalizedText | null
     traits: readonly string[]            // family_facing traits, in display order
+    features: readonly FeatureId[]     // governing features, at most one per audience
     phase: PhaseId | null              // governing phase, for target and closed notices
     late_contact: LocalizedText | null // copy shown once the phase is late; required with a phase
   }[]
@@ -48,7 +49,7 @@ type FamilyPreferencesParams = {
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `sections` | — (required) | every `family_facing` trait appears in exactly one section; no other traits appear; each `phase` is a declared phase or `null`; `late_contact` is set exactly when `phase` is |
+| `sections` | — (required) | every `family_facing` trait appears in exactly one section; no other traits appear; each `features` entry is a feature of a selected module, at most one per audience; each `phase` is a declared phase or `null`; `late_contact` is set exactly when `phase` is |
 | `module_controls` | `[]` | unique selected module control keys; section exists; cannot redefine key schemas or authorisation |
 
 The module declares the phase `family-preferences.accommodation-preferences`
@@ -56,6 +57,13 @@ The module declares the phase `family-preferences.accommodation-preferences`
 [phases](../architecture/phases.md) §4). A section's `phase` selects whose
 Zieltermin and closed state the section shows; the Zieltermin comes from
 `meta.phase_dates`. `null` means that the section has no phase notice.
+
+A section's `features` govern every control in the section, including its module
+controls ([features](../architecture/features.md) §3). The family view offers a
+governed section only while its family feature is effective, and a family label
+write for one of its controls is rejected on append otherwise. Organiser family
+detail offers it while its organiser feature is effective (D24). An audience
+without a listed feature leaves the section ungoverned for that audience.
 
 ## 4. Entity kinds
 

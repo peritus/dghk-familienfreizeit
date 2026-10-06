@@ -80,9 +80,9 @@ application shells.
 **Module** — a selectable unit of domain capability with a stable kebab-case id,
 typed parameters, and its own specification in `spec/modules/<module-id>.md`.
 
-**Feature** — a module-owned product capability, such as a screen, family control,
-or action, that the profile selects, a deployment binding may switch, and a phase
-may activate. Its effective availability is derived per request and never stored
+**Feature** — a module-owned capability offered to one audience, families or
+organisers, such as families stating room wishes. The profile selects it, a
+deployment binding may switch it, and a phase may activate it. Its effective availability is derived per request and never stored
 ([features](features.md)). A room's physical attribute is an **amenity**, not a
 feature.
 

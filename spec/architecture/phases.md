@@ -131,23 +131,23 @@ The active profile's phases:
 
 ### Feature bindings
 
-The phases refine the first feature set ([features](features.md) §8):
+The phases activate the family wish features ([features](features.md) §8); the
+organiser wish features bind no phase, so they stay effective while an area is
+closed:
 
-| Feature | Requires phases | Change |
-|---|---|---|
-| `family-preferences.accommodation-preferences` | `family-preferences.accommodation-preferences` | new; governs the controls of sections whose `phase` is that phase, split from `family-preferences.preferences` |
-| `family-preferences.preferences` | — | governs the remaining profile-trait controls |
-| `workshop-rankings.ranking` | `workshop-rankings.choice` | bound |
-| `official-workshops.sign-up`, `official-workshops.interest` | `workshop-rankings.choice` | bound; `official-workshops` gains an `enhances` on `workshop-rankings` |
-| `official-workshops.family-catalogue` | `workshop-rankings.choice` | new, family audience read-only; the organiser equivalent is `official-workshops.catalogue` |
-| `workshop-rankings.allocation-review` | — | gains the `open-choice` action writing `WorkshopChoiceOpened` |
-| `workshop-assignment.closing` | `workshop-assignment.review` | new, organiser; actions `close` and `reopen` writing `WorkshopsClosed` and `WorkshopsReopened` |
-| `room-assignment.closing` | `room-assignment.review` | new, organiser; actions `close` and `reopen` writing `AccommodationClosed` and `AccommodationReopened` |
+| Feature | Requires phases |
+|---|---|
+| `family-preferences.family-room-wishes` | `family-preferences.accommodation-preferences` |
+| `workshop-rankings.family-workshop-wishes` | `workshop-rankings.choice` |
 
-A phase binding to a phase of a module that is not selected is a composition
-error ([features](features.md) §5), so `official-workshops` binds the choice phase
-only when `workshop-rankings` is selected; otherwise its sign-up and interest
-features carry no phase binding.
+The `workshops` section governed by `workshop-rankings.family-workshop-wishes` contains
+the ranking, sign-up, interest, and workshop-companion controls, so one phase
+opens and closes all workshop wishes together. Before workshop choice opens,
+families see no workshop.
+
+Opening workshop choice, closing, and reopening are organiser workflow actions
+of the owning modules, not features (§5). They are always present on the organiser
+screens of a selected module.
 
 ## 5. Organiser events
 
@@ -189,16 +189,21 @@ names, slot times, and other descriptors stay live. Solver traces, scores,
 findings, and notes are never recorded. Attendance covers solver-assigned
 workshops; sign-up and interest participation stays live.
 
-The client never supplies the result. A closing request carries only the head
-sequence the organiser reviewed. The Worker:
+The client never supplies the result. **Festlegen** stages the closing event
+with an empty payload, like any other organiser edit, and the ordinary organiser
+apply request carries the head sequence the organiser reviewed. The Worker:
 
 1. authenticates and authorises the organiser;
 2. refuses with the ordinary stale-head response when the log head differs from
    the reviewed sequence;
-3. derives the world at the head and refuses while the area's review phase is
-   not ready;
-4. computes the payload from that derivation and appends the closing event
-   atomically.
+3. derives the world at the head, including the batch's preceding events, and
+   refuses while the area's review phase is not ready;
+4. computes the payload from that derivation and appends the filled event
+   atomically with the batch.
+
+A closing event with a non-empty client payload is rejected. Until the apply
+response returns the filled event, a staged closing folds as closed with its
+result pending.
 
 The solver remains the only producer of assignments (D6): the closing event
 records its output as an organiser decision and does not let anyone write an
@@ -296,7 +301,7 @@ Die Zimmerwünsche sind festgelegt. Für Änderungen wende dich bitte an das Org
 - Status derivation for every status, including a target passing while open and
   reopening after closing, with an injected `now`.
 - Profile-build failures from §2.
-- Feature availability following phase status, including the ranking feature
+- Feature availability following phase status, including the family workshop-wishes feature
   becoming unavailable when workshops close and available again on reopening.
 - Closing: stale-head refusal, not-ready refusal, server-computed payload equal to
   the reviewed derivation, a corrected re-close, and a payload unchanged by a

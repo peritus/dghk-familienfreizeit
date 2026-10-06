@@ -1,7 +1,8 @@
 # Features
 
-A feature is a product capability that a selected module offers and that can be
-selected by the profile, switched by deployment, and activated by a phase. This
+A feature is a capability that a selected module offers to one audience —
+families or organisers — and that can be selected by the profile, switched by
+deployment, and activated by a phase. This
 document is the contract for declaring features, composing them, and deriving
 their effective availability. Module composition is specified in
 [modules](../modules/contract.md); phase activation is specified in
@@ -12,17 +13,27 @@ is the foundation this contract extends. Nothing below is implemented yet.
 
 ## 1. Terminology
 
-- **Feature** — a module-owned product capability that may expose a screen,
-  family control, projection, or action. Its identity is a typed `FeatureId`.
+- **Feature** — a module-owned capability offered to exactly one audience, such
+  as families stating room wishes. Its identity is a typed `FeatureId`.
+- **Audience** — `family` or `organiser`. The same capability offered to both
+  audiences is two features, each with its own id and availability, offered
+  through its own variant of the editing components.
 - **Feature definition** — the code-owned, typed contract for one feature: owner,
-  audience, subject kind, actions, dependencies, and phase bindings.
-- **Feature action** — a concrete operation the feature offers, such as
-  submitting a ranking. Its identity is a typed `FeatureActionId` within the
-  feature.
+  audience, subject kind, dependencies, phase bindings, readiness, and for a
+  family feature its organiser counterpart.
+- **Governed section** — a [family preferences](../modules/family-preferences.md)
+  section whose profile entry names the feature. The feature governs every control
+  in that section — profile-trait controls and module controls alike — in the
+  renderer for its audience: the family view for a family feature, organiser
+  family detail for an organiser feature.
 - **Feature availability** — the derived result of the layers in §4 for one
-  feature, audience, and principal.
+  feature and principal.
 - **Feature view** — the derived set of availability results that a response
   carries to a client.
+
+Organiser workflow actions — authoring, review, opening workshop choice, closing
+and reopening an area — are not features. They are always present on the
+organiser screens of a selected module.
 
 The word is used in this technical sense only. A physical attribute of a room is a
 room **amenity** ("Merkmal" in German copy), a resolver match target is a
@@ -37,9 +48,12 @@ it is present in every deployment ([modules](../modules/contract.md) §1), so a
 kernel surface has nothing to select or switch.
 
 A feature id is `<module-id>.<feature>`, both parts kebab-case, following the
-stage-id pattern ([modules](../modules/contract.md) §4.1). Ids are stable; a
-feature is never redefined to mean something different, and a new id replaces
-it. Feature action ids are kebab-case and unique within their feature.
+stage-id pattern ([modules](../modules/contract.md) §4.1). The feature part of a
+family feature starts with `family-` and that of an organiser feature with
+`organiser-`, so `family-preferences.family-room-wishes` and
+`family-preferences.organiser-room-wishes` are the two audiences of one
+capability. Ids are stable; a feature is never redefined to mean something
+different, and a new id replaces it.
 
 Profile data selects among declared features and may not supply executable
 predicates (D11, D12). Feature selection changes whether a capability is
@@ -54,37 +68,33 @@ identities; this is the contract, not an illustrative sketch:
 
 ```ts
 type FeatureDefinition = {
-  id: FeatureId                               // '<module-id>.<feature>'
-  audience: 'organiser' | 'family' | 'both'
+  id: FeatureId                               // '<module-id>.<audience>-<feature>'
+  audience: 'family' | 'organiser'
   subject_kind: EntityKind | null             // the entity the feature acts on, if any
-  actions: readonly FeatureActionDefinition[]
   requires_features: readonly FeatureId[]     // must be effective for this one to be
   requires_phases: readonly PhaseId[]         // phases.md §4
   activation_mode: 'all' | 'any'              // over requires_phases
-  surfaces: readonly FeatureSurface[]         // screens and family controls it governs
   readiness?: FeatureReadiness                // module-owned, pure, over derived facts
-  organiser_equivalent?: FeatureId            // required when audience is 'family'
+  organiser_counterpart?: FeatureId           // required when audience is 'family' (D24)
 }
-
-type FeatureActionDefinition = {
-  id: FeatureActionId
-  audience: 'organiser' | 'family' | 'both'
-  writes: readonly EventType[]                // event types this action appends
-}
-
-type FeatureSurface =
-  | { kind: 'screen'; screen_id: ScreenId }
-  | { kind: 'family-control'; key: FamilyControlKey }
 ```
+
+A family-preferences section names its governing features through
+`sections[].features`, at most one per audience
+([family preferences](../modules/family-preferences.md) §3). Each feature governs
+the section's controls, and through them the label keys those controls write, in
+the renderer for its audience. A section without a feature for an audience is
+ungoverned for that audience: its controls are offered whenever authorisation
+permits, and no layer below applies to them.
 
 `readiness` is a pure function the owning module supplies over its own derived
 facts or its typed contributions. It returns `ready` or a typed not-ready reason
 with a module-owned finding id; it never reads raw events, rendered views, or a
 global string-keyed registry.
 
-A feature definition must not declare an action, surface, or state that no
-production code path can reach. An unreachable typed state is a composition
-error, not a placeholder.
+A feature must not be declared before a production code path consumes it; this
+is a design-review obligation. A declared feature that no section of the profile
+names governs nothing and is inert.
 
 ### Consuming another module's feature
 
@@ -106,8 +116,8 @@ individually inspectable (§7):
 | `operational` | A deployment binding switched it on or off, or none is set | Worker environment (§6) |
 | `phase_active` | A governing phase currently activates it | Phase view; `true` when `requires_phases` is empty |
 | `ready` | Its readiness and `requires_features` pass | Module readiness over derived facts |
-| `authorised` | The current principal belongs to an audience the feature serves | Session principal |
-| `effective` | The feature may be offered to this audience | Composition below |
+| `authorised` | The current principal belongs to the feature's audience | Session principal |
+| `effective` | The feature may be offered to this principal | Composition below |
 
 ```text
 effective = declared
@@ -117,6 +127,9 @@ effective = declared
           ∧ ready
           ∧ authorised
 ```
+
+The family and organiser features of one capability are independent: either may
+be effective while the other is not.
 
 `declared` is the hard floor. Every module is compiled into every build (D19),
 so `declared` means *defined by a module the profile selects*. A feature of an
@@ -143,29 +156,37 @@ against ordinary authorisation, event schemas, ownership, phase policy, and
 domain invariants.
 
 Availability can only narrow what the append path accepts. A family-authored
-event whose governing feature action is not effective for that family is
-rejected on append. Organiser-authored events are not gated by availability,
-because the organiser retains full authority through the organiser UI and every
-event of a selected module must remain replayable.
+`LabelSet` or `LabelCleared` whose label key belongs to a control in a section
+governed by a family feature is rejected on append when that feature is not
+effective for the family. Organiser-authored events are not gated by
+availability: the organiser retains full authority, and an organiser feature
+that is not effective is only absent from the organiser UI.
 
-### Audiences
+### Renderers
 
-`audience` decides which projections may offer a feature; it is not an
-authorisation rule. The family projection contains only features that are
-effective for that family. A feature that is not effective is absent: the family
-view does not reveal its existence, timing, or reason. Explaining what comes
-next to a family belongs to the phase view, under the
+Each renderer offers a governed section only while the section's feature for its
+audience is effective: the family view uses the family feature, organiser family
+detail the organiser feature. The two renderers use variants of the same control
+components.
+
+The family wish features bind their phase; the organiser wish features bind none
+(§8), so closing an area removes the family feature and leaves the organiser
+feature effective. While the section's family phase is closed, organiser family
+detail shows a **Festgelegt** note, and organiser edits feed the area's difference
+from its closed result ([phases](phases.md) §7).
+
+The family projection contains only family features that are effective for that
+family. A feature that is not effective is absent: the family view does not
+reveal its existence, timing, or reason. Explaining what comes next to a family
+belongs to the phase view, under the
 [family projection privacy boundary](../issues/open/031-family-projection-privacy-boundary.md).
 
-Every family-audience action must have an organiser equivalent (D24). A feature
-with audience `both` satisfies this when each family action also lists the
-organiser audience. A feature with audience `family` must name an
-`organiser_equivalent` feature of audience `organiser` or `both` whose actions
-write the same event types. Composition fails otherwise.
+### Organiser parity
 
-Each family control is governed by exactly one feature through its `surfaces`
-(D14). The preferences renderer omits a control whose governing feature is not
-effective, and keeps profile order among the rest.
+Every family feature names its `organiser_counterpart`: an organiser feature of
+the same module that offers the same writes through the organiser variant
+(D24). Composition fails when it is missing or does not name an organiser
+feature. The counterpart's availability is still independent at runtime.
 
 ## 5. Composition and validation
 
@@ -173,18 +194,19 @@ effective, and keeps profile order among the rest.
 other contribution guards, and fails the build when:
 
 - two modules contribute the same feature id (`feature:` duplicate key);
-- a feature id is not `<owning-module-id>.<kebab-case>`;
+- a feature id is not `<owning-module-id>.<audience>-<kebab-case>` for its
+  audience;
+- a family feature has no `organiser_counterpart`, or it names anything other
+  than an organiser feature of the same module; an organiser feature names one;
 - a `requires_features` entry names an unknown feature, a feature of a module
   that is not selected, or a feature of a module the owner does not `require`;
 - `requires_features` forms a cycle;
+- a `requires_phases` entry names an unknown phase ([phases](phases.md) §2);
 - a `subject_kind` is not an entity kind of a selected module or the kernel, or
   differs from the subject kind of a feature it requires when both are set;
-- a surface names an unknown screen id or family-control key, a surface of
-  another module, or a surface already governed by another feature;
-- a selected module's screen or family control is governed by no feature;
-- an action writes an event type its owning module does not define;
-- a family-audience action has no organiser equivalent (§4);
-- the profile deselects an unknown feature or a feature of an unselected module;
+- a family-preferences section names an unknown feature, a feature of a module
+  that is not selected, or two features of one audience;
+- the profile deselects an unknown feature or a feature of another module;
 - two feature ids map to the same operational binding name (§6).
 
 Each failure names the feature id and the offending reference, matching the
@@ -205,14 +227,15 @@ DGHK_FEATURE_<ID>=on|off
 ```
 
 `<ID>` is the feature id upper-cased with `.` and `-` replaced by `_`, so
-`workshop-rankings.ranking` maps to `DGHK_FEATURE_WORKSHOP_RANKINGS_RANKING`.
-`on` sets `env_enabled`; `off` sets `env_disabled`; an absent binding leaves the
-built selection in force. Both directions are permitted in every environment,
+`workshop-rankings.family-workshop-wishes` maps to
+`DGHK_FEATURE_WORKSHOP_RANKINGS_FAMILY_WORKSHOP_WISHES`. `on` sets
+`env_enabled`; `off` sets `env_disabled`; an absent binding leaves the built
+selection in force. Both directions are permitted in every environment,
 including production.
 
 The Worker receives only allowlisted bindings
 ([development](../../docs/engineering/development.md)). Every declared feature's
-binding is added to the Wrangler allowlist and to `src/worker/environment.d.ts`
+binding is added to the binding allowlist and to `src/worker/environment.d.ts`
 deliberately. A test derives the expected binding names from the composed
 profile and fails when the allowlist or the environment type differs from that
 set in either direction.
@@ -253,42 +276,40 @@ change how a plan is computed, so a plan is still reproduced from `input_seq`,
 Defining features and switching them is a system-administration task, not an
 organiser workflow. Features are defined in module code and selected or
 deselected in the profile; they are switched through the operational bindings in
-§6. Organisers have no screen that shows or changes feature state; a feature
-that is not effective is simply absent from their navigation. An organiser
+§6. Organisers have no screen that shows or changes feature state; an organiser
+feature that is not effective is simply absent from their UI. An organiser
 diagnostics screen is accepted but deferred as
 [UI-15](../deferred-ideas/feature-availability-ui.md).
 
 The organiser feature view nevertheless carries, per declared feature, the value
-of every layer in §4, the source of `operational` (`built`, `env-on`, `env-off`),
-the not-ready reason and finding id when `ready` is false, and the failing
-`requires_features` entry when a dependency is not effective, so tests and a
-later diagnostics screen can inspect each layer. The family feature view carries
-only the effective features, with no layer detail.
+of every layer in §4 — `authorised` evaluated for the feature's audience — the
+source of `operational` (`built`, `env-on`, `env-off`), the not-ready reason and
+finding id when `ready` is false, and the failing `requires_features` entry when
+a dependency is not effective, so tests and a later diagnostics screen can
+inspect each layer. The family feature view carries only the effective family
+features, with no layer detail.
 
-## 8. First feature set
+## 8. Feature set
 
-The first implementation declares one feature per existing selected surface and
-no feature for work that does not exist yet. Actions are declared only for event
-types the surface already writes. [Phases](phases.md#feature-bindings) add the
-phase bindings, the phase actions and three further features to this set.
+The active profile has two capabilities per area, each offered as a family and an
+organiser feature:
 
-| Feature id | Audience | Governs |
-|---|---|---|
-| `official-workshops.catalogue` | organiser | screen `organiser-workshops` |
-| `official-workshops.sign-up` | both | family control `workshop-sign-up` |
-| `official-workshops.interest` | both | family control `workshop-interest` |
-| `workshop-rankings.allocation-review` | organiser | screen `organiser-workshop-allocation` |
-| `workshop-rankings.ranking` | both | the ranking family control |
-| `workshop-scheduling.programme` | organiser | screen `organiser-workshop-programme` |
-| `workshop-space.spaces` | organiser | screen `organiser-workshop-spaces` |
-| `workshop-assignment.lists` | organiser | screen `organiser-workshop-lists` |
-| `room-inventory.inventory` | organiser | screen `organiser-inventory` |
-| `room-assignment.assignment-board` | organiser | screen `organiser-assignment-board` |
-| `family-preferences.preferences` | both | every profile-trait family control |
+| Feature id | Audience | Capability | Governs | Requires phases | Readiness | Milestone |
+|---|---|---|---|---|---|---|
+| `family-preferences.family-room-wishes` | family | room wishes | section `room-wishes` | `family-preferences.accommodation-preferences` | — | M8 |
+| `family-preferences.organiser-room-wishes` | organiser | room wishes | section `room-wishes` | — | — | M8 |
+| `workshop-rankings.family-workshop-wishes` | family | the workshop catalogue and workshop wishes: ranking, sign-up, interest, and workshop companions | section `workshops` | `workshop-rankings.choice` | — | M8 |
+| `workshop-rankings.organiser-workshop-wishes` | organiser | workshop wishes | section `workshops` | — | — | M8 |
+| `room-assignment.family-room-allocation` | family | the closed room allocation | the family room result | — | the area has a closed result | M10 |
+| `workshop-assignment.family-workshop-allocation` | family | the closed workshop allocation | the family workshop result | — | the area has a closed result | M10 |
 
-None declares `readiness` in the first set. Until the phase bindings are
-implemented, each is `phase_active` by construction. A screen whose feature is not
-effective is absent from navigation and its route renders the not-found view.
+The allocation features and their organiser counterparts are declared with the
+family composition in [M10](../roadmap.md#m10--family-access-and-release-control),
+which provides the family result they govern; until then no production code path
+consumes them.
+
+The sections `people` and `food` are not governed by a feature: they are
+offered whenever authorisation permits.
 
 The room-assignment board's `features` field and its uses are renamed to
 `amenities` in the same implementation, so the term has one meaning in code.
@@ -303,12 +324,15 @@ derivation, target dates and closing belong to [phases](phases.md).
 - Profile-build tests for every failure in §5.
 - Availability tests for each layer in isolation and in combination, including
   `env_enabled` for a profile-deselected feature, `env_disabled` for a selected
-  one, and the `declared` floor for a feature of an unselected module.
+  one, the `declared` floor for a feature of an unselected module, and a family
+  feature not effective while its organiser counterpart is.
 - Worker tests for fail-closed binding validation, the health and log
   `feature_overrides`, and the organiser derive refusal on an override mismatch.
 - An allowlist consistency test over the composed profile.
-- Append tests showing that a family-authored event is rejected when its feature
-  action is not effective and that organiser-authored events are not gated.
+- Append tests showing that a family-authored label write in a governed section
+  is rejected when its family feature is not effective, that an ungoverned
+  section is not gated, and that organiser-authored events are not gated.
 - Family projection tests showing that a non-effective feature is absent.
-- Browser coverage of a navigation entry disappearing when its feature is
-  switched off.
+- Organiser coverage showing that family detail keeps a governed section while
+  its family phase is closed, with the **Festgelegt** note, and omits it when the
+  organiser feature is switched off.

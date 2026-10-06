@@ -30,19 +30,22 @@ remaining active work is limited to the unresolved planning contract:
 
 - complete the remaining organiser finding and open-case review surfaces over
   current and prospective programme and allocation contexts;
-- implement the [feature contract](architecture/features.md) for every existing
-  selected surface: the `features` contribution kind and its composition checks
-  (§5), `deselected_features`, the first feature set (§8), derived availability
+- implement the [feature contract](architecture/features.md) for the family and
+  organiser wish features: the `features` contribution kind and its composition
+  checks (§5), `deselected_features`, section governance in both renderers, the
+  M8 rows of the feature set (§8), derived availability
   and the family append narrowing (§4), fail-closed `DGHK_FEATURE_*` bindings
   with the allowlist consistency test, `feature_overrides` in the health and log
   responses (§6), and the room `features` → `amenities` rename. Feature
   administration stays with the system administrator; the organiser diagnostics
   screen remains deferred;
-- once the feature contract is verified, replace the hand-maintained "Current
-  limits" inventory in
-  [`docs/application/organiser-view.md`](../docs/application/organiser-view.md)
-  with the verified feature view, and document feature validation in
-  [`docs/architecture/profile-composition.md`](../docs/architecture/profile-composition.md);
+- once the feature contract is verified, document the wish features and their
+  organiser-visible effects in
+  [`docs/application/organiser-view.md`](../docs/application/organiser-view.md),
+  and feature validation in
+  [`docs/architecture/profile-composition.md`](../docs/architecture/profile-composition.md).
+  The organiser "Current limits" paragraph keeps describing workflow limits that
+  are not features;
 - implement the [phase contract](architecture/phases.md) on top of the feature
   contract: the `phases` and `closed_results` contribution kinds, typed
   `meta.phase_dates`, the phase view with `now` outside `derive` (§2–3), both
@@ -87,9 +90,11 @@ Specification coverage: [authentication](application/authentication.md), [family
   family composition with each area's closed result, live descriptors,
   unavailable referenced entities, and the own-family before/after comparison.
   Preserve the separate privacy gate in issue 031 for family projections.
-- Apply [feature availability](architecture/features.md#4-effective-availability)
+- Declare the allocation features of the [feature set](architecture/features.md#8-feature-set)
+  together with the family results they govern, and apply
+  [feature availability](architecture/features.md#4-effective-availability)
   to the family projection and family controls: only effective features reach a
-  family, and a family-authored event whose feature action is not effective is
+  family, and a family-authored event whose governing feature is not effective is
   rejected on append, including writes to a closed area. Keep availability
   distinct from authorization and phase status.
 - Let an authenticated family correct its own `display-name` from the family

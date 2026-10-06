@@ -596,9 +596,10 @@ already "Emitted by the family or by an allowlisted organiser"
 ([events](spec/architecture/events.md) §"Setup and identity"). D24 is a
 UI-completeness and design-review obligation: no family-facing trait or
 family-authorable event type is spec-complete without a matching
-organiser-facing entry point. Feature definitions encode the pairing: every
-family-audience feature action has an organiser-audience action writing the same
-event types, and profile composition fails when one is missing
+organiser-facing entry point. Feature definitions encode the pairing: every family
+feature names an organiser counterpart feature that offers the same writes
+through the organiser variant of its components, and profile composition fails
+when it is missing. The two features' availability is derived independently
 ([features](spec/architecture/features.md) §4).
 
 *Mechanism.* The organiser family-detail screen renders the same

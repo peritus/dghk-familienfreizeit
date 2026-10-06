@@ -456,6 +456,7 @@ export default defineOccasionProfile({
           title: { de: 'Wer kommt mit', en: 'Who is coming' },
           intro: null,
           traits: ['does-not-need-a-bed'],
+          features: [],
           phase: null,
           late_contact: null,
         },
@@ -464,6 +465,7 @@ export default defineOccasionProfile({
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
           traits: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
+          features: ['family-preferences.family-room-wishes', 'family-preferences.organiser-room-wishes'],
           phase: 'family-preferences.accommodation-preferences',
           late_contact: {
             de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
@@ -475,6 +477,7 @@ export default defineOccasionProfile({
           title: { de: 'Essen', en: 'Food' },
           intro: null,
           traits: ['diet', 'food-note'],
+          features: [],
           phase: null,
           late_contact: null,
         },
@@ -483,6 +486,10 @@ export default defineOccasionProfile({
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
           traits: ['prefers-workshop', 'workshop-with'],
+          features: [
+            'workshop-rankings.family-workshop-wishes',
+            'workshop-rankings.organiser-workshop-wishes',
+          ],
           phase: 'workshop-rankings.choice',
           late_contact: {
             de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',

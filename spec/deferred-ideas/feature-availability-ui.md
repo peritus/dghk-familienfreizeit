@@ -24,7 +24,7 @@ order and sorted by feature id within a module:
 | Column | Content |
 |---|---|
 | Funktion | The feature's localized name, with its id in a secondary line |
-| Zielgruppe | **Organisationsteam**, **Familien**, or **beide** |
+| Zielgruppe | **Familien** or **Organisationsteam** |
 | Profil | **ausgewählt** or **nicht ausgewählt** |
 | Umgebung | empty when no binding is set; otherwise **eingeschaltet** or **ausgeschaltet** with the binding name |
 | Phase | **aktiv**, or the governing phase that is not active |

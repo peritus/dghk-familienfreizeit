@@ -49,7 +49,7 @@ The module list is explicit, and there are no hidden presets. A selected module
 selects all of its [features](../architecture/features.md); a module entry may
 deselect individual features of that module by id through the kernel-owned
 `deselected_features` parameter, for example
-`workshopRankings({ …, deselected_features: ['workshop-rankings.ranking'] })`.
+`workshopRankings({ …, deselected_features: ['workshop-rankings.family-workshop-wishes'] })`.
 Module order in the list has no meaning; stage order comes from the modules
 ([modules](../modules/contract.md) §4.1).
 
