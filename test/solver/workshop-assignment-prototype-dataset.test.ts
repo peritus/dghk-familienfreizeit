@@ -325,6 +325,41 @@ test('the workshop allocation projection exposes answers, demand, and trace from
       }),
     ]),
   )
+  expect(projection.participation.slots).toHaveLength(8)
+  expect(projection.participation.slots[0]).toEqual({
+    id: 'slot_s1',
+    day_label: 'Fr',
+    start_label: '09:00',
+    end_label: '11:00',
+  })
+  expect(projection.participation.people).toHaveLength(projection.answers.length)
+  expect(projection.participation.people.every((person) => person.cells.length === 8)).toBe(true)
+  expect(projection.participation.people.map((person) => person.id)).toEqual(
+    projection.participation.people
+      .slice()
+      .sort(
+        (left, right) =>
+          Number(right.has_open_case) - Number(left.has_open_case) ||
+          left.name.localeCompare(right.name, 'de') ||
+          left.id.localeCompare(right.id),
+      )
+      .map((person) => person.id),
+  )
+  expect(
+    projection.participation.people.some((person) =>
+      person.ranks.some((rank) => rank.rank === 1 && rank.received),
+    ),
+  ).toBe(true)
+  expect(
+    projection.participation.people.some((person) =>
+      person.cells.some((cell) => cell.kind === 'leader'),
+    ),
+  ).toBe(true)
+  expect(
+    projection.participation.people.some((person) =>
+      person.cells.some((cell) => cell.kind === 'sign-up'),
+    ),
+  ).toBe(true)
 
   const stages = buildWorkshopAllocationTraceStages(projection, 'all')
   expect(stages[0]).toEqual(

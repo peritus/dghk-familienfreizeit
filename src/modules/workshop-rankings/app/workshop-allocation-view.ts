@@ -75,9 +75,55 @@ export type WorkshopAllocationTracePerson = {
   fulfilled_count: number
 }
 
+export type WorkshopParticipationSlot = {
+  id: string
+  day_label: string
+  start_label: string
+  end_label: string
+}
+
+export type WorkshopParticipationEntry = {
+  workshop_id: string
+  title: string
+  rank: number | null
+  reason: 'ranked' | 'fixed' | 'leader' | 'sign-up' | 'interest' | 'open'
+  detail?: string
+}
+
+export type WorkshopParticipationCell = {
+  kind: 'free' | 'assignment' | 'leader' | 'sign-up' | 'interest' | 'open'
+  entries: readonly WorkshopParticipationEntry[]
+}
+
+export type WorkshopParticipationRank = {
+  workshop_id: string
+  title: string
+  rank: number
+  received: boolean
+}
+
+export type WorkshopParticipationPerson = {
+  id: string
+  name: string
+  age_label: string
+  group: Exclude<WorkshopAllocationGroup, 'all'>
+  response_status: WorkshopAllocationAnswer['status']
+  response_tone?: WorkshopAllocationAnswer['status_tone']
+  ranks: readonly WorkshopParticipationRank[]
+  workshop_count: number
+  has_open_case: boolean
+  cells: readonly WorkshopParticipationCell[]
+}
+
+export type WorkshopParticipationView = {
+  slots: readonly WorkshopParticipationSlot[]
+  people: readonly WorkshopParticipationPerson[]
+}
+
 export type WorkshopAllocationProjection = {
   max_rank: number
   answers: readonly WorkshopAllocationAnswer[]
+  participation: WorkshopParticipationView
   demand: readonly WorkshopAllocationDemand[]
   trace_events: readonly WorkshopAllocationTraceEvent[]
   trace_people: readonly WorkshopAllocationTracePerson[]
@@ -201,6 +247,20 @@ function timeLabel(startsAt: string, endsAt: string, timeZone: string): string {
     ['timeZone']: timeZone,
   })
   return `${starts}–${ends}`
+}
+
+function weekdayLabel(value: string, timeZone: string): string {
+  return new globalThis.Date(value)
+    .toLocaleDateString('de-DE', { weekday: 'short', timeZone })
+    .replace(/\.$/u, '')
+}
+
+function clockLabel(value: string, timeZone: string): string {
+  return new globalThis.Date(value).toLocaleTimeString('de-DE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone,
+  })
 }
 
 function audienceLabel(value: string): string {
@@ -593,6 +653,150 @@ export function buildWorkshopAllocationProjection(
       ).length,
     }
   })
+  const participationSlots: WorkshopParticipationSlot[] = schedule.slots
+    .slice()
+    .sort(
+      (left, right) =>
+        left.starts_at.localeCompare(right.starts_at) || left.id.localeCompare(right.id),
+    )
+    .map((slot) => ({
+      id: slot.id,
+      day_label: weekdayLabel(slot.starts_at, input.time_zone),
+      start_label: clockLabel(slot.starts_at, input.time_zone),
+      end_label: clockLabel(slot.ends_at, input.time_zone),
+    }))
+  type SlotEntries = {
+    assignments: WorkshopParticipationEntry[]
+    leaders: WorkshopParticipationEntry[]
+    signups: WorkshopParticipationEntry[]
+    interests: WorkshopParticipationEntry[]
+    open: WorkshopParticipationEntry[]
+  }
+  const slotEntriesByPerson = new Map<string, Map<string, SlotEntries>>()
+  const slotEntries = (personId: string, slotId: string): SlotEntries => {
+    const personSlots = slotEntriesByPerson.get(personId) ?? new Map<string, SlotEntries>()
+    slotEntriesByPerson.set(personId, personSlots)
+    const entries = personSlots.get(slotId) ?? {
+      assignments: [],
+      leaders: [],
+      signups: [],
+      interests: [],
+      open: [],
+    }
+    personSlots.set(slotId, entries)
+    return entries
+  }
+  for (const item of assignment.assignments) {
+    const entries = slotEntries(item.person_id, item.slot_id)
+    entries.assignments.push({
+      workshop_id: item.workshop_id,
+      title: workshops.get(item.workshop_id)?.title ?? item.workshop_id,
+      rank: item.rank,
+      reason: item.reason,
+    })
+  }
+  for (const workshop of official.workshops) {
+    const placement = placements.get(workshop.id)
+    if (!placement) continue
+    for (const leaderId of workshop.leader_ids)
+      slotEntries(leaderId, placement.slot_id).leaders.push({
+        workshop_id: workshop.id,
+        title: workshop.title,
+        rank: null,
+        reason: 'leader',
+      })
+  }
+  for (const item of assignment.signups) {
+    const placement = placements.get(item.workshop_id)
+    if (!placement) continue
+    slotEntries(item.person_id, placement.slot_id).signups.push({
+      workshop_id: item.workshop_id,
+      title: workshops.get(item.workshop_id)?.title ?? item.workshop_id,
+      rank: null,
+      reason: 'sign-up',
+    })
+  }
+  for (const item of assignment.interests) {
+    const placement = placements.get(item.workshop_id)
+    if (!placement) continue
+    slotEntries(item.person_id, placement.slot_id).interests.push({
+      workshop_id: item.workshop_id,
+      title: workshops.get(item.workshop_id)?.title ?? item.workshop_id,
+      rank: null,
+      reason: 'interest',
+    })
+  }
+  for (const round of assignment.rounds)
+    for (const decision of round.decisions) {
+      if (decision.outcome !== 'rejected') continue
+      const placement = placements.get(decision.workshop_id)
+      if (!placement) continue
+      slotEntries(decision.person_id, placement.slot_id).open.push({
+        workshop_id: decision.workshop_id,
+        title: workshops.get(decision.workshop_id)?.title ?? decision.workshop_id,
+        rank: decision.rank,
+        reason: 'open',
+        detail: reasonText(reasonOutcome(decision.reason)),
+      })
+    }
+  const answerById = new Map(answers.map((answer) => [answer.id, answer]))
+  const unassignedPersonIds = new Set(assignment.unassigned.map((item) => item.person_id))
+  const participationPeople: WorkshopParticipationPerson[] = people
+    .map((person) => {
+      const answer = answerById.get(person.id)!
+      const ranking = rankingsByPerson.get(person.id)
+      const assignedWorkshopIds = new Set(
+        assignment.assignments
+          .filter((item) => item.person_id === person.id)
+          .map((item) => item.workshop_id),
+      )
+      const ranks: WorkshopParticipationRank[] = (ranking?.choices ?? [])
+        .filter(
+          (choice): choice is WorkshopChoice & { workshop_id: string; rank: number } =>
+            choice.workshop_id !== null && choice.rank !== null,
+        )
+        .map((choice) => ({
+          workshop_id: choice.workshop_id,
+          title: workshops.get(choice.workshop_id)?.title ?? choice.workshop_id,
+          rank: choice.rank,
+          received: assignedWorkshopIds.has(choice.workshop_id),
+        }))
+      const cells: WorkshopParticipationCell[] = participationSlots.map((slot) => {
+        const entries = slotEntriesByPerson.get(person.id)?.get(slot.id)
+        if (entries?.leaders.length) return { kind: 'leader', entries: entries.leaders }
+        if (entries?.assignments.length)
+          return { kind: 'assignment', entries: entries.assignments }
+        if (entries?.signups.length) return { kind: 'sign-up', entries: entries.signups }
+        if (entries?.interests.length) return { kind: 'interest', entries: entries.interests }
+        if (entries?.open.length) return { kind: 'open', entries: entries.open }
+        return { kind: 'free', entries: [] }
+      })
+      return {
+        id: person.id,
+        name: person.name,
+        age_label: person.age_label,
+        group: person.group,
+        response_status: answer.status,
+        response_tone: answer.status_tone,
+        ranks,
+        workshop_count:
+          assignment.assignments.filter((item) => item.person_id === person.id).length +
+          assignment.signups.filter((item) => item.person_id === person.id).length,
+        has_open_case:
+          unassignedPersonIds.has(person.id) || cells.some((cell) => cell.kind === 'open'),
+        cells,
+      }
+    })
+    .sort(
+      (left, right) =>
+        Number(right.has_open_case) - Number(left.has_open_case) ||
+        left.name.localeCompare(right.name, 'de') ||
+        left.id.localeCompare(right.id),
+    )
+  const participation: WorkshopParticipationView = {
+    slots: participationSlots,
+    people: participationPeople,
+  }
   const rankedPeople = people.filter((person) => {
     const ranking = rankingsByPerson.get(person.id)
     return ranking?.choices.some((choice) => choice.workshop_id !== null) ?? false
@@ -626,6 +830,7 @@ export function buildWorkshopAllocationProjection(
   return {
     max_rank: input.max_rank,
     answers,
+    participation,
     demand,
     trace_events: traceEvents,
     trace_people: tracePeople,
