@@ -182,23 +182,14 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
   expect(assignmentKey(attendanceAgain)).toEqual(assignmentKey(attendance))
 })
 
-test('projects the complete workshop list set for current and prospective plans', () => {
+test('projects the complete workshop list set from the organiser plan', () => {
   const { plan, world } = solveFixture()
   const current = buildWorkshopReportsProjection({
     world,
     plan,
-    context: 'current',
-    time_zone: 'Europe/Berlin',
-  })
-  const prospective = buildWorkshopReportsProjection({
-    world,
-    plan,
-    context: 'prospective',
     time_zone: 'Europe/Berlin',
   })
 
-  expect(current.context).toBe('current')
-  expect(prospective.context).toBe('prospective')
   expect(current.slots.length).toBe(8)
   expect(current.workshops.length).toBeGreaterThan(20)
   expect(current.persons.length).toBe(140)
@@ -233,10 +224,6 @@ test('projects the complete workshop list set for current and prospective plans'
   expect(atelier?.entries.length).toBeGreaterThan(0)
   expect(atelier?.entries[0]).toEqual(
     expect.objectContaining({ workshop: 'Keramik', audience: 'Kinder, 5–14 Jahre' }),
-  )
-
-  expect(prospective.workshops.map((workshop) => workshop.id)).toEqual(
-    current.workshops.map((workshop) => workshop.id),
   )
 })
 

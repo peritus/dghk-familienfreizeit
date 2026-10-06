@@ -7,9 +7,7 @@ import {
   WorkshopEmptyState,
   WorkshopErrorState,
   WorkshopLoadingState,
-  WorkshopPhaseNotice,
   WorkshopScreenHeader,
-  WorkshopStatusBadge,
 } from '../../components/shared/workshop/shared.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
@@ -27,7 +25,6 @@ import {
 } from '../components/workshop/reports.js'
 import {
   buildWorkshopReportsProjection,
-  type WorkshopReportContext,
   type WorkshopReportFamily,
   type WorkshopReportPerson,
   type WorkshopReportRoom,
@@ -54,14 +51,6 @@ function listPath(kind: WorkshopListKind): string {
 
 function queryFor(location: string): URLSearchParams {
   return new URLSearchParams(location.split('?')[1] ?? '')
-}
-
-function contextFor(location: string): WorkshopReportContext {
-  return queryFor(location).get('context') === 'prospective' ? 'prospective' : 'current'
-}
-
-function contextLabel(context: WorkshopReportContext): string {
-  return context === 'current' ? 'Aktueller Stand · gespeichert' : 'Entwurf · lokale Änderungen'
 }
 
 function workshopOptions(workshops: readonly WorkshopReportWorkshop[]) {
@@ -125,52 +114,11 @@ function roomPlanEntries(room: WorkshopReportRoom): RoomPlanEntry[] {
   }))
 }
 
-function ReportDataHeader({ context }: { context: WorkshopReportContext }) {
-  return (
-    <WorkshopPhaseNotice
-      label={context === 'current' ? 'Aktuell' : 'Entwurf'}
-      tone={context === 'current' ? 'success' : 'draft'}
-    >
-      {context === 'current'
-        ? 'Diese Listen zeigen den zuletzt gespeicherten Plan.'
-        : 'Diese Listen enthalten auch lokale Änderungsentwürfe und sind noch nicht endgültig.'}
-    </WorkshopPhaseNotice>
-  )
-}
-
-function ContextPicker({
-  context,
-  onChange,
-}: {
-  context: WorkshopReportContext
-  onChange: (value: WorkshopReportContext) => void
-}) {
-  return (
-    <label className="grid min-w-56 gap-1 font-bold">
-      Datenstand
-      <select
-        value={context}
-        onChange={(event) => onChange(event.target.value as WorkshopReportContext)}
-        className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3 font-normal"
-      >
-        <option value="current">Aktuell · gespeichert</option>
-        <option value="prospective">Entwurf · mit Änderungen</option>
-      </select>
-    </label>
-  )
-}
-
-function WorkshopReport({
-  workshop,
-  context,
-}: {
-  workshop: WorkshopReportWorkshop
-  context: WorkshopReportContext
-}) {
+function WorkshopReport({ workshop }: { workshop: WorkshopReportWorkshop }) {
   return (
     <WorkshopRosterDocument
       title={workshop.title}
-      status={`${workshop.status_label} · ${contextLabel(context)}`}
+      status={workshop.status_label}
       metadata={[
         workshop.slot_label && workshop.space_name
           ? `${workshop.slot_label} · ${workshop.space_name}`
@@ -185,37 +133,22 @@ function WorkshopReport({
   )
 }
 
-function PersonReport({
-  person,
-  context,
-}: {
-  person: WorkshopReportPerson
-  context: WorkshopReportContext
-}) {
+function PersonReport({ person }: { person: WorkshopReportPerson }) {
   return (
     <WorkshopPersonPlanDocument
       title={person.name}
-      metadata={[
-        `${person.age_label}${person.family_name ? ` · ${person.family_name}` : ''}`,
-        contextLabel(context),
-      ]}
+      metadata={[`${person.age_label}${person.family_name ? ` · ${person.family_name}` : ''}`]}
       entries={personPlanEntries(person)}
     />
   )
 }
 
-function FamilyReport({
-  family,
-  context,
-}: {
-  family: WorkshopReportFamily
-  context: WorkshopReportContext
-}) {
+function FamilyReport({ family }: { family: WorkshopReportFamily }) {
   return (
     <WorkshopFamilyPlanDocument
       title={family.name}
       metadata={[
-        `${family.members.length} ${family.members.length === 1 ? 'Person' : 'Personen'} · ${contextLabel(context)}`,
+        `${family.members.length} ${family.members.length === 1 ? 'Person' : 'Personen'}`,
         family.email ? `Kontakt: ${family.email}` : 'Kein Kontakt hinterlegt',
       ]}
       slots={familyPlanSlots(family)}
@@ -223,18 +156,12 @@ function FamilyReport({
   )
 }
 
-function RoomReport({
-  room,
-  context,
-}: {
-  room: WorkshopReportRoom
-  context: WorkshopReportContext
-}) {
+function RoomReport({ room }: { room: WorkshopReportRoom }) {
   return (
     <WorkshopRoomPlanDocument
       title={room.name}
       metadata={[
-        `${room.entries.length} ${room.entries.length === 1 ? 'Workshop' : 'Workshops'} in diesem Raum · ${contextLabel(context)}`,
+        `${room.entries.length} ${room.entries.length === 1 ? 'Workshop' : 'Workshops'} in diesem Raum`,
         `${room.location} · ${room.capacity} Plätze`,
       ]}
       entries={roomPlanEntries(room)}
@@ -245,28 +172,18 @@ function RoomReport({
 export function WorkshopLists() {
   useDocumentTitle('Listen · Workshops · Familienfreizeit')
   const [location, navigate] = useLocation()
-  const {
-    state,
-    world,
-    committed_world: committedWorld,
-    current_plan: currentPlan,
-    prospective_plan: prospectivePlan,
-  } = useOrganiser()
-  const context = contextFor(location)
+  const { state, world, current_plan: currentPlan } = useOrganiser()
   const kind = listKind(location.split('?')[0] ?? location)
-  const reportWorld = context === 'current' ? committedWorld : world
-  const reportPlan = context === 'current' ? currentPlan : prospectivePlan
   const projection = useMemo(
     () =>
-      reportWorld && reportPlan
+      world && currentPlan
         ? buildWorkshopReportsProjection({
-            world: reportWorld,
-            plan: reportPlan,
-            context,
+            world,
+            plan: currentPlan,
             time_zone: activeProfile.meta.timezone,
           })
         : null,
-    [context, reportPlan, reportWorld],
+    [currentPlan, world],
   )
 
   const navigateWithQuery = (path: string, updates: Record<string, string | null>) => {
@@ -307,7 +224,7 @@ export function WorkshopLists() {
         options={workshopOptions(projection.workshops)}
         onChange={(value) => navigateWithQuery(listPath(kind), { workshop: value })}
       >
-        <WorkshopReport workshop={selectedWorkshop} context={context} />
+        <WorkshopReport workshop={selectedWorkshop} />
       </WorkshopListPickerWithDocument>
     ) : kind === 'person' && selectedPerson ? (
       <WorkshopListPickerWithDocument
@@ -316,7 +233,7 @@ export function WorkshopLists() {
         options={personOptions(projection.persons)}
         onChange={(value) => navigateWithQuery(listPath(kind), { person: value })}
       >
-        <PersonReport person={selectedPerson} context={context} />
+        <PersonReport person={selectedPerson} />
       </WorkshopListPickerWithDocument>
     ) : kind === 'family' && selectedFamily ? (
       <WorkshopListPickerWithDocument
@@ -325,7 +242,7 @@ export function WorkshopLists() {
         options={familyOptions(projection.families)}
         onChange={(value) => navigateWithQuery(listPath(kind), { family: value })}
       >
-        <FamilyReport family={selectedFamily} context={context} />
+        <FamilyReport family={selectedFamily} />
       </WorkshopListPickerWithDocument>
     ) : kind === 'room' && selectedRoom ? (
       <WorkshopListPickerWithDocument
@@ -334,11 +251,11 @@ export function WorkshopLists() {
         options={roomOptions(projection.rooms)}
         onChange={(value) => navigateWithQuery(listPath(kind), { room: value })}
       >
-        <RoomReport room={selectedRoom} context={context} />
+        <RoomReport room={selectedRoom} />
       </WorkshopListPickerWithDocument>
     ) : (
       <WorkshopEmptyState title="Noch keine Daten für diese Liste">
-        Für diesen Datenstand gibt es noch keine passende Auswahl.
+        Für diese Liste gibt es noch keine passende Auswahl.
       </WorkshopEmptyState>
     )
 
@@ -349,19 +266,11 @@ export function WorkshopLists() {
         eyebrow="Workshops · Listen"
         title="Listen"
         description="Druckbare Übersichten für Workshop, Person, Familie und Raum. Gesundheits- und Kontaktdaten bleiben auf die Organisationsansicht beschränkt."
-        action={
-          <ContextPicker
-            context={context}
-            onChange={(value) => navigateWithQuery(listPath(kind), { context: value })}
-          />
-        }
       />
-      <ReportDataHeader context={context} />
       <WorkshopListKinds
         value={kind}
         onChange={(value) =>
           navigateWithQuery(listPath(value), {
-            context,
             workshop: null,
             person: null,
             family: null,
@@ -369,14 +278,6 @@ export function WorkshopLists() {
           })
         }
       />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <WorkshopStatusBadge tone="success">
-          {projection.summary.workshop_count} Workshops
-        </WorkshopStatusBadge>
-        <WorkshopStatusBadge>{projection.summary.person_count} Personen</WorkshopStatusBadge>
-        <WorkshopStatusBadge>{projection.summary.family_count} Familien</WorkshopStatusBadge>
-        <WorkshopStatusBadge>{projection.summary.room_count} Räume</WorkshopStatusBadge>
-      </div>
       {selectedDocument}
     </div>
   )

@@ -7,12 +7,10 @@ import type { Plan } from '../../solver/types.js'
 export type OrganiserContextValue = {
   state: OrganiserState
   world: World | null
-  committed_world?: World | null
   dispatch: Dispatch<OrganiserAction>
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>
   current_plan?: Plan | null
-  prospective_plan?: Plan | null
 }
 
 export const OrganiserContext = createContext<OrganiserContextValue | null>(null)

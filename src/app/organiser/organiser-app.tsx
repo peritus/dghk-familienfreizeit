@@ -3,7 +3,6 @@ import { Route, Switch, useLocation } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
 import type { EventDraft } from '../../events/types.js'
-import { derive } from '../../events/fold.js'
 import { NotFound, RouteLoading } from '../components/application/route-states'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { Button } from '../components/shared/ui/button'
@@ -161,41 +160,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     }
   }, [state])
 
-  const committedWorld = useMemo(() => {
-    if (
-      state.status === 'loading' ||
-      state.status === 'unauthorized' ||
-      state.status === 'load_error'
-    )
-      return null
-    try {
-      return derive(state.committed, activeProfile.validation_view)
-    } catch {
-      return null
-    }
-  }, [state])
-
   const currentPlan = useMemo(() => {
-    if (
-      state.status === 'loading' ||
-      state.status === 'unauthorized' ||
-      state.status === 'load_error' ||
-      !committedWorld ||
-      !state.build_revision ||
-      state.compatibility_revision === null
-    )
-      return null
-    const contributions = composeSolverContributions(activeProfile)
-    return solve(buildSolverInput(committedWorld, contributions), contributions, {
-      build_revision: state.build_revision,
-      compatibility_revision: state.compatibility_revision,
-      event_date: activeProfile.meta.starts_on,
-      profile: activeProfile,
-      seed: null,
-    })
-  }, [committedWorld, state])
-
-  const prospectivePlan = useMemo(() => {
     if (
       state.status === 'loading' ||
       state.status === 'unauthorized' ||
@@ -309,12 +274,10 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       value={{
         state,
         world: derivation.world,
-        committed_world: committedWorld,
         dispatch,
         stage,
         apply,
         current_plan: currentPlan,
-        prospective_plan: prospectivePlan,
       }}
     >
       <OrganiserFrame profile={profile}>

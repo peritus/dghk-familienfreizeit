@@ -14,8 +14,6 @@ import {
 } from '../../workshop-scheduling/index.js'
 import { workshopSpaceWorld } from '../../workshop-space/index.js'
 
-export type WorkshopReportContext = 'current' | 'prospective'
-
 export type WorkshopReportSlot = {
   id: string
   label: string
@@ -112,7 +110,6 @@ export type WorkshopReportRoom = {
 }
 
 export type WorkshopReportsProjection = {
-  context: WorkshopReportContext
   slots: readonly WorkshopReportSlot[]
   workshops: readonly WorkshopReportWorkshop[]
   persons: readonly WorkshopReportPerson[]
@@ -131,7 +128,6 @@ export type WorkshopReportsProjection = {
 export type WorkshopReportsProjectionInput = {
   world: World
   plan: Plan
-  context: WorkshopReportContext
   time_zone: string
 }
 
@@ -500,7 +496,6 @@ export function buildWorkshopReportsProjection(
     0,
   )
   return {
-    context: input.context,
     slots,
     workshops: workshopViews,
     persons: personViews,
