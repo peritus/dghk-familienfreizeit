@@ -48,8 +48,14 @@ test('participation switches between the detailed table, narrow cards, and lands
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/organiser/workshops/participation')
   await expect(page.getByRole('heading', { name: 'Teilnahme' })).toBeVisible()
-  await expect(page.getByRole('navigation', { name: 'Teilnahme-Unterbereiche' })).toContainText(
-    'Programm',
+  const participationViews = page.getByRole('tablist', { name: 'Teilnahmeansichten' })
+  await expect(participationViews.getByRole('tab', { name: 'Personen' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  await expect(participationViews.getByRole('tab', { name: 'Programm' })).toHaveAttribute(
+    'aria-selected',
+    'false',
   )
   await expect(page.getByText('Wer nimmt woran teil, und wer leitet?')).toHaveCount(0)
   await expect(
@@ -81,22 +87,23 @@ test('participation switches between the detailed table, narrow cards, and lands
   await expect(freeMark).toHaveText('-')
   await page.screenshot({ path: '/tmp/dghk-participation-desktop.png' })
 
-  await page
-    .getByRole('navigation', { name: 'Teilnahme-Unterbereiche' })
-    .getByRole('link', { name: 'Programm' })
-    .click()
+  await participationViews.getByRole('tab', { name: 'Programm' }).click()
   await expect(page).toHaveURL(/\/organiser\/workshops\/programme$/u)
   await expect(
     page.getByRole('navigation', { name: 'Workshopbereiche' }).getByRole('link', {
       name: 'Teilnahme',
     }),
   ).toHaveAttribute('aria-current', 'page')
-  await expect(
-    page.getByRole('navigation', { name: 'Teilnahme-Unterbereiche' }).getByRole('link', {
-      name: 'Programm',
-    }),
-  ).toHaveAttribute('aria-current', 'page')
-  await page.goto('/organiser/workshops/participation')
+  await expect(participationViews.getByRole('tab', { name: 'Programm' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  await participationViews.getByRole('tab', { name: 'Personen' }).click()
+  await expect(page).toHaveURL(/\/organiser\/workshops\/participation$/u)
+  await expect(participationViews.getByRole('tab', { name: 'Personen' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
 
   const lightBackground = await page
     .locator('body')

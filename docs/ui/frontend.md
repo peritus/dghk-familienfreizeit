@@ -41,8 +41,8 @@ draft state.
 
 Workshop routes use the same reducer and draft pipeline. Their section navigation
 links **Workshops**, **Teilnahme**, **Wünsche**, **Räume und Slots**, and **Listen**.
-Within Teilnahme, a third-level **Programm** link opens the programme review and
-stays current on all three programme review URLs. The resource item stays current
+Within Teilnahme, the shared third-level tabs switch between **Personen** and
+**Programm**; Programm stays selected on all three programme review URLs. The resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
 overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
 Moving between workshop routes preserves staged events because navigation does not

@@ -35,8 +35,8 @@ The host exposes these kernel-owned and selected-module screens through one scre
 registry. The app bar presents four primary areas: Dashboard, Familien,
 Unterbringung, and Workshops. Accommodation has page-local secondary links for
 Unterkunft and Belegung. The workshop section navigation visibly links Workshops,
-Teilnahme, Wünsche, Räume und Slots, and Listen. Teilnahme contains a third-level
-Programm link that stays selected across programme review URLs. Räume und Slots remains selected for its Räume and
+Teilnahme, Wünsche, Räume und Slots, and Listen. Teilnahme contains shared
+third-level tabs for Personen and Programm; Programm stays selected across programme review URLs. Räume und Slots remains selected for its Räume and
 Slots resource routes, and the workshop overview provides local tabs for Workshops,
 Leitungen, and Externe Leitungen. Wünsche remains selected across its three
 allocation URLs, whose tertiary views are Antworten, Nachfrage, and Verlauf. Listen

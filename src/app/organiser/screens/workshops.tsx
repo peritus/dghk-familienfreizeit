@@ -226,7 +226,7 @@ function slotDurationMinutes(startsAt: string, endsAt: string): number {
 }
 
 export function WorkshopNavigation() {
-  const [location] = useLocation()
+  const [location, setLocation] = useLocation()
   const programmePaths = [
     organiserPaths.workshop_programme(),
     organiserPaths.workshop_programme_unplaced(),
@@ -283,18 +283,21 @@ export function WorkshopNavigation() {
         ]}
       />
       {inParticipationSection ? (
-        <div className="ml-4 border-l-2 border-border/30 pl-3">
-          <SecondaryNavigation
-            aria_label="Teilnahme-Unterbereiche"
-            items={[
-              {
-                href: organiserPaths.workshop_programme(),
-                active_paths: programmePaths,
-                label: 'Programm',
-              },
-            ]}
-          />
-        </div>
+        <TertiaryNavigation
+          aria_label="Teilnahmeansichten"
+          value={programmePaths.some((path) => location === path) ? 'programme' : 'persons'}
+          onChange={(next) =>
+            setLocation(
+              next === 'programme'
+                ? organiserPaths.workshop_programme()
+                : organiserPaths.workshop_participation(),
+            )
+          }
+          items={[
+            { value: 'persons', label: 'Personen' },
+            { value: 'programme', label: 'Programm' },
+          ]}
+        />
       ) : null}
     </div>
   )

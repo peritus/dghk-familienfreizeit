@@ -367,7 +367,12 @@ test('workshop participation shows the responsive person overview and links to w
   ).toBeNull()
   expect(screen.queryByText('4.–5. Wahl')).toBeNull()
   expect(
-    within(screen.getByRole('navigation', { name: 'Teilnahme-Unterbereiche' })).getByRole('link', {
+    within(screen.getByRole('tablist', { name: 'Teilnahmeansichten' })).getByRole('tab', {
+      name: 'Personen',
+    }),
+  ).toBeTruthy()
+  expect(
+    within(screen.getByRole('tablist', { name: 'Teilnahmeansichten' })).getByRole('tab', {
       name: 'Programm',
     }),
   ).toBeTruthy()
@@ -573,7 +578,8 @@ test('the programme review keeps each view at its own URL and avoids false roste
   open('/organiser/workshops/programme', workshopFixtureEvents())
 
   expect(await screen.findByRole('heading', { name: 'Programm' })).toBeTruthy()
-  expect(screen.getByRole('link', { name: 'Programm' }).getAttribute('aria-current')).toBe('page')
+  expect(screen.getByRole('link', { name: 'Teilnahme' }).getAttribute('aria-current')).toBe('page')
+  expect(screen.getByRole('tab', { name: 'Programm' }).getAttribute('aria-selected')).toBe('true')
   expect(screen.getByText(/Freitag/)).toBeTruthy()
   expect(screen.getByText('Keramik')).toBeTruthy()
   expect(screen.queryByRole('button', { name: 'Keramik' })).toBeNull()
