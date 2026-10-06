@@ -17,6 +17,7 @@ import { DestructiveActionDialog } from '../../components/shared/ui/destructive-
 import { SegmentedControl } from '../../components/shared/ui/segmented-control.js'
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
 import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
+import { PhaseDecisionAction } from '../components/phase-decision.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
@@ -566,8 +567,10 @@ function WorkshopResourceNavigation({ value }: { value: 'spaces' | 'slots' }) {
 }
 export function Workshops() {
   useDocumentTitle('Workshops · Familienfreizeit')
-  const { world, state, stage } = useOrganiser()
+  const { world, state, stage, phases } = useOrganiser()
   const summary = officialWorkshopsWorld(world!)
+  const choice = phases?.find(({ phase }) => phase === 'workshop-rankings.choice')
+  const choiceOpened = choice !== undefined && choice.status !== 'upcoming'
   const schedule = workshopSchedulingWorld(world!)
   const spaces = workshopSpaceWorld(world!).live
   const plan = solveWorkshopPlan(world!)
@@ -694,7 +697,7 @@ export function Workshops() {
           {
             id: 'choice',
             label: 'Wahl öffnen',
-            state: summary.workshops.length ? 'current' : 'upcoming',
+            state: choiceOpened ? 'complete' : summary.workshops.length ? 'current' : 'upcoming',
           },
           {
             id: 'review',
@@ -711,18 +714,37 @@ export function Workshops() {
         ]}
       />
       <WorkshopPhaseNotice
-        label={summary.workshops.length ? 'Vorbereitung' : 'Noch kein Workshopplan'}
+        label={
+          choiceOpened
+            ? 'Wahl offen'
+            : summary.workshops.length
+              ? 'Vorbereitung'
+              : 'Noch kein Workshopplan'
+        }
         tone={summary.workshops.length ? 'success' : 'attention'}
         details={
-          summary.workshops.length
-            ? 'Die Wahlphase ist in dieser Ansicht noch nicht als eigenes Ereignis gespeichert.'
-            : 'Lege den ersten Workshop an, um die nächste Phase vorzubereiten.'
+          choiceOpened
+            ? 'Familien sehen den Katalog und können Wünsche, Anmeldungen und Interesse angeben.'
+            : summary.workshops.length
+              ? 'Familien sehen noch keine Workshops, bis die Wahl geöffnet ist.'
+              : 'Lege den ersten Workshop an, um die nächste Phase vorzubereiten.'
         }
       >
-        {summary.workshops.length
-          ? 'Workshopdaten sind vorhanden. Prüfe als Nächstes die Zielgruppen, Leitungen und Programmwünsche.'
-          : 'Die Workshopdatenbank ist bereit für den ersten Entwurf.'}
+        {choiceOpened
+          ? 'Die Workshopwahl ist geöffnet.'
+          : summary.workshops.length
+            ? 'Workshopdaten sind vorhanden. Prüfe Zielgruppen und Leitungen, bevor du die Wahl öffnest.'
+            : 'Die Workshopdatenbank ist bereit für den ersten Entwurf.'}
       </WorkshopPhaseNotice>
+      {!choiceOpened && summary.workshops.length > 0 && state.principal_email ? (
+        <PhaseDecisionAction
+          label="Wahl öffnen"
+          title="Workshopwahl öffnen?"
+          description="Familien sehen danach den Workshopkatalog und können Wünsche, Anmeldungen und Interesse angeben. Das Öffnen wird nicht zurückgenommen; danach steuert das Festlegen die Eingaben."
+          confirm_label="Wahl öffnen"
+          on_confirm={() => stage([draft(state.principal_email!, 'WorkshopChoiceOpened', {})])}
+        />
+      ) : null}
       <WorkshopEditorDialog
         open={editor !== null}
         on_open_change={(open) => {

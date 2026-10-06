@@ -1,3 +1,4 @@
+import { derivePhaseView } from '../../derive/phases.js'
 import { useCallback, useMemo, useState, type Dispatch, type ReactNode } from 'react'
 import { activeProfile } from '../../config/index.js'
 import type { Event, EventDraft, JsonValue } from '../../events/types.js'
@@ -847,11 +848,15 @@ export function stateWithDrafts(...drafts: readonly EventDraft[][]): OrganiserSt
   )
 }
 
+/** The fixed moment organiser stories and tests derive phase status at. */
+export const fixtureNow = '2027-01-15T12:00:00.000Z'
+
 export function FixtureProvider({
   children,
   initialState = organiserFixtureState,
   with_plan: withPlan = false,
   effective_features: effectiveFeatures,
+  now = fixtureNow,
 }: {
   children: ReactNode
   initialState?: OrganiserState
@@ -859,6 +864,8 @@ export function FixtureProvider({
   with_plan?: boolean
   /** Effective organiser features; absent offers every built feature. */
   effective_features?: ReadonlySet<string>
+  /** The time the phase view is derived at; fixed so stories stay deterministic. */
+  now?: string
 }) {
   const [state, dispatch] = useState<OrganiserState>(initialState)
   const update: Dispatch<OrganiserAction> = useCallback(
@@ -882,6 +889,19 @@ export function FixtureProvider({
       seed: null,
     })
   }, [withPlan, world])
+  const phases = useMemo(
+    () =>
+      world
+        ? derivePhaseView({
+            modules: activeProfile.modules,
+            meta: activeProfile.meta,
+            world,
+            now,
+            plan: currentPlan,
+          })
+        : [],
+    [world, now, currentPlan],
+  )
   const value: OrganiserContextValue = {
     state,
     world,
@@ -890,6 +910,7 @@ export function FixtureProvider({
     apply,
     current_plan: currentPlan,
     effective_features: effectiveFeatures,
+    phases,
   }
 
   return <OrganiserContext.Provider value={value}>{children}</OrganiserContext.Provider>

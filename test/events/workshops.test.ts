@@ -581,3 +581,55 @@ describe('workshop domain events', () => {
     ])
   })
 })
+
+describe('opening workshop choice', () => {
+  test('records the opening as a phase fact once', () => {
+    const world = derive(
+      [...baseEvents, event('WorkshopChoiceOpened', {}, 5)],
+      profile.validation_view,
+    )
+    expect(world.phase_facts.opened).toEqual({
+      'workshop-rankings.choice': { seq: 5, at: '2027-04-30T00:00:00.000Z' },
+    })
+  })
+
+  test('rejects a second opening', () => {
+    expect(() =>
+      derive(
+        [...baseEvents, event('WorkshopChoiceOpened', {}, 5), event('WorkshopChoiceOpened', {}, 6)],
+        profile.validation_view,
+      ),
+    ).toThrow(/already open/)
+  })
+
+  test('rejects opening without an active workshop', () => {
+    expect(() => derive([event('WorkshopChoiceOpened', {}, 1)], profile.validation_view)).toThrow(
+      /at least one active workshop/,
+    )
+    expect(() =>
+      derive(
+        [
+          ...baseEvents,
+          event('WorkshopCancelled', { workshop_id: 'wks_ceramics', reason: 'Leitung krank' }, 5),
+          event('WorkshopChoiceOpened', {}, 6),
+        ],
+        profile.validation_view,
+      ),
+    ).toThrow(/at least one active workshop/)
+  })
+
+  test('rejects a payload and authorises only organisers', () => {
+    expect(() =>
+      derive(
+        [...baseEvents, event('WorkshopChoiceOpened', { early: true }, 5)],
+        profile.validation_view,
+      ),
+    ).toThrow()
+    const authorize = profile.validation_view.event_authorize_dispatch!['WorkshopChoiceOpened']!
+    const world = derive(baseEvents, profile.validation_view)
+    expect(authorize({ kind: 'organiser', email: 'o@example.test' }, {}, world)).toBe(true)
+    expect(
+      authorize({ kind: 'family', email: 'f@example.test', family_id: 'fam_1' }, {}, world),
+    ).toBe(false)
+  })
+})

@@ -1,11 +1,25 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
-import type { World } from '../../events/fold.js'
+import type { ValidationWorld, World } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult } from '../../solver/types.js'
 
 /** `WorkshopChoiceOpened` carries no payload: the event itself is the organiser decision. */
 const workshopChoiceOpenedPayload = z.object({}).strict()
+
+/**
+ * Workshop choice opens once, and only for a catalogue with at least one active workshop
+ * (spec/architecture/phases.md §5). Opening is never undone; closing governs input afterwards.
+ */
+function validateWorkshopChoiceOpened(world: ValidationWorld): string | null {
+  if (world.phaseOpened('workshop-rankings.choice')) return 'workshop choice is already open'
+  const active = world
+    .entities('workshop')
+    .some(
+      ({ id }) => !world.labels(id).some(({ key, value }) => key === 'cancelled' && value === true),
+    )
+  return active ? null : 'workshop choice needs at least one active workshop'
+}
 
 export type WorkshopRankingsParams = {
   ranking_trait: string
@@ -135,6 +149,7 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
       {
         type: 'WorkshopChoiceOpened',
         payload: workshopChoiceOpenedPayload,
+        validate: (_payload, world) => validateWorkshopChoiceOpened(world),
         authorize: (principal) => principal.kind === 'organiser',
         fold: () => {},
       },
