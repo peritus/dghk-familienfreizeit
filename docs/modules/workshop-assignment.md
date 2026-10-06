@@ -40,7 +40,7 @@ local-first organiser drafts.
 The organiser workshop-list projection derives four read-only document views from
 the organiser world and solver plan: a workshop roster, person plan, family plan,
 and room plan. It reads placements, attendance with its fixed and unassigned
-outcomes, sign-ups, interests, and ranked choices from the solver sections, and
+outcomes, sign-ups, and interests from the solver sections, and
 includes external leaders in the person plans. The projection joins
 typed workshop, person, family, slot, and space identities through the existing
 module summaries and solver sections; it does not persist folded report state or

@@ -209,8 +209,6 @@ test('projects the complete workshop list set from the organiser plan', () => {
     leaders: ['Sam Morgan', 'Anna Albers'],
   })
   expect(ceramics?.roster.length).toBeGreaterThan(0)
-  expect(ceramics?.choice_stats).toMatchObject({ max_rank: 3 })
-  expect(ceramics?.choice_stats?.first_choice).toBeLessThanOrEqual(ceramics!.participant_count)
 
   // People and external leaders share the person list.
   const externals = lists.persons.filter((person) => person.kind === 'external')

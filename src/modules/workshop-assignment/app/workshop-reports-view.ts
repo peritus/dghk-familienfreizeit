@@ -5,7 +5,6 @@ import {
   type ExternalLeader,
   type WorkshopRecord,
 } from '../../official-workshops/index.js'
-import type { WorkshopRankingsDemand } from '../../workshop-rankings/index.js'
 import { workshopAssignmentSection, type WorkshopAssignmentSection } from '../index.js'
 import {
   workshopSchedulingWorld,
@@ -32,17 +31,6 @@ export type WorkshopReportRosterEntry = {
   source: 'assignment' | 'signup'
 }
 
-export type WorkshopReportChoiceStats = {
-  /** Participants placed by their first choice. */
-  first_choice: number
-  /** Participants placed by any ranked choice. */
-  ranked_choice: number
-  /** People who ranked this workshop first. */
-  wished_first: number
-  /** Highest rank the profile accepts. */
-  max_rank: number
-}
-
 export type WorkshopReportWorkshop = {
   id: string
   title: string
@@ -58,7 +46,6 @@ export type WorkshopReportWorkshop = {
   participant_count: number
   health_count: number
   interest_count: number
-  choice_stats: WorkshopReportChoiceStats | null
   roster: readonly WorkshopReportRosterEntry[]
 }
 
@@ -375,27 +362,6 @@ function buildExternalEntries(
   })
 }
 
-function choiceStats(
-  workshopId: string,
-  roster: readonly WorkshopReportRosterEntry[],
-  assignment: WorkshopAssignmentSection,
-  rankings: WorkshopRankingsDemand | undefined,
-): WorkshopReportChoiceStats | null {
-  if (!rankings || rankings.rankings.length === 0) return null
-  const rosterIds = new Set(roster.map((entry) => entry.person_id))
-  const ranks = assignment.assignments
-    .filter((item) => item.workshop_id === workshopId && rosterIds.has(item.person_id))
-    .map((item) => item.rank)
-  return {
-    first_choice: ranks.filter((rank) => rank === 1).length,
-    ranked_choice: ranks.filter((rank) => rank !== null && rank <= rankings.max_rank).length,
-    wished_first: rankings.rankings.filter((ranking) =>
-      ranking.choices.some((choice) => choice.rank === 1 && choice.workshop_id === workshopId),
-    ).length,
-    max_rank: rankings.max_rank,
-  }
-}
-
 export function buildWorkshopReportsProjection(
   input: WorkshopReportsProjectionInput,
 ): WorkshopReportsProjection {
@@ -403,7 +369,6 @@ export function buildWorkshopReportsProjection(
   const scheduling = workshopSchedulingWorld(input.world)
   const spaces = workshopSpaceWorld(input.world).live
   const assignment = workshopAssignmentSection(input.plan)
-  const rankings = input.plan.sections['workshop-rankings'] as WorkshopRankingsDemand | undefined
   const placements = new Map(
     schedulingSection(input.plan).map((placement) => [placement.workshop_id, placement]),
   )
@@ -483,10 +448,6 @@ export function buildWorkshopReportsProjection(
         health_count: roster.filter((entry) => entry.health).length,
         interest_count: assignment.interests.filter((item) => item.workshop_id === workshop.id)
           .length,
-        choice_stats:
-          workshop.mode === 'assigned'
-            ? choiceStats(workshop.id, roster, assignment, rankings)
-            : null,
         roster,
       }
     })

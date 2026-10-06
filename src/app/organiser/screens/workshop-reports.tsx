@@ -154,36 +154,26 @@ function roomPlanEntries(room: WorkshopReportRoom): RoomPlanEntry[] {
 }
 
 function WorkshopReport({ workshop }: { workshop: WorkshopReportWorkshop }) {
-  const stats = workshop.choice_stats
   return (
-    <div className="space-y-4">
-      {stats ? (
-        <p className="rounded-base border-2 border-dashed border-border bg-paper px-4 py-3 text-sm print:hidden">
-          <strong>Nur für die Orga:</strong> {stats.first_choice} Teilnehmende mit 1. Wahl ·{' '}
-          {stats.ranked_choice} mit einer Wahl aus ihrer Top {stats.max_rank} · {stats.wished_first}
-          × als 1. Wahl gewünscht
-        </p>
-      ) : null}
-      <WorkshopRosterDocument
-        title={workshop.title}
-        metadata={[
-          `${workshop.slot_label} · ${workshop.space_name}`,
-          `Leitung: ${workshop.leaders.join(', ') || '—'}`,
-          <>
-            <strong>{personen(workshop.participant_count)}</strong> von {workshop.capacity}{' '}
-            {workshop.capacity === 1 ? 'Platz' : 'Plätzen'} · {workshop.audience},{' '}
-            {workshop.age_label}
-            {workshop.health_count
-              ? ` · ${personen(workshop.health_count)} mit Gesundheitshinweis`
-              : ''}
-            {workshop.interest_count ? ` · ${workshop.interest_count} Interessen` : ''}
-          </>,
-        ]}
-        entries={rosterEntries(workshop)}
-        confidential
-        show_attendance
-      />
-    </div>
+    <WorkshopRosterDocument
+      title={workshop.title}
+      metadata={[
+        `${workshop.slot_label} · ${workshop.space_name}`,
+        `Leitung: ${workshop.leaders.join(', ') || '—'}`,
+        <>
+          <strong>{personen(workshop.participant_count)}</strong> von {workshop.capacity}{' '}
+          {workshop.capacity === 1 ? 'Platz' : 'Plätzen'} · {workshop.audience},{' '}
+          {workshop.age_label}
+          {workshop.health_count
+            ? ` · ${personen(workshop.health_count)} mit Gesundheitshinweis`
+            : ''}
+          {workshop.interest_count ? ` · ${workshop.interest_count} Interessen` : ''}
+        </>,
+      ]}
+      entries={rosterEntries(workshop)}
+      confidential
+      show_attendance
+    />
   )
 }
 

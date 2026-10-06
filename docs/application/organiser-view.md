@@ -178,9 +178,7 @@ Documents carry a title and metadata lines, without a kind or status header.
 
 - Workshop rosters cover placed workshops in programme order, grouped by slot in
   the picker. They show placement, leaders, capacity, assigned people and
-  sign-ups, and the person `food-note` as the confidential health column. A
-  screen-only organiser note counts first-choice placements, placements from a
-  ranked choice, and how often the workshop was ranked first.
+  sign-ups, and the person `food-note` as the confidential health column.
 - Person plans list people and external leaders. Every configured slot shows the
   workshop, room, and role; fixed attendance is marked, external leaders show the
   workshops they lead and their available slots, and people the resolver left
