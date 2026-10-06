@@ -9,7 +9,11 @@ import { Button } from '../components/shared/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../solver/index.js'
-import { deriveFeatureView, effectiveFeatureIds } from '../../derive/features.js'
+import {
+  deriveFeatureView,
+  effectiveFeatureIds,
+  sameFeatureOverrides,
+} from '../../derive/features.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveWorld,
@@ -123,6 +127,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
           events: log.events,
           build_revision: log.build_revision,
           compatibility_revision: log.compatibility_revision,
+          feature_overrides: log.feature_overrides,
           principal_email: me.principal.email,
         })
       })
@@ -173,13 +178,13 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
             deriveFeatureView({
               modules: activeProfile.modules,
               world: derivation.world,
-              overrides: [],
+              overrides: state.feature_overrides,
               phase_active: () => true,
               principal: 'organiser',
             }),
           )
         : new Set<string>(),
-    [derivation.world],
+    [derivation.world, state.feature_overrides],
   )
 
   const currentPlan = useMemo(() => {
@@ -218,6 +223,14 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         build_revision: state.build_revision,
         compatibility_revision: state.compatibility_revision,
       })
+      if (!sameFeatureOverrides(result.feature_overrides, state.feature_overrides)) {
+        dispatch({
+          type: 'failed',
+          status: 'stale_build',
+          error: 'Diese Ansicht ist veraltet. Bitte lade sie neu.',
+        })
+        return
+      }
       dispatch({ type: 'applied', count: drafts.length, events: result.events })
     } catch (error: unknown) {
       if (error instanceof OrganiserApiError) {

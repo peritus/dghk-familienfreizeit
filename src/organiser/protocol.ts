@@ -1,3 +1,4 @@
+import type { FeatureOverride } from '../derive/features.js'
 import type { World } from '../events/fold.js'
 import type { Event, EventPayloadSchemas, JsonValue } from '../events/types.js'
 
@@ -15,6 +16,8 @@ export type OrganiserLogResponse = {
   build_revision: string
   compatibility_revision: number
   screen_registry: readonly ScreenDescriptor[]
+  /** Operational feature bindings set for this deployment (features.md §6). */
+  feature_overrides: readonly FeatureOverride[]
 }
 
 export type OrganiserEventDraft = {
@@ -36,6 +39,7 @@ export type OrganiserApplyResponse = {
   world: World
   build_revision: string
   compatibility_revision: number
+  feature_overrides: readonly FeatureOverride[]
 }
 
 export type OrganiserStaleResponse = {

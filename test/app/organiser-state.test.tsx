@@ -28,6 +28,7 @@ function loadedState() {
     events: [],
     build_revision: 'development',
     compatibility_revision: 1,
+    feature_overrides: [],
     principal_email: 'organiser@example.test',
   })
 }
@@ -38,6 +39,7 @@ test('draft batches materialize contiguous events and derive locally', () => {
     events: [],
     build_revision: 'development',
     compatibility_revision: 1,
+    feature_overrides: [],
     principal_email: 'organiser@example.test',
   })
   const state = organiserReducer(loaded, { type: 'stage', events: [family] })

@@ -153,6 +153,7 @@ export const organiserFixtureState = organiserReducer(initialOrganiserState, {
   events: organiserFixtureEvents,
   build_revision: 'storybook',
   compatibility_revision: 1,
+  feature_overrides: [],
   principal_email: actor,
 })
 
@@ -799,6 +800,7 @@ export const organiserAssignmentFixtureState = organiserReducer(initialOrganiser
   events: organiserAssignmentFixtureEvents,
   build_revision: 'storybook-assignment-board',
   compatibility_revision: 1,
+  feature_overrides: [],
   principal_email: 'anna.keller@example.test',
 })
 

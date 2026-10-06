@@ -36,6 +36,7 @@ test.beforeEach(async ({ page }) => {
           audience: 'organiser',
           host: 'kernel',
         })),
+        feature_overrides: [],
       }),
     }),
   )

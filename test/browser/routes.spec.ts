@@ -44,6 +44,7 @@ async function mockOrganiserApi(page: Page): Promise<void> {
           audience: 'organiser',
           host: 'kernel',
         })),
+        feature_overrides: [],
       }),
     }),
   )

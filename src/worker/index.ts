@@ -19,6 +19,7 @@ import { authorizeEventBatch } from '../auth/authorization.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
 import { maxEventsPerBatch } from './request-limits.js'
+import { readFeatureBindings, type FeatureBindingState } from './feature-bindings.js'
 import {
   cleanupOperationalRows,
   consumeLoginRateLimits,
@@ -39,9 +40,19 @@ const eventRateLimitDuration = 60 * 60 * 1000
 let warnedMagicLinkConsole = false
 let warnedInsecureSessionCookies = false
 let warnedDemoLogin = false
+let announcedFeatureBindings = ''
 
 app.use('*', async (context, next) => {
   warnDangerousDevelopmentBindings(context.env)
+  const features = featureBindings(context.env)
+  if (features.invalid.length > 0 && new URL(context.req.url).pathname !== '/api/health') {
+    context.res = context.json(
+      { error: 'invalid_feature_bindings', invalid_feature_bindings: features.invalid },
+      503,
+    )
+    applySecurityHeaders(context)
+    return
+  }
   await next()
   applySecurityHeaders(context)
 })
@@ -104,6 +115,17 @@ app.get('/auth/:token', async (context) => {
 })
 
 app.get('/api/health', async (context) => {
+  const features = featureBindings(context.env)
+  if (features.invalid.length > 0)
+    return context.json(
+      {
+        status: 'misconfigured',
+        build_revision: buildRevision,
+        compatibility_revision: compatibilityRevision,
+        invalid_feature_bindings: features.invalid,
+      },
+      503,
+    )
   try {
     const row = await context.env.DB.prepare('SELECT 1 AS ok').first<{ ok: number }>()
     if (row?.ok === 1)
@@ -111,6 +133,7 @@ app.get('/api/health', async (context) => {
         status: 'ok',
         build_revision: buildRevision,
         compatibility_revision: compatibilityRevision,
+        feature_overrides: features.overrides,
       })
   } catch {
     // Report availability without disclosing binding details or database errors.
@@ -146,6 +169,7 @@ app.get('/api/organiser/log', async (context) => {
     build_revision: buildRevision,
     compatibility_revision: compatibilityRevision,
     screen_registry: organiserScreenRegistry,
+    feature_overrides: featureBindings(context.env).overrides,
   })
 })
 
@@ -224,6 +248,7 @@ app.post('/api/organiser/apply', async (context) => {
       world,
       build_revision: buildRevision,
       compatibility_revision: compatibilityRevision,
+      feature_overrides: featureBindings(context.env).overrides,
     })
   } catch (error) {
     if (error instanceof StaleHeadError) {
@@ -500,6 +525,25 @@ function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
   if (url.protocol === 'https:') context.header('Strict-Transport-Security', 'max-age=31536000')
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/'))
     context.header('Cache-Control', 'no-store')
+}
+
+/**
+ * Validates the operational feature bindings fail-closed and logs every set or invalid
+ * binding whenever the set changes (spec/architecture/features.md §6).
+ */
+function featureBindings(env: Env): FeatureBindingState {
+  const state = readFeatureBindings(env, activeProfile.modules)
+  const announcement = JSON.stringify(state)
+  if (announcement !== announcedFeatureBindings) {
+    for (const { feature, value } of state.overrides)
+      console.warn(`[WARN] Feature ${feature} is switched ${value} by its deployment binding.`)
+    for (const name of state.invalid)
+      console.error(
+        `[ERROR] ${name} is not a valid feature binding: the Worker refuses to serve application routes.`,
+      )
+    announcedFeatureBindings = announcement
+  }
+  return state
 }
 
 function warnDangerousDevelopmentBindings(env: Env): void {

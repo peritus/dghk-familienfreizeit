@@ -1,6 +1,7 @@
 import { deriveDraftWorld } from '../../events/world.js'
 import type { KernelConfig } from '../../events/fold.js'
 import type { Event, EventDraft } from '../../events/types.js'
+import type { FeatureOverride } from '../../derive/features.js'
 
 export type DraftBatch = {
   events: readonly EventDraft[]
@@ -25,6 +26,8 @@ export type OrganiserState = {
   head_seq: number
   build_revision: string | null
   compatibility_revision: number | null
+  /** The Worker's operational feature bindings this view derives with (features.md §6). */
+  feature_overrides: readonly FeatureOverride[]
   principal_email: string | null
   status: OrganiserStatus
   error: string | null
@@ -37,6 +40,7 @@ export const initialOrganiserState: OrganiserState = {
   head_seq: 0,
   build_revision: null,
   compatibility_revision: null,
+  feature_overrides: [],
   principal_email: null,
   status: 'loading',
   error: null,
@@ -48,6 +52,7 @@ export type OrganiserAction =
       events: readonly Event[]
       build_revision: string
       compatibility_revision: number
+      feature_overrides: readonly FeatureOverride[]
       principal_email: string
     }
   | { type: 'stage'; events: readonly EventDraft[] }
@@ -73,6 +78,7 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         head_seq: action.events.length,
         build_revision: action.build_revision,
         compatibility_revision: action.compatibility_revision,
+        feature_overrides: action.feature_overrides,
         principal_email: action.principal_email,
         status: 'ready',
         error: null,

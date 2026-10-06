@@ -37,7 +37,7 @@ function open(events: readonly Event[] = []) {
         seq: inputSeq + index + 1,
       }))
       return Promise.resolve(
-        new Response(JSON.stringify({ events: applied }), {
+        new Response(JSON.stringify({ events: applied, feature_overrides: [] }), {
           status: 200,
           headers: { 'content-type': 'application/json' },
         }),
@@ -51,6 +51,7 @@ function open(events: readonly Event[] = []) {
           build_revision: buildRevision,
           compatibility_revision: compatibilityRevision,
           screen_registry: [],
+          feature_overrides: [],
         }),
         { status: 200, headers: { 'content-type': 'application/json' } },
       ),

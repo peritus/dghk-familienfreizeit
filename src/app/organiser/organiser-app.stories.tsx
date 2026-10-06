@@ -43,6 +43,7 @@ function mockOrganiserApi() {
         build_revision: buildRevision,
         compatibility_revision: compatibilityRevision,
         screen_registry: [],
+        feature_overrides: [],
       }),
       { headers: { 'content-type': 'application/json' } },
     )

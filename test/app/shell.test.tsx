@@ -38,6 +38,7 @@ function open(
   path: string,
   events: readonly Event[] = [],
   profile: typeof activeProfilePresentation = activeProfilePresentation,
+  applyFeatureOverrides: readonly { feature: string; value: 'on' | 'off' }[] = [],
 ) {
   let fetchMock: ReturnType<typeof vi.fn> | undefined
   if (path.startsWith('/organiser')) {
@@ -65,10 +66,13 @@ function open(
           actor: 'organiser@example.test',
         }))
         return Promise.resolve(
-          new Response(JSON.stringify({ events: applied }), {
-            status: 200,
-            headers: { 'content-type': 'application/json' },
-          }),
+          new Response(
+            JSON.stringify({ events: applied, feature_overrides: applyFeatureOverrides }),
+            {
+              status: 200,
+              headers: { 'content-type': 'application/json' },
+            },
+          ),
         )
       }
       return Promise.resolve(
@@ -79,6 +83,7 @@ function open(
             build_revision: buildRevision,
             compatibility_revision: compatibilityRevision,
             screen_registry: [],
+            feature_overrides: [],
           }),
           { status: 200, headers: { 'content-type': 'application/json' } },
         ),
@@ -921,4 +926,22 @@ test('a route change resets the error boundary without a child remount key', () 
     </RouteBoundary>,
   )
   expect(screen.getByText('Recovered route')).toBeTruthy()
+})
+
+test('an apply response with changed feature overrides asks for a reload', async () => {
+  open('/organiser/families', [], activeProfilePresentation, [
+    { feature: 'family-preferences.family-room-wishes', value: 'off' },
+  ])
+  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+
+  const inviteDialog = await openFamilyInviteDialog()
+  fireEvent.change(inviteDialog.getByLabelText('Familienname'), {
+    target: { value: 'Sofort Familie' },
+  })
+  fireEvent.change(inviteDialog.getByLabelText('E-Mail'), {
+    target: { value: 'sofort@example.test' },
+  })
+  fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie hinzufügen' }))
+
+  expect(await screen.findByText('Diese Ansicht ist veraltet. Bitte lade sie neu.')).toBeTruthy()
 })

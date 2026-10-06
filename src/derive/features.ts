@@ -112,3 +112,17 @@ export function sectionOffered(
   const governing = section.features.find((id) => features.get(id)?.audience === audience)
   return governing === undefined || effective.has(governing)
 }
+
+/** Whether two override lists describe the same operational state. */
+export function sameFeatureOverrides(
+  left: readonly FeatureOverride[],
+  right: readonly FeatureOverride[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every(
+      (override, index) =>
+        override.feature === right[index]?.feature && override.value === right[index]?.value,
+    )
+  )
+}

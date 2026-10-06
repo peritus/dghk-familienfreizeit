@@ -200,3 +200,15 @@ test('organiser apply reports intervening events for a stale head', async () => 
   expect(stale.status).toBe(409)
   expect(await stale.json()).toMatchObject({ error: 'stale_head', actual_head: 1 })
 })
+
+test('organiser log carries the operational feature overrides', async () => {
+  const response = await app.request(
+    '/api/organiser/log',
+    { headers: { cookie: await organiserCookie() } },
+    { ...organiserEnv, DGHK_FEATURE_FAMILY_PREFERENCES_FAMILY_ROOM_WISHES: 'off' as const },
+  )
+  expect(response.status).toBe(200)
+  expect(await response.json()).toMatchObject({
+    feature_overrides: [{ feature: 'family-preferences.family-room-wishes', value: 'off' }],
+  })
+})
