@@ -611,17 +611,20 @@ function WorkshopControls({
   )
 }
 
-function deadlineNotice(
+function targetNotice(
   section: FamilyPreferencesParams['sections'][number],
-  params: FamilyPreferencesParams,
   meta: OccasionProfile['meta'],
 ): string | null {
-  if (!section.deadline_scope) return null
-  const deadline = meta.deadlines?.[section.deadline_scope]
-  if (!deadline) return null
-  const contact = params.deadline_contact[section.deadline_scope]
-  const passed = Date.now() > Date.parse(deadline)
-  return `${passed ? 'Frist vorbei' : `Frist bis ${new Intl.DateTimeFormat(meta.locale).format(new Date(deadline))}`}. ${localized(contact, meta.locale, meta.fallback_locale)}`
+  if (!section.phase) return null
+  const target = meta.phase_dates?.find(({ phase }) => phase === section.phase)?.target_at
+  if (!target) return null
+  const date = new Intl.DateTimeFormat(meta.locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    ['timeZone']: meta.timezone,
+  }).format(new Date(target))
+  return `Zieltermin: ${date}. Änderungen bleiben danach möglich, werden aber als verspätet markiert.`
 }
 
 export function FamilyPreferenceSection({
@@ -656,8 +659,8 @@ export function FamilyPreferenceSection({
         {section.intro ? (
           <p>{localized(section.intro, profile.meta.locale, profile.meta.fallback_locale)}</p>
         ) : null}
-        {deadlineNotice(section, params, profile.meta) ? (
-          <p role="note">{deadlineNotice(section, params, profile.meta)}</p>
+        {targetNotice(section, profile.meta) ? (
+          <p role="note">{targetNotice(section, profile.meta)}</p>
         ) : null}
       </CardHeader>
       <CardContent className="grid gap-5">

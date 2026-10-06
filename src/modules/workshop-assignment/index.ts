@@ -386,6 +386,15 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
     workshops_per_person: z.number().int().min(1).default(2),
   }),
   contribute: (params) => ({
+    phases: [
+      {
+        id: 'workshop-assignment.review',
+        area: 'workshops',
+        opens: { kind: 'always' },
+        target: false,
+        closed_by_area: false,
+      },
+    ],
     stages: [assignmentStage(params)],
     reports: [
       { id: 'workshop-roster' },

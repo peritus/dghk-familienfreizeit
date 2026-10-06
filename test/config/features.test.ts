@@ -85,11 +85,11 @@ function profile(
             intro: null,
             traits: ['answer'],
             features: sectionFeatures,
-            deadline_scope: null,
+            phase: null,
+            late_contact: null,
           },
         ],
         module_controls: [],
-        deadline_contact: { accommodation: 'Contact', workshops: 'Contact' },
       }),
     ],
   })

@@ -40,10 +40,10 @@ describe('occasion profile', () => {
         value: { kind: 'enum', values: ['active', 'blocked'] },
       }),
     )
-    expect(luebben2027Profile.meta.deadlines).toEqual({
-      accommodation: '2027-03-31T21:59:59Z',
-      workshops: '2027-04-15T21:59:59Z',
-    })
+    expect(luebben2027Profile.meta.phase_dates).toEqual([
+      { phase: 'family-preferences.accommodation-preferences', target_at: '2027-03-31T21:59:59Z' },
+      { phase: 'workshop-rankings.choice', target_at: '2027-04-15T21:59:59Z' },
+    ])
     expect(luebben2027Profile.traits['needs-private-sanitary'].family_facing).toEqual(
       expect.objectContaining({ control: 'tri-state', scope: 'family' }),
     )
@@ -81,12 +81,18 @@ describe('occasion profile', () => {
           controlModule({}),
           familyPreferences({
             sections: [
-              { key: 'main', title: 'Main', intro: null, traits: ['answer'], deadline_scope: null },
+              {
+                key: 'main',
+                title: 'Main',
+                intro: null,
+                traits: ['answer'],
+                phase: null,
+                late_contact: null,
+              },
             ],
             module_controls: [
               { key: 'fixture-control', section: 'main', title: 'Fixture', help: null },
             ],
-            deadline_contact: { accommodation: 'Contact', workshops: 'Contact' },
           }),
         ],
       }),
@@ -99,10 +105,16 @@ describe('occasion profile', () => {
           controlModule({}),
           familyPreferences({
             sections: [
-              { key: 'main', title: 'Main', intro: null, traits: [], deadline_scope: null },
+              {
+                key: 'main',
+                title: 'Main',
+                intro: null,
+                traits: [],
+                phase: null,
+                late_contact: null,
+              },
             ],
             module_controls: [],
-            deadline_contact: { accommodation: 'Contact', workshops: 'Contact' },
           }),
         ],
       }),

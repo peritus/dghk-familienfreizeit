@@ -112,6 +112,15 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
   requires: ['room-inventory'],
   params: paramsSchema,
   contribute: (params) => ({
+    phases: [
+      {
+        id: 'room-assignment.review',
+        area: 'accommodation',
+        opens: { kind: 'always' },
+        target: false,
+        closed_by_area: false,
+      },
+    ],
     trait_roles: [
       { parameter: 'keep_apart_trait', kind: 'relation', operator: 'separates-from' },
       { parameter: 'no_bed_trait', kind: 'property' },

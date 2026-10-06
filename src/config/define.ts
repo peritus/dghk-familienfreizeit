@@ -13,6 +13,7 @@ import {
 import { kernelEventTypes, kernelPayloadSchemas, type JsonValue } from '../events/types.js'
 import type { PreflightCheck, Rule, SolverInputContribution, SolverStage } from '../solver/types.js'
 import { validateFeatures, type FeatureDefinition } from './features.js'
+import { declaredPhases, validatePhases, type PhaseDate, type PhaseDefinition } from './phases.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -67,7 +68,10 @@ export type FamilyPreferenceSection = {
   traits: readonly string[]
   /** The features governing every control in the section, at most one per audience (features.md §3). */
   features: readonly string[]
-  deadline_scope: 'accommodation' | 'workshops' | null
+  /** The governing phase, for Zieltermin and closed notices (family-preferences.md §3). */
+  phase: string | null
+  /** Copy shown once the phase is late; set exactly when `phase` is. */
+  late_contact: LocalizedText | null
 }
 
 export type FamilyPreferenceModuleControl = {
@@ -80,10 +84,6 @@ export type FamilyPreferenceModuleControl = {
 export type FamilyPreferencesParams = {
   sections: readonly FamilyPreferenceSection[]
   module_controls: readonly FamilyPreferenceModuleControl[]
-  deadline_contact: {
-    accommodation: LocalizedText
-    workshops: LocalizedText
-  }
 }
 
 export type FamilyControlDefinition = {
@@ -163,7 +163,8 @@ export type ProfileMeta = {
   description: LocalizedText
   public_landing: ProfilePublicLanding
   event?: ProfileEvent
-  deadlines?: Readonly<Record<string, string>>
+  /** Advisory target dates per phase (spec/architecture/phases.md §2). */
+  phase_dates?: readonly PhaseDate[]
 }
 
 export type ProfileModule = {
@@ -211,6 +212,7 @@ export type ModuleContributions = {
   preflight_checks?: readonly PreflightCheck[]
   family_controls?: readonly FamilyControlDefinition[]
   features?: readonly FeatureDefinition[]
+  phases?: readonly PhaseDefinition[]
 }
 
 export type ScreenDefinition = {
@@ -474,8 +476,15 @@ function validateModules(
   const familyPreferencesParams = familyPreferences?.parameters as
     | FamilyPreferencesParams
     | undefined
+  validatePhases(modules, meta.phase_dates ?? [])
   if (familyPreferencesParams)
-    validateFamilyPreferences(familyPreferencesParams, traits, meta, familyControlDefinitions)
+    validateFamilyPreferences(
+      familyPreferencesParams,
+      traits,
+      meta,
+      familyControlDefinitions,
+      new Set(declaredPhases(modules).keys()),
+    )
   validateFeatures(
     modules,
     kernelEntityKinds,
@@ -509,6 +518,7 @@ function validateFamilyPreferences(
   traits: Record<string, Trait>,
   meta: ProfileMeta,
   familyControls: ReadonlyMap<string, FamilyControlDefinition>,
+  phases: ReadonlySet<string>,
 ): void {
   const sections = new Map<string, FamilyPreferenceSection>()
   for (const section of params.sections) {
@@ -517,8 +527,13 @@ function validateFamilyPreferences(
     sections.set(section.key, section)
     validateCopy(meta, section.title)
     if (section.intro) validateCopy(meta, section.intro)
-    if (section.deadline_scope && !meta.deadlines?.[section.deadline_scope])
-      throw new Error(`family preference deadline is not configured: ${section.deadline_scope}`)
+    if (section.phase !== null && !phases.has(section.phase))
+      throw new Error(`family preference section names undeclared phase: ${section.phase}`)
+    if ((section.phase === null) !== (section.late_contact === null))
+      throw new Error(
+        `family preference section ${section.key} needs late copy exactly with a phase`,
+      )
+    if (section.late_contact) validateCopy(meta, section.late_contact)
   }
   const occurrences = new Map<string, number>()
   for (const section of params.sections) {
@@ -546,8 +561,6 @@ function validateFamilyPreferences(
     validateCopy(meta, control.title)
     if (control.help) validateCopy(meta, control.help)
   }
-  validateCopy(meta, params.deadline_contact.accommodation)
-  validateCopy(meta, params.deadline_contact.workshops)
 }
 
 const kernelEntityKinds = ['family', 'person']

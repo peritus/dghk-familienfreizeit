@@ -316,7 +316,8 @@ export const luebben2027Profile = defineOccasionProfile({
           intro: null,
           traits: ['does-not-need-a-bed'],
           features: [],
-          deadline_scope: null,
+          phase: null,
+          late_contact: null,
         },
         {
           key: 'room-wishes',
@@ -327,7 +328,11 @@ export const luebben2027Profile = defineOccasionProfile({
             'family-preferences.family-room-wishes',
             'family-preferences.organiser-room-wishes',
           ],
-          deadline_scope: 'accommodation',
+          phase: 'family-preferences.accommodation-preferences',
+          late_contact: {
+            de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
+            en: 'Please coordinate late room-preference changes with the organisers.',
+          },
         },
         {
           key: 'food',
@@ -335,7 +340,8 @@ export const luebben2027Profile = defineOccasionProfile({
           intro: null,
           traits: ['diet', 'food-note'],
           features: [],
-          deadline_scope: null,
+          phase: null,
+          late_contact: null,
         },
         {
           key: 'workshops',
@@ -346,7 +352,11 @@ export const luebben2027Profile = defineOccasionProfile({
             'workshop-rankings.family-workshop-wishes',
             'workshop-rankings.organiser-workshop-wishes',
           ],
-          deadline_scope: 'workshops',
+          phase: 'workshop-rankings.choice',
+          late_contact: {
+            de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
+            en: 'Please coordinate late workshop changes with the organisers.',
+          },
         },
       ],
       module_controls: [
@@ -378,16 +388,6 @@ export const luebben2027Profile = defineOccasionProfile({
           },
         },
       ],
-      deadline_contact: {
-        accommodation: {
-          de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
-          en: 'Please coordinate late room-preference changes with the organisers.',
-        },
-        workshops: {
-          de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
-          en: 'Please coordinate late workshop changes with the organisers.',
-        },
-      },
     }),
   ],
 })

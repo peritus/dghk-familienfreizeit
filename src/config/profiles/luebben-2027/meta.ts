@@ -31,10 +31,10 @@ export const luebben2027Meta = {
   starts_on: '2027-04-30',
   ends_on: '2027-05-02',
   timezone: 'Europe/Berlin',
-  deadlines: {
-    accommodation: '2027-03-31T21:59:59Z',
-    workshops: '2027-04-15T21:59:59Z',
-  },
+  phase_dates: [
+    { phase: 'family-preferences.accommodation-preferences', target_at: '2027-03-31T21:59:59Z' },
+    { phase: 'workshop-rankings.choice', target_at: '2027-04-15T21:59:59Z' },
+  ],
   locale: 'de',
   fallback_locale: 'en',
 } satisfies ProfileMeta

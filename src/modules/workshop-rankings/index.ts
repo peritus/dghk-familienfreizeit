@@ -4,6 +4,9 @@ import type { World } from '../../events/fold.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult } from '../../solver/types.js'
 
+/** `WorkshopChoiceOpened` carries no payload: the event itself is the organiser decision. */
+const workshopChoiceOpenedPayload = z.object({}).strict()
+
 export type WorkshopRankingsParams = {
   ranking_trait: string
   max_rank: number
@@ -128,6 +131,23 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
       },
     ],
     family_controls: [{ key: params.ranking_trait, control: 'ranking' }],
+    events: [
+      {
+        type: 'WorkshopChoiceOpened',
+        payload: workshopChoiceOpenedPayload,
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: () => {},
+      },
+    ],
+    phases: [
+      {
+        id: 'workshop-rankings.choice',
+        area: 'workshops',
+        opens: { kind: 'event', event: 'WorkshopChoiceOpened' },
+        target: true,
+        closed_by_area: true,
+      },
+    ],
     features: [
       {
         id: 'workshop-rankings.family-workshop-wishes',
