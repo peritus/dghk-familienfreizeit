@@ -96,6 +96,7 @@ test('the allocation conflict notice asks for review of the marked cases', () =>
       projection={{
         max_rank: 3,
         answers: [],
+        participation: { slots: [], people: [] },
         demand: [],
         trace_events: [],
         trace_people: [],
