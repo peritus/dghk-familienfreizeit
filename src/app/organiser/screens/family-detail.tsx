@@ -30,7 +30,11 @@ import {
 import { familyTopicLabel, FamilyTopicNavigation } from '../components/family-navigation.js'
 import { organiserPaths, type FamilyTopic } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
-import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
+import {
+  FamilyPreferencesControls,
+  phaseNoticeText,
+} from '../../../modules/family-preferences/app/controls.js'
+import type { PhaseView } from '../../../derive/phases.js'
 import { familyPreferencesConfig } from '../../../modules/family-preferences/index.js'
 import { sectionOffered } from '../../../derive/features.js'
 import {
@@ -266,6 +270,7 @@ function FamilyRoomView({
   stage,
   effective_features: effectiveFeatures,
   room_wishes_offered: roomWishesOffered,
+  phases,
 }: {
   family_id: string
   persons: ReturnType<typeof familyPeople>
@@ -274,6 +279,7 @@ function FamilyRoomView({
   stage: (events: readonly EventDraft[]) => void
   effective_features?: ReadonlySet<string>
   room_wishes_offered: boolean
+  phases?: readonly PhaseView[]
 }) {
   const peopleWithOwnBed = persons.filter((person) => {
     const labels = world.labels_by_entity[person.entity.id] ?? []
@@ -295,6 +301,7 @@ function FamilyRoomView({
         tri_state_no_answer
         audience="organiser"
         effective_features={effectiveFeatures}
+        phases={phases}
       />
       <Card className="bg-secondary-background">
         <CardHeader>
@@ -1278,9 +1285,15 @@ export function FamilyDetail({
   topic?: FamilyTopic
   person_id?: string
 }) {
-  const { state, world, stage, effective_features: effectiveFeatures } = useOrganiser()
+  const { state, world, stage, effective_features: effectiveFeatures, phases } = useOrganiser()
   const [, navigate] = useLocation()
   const family = familyId ? findFamily(world!, familyId) : null
+  const workshopSection = familyPreferencesConfig(activeProfile).sections.find(
+    ({ key }) => key === 'workshops',
+  )
+  const workshopNotice = workshopSection
+    ? phaseNoticeText(workshopSection, activeProfile.meta, 'organiser', phases)
+    : null
   const offered = (sectionKey: string): boolean => {
     const section = familyPreferencesConfig(activeProfile).sections.find(
       ({ key }) => key === sectionKey,
@@ -1362,6 +1375,7 @@ export function FamilyDetail({
               stage={stage}
               effective_features={effectiveFeatures}
               room_wishes_offered={offered('room-wishes')}
+              phases={phases}
             />
           ) : topic === 'personen' ? (
             <FamilyPeopleView
@@ -1387,15 +1401,18 @@ export function FamilyDetail({
               Workshopwünsche sind in dieser Planung ausgeschaltet.
             </p>
           ) : topic === 'workshops' ? (
-            <FamilyWorkshopView
-              family_id={selectedFamilyId}
-              persons={people}
-              world={world!}
-              actor={state.principal_email}
-              stage={stage}
-              selected_person_id={detailPersonId}
-              on_select={selectPerson}
-            />
+            <>
+              {workshopNotice ? <p role="note">{workshopNotice}</p> : null}
+              <FamilyWorkshopView
+                family_id={selectedFamilyId}
+                persons={people}
+                world={world!}
+                actor={state.principal_email}
+                stage={stage}
+                selected_person_id={detailPersonId}
+                on_select={selectPerson}
+              />
+            </>
           ) : (
             <p className="rounded-base border-2 border-dashed border-muted p-5">
               Dieser Bereich wird noch aufgebaut.

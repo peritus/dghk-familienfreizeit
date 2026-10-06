@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
+import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult, TraceEntry } from '../../solver/types.js'
 import type {
@@ -393,6 +394,7 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
         opens: { kind: 'always' },
         target: false,
         closed_by_area: false,
+        readiness: workshopReviewReadiness,
       },
     ],
     stages: [assignmentStage(params)],
@@ -457,3 +459,57 @@ export function workshopAssignmentSection(plan: {
 }
 
 export type { WorkshopMode }
+
+/**
+ * The workshop review is ready once workshop choice has been opened, every active workshop is
+ * placed, every fixed placement and attendance decision holds, and no workshop preflight finding
+ * blocks the plan (spec/architecture/phases.md §4).
+ */
+export const workshopReviewReadiness: PhaseReadiness = ({ world, plan }) => {
+  const findings: FindingRef[] = []
+  if (world.phase_facts.opened['workshop-rankings.choice'] === undefined)
+    findings.push({
+      id: 'workshop-rankings.choice-not-opened',
+      subject_id: null,
+      message: 'Die Workshopwahl ist noch nicht geöffnet.',
+    })
+  if (!plan) {
+    findings.push({
+      id: 'phase.plan-unavailable',
+      subject_id: null,
+      message: 'Die Zuordnung ist noch nicht berechnet.',
+    })
+    return { ready: false, findings }
+  }
+  const scheduling = plan.sections['workshop-scheduling'] as WorkshopSchedulingSection | undefined
+  const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection | undefined
+  // Unscheduled and invalid fixed placements are reported once below, with readable text.
+  const coveredChecks = new Set([
+    'workshop-scheduling.unscheduled',
+    'workshop-scheduling.fixed-invalid',
+  ])
+  for (const finding of plan.preflight)
+    if (
+      finding.severity === 'error' &&
+      finding.check.startsWith('workshop-') &&
+      !coveredChecks.has(finding.check)
+    )
+      findings.push({
+        id: finding.check,
+        subject_id: finding.subjects[0] ?? null,
+        message: finding.text,
+      })
+  for (const { workshop_id: workshopId, reason } of scheduling?.unscheduled ?? [])
+    findings.push({
+      id: 'workshop-scheduling.unplaced',
+      subject_id: workshopId,
+      message: `Workshop ${workshopId} hat keinen Platz im Programm (${reason}).`,
+    })
+  for (const violation of attendance?.fixed_violations ?? [])
+    findings.push({
+      id: 'workshop-assignment.fixed-invalid',
+      subject_id: violation.person_id,
+      message: `Feste Teilnahme von ${violation.person_id} an ${violation.workshop_id} ist nicht erfüllbar.`,
+    })
+  return findings.length === 0 ? { ready: true } : { ready: false, findings }
+}

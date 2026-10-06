@@ -93,6 +93,20 @@ function project(
     requirements: world.requirements.filter((requirement) => visible.has(requirement.holder_id)),
     capabilities: world.capabilities.filter((capability) => visible.has(capability.entity_id)),
     entities_by_kind: index(entities, (entity) => entity.kind),
+    // Closing payloads name every family's placements; a projected world keeps only the
+    // timing of each fact. The family composition of closed results belongs to phases §6.
+    phase_facts: {
+      opened: world.phase_facts.opened,
+      areas: Object.fromEntries(
+        Object.entries(world.phase_facts.areas).map(([area, facts]) => [
+          area,
+          {
+            closings: facts.closings.map(({ seq, at }) => ({ seq, at, payload: null })),
+            latest: facts.latest,
+          },
+        ]),
+      ),
+    },
   }
 }
 

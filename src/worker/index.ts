@@ -17,6 +17,7 @@ import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
 import { authorizeEventBatch, type FamilyLabelOffered } from '../auth/authorization.js'
 import { deriveFeatureView, effectiveFeatureIds } from '../derive/features.js'
+import { derivePhaseView, phaseActivation } from '../derive/phases.js'
 import { familyGovernedLabelKeys } from '../modules/family-preferences/index.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
@@ -545,7 +546,15 @@ function familyLabelGate(world: World, env: Env): FamilyLabelOffered {
       modules: activeProfile.modules,
       world,
       overrides: featureBindings(env).overrides,
-      phase_active: () => true,
+      phase_active: phaseActivation(
+        derivePhaseView({
+          modules: activeProfile.modules,
+          meta: activeProfile.meta,
+          world,
+          now: new Date().toISOString(),
+          plan: null,
+        }),
+      ),
       principal: 'family',
     }),
   )

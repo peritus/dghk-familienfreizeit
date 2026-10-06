@@ -9,6 +9,7 @@ import type {
 } from '../../../config/define.js'
 import type { FeatureAudience } from '../../../config/features.js'
 import { sectionOffered } from '../../../derive/features.js'
+import type { PhaseView } from '../../../derive/phases.js'
 import {
   familyControlDefinitions,
   familyControlLabelKey,
@@ -34,6 +35,8 @@ export type FamilyPreferencesControlsProps = {
   audience?: FeatureAudience
   /** Effective features for the audience; absent offers every section (features.md §4). */
   effective_features?: ReadonlySet<string>
+  /** The derived phase view, for Zieltermin, late, and closed notices (phases.md §8). */
+  phases?: readonly PhaseView[]
 }
 
 type Target = { id: string; kind: 'family' | 'person' }
@@ -611,20 +614,42 @@ function WorkshopControls({
   )
 }
 
-function targetNotice(
-  section: FamilyPreferencesParams['sections'][number],
-  meta: OccasionProfile['meta'],
-): string | null {
-  if (!section.phase) return null
-  const target = meta.phase_dates?.find(({ phase }) => phase === section.phase)?.target_at
-  if (!target) return null
-  const date = new Intl.DateTimeFormat(meta.locale, {
+function formatPhaseDate(value: string, meta: OccasionProfile['meta']): string {
+  return new Intl.DateTimeFormat(meta.locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     ['timeZone']: meta.timezone,
-  }).format(new Date(target))
-  return `Zieltermin: ${date}. Änderungen bleiben danach möglich, werden aber als verspätet markiert.`
+  }).format(new Date(value))
+}
+
+/**
+ * The notice for a section's governing phase (spec/architecture/phases.md §8). A Zieltermin
+ * never reads as a cut-off; only a closed area names the organiser decision. Without a phase
+ * view the static Zieltermin is shown.
+ */
+export function phaseNoticeText(
+  section: FamilyPreferencesParams['sections'][number],
+  meta: OccasionProfile['meta'],
+  audience: FeatureAudience,
+  phases?: readonly PhaseView[],
+): string | null {
+  if (!section.phase) return null
+  const view = phases?.find(({ phase }) => phase === section.phase)
+  const target =
+    view?.target_at ??
+    meta.phase_dates?.find(({ phase }) => phase === section.phase)?.target_at ??
+    null
+  const title = localized(section.title, meta.locale, meta.fallback_locale)
+  if (view?.status === 'closed')
+    return audience === 'organiser'
+      ? `${title}: Festgelegt${view.closed ? ` am ${formatPhaseDate(view.closed.at, meta)}` : ''}. Änderungen hier erscheinen als Abweichung vom festgelegten Ergebnis.`
+      : `${title}: Festgelegt. Für Änderungen wende dich bitte an das Organisationsteam.`
+  if (view?.status === 'upcoming') return null
+  if (!target) return null
+  if (view?.status === 'late')
+    return `Zieltermin: ${formatPhaseDate(target, meta)} (überschritten). Änderungen bleiben möglich, werden aber als verspätet markiert.${section.late_contact ? ` ${localized(section.late_contact, meta.locale, meta.fallback_locale)}` : ''}`
+  return `Zieltermin: ${formatPhaseDate(target, meta)}. Änderungen bleiben danach möglich, werden aber als verspätet markiert.`
 }
 
 export function FamilyPreferenceSection({
@@ -639,6 +664,8 @@ export function FamilyPreferenceSection({
   trait_keys: traitKeys,
   defer_text: deferText,
   tri_state_no_answer: triStateNoAnswer,
+  audience = 'family',
+  phases,
 }: FamilyPreferencesControlsProps & {
   section: FamilyPreferencesParams['sections'][number]
 }) {
@@ -648,6 +675,7 @@ export function FamilyPreferenceSection({
     [profile],
   )
   const familyTarget: Target = { id: familyId, kind: 'family' }
+  const notice = phaseNoticeText(section, profile.meta, audience, phases)
   const scopedPersons = personId ? persons.filter((person) => person.id === personId) : persons
 
   return (
@@ -659,9 +687,7 @@ export function FamilyPreferenceSection({
         {section.intro ? (
           <p>{localized(section.intro, profile.meta.locale, profile.meta.fallback_locale)}</p>
         ) : null}
-        {targetNotice(section, profile.meta) ? (
-          <p role="note">{targetNotice(section, profile.meta)}</p>
-        ) : null}
+        {notice ? <p role="note">{notice}</p> : null}
       </CardHeader>
       <CardContent className="grid gap-5">
         {section.traits

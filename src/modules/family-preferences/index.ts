@@ -56,7 +56,7 @@ export const familyPreferences = defineModule<FamilyPreferencesParams>({
         audience: 'family',
         subject_kind: 'family',
         requires_features: [],
-        requires_phases: [],
+        requires_phases: ['family-preferences.accommodation-preferences'],
         activation_mode: 'all',
         organiser_counterpart: 'family-preferences.organiser-room-wishes',
       },

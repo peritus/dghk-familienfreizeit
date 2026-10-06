@@ -4,6 +4,7 @@ import type { ResolvedRequirement } from '../../events/resolver.js'
 import { evaluateRules } from '../../solver/index.js'
 import type { Rule, SolverInput, SolverStage, TraceEntry } from '../../solver/types.js'
 import { defineModule } from '../define.js'
+import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
 import { inventoryWorld, type InventoryRoom } from '../room-inventory/index.js'
 
 export type RoomAssignmentParams = {
@@ -119,6 +120,7 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
         opens: { kind: 'always' },
         target: false,
         closed_by_area: false,
+        readiness: roomReviewReadiness,
       },
     ],
     trait_roles: [
@@ -999,4 +1001,38 @@ function priority(family: FamilyPlacementUnit, params: RoomAssignmentParams): nu
 
 function compareScore(left: RoomScore, right: RoomScore): number {
   return right.score - left.score || compareEntity(left.room, right.room)
+}
+
+/**
+ * The accommodation review is ready when the current plan has no blocking room-assignment
+ * preflight finding and every fixed room decision holds (spec/architecture/phases.md §4).
+ */
+export const roomReviewReadiness: PhaseReadiness = ({ plan }) => {
+  if (!plan)
+    return {
+      ready: false,
+      findings: [
+        {
+          id: 'phase.plan-unavailable',
+          subject_id: null,
+          message: 'Die Zuordnung ist noch nicht berechnet.',
+        },
+      ],
+    }
+  const section = plan.sections['room-assignment'] as RoomAssignmentSection | undefined
+  const findings: FindingRef[] = [
+    ...plan.preflight
+      .filter(({ check, severity }) => severity === 'error' && check.startsWith('room-assignment.'))
+      .map(({ check, subjects, text }) => ({
+        id: check,
+        subject_id: subjects[0] ?? null,
+        message: text,
+      })),
+    ...(section?.fixed_violations ?? []).map((violation) => ({
+      id: 'room-assignment.fixed-invalid',
+      subject_id: violation.family_id,
+      message: `Feste Zimmerentscheidung für ${violation.family_id} ist nicht erfüllbar.`,
+    })),
+  ]
+  return findings.length === 0 ? { ready: true } : { ready: false, findings }
 }

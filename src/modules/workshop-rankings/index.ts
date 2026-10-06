@@ -154,7 +154,7 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
         audience: 'family',
         subject_kind: 'person',
         requires_features: [],
-        requires_phases: [],
+        requires_phases: ['workshop-rankings.choice'],
         activation_mode: 'all',
         organiser_counterpart: 'workshop-rankings.organiser-workshop-wishes',
       },

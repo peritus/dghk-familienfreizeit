@@ -14,6 +14,7 @@ import {
   effectiveFeatureIds,
   sameFeatureOverrides,
 } from '../../derive/features.js'
+import { derivePhaseView, phaseActivation } from '../../derive/phases.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveWorld,
@@ -171,22 +172,6 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     }
   }, [state])
 
-  const effectiveFeatures = useMemo(
-    () =>
-      derivation.world
-        ? effectiveFeatureIds(
-            deriveFeatureView({
-              modules: activeProfile.modules,
-              world: derivation.world,
-              overrides: state.feature_overrides,
-              phase_active: () => true,
-              principal: 'organiser',
-            }),
-          )
-        : new Set<string>(),
-    [derivation.world, state.feature_overrides],
-  )
-
   const currentPlan = useMemo(() => {
     if (
       state.status === 'loading' ||
@@ -206,6 +191,36 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       seed: null,
     })
   }, [derivation.world, state])
+
+  const phaseView = useMemo(
+    () =>
+      derivation.world
+        ? derivePhaseView({
+            modules: activeProfile.modules,
+            meta: activeProfile.meta,
+            world: derivation.world,
+            now: new Date().toISOString(),
+            plan: currentPlan,
+          })
+        : [],
+    [derivation.world, currentPlan],
+  )
+
+  const effectiveFeatures = useMemo(
+    () =>
+      derivation.world
+        ? effectiveFeatureIds(
+            deriveFeatureView({
+              modules: activeProfile.modules,
+              world: derivation.world,
+              overrides: state.feature_overrides,
+              phase_active: phaseActivation(phaseView),
+              principal: 'organiser',
+            }),
+          )
+        : new Set<string>(),
+    [derivation.world, phaseView, state.feature_overrides],
+  )
 
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
@@ -314,6 +329,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         apply,
         current_plan: currentPlan,
         effective_features: effectiveFeatures,
+        phases: phaseView,
       }}
     >
       <OrganiserFrame profile={profile}>

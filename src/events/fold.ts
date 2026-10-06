@@ -64,6 +64,28 @@ export type Label = {
   sensitivity: 'normal' | 'restricted'
 }
 
+/** How the kernel records a module event as a phase fact (spec/architecture/phases.md §3). */
+export type PhaseEventRole =
+  | { role: 'open'; phase: string }
+  | { role: 'close'; area: string }
+  | { role: 'reopen'; area: string }
+
+/** One closing event of an area, with the payload it recorded. */
+export type AreaClosing = { seq: number; at: string; payload: JsonValue }
+
+export type AreaFacts = {
+  /** Every closing of the area, oldest first. */
+  closings: readonly AreaClosing[]
+  /** The latest closing or reopening, or null while the area was never closed. */
+  latest: { kind: 'closed' | 'reopened'; seq: number; at: string } | null
+}
+
+/** Per-phase and per-area facts folded from opening, closing, and reopening events. */
+export type PhaseFacts = {
+  opened: Readonly<Record<string, { seq: number; at: string }>>
+  areas: Readonly<Record<string, AreaFacts>>
+}
+
 export type World = {
   families: Entity[]
   persons: Entity[]
@@ -82,6 +104,8 @@ export type World = {
   summaries: Readonly<Record<string, unknown>>
   /** One sorted collection per entity kind, kernel and module-owned alike. Retired/withdrawn entities are absent (D27). */
   entities_by_kind: Readonly<Record<string, readonly Entity[]>>
+  /** Opening, closing, and reopening facts; the phase view is derived from them outside `derive`. */
+  phase_facts: PhaseFacts
 }
 
 /**
@@ -259,6 +283,10 @@ export type ValidationWorld = {
   entities(kind: string): readonly Entity[]
   labels(entityId: string): readonly Label[]
   labelsByKey(key: string): readonly Label[]
+  /** Whether an event-opened phase has been opened. */
+  phaseOpened(phase: string): boolean
+  /** Whether the area's latest closing or reopening event is a closing. */
+  areaClosed(area: string): boolean
 }
 
 export type ModuleEventValidate = (payload: JsonValue, world: ValidationWorld) => string | null
@@ -282,6 +310,8 @@ export type KernelConfig = {
   event_authorize_dispatch?: Readonly<Record<string, ModuleEventAuthorize>>
   /** Single-owner event type -> state-aware invariant validation. */
   event_validate_dispatch?: Readonly<Record<string, ModuleEventValidate>>
+  /** Module event type -> the phase fact it records; see `defineOccasionProfile`. */
+  phase_event_roles?: Readonly<Record<string, PhaseEventRole>>
 }
 type MutableWorld = {
   families: Map<string, Entity>
@@ -306,6 +336,9 @@ type MutableWorld = {
   entities_by_kind: Map<string, Map<string, Entity>>
   labels_by_entity: Map<string, Map<string, Label>>
   labels_by_key: Map<string, Map<string, Label>>
+  phase_opened: Map<string, { seq: number; at: string }>
+  area_closings: Map<string, AreaClosing[]>
+  area_latest: Map<string, { kind: 'closed' | 'reopened'; seq: number; at: string }>
 }
 
 export function derive(events: readonly Event[], config: KernelConfig = {}): World {
@@ -391,6 +424,8 @@ function validationWorld(state: MutableWorld): ValidationWorld {
     entities: (kind) => [...(state.entities_by_kind.get(kind)?.values() ?? [])],
     labels: (entityId) => entityLabels(state, entityId),
     labelsByKey: (key) => [...(state.labels_by_key.get(key)?.values() ?? [])],
+    phaseOpened: (phase) => state.phase_opened.has(phase),
+    areaClosed: (area) => state.area_latest.get(area)?.kind === 'closed',
   }
 }
 
@@ -406,6 +441,9 @@ function createMutableWorld(): MutableWorld {
     entities_by_kind: new Map(),
     labels_by_entity: new Map(),
     labels_by_key: new Map(),
+    phase_opened: new Map(),
+    area_closings: new Map(),
+    area_latest: new Map(),
   }
 }
 
@@ -472,7 +510,49 @@ function worldFromState(state: MutableWorld, config: KernelConfig): World {
     diagnostics: resolved.diagnostics,
     summaries: {},
     entities_by_kind: entitiesByKind(entities),
+    phase_facts: phaseFacts(state),
   }
+}
+
+function phaseFacts(state: MutableWorld): PhaseFacts {
+  const areas = new Set([...state.area_closings.keys(), ...state.area_latest.keys()])
+  return {
+    opened: Object.fromEntries(state.phase_opened),
+    areas: Object.fromEntries(
+      [...areas].sort().map((area) => [
+        area,
+        {
+          closings: [...(state.area_closings.get(area) ?? [])],
+          latest: state.area_latest.get(area) ?? null,
+        },
+      ]),
+    ),
+  }
+}
+
+/** Records the phase fact of an opening, closing, or reopening event after its module fold. */
+function recordPhaseEvent(state: MutableWorld, event: Event, config: KernelConfig): void {
+  const role = config.phase_event_roles?.[event.type]
+  if (!role) return
+  const at = { seq: event.seq, at: event.at }
+  if (role.role === 'open') {
+    if (!state.phase_opened.has(role.phase)) state.phase_opened.set(role.phase, at)
+    return
+  }
+  if (role.role === 'close') {
+    indexList(state.area_closings, role.area).push({ ...at, payload: event.payload })
+    state.area_latest.set(role.area, { kind: 'closed', ...at })
+    return
+  }
+  state.area_latest.set(role.area, { kind: 'reopened', ...at })
+}
+
+function indexList<T>(index: Map<string, T[]>, key: string): T[] {
+  const existing = index.get(key)
+  if (existing) return existing
+  const created: T[] = []
+  index.set(key, created)
+  return created
 }
 
 function entitiesByKind(entities: readonly Entity[]): Readonly<Record<string, readonly Entity[]>> {
@@ -648,6 +728,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         },
       }
       fold(capability, { type: event.type, payload: event.payload, seq: event.seq })
+      recordPhaseEvent(state, event, config)
     }
   }
   state.head_seq = event.seq

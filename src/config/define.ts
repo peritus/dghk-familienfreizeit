@@ -6,6 +6,7 @@ import {
   type ModuleEventAuthorize,
   type ModuleEventFold,
   type ModuleEventValidate,
+  type PhaseEventRole,
   type ResolverDescriptor,
   type WorldCheck,
   type WorldSummaryDefinition,
@@ -571,6 +572,15 @@ const kernelEntityKindPrefixes: Readonly<Record<string, string>> = {
   person: 'per_',
 }
 
+/** Maps each module event that opens, closes, or reopens a phase to the fact the fold records. */
+function phaseEventRoles(modules: readonly ProfileModule[]): Record<string, PhaseEventRole> {
+  const roles: Record<string, PhaseEventRole> = {}
+  for (const module of modules)
+    for (const phase of module.contributions.phases ?? [])
+      if (phase.opens.kind === 'event') roles[phase.opens.event] = { role: 'open', phase: phase.id }
+  return roles
+}
+
 function validationView(
   traits: Record<string, Trait>,
   modules: readonly ProfileModule[],
@@ -648,6 +658,7 @@ function validationView(
     event_authorize_dispatch: eventAuthorizeDispatch,
     event_validate_dispatch: eventValidateDispatch,
     entity_kind_prefixes: entityKindPrefixes,
+    phase_event_roles: phaseEventRoles(modules),
   }
 }
 
