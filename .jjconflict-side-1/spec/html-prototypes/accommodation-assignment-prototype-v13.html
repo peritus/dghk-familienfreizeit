@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wer schläft wo? — Prototyp</title>
+<style>
+  :root {
+    color-scheme: light;
+    --background: hsl(33 100% 92%);
+    --paper: #fffaf0;
+    --main: hsl(28 100% 51%);
+    --danger: hsl(2 90% 66%);
+    --muted: hsl(30 10% 32%);
+    --rule: hsl(33 25% 82%);
+    --shadow: 4px 4px 0 0 #000;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--background); color: #000; line-height: 1.625;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  }
+  button { font: inherit; color: inherit; }
+  a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid #000; outline-offset: 4px; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 24px 96px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 14px; }
+  h1, h2, h3, h4 { font-weight: 700; margin: 0; line-height: 1.2; }
+  p { margin: 0; }
+
+  /* Links to edit screens: quiet underline, full weight on hover */
+  .edit-link { color: inherit; text-decoration: underline; text-decoration-color: rgb(0 0 0 / 0.25); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  .edit-link:hover { text-decoration-color: #000; text-decoration-thickness: 2px; }
+
+  /* Pressable button */
+  .btn {
+    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px; padding: 8px 16px; white-space: nowrap;
+    border: 2px solid #000; border-radius: 5px; background: #fff; color: #000;
+    font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer;
+    box-shadow: var(--shadow); transition: translate 120ms, box-shadow 120ms;
+  }
+  .btn:hover, .btn:active { translate: 4px 4px; box-shadow: none; }
+  .btn.sm { min-height: 36px; padding: 4px 12px; }
+  .btn.main { background: var(--main); }
+  @media (prefers-reduced-motion: reduce) { .btn:hover, .btn:active { translate: none; box-shadow: var(--shadow); } }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 8px;
+    border: 2px solid #000; border-radius: 5px; background: #fff;
+    font-size: 14px; font-weight: 700; white-space: nowrap;
+  }
+  .chip.free { border-style: dashed; }
+  .chip.bad { background: var(--danger); }
+  .chip svg { width: 14px; height: 14px; }
+
+  /* Requirement chips: met = quiet, unmet wish = dashed, violation = red */
+  .needs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .need {
+    display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 8px;
+    border: 1.5px solid var(--muted); border-radius: 5px; font-size: 13px; font-weight: 500; background: #fff;
+  }
+  .need.no-pref { border-style: dashed; color: var(--muted); }
+  .need.bad-req { border: 2px solid #000; background: var(--danger); font-weight: 700; }
+  .need.open { border: 2px solid #000; background: var(--paper); font-weight: 700; }
+
+  /* Prototype-only switch */
+  .proto { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border: 2px dashed var(--muted); border-radius: 5px; padding: 8px 12px; margin-bottom: 24px; font-size: 14px; }
+  .proto label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .proto input { width: 18px; height: 18px; accent-color: #000; }
+
+  /* Header + stats */
+  .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+  h1 { font-size: clamp(30px, 4vw, 36px); }
+  .page-head p { margin-top: 8px; }
+  .stats { display: grid; border: 2px solid #000; border-radius: 5px; background: #fff; margin-bottom: 40px; overflow: hidden; }
+  .stat { padding: 16px; text-align: center; border-right: 2px solid #000; }
+  .stat:last-child { border-right: 0; }
+  .stat.attn { background: var(--main); }
+  .stat .num { font-size: 36px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .lbl { font-weight: 700; margin-top: 4px; }
+  @media (max-width: 720px) {
+    .stats { grid-template-columns: repeat(2, 1fr) !important; }
+    .stat { border-right: 0; border-bottom: 2px solid #000; }
+    .stat:nth-child(odd) { border-right: 2px solid #000; }
+    .stat:last-child { border-bottom: 0; }
+    .stat:last-child:nth-child(odd) { grid-column: span 2; border-right: 0; }
+    .stat:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+  }
+
+  /* Overview */
+  .overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 32px; margin-bottom: 48px; align-items: start; }
+  .overview .col { display: grid; gap: 32px; }
+  .section-head { margin-bottom: 12px; }
+  h2 { font-size: 24px; }
+  .section-head p { margin-top: 2px; }
+  .list { border: 2px solid #000; border-radius: 5px; background: #fff; }
+  .list > * + * { border-top: 2px solid #000; }
+  .list-empty { border: 2px dashed var(--muted); border-radius: 5px; padding: 16px; }
+  .fam-row { padding: 16px; }
+  .fam-row .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+  .room-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px 16px; padding: 12px 16px; }
+  .room-row .right { display: flex; align-items: center; gap: 12px; font-variant-numeric: tabular-nums; }
+  .room-row .right span { display: inline-flex; align-items: center; gap: 4px; }
+  .fit { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+  .fit li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+  /* Buildings: the same header bar collapsed and expanded; expanding only adds the rooms below */
+  /* Section heading, not a card: cards are reserved for rooms */
+  .building { margin-bottom: 24px; }
+  .building.open { margin: 40px 0 48px; }
+  .building.open:first-child { margin-top: 0; }
+  .bhead {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
+    padding-bottom: 12px; border-bottom: 2px solid #000;
+  }
+  .building.open .bhead { margin-bottom: 8px; }
+  .bhead .title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; min-width: 0; }
+  .bhead h2 { font-size: 24px; }
+  .bhead .side { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .bhead .status { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip.ok { background: #fff; }
+  h3.floor { font-size: 17px; border-bottom: 1.5px solid var(--rule); padding-bottom: 6px; margin: 16px 0 16px; }
+  .floors > h3.floor:not(:first-child) { margin-top: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 20px; align-items: start; }
+
+  /* Room card */
+  .room { border: 2px solid #000; border-radius: 5px; background: #fff; overflow: hidden; }
+  .room.empty { border-style: dashed; background: transparent; }
+  .room-top { padding: 16px; }
+  .room-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .room-title h4 { font-size: 20px; line-height: 1.3; }
+  .room-meta { margin-top: 2px; font-size: 14px; }
+  .bed-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 10px; font-variant-numeric: tabular-nums; }
+  .bed-summary span { display: inline-flex; align-items: center; gap: 4px; }
+  .bed-summary .places { margin-left: auto; font-weight: 700; }
+  .ico { width: 32px; height: 24px; flex-shrink: 0; }
+
+  .fams { list-style: none; margin: 0; padding: 0 16px; border-top: 2px solid #000; }
+  .fam { padding: 12px 0; border-top: 1.5px solid var(--rule); }
+  .fam:first-child { border-top: 0; }
+  .fam-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .fam .names, .fam-row .names { color: var(--muted); font-size: 15px; }
+  .fam.pinned { background: var(--paper); margin: 0 -16px; padding: 12px 16px; }
+  .fam .actions { margin-top: 10px; }
+  body.families-only .names { display: none; }
+  .empty-note { padding: 12px 16px 16px; border-top: 2px dashed var(--muted); font-size: 15px; }
+
+  /* Dialog */
+  dialog {
+    border: 2px solid #000; border-radius: 5px; padding: 0; background: #fff; color: #000;
+    width: min(38rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); box-shadow: 6px 6px 0 0 #000;
+  }
+  dialog::backdrop { background: rgb(0 0 0 / 0.4); }
+  .dlg { display: flex; flex-direction: column; max-height: calc(100dvh - 2rem - 4px); }
+  .dlg-head { padding: 20px 20px 16px; border-bottom: 2px solid #000; }
+  .dlg-head h2 { font-size: 22px; }
+  .dlg-warn { border-left: 4px solid var(--main); padding-left: 12px; margin-top: 12px; font-size: 14px; }
+  .dlg-body { overflow-y: auto; padding: 16px 20px; background: var(--paper); }
+  .cand { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 16px; }
+  .dlg-foot { padding: 14px 20px; border-top: 2px solid #000; display: flex; justify-content: flex-end; }
+
+  footer { margin-top: 48px; padding-top: 16px; border-top: 2px dashed var(--muted); font-size: 13px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* Print: a door list of the whole board */
+  @media print {
+    body { background: #fff; font-size: 11pt; }
+    .wrap { padding: 0; max-width: none; }
+    .proto, .stats, .overview, .btn, .actions, footer, dialog, .page-head p { display: none !important; }
+    body.families-only .names { display: block; }
+    .building { break-before: page; margin: 0; }
+    .building:first-child { break-before: auto; }
+    .bhead .side { display: none !important; }
+    .floors { display: block !important; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .room, .room.empty { break-inside: avoid; box-shadow: none; }
+    .fam.pinned { background: none; }
+    .edit-link { text-decoration: none; }
+  }
+</style>
+</head>
+<body class="families-only">
+<div class="wrap">
+  <div class="proto">
+    <strong>Prototyp</strong>
+    <label><input type="checkbox" id="happy"> Übersicht ohne Probleme zeigen</label>
+  </div>
+
+  <header class="page-head">
+    <div>
+      <h1>Wer schläft wo?</h1>
+    </div>
+    <button type="button" class="btn" id="print">Belegung drucken</button>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="overview">
+    <div class="col" id="problems"></div>
+    <div class="col">
+      <section aria-labelledby="free-title">
+        <div class="section-head"><h2 id="free-title">Freie Zimmer</h2><p class="muted" id="freeSub"></p></div>
+        <div id="freeList"></div>
+      </section>
+      <section aria-labelledby="partial-title">
+        <div class="section-head"><h2 id="partial-title">Teilweise freie Zimmer</h2><p class="muted" id="partialSub"></p></div>
+        <div id="partialList"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="board"></div>
+
+  <footer class="muted">Statischer Prototyp: zeigt alle Zustände nebeneinander, Aktionen ändern nichts. Links führen zu den Bearbeitungsseiten von Familien und Zimmern (Pfade sind Platzhalter). Gebäude ohne Probleme starten eingeklappt. Anforderungen und Vornamen außerhalb von Baumann, Gaertner, Keller und Rivera sind Platzhalter.</footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlg" id="dlgInner"></div></dialog>
+
+<script>
+const ICON = {
+  einzel: '<svg class="ico" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="14" height="20" rx="2"/><line x1="12" y1="7" x2="20" y2="7"/></svg>',
+  doppel: '<svg class="ico" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="28" height="20" rx="2"/><line x1="6" y1="7" x2="13" y2="7"/><line x1="19" y1="7" x2="26" y2="7"/></svg>',
+  etagen: '<svg class="ico" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="2" x2="4" y2="22"/><line x1="28" y1="2" x2="28" y2="22"/><line x1="4" y1="4" x2="28" y2="4"/><line x1="7" y1="4" x2="11" y2="4" stroke-width="3"/><line x1="4" y1="13" x2="28" y2="13"/><line x1="7" y1="13" x2="11" y2="13" stroke-width="3"/><line x1="4" y1="22" x2="28" y2="22"/></svg>',
+};
+const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 3h6l-1 6 4 4H6l4-4z"/></svg>';
+const LAYOUT = { 1: ['einzel'], 2: ['doppel'], 3: ['einzel','etagen'], 4: ['doppel','etagen'], 5: ['einzel','doppel','etagen'], 6: ['etagen','etagen','etagen'] };
+const NEED = { bad: 'Eigenes Bad', barrierearm: 'Barrierearm', eigenes: 'Eigenes Zimmer' };
+
+/* One consistent state that covers every case:
+   - all rooms with a private bath are taken, so Dietrich's unmet wish is explainable
+   - no barrier-free room is big enough for Seidel
+   - Brandt is fixed to a room that breaks their requirement
+   - Hahn is fixed to a room that became too small
+   Needs belong to the family: k = kind, req = required (else a wish) */
+const data = [
+  { name: 'Haupthaus', floors: [
+    { name: '1. Obergeschoss', rooms: [
+      { id: 'rm_12', name: 'Zimmer 12', cap: 4, tags: ['Eigenes Bad'], fams: [{ id: 'fam_baumann', n: 'Baumann', p: ['Ben','Clara','David','Ella'], needs: [{ k: 'bad', req: true }] }] },
+      { id: 'rm_14', name: 'Zimmer 14', cap: 6, tags: [], fams: [{ id: 'fam_gaertner', n: 'Gaertner', p: ['Greta','Hannes','Anna'], needs: [] }, { id: 'fam_keller', n: 'Keller', p: ['Ben','Clara','David'], needs: [] }] },
+      { id: 'rm_16', name: 'Zimmer 16', cap: 3, tags: [], fams: [{ id: 'fam_rivera', n: 'Rivera', p: ['Sam','Kim','Toni'], needs: [{ k: 'eigenes' }] }] },
+    ]}
+  ]},
+  { name: 'Gartenhaus', floors: [
+    { name: 'Erdgeschoss', rooms: [
+      { id: 'rm_3', name: 'Zimmer 3', cap: 2, tags: ['Barrierearm','Eigenes Bad'], fams: [{ id: 'fam_morgan', n: 'Morgan', p: ['Lea','Timo'], needs: [{ k: 'barrierearm', req: true }] }] },
+    ]}
+  ]},
+  { name: 'Waldhaus', floors: [
+    { name: 'Erdgeschoss', rooms: [
+      { id: 'rm_101', name: 'Zimmer 101', cap: 4, tags: ['Barrierearm','Eigenes Bad'], fams: [{ id: 'fam_becker', n: 'Becker', p: ['Nora','Jens','Mila','Finn'], needs: [{ k: 'barrierearm', req: true }, { k: 'bad' }] }] },
+      { id: 'rm_102', name: 'Zimmer 102', cap: 6, tags: [], fams: [{ id: 'fam_mertens', n: 'Mertens', p: ['Ute','Karl','Jonas','Lotta','Mats'], needs: [{ k: 'eigenes', req: true }] }] },
+      { id: 'rm_103', name: 'Zimmer 103', cap: 5, tags: [], fams: [{ id: 'fam_ziegler', n: 'Ziegler', p: ['Sabine','Tom','Leni','Ben','Pia'], needs: [] }] },
+      { id: 'rm_104', name: 'Zimmer 104', cap: 6, tags: ['Eigenes Bad'], fams: [{ id: 'fam_grimm', n: 'Grimm', p: ['Hanna','Olaf','Juri'], needs: [] }, { id: 'fam_koenig', n: 'Koenig', p: ['Maren','Felix','Ella'], needs: [{ k: 'bad' }] }] },
+      { id: 'rm_105', name: 'Zimmer 105', cap: 6, tags: [], fams: [] },
+    ]},
+    { name: '1. Obergeschoss', rooms: [
+      { id: 'rm_201', name: 'Zimmer 201', cap: 4, tags: ['Eigenes Bad'], fams: [{ id: 'fam_yilmaz', n: 'Yilmaz', p: ['Elif','Can','Deniz','Aylin'], needs: [{ k: 'bad' }] }] },
+      { id: 'rm_202', name: 'Zimmer 202', cap: 5, tags: [], fams: [{ id: 'fam_engel', n: 'Engel', p: ['Paul','Rike','Ida','Emil'], needs: [] }, { id: 'fam_lang', n: 'Lang', p: ['Otto'], needs: [], pinned: true }] },
+      { id: 'rm_203', name: 'Zimmer 203', cap: 5, tags: [], fams: [{ id: 'fam_dietrich', n: 'Dietrich', p: ['Vera','Nils','Kai'], needs: [{ k: 'bad' }] }] },
+      { id: 'rm_204', name: 'Zimmer 204', cap: 6, tags: [], fams: [{ id: 'fam_brandt', n: 'Brandt', p: ['Ilse','Horst'], needs: [{ k: 'barrierearm', req: true }], pinned: true }] },
+      { id: 'rm_205', name: 'Zimmer 205', cap: 6, tags: [], fams: [] },
+    ]}
+  ]},
+];
+const unplaced = [
+  { id: 'fam_seidel', n: 'Seidel', p: ['Jana','Marc','Lina','Paul','Ruth'], needs: [{ k: 'barrierearm', req: true }] },
+  { id: 'fam_hahn', n: 'Hahn', p: ['Mia','Lars','Emma','Noah'], needs: [], pinnedTo: 'Zimmer 16' },
+];
+
+const ROOMS = [];
+data.forEach(b => b.floors.forEach(f => f.rooms.forEach(r => { r.floor = f.name; r.building = b.name; ROOMS.push(r); })));
+const FAMS = {};
+ROOMS.forEach(r => r.fams.forEach(f => { f.room = r; FAMS[f.id] = f; }));
+unplaced.forEach(f => FAMS[f.id] = f);
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const used = r => r.fams.reduce((a, f) => a + f.p.length, 0);
+const personen = n => n === 1 ? '1 Person' : n + ' Personen';
+const plaetze = n => n === 1 ? '1 Platz' : n + ' Plätze';
+const plaetzen = n => n === 1 ? '1 Platz' : n + ' Plätzen'; // after "von"
+const familien = n => n === 1 ? '1 Familie' : n + ' Familien';
+const exclusive = r => r.fams.some(f => f.needs.some(n => n.k === 'eigenes' && n.req));
+// Is need `n` met in room `r` if it holds `count` families?
+const met = (n, r, count = r.fams.length) => n.k === 'eigenes' ? count === 1 : r.tags.includes(NEED[n.k]);
+const label = n => NEED[n.k];
+
+const famLink = f => `<a class="edit-link" href="/familien/${f.id}/bearbeiten">Familie ${esc(f.n)}</a>`;
+const roomLink = r => `<a class="edit-link" href="/unterkunft/zimmer/${r.id}/bearbeiten">${esc(r.name)}</a>`;
+
+function needChip(n, ok) {
+  if (ok === null) return `<span class="need open">${label(n)} (${n.req ? 'erforderlich' : 'Wunsch'})</span>`;
+  if (n.req) return ok ? `<span class="need">✓ ${label(n)}<span class="sr"> erfüllt</span></span>`
+                       : `<span class="need bad-req">${label(n)} fehlt</span>`;
+  return ok ? `<span class="need">✓ ${label(n)} (Wunsch)</span>`
+            : `<span class="need no-pref">${label(n)} fehlt (Wunsch)</span>`;
+}
+function needBlock(f, r, count) {
+  if (!f.needs.length) return '';
+  const chips = f.needs.map(n => needChip(n, r ? met(n, r, count) : null)).join('');
+  return `<div class="needs">${chips}</div>`;
+}
+const violated = f => f.room && f.needs.some(n => n.req && !met(n, f.room));
+const wishMissed = f => f.room && f.needs.some(n => !n.req && !met(n, f.room));
+
+function bedSummary(r) {
+  const counts = {};
+  LAYOUT[r.cap].forEach(t => counts[t] = (counts[t] || 0) + 1);
+  return Object.entries(counts).map(([t, n]) => `<span>${ICON[t]}${n}×</span>`).join('');
+}
+const success = text => `<p><span class="chip ok">✓ ${text}</span></p>`;
+const pinChip = `<span class="chip">${PIN}Fest zugeordnet</span>`;
+
+function roomCard(r) {
+  const free = r.cap - used(r);
+  const status = !r.fams.length || free === 0 ? ''
+    : `<span class="chip free">${free} frei</span>`;
+  const meta = r.tags.length ? `<p class="room-meta muted">${r.tags.map(esc).join(', ')}</p>` : '';
+  const top = `<div class="room-top"><div class="room-title"><h4>${roomLink(r)}</h4>${status}</div>${meta}
+    <div class="bed-summary">${bedSummary(r)}<span class="places">${plaetze(r.cap)}</span></div></div>`;
+  if (!r.fams.length) return `<article class="room empty">${top}<p class="empty-note muted">Noch keine Familie zugeordnet.</p></article>`;
+  const fams = r.fams.map(f => {
+    const acts = f.pinned ? `<button type="button" class="btn sm">Zuordnung aufheben</button>`
+      : wishMissed(f) ? `<button type="button" class="btn sm" data-pin="${f.id}">Fest zuordnen</button>` : '';
+    return `<li class="fam${f.pinned ? ' pinned' : ''}">
+      <div class="fam-head"><p><strong>${famLink(f)}</strong><span class="muted"> · ${personen(f.p.length)}</span></p>${f.pinned ? pinChip : ''}</div>
+      <p class="names">${f.p.map(esc).join(', ')}</p>
+      ${needBlock(f, r)}
+      ${acts ? `<div class="actions">${acts}</div>` : ''}
+    </li>`;
+  }).join('');
+  return `<article class="room">${top}<ul class="fams">${fams}</ul></article>`;
+}
+
+// How a free room relates to each family without a room: name + the same chips as on the cards
+function fitHints(r, list) {
+  const free = r.cap - used(r), count = r.fams.length + 1;
+  const lines = list.filter(f => f.p.length <= free).map(f => {
+    const missing = f.needs.filter(n => n.req && !met(n, r, count));
+    const chips = missing.length ? missing.map(n => needChip(n, false)).join('') : '<span class="need">✓ Passt</span>';
+    return `<li>${famLink(f)} ${chips}</li>`;
+  });
+  return lines.length ? `<ul class="fit">${lines.join('')}</ul>` : '';
+}
+
+const expanded = new Set(), seen = new Set();
+function render() {
+  const happy = document.getElementById('happy').checked;
+  const placed = ROOMS.flatMap(r => r.fams);
+  const open = happy ? [] : unplaced;
+  const violations = happy ? [] : placed.filter(violated);
+  const empty = happy ? [] : ROOMS.filter(r => !r.fams.length);
+  const pins = placed.filter(f => f.pinned).length + unplaced.filter(f => f.pinnedTo).length;
+
+  // Stats: problem counts get an orange cell only when non-zero; optional stats hide at zero
+  const stats = [
+    [placed.length + unplaced.length, 'Familien'],
+    [open.length, 'Ohne Zimmer', open.length > 0],
+    violations.length ? [violations.length, 'Ohne passendes Zimmer', true] : null,
+    !happy && pins ? [pins, 'Fest zugeordnet'] : null,
+    [happy ? 0 : ROOMS.reduce((a, r) => a + r.cap - used(r), 0), 'Freie Plätze'],
+  ].filter(Boolean);
+  const st = document.getElementById('stats');
+  st.style.gridTemplateColumns = `repeat(${stats.length}, 1fr)`;
+  st.innerHTML = stats.map(([n, l, a]) => `<div class="stat${a ? ' attn' : ''}"><p class="num">${n}</p><p class="lbl">${l}</p></div>`).join('');
+
+  // Problems column
+  const unplacedHtml = open.length ? `<div class="list">${open.map(f => `
+    <div class="fam-row">
+      <div class="top"><p><strong>${famLink(f)}</strong><span class="muted"> · ${personen(f.p.length)}</span></p>${f.pinnedTo ? `<span class="chip">${PIN}Fest zugeordnet: ${esc(f.pinnedTo)}</span>` : ''}</div>
+      <p class="names">${f.p.map(esc).join(', ')}</p>
+      ${needBlock(f, null)}
+      <div class="actions">
+        <button type="button" class="btn" data-pin="${f.id}">${f.pinnedTo ? 'Anderem Zimmer zuordnen' : 'Fest zuordnen'}</button>
+        ${f.pinnedTo ? '<button type="button" class="btn">Zuordnung aufheben</button>' : ''}
+      </div>
+    </div>`).join('')}</div>` : success('Alle Familien haben ein Zimmer');
+  const openPeople = open.reduce((a, f) => a + f.p.length, 0);
+  let problems = `<section aria-labelledby="unplaced-title">
+      <div class="section-head"><h2 id="unplaced-title">Ohne Zimmer</h2>${open.length ? `<p class="muted">${familien(open.length)}, ${personen(openPeople)}</p>` : ''}</div>
+      ${unplacedHtml}</section>`;
+  if (violations.length) problems += `<section aria-labelledby="viol-title">
+      <div class="section-head"><h2 id="viol-title">Ohne passendes Zimmer</h2><p class="muted">${familien(violations.length)}</p></div>
+      <div class="list">${violations.map(f => `
+        <div class="fam-row">
+          <div class="top"><p><strong>${famLink(f)}</strong><span class="muted"> · ${personen(f.p.length)} · in </span>${roomLink(f.room)}<span class="muted">, ${esc(f.room.building)}</span></p>${f.pinned ? pinChip : ''}</div>
+          ${needBlock(f, f.room)}
+          ${f.pinned ? '<div class="actions"><button type="button" class="btn">Zuordnung aufheben</button></div>' : ''}
+        </div>`).join('')}</div></section>`;
+  document.getElementById('problems').innerHTML = problems;
+
+  // Free rooms and partly free rooms, as two sections
+  const partial = happy ? [] : ROOMS.filter(r => r.fams.length && r.cap > used(r));
+  const freeIn = rs => rs.reduce((a, r) => a + r.cap - used(r), 0);
+  const roomRow = r => {
+    const shared = r.fams.length ? `<p class="small muted">Belegt von ${r.fams.map(famLink).join(', ')}</p>` : '';
+    const features = r.tags.length ? `<p class="small muted">${r.tags.map(esc).join(', ')}</p>` : '';
+    const amount = r.fams.length ? `<span class="chip free">${r.cap - used(r)} frei</span>` : `<strong>${plaetze(r.cap)}</strong>`;
+    return `<div class="room-row">
+      <div>
+        <p><strong>${roomLink(r)}</strong><span class="muted"> · ${esc(r.building)}, ${esc(r.floor)}</span></p>
+        ${features}${shared}
+        ${fitHints(r, open)}
+      </div>
+      <div class="right">${r.fams.length ? '' : bedSummary(r)}${amount}</div>
+    </div>`;
+  };
+  const inRooms = rs => `${plaetze(freeIn(rs))} in ${rs.length === 1 ? '1 Zimmer' : rs.length + ' Zimmern'}`;
+  document.getElementById('freeSub').textContent = empty.length ? inRooms(empty) : '';
+  document.getElementById('freeList').innerHTML = empty.length
+    ? `<div class="list">${empty.map(roomRow).join('')}</div>` : success('Alle Zimmer sind belegt');
+  document.getElementById('partialSub').textContent = partial.length ? inRooms(partial) : '';
+  document.getElementById('partialList').innerHTML = partial.length
+    ? `<div class="list">${partial.map(roomRow).join('')}</div>` : success('Alle belegten Zimmer sind voll');
+
+  // Buildings: expanded when something needs attention, otherwise a single bar
+  document.getElementById('board').innerHTML = data.map((b, bi) => {
+    const rs = b.floors.flatMap(f => f.rooms);
+    const fams = rs.flatMap(r => r.fams);
+    const cap = rs.reduce((a, r) => a + r.cap, 0), occ = rs.reduce((a, r) => a + used(r), 0);
+    const nViol = fams.filter(violated).length, nWish = fams.filter(wishMissed).length;
+    if (!expanded.has(bi) && !seen.has(bi)) { seen.add(bi); if (nViol || nWish) expanded.add(bi); }
+    const isOpen = expanded.has(bi);
+
+    const status = nViol || nWish
+      ? [nViol ? `<span class="chip bad">${nViol} ${nViol > 1 ? 'Anforderungen' : 'Anforderung'} nicht erfüllt</span>` : '',
+         nWish ? `<span class="chip free">${nWish} ${nWish > 1 ? 'Wünsche' : 'Wunsch'} nicht erfüllt</span>` : ''].join('')
+      : '<span class="chip ok">✓ Alles in Ordnung</span>';
+
+    return `<section class="building${isOpen ? ' open' : ''}" aria-labelledby="b${bi}">
+      <div class="bhead">
+        <div class="title">
+          <h2 id="b${bi}">${esc(b.name)}</h2>
+          <p class="muted small">${rs.length === 1 ? '1 Zimmer' : rs.length + ' Zimmer'}, ${familien(fams.length)}, ${occ} von ${plaetzen(cap)} belegt</p>
+        </div>
+        <div class="side">
+          <div class="status">${status}</div>
+          <button type="button" class="btn sm" data-toggle="${bi}" aria-expanded="${isOpen}" aria-controls="floors${bi}">${isOpen ? 'Zimmer ausblenden' : 'Zimmer anzeigen'}</button>
+        </div>
+      </div>
+      <div class="floors" id="floors${bi}"${isOpen ? '' : ' hidden'}>
+        ${b.floors.map(f => `<h3 class="floor">${esc(f.name)}</h3><div class="grid">${f.rooms.map(roomCard).join('')}</div>`).join('')}
+      </div>
+    </section>`;
+  }).join('');
+}
+
+// "Fest zuordnen" dialog: rooms with enough free places and how they match the family's needs
+const dlg = document.getElementById('dlg');
+function openPinDialog(id) {
+  const f = FAMS[id];
+  const size = f.p.length;
+  const cands = ROOMS.filter(r => r !== f.room && !exclusive(r) && r.cap - used(r) >= size).map(r => {
+    const count = r.fams.length + 1;
+    return { r, count,
+      reqMiss: f.needs.filter(n => n.req && !met(n, r, count)).length,
+      wishMiss: f.needs.filter(n => !n.req && !met(n, r, count)).length };
+  }).sort((a, b) => a.reqMiss - b.reqMiss || a.wishMiss - b.wishMiss || (a.r.cap - used(a.r)) - (b.r.cap - used(b.r)));
+  const noneFits = f.needs.some(n => n.req) && cands.every(c => c.reqMiss);
+  document.getElementById('dlgInner').innerHTML = `
+    <div class="dlg-head">
+      <h2 id="dlgTitle">Familie ${esc(f.n)} fest zuordnen</h2>
+      <p class="muted small" style="margin-top:4px">${personen(size)}</p>
+      <p class="dlg-warn">Eine feste Zuordnung hat Vorrang vor der automatischen Verteilung. Nur als letzten Ausweg nutzen.${noneFits ? ' <strong>Kein Zimmer erfüllt alle Anforderungen der Familie.</strong>' : ''}</p>
+    </div>
+    <div class="dlg-body">${cands.length ? `<div class="list">${cands.map(c => `
+      <div class="cand">
+        <div>
+          <p><strong>${esc(c.r.name)}</strong><span class="muted"> · ${esc(c.r.building)}, ${esc(c.r.floor)}</span></p>
+          ${c.r.fams.length ? `<p class="small muted">Belegt von ${c.r.fams.map(x => 'Familie ' + esc(x.n)).join(', ')}</p>` : ''}
+          ${f.needs.length ? `<div class="needs">${f.needs.map(n => needChip(n, met(n, c.r, c.count))).join('')}</div>` : ''}
+        </div>
+        <div class="right" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px"><span class="chip free">${c.r.cap - used(c.r)} frei</span><button type="button" class="btn sm${c.reqMiss ? '' : ' main'}" data-close>${c.reqMiss ? 'Trotzdem zuordnen' : 'Zuordnen'}</button></div>
+      </div>`).join('')}</div>` : `<p class="list-empty muted">Kein Zimmer hat ${plaetze(size)} frei.</p>`}</div>
+    <div class="dlg-foot"><button type="button" class="btn sm" data-close>Abbrechen</button></div>`;
+  dlg.showModal();
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.edit-link')) { e.preventDefault(); return; } // placeholder routes
+  const tog = e.target.closest('[data-toggle]');
+  if (tog) { const i = +tog.dataset.toggle; expanded.has(i) ? expanded.delete(i) : expanded.add(i); render(); return; }
+  const pin = e.target.closest('[data-pin]');
+  if (pin) openPinDialog(pin.dataset.pin);
+  else if (e.target.closest('[data-close]')) dlg.close();
+});
+document.getElementById('happy').addEventListener('change', render);
+document.getElementById('print').addEventListener('click', () => window.print());
+// Print every building, including collapsed ones
+// (print CSS reveals all floors)
+
+render();
+</script>
+</body>
+</html>

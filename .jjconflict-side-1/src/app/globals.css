@@ -1,0 +1,1131 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Neobrutalism orange registry tokens; see THIRD_PARTY.md. */
+:root {
+  --background: hsl(33 100% 92%);
+  --secondary-background: white;
+  --paper: #fffaf0;
+  --input: var(--secondary-background);
+  --main: hsl(28 100% 51%);
+  --main-deep: var(--main);
+  --main-foreground: black;
+  --danger: hsl(2 90% 66%);
+  --danger-foreground: black;
+  --offline: hsl(30 8% 80%);
+  --muted: hsl(30 10% 32%);
+  --rule: hsl(33 25% 82%);
+  --foreground: black;
+  --border: black;
+  --ring: black;
+  --shadow-c: var(--border);
+  --shadow: 4px 4px 0 0 var(--shadow-c);
+}
+
+.workshop-participation-page {
+  container-name: workshop-participation;
+  container-type: inline-size;
+}
+
+main:has(> .workshop-participation-page) {
+  max-width: 90rem;
+  color-scheme: light;
+  color: black;
+  background: hsl(33 100% 92%);
+  --background: hsl(33 100% 92%);
+  --secondary-background: white;
+  --paper: #fffaf0;
+  --foreground: black;
+  --muted: hsl(30 10% 32%);
+  --rule: hsl(33 25% 82%);
+  --border: black;
+  --ring: black;
+  --main: hsl(28 100% 51%);
+  --main-foreground: black;
+  --danger: hsl(2 90% 66%);
+  --danger-foreground: black;
+}
+
+.workshop-participation__section-head {
+  margin-bottom: 1rem;
+  color: var(--muted);
+}
+
+.workshop-participation {
+  color-scheme: light;
+  color: black;
+  --paper: #fffaf0;
+  --muted: hsl(30 10% 32%);
+  --rule: hsl(33 25% 82%);
+  --main: hsl(28 100% 51%);
+}
+
+.workshop-participation__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.875rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.workshop-participation__legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.workshop-participation__swatch {
+  width: 1.125rem;
+  height: 0.875rem;
+  flex: none;
+  border: 1.5px solid black;
+  border-radius: 2px;
+  background: white;
+}
+
+.workshop-participation__swatch--rank-1,
+.workshop-participation__slot-cell--rank-1 {
+  background-color: hsl(33 100% 76%);
+}
+
+.workshop-participation__swatch--rank-2,
+.workshop-participation__slot-cell--rank-2 {
+  background-color: hsl(33 100% 83%);
+}
+
+.workshop-participation__swatch--rank-3,
+.workshop-participation__slot-cell--rank-3 {
+  background-color: hsl(33 100% 88%);
+}
+
+.workshop-participation__swatch--rank-4,
+.workshop-participation__slot-cell--rank-4 {
+  background-color: hsl(33 70% 94%);
+}
+
+.workshop-participation__swatch--leader {
+  box-shadow: inset 0 0 0 2px black;
+}
+
+.workshop-participation__table-wrap {
+  overflow-x: auto;
+  border: 2px solid black;
+  border-radius: 5px;
+  background: white;
+}
+
+.workshop-participation__table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem;
+}
+
+.workshop-participation__table caption {
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid black;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.workshop-participation__table caption span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.workshop-participation__table :is(th, td) {
+  padding: 0.5rem 0.625rem;
+  border-top: 1.5px solid var(--rule);
+  border-left: 1.5px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+}
+
+.workshop-participation__table thead th {
+  border-top: 0;
+  border-bottom: 2px solid black;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.workshop-participation__table tbody tr:first-child > * {
+  border-top: 0;
+}
+
+.workshop-participation__table th[scope='row'] {
+  position: sticky;
+  z-index: 1;
+  left: 0;
+  min-width: 12em;
+  border-right: 2px solid black;
+  border-left: 0;
+  background: white;
+  font-size: 0.875rem;
+}
+
+.workshop-participation__table thead th:first-child {
+  position: sticky;
+  z-index: 2;
+  left: 0;
+  border-right: 2px solid black;
+  border-left: 0;
+  background: white;
+}
+
+.workshop-participation__table tr.is-open > th[scope='row'] {
+  box-shadow: inset 6px 0 0 hsl(28 100% 51%);
+}
+
+.workshop-participation__table td.workshop-participation__rank-column {
+  min-width: 13em;
+  font-size: 0.8125rem;
+}
+
+.workshop-participation__rank-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workshop-participation__rank-list li.is-received {
+  font-weight: 700;
+}
+
+.workshop-participation__rank-list li.is-missed,
+.workshop-participation__quiet,
+.workshop-participation__age,
+.workshop-participation__cell-detail {
+  color: var(--muted);
+}
+
+.workshop-participation__rank-result {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.workshop-participation__table td.workshop-participation__count-column {
+  min-width: 4.5em;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.workshop-participation__table td.workshop-participation__slot-cell {
+  min-width: 8.5em;
+}
+
+.workshop-participation__person-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgb(0 0 0 / 25%);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.workshop-participation__person-link:hover {
+  text-decoration-color: black;
+  text-decoration-thickness: 2px;
+}
+
+.workshop-participation__age {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.workshop-participation__badge {
+  display: inline-flex;
+  min-height: 1.625rem;
+  align-items: center;
+  padding: 0 0.5rem;
+  border: 1.5px solid hsl(30 10% 32%);
+  border-radius: 5px;
+  background: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.workshop-participation__table th[scope='row'] > .workshop-participation__badge {
+  margin-top: 0.375rem;
+}
+
+.workshop-participation__badge--attention {
+  border: 2px solid black;
+  background: hsl(28 100% 51%);
+  color: black;
+  font-weight: 700;
+}
+
+.workshop-participation__badge--quiet {
+  border-style: dashed;
+}
+
+.workshop-participation__slot-end {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.workshop-participation__cell-entries {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.workshop-participation__cell-entry {
+  min-height: 2.25rem;
+}
+
+.workshop-participation__cell-title,
+.workshop-participation__cell-detail {
+  display: block;
+}
+
+.workshop-participation__cell-title {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.workshop-participation__table td.workshop-participation__slot-cell--leader {
+  background: repeating-linear-gradient(90deg, white 0 4px, #8a847c 4px 6px);
+  box-shadow: inset 0 0 0 1.5px black;
+}
+
+.workshop-participation__slot-cell--leader
+  :is(.workshop-participation__cell-title, .workshop-participation__cell-detail) {
+  width: fit-content;
+  padding: 0 0.125rem;
+  background: white;
+}
+
+.workshop-participation__table td.workshop-participation__slot-cell--sign-up,
+.workshop-participation__table td.workshop-participation__slot-cell--interest {
+  background: repeating-linear-gradient(135deg, white 0 6px, var(--paper) 6px 12px);
+}
+
+.workshop-participation__table td.workshop-participation__slot-cell--fixed {
+  background: repeating-linear-gradient(45deg, white 0 4px, var(--paper) 4px 8px);
+  box-shadow: inset 0 0 0 2px black;
+}
+
+.workshop-participation__open-cell {
+  display: grid;
+  justify-items: start;
+  gap: 0.25rem;
+}
+
+.workshop-participation__cell-detail {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+.workshop-participation__narrow,
+.workshop-participation__print-title {
+  display: none;
+}
+
+.workshop-participation__cards {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.workshop-participation__card {
+  padding: 0.875rem 1rem;
+  border: 2px solid black;
+  border-radius: 5px;
+  background: white;
+}
+
+.workshop-participation__card.is-open {
+  border-left: 10px solid hsl(28 100% 51%);
+}
+
+.workshop-participation__card h3 {
+  font-size: 1.125rem;
+  line-height: 1.25;
+}
+
+.workshop-participation__person-meta {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.workshop-participation__card h4 {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.workshop-participation__card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.workshop-participation__card-slots {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.workshop-participation__card-slots > li {
+  display: grid;
+  grid-template-columns: 4.5em minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.workshop-participation__slot-name {
+  color: var(--muted);
+}
+
+.workshop-participation__card .workshop-participation__rank-list {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.workshop-participation__table tfoot {
+  display: none;
+}
+
+.workshop-participation__print-stamp {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1.5px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@container workshop-participation (max-width: 45rem) {
+  .workshop-participation__wide {
+    display: none;
+  }
+
+  .workshop-participation__narrow {
+    display: block;
+  }
+}
+
+@page workshop-participation {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+@media print {
+  html:has(.workshop-participation) {
+    page: workshop-participation;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  html:has(.workshop-participation),
+  body:has(.workshop-participation),
+  body:has(.workshop-participation) *:has(.workshop-participation) {
+    display: block;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .workshop-participation-page {
+    display: block;
+    color: black;
+    font-size: 10pt;
+    line-height: 1.4;
+  }
+
+  .workshop-participation-screen-only,
+  .workshop-participation__narrow {
+    display: none !important;
+  }
+
+  .workshop-participation-body {
+    display: block;
+    margin: 0;
+  }
+
+  .workshop-participation {
+    display: block;
+    color: black;
+  }
+
+  .workshop-participation__print-title {
+    display: block;
+    margin: 0 0 0.4em;
+    font-size: 1.8em;
+    break-after: avoid;
+  }
+
+  .workshop-participation__section-head {
+    margin: 0;
+  }
+
+  .workshop-participation__legend {
+    display: none;
+  }
+
+  .workshop-participation__wide {
+    display: block !important;
+  }
+
+  .workshop-participation__table-wrap {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .workshop-participation__table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 0.75em;
+  }
+
+  .workshop-participation__table caption {
+    padding: 0.4em 0.5em;
+    font-size: 0.9em;
+  }
+
+  .workshop-participation__table :is(th, td) {
+    padding: 0.3em 0.35em;
+    border-top: 0;
+    border-bottom: 1px solid #777;
+    border-left: 0;
+    background-color: white;
+    color: black;
+    overflow-wrap: anywhere;
+  }
+
+  .workshop-participation__table thead {
+    display: table-header-group;
+  }
+
+  .workshop-participation__table thead th {
+    border-bottom: 2px solid black;
+    font-size: 0.9em;
+  }
+
+  .workshop-participation__table tbody tr {
+    break-inside: avoid;
+  }
+
+  .workshop-participation__table th[scope='row'],
+  .workshop-participation__table thead th:first-child {
+    position: static;
+    min-width: 0;
+    border-right: 1px solid #777;
+    font-size: 0.8em;
+  }
+
+  .workshop-participation__table th[scope='row'] {
+    width: 13%;
+  }
+
+  .workshop-participation__table th:nth-child(2),
+  .workshop-participation__table td:nth-child(2) {
+    width: 20%;
+  }
+
+  .workshop-participation__table th:nth-child(3),
+  .workshop-participation__table td:nth-child(3) {
+    width: 4.5%;
+    text-align: center;
+  }
+
+  .workshop-participation__table td.workshop-participation__slot-cell {
+    min-width: 0;
+    width: 7.8125%;
+  }
+
+  .workshop-participation__table th[scope='row'] .workshop-participation__badge {
+    display: table;
+    min-height: 0;
+    padding: 0 0.35em;
+    border-width: 1px;
+    font-size: 0.8em;
+  }
+
+  .workshop-participation__table .workshop-participation__cell-entry {
+    min-height: 0;
+    background: white;
+    text-shadow: none;
+    box-shadow: none;
+  }
+
+  .workshop-participation__table .workshop-participation__cell-entry--fixed,
+  .workshop-participation__table .workshop-participation__cell-entry--leader,
+  .workshop-participation__table .workshop-participation__cell-entry--participation {
+    padding: 0;
+    border-left: 0;
+    font-weight: 700;
+  }
+
+  .workshop-participation__table .workshop-participation__badge--attention {
+    border: 1px solid black;
+    background: white;
+  }
+
+  .workshop-participation__age,
+  .workshop-participation__quiet,
+  .workshop-participation__cell-detail,
+  .workshop-participation__table caption span {
+    color: #333;
+  }
+
+  .workshop-participation__rank-list li {
+    display: inline;
+  }
+
+  .workshop-participation__rank-list li + li::before {
+    content: ' · ';
+    font-weight: 400;
+  }
+
+  .workshop-participation__rank-result {
+    font-weight: 400;
+  }
+
+  .workshop-participation__table tfoot {
+    display: table-footer-group;
+  }
+
+  .workshop-participation__table tfoot td {
+    display: table-cell;
+    height: 10mm;
+    padding: 0;
+    border: 0;
+  }
+
+  .workshop-participation__print-stamp {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    margin: 0;
+    padding-top: 4px;
+    border-top: 1px solid #777;
+    background: white;
+    color: #333;
+    font-size: 0.75em;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --background: #1a1511;
+    --secondary-background: #26201c;
+    --paper: #1f1915;
+    --input: #130e0a;
+
+    --foreground: #f0eae0;
+    --border: #d0c2af;
+    --ring: #d0c2af;
+    --shadow-c: #50453d;
+    --shadow: 4px 4px 0 0 var(--shadow-c);
+
+    --main: #fe9d4a;
+    --main-deep: #f88b1c;
+    --main-foreground: #180f09;
+
+    --danger: #d42325;
+    --danger-foreground: #ffffff;
+
+    --muted: #aca397;
+    --rule: #3d352f;
+    --offline: #37322e;
+
+    --background: oklch(0.2 0.012 60);
+    --secondary-background: oklch(0.25 0.012 60);
+    --paper: oklch(0.22 0.012 60);
+    --input: oklch(0.17 0.012 60);
+    --foreground: oklch(0.94 0.015 80);
+    --border: oklch(0.82 0.03 75);
+    --ring: oklch(0.82 0.03 75);
+    --shadow-c: oklch(0.4 0.02 60);
+    --main: oklch(0.78 0.15 58);
+    --main-deep: oklch(0.74 0.17 58);
+    --main-foreground: oklch(0.18 0.02 58);
+    --danger: oklch(0.56 0.21 27);
+    --danger-foreground: oklch(1 0 0);
+    --muted: oklch(0.72 0.02 75);
+    --rule: oklch(0.34 0.012 60);
+    --offline: oklch(0.32 0.01 60);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-secondary-background: var(--secondary-background);
+  --color-paper: var(--paper);
+  --color-input: var(--input);
+  --color-main: var(--main);
+  --color-main-deep: var(--main-deep);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-offline: var(--offline);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-foreground: var(--foreground);
+  --color-main-foreground: var(--main-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --spacing-boxShadowX: 4px;
+  --spacing-boxShadowY: 4px;
+  --spacing-reverseBoxShadowX: -4px;
+  --spacing-reverseBoxShadowY: -4px;
+  --radius-base: 5px;
+  --font-weight-base: 500;
+  --font-weight-heading: 700;
+  --shadow-shadow: var(--shadow);
+}
+
+@layer base {
+  body {
+    @apply m-0 bg-background font-sans text-base leading-relaxed text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    @apply outline-2 outline-offset-4 outline-ring;
+  }
+  main:focus {
+    outline: none;
+  }
+
+  /* Tailwind v4 preflight resets buttons to cursor: default. Every clickable element gets a pointer. */
+  button:not(:disabled),
+  [role='button'],
+  [role='switch'],
+  summary,
+  label:has(input) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  button[aria-busy='true'] {
+    cursor: wait;
+  }
+
+  :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+    background-color: var(--input);
+    color: var(--foreground);
+  }
+}
+
+/* A hard shadow means "you can press this". Buttons and whole-card links only. */
+@utility pressable {
+  position: relative;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition:
+    translate 120ms,
+    box-shadow 120ms;
+
+  &:hover,
+  &:active {
+    translate: 4px 4px;
+    box-shadow: none;
+  }
+
+  /* Keep the original footprint clickable while the element slides 4px into its shadow.
+     Without this, the top and left edges move out from under the cursor. (-4px travel, -2px border) */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: calc(-4px - 2px) -2px -2px calc(-4px - 2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover,
+    &:active {
+      translate: none;
+      box-shadow: var(--shadow);
+    }
+  }
+}
+
+/* A single select with the neobrutalist chevron (prototype `#app select`). */
+@utility select-chevron {
+  appearance: none;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (prefers-color-scheme: dark) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f0eae0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+/* The workshop lists close with a footer at the bottom of the window when short. */
+main:has(> .workshop-lists) {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Draft/provisional state = engineering grid (blueprint): 6px minor, 30px major lines.
+   Only for things that are not yet saved for the team. Never decorative. */
+@utility blueprint {
+  background-image:
+    linear-gradient(to right, var(--grid-major, rgb(31 95 191 / 0.35)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-major, rgb(31 95 191 / 0.35)) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-minor, rgb(31 95 191 / 0.14)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-minor, rgb(31 95 191 / 0.14)) 1px, transparent 1px);
+  background-size:
+    30px 30px,
+    30px 30px,
+    6px 6px,
+    6px 6px;
+  background-position: -1px -1px;
+}
+
+/* On accent orange, blue lines turn muddy, so switch them to dark navy. Use together with `blueprint`. */
+@utility blueprint-on-main {
+  --grid-major: rgb(0 48 110 / 0.35);
+  --grid-minor: rgb(0 48 110 / 0.14);
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+    --background: hsl(33 100% 92%);
+    --secondary-background: white;
+    --paper: #fffaf0;
+    --input: white;
+    --foreground: black;
+    --border: black;
+    --ring: black;
+    --shadow-c: black;
+    --shadow: 4px 4px 0 0 var(--shadow-c);
+    --main: hsl(28 100% 51%);
+    --main-deep: var(--main);
+    --main-foreground: black;
+    --danger: hsl(2 90% 66%);
+    --danger-foreground: black;
+    --muted: hsl(30 10% 32%);
+    --offline: hsl(30 8% 80%);
+  }
+
+  .assignment-board-screen {
+    display: none !important;
+  }
+
+  .assignment-print {
+    display: block !important;
+    color: black;
+    background: white;
+  }
+
+  .assignment-print-header {
+    border-bottom: 2px solid black;
+    padding-bottom: 1rem;
+  }
+
+  .assignment-print-header h1,
+  .assignment-print-building h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .assignment-print-header dl,
+  .assignment-print-summary dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+  }
+
+  .assignment-print-header dt,
+  .assignment-print-summary dt {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .assignment-print-header dd,
+  .assignment-print-summary dd {
+    margin: 0;
+  }
+
+  .assignment-print-summary,
+  .assignment-print-findings {
+    margin: 1rem 0;
+    break-inside: avoid;
+  }
+
+  .assignment-print-summary h2,
+  .assignment-print-findings h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+  }
+
+  .assignment-print-findings ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .assignment-print-building {
+    break-before: page;
+  }
+
+  .assignment-print-building:first-child {
+    break-before: auto;
+  }
+
+  .assignment-print-room {
+    break-inside: avoid;
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+    padding: 0.5rem;
+  }
+
+  .assignment-print-room h2 {
+    margin: 0;
+  }
+
+  .assignment-print-room p {
+    margin: 0.15rem 0;
+  }
+
+  .assignment-print-bed {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.75rem;
+  }
+
+  .assignment-print-room-status {
+    font-weight: bold;
+  }
+
+  .assignment-print-room ul {
+    margin: 0.25rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  /* Workshop lists (prototype `leadprint`): only the selected document, black on
+     white A4. Screen controls carry `workshop-screen-only`; paper-only details carry
+     `workshop-print-only` / `workshop-print-note`.
+
+     Type scale on paper, all relative to the 10pt base:
+       title 2em · metadata 1.05em · table 1em (room plan 1.3em, family plan 0.9em)
+       · table header and secondary lines 0.9em · paper note 0.85em · chips 0.8em
+       · footer 0.75em · "extern" badge 0.7em. */
+  @page workshop-list {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  /* The whole document takes the list's page type (where named pages exist):
+     switching page types inside the flow would force a sheet break. */
+  html:has(.workshop-lists) {
+    page: workshop-list;
+  }
+
+  /* Every ancestor of the list becomes a plain block with natural height, so no
+     browser carries a window-sized frame (flex column, min-height: 100dvh) onto an
+     empty extra sheet. */
+  html:has(.workshop-lists),
+  body:has(.workshop-lists),
+  body :has(.workshop-lists) {
+    display: block;
+    height: auto;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .workshop-lists {
+    display: block;
+    color: black;
+    font-size: 10pt;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .workshop-lists * {
+    box-shadow: none !important;
+  }
+
+  .workshop-lists a {
+    color: black;
+    text-decoration: none;
+  }
+
+  .workshop-lists .workshop-screen-only,
+  .workshop-lists .workshop-list-narrow {
+    display: none !important;
+  }
+
+  .workshop-lists .workshop-list-wide {
+    display: block !important;
+  }
+
+  .workshop-lists .workshop-list-body {
+    margin: 0;
+  }
+
+  .workshop-lists .text-muted {
+    color: #333;
+  }
+
+  /* Screen sizes are rem-based; on paper every smaller line follows its context. */
+  .workshop-lists :is(.text-xs, .text-sm, .text-base) {
+    font-size: 0.9em;
+  }
+
+  .workshop-lists .workshop-print-title {
+    margin-top: 2px;
+    padding-bottom: 4px;
+    font-size: 2em;
+    break-after: avoid;
+  }
+
+  .workshop-lists .workshop-print-meta {
+    font-size: 1.05em;
+  }
+
+  .workshop-lists .workshop-print-meta--last {
+    padding-bottom: 8px;
+    border-bottom: 3px solid black;
+  }
+
+  .workshop-lists .workshop-print-note {
+    display: block !important;
+    margin-top: 8px;
+    font-size: 0.85em;
+  }
+
+  .workshop-lists .workshop-list-table-wrap {
+    margin-top: 10px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  .workshop-lists .workshop-list-table {
+    font-size: 1em;
+  }
+
+  .workshop-lists .workshop-list-table thead {
+    display: table-header-group;
+  }
+
+  .workshop-lists .workshop-list-table tr {
+    break-inside: avoid;
+  }
+
+  .workshop-lists .workshop-list-table :is(th, td) {
+    padding: 7px 6px;
+    border-top: 0;
+    border-bottom: 1px solid #777;
+    background: none;
+  }
+
+  .workshop-lists .workshop-list-table thead th {
+    border-bottom: 2px solid black;
+    font-size: 0.9em;
+  }
+
+  .workshop-lists .workshop-list-table .workshop-print-only {
+    display: table-cell !important;
+  }
+
+  .workshop-lists .workshop-list-table td.workshop-print-only {
+    width: 5.5em;
+  }
+
+  .workshop-lists .workshop-check {
+    border-color: black;
+  }
+
+  /* The room plan doubles as a door sign; the family plan has many columns. */
+  .workshop-lists .workshop-list-table--room {
+    font-size: 1.3em;
+  }
+
+  .workshop-lists .workshop-list-table--room :is(th, td) {
+    padding: 12px 8px;
+  }
+
+  .workshop-lists .workshop-list-table--family {
+    font-size: 0.9em;
+  }
+
+  /* Greyscale-safe: printers and copiers turn colour fills into unreadable grey. */
+  .workshop-lists :is(.workshop-chip, .workshop-quiet-badge, .workshop-ext-badge) {
+    min-height: 0;
+    border-color: black;
+    background: white;
+    color: black;
+  }
+
+  .workshop-lists :is(.workshop-chip, .workshop-quiet-badge) {
+    padding: 0 5px;
+    border-width: 1.5px;
+    font-size: 0.8em;
+  }
+
+  .workshop-lists .workshop-ext-badge {
+    font-size: 0.7em;
+  }
+
+  /* The stamp repeats at the foot of every sheet. A fixed element is printed on each
+     page by Chrome, Firefox and Safari alike; the tables reserve its height with a
+     print-only spacer row in their repeated footer group. */
+  .workshop-lists .workshop-print-stamp {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding-top: 4px;
+    border-top: 1px solid #777;
+    background: white;
+    font-size: 0.75em;
+    color: #333;
+  }
+
+  .workshop-lists .workshop-list-table tfoot {
+    display: table-footer-group;
+  }
+
+  .workshop-lists .workshop-list-table .workshop-print-footer-space {
+    display: table-cell !important;
+    height: 10mm;
+    padding: 0;
+    border: 0;
+  }
+}

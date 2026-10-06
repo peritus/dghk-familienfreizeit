@@ -28,9 +28,11 @@ The **Wünsche** entry is selected for all three allocation URLs and its tertiar
 navigation contains **Antworten**, **Nachfrage**, and **Verlauf**. **Listen** has
 the four URL-backed views above and defaults to the workshop roster.
 
-The overview is the landing view. Participation review remains an outstanding
-product view. Workshop allocation demand and solver traces are delivered through
-the three allocation routes above.
+The overview is the landing view. The current-plan Personen matrix is implemented;
+see the [implemented frontend](../../../docs/ui/frontend.md#workshop-participation-overview)
+for its behavior. Separate participation finding and open-case review surfaces remain
+outstanding. Workshop allocation demand and solver traces are delivered through the
+three allocation routes above.
 
 The overview, programme and allocation screens render the same workshop track
 from the [phase view](../../architecture/phases.md) §4:

@@ -19,6 +19,7 @@ The route table is:
 | `/organiser/workshops/programme` | Whole programme: workshop placements by slot and room |
 | `/organiser/workshops/programme/unplaced` | Workshops without a feasible placement and their reasons |
 | `/organiser/workshops/programme/overlaps` | Ranked workshop pairs that occupy the same slot |
+| `/organiser/workshops/participation` | Read-only person-by-slot participation overview (**Teilnahme · Personen**) |
 | `/organiser/workshops/slots` | Event-backed workshop slots |
 | `/organiser/workshops/spaces` | Physical workshop spaces and per-slot availability context |
 | `/organiser/workshops/allocation` | Workshop allocation answers (**Wünsche · Antworten**) |
@@ -39,7 +40,7 @@ remains the only persistence boundary; there is no separate drafting API or serv
 draft state.
 
 Workshop routes use the same reducer and draft pipeline. Their section navigation
-links **Workshops**, **Programm**, **Wünsche**, **Räume und Slots**, and **Listen**; the programme
+links **Workshops**, **Programm**, **Teilnahme**, **Wünsche**, **Räume und Slots**, and **Listen**; the programme
 item stays current on all three programme review URLs, while the resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
 overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
@@ -66,6 +67,35 @@ person and room plans keep scrolling tables. The global stylesheet's print block
 prints only the selected document on A4; screen-only and print-only parts are
 marked with `workshop-screen-only` and `workshop-print-only` classes. The lists
 expose no application print, download, or export control.
+
+## Workshop participation overview
+
+**Teilnahme** presents the `Personen` section as a derived person-by-slot matrix.
+The semantic table includes each person in the derived world, their ranked
+choices and outcomes, participation count, and every configured workshop slot.
+Assigned choices use the prototype's rank colors; leadership, sign-up, interest,
+fixed attendance, unresolved unassigned choices, and free slots have visible text
+labels as well. People with unresolved ranked choices appear first, then names sort
+in German locale order. Selecting a name opens that person's **Wünsche · Verlauf**
+trace with the person preselected.
+
+When the available screen area is 720px or narrower, the table becomes one card per
+person with slot-by-slot attendance and the same ranking details. Browser printing
+uses the semantic table on A4 landscape paper at a 10pt base size, repeats the table
+header and a fixed date/revision stamp, and keeps rows together. A repeated footer
+spacer reserves room for the stamp on every page. Print styles remove sticky columns,
+horizontal scrolling, and window-height layout constraints. The view adds no
+application print or export control.
+
+### Responsive organiser matrices and printing
+
+Person-by-slot organiser matrices keep one semantic table as their wide-screen and
+print representation, and use labelled person cards in narrow layouts. State must
+remain understandable from text and structure when printed without color. Multi-page
+print styles repeat table headers, keep person rows together, reserve room for a
+repeated fixed footer with a table-footer spacer, and reset every enclosing layout
+to natural document height. Verify both the narrow card layout and a multi-page
+landscape print in a browser before delivery.
 
 Family routes reuse the organiser `PrimaryNavigation` and introduce no secondary
 navigation level. `FamilyTopicNavigation` wraps the shared `TertiaryNavigation`
