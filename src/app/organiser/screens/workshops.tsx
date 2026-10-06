@@ -52,7 +52,7 @@ import {
 } from '../components/workshop/resources.js'
 import { SecondaryNavigation } from '../components/navigation.js'
 import { CollectionCreateAction } from '../components/collection-create-action.js'
-import { organiserPaths } from '../../../organiser/routes.js'
+import { organiserPathWithQuery, organiserPaths } from '../../../organiser/routes.js'
 import { useOrganiser } from '../context.js'
 import {
   Dialog,
@@ -1012,7 +1012,26 @@ export function WorkshopProgramme() {
       />
       {view === 'programme' ? (
         programme.rows.length && programme.rooms.length ? (
-          <ProgrammeGrid rooms={programme.rooms} rows={programme.rows} />
+          <ProgrammeGrid
+            rooms={programme.rooms}
+            rows={programme.rows.map((row) => ({
+              ...row,
+              // A placed workshop's title opens its roster (placed cells carry the workshop id).
+              cells: row.cells.map((cell) =>
+                cell.state === 'placed'
+                  ? {
+                      ...cell,
+                      on_open: () =>
+                        navigate(
+                          organiserPathWithQuery(organiserPaths.workshop_workshop_list(), {
+                            workshop: cell.id,
+                          }),
+                        ),
+                    }
+                  : cell,
+              ),
+            }))}
+          />
         ) : (
           <WorkshopEmptyState title="Noch kein Programm">
             Ohne Slots und Räume kann nichts eingeplant werden.

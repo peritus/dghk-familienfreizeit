@@ -148,6 +148,15 @@ export function organiserPathWithHash(path: OrganiserPath, hash: string): Organi
   return nestedPath(`${path}${hash}`)
 }
 
+/** Adds query parameters to a nested organiser path, e.g. a selected list document. */
+export function organiserPathWithQuery(
+  path: OrganiserPath,
+  query: Readonly<Record<string, string>>,
+): OrganiserPath {
+  const search = new URLSearchParams(query).toString()
+  return search ? nestedPath(`${path}?${search}`) : path
+}
+
 const familyRouteIdPattern = /^[a-zA-Z0-9_-]+$/
 
 export const familyTopics = ['zimmer', 'personen', 'essen', 'workshops'] as const

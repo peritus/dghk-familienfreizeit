@@ -30,6 +30,7 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
           onClick={cell.on_open}
         >
           {cell.title}
+          <span className="sr-only">: Teilnahmeliste öffnen</span>
         </button>
       ) : (
         <strong>{cell.title}</strong>

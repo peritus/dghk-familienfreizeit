@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
-import { organiserPaths } from '../../../organiser/routes.js'
+import { organiserPathWithQuery, organiserPaths } from '../../../organiser/routes.js'
+import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
 import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
@@ -278,6 +279,21 @@ export function WorkshopAllocation() {
                 on_person_id={(personId) => openTrace({ id: personId })}
                 selected_person_id={activeSelectedPersonId}
               />
+              {activeSelectedPersonId && selectedLabel ? (
+                <p className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-base border-2 border-border bg-secondary-background px-3.5 py-2.5">
+                  <span className="rounded-[3px] bg-foreground px-1.5 text-sm font-bold text-background">
+                    {selectedLabel}
+                  </span>
+                  <OrganiserLink
+                    href={organiserPathWithQuery(organiserPaths.workshop_person_list(), {
+                      person: activeSelectedPersonId,
+                    })}
+                    className="underline decoration-foreground/25 decoration-[1.5px] underline-offset-[3px] hover:decoration-foreground hover:decoration-2"
+                  >
+                    Workshopplan ansehen
+                  </OrganiserLink>
+                </p>
+              ) : null}
             </div>
           ) : null}
         </section>
