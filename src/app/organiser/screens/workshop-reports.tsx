@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { useLocation } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
@@ -8,6 +8,8 @@ import {
   WorkshopErrorState,
   WorkshopLoadingState,
   WorkshopScreenHeader,
+  WorkshopStatusBadge,
+  type WorkshopListOption,
 } from '../../components/shared/workshop/shared.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
@@ -26,6 +28,7 @@ import {
 import {
   buildWorkshopReportsProjection,
   type WorkshopReportFamily,
+  type WorkshopReportFamilyCell,
   type WorkshopReportPerson,
   type WorkshopReportRoom,
   type WorkshopReportWorkshop,
@@ -53,25 +56,33 @@ function queryFor(location: string): URLSearchParams {
   return new URLSearchParams(location.split('?')[1] ?? '')
 }
 
-function workshopOptions(workshops: readonly WorkshopReportWorkshop[]) {
+function personen(count: number): string {
+  return `${count} ${count === 1 ? 'Person' : 'Personen'}`
+}
+
+function workshopOptions(workshops: readonly WorkshopReportWorkshop[]): WorkshopListOption[] {
   return workshops.map((workshop) => ({
     value: workshop.id,
-    label: `${workshop.title} · ${workshop.status_label}`,
+    label: `${workshop.title} · ${personen(workshop.participant_count)}`,
+    group: workshop.slot_label,
   }))
 }
 
-function personOptions(persons: readonly WorkshopReportPerson[]) {
+function personOptions(persons: readonly WorkshopReportPerson[]): WorkshopListOption[] {
   return persons.map((person) => ({
     value: person.id,
-    label: `${person.name} · ${person.age_label}`,
+    label: person.kind === 'external' ? `${person.name} (extern)` : person.name,
   }))
 }
 
-function familyOptions(families: readonly WorkshopReportFamily[]) {
-  return families.map((family) => ({ value: family.id, label: family.name }))
+function familyOptions(families: readonly WorkshopReportFamily[]): WorkshopListOption[] {
+  return families.map((family) => ({
+    value: family.id,
+    label: `${family.name} · ${personen(family.members.length)}`,
+  }))
 }
 
-function roomOptions(rooms: readonly WorkshopReportRoom[]) {
+function roomOptions(rooms: readonly WorkshopReportRoom[]): WorkshopListOption[] {
   return rooms.map((room) => ({ value: room.id, label: room.name }))
 }
 
@@ -81,7 +92,6 @@ function rosterEntries(workshop: WorkshopReportWorkshop): WorkshopRosterEntry[] 
     name: entry.name,
     age_label: entry.age_label,
     health: entry.health,
-    emergency_contact: entry.emergency_contact,
   }))
 }
 
@@ -92,15 +102,48 @@ function personPlanEntries(person: WorkshopReportPerson): PersonPlanEntry[] {
     workshop: entry.workshop ?? undefined,
     room: entry.space ?? undefined,
     role: entry.role_label,
-    status: entry.status === 'free' ? 'free' : entry.status,
+    status: entry.status,
   }))
+}
+
+function OpenNotice({ reason }: { reason: string }) {
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <WorkshopStatusBadge tone="attention">Offen</WorkshopStatusBadge>
+      {reason}
+    </span>
+  )
+}
+
+function FamilyCell({ cell }: { cell: WorkshopReportFamilyCell }) {
+  if (!cell.workshop) return <span className="text-muted">—</span>
+  return (
+    <span className="grid gap-0.5">
+      <span className="inline-flex flex-wrap items-center gap-2">
+        <strong>{cell.workshop}</strong>
+        {cell.lead ? <WorkshopStatusBadge>leitet</WorkshopStatusBadge> : null}
+      </span>
+      {cell.space ? <span className="text-sm text-muted">{cell.space}</span> : null}
+    </span>
+  )
 }
 
 function familyPlanSlots(family: WorkshopReportFamily): FamilyPlanSlot[] {
   return family.slots.map((slot) => ({
     id: slot.id,
     label: slot.label,
-    members: slot.members,
+    members: family.members.map((member, index) => ({
+      id: member.id,
+      name: member.first_name,
+      detail: member.open_reason ? (
+        <>
+          {member.age_label} <OpenNotice reason={member.open_reason} />
+        </>
+      ) : (
+        member.age_label
+      ),
+      value: <FamilyCell cell={slot.cells[index]!} />,
+    })),
   }))
 }
 
@@ -108,35 +151,65 @@ function roomPlanEntries(room: WorkshopReportRoom): RoomPlanEntry[] {
   return room.entries.map((entry) => ({
     id: entry.id,
     time: entry.time,
-    workshop: entry.workshop,
-    audience: entry.audience,
-    leaders: entry.leaders,
+    workshop: entry.workshop ?? undefined,
+    audience: entry.audience ?? undefined,
+    leaders: entry.leaders ?? undefined,
   }))
 }
 
 function WorkshopReport({ workshop }: { workshop: WorkshopReportWorkshop }) {
+  const stats = workshop.choice_stats
   return (
-    <WorkshopRosterDocument
-      title={workshop.title}
-      metadata={[
-        workshop.slot_label && workshop.space_name
-          ? `${workshop.slot_label} · ${workshop.space_name}`
-          : 'Ohne Termin oder Raum',
-        `Leitung: ${workshop.leaders.join(', ') || '—'}`,
-        `${workshop.participant_count} von ${workshop.capacity} Plätzen · ${workshop.audience}, ${workshop.age_label}${workshop.interest_count ? ` · ${workshop.interest_count} Interessen` : ''}`,
-      ]}
-      entries={rosterEntries(workshop)}
-      confidential
-      show_attendance
-    />
+    <div className="space-y-4">
+      {stats ? (
+        <p className="rounded-base border-2 border-dashed border-border bg-paper px-4 py-3 text-sm print:hidden">
+          <strong>Nur für die Orga:</strong> {stats.first_choice} Teilnehmende mit 1. Wahl ·{' '}
+          {stats.ranked_choice} mit einer Wahl aus ihrer Top {stats.max_rank} · {stats.wished_first}
+          × als 1. Wahl gewünscht
+        </p>
+      ) : null}
+      <WorkshopRosterDocument
+        title={workshop.title}
+        metadata={[
+          `${workshop.slot_label} · ${workshop.space_name}`,
+          `Leitung: ${workshop.leaders.join(', ') || '—'}`,
+          <>
+            <strong>{personen(workshop.participant_count)}</strong> von {workshop.capacity}{' '}
+            {workshop.capacity === 1 ? 'Platz' : 'Plätzen'} · {workshop.audience},{' '}
+            {workshop.age_label}
+            {workshop.health_count
+              ? ` · ${personen(workshop.health_count)} mit Gesundheitshinweis`
+              : ''}
+            {workshop.interest_count ? ` · ${workshop.interest_count} Interessen` : ''}
+          </>,
+        ]}
+        entries={rosterEntries(workshop)}
+        confidential
+        show_attendance
+      />
+    </div>
   )
 }
 
 function PersonReport({ person }: { person: WorkshopReportPerson }) {
+  const led = person.led_workshops.length ? ` · leitet ${person.led_workshops.join(', ')}` : ''
+  const metadata: ReactNode[] =
+    person.kind === 'external'
+      ? [
+          person.age_label,
+          person.led_workshops.length
+            ? `leitet ${person.led_workshops.join(', ')}`
+            : 'Leitet keinen eingeplanten Workshop',
+        ]
+      : [
+          `${person.age_label}${person.family_name ? ` · Familie ${person.family_name}` : ''}`,
+          `${person.workshop_count} ${person.workshop_count === 1 ? 'Workshop' : 'Workshops'}${led}`,
+        ]
+  if (person.open_reason) metadata.push(<OpenNotice reason={person.open_reason} />)
   return (
     <WorkshopPersonPlanDocument
       title={person.name}
-      metadata={[`${person.age_label}${person.family_name ? ` · ${person.family_name}` : ''}`]}
+      metadata={metadata}
       entries={personPlanEntries(person)}
     />
   )
@@ -145,11 +218,8 @@ function PersonReport({ person }: { person: WorkshopReportPerson }) {
 function FamilyReport({ family }: { family: WorkshopReportFamily }) {
   return (
     <WorkshopFamilyPlanDocument
-      title={family.name}
-      metadata={[
-        `${family.members.length} ${family.members.length === 1 ? 'Person' : 'Personen'}`,
-        family.email ? `Kontakt: ${family.email}` : 'Kein Kontakt hinterlegt',
-      ]}
+      title={`Familie ${family.name}`}
+      metadata={[family.members.map((member) => member.first_name).join(', ')]}
       slots={familyPlanSlots(family)}
     />
   )
@@ -160,8 +230,7 @@ function RoomReport({ room }: { room: WorkshopReportRoom }) {
     <WorkshopRoomPlanDocument
       title={room.name}
       metadata={[
-        `${room.entries.length} ${room.entries.length === 1 ? 'Workshop' : 'Workshops'} in diesem Raum`,
-        `${room.location} · ${room.capacity} Plätze`,
+        `${room.workshop_count} ${room.workshop_count === 1 ? 'Workshop' : 'Workshops'} in diesem Raum`,
       ]}
       entries={roomPlanEntries(room)}
     />
@@ -264,7 +333,7 @@ export function WorkshopLists() {
       <WorkshopScreenHeader
         eyebrow="Workshops · Listen"
         title="Listen"
-        description="Druckbare Übersichten für Workshop, Person, Familie und Raum. Gesundheits- und Kontaktdaten bleiben auf die Organisationsansicht beschränkt."
+        description="Druckbare Übersichten für Workshop, Person, Familie und Raum. Gesundheitsangaben bleiben auf die Organisationsansicht beschränkt."
       />
       <WorkshopListKinds
         value={kind}

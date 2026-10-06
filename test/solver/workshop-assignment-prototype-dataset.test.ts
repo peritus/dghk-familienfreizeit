@@ -184,47 +184,91 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
 
 test('projects the complete workshop list set from the organiser plan', () => {
   const { plan, world } = solveFixture()
-  const current = buildWorkshopReportsProjection({
-    world,
-    plan,
-    time_zone: 'Europe/Berlin',
-  })
+  const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+  const schedule = plan.sections['workshop-scheduling'] as WorkshopSchedulingSection
+  const lists = buildWorkshopReportsProjection({ world, plan, time_zone: 'Europe/Berlin' })
 
-  expect(current.slots.length).toBe(8)
-  expect(current.workshops.length).toBeGreaterThan(20)
-  expect(current.persons.length).toBe(140)
-  expect(current.families.length).toBe(49)
-  expect(current.rooms.length).toBe(10)
+  expect(lists.slots.length).toBe(8)
+  expect(lists.families.length).toBe(49)
+  expect(lists.rooms.length).toBe(10)
 
-  const ceramics = current.workshops.find((workshop) => workshop.id === 'wks_keramik')
+  // Workshop lists cover exactly the placed workshops, in programme order.
+  expect(lists.workshops.map((workshop) => workshop.id).sort()).toEqual(
+    schedule.placements.map((placement) => placement.workshop_id).sort(),
+  )
+  expect(lists.workshops.some((workshop) => workshop.id === 'wks_schmieden')).toBe(false)
+  const slotOrder = lists.workshops.map((workshop) =>
+    lists.slots.findIndex((slot) => slot.id === workshop.slot_id),
+  )
+  expect(slotOrder).toEqual(slotOrder.slice().sort((left, right) => left - right))
+
+  const ceramics = lists.workshops.find((workshop) => workshop.id === 'wks_keramik')
   expect(ceramics).toMatchObject({
     title: 'Keramik',
-    status: 'placed',
     space_name: 'Atelier',
     leaders: ['Sam Morgan', 'Anna Albers'],
   })
   expect(ceramics?.roster.length).toBeGreaterThan(0)
+  expect(ceramics?.choice_stats).toMatchObject({ max_rank: 3 })
+  expect(ceramics?.choice_stats?.first_choice).toBeLessThanOrEqual(ceramics!.participant_count)
 
-  const unplaced = current.workshops.find((workshop) => workshop.id === 'wks_schmieden')
-  expect(unplaced).toMatchObject({ status: 'unplaced', slot_id: null, space_name: null })
+  // People and external leaders share the person list.
+  const externals = lists.persons.filter((person) => person.kind === 'external')
+  expect(lists.persons.length - externals.length).toBe(140)
+  expect(externals.length).toBeGreaterThan(0)
+  const leadingExternal = externals.find((person) => person.led_workshops.length > 0)
+  expect(leadingExternal?.entries.find((entry) => entry.status === 'lead')?.role_label).toMatch(
+    /^leitet · \d+ Person/,
+  )
 
-  const alex = current.persons.find((person) => person.name === 'Alex Morgan')
+  const alex = lists.persons.find((person) => person.name === 'Alex Morgan')
   expect(alex?.entries).toHaveLength(8)
   expect(alex?.entries.some((entry) => entry.status === 'assigned')).toBe(true)
+  expect(alex?.workshop_count).toBe(alex?.entries.filter((entry) => entry.status !== 'free').length)
 
-  const morgan = current.families.find((family) => family.id === 'fam_f0')
-  expect(morgan).toMatchObject({ name: 'Morgan', email: 'f0@example.test' })
-  expect(morgan?.slots[0]?.members.map((member) => member.name)).toEqual([
-    'Sam Morgan',
-    'Alex Morgan',
-    'Jamie Morgan',
-  ])
+  // The resolver's open cases reach the person and family lists.
+  expect(attendance.unassigned.length).toBeGreaterThan(0)
+  for (const item of attendance.unassigned) {
+    const person = lists.persons.find((candidate) => candidate.id === item.person_id)
+    expect(person?.open_reason).toBeTruthy()
+  }
 
-  const atelier = current.rooms.find((room) => room.id === 'wsp_r9')
-  expect(atelier?.entries.length).toBeGreaterThan(0)
-  expect(atelier?.entries[0]).toEqual(
+  const morgan = lists.families.find((family) => family.id === 'fam_f0')
+  expect(morgan?.name).toBe('Morgan')
+  expect(morgan?.members.map((member) => member.first_name)).toEqual(['Sam', 'Jamie', 'Alex'])
+  expect(morgan?.slots[0]?.cells).toHaveLength(3)
+
+  // Every room lists every slot, with the hosted workshops in place.
+  const atelier = lists.rooms.find((room) => room.id === 'wsp_r9')
+  expect(atelier?.entries).toHaveLength(8)
+  expect(atelier?.entries.filter((entry) => entry.workshop).length).toBe(atelier?.workshop_count)
+  expect(atelier?.entries).toContainEqual(
     expect.objectContaining({ workshop: 'Keramik', audience: 'Kinder, 5–14 Jahre' }),
   )
+})
+
+test('workshop rosters read health notes from the profile food note', () => {
+  const { plan, world } = solveFixture()
+  const attendee = (plan.sections['workshop-assignment'] as WorkshopAssignmentSection)
+    .assignments[0]!
+  const labels = world.labels_by_entity[attendee.person_id] ?? []
+  const annotated = {
+    ...world,
+    labels_by_entity: {
+      ...world.labels_by_entity,
+      [attendee.person_id]: [...labels, { ...labels[0]!, key: 'food-note', value: 'Nussallergie' }],
+    },
+  }
+  const lists = buildWorkshopReportsProjection({
+    world: annotated,
+    plan,
+    time_zone: 'Europe/Berlin',
+  })
+  const workshop = lists.workshops.find((item) => item.id === attendee.workshop_id)
+  expect(workshop?.roster.find((entry) => entry.person_id === attendee.person_id)?.health).toBe(
+    'Nussallergie',
+  )
+  expect(workshop?.health_count).toBe(1)
 })
 
 test('the workshop allocation projection exposes answers, demand, and trace from the solved world', () => {

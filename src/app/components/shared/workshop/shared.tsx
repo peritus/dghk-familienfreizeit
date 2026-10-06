@@ -333,6 +333,18 @@ export function WorkshopResponsiveCollection({
   )
 }
 
+export type WorkshopListOption = { value: string; label: string; group?: string }
+
+function optionGroups(options: readonly WorkshopListOption[]) {
+  const groups: { label: string | undefined; options: WorkshopListOption[] }[] = []
+  for (const option of options) {
+    const last = groups.at(-1)
+    if (last && last.label === option.group) last.options.push(option)
+    else groups.push({ label: option.group, options: [option] })
+  }
+  return groups
+}
+
 export function WorkshopListPicker({
   label,
   value,
@@ -343,7 +355,7 @@ export function WorkshopListPicker({
 }: {
   label: string
   value: string
-  options: readonly { value: string; label: string }[]
+  options: readonly WorkshopListOption[]
   onChange: (value: string) => void
   onPrevious?: () => void
   onNext?: () => void
@@ -357,11 +369,20 @@ export function WorkshopListPicker({
           onChange={(event) => onChange(event.target.value)}
           className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3 font-normal"
         >
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
+          {optionGroups(options).map((group, index) => {
+            const items = group.options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))
+            return group.label ? (
+              <optgroup key={`${group.label}-${index}`} label={group.label}>
+                {items}
+              </optgroup>
+            ) : (
+              items
+            )
+          })}
         </select>
       </label>
       <div className="flex gap-2">
@@ -409,7 +430,7 @@ export function WorkshopPrintDocument({
 }
 
 export function WorkshopConfidentialityNotice({
-  children = 'Vertraulich: enthält Gesundheitsangaben oder Telefonnummern. Nur für die Workshopleitung.',
+  children = 'Vertraulich: enthält Gesundheitsangaben. Nur für die Workshopleitung.',
 }: {
   children?: ReactNode
 }) {

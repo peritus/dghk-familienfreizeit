@@ -29,14 +29,12 @@ const entries = [
     name: 'Mara Schmidt',
     age_label: '9 Jahre',
     health: 'Hinweis A',
-    emergency_contact: 'Notfallkontakt Beispiel A',
     attendance: true,
   },
   {
     id: 'jamie',
     name: 'Leni Schmidt',
     age_label: '12 Jahre',
-    emergency_contact: 'Notfallkontakt Beispiel A',
     attendance: false,
   },
   {
@@ -44,14 +42,12 @@ const entries = [
     name: 'Nika Weber',
     age_label: '11 Jahre',
     health: 'Hinweis B',
-    emergency_contact: 'Notfallkontakt Beispiel B',
     attendance: true,
   },
   {
     id: 'noah',
     name: 'Toni Berger',
     age_label: '10 Jahre',
-    emergency_contact: 'Notfallkontakt Beispiel C',
     attendance: false,
   },
 ]

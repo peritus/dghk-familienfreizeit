@@ -3,6 +3,7 @@ import { TertiaryNavigation } from '../../../components/shared/ui/tertiary-navig
 import {
   WorkshopDataTable,
   WorkshopListPicker,
+  type WorkshopListOption,
   WorkshopPrintDocument,
   WorkshopResponsiveCollection,
   WorkshopStatusBadge,
@@ -13,19 +14,16 @@ export type WorkshopRosterEntry = {
   name: string
   age_label: string
   health?: string
-  emergency_contact?: string
   attendance?: boolean
 }
 
 export function WorkshopRosterTable({
   entries,
   show_health: showHealth = true,
-  show_contact: showContact = true,
   show_attendance: showAttendance = false,
 }: {
   entries: readonly WorkshopRosterEntry[]
   show_health?: boolean
-  show_contact?: boolean
   show_attendance?: boolean
 }) {
   return (
@@ -35,7 +33,6 @@ export function WorkshopRosterTable({
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Alter' },
         ...(showHealth ? [{ key: 'health', label: 'Allergien und Gesundheit' }] : []),
-        ...(showContact ? [{ key: 'contact', label: 'Notfallkontakt' }] : []),
         ...(showAttendance ? [{ key: 'attendance', label: 'Anwesend' }] : []),
       ]}
       rows={entries}
@@ -49,11 +46,6 @@ export function WorkshopRosterTable({
           {showHealth ? (
             <td className="p-3">
               {entry.health ?? <span className="text-muted">keine Angabe</span>}
-            </td>
-          ) : null}
-          {showContact ? (
-            <td className="p-3">
-              {entry.emergency_contact ?? <span className="text-muted">—</span>}
             </td>
           ) : null}
           {showAttendance ? (
@@ -78,9 +70,6 @@ export function WorkshopRosterCards({ entries }: { entries: readonly WorkshopRos
           <strong>{entry.name}</strong>
           <span className="text-sm text-muted">{entry.age_label}</span>
           {entry.health ? <strong className="text-sm">{entry.health}</strong> : null}
-          {entry.emergency_contact ? (
-            <span className="text-sm">Notfall: {entry.emergency_contact}</span>
-          ) : null}
         </li>
       ))}
     </ul>
@@ -104,7 +93,20 @@ export type PersonPlanEntry = {
   workshop?: string
   room?: string
   role?: string
-  status?: 'open' | 'assigned' | 'lead' | 'signup' | 'interest' | 'free'
+  status?:
+    | 'open'
+    | 'assigned'
+    | 'fixed'
+    | 'lead'
+    | 'signup'
+    | 'interest'
+    | 'free'
+    | 'available'
+    | 'unavailable'
+}
+
+function emptyPlanSlot(status: PersonPlanEntry['status']): string {
+  return status === 'open' ? 'Offen' : status === 'free' ? 'frei' : '—'
 }
 
 export function PersonPlanTable({ entries }: { entries: readonly PersonPlanEntry[] }) {
@@ -125,12 +127,13 @@ export function PersonPlanTable({ entries }: { entries: readonly PersonPlanEntry
             {entry.slot}
           </th>
           <td className="p-3">
-            {entry.workshop ??
-              (entry.status === 'open' ? (
-                <WorkshopStatusBadge tone="attention">Offen</WorkshopStatusBadge>
-              ) : (
-                <span className="text-muted">frei</span>
-              ))}
+            {entry.workshop ? (
+              <strong>{entry.workshop}</strong>
+            ) : entry.status === 'open' ? (
+              <WorkshopStatusBadge tone="attention">Offen</WorkshopStatusBadge>
+            ) : (
+              <span className="text-muted">{emptyPlanSlot(entry.status)}</span>
+            )}
           </td>
           <td className="p-3">{entry.room ?? '—'}</td>
           <td className="p-3">{entry.role ?? '—'}</td>
@@ -149,7 +152,7 @@ export function PersonPlanCards({ entries }: { entries: readonly PersonPlanEntry
           className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-4"
         >
           <strong>{entry.slot}</strong>
-          <span>{entry.workshop ?? (entry.status === 'open' ? 'Offen' : 'frei')}</span>
+          <span>{entry.workshop ?? emptyPlanSlot(entry.status)}</span>
           <span className="text-sm text-muted">
             {entry.room ?? '—'} · {entry.role ?? '—'}
           </span>
@@ -162,7 +165,7 @@ export function PersonPlanCards({ entries }: { entries: readonly PersonPlanEntry
 export type FamilyPlanSlot = {
   id: string
   label: string
-  members: readonly { id: string; name: string; value: ReactNode }[]
+  members: readonly { id: string; name: string; detail?: ReactNode; value: ReactNode }[]
 }
 
 export function FamilyPlanTable({ slots }: { slots: readonly FamilyPlanSlot[] }) {
@@ -177,8 +180,11 @@ export function FamilyPlanTable({ slots }: { slots: readonly FamilyPlanSlot[] })
               Slot
             </th>
             {members.map((member) => (
-              <th scope="col" key={member.id} className="p-3">
+              <th scope="col" key={member.id} className="p-3 align-top">
                 {member.name}
+                {member.detail ? (
+                  <span className="block text-sm font-normal text-muted">{member.detail}</span>
+                ) : null}
               </th>
             ))}
           </tr>
@@ -212,9 +218,9 @@ export function FamilyPlanCards({ slots }: { slots: readonly FamilyPlanSlot[] })
         >
           <strong>{slot.label}</strong>
           {slot.members.map((member) => (
-            <p key={member.id} className="text-sm">
+            <div key={member.id} className="text-sm">
               <strong>{member.name}:</strong> {member.value}
-            </p>
+            </div>
           ))}
         </li>
       ))}
@@ -386,13 +392,23 @@ export function WorkshopListPickerWithDocument({
 }: {
   label: string
   value: string
-  options: readonly { value: string; label: string }[]
+  options: readonly WorkshopListOption[]
   onChange: (value: string) => void
   children: ReactNode
 }) {
+  const index = options.findIndex((option) => option.value === value)
+  const previous = index > 0 ? options[index - 1] : undefined
+  const next = index >= 0 && index < options.length - 1 ? options[index + 1] : undefined
   return (
     <div className="space-y-5">
-      <WorkshopListPicker label={label} value={value} options={options} onChange={onChange} />
+      <WorkshopListPicker
+        label={label}
+        value={value}
+        options={options}
+        onChange={onChange}
+        onPrevious={previous ? () => onChange(previous.value) : undefined}
+        onNext={next ? () => onChange(next.value) : undefined}
+      />
       {children}
     </div>
   )

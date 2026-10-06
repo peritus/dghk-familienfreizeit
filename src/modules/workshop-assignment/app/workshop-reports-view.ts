@@ -5,6 +5,7 @@ import {
   type ExternalLeader,
   type WorkshopRecord,
 } from '../../official-workshops/index.js'
+import type { WorkshopRankingsDemand } from '../../workshop-rankings/index.js'
 import { workshopAssignmentSection, type WorkshopAssignmentSection } from '../index.js'
 import {
   workshopSchedulingWorld,
@@ -28,8 +29,18 @@ export type WorkshopReportRosterEntry = {
   name: string
   age_label: string
   health?: string
-  emergency_contact?: string
   source: 'assignment' | 'signup'
+}
+
+export type WorkshopReportChoiceStats = {
+  /** Participants placed by their first choice. */
+  first_choice: number
+  /** Participants placed by any ranked choice. */
+  ranked_choice: number
+  /** People who ranked this workshop first. */
+  wished_first: number
+  /** Highest rank the profile accepts. */
+  max_rank: number
 }
 
 export type WorkshopReportWorkshop = {
@@ -39,17 +50,27 @@ export type WorkshopReportWorkshop = {
   age_label: string
   capacity: number
   mode: WorkshopRecord['mode']
-  status: 'placed' | 'unplaced' | 'cancelled'
-  status_label: string
-  slot_id: string | null
-  slot_label: string | null
-  space_id: string | null
-  space_name: string | null
+  slot_id: string
+  slot_label: string
+  space_id: string
+  space_name: string
   leaders: readonly string[]
   participant_count: number
+  health_count: number
   interest_count: number
+  choice_stats: WorkshopReportChoiceStats | null
   roster: readonly WorkshopReportRosterEntry[]
 }
+
+export type WorkshopReportPersonPlanStatus =
+  | 'free'
+  | 'assigned'
+  | 'fixed'
+  | 'lead'
+  | 'signup'
+  | 'interest'
+  | 'available'
+  | 'unavailable'
 
 export type WorkshopReportPersonPlanEntry = {
   id: string
@@ -58,35 +79,48 @@ export type WorkshopReportPersonPlanEntry = {
   workshop_id: string | null
   workshop: string | null
   space: string | null
-  status: 'free' | 'assigned' | 'lead' | 'signup' | 'interest'
+  status: WorkshopReportPersonPlanStatus
   role_label: string
 }
 
 export type WorkshopReportPerson = {
   id: string
+  kind: 'person' | 'external'
   name: string
   age_label: string
   family_id: string | null
   family_name: string | null
+  workshop_count: number
+  led_workshops: readonly string[]
+  /** Why the resolver could not give this person any workshop, if it could not. */
+  open_reason: string | null
   entries: readonly WorkshopReportPersonPlanEntry[]
 }
 
 export type WorkshopReportFamilyMember = {
   id: string
   name: string
+  first_name: string
   age_label: string
+  open_reason: string | null
+}
+
+export type WorkshopReportFamilyCell = {
+  member_id: string
+  workshop: string | null
+  space: string | null
+  lead: boolean
 }
 
 export type WorkshopReportFamilySlot = {
   id: string
   label: string
-  members: readonly { id: string; name: string; value: string }[]
+  cells: readonly WorkshopReportFamilyCell[]
 }
 
 export type WorkshopReportFamily = {
   id: string
   name: string
-  email: string | null
   members: readonly WorkshopReportFamilyMember[]
   slots: readonly WorkshopReportFamilySlot[]
 }
@@ -95,17 +129,16 @@ export type WorkshopReportRoomEntry = {
   id: string
   slot_id: string
   time: string
-  workshop_id: string
-  workshop: string
-  audience: string
-  leaders: string
+  workshop_id: string | null
+  workshop: string | null
+  audience: string | null
+  leaders: string | null
 }
 
 export type WorkshopReportRoom = {
   id: string
   name: string
-  location: string
-  capacity: number
+  workshop_count: number
   entries: readonly WorkshopReportRoomEntry[]
 }
 
@@ -115,14 +148,6 @@ export type WorkshopReportsProjection = {
   persons: readonly WorkshopReportPerson[]
   families: readonly WorkshopReportFamily[]
   rooms: readonly WorkshopReportRoom[]
-  summary: {
-    workshop_count: number
-    placed_workshop_count: number
-    participant_count: number
-    family_count: number
-    person_count: number
-    room_count: number
-  }
 }
 
 export type WorkshopReportsProjectionInput = {
@@ -150,20 +175,28 @@ function personName(world: World, personId: string): string {
   )
 }
 
-function ageLabel(world: World, personId: string): string {
-  const labels = world.labels_by_entity[personId] ?? []
-  const age = numberLabel(labels, 'age')
-  const role = stringLabel(labels, 'role')
-  return age === null ? (role === 'adult' ? 'erwachsen' : 'Kind') : `${age} Jahre`
+function firstName(world: World, personId: string): string {
+  return (
+    stringLabel(world.labels_by_entity[personId] ?? [], 'given-name') ?? personName(world, personId)
+  )
 }
 
-function labelValue(world: World, entityId: string, keys: readonly string[]): string | null {
-  const labels = world.labels_by_entity[entityId] ?? []
-  for (const key of keys) {
-    const value = stringLabel(labels, key)
-    if (value) return value
-  }
-  return null
+function isAdult(world: World, personId: string): boolean {
+  return stringLabel(world.labels_by_entity[personId] ?? [], 'role') === 'adult'
+}
+
+function ageOf(world: World, personId: string): number | null {
+  return numberLabel(world.labels_by_entity[personId] ?? [], 'age')
+}
+
+function ageLabel(world: World, personId: string): string {
+  const age = ageOf(world, personId)
+  return age === null ? (isAdult(world, personId) ? 'erwachsen' : 'Kind') : `${age} Jahre`
+}
+
+/** The profile's person note for allergies, intolerances, and emergencies. */
+function healthNote(world: World, personId: string): string | undefined {
+  return stringLabel(world.labels_by_entity[personId] ?? [], 'food-note') ?? undefined
 }
 
 function dateLabel(value: string, timeZone: string): string {
@@ -197,13 +230,28 @@ function audienceLabel(value: string): string {
   return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[value] ?? value
 }
 
+function personenLabel(count: number): string {
+  return `${count} ${count === 1 ? 'Person' : 'Personen'}`
+}
+
+function openReasonLabel(reason: string): string {
+  switch (reason) {
+    case 'no eligible capacity':
+      return 'Alle passenden Workshops sind voll.'
+    case 'no current workshop choice':
+      return 'Keine Workshopwahl abgegeben.'
+    default:
+      return reason
+  }
+}
+
 function leaderName(world: World, externalLeaders: readonly ExternalLeader[], id: string): string {
   if (world.entity_kind_by_id[id] === 'person') return personName(world, id)
   return externalLeaders.find((leader) => leader.id === id)?.name ?? id
 }
 
-function sortById<T extends { id: string }>(items: readonly T[]): T[] {
-  return items.slice().sort((left, right) => left.id.localeCompare(right.id))
+function byName<T extends { id: string; name: string }>(left: T, right: T): number {
+  return left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id)
 }
 
 function reportSlots(slots: readonly WorkshopSlot[], timeZone: string): WorkshopReportSlot[] {
@@ -224,66 +272,67 @@ function familyIdFor(world: World, personId: string): string | null {
   return typeof value === 'string' ? value : null
 }
 
-function placementMaps(placements: readonly WorkshopPlacement[]) {
-  return new Map(placements.map((placement) => [placement.workshop_id, placement]))
-}
-
 function participationKey(personId: string, workshopId: string): string {
   return `${personId}:${workshopId}`
 }
 
+type PlanContext = {
+  slots: readonly WorkshopReportSlot[]
+  workshops: ReadonlyMap<string, WorkshopReportWorkshop>
+  placements: ReadonlyMap<string, WorkshopPlacement>
+  assignment: WorkshopAssignmentSection
+  /** `${leader id}:${slot id}` -> workshop ids led in that slot. */
+  leader_workshops: ReadonlyMap<string, readonly string[]>
+}
+
 function buildPersonEntries(
   personId: string,
-  slots: readonly WorkshopReportSlot[],
-  workshops: ReadonlyMap<string, WorkshopReportWorkshop>,
-  placements: ReadonlyMap<string, WorkshopPlacement>,
-  assignments: WorkshopAssignmentSection['assignments'],
-  signups: WorkshopAssignmentSection['signups'],
-  interests: WorkshopAssignmentSection['interests'],
-  leaderWorkshops: ReadonlyMap<string, readonly string[]>,
+  context: PlanContext,
 ): WorkshopReportPersonPlanEntry[] {
   const assignmentBySlot = new Map(
-    assignments.filter((item) => item.person_id === personId).map((item) => [item.slot_id, item]),
+    context.assignment.assignments
+      .filter((item) => item.person_id === personId)
+      .map((item) => [item.slot_id, item]),
   )
-  const signupIds = new Set(
-    signups.filter((item) => item.person_id === personId).map((item) => item.workshop_id),
-  )
-  const interestIds = new Set(
-    interests.filter((item) => item.person_id === personId).map((item) => item.workshop_id),
-  )
-  return slots.map((slot) => {
-    const ledWorkshopId = leaderWorkshops.get(`${personId}:${slot.id}`)?.[0]
+  const signupIds = context.assignment.signups
+    .filter((item) => item.person_id === personId)
+    .map((item) => item.workshop_id)
+  const interestIds = context.assignment.interests
+    .filter((item) => item.person_id === personId)
+    .map((item) => item.workshop_id)
+  const inSlot = (ids: readonly string[], slotId: string) =>
+    ids.find((id) => context.placements.get(id)?.slot_id === slotId)
+  return context.slots.map((slot) => {
+    const ledWorkshopId = context.leader_workshops.get(`${personId}:${slot.id}`)?.[0]
     const assignment = assignmentBySlot.get(slot.id)
     const workshopId = ledWorkshopId ?? assignment?.workshop_id ?? null
-    const signup = !workshopId
-      ? [...signupIds].find((id) => placements.get(id)?.slot_id === slot.id)
-      : undefined
-    const interest =
-      !workshopId && !signup
-        ? [...interestIds].find((id) => placements.get(id)?.slot_id === slot.id)
-        : undefined
+    const signup = workshopId ? undefined : inSlot(signupIds, slot.id)
+    const interest = workshopId || signup ? undefined : inSlot(interestIds, slot.id)
     const selectedWorkshopId = workshopId ?? signup ?? interest ?? null
-    const selectedWorkshop = selectedWorkshopId ? workshops.get(selectedWorkshopId) : undefined
-    const status: WorkshopReportPersonPlanEntry['status'] = ledWorkshopId
+    const selectedWorkshop = selectedWorkshopId
+      ? context.workshops.get(selectedWorkshopId)
+      : undefined
+    const status: WorkshopReportPersonPlanStatus = ledWorkshopId
       ? 'lead'
-      : assignment
-        ? 'assigned'
-        : signup
-          ? 'signup'
-          : interest
-            ? 'interest'
-            : 'free'
-    const roleLabel = ledWorkshopId
-      ? 'leitet'
-      : assignment?.rank
-        ? `nimmt teil (${assignment.rank}. Wahl)`
+      : assignment?.reason === 'fixed'
+        ? 'fixed'
         : assignment
-          ? 'nimmt teil'
+          ? 'assigned'
           : signup
-            ? 'Anmeldung'
+            ? 'signup'
             : interest
-              ? 'Interesse'
-              : 'frei'
+              ? 'interest'
+              : 'free'
+    const roleLabel = {
+      lead: 'leitet',
+      fixed: 'nimmt teil (fest zugeordnet)',
+      assigned: assignment?.rank ? `nimmt teil (${assignment.rank}. Wahl)` : 'nimmt teil',
+      signup: 'Anmeldung',
+      interest: 'Interesse',
+      free: 'frei',
+      available: 'verfügbar',
+      unavailable: '—',
+    }[status]
     return {
       id: `${personId}:${slot.id}`,
       slot_id: slot.id,
@@ -297,6 +346,56 @@ function buildPersonEntries(
   })
 }
 
+function buildExternalEntries(
+  leader: ExternalLeader,
+  context: PlanContext,
+): WorkshopReportPersonPlanEntry[] {
+  return context.slots.map((slot) => {
+    const workshopId = context.leader_workshops.get(`${leader.id}:${slot.id}`)?.[0]
+    const workshop = workshopId ? context.workshops.get(workshopId) : undefined
+    const status: WorkshopReportPersonPlanStatus = workshop
+      ? 'lead'
+      : leader.availability.includes(slot.id)
+        ? 'available'
+        : 'unavailable'
+    return {
+      id: `${leader.id}:${slot.id}`,
+      slot_id: slot.id,
+      slot_label: slot.label,
+      workshop_id: workshop?.id ?? null,
+      workshop: workshop?.title ?? null,
+      space: workshop?.space_name ?? null,
+      status,
+      role_label: workshop
+        ? `leitet · ${personenLabel(workshop.participant_count)}`
+        : status === 'available'
+          ? 'verfügbar'
+          : '—',
+    }
+  })
+}
+
+function choiceStats(
+  workshopId: string,
+  roster: readonly WorkshopReportRosterEntry[],
+  assignment: WorkshopAssignmentSection,
+  rankings: WorkshopRankingsDemand | undefined,
+): WorkshopReportChoiceStats | null {
+  if (!rankings || rankings.rankings.length === 0) return null
+  const rosterIds = new Set(roster.map((entry) => entry.person_id))
+  const ranks = assignment.assignments
+    .filter((item) => item.workshop_id === workshopId && rosterIds.has(item.person_id))
+    .map((item) => item.rank)
+  return {
+    first_choice: ranks.filter((rank) => rank === 1).length,
+    ranked_choice: ranks.filter((rank) => rank !== null && rank <= rankings.max_rank).length,
+    wished_first: rankings.rankings.filter((ranking) =>
+      ranking.choices.some((choice) => choice.rank === 1 && choice.workshop_id === workshopId),
+    ).length,
+    max_rank: rankings.max_rank,
+  }
+}
+
 export function buildWorkshopReportsProjection(
   input: WorkshopReportsProjectionInput,
 ): WorkshopReportsProjection {
@@ -304,81 +403,70 @@ export function buildWorkshopReportsProjection(
   const scheduling = workshopSchedulingWorld(input.world)
   const spaces = workshopSpaceWorld(input.world).live
   const assignment = workshopAssignmentSection(input.plan)
-  const allWorkshops = [...official.workshops, ...official.cancelled]
-  const placements = placementMaps(schedulingSection(input.plan))
+  const rankings = input.plan.sections['workshop-rankings'] as WorkshopRankingsDemand | undefined
+  const placements = new Map(
+    schedulingSection(input.plan).map((placement) => [placement.workshop_id, placement]),
+  )
   const slots = reportSlots(scheduling.slots, input.time_zone)
   const slotById = new Map(slots.map((slot) => [slot.id, slot]))
   const spaceById = new Map(spaces.map((space) => [space.id, space]))
   const externalLeaders = official.external_leaders
   const personIds = new Set(input.world.persons.map((person) => person.id))
+  const openReasons = new Map(
+    assignment.unassigned.map((item) => [item.person_id, openReasonLabel(item.reason)]),
+  )
+
+  const placedWorkshops = official.workshops.flatMap((workshop) => {
+    const placement = placements.get(workshop.id)
+    const slot = placement ? slotById.get(placement.slot_id) : undefined
+    const space = placement ? spaceById.get(placement.space_id) : undefined
+    return placement && slot && space ? [{ workshop, slot, space }] : []
+  })
 
   const leaderWorkshops = new Map<string, string[]>()
-  for (const workshop of allWorkshops) {
-    const placement = placements.get(workshop.id)
-    if (!placement) continue
+  for (const { workshop, slot } of placedWorkshops)
     for (const leaderId of workshop.leader_ids) {
-      const key = `${leaderId}:${placement.slot_id}`
-      const values = leaderWorkshops.get(key) ?? []
-      values.push(workshop.id)
-      leaderWorkshops.set(key, values)
+      const key = `${leaderId}:${slot.id}`
+      leaderWorkshops.set(key, [...(leaderWorkshops.get(key) ?? []), workshop.id])
     }
-  }
 
   const participation = new Map<string, Set<'assignment' | 'signup'>>()
-  for (const item of assignment.assignments) {
-    if (!personIds.has(item.person_id)) continue
-    const key = participationKey(item.person_id, item.workshop_id)
-    const values = participation.get(key) ?? new Set()
-    values.add('assignment')
-    participation.set(key, values)
+  const addParticipation = (
+    personId: string,
+    workshopId: string,
+    source: 'assignment' | 'signup',
+  ) => {
+    if (!personIds.has(personId)) return
+    const key = participationKey(personId, workshopId)
+    participation.set(key, (participation.get(key) ?? new Set()).add(source))
   }
-  for (const item of assignment.signups) {
-    if (!personIds.has(item.person_id)) continue
-    const key = participationKey(item.person_id, item.workshop_id)
-    const values = participation.get(key) ?? new Set()
-    values.add('signup')
-    participation.set(key, values)
-  }
+  for (const item of assignment.assignments)
+    addParticipation(item.person_id, item.workshop_id, 'assignment')
+  for (const item of assignment.signups)
+    addParticipation(item.person_id, item.workshop_id, 'signup')
 
-  const workshopViews: WorkshopReportWorkshop[] = allWorkshops
-    .slice()
-    .sort((left, right) => left.sort_key - right.sort_key || left.id.localeCompare(right.id))
-    .map((workshop) => {
-      const placement = placements.get(workshop.id)
-      const slot = placement ? slotById.get(placement.slot_id) : undefined
-      const space = placement ? spaceById.get(placement.space_id) : undefined
-      const roster = sortById(
-        [...participation.entries()]
-          .filter(([key]) => key.endsWith(`:${workshop.id}`))
-          .map(([key, sources]) => {
-            const personId = key.slice(0, key.length - workshop.id.length - 1)
-            const source = sources.has('assignment') ? 'assignment' : 'signup'
-            return {
-              id: `${workshop.id}:${personId}`,
-              person_id: personId,
-              name: personName(input.world, personId),
-              age_label: ageLabel(input.world, personId),
-              health:
-                labelValue(input.world, personId, ['health', 'health-note', 'allergy']) ??
-                undefined,
-              emergency_contact:
-                labelValue(input.world, personId, [
-                  'emergency-contact',
-                  'emergency-contact-name',
-                  'contact',
-                ]) ?? undefined,
-              source,
-            } satisfies WorkshopReportRosterEntry
-          }),
-      )
-      const interestCount = assignment.interests.filter(
-        (item) => item.workshop_id === workshop.id,
-      ).length
-      const status: WorkshopReportWorkshop['status'] = workshop.cancelled
-        ? 'cancelled'
-        : placement
-          ? 'placed'
-          : 'unplaced'
+  const workshopViews: WorkshopReportWorkshop[] = placedWorkshops
+    .sort(
+      (left, right) =>
+        left.slot.sort_key - right.slot.sort_key ||
+        left.workshop.title.localeCompare(right.workshop.title, 'de') ||
+        left.workshop.id.localeCompare(right.workshop.id),
+    )
+    .map(({ workshop, slot, space }) => {
+      const roster = [...participation.entries()]
+        .filter(([key]) => key.endsWith(`:${workshop.id}`))
+        .map(([key, sources]): WorkshopReportRosterEntry => {
+          const personId = key.slice(0, key.length - workshop.id.length - 1)
+          return {
+            id: `${workshop.id}:${personId}`,
+            person_id: personId,
+            name: personName(input.world, personId),
+            age_label: ageLabel(input.world, personId),
+            health: healthNote(input.world, personId),
+            source: sources.has('assignment') ? 'assignment' : 'signup',
+          }
+        })
+        .sort(byName)
       return {
         id: workshop.id,
         title: workshop.title,
@@ -386,130 +474,140 @@ export function buildWorkshopReportsProjection(
         age_label: `${workshop.age_min}–${workshop.age_max} Jahre`,
         capacity: workshop.capacity,
         mode: workshop.mode,
-        status,
-        status_label:
-          status === 'cancelled'
-            ? 'abgesagt'
-            : status === 'placed'
-              ? 'platziert'
-              : 'nicht eingeplant',
-        slot_id: placement?.slot_id ?? null,
-        slot_label: slot?.label ?? null,
-        space_id: placement?.space_id ?? null,
-        space_name: space?.name ?? null,
+        slot_id: slot.id,
+        slot_label: slot.label,
+        space_id: space.id,
+        space_name: space.name,
         leaders: workshop.leader_ids.map((id) => leaderName(input.world, externalLeaders, id)),
         participant_count: roster.length,
-        interest_count: interestCount,
+        health_count: roster.filter((entry) => entry.health).length,
+        interest_count: assignment.interests.filter((item) => item.workshop_id === workshop.id)
+          .length,
+        choice_stats:
+          workshop.mode === 'assigned'
+            ? choiceStats(workshop.id, roster, assignment, rankings)
+            : null,
         roster,
       }
     })
 
-  const workshopById = new Map(workshopViews.map((workshop) => [workshop.id, workshop]))
-  const personViews: WorkshopReportPerson[] = input.world.persons
-    .map((person) => {
-      const familyId = familyIdFor(input.world, person.id)
-      const familyLabels = familyId ? (input.world.labels_by_entity[familyId] ?? []) : []
-      return {
-        id: person.id,
-        name: personName(input.world, person.id),
-        age_label: ageLabel(input.world, person.id),
-        family_id: familyId,
-        family_name: familyId ? stringLabel(familyLabels, 'display-name') : null,
-        entries: buildPersonEntries(
-          person.id,
-          slots,
-          workshopById,
-          placements,
-          assignment.assignments,
-          assignment.signups,
-          assignment.interests,
-          leaderWorkshops,
-        ),
-      }
-    })
-    .sort(
-      (left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id),
-    )
+  const context: PlanContext = {
+    slots,
+    workshops: new Map(workshopViews.map((workshop) => [workshop.id, workshop])),
+    placements,
+    assignment,
+    leader_workshops: leaderWorkshops,
+  }
+  const counted = new Set<WorkshopReportPersonPlanStatus>(['lead', 'fixed', 'assigned', 'signup'])
+  const ledTitles = (entries: readonly WorkshopReportPersonPlanEntry[]) =>
+    entries
+      .filter((entry) => entry.status === 'lead' && entry.workshop)
+      .map((entry) => entry.workshop as string)
+
+  const personViews: WorkshopReportPerson[] = input.world.persons.map((person) => {
+    const familyId = familyIdFor(input.world, person.id)
+    const familyLabels = familyId ? (input.world.labels_by_entity[familyId] ?? []) : []
+    const entries = buildPersonEntries(person.id, context)
+    return {
+      id: person.id,
+      kind: 'person' as const,
+      name: personName(input.world, person.id),
+      age_label: ageLabel(input.world, person.id),
+      family_id: familyId,
+      family_name: familyId ? stringLabel(familyLabels, 'display-name') : null,
+      workshop_count: entries.filter((entry) => counted.has(entry.status)).length,
+      led_workshops: ledTitles(entries),
+      open_reason: openReasons.get(person.id) ?? null,
+      entries,
+    }
+  })
+  const externalViews: WorkshopReportPerson[] = externalLeaders.map((leader) => {
+    const entries = buildExternalEntries(leader, context)
+    return {
+      id: leader.id,
+      kind: 'external' as const,
+      name: leader.name,
+      age_label: 'Externe Leitung',
+      family_id: null,
+      family_name: null,
+      workshop_count: entries.filter((entry) => entry.status === 'lead').length,
+      led_workshops: ledTitles(entries),
+      open_reason: null,
+      entries,
+    }
+  })
+  const allPersons = [...personViews, ...externalViews].sort(byName)
 
   const personById = new Map(personViews.map((person) => [person.id, person]))
   const familyViews: WorkshopReportFamily[] = input.world.families
     .map((family) => {
-      const labels = input.world.labels_by_entity[family.id] ?? []
-      const members = input.world.persons
+      const memberIds = input.world.persons
         .filter((person) => familyIdFor(input.world, person.id) === family.id)
-        .map((person) => personById.get(person.id))
-        .filter((person): person is WorkshopReportPerson => Boolean(person))
-        .map(({ id, name, age_label: ageLabel }) => ({ id, name, age_label: ageLabel }))
+        .map((person) => person.id)
+        .sort(
+          (left, right) =>
+            Number(isAdult(input.world, right)) - Number(isAdult(input.world, left)) ||
+            (ageOf(input.world, right) ?? 0) - (ageOf(input.world, left) ?? 0) ||
+            left.localeCompare(right),
+        )
       return {
         id: family.id,
-        name: stringLabel(labels, 'display-name') ?? family.id,
-        email: stringLabel(labels, 'email'),
-        members,
+        name:
+          stringLabel(input.world.labels_by_entity[family.id] ?? [], 'display-name') ?? family.id,
+        members: memberIds.map((id) => ({
+          id,
+          name: personName(input.world, id),
+          first_name: firstName(input.world, id),
+          age_label: ageLabel(input.world, id),
+          open_reason: openReasons.get(id) ?? null,
+        })),
         slots: slots.map((slot) => ({
           id: `${family.id}:${slot.id}`,
           label: slot.label,
-          members: members.map((member) => {
-            const entry = personById
-              .get(member.id)
-              ?.entries.find((item) => item.slot_id === slot.id)
-            const value = entry?.workshop
-              ? `${entry.status === 'lead' ? 'leitet ' : ''}${entry.workshop}${
-                  entry.status === 'signup'
-                    ? ' (Anmeldung)'
-                    : entry.status === 'interest'
-                      ? ' (Interesse)'
-                      : ''
-                }`
-              : 'frei'
-            return { id: member.id, name: member.name, value }
+          cells: memberIds.map((id) => {
+            const entry = personById.get(id)?.entries.find((item) => item.slot_id === slot.id)
+            return {
+              member_id: id,
+              workshop: entry?.workshop ?? null,
+              space: entry?.space ?? null,
+              lead: entry?.status === 'lead',
+            }
           }),
         })),
       }
     })
-    .sort(
-      (left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id),
-    )
+    .sort(byName)
 
   const roomViews: WorkshopReportRoom[] = spaces
     .slice()
     .sort((left, right) => left.sort_key - right.sort_key || left.id.localeCompare(right.id))
-    .map((space) => ({
-      id: space.id,
-      name: space.name,
-      location: space.location_description,
-      capacity: space.capacity,
-      entries: workshopViews
-        .filter((workshop) => workshop.space_id === space.id && workshop.slot_id)
-        .map((workshop) => ({
-          id: `${space.id}:${workshop.id}`,
-          slot_id: workshop.slot_id as string,
-          time: workshop.slot_label ?? '—',
-          workshop_id: workshop.id,
-          workshop: workshop.title,
-          audience: `${workshop.audience}, ${workshop.age_label}`,
-          leaders: workshop.leaders.join(', '),
-        })),
-    }))
+    .map((space) => {
+      const hosted = workshopViews.filter((workshop) => workshop.space_id === space.id)
+      return {
+        id: space.id,
+        name: space.name,
+        workshop_count: hosted.length,
+        entries: slots.map((slot) => {
+          const workshop = hosted.find((item) => item.slot_id === slot.id)
+          return {
+            id: `${space.id}:${slot.id}`,
+            slot_id: slot.id,
+            time: slot.label,
+            workshop_id: workshop?.id ?? null,
+            workshop: workshop?.title ?? null,
+            audience: workshop ? `${workshop.audience}, ${workshop.age_label}` : null,
+            leaders: workshop ? workshop.leaders.join(', ') || '—' : null,
+          }
+        }),
+      }
+    })
 
-  const participantCount = workshopViews.reduce(
-    (count, workshop) => count + workshop.participant_count,
-    0,
-  )
   return {
     slots,
     workshops: workshopViews,
-    persons: personViews,
+    persons: allPersons,
     families: familyViews,
     rooms: roomViews,
-    summary: {
-      workshop_count: workshopViews.length,
-      placed_workshop_count: workshopViews.filter((workshop) => workshop.status === 'placed')
-        .length,
-      participant_count: participantCount,
-      family_count: familyViews.length,
-      person_count: personViews.length,
-      room_count: roomViews.length,
-    },
   }
 }
 
