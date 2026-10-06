@@ -14,7 +14,14 @@ import {
 import { kernelEventTypes, kernelPayloadSchemas, type JsonValue } from '../events/types.js'
 import type { PreflightCheck, Rule, SolverInputContribution, SolverStage } from '../solver/types.js'
 import { validateFeatures, type FeatureDefinition } from './features.js'
-import { declaredPhases, validatePhases, type PhaseDate, type PhaseDefinition } from './phases.js'
+import {
+  declaredPhases,
+  validateClosedResults,
+  validatePhases,
+  type ClosedResultContribution,
+  type PhaseDate,
+  type PhaseDefinition,
+} from './phases.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -214,6 +221,7 @@ export type ModuleContributions = {
   family_controls?: readonly FamilyControlDefinition[]
   features?: readonly FeatureDefinition[]
   phases?: readonly PhaseDefinition[]
+  closed_results?: readonly ClosedResultContribution[]
 }
 
 export type ScreenDefinition = {
@@ -478,6 +486,7 @@ function validateModules(
     | FamilyPreferencesParams
     | undefined
   validatePhases(modules, meta.phase_dates ?? [])
+  validateClosedResults(modules)
   if (familyPreferencesParams)
     validateFamilyPreferences(
       familyPreferencesParams,
@@ -578,6 +587,11 @@ function phaseEventRoles(modules: readonly ProfileModule[]): Record<string, Phas
   for (const module of modules)
     for (const phase of module.contributions.phases ?? [])
       if (phase.opens.kind === 'event') roles[phase.opens.event] = { role: 'open', phase: phase.id }
+  for (const module of modules)
+    for (const result of module.contributions.closed_results ?? []) {
+      roles[result.close_event] = { role: 'close', area: result.area }
+      roles[result.reopen_event] = { role: 'reopen', area: result.area }
+    }
   return roles
 }
 

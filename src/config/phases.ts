@@ -1,4 +1,5 @@
 import type { World } from '../events/fold.js'
+import type { JsonValue } from '../events/types.js'
 import type { Plan } from '../solver/types.js'
 
 /** The parts of an occasion whose solver result is closed as a whole (phases.md §1). */
@@ -100,4 +101,74 @@ export function validatePhases(
 
 function kebab(value: string): boolean {
   return /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value)
+}
+
+/** One family-attributed change between two closed results, or a closed result and the plan. */
+export type ClosedResultChange = {
+  kind: 'added' | 'removed' | 'moved'
+  /** The person or family whose arrangement changed. */
+  subject_id: string
+  family_id: string | null
+  /** The workshop, room, or slot before and after the change. */
+  before: string | null
+  after: string | null
+}
+
+export type ClosedResultDifference = {
+  changes: readonly ClosedResultChange[]
+  affected_family_ids: readonly string[]
+}
+
+/**
+ * An area-owning module's closed-result contract (spec/modules/contract.md §3.1): its closing
+ * and reopening events, the stored payload schema, the pure accessor that computes the payload
+ * from the current plan, and the canonical comparison used for differences.
+ */
+export type ClosedResultContribution = {
+  area: AreaId
+  close_event: string
+  reopen_event: string
+  /** Computes the solver-output slice, ids only and in canonical order, without revisions. */
+  compute: (context: { world: World; plan: Plan }) => Readonly<Record<string, JsonValue>>
+  /** Compares two payloads, attributing each change to its family through the world. */
+  compare: (before: JsonValue | null, after: JsonValue, world: World) => ClosedResultDifference
+}
+
+type ClosedResultModule = {
+  id: string
+  contributions: {
+    closed_results?: readonly ClosedResultContribution[]
+    phases?: readonly PhaseDefinition[]
+    events?: readonly { type: string }[]
+  }
+}
+
+/** Every closed-result contribution of the selected modules, keyed by area. */
+export function closedResults(
+  modules: readonly Pick<ClosedResultModule, 'contributions'>[],
+): ReadonlyMap<AreaId, ClosedResultContribution> {
+  return new Map(
+    modules.flatMap((module) =>
+      (module.contributions.closed_results ?? []).map((result) => [result.area, result] as const),
+    ),
+  )
+}
+
+/**
+ * Validates closed-result contributions: one owner per area and events of the owning module
+ * (phases.md §2). An area that no selected module closes never closes.
+ */
+export function validateClosedResults(modules: readonly ClosedResultModule[]): void {
+  const owners = new Map<string, string>()
+  for (const module of modules)
+    for (const result of module.contributions.closed_results ?? []) {
+      const owner = owners.get(result.area)
+      if (owner) throw new Error(`area ${result.area} is closed by both ${owner} and ${module.id}`)
+      owners.set(result.area, module.id)
+      for (const type of [result.close_event, result.reopen_event])
+        if (!(module.contributions.events ?? []).some((event) => event.type === type))
+          throw new Error(
+            `closed result of ${result.area} names ${type}, which ${module.id} does not define`,
+          )
+    }
 }

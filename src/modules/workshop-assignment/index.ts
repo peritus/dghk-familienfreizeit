@@ -1,5 +1,11 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
+import {
+  validateWorkshopsReopened,
+  workshopsClosedPayload,
+  workshopsClosedResultContribution,
+  workshopsReopenedPayload,
+} from './closed-result.js'
 import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult, TraceEntry } from '../../solver/types.js'
@@ -397,6 +403,22 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
         readiness: workshopReviewReadiness,
       },
     ],
+    events: [
+      {
+        type: 'WorkshopsClosed',
+        payload: workshopsClosedPayload,
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: () => {},
+      },
+      {
+        type: 'WorkshopsReopened',
+        payload: workshopsReopenedPayload,
+        validate: (_payload, world) => validateWorkshopsReopened(world),
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: () => {},
+      },
+    ],
+    closed_results: [workshopsClosedResultContribution],
     stages: [assignmentStage(params)],
     reports: [
       { id: 'workshop-roster' },

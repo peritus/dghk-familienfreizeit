@@ -4,6 +4,12 @@ import type { ResolvedRequirement } from '../../events/resolver.js'
 import { evaluateRules } from '../../solver/index.js'
 import type { Rule, SolverInput, SolverStage, TraceEntry } from '../../solver/types.js'
 import { defineModule } from '../define.js'
+import {
+  accommodationClosedPayload,
+  accommodationClosedResultContribution,
+  accommodationReopenedPayload,
+  validateAccommodationReopened,
+} from './closed-result.js'
 import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
 import { inventoryWorld, type InventoryRoom } from '../room-inventory/index.js'
 
@@ -123,6 +129,22 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
         readiness: roomReviewReadiness,
       },
     ],
+    events: [
+      {
+        type: 'AccommodationClosed',
+        payload: accommodationClosedPayload,
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: () => {},
+      },
+      {
+        type: 'AccommodationReopened',
+        payload: accommodationReopenedPayload,
+        validate: (_payload, world) => validateAccommodationReopened(world),
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: () => {},
+      },
+    ],
+    closed_results: [accommodationClosedResultContribution],
     trait_roles: [
       { parameter: 'keep_apart_trait', kind: 'relation', operator: 'separates-from' },
       { parameter: 'no_bed_trait', kind: 'property' },

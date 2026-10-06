@@ -54,8 +54,10 @@ features it deactivates. A phase that is not active removes every feature bound 
 it from effective availability. Phases add no availability layer of their own.
 
 Profile composition fails when a phase id is duplicated or malformed, its area is
-not contributed by a selected module, its opening event is not an event of the
-owning module, or a feature binds an unknown phase.
+unknown, its opening event is not an event of the owning module, a feature binds
+an unknown phase, two modules close the same area, or a closing or reopening event
+is not an event of the area's owning module. An area that no selected module
+closes never closes.
 
 ### Profile dates
 
@@ -171,7 +173,7 @@ A closing payload records the area's solver-output slice and nothing else:
 type WorkshopsClosedPayload = {
   placements: readonly { workshop_id: string; slot_id: string; space_id: string }[]
   attendance: readonly { person_id: string; workshop_id: string }[]
-  unassigned: readonly { person_id: string; slot_id: string }[]
+  unassigned: readonly { person_id: string }[]
   build_revision: string
   compatibility_revision: number
 }
