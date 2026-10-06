@@ -45,9 +45,19 @@ export default defineOccasionProfile({
 })
 ```
 
-The module list is explicit. There are no hidden presets and no runtime feature
-flags that can change solver semantics after deployment. Module order in the list
-has no meaning; stage order comes from the modules ([modules](../modules/contract.md) §4.1).
+The module list is explicit, and there are no hidden presets. A selected module
+selects all of its [features](../architecture/features.md); a module entry may
+deselect individual features of that module by id through the kernel-owned
+`deselected_features` parameter, for example
+`workshopRankings({ …, deselected_features: ['workshop-rankings.ranking'] })`.
+Module order in the list has no meaning; stage order comes from the modules
+([modules](../modules/contract.md) §4.1).
+
+No deployment control may change solver semantics, domain behavior, or phase
+meaning. A deployment may switch the availability of a declared feature on or
+off through its operational binding; that switch is validated, fails closed, and
+is attributed separately from `build_revision`
+([features](../architecture/features.md) §6).
 
 The kernel does not depend on the profile builder's implementation. Before M2's
 composition work is complete, M1 consumes the profile's validation view: entity

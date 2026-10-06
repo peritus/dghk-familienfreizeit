@@ -88,6 +88,22 @@ or UI inputs. `EMAIL_FROM` remains a deployment fact and must not enter
 origin of the request handled by the Worker, so local, preview, and production
 origins require no duplicated public-URL setting.
 
+### Operational feature bindings
+
+Each declared [feature](../architecture/features.md) has one optional Worker
+binding, `DGHK_FEATURE_<ID>=on|off`, whose name is derived from the feature id.
+Both values are permitted in every environment, including production. The
+bindings are allowlisted deliberately like every other Worker binding, and a test
+fails when the allowlist or `src/worker/environment.d.ts` differs from the names
+derived from the composed profile.
+
+An invalid value, or a binding that names no declared feature, makes the Worker
+refuse to serve application routes; the health response and the startup log name
+each invalid binding. The health response reports the set bindings as
+`feature_overrides` next to `build_revision` and `compatibility_revision`. These
+bindings are deployment facts and must not enter either revision
+([features](../architecture/features.md) §6).
+
 ### The application bundles
 
 The build produces an entry chunk for login and the family view, and a lazy organiser
@@ -105,7 +121,10 @@ as domain code is introduced. The remaining requirement is:
   the bundle are built from one monorepo revision and deployed together (D19); the
   build injects that revision's commit id as `build_revision` (D20). A deploy that
   updates the Worker while a browser holds yesterday's bundle then produces a reload
-  prompt rather than a plan computed against the wrong vocabulary.
+  prompt rather than a plan computed against the wrong vocabulary. The same
+  response carries the Worker's `feature_overrides`; the organiser application
+  derives its feature view from them and refuses to derive when they differ from
+  the overrides it already holds, so a changed binding produces the same prompt.
 
 ---
 

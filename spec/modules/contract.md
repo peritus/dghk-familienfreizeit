@@ -73,9 +73,11 @@ export interface ModuleDefinition<Id extends ModuleId, Params> {
 export interface ModuleContributions {
   entity_kinds: readonly EntityKindDefinition[]
   events: readonly EventDefinition[]
+  event_mappings: readonly EventMapping[]
   label_keys: readonly BuiltInLabelKey[]
   trait_roles: readonly TraitRole[]
   solver_input: readonly SolverInputContribution[]
+  typed_contributions: readonly TypedContribution[]
   stages: readonly SolverStage[]
   rules: readonly Rule[]
   preflight_checks: readonly PreflightCheck[]
@@ -86,6 +88,7 @@ export interface ModuleContributions {
   routes: readonly RouteDefinition[]       // Worker handlers under src/modules/<id>/worker/
   screens: readonly ScreenDefinition[]     // React screens under src/modules/<id>/app/
   family_controls: readonly ControlDefinition[]
+  features: readonly FeatureDefinition[]   // spec/architecture/features.md
   reports: readonly ReportDefinition[]
   emails: readonly EmailDefinition[]
   fixtures: readonly FixtureContract[]
@@ -121,6 +124,7 @@ is evaluated once, at profile build.
 | `change_kinds` | What `diff` reports for world facts or plan output, with subject/family attribution. Release control selects scope content differences; arbitrary world changes do not imply held work. |
 | `routes`, `screens` | Worker handlers and organiser or family screens. A module contributes a `screens` entry only for a route it renders as its own top-level screen ([§4](#4-composition) forbids two modules contributing the same route). Content a module adds inside another module's screen is described in prose against that screen's identity, not as a second `screens` entry for the same route — a contributing (non-owning) module's `ScreenDefinition` names the host screen it targets and carries no independent `route` value, so the collision check has nothing to compare for contributed content. A route or screen of an unselected module does not exist in the build. |
 | `family_controls` | Additional `control` kinds and module-owned control definitions for the preferences renderer ([family preferences](family-preferences.md)). |
+| `features` | Module-owned feature definitions: id, audience, subject kind, actions, required features and phases, governed screens and family controls, and optional readiness ([features](../architecture/features.md) §3). Every screen and family control the module contributes is governed by exactly one of its features. |
 | `reports` | Report definitions with audience and sensitivity ([reports](../application/reports.md)). |
 | `emails` | Email kinds with their trigger and the plan data they may include. |
 | `fixtures` | The KDL fixture and golden-plan contracts a profile that selects the module must supply ([testing](../engineering/testing.md)). |
@@ -154,8 +158,9 @@ time and fails the build when:
 
 - a module is selected twice;
 - a `requires` dependency is not selected;
-- two modules contribute the same entity kind, event type, route, or report id,
-  or the same label key for the same entity kind;
+- two modules contribute the same entity kind, event type, route, report id, or
+  feature id, or the same label key for the same entity kind;
+- a feature definition fails a feature composition check ([features](../architecture/features.md) §5);
 - a profile trait uses a label key on an entity kind a module owns it for;
 - a trait role parameter names no trait, or names a trait of the wrong shape;
 - a parameter fails its schema;
@@ -193,7 +198,8 @@ application code never reads `sections` with a bare string.
 
 An unselected module contributes nothing: no entity kind, event type, label key,
 solver input, stage, rule, preflight check, world summary/check, release scope, plan section, route, screen, control,
-report, email, or fixture requirement. An event of a type no selected module
+feature, report, email, or fixture requirement. Its features are not declared, so
+no operational binding can enable them ([features](../architecture/features.md) §4). An event of a type no selected module
 defines fails replay validation, which is the signal that a profile change needs a
 migration ([deployment](../engineering/deployment.md) §2).
 

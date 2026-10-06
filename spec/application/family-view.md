@@ -26,7 +26,10 @@ a form people return to as they change their minds. Everything saves on change.
 
 Section 2 ("Zimmerwünsche") and the later sections are **generated from the
 active occasion profile**: every trait declaring
-`family_facing` produces a control, in the sections the profile configures.
+`family_facing` produces a control where its governing
+[feature](../architecture/features.md) is effective, in the sections the profile
+configures. The family view never shows a control, section, or notice for a
+feature that is not effective.
 Selected module-owned participation controls are placed through `module_controls`
 as defined by [family preferences](../modules/family-preferences.md). The
 mock-up below is explanatory only; no occasion-specific form is hard-coded here.

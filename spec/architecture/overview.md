@@ -143,12 +143,18 @@ contribute the domain: room inventory, whole-family room and workshop assignment
 food preferences, materials, and the surfaces that go with them. The catalogue and
 the module contract are in [modules](../modules/contract.md).
 
-This resembles feature flags at the selection boundary, but module composition is a
-build-time property rather than a runtime rollout switch. The occasion profile
-selects modules explicitly, and the selection is part of the built profile identified
-by `build_revision`. A module
-that is not selected contributes no event type, solver stage, trace section, route,
-screen, report, or required fixture.
+Module composition is a build-time property. The occasion profile selects modules
+and their [features](features.md) explicitly, and the selection is part of the built
+profile identified by `build_revision`. A module that is not selected contributes no
+event type, solver stage, trace section, route, screen, feature, report, or required
+fixture.
+
+Feature availability is separate from composition. A deployment may switch a
+declared feature of a selected module on or off through an operational binding;
+the switch changes only whether the capability is offered, never solver semantics,
+domain behavior, or phase meaning. It is a deployment fact, validated fail-closed and
+attributed in the startup log and health response rather than in
+`build_revision` ([features](features.md) §6).
 
 Modules own mechanisms. The profile owns vocabulary and policy: concrete traits and
 values, module parameters, pure derivations and checks, scoring weights, and

@@ -6,7 +6,8 @@ Module id `family-preferences` · factory `familyPreferences`
 
 Family preferences renders the page where a family states its preferences. The page
 is a renderer, not a form: every profile trait declaring `family_facing` produces a
-control, grouped into the sections this module's parameters name (D14). Adding a trait
+control where its governing [feature](../architecture/features.md) is effective,
+grouped into the sections this module's parameters name (D14). Adding a trait
 that reuses an existing control needs no family view code.
 
 The module owns the control union, section layout, deadline notices, and the

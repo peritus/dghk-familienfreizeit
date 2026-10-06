@@ -279,6 +279,8 @@ wrongly:
 - no alias collides with another trait or alias, or with a module-owned key;
 - every `family_facing.control` has a renderer contributed by a selected module;
 - every `_trait` parameter names a trait of the shape its module role requires;
+- every feature composition check in [features](../architecture/features.md) §5
+  holds, and the Worker binding allowlist matches the declared feature set;
 - every selected module's `requires` is satisfied and stage order has no cycle;
 - `defineOccasionProfile` throws on each of the above when deliberately broken.
 

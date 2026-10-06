@@ -37,6 +37,9 @@ is kept in [`spec/deferred-ideas/party-review.md`](../deferred-ideas/party-revie
 UI-13 organiser placement decisions are accepted but deferred in
 [`organiser-placement-overrides`](../deferred-ideas/organiser-placement-overrides.md).
 
+UI-15 feature availability is accepted but deferred in
+[`feature-availability-ui`](../deferred-ideas/feature-availability-ui.md).
+
 Release control, communication review, and communication history UI are deferred
 in [`release-control-ui`](../deferred-ideas/release-control-ui.md). The release
 control domain contract remains authoritative for its later milestone.

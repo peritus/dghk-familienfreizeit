@@ -237,7 +237,8 @@ in [workshop rankings](spec/modules/workshop-rankings.md).
 ## D14 — `family_facing` in the occasion profile drives the family view
 
 *Chosen.* The preferences page is a renderer: every trait that declares
-`family_facing` in the active profile produces a control, in profile order. Adding a
+`family_facing` in the active profile produces a control where its governing
+[feature](spec/architecture/features.md) is effective, in profile order. Adding a
 trait that reuses an existing control needs no family view code. See
 [family view](spec/application/family-view.md) §1.
 
@@ -409,9 +410,17 @@ identifiers that are not kebab-case.
 *Chosen.* The application is a single monolith in a single monorepo: the kernel,
 every module, every occasion profile, the Worker, and the browser application. One
 build from one revision produces everything a deployment runs, and a deployment
-ships all of it together. The occasion profile selects which modules are active
-(D12, [modules](spec/modules/contract.md)); selection happens inside that one build, not by
+ships all of it together. The occasion profile selects which modules and
+[features](spec/architecture/features.md) are active (D12,
+[modules](spec/modules/contract.md)); composition happens inside that one build, not by
 combining separately built parts.
+
+Availability is distinct from composition. A deployment may switch a declared
+feature of a selected module on or off through an operational binding. The switch
+changes only whether a capability is offered: it cannot add a module, enable a
+feature of an unselected module, or change solver semantics, domain behavior, or
+phase meaning. It is validated fail-closed and attributed separately from the
+build (D20).
 
 *Rejected alternative:* modules as separately built or distributed packages with
 their own release cycles. It buys independent releases that nobody here needs and
@@ -440,6 +449,12 @@ made. It is not a semantic version and does not identify a build.
 Configuration is repository code and is identified by `build_revision`; there is no
 separate `config_hash`. A plan is identified by `input_seq`, `build_revision`, and
 `compatibility_revision`.
+
+Build identity covers code only. Operational feature bindings (D19) are deployment
+facts: they never enter either revision and are reported instead as
+`feature_overrides` in the startup log and in the health and organiser log
+responses ([features](spec/architecture/features.md) §6). Plans do not record them,
+because a feature cannot change how a plan is computed.
 
 *Rejected alternative:* semver for the application or per module. Version numbers
 communicate compatibility to independent consumers; a monolith deployed as a whole
@@ -569,7 +584,10 @@ already "Emitted by the family or by an allowlisted organiser"
 ([events](spec/architecture/events.md) §"Setup and identity"). D24 is a
 UI-completeness and design-review obligation: no family-facing trait or
 family-authorable event type is spec-complete without a matching
-organiser-facing entry point.
+organiser-facing entry point. Feature definitions encode the pairing: every
+family-audience feature action has an organiser-audience action writing the same
+event types, and profile composition fails when one is missing
+([features](spec/architecture/features.md) §4).
 
 *Mechanism.* The organiser family-detail screen renders the same
 trait-driven control union as the family view

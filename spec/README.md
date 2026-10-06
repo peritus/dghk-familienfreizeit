@@ -57,19 +57,20 @@ particular profile.
 | 14 | [German translation guidelines](ui/german-translation-guidelines.md) | Family-facing terminology and translation rules |
 | 15 | [Reports](application/reports.md) | Report catalogue, audience scopes, responsive behavior, and print stylesheets |
 | 16 | [Modules](modules/contract.md) | Module contract, composition, and catalogue |
-| 17 | [Room inventory](modules/room-inventory.md) | Buildings, rooms, beds, places, and capacity |
-| 18 | [Room assignment](modules/room-assignment.md) | Remaining placement extensions and consumers |
-| 19 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
-| 20 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
-| 21 | [Workshops](modules/workshops.md) | Direct workshop identity and selected workshop modules |
-| 22 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
-| 23 | [Official workshops](modules/official-workshops.md) | Official workshop facts and eligibility |
-| 24 | [Self-organized workshops](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred proposer-created workshops |
-| 25 | [Workshop scheduling](modules/workshop-scheduling.md) | Event-backed slots, one placement, conflicts, and schedule release |
-| 26 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered current-cycle choices |
-| 27 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
-| 28 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred proposal intake |
-| 29 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred food aggregation, reporting, and safety-sheet scope |
-| 30 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
-| 31 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
-| 32 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |
+| 17 | [Features](architecture/features.md) | Module-owned features, effective availability, and operational bindings |
+| 18 | [Room inventory](modules/room-inventory.md) | Buildings, rooms, beds, places, and capacity |
+| 19 | [Room assignment](modules/room-assignment.md) | Remaining placement extensions and consumers |
+| 20 | [Workshops](modules/workshops.md) | Slots, workshops, audience, leadership, and cancellation |
+| 21 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
+| 22 | [Workshops](modules/workshops.md) | Direct workshop identity and selected workshop modules |
+| 23 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
+| 24 | [Official workshops](modules/official-workshops.md) | Official workshop facts and eligibility |
+| 25 | [Self-organized workshops](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred proposer-created workshops |
+| 26 | [Workshop scheduling](modules/workshop-scheduling.md) | Event-backed slots, one placement, conflicts, and schedule release |
+| 27 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered current-cycle choices |
+| 28 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
+| 29 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred proposal intake |
+| 30 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred food aggregation, reporting, and safety-sheet scope |
+| 31 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
+| 32 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
+| 33 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |
