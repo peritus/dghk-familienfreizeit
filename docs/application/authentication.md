@@ -56,9 +56,10 @@ JSON 401 to unauthenticated or non-organiser requests; the base `/api/organiser`
 route intentionally returns JSON 404 to conceal the organiser surface. `/api/me`
 exposes only the current principal kind and identity needed by the shell.
 `POST /api/events` sets the verified actor server-side, requires a same-origin
-`Origin`, rejects stale heads, bounds request size and batch shape, rate-limits
-family writes, and permits family principals only to append events about their
-own family or people; organiser principals may append setup events.
+`Origin`, rejects stale heads, accepts at most 100 events per request, bounds
+request size and batch shape, rate-limits family writes, and permits family
+principals only to append events about their own family or people; organiser
+principals may append setup events.
 
 Cookie-authenticated mutations require a same-origin `Origin` header. Worker
 responses set browser security headers, and authentication/API responses are

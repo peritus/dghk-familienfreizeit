@@ -28,9 +28,10 @@ without starting Vite, run `npm run db:migrate:local`.
 Use `db:import-fixture` to populate a local or remote Worker through the same
 authenticated event API used by the organiser application. The importer parses
 and validates the complete KDL fixture with the active profile before uploading
-anything, then sends the complete fixture in one request to `POST /api/events`.
-This lets the Worker validate and append the fixture atomically, including when
-an intermediate prefix is not itself a valid world.
+anything. It then plans requests of at most 100 events, ending each request at
+the largest prefix that the active profile considers appendable. The whole plan
+is checked before the first write. The importer sends a same-origin `Origin`
+header because the Worker requires it for cookie-authenticated mutations.
 
 For local development, start the preview and request a magic link for the
 synthetic demo identity `demo-organiser@example.invalid`. The local Worker
@@ -69,11 +70,11 @@ stream. The generator can create another synthetic family count with
 Food preferences in the active profile use person-scoped `diet` and `food-note`
 traits through the generic family-preferences label/control system. Synthetic
 fixtures may include those labels directly; they must not copy prototype data.
-It refuses to use a non-empty log by default. If a
-previous request failed, use `--resume` with the same fixture and credential;
-the importer checks that the server log is an exact fixture prefix and uploads
-only the remaining suffix in one request. It refuses mismatched logs. The event
-API is append-only, so the importer never resets or deletes a remote log.
+Each request is appended atomically, but the complete import can partially
+finish if a later request fails. The importer reports event progress; rerun
+with `--resume` and the same fixture and credential to continue after an exact
+fixture prefix. It refuses mismatched logs. The event API is append-only, so
+the importer never resets or deletes a remote log.
 
 To run the full browser route suite locally, use
 `nix develop --command npm run test:browser`. It starts the local Vite/Worker
