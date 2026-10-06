@@ -23,6 +23,7 @@ import {
 import type { EventDraft } from '../../../events/types.js'
 import type { Label } from '../../../events/fold.js'
 import { activeProfile } from '../../../config/index.js'
+import { AreaClosingActions } from '../components/area-closing.js'
 import { accommodationTrack } from '../../../modules/room-assignment/app/accommodation-track.js'
 import { SecondaryNavigation } from '../components/navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
@@ -240,6 +241,7 @@ export function Inventory() {
       <WorkflowStepper
         aria_label="Ablauf der Unterbringung"
         steps={accommodationTrack({ phases: phases ?? [], meta: activeProfile.meta })}
+        next_action={<AreaClosingActions area="accommodation" />}
       />
       <OrganiserScreenHeader
         title="Unterkunft"

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
+import { AreaClosingActions, ClosedAreaDifferences } from '../components/area-closing.js'
 import { workshopTrack } from '../../../modules/workshop-assignment/app/workshop-track.js'
 import type { PhaseView } from '../../../derive/phases.js'
 import { organiserPathWithQuery, organiserPaths } from '../../../organiser/routes.js'
@@ -155,6 +156,13 @@ export function WorkshopAllocation() {
           active_workshop_count: officialWorkshopsWorld(world).workshops.length,
           meta: activeProfile.meta,
         })}
+        next_action={
+          phases?.some(
+            ({ phase, status }) => phase === 'workshop-rankings.choice' && status !== 'upcoming',
+          ) ? (
+            <AreaClosingActions area="workshops" />
+          ) : null
+        }
       />
       <WorkshopAllocationStatus label={allocationStatusLabel(phases ?? [])}>
         {projection.has_answers
@@ -162,6 +170,7 @@ export function WorkshopAllocation() {
           : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
       </WorkshopAllocationStatus>
       <WorkshopAllocationConflictNotice projection={projection} />
+      <ClosedAreaDifferences area="workshops" />
       <FixedDecisionReview
         items={projection.fixed_reviews ?? []}
         title="Feste Teilnahmen prüfen"

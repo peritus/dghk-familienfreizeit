@@ -18,6 +18,7 @@ import { SegmentedControl } from '../../components/shared/ui/segmented-control.j
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
 import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import { PhaseDecisionAction } from '../components/phase-decision.js'
+import { AreaClosingActions } from '../components/area-closing.js'
 import { workshopTrack } from '../../../modules/workshop-assignment/app/workshop-track.js'
 import type { PhaseView } from '../../../derive/phases.js'
 import {
@@ -692,6 +693,19 @@ export function Workshops() {
           active_workshop_count: officialWorkshopsWorld(world!).workshops.length,
           meta: activeProfile.meta,
         })}
+        next_action={
+          choiceOpened ? (
+            <AreaClosingActions area="workshops" />
+          ) : summary.workshops.length > 0 && state.principal_email ? (
+            <PhaseDecisionAction
+              label="Wahl öffnen"
+              title="Workshopwahl öffnen?"
+              description="Familien sehen danach den Workshopkatalog und können Wünsche, Anmeldungen und Interesse angeben. Das Öffnen wird nicht zurückgenommen; danach steuert das Festlegen die Eingaben."
+              confirm_label="Wahl öffnen"
+              on_confirm={() => stage([draft(state.principal_email!, 'WorkshopChoiceOpened', {})])}
+            />
+          ) : null
+        }
       />
       <WorkshopPhaseNotice
         label={
@@ -716,15 +730,6 @@ export function Workshops() {
             ? 'Workshopdaten sind vorhanden. Prüfe Zielgruppen und Leitungen, bevor du die Wahl öffnest.'
             : 'Die Workshopdatenbank ist bereit für den ersten Entwurf.'}
       </WorkshopPhaseNotice>
-      {!choiceOpened && summary.workshops.length > 0 && state.principal_email ? (
-        <PhaseDecisionAction
-          label="Wahl öffnen"
-          title="Workshopwahl öffnen?"
-          description="Familien sehen danach den Workshopkatalog und können Wünsche, Anmeldungen und Interesse angeben. Das Öffnen wird nicht zurückgenommen; danach steuert das Festlegen die Eingaben."
-          confirm_label="Wahl öffnen"
-          on_confirm={() => stage([draft(state.principal_email!, 'WorkshopChoiceOpened', {})])}
-        />
-      ) : null}
       <WorkshopEditorDialog
         open={editor !== null}
         on_open_change={(open) => {

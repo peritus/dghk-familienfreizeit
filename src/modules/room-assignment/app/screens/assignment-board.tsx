@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ClosedAreaDifferences } from '../../../../app/organiser/components/area-closing.js'
 import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
 import { OrganiserSectionHeader } from '../../../../app/organiser/components/layout.js'
 import { useOrganiser } from '../../../../app/organiser/context.js'
@@ -113,6 +114,7 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
     <>
       <div className="assignment-board-screen">
         <ScreenFrame title="Wer schläft wo?">
+          <ClosedAreaDifferences area="accommodation" />
           <StatsStrip
             items={[
               { value: view.stats.families, label: 'Familien' },

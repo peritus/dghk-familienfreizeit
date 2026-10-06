@@ -14,7 +14,8 @@ import { Button } from '../../components/shared/ui/button.js'
 /**
  * Confirms one organiser phase decision — opening workshop choice, closing, or reopening an
  * area (spec/architecture/phases.md §5). Previewing appends nothing; only confirming calls
- * `on_confirm`, which stages the decision's event like any other organiser edit.
+ * `on_confirm`, which stages the decision's event like any other organiser edit. `disabled`
+ * blocks only the confirmation, so the review still explains why.
  */
 export function PhaseDecisionAction({
   label,
@@ -36,7 +37,7 @@ export function PhaseDecisionAction({
   const [open, setOpen] = useState(false)
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <Button type="button" disabled={disabled} onClick={() => setOpen(true)}>
+      <Button type="button" onClick={() => setOpen(true)}>
         {label}
       </Button>
       <AlertDialogContent>

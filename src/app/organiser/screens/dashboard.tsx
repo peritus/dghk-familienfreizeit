@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { Card } from '../../components/shared/ui/card'
 import { SuccessState } from '../../components/shared/ui/success-state.js'
@@ -7,6 +8,13 @@ import { familyRows } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { OrganiserScreenHeader } from '../components/layout.js'
 
+// Closed-area differences derive solver results; they load only once an area has been closed.
+const ClosedAreaHints = lazy(() =>
+  import('../components/closed-area-hints.js').then((module) => ({
+    default: module.ClosedAreaHints,
+  })),
+)
+
 const overviewCardClassName =
   'block rounded-base border-2 border-border bg-secondary-background p-6'
 
@@ -15,11 +23,19 @@ export function Dashboard() {
   const families = familyRows(world!)
   const people = families.reduce((total, family) => total + family.persons.length, 0)
   const diagnostics = world!.diagnostics
+  const closedOnce = Object.values(world!.phase_facts.areas).some(
+    ({ closings }) => closings.length > 0,
+  )
 
   return (
     <div className="space-y-12">
       <div className="space-y-6">
         <OrganiserScreenHeader title="Was braucht heute Aufmerksamkeit?" />
+        {closedOnce ? (
+          <Suspense fallback={null}>
+            <ClosedAreaHints />
+          </Suspense>
+        ) : null}
         {diagnostics.length > 0 ? (
           <div>
             <h2 className="text-xl font-bold">{diagnostics.length} Hinweise</h2>
