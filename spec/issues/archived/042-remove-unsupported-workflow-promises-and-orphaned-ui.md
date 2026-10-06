@@ -16,7 +16,7 @@ opened: 2026-10-05
 
 This cleanup has no prerequisite. It removes misleading copy, unreachable UI
 surfaces and inaccurate visual-coverage claims without choosing a feature or
-phase contract. [043](../open/043-feature-model.md) remains an independent feature-model
+phase contract. [043](043-feature-model.md) remains an independent feature-model
 design, and [044](../open/044-phase-model.md) depends on 043 alone.
 
 Phase-dependent stepper, deadline and projection behavior belongs to 044. Those

@@ -15,8 +15,10 @@ opened: 2026-10-06
 
 ## Dependencies
 
-Blocked by [043 — module-contributed feature model](043-feature-model.md): a
-phase activates features, so the feature contract must be accepted first.
+Depends on [043 — module-contributed feature model](../archived/043-feature-model.md):
+a phase activates features. That design is resolved, and the contract this issue
+builds on is [features](../../architecture/features.md); `requires_phases` and
+`activation_mode` there are the binding points for phase activation.
 
 The independent cleanup in [042 — unsupported workflow promises and orphaned UI](../archived/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 is resolved and did not touch phase state. This issue owns the phase-dependent
@@ -528,7 +530,8 @@ lies, and how a reopened phase must be re-derivable rather than tombstoned.
 - [ui/frontend.md](../../ui/frontend.md)
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
 - [ui/screens/family-preferences.md](../../ui/screens/family-preferences.md)
-- [043 — module-contributed feature model](043-feature-model.md)
+- [043 — module-contributed feature model](../archived/043-feature-model.md)
+- [architecture/features.md](../../architecture/features.md)
 - [042 — unsupported workflow promises and orphaned UI](../archived/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](031-family-projection-privacy-boundary.md)
 - [archived 008 — milestone ordering and release-control prerequisites](../archived/008-milestone-ordering-release-control-prereqs.md)

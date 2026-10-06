@@ -17,7 +17,7 @@ opened: 2026-10-06
 This issue has no prerequisite. It blocks
 [044 — phase activation model](../open/044-phase-model.md), which activates the features
 defined here. Its design and implementation are independent of
-[042 — unsupported workflow promises and orphaned UI](../open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md).
+[042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md).
 
 ## Problem
 
@@ -44,7 +44,7 @@ whether a capability exists:
    is the de facto list of what the product can do, maintained by hand.
 4. **Orphaning.** A component tree with no route reaching it, while its copy still
    advertises the capability. This mechanism is invisible: see
-   [042](../open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md) for the
+   [042](042-remove-unsupported-workflow-promises-and-orphaned-ui.md) for the
    cleanup inventory, including copy that promises capabilities represented by
    component files with no production importer.
 
@@ -422,7 +422,7 @@ carries no solver policy values, so it does not depend on that review.
 - [engineering/deployment.md](../../engineering/deployment.md)
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
 - [044 — phase activation model](../open/044-phase-model.md)
-- [042 — unsupported workflow promises and orphaned UI](../open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
+- [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](../open/031-family-projection-privacy-boundary.md)
 - [docs/application/organiser-view.md](../../../docs/application/organiser-view.md)
 - [docs/architecture/profile-composition.md](../../../docs/architecture/profile-composition.md)

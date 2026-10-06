@@ -16,7 +16,8 @@ before the report host exists.
 <a id="m8--organiser-authored-workshop-programme"></a>
 ## M8 — Workshop planning completion
 
-Specification coverage: [official workshops](modules/official-workshops.md),
+Specification coverage: [features](architecture/features.md),
+[official workshops](modules/official-workshops.md),
 [workshop space](modules/workshop-space.md), [workshops](modules/workshops.md),
 [workshop scheduling](modules/workshop-scheduling.md),
 [workshop rankings](modules/workshop-rankings.md),
@@ -31,12 +32,22 @@ remaining active work is limited to the unresolved planning contract:
   programme and allocation contexts; released/effective contexts belong to M10
   release control;
 - resolve the design and decision gates for
-  [issue 043](issues/open/043-feature-model.md) and
   [issue 044](issues/open/044-phase-model.md);
-- implement the accepted 043 feature contract for selected workshop capabilities:
-  typed module declarations, profile selection, validated effective availability,
-  and approved operational override attribution;
-- implement the M8 workshop phase track in issue 044. It depends on 043;
+- implement the [feature contract](architecture/features.md) for every existing
+  selected surface: the `features` contribution kind and its composition checks
+  (§5), `deselected_features`, the first feature set (§8), derived availability
+  and the family append narrowing (§4), fail-closed `DGHK_FEATURE_*` bindings
+  with the allowlist consistency test, `feature_overrides` in the health and log
+  responses (§6), and the room `features` → `amenities` rename. Feature
+  administration stays with the system administrator; the organiser diagnostics
+  screen remains deferred;
+- once the feature contract is verified, replace the hand-maintained "Current
+  limits" inventory in
+  [`docs/application/organiser-view.md`](../docs/application/organiser-view.md)
+  with the verified feature view, and document feature validation in
+  [`docs/architecture/profile-composition.md`](../docs/architecture/profile-composition.md);
+- implement the M8 workshop phase track in issue 044. It depends on the feature
+  contract;
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
   fixtures (the capacity-reduction policy is resolved as
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
@@ -68,11 +79,14 @@ Specification coverage: [authentication](application/authentication.md), [family
   definitions and ordinary event path, including deadline notices and assignment
   cards.
 - Implement 044's accepted target-date and closing-date policies for family
-  controls and notices. This phase work depends on issue 043's feature contract;
-  preserve the separate privacy gate in issue 031 for family projections.
-- Apply 043's accepted feature-availability contract to the selected family
-  controls and release-control capabilities; keep availability distinct from
-  authorization and phase status.
+  controls and notices. This phase work depends on the
+  [feature contract](architecture/features.md); preserve the separate privacy
+  gate in issue 031 for family projections.
+- Apply [feature availability](architecture/features.md#4-effective-availability)
+  to the family projection and family controls: only effective features reach a
+  family, and a family-authored event whose feature action is not effective is
+  rejected on append. Release control is kernel and declares no features; keep
+  availability distinct from authorization, release visibility and phase status.
 - Let an authenticated family correct its own `display-name` from the family
   view through `FamilyDisplayNameChanged`; the family may address only its own
   entity, while organisers retain the cross-family correction path from M7.
@@ -109,8 +123,8 @@ feature slices own their report data; this milestone owns the shared host.
 
 ## M12 — Active-profile integration and operational readiness
 
-Specification coverage: [profile contract](profiles/contract.md), [testing](engineering/testing.md),
-and the selected active module contracts.
+Specification coverage: [profile contract](profiles/contract.md), [features](architecture/features.md),
+[testing](engineering/testing.md), and the selected active module contracts.
 
 - Load the active profile with every non-deferred module contribution.
 - Verify module identity, contribution registration, selected-profile routing,
