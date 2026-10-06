@@ -17,9 +17,11 @@ Options:
   --help                     Show this help
 
 The fixtures are parsed in the supplied order and validated as one combined
-event stream before any HTTP request appends events. The complete stream is sent
-in one request so the server can validate and append it atomically. Use either
---session-cookie or --magic-link.
+event stream before any HTTP request appends events. The importer plans batches
+of at most the Worker limit, with every batch ending at an appendable fixture
+prefix. Each batch is appended atomically. Use --resume to continue an import
+that stopped after one or more batches. Use either --session-cookie or
+--magic-link.
 `
 }
 
@@ -112,6 +114,44 @@ export function matchingPrefixLength(existing, fixture) {
   return existing.length
 }
 
+/**
+ * Plan the largest appendable fixture prefixes that fit within each batch.
+ *
+ * @template T
+ * @param {T[]} events
+ * @param {number} startIndex
+ * @param {number} maxEventsPerBatch
+ * @param {(endIndex: number) => boolean} isAppendablePrefix
+ * @returns {{ startIndex: number, endIndex: number, events: T[] }[]}
+ */
+export function planAppendableBatches(events, startIndex, maxEventsPerBatch, isAppendablePrefix) {
+  if (!Number.isSafeInteger(startIndex) || startIndex < 0 || startIndex > events.length)
+    throw new Error('batch start index must be within the fixture event range')
+  if (!Number.isSafeInteger(maxEventsPerBatch) || maxEventsPerBatch < 1)
+    throw new Error('maximum events per batch must be a positive integer')
+  if (typeof isAppendablePrefix !== 'function')
+    throw new Error('appendable-prefix validator must be a function')
+
+  const batches = []
+  let batchStart = startIndex
+  while (batchStart < events.length) {
+    let batchEnd = Math.min(events.length, batchStart + maxEventsPerBatch)
+    while (batchEnd > batchStart && !isAppendablePrefix(batchEnd)) batchEnd -= 1
+    if (batchEnd === batchStart) {
+      throw new Error(
+        `no appendable batch of at most ${maxEventsPerBatch} events can be found after event ${batchStart}`,
+      )
+    }
+    batches.push({
+      startIndex: batchStart,
+      endIndex: batchEnd,
+      events: events.slice(batchStart, batchEnd),
+    })
+    batchStart = batchEnd
+  }
+  return batches
+}
+
 async function loadFixture(fixturePaths) {
   const vite = await createServer({
     root: repositoryRoot,
@@ -122,10 +162,16 @@ async function loadFixture(fixturePaths) {
     server: { middlewareMode: true, hmr: false },
   })
   try {
-    const [{ loadKdl }, { activeProfile }, { assertAppendableWorld, derive }] = await Promise.all([
+    const [
+      { loadKdl },
+      { activeProfile },
+      { assertAppendableWorld, derive },
+      { maxEventsPerBatch },
+    ] = await Promise.all([
       vite.ssrLoadModule('/src/events/kdl.ts'),
       vite.ssrLoadModule('/src/config/index.ts'),
       vite.ssrLoadModule('/src/events/fold.ts'),
+      vite.ssrLoadModule('/src/worker/request-limits.ts'),
     ])
     const events = []
     for (const fixturePath of fixturePaths) {
@@ -134,7 +180,18 @@ async function loadFixture(fixturePaths) {
     }
     const combined = events.map((event, index) => ({ ...event, seq: index + 1 }))
     assertAppendableWorld(derive(combined, activeProfile.validation_view))
-    return combined
+    return {
+      events: combined,
+      maxEventsPerBatch,
+      isAppendablePrefix(endIndex) {
+        try {
+          assertAppendableWorld(derive(combined.slice(0, endIndex), activeProfile.validation_view))
+          return true
+        } catch {
+          return false
+        }
+      },
+    }
   } finally {
     await vite.close()
   }
@@ -151,7 +208,10 @@ function extractSessionCookie(response) {
 }
 
 async function cookieFromMagicLink(magicLink) {
-  const response = await fetch(magicLink, { redirect: 'manual' })
+  const response = await fetch(magicLink, {
+    headers: new Headers({ origin: new URL(magicLink).origin }),
+    redirect: 'manual',
+  })
   if (response.status < 300 || response.status >= 400)
     throw new Error(`magic-link redemption failed with HTTP ${response.status}`)
   return extractSessionCookie(response)
@@ -161,11 +221,17 @@ function apiUrl(baseUrl, path) {
   return new URL(path, `${baseUrl.replace(/\/$/, '')}/`).toString()
 }
 
-async function apiRequest(baseUrl, path, cookie, init = {}) {
+export function apiRequestHeaders(baseUrl, cookie, init = {}) {
   const headers = new Headers(init.headers)
   headers.set('accept', 'application/json')
   headers.set('cookie', cookie)
+  headers.set('origin', new URL(baseUrl).origin)
   if (init.body) headers.set('content-type', 'application/json')
+  return headers
+}
+
+async function apiRequest(baseUrl, path, cookie, init = {}) {
+  const headers = apiRequestHeaders(baseUrl, cookie, init)
   return fetch(apiUrl(baseUrl, path), { ...init, headers })
 }
 
@@ -199,24 +265,44 @@ async function authenticatedLog(baseUrl, cookie) {
   return body
 }
 
-async function upload(baseUrl, cookie, events, initialHead, totalEvents) {
-  const response = await apiRequest(baseUrl, '/api/events', cookie, {
-    method: 'POST',
-    body: JSON.stringify({ expected_head: initialHead, events }),
-  })
-  const body = await responseJson(response)
-  if (response.status === 401 || response.status === 403)
-    throw new Error('authentication failed while uploading; provide a valid organiser credential')
-  if (response.status === 409)
-    throw new Error('event log changed during upload; no automatic retry was attempted')
-  if (!response.ok || !body || !Number.isSafeInteger(body.head))
-    throw new Error(apiFailure(response, body, `event upload failed for ${events.length} events`))
-  console.log(`Uploaded ${totalEvents}/${totalEvents} events (head ${body.head})`)
-  return body.head
+async function upload(baseUrl, cookie, batches, initialHead, totalEvents) {
+  let head = initialHead
+  for (const batch of batches) {
+    const firstEvent = batch.startIndex + 1
+    const lastEvent = batch.endIndex
+    const response = await apiRequest(baseUrl, '/api/events', cookie, {
+      method: 'POST',
+      body: JSON.stringify({ expected_head: head, events: batch.events }),
+    })
+    const body = await responseJson(response)
+    if (response.status === 401)
+      throw new Error('authentication failed while uploading; provide a valid organiser credential')
+    if (response.status === 403)
+      throw new Error(
+        apiFailure(response, body, `event upload rejected for events ${firstEvent}-${lastEvent}`),
+      )
+    if (response.status === 409)
+      throw new Error(
+        `event log changed during upload at events ${firstEvent}-${lastEvent}; no automatic retry was attempted. Rerun with --resume if the server contains a fixture prefix`,
+      )
+    if (!response.ok || !body || !Number.isSafeInteger(body.head))
+      throw new Error(
+        apiFailure(response, body, `event upload failed for events ${firstEvent}-${lastEvent}`),
+      )
+    const expectedHead = head + batch.events.length
+    if (body.head !== expectedHead)
+      throw new Error(
+        `event upload returned head ${body.head} for events ${firstEvent}-${lastEvent}; expected ${expectedHead}`,
+      )
+    head = body.head
+    console.log(`Uploaded ${batch.endIndex}/${totalEvents} events (head ${head})`)
+  }
+  return head
 }
 
 export async function run(options) {
-  const events = await loadFixture(options.fixturePaths)
+  const fixture = await loadFixture(options.fixturePaths)
+  const { events, maxEventsPerBatch, isAppendablePrefix } = fixture
   if (events.length === 0) throw new Error('fixture contains no events')
   const drafts = eventsToDrafts(events)
   const cookie = options.sessionCookie
@@ -228,7 +314,6 @@ export async function run(options) {
     throw new Error('authentication is required; provide --session-cookie or --magic-link')
 
   const log = await authenticatedLog(options.baseUrl, cookie)
-  let remaining = drafts
   let imported = 0
   if (log.events.length > 0) {
     if (!options.resume)
@@ -238,20 +323,14 @@ export async function run(options) {
     imported = matchingPrefixLength(log.events, drafts)
     if (imported < 0)
       throw new Error('cannot resume: the server event log is not a prefix of this fixture')
-    remaining = drafts.slice(imported)
   }
-  if (remaining.length === 0) {
+  if (imported === drafts.length) {
     console.log(`Fixture already imported into ${options.baseUrl} (head ${log.head_seq})`)
     return log.head_seq
   }
 
-  const finalHead = await upload(
-    options.baseUrl,
-    cookie,
-    remaining,
-    log.head_seq,
-    imported + remaining.length,
-  )
+  const batches = planAppendableBatches(drafts, imported, maxEventsPerBatch, isAppendablePrefix)
+  const finalHead = await upload(options.baseUrl, cookie, batches, log.head_seq, drafts.length)
   console.log(`Imported ${events.length} events into ${options.baseUrl} (head ${finalHead})`)
   return finalHead
 }

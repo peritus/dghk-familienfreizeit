@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { resolve } from 'node:path'
 import {
+  apiRequestHeaders,
   eventsToDrafts,
   matchingPrefixLength,
   normaliseSessionCookie,
   parseArgs,
+  planAppendableBatches,
 } from '../../scripts/import-fixture.mjs'
 
 test('fixture importer parses target and upload options', () => {
@@ -70,4 +72,55 @@ test('fixture importer recognises an exact event prefix for resume', () => {
   assert.equal(matchingPrefixLength(fixture, fixture), 2)
   assert.equal(matchingPrefixLength([{ ...fixture[0], payload: { a: 9, b: 2 } }], fixture), -1)
   assert.equal(matchingPrefixLength([...fixture, fixture[0]], fixture), -1)
+})
+
+test('fixture importer sends same-origin request headers', () => {
+  const headers = apiRequestHeaders('https://preview.example.test/app/', 'sid=secret', {
+    method: 'POST',
+    body: '{}',
+    headers: { 'x-importer': 'fixture' },
+  })
+
+  assert.equal(headers.get('origin'), 'https://preview.example.test')
+  assert.equal(headers.get('cookie'), 'sid=secret')
+  assert.equal(headers.get('content-type'), 'application/json')
+  assert.equal(headers.get('x-importer'), 'fixture')
+})
+
+test('fixture importer chooses the largest appendable prefix within each batch limit', () => {
+  const events = Array.from({ length: 12 }, (_, index) => ({ id: index + 1 }))
+  const appendableEnds = new Set([3, 6, 8, 12])
+  const batches = planAppendableBatches(events, 0, 5, (endIndex) => appendableEnds.has(endIndex))
+
+  assert.deepEqual(
+    batches.map(({ startIndex, endIndex }) => [startIndex, endIndex]),
+    [
+      [0, 3],
+      [3, 8],
+      [8, 12],
+    ],
+  )
+  assert.equal(
+    batches.every(({ events: batch }) => batch.length <= 5),
+    true,
+  )
+})
+
+test('fixture importer plans from an exact resume offset and fails before uploading without a safe batch', () => {
+  const events = Array.from({ length: 8 }, (_, index) => ({ id: index + 1 }))
+  const appendableEnds = new Set([3, 6, 8])
+
+  assert.deepEqual(
+    planAppendableBatches(events, 3, 3, (endIndex) => appendableEnds.has(endIndex)).map(
+      ({ startIndex, endIndex }) => [startIndex, endIndex],
+    ),
+    [
+      [3, 6],
+      [6, 8],
+    ],
+  )
+  assert.throws(
+    () => planAppendableBatches(events, 0, 2, () => false),
+    /no appendable batch of at most 2 events/,
+  )
 })
