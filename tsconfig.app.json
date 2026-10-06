@@ -13,6 +13,7 @@
     "src/modules/**/*.tsx",
     "src/config/**/*.ts",
     "src/events/fold.ts",
+    "src/events/kdl.ts",
     "src/events/resolver.ts",
     "src/events/types.ts",
     "src/events/world.ts",

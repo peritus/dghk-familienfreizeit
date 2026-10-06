@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from 'react'
-import { useLocation } from 'wouter'
+import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
@@ -50,10 +50,6 @@ function listPath(kind: WorkshopListKind): string {
     family: organiserPaths.workshop_family_list(),
     room: organiserPaths.workshop_room_list(),
   }[kind]
-}
-
-function queryFor(location: string): URLSearchParams {
-  return new URLSearchParams(location.split('?')[1] ?? '')
 }
 
 function personen(count: number): string {
@@ -239,9 +235,11 @@ function RoomReport({ room }: { room: WorkshopReportRoom }) {
 
 export function WorkshopLists() {
   useDocumentTitle('Listen · Workshops · Familienfreizeit')
+  // wouter's location is the pathname only; the selected documents live in the query.
   const [location, navigate] = useLocation()
+  const search = useSearch()
   const { state, world, current_plan: currentPlan } = useOrganiser()
-  const kind = listKind(location.split('?')[0] ?? location)
+  const kind = listKind(location)
   const projection = useMemo(
     () =>
       world && currentPlan
@@ -255,7 +253,7 @@ export function WorkshopLists() {
   )
 
   const navigateWithQuery = (path: string, updates: Record<string, string | null>) => {
-    const query = queryFor(location)
+    const query = new URLSearchParams(search)
     for (const [key, value] of Object.entries(updates)) {
       if (value === null) query.delete(key)
       else query.set(key, value)
@@ -273,7 +271,7 @@ export function WorkshopLists() {
   }
   if (!projection) return <WorkshopLoadingState message="Workshoplisten werden berechnet …" />
 
-  const query = queryFor(location)
+  const query = new URLSearchParams(search)
   const selectedWorkshop =
     projection.workshops.find((item) => item.id === query.get('workshop')) ??
     projection.workshops[0]
