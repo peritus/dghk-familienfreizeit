@@ -347,7 +347,7 @@ test('workshop navigation exposes the intended areas and switches resource views
     within(navigation)
       .getAllByRole('link')
       .map((link) => link.textContent),
-  ).toEqual(['Workshops', 'Programm', 'Teilnahme', 'Wünsche', 'Räume und Slots', 'Listen'])
+  ).toEqual(['Workshops', 'Teilnahme', 'Wünsche', 'Räume und Slots', 'Listen'])
   expect(
     within(navigation).getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current'),
   ).toBe('page')
@@ -360,15 +360,29 @@ test('workshop navigation exposes the intended areas and switches resource views
 test('workshop participation shows the responsive person overview and links to wish traces', async () => {
   open('/organiser/workshops/participation', workshopFixtureEvents())
   expect(await screen.findByRole('heading', { name: 'Teilnahme' })).toBeTruthy()
-  expect(screen.getByRole('heading', { name: 'Personen' })).toBeTruthy()
+  expect(screen.queryByRole('heading', { name: 'Personen' })).toBeNull()
+  expect(screen.queryByText('Wer nimmt woran teil, und wer leitet?')).toBeNull()
+  expect(
+    screen.queryByText('Ein Name zeigt, was aus den Wünschen der Person geworden ist.'),
+  ).toBeNull()
   expect(screen.queryByText('4.–5. Wahl')).toBeNull()
+  expect(
+    within(screen.getByRole('navigation', { name: 'Teilnahme-Unterbereiche' })).getByRole('link', {
+      name: 'Programm',
+    }),
+  ).toBeTruthy()
   const table = document.querySelector('.workshop-participation__table')
   expect(table?.querySelector('tbody tr th')?.textContent).toContain('erwachsen')
-  expect(table?.querySelector('thead th:nth-child(3)')?.textContent).toContain('Work­shops')
+  expect(table?.querySelectorAll('thead th')).toHaveLength(
+    1 +
+      (table?.querySelectorAll('tbody tr:first-child .workshop-participation__slot-cell').length ??
+        0),
+  )
+  expect(table?.querySelector('thead')?.textContent).not.toMatch(/Rangfolge|Workshops/u)
   expect(table?.querySelector('caption')?.textContent).toMatch(
     /Teilnahme · \d+ Person(?:en)? · \d+ Slots?/u,
   )
-  const firstSlotHeading = table?.querySelector('thead th:nth-child(4)')
+  const firstSlotHeading = table?.querySelector('thead th:nth-child(2)')
   expect(firstSlotHeading?.textContent).toContain('Fr 11:00')
   expect(firstSlotHeading?.querySelector('.workshop-participation__slot-end')?.textContent).toBe(
     'bis 13:00',

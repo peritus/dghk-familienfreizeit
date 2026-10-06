@@ -15,7 +15,7 @@ allocation communication scopes.
 The organiser allocation projection is derived in memory from the event-folded world,
 the scheduling output, and the workshop-assignment solver section. It exposes three
 allocation views shown in the German UI as **Wünsche · Antworten**, **Wünsche · Nachfrage**,
-and **Wünsche · Verlauf**, plus the **Teilnahme · Personen** overview. Answers preserve explicit no-preference and no-response
+and **Wünsche · Verlauf**, plus the **Teilnahme** overview. Answers preserve explicit no-preference and no-response
 states; demand combines first-choice and ranked counts with configured capacity and
 placement; trace stages preserve solver reasons, fixed violations,
 and unassigned outcomes. The trace presenter reads the solver's round snapshots
@@ -27,10 +27,12 @@ organiser drafts are visible immediately.
 The participation overview adds a read-only projection of slots and people to the
 same allocation projection. It combines derived rankings, attendance assignments,
 scheduled internal leadership, sign-ups, interests, and solver-reported unassigned
-ranked choices into person-by-slot cells. A choice is marked received only when the
-solver assigns that workshop to that person. It does not infer participation to meet
-a per-person target or persist a second roster. The overview links each name to the
-existing trace route and is recalculated from the prospective world and plan.
+ranked choices into person-by-slot cells. Assigned cells show the workshop and rank;
+leaders are outlined and labelled `Leitet <workshop>`, and free cells display a dash.
+A choice is marked received only when the solver assigns that workshop to that
+person. It does not infer participation to meet a per-person target or persist a
+second roster. The overview links each name to the existing trace route and is
+recalculated from the prospective world and plan.
 
 The trace view presents the allocation as a cumulative funnel. It shows the
 answer intake, one stage per configured ranking, and a final result stage for

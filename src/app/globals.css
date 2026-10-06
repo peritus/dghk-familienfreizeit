@@ -29,35 +29,14 @@
 
 main:has(> .workshop-participation-page) {
   max-width: 90rem;
-  color-scheme: light;
-  color: black;
-  background: hsl(33 100% 92%);
-  --background: hsl(33 100% 92%);
-  --secondary-background: white;
-  --paper: #fffaf0;
-  --foreground: black;
-  --muted: hsl(30 10% 32%);
-  --rule: hsl(33 25% 82%);
-  --border: black;
-  --ring: black;
-  --main: hsl(28 100% 51%);
-  --main-foreground: black;
-  --danger: hsl(2 90% 66%);
-  --danger-foreground: black;
-}
-
-.workshop-participation__section-head {
-  margin-bottom: 1rem;
-  color: var(--muted);
 }
 
 .workshop-participation {
-  color-scheme: light;
-  color: black;
-  --paper: #fffaf0;
-  --muted: hsl(30 10% 32%);
-  --rule: hsl(33 25% 82%);
-  --main: hsl(28 100% 51%);
+  color: var(--foreground);
+  --participation-rank-1: color-mix(in srgb, var(--main) 46%, var(--secondary-background));
+  --participation-rank-2: color-mix(in srgb, var(--main) 32%, var(--secondary-background));
+  --participation-rank-3: color-mix(in srgb, var(--main) 22%, var(--secondary-background));
+  --participation-rank-4: color-mix(in srgb, var(--main) 14%, var(--secondary-background));
 }
 
 .workshop-participation__legend {
@@ -79,52 +58,58 @@ main:has(> .workshop-participation-page) {
   width: 1.125rem;
   height: 0.875rem;
   flex: none;
-  border: 1.5px solid black;
+  border: 1.5px solid var(--border);
   border-radius: 2px;
-  background: white;
+  background: var(--secondary-background);
 }
 
 .workshop-participation__swatch--rank-1,
 .workshop-participation__slot-cell--rank-1 {
-  background-color: hsl(33 100% 76%);
+  background-color: var(--participation-rank-1);
 }
 
 .workshop-participation__swatch--rank-2,
 .workshop-participation__slot-cell--rank-2 {
-  background-color: hsl(33 100% 83%);
+  background-color: var(--participation-rank-2);
 }
 
 .workshop-participation__swatch--rank-3,
 .workshop-participation__slot-cell--rank-3 {
-  background-color: hsl(33 100% 88%);
+  background-color: var(--participation-rank-3);
 }
 
 .workshop-participation__swatch--rank-4,
 .workshop-participation__slot-cell--rank-4 {
-  background-color: hsl(33 70% 94%);
+  background-color: var(--participation-rank-4);
 }
 
 .workshop-participation__swatch--leader {
-  box-shadow: inset 0 0 0 2px black;
+  box-shadow: inset 0 0 0 2px var(--border);
 }
 
 .workshop-participation__table-wrap {
   overflow-x: auto;
-  border: 2px solid black;
+  border: 2px solid var(--border);
   border-radius: 5px;
-  background: white;
+  background: var(--secondary-background);
 }
 
 .workshop-participation__table {
+  width: 100%;
   min-width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.8125rem;
 }
 
+.workshop-participation__person-column {
+  width: 12rem;
+}
+
 .workshop-participation__table caption {
   padding: 0.75rem 1rem;
-  border-bottom: 2px solid black;
+  border-bottom: 2px solid var(--border);
   font-size: 0.9375rem;
   font-weight: 700;
   text-align: left;
@@ -145,7 +130,7 @@ main:has(> .workshop-participation-page) {
 
 .workshop-participation__table thead th {
   border-top: 0;
-  border-bottom: 2px solid black;
+  border-bottom: 2px solid var(--border);
   font-size: 0.8125rem;
   line-height: 1.3;
   white-space: nowrap;
@@ -160,9 +145,9 @@ main:has(> .workshop-participation-page) {
   z-index: 1;
   left: 0;
   min-width: 12em;
-  border-right: 2px solid black;
+  border-right: 2px solid var(--border);
   border-left: 0;
-  background: white;
+  background: var(--secondary-background);
   font-size: 0.875rem;
 }
 
@@ -170,50 +155,24 @@ main:has(> .workshop-participation-page) {
   position: sticky;
   z-index: 2;
   left: 0;
-  border-right: 2px solid black;
+  border-right: 2px solid var(--border);
   border-left: 0;
-  background: white;
+  background: var(--secondary-background);
 }
 
 .workshop-participation__table tr.is-open > th[scope='row'] {
-  box-shadow: inset 6px 0 0 hsl(28 100% 51%);
+  box-shadow: inset 6px 0 0 var(--main);
 }
 
-.workshop-participation__table td.workshop-participation__rank-column {
-  min-width: 13em;
-  font-size: 0.8125rem;
-}
-
-.workshop-participation__rank-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.workshop-participation__rank-list li.is-received {
-  font-weight: 700;
-}
-
-.workshop-participation__rank-list li.is-missed,
 .workshop-participation__quiet,
 .workshop-participation__age,
 .workshop-participation__cell-detail {
   color: var(--muted);
 }
 
-.workshop-participation__rank-result {
-  color: var(--muted);
-  font-weight: 400;
-}
-
-.workshop-participation__table td.workshop-participation__count-column {
-  min-width: 4.5em;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
 .workshop-participation__table td.workshop-participation__slot-cell {
   min-width: 8.5em;
+  overflow-wrap: anywhere;
 }
 
 .workshop-participation__person-link {
@@ -226,7 +185,7 @@ main:has(> .workshop-participation-page) {
 }
 
 .workshop-participation__person-link:hover {
-  text-decoration-color: black;
+  text-decoration-color: var(--border);
   text-decoration-thickness: 2px;
 }
 
@@ -241,9 +200,9 @@ main:has(> .workshop-participation-page) {
   min-height: 1.625rem;
   align-items: center;
   padding: 0 0.5rem;
-  border: 1.5px solid hsl(30 10% 32%);
+  border: 1.5px solid var(--muted);
   border-radius: 5px;
-  background: white;
+  background: var(--secondary-background);
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.2;
@@ -255,9 +214,9 @@ main:has(> .workshop-participation-page) {
 }
 
 .workshop-participation__badge--attention {
-  border: 2px solid black;
-  background: hsl(28 100% 51%);
-  color: black;
+  border: 2px solid var(--border);
+  background: var(--main);
+  color: var(--main-foreground);
   font-weight: 700;
 }
 
@@ -291,25 +250,26 @@ main:has(> .workshop-participation-page) {
 }
 
 .workshop-participation__table td.workshop-participation__slot-cell--leader {
-  background: repeating-linear-gradient(90deg, white 0 4px, #8a847c 4px 6px);
-  box-shadow: inset 0 0 0 1.5px black;
-}
-
-.workshop-participation__slot-cell--leader
-  :is(.workshop-participation__cell-title, .workshop-participation__cell-detail) {
-  width: fit-content;
-  padding: 0 0.125rem;
-  background: white;
+  background: var(--secondary-background);
+  box-shadow: inset 0 0 0 2px var(--border);
 }
 
 .workshop-participation__table td.workshop-participation__slot-cell--sign-up,
 .workshop-participation__table td.workshop-participation__slot-cell--interest {
-  background: repeating-linear-gradient(135deg, white 0 6px, var(--paper) 6px 12px);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--secondary-background) 0 6px,
+    var(--paper) 6px 12px
+  );
 }
 
 .workshop-participation__table td.workshop-participation__slot-cell--fixed {
-  background: repeating-linear-gradient(45deg, white 0 4px, var(--paper) 4px 8px);
-  box-shadow: inset 0 0 0 2px black;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--secondary-background) 0 4px,
+    var(--paper) 4px 8px
+  );
+  box-shadow: inset 0 0 0 2px var(--border);
 }
 
 .workshop-participation__open-cell {
@@ -323,8 +283,7 @@ main:has(> .workshop-participation-page) {
   line-height: 1.3;
 }
 
-.workshop-participation__narrow,
-.workshop-participation__print-title {
+.workshop-participation__narrow {
   display: none;
 }
 
@@ -335,13 +294,13 @@ main:has(> .workshop-participation-page) {
 
 .workshop-participation__card {
   padding: 0.875rem 1rem;
-  border: 2px solid black;
+  border: 2px solid var(--border);
   border-radius: 5px;
-  background: white;
+  background: var(--secondary-background);
 }
 
 .workshop-participation__card.is-open {
-  border-left: 10px solid hsl(28 100% 51%);
+  border-left: 10px solid var(--main);
 }
 
 .workshop-participation__card h3 {
@@ -384,11 +343,6 @@ main:has(> .workshop-participation-page) {
 
 .workshop-participation__slot-name {
   color: var(--muted);
-}
-
-.workshop-participation__card .workshop-participation__rank-list {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
 }
 
 .workshop-participation__table tfoot {
@@ -436,12 +390,12 @@ main:has(> .workshop-participation-page) {
     max-width: none;
     margin: 0;
     padding: 0;
-    background: white;
+    background: var(--secondary-background);
   }
 
   .workshop-participation-page {
     display: block;
-    color: black;
+    color: var(--foreground);
     font-size: 10pt;
     line-height: 1.4;
   }
@@ -458,18 +412,7 @@ main:has(> .workshop-participation-page) {
 
   .workshop-participation {
     display: block;
-    color: black;
-  }
-
-  .workshop-participation__print-title {
-    display: block;
-    margin: 0 0 0.4em;
-    font-size: 1.8em;
-    break-after: avoid;
-  }
-
-  .workshop-participation__section-head {
-    margin: 0;
+    color: var(--foreground);
   }
 
   .workshop-participation__legend {
@@ -493,6 +436,10 @@ main:has(> .workshop-participation-page) {
     font-size: 0.75em;
   }
 
+  .workshop-participation__table td.workshop-participation__slot-cell {
+    min-width: 0;
+  }
+
   .workshop-participation__table caption {
     padding: 0.4em 0.5em;
     font-size: 0.9em;
@@ -503,8 +450,8 @@ main:has(> .workshop-participation-page) {
     border-top: 0;
     border-bottom: 1px solid #777;
     border-left: 0;
-    background-color: white;
-    color: black;
+    background-color: var(--secondary-background);
+    color: var(--foreground);
     overflow-wrap: anywhere;
   }
 
@@ -513,12 +460,16 @@ main:has(> .workshop-participation-page) {
   }
 
   .workshop-participation__table thead th {
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid var(--border);
     font-size: 0.9em;
   }
 
   .workshop-participation__table tbody tr {
     break-inside: avoid;
+  }
+
+  .workshop-participation__table tr.is-open > th[scope='row'] {
+    box-shadow: none;
   }
 
   .workshop-participation__table th[scope='row'],
@@ -533,20 +484,8 @@ main:has(> .workshop-participation-page) {
     width: 13%;
   }
 
-  .workshop-participation__table th:nth-child(2),
-  .workshop-participation__table td:nth-child(2) {
-    width: 20%;
-  }
-
-  .workshop-participation__table th:nth-child(3),
-  .workshop-participation__table td:nth-child(3) {
-    width: 4.5%;
-    text-align: center;
-  }
-
-  .workshop-participation__table td.workshop-participation__slot-cell {
-    min-width: 0;
-    width: 7.8125%;
+  .workshop-participation__person-column {
+    width: 13%;
   }
 
   .workshop-participation__table th[scope='row'] .workshop-participation__badge {
@@ -559,7 +498,7 @@ main:has(> .workshop-participation-page) {
 
   .workshop-participation__table .workshop-participation__cell-entry {
     min-height: 0;
-    background: white;
+    background: var(--secondary-background);
     text-shadow: none;
     box-shadow: none;
   }
@@ -573,28 +512,15 @@ main:has(> .workshop-participation-page) {
   }
 
   .workshop-participation__table .workshop-participation__badge--attention {
-    border: 1px solid black;
-    background: white;
+    border: 1px solid var(--border);
+    background: var(--secondary-background);
   }
 
   .workshop-participation__age,
   .workshop-participation__quiet,
   .workshop-participation__cell-detail,
   .workshop-participation__table caption span {
-    color: #333;
-  }
-
-  .workshop-participation__rank-list li {
-    display: inline;
-  }
-
-  .workshop-participation__rank-list li + li::before {
-    content: ' · ';
-    font-weight: 400;
-  }
-
-  .workshop-participation__rank-result {
-    font-weight: 400;
+    color: var(--muted);
   }
 
   .workshop-participation__table tfoot {
@@ -616,9 +542,9 @@ main:has(> .workshop-participation-page) {
     z-index: 10;
     margin: 0;
     padding-top: 4px;
-    border-top: 1px solid #777;
-    background: white;
-    color: #333;
+    border-top: 1px solid var(--rule);
+    background: var(--secondary-background);
+    color: var(--muted);
     font-size: 0.75em;
   }
 }

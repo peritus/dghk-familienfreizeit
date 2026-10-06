@@ -35,8 +35,8 @@ The host exposes these kernel-owned and selected-module screens through one scre
 registry. The app bar presents four primary areas: Dashboard, Familien,
 Unterbringung, and Workshops. Accommodation has page-local secondary links for
 Unterkunft and Belegung. The workshop section navigation visibly links Workshops,
-Programm, Teilnahme, Wünsche, Räume und Slots, and Listen. Programm remains selected across
-its programme review URLs, while Räume und Slots remains selected for its Räume and
+Teilnahme, Wünsche, Räume und Slots, and Listen. Teilnahme contains a third-level
+Programm link that stays selected across programme review URLs. Räume und Slots remains selected for its Räume and
 Slots resource routes, and the workshop overview provides local tabs for Workshops,
 Leitungen, and Externe Leitungen. Wünsche remains selected across its three
 allocation URLs, whose tertiary views are Antworten, Nachfrage, and Verlauf. Listen
@@ -172,13 +172,14 @@ browser print use shared workshop components. Fixed violations and unassigned pe
 remain visible as review notices; the views do not create attendance or roster events.
 
 The **Teilnahme** route presents a person-by-slot overview derived from the same
-prospective world and solver plan. Its accessible table shows each person's ranked
-choices and results, participation count, and scheduled slot cells for assignments,
-leadership, sign-ups, interests, unresolved ranked choices, and free time. It sorts
-solver-reported unassigned people with ranked choices first, then sorts by German
-name. Names link to the person's allocation trace. Narrow layouts show one card per
-person; browser print switches back to the semantic table on A4 landscape, repeats
-the header and fixed date/revision footer, and keeps rows together. It adds no print
+prospective world and solver plan. Its accessible table has one person column and
+equal-width slot columns. Cells show workshop titles with their rank, leader, sign-up,
+interest, fixed-assignment, unresolved-choice, or free-slot state; a dash marks a
+free slot. It sorts solver-reported unassigned people with ranked choices first, then
+sorts by German name. Names link to the person's allocation trace. Narrow layouts
+show one card per person; browser print switches back to the semantic table on A4
+landscape, repeats the header and fixed date/revision footer, and keeps rows
+together. The view follows the shared light and dark theme tokens. It adds no print
 or export action and creates no attendance events.
 
 Workshop list reports are read-only projections over the same world and plan as

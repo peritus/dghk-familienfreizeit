@@ -226,60 +226,77 @@ function slotDurationMinutes(startsAt: string, endsAt: string): number {
 }
 
 export function WorkshopNavigation() {
+  const [location] = useLocation()
+  const programmePaths = [
+    organiserPaths.workshop_programme(),
+    organiserPaths.workshop_programme_unplaced(),
+    organiserPaths.workshop_programme_overlaps(),
+  ] as const
+  const inParticipationSection =
+    location === organiserPaths.workshop_participation() ||
+    programmePaths.some((path) => location === path)
+
   return (
-    <SecondaryNavigation
-      aria_label="Workshopbereiche"
-      items={[
-        {
-          href: organiserPaths.workshops(),
-          active_paths: [
-            organiserPaths.workshops(),
-            organiserPaths.workshop_leaders(),
-            organiserPaths.workshop_external_leaders(),
-          ],
-          label: 'Workshops',
-        },
-        {
-          href: organiserPaths.workshop_programme(),
-          active_paths: [
-            organiserPaths.workshop_programme(),
-            organiserPaths.workshop_programme_unplaced(),
-            organiserPaths.workshop_programme_overlaps(),
-          ],
-          label: 'Programm',
-        },
-        {
-          href: organiserPaths.workshop_participation(),
-          active_paths: [organiserPaths.workshop_participation()],
-          label: 'Teilnahme',
-        },
-        {
-          href: organiserPaths.workshop_allocation(),
-          active_paths: [
-            organiserPaths.workshop_allocation(),
-            organiserPaths.workshop_allocation_demand(),
-            organiserPaths.workshop_allocation_trace(),
-          ],
-          label: 'Wünsche',
-        },
-        {
-          href: organiserPaths.workshop_spaces(),
-          active_paths: [organiserPaths.workshop_spaces(), organiserPaths.workshop_slots()],
-          label: 'Räume und Slots',
-        },
-        {
-          href: organiserPaths.workshop_lists(),
-          active_paths: [
-            organiserPaths.workshop_lists(),
-            organiserPaths.workshop_workshop_list(),
-            organiserPaths.workshop_person_list(),
-            organiserPaths.workshop_family_list(),
-            organiserPaths.workshop_room_list(),
-          ],
-          label: 'Listen',
-        },
-      ]}
-    />
+    <div className="grid gap-2">
+      <SecondaryNavigation
+        aria_label="Workshopbereiche"
+        items={[
+          {
+            href: organiserPaths.workshops(),
+            active_paths: [
+              organiserPaths.workshops(),
+              organiserPaths.workshop_leaders(),
+              organiserPaths.workshop_external_leaders(),
+            ],
+            label: 'Workshops',
+          },
+          {
+            href: organiserPaths.workshop_participation(),
+            active_paths: [organiserPaths.workshop_participation(), ...programmePaths],
+            label: 'Teilnahme',
+          },
+          {
+            href: organiserPaths.workshop_allocation(),
+            active_paths: [
+              organiserPaths.workshop_allocation(),
+              organiserPaths.workshop_allocation_demand(),
+              organiserPaths.workshop_allocation_trace(),
+            ],
+            label: 'Wünsche',
+          },
+          {
+            href: organiserPaths.workshop_spaces(),
+            active_paths: [organiserPaths.workshop_spaces(), organiserPaths.workshop_slots()],
+            label: 'Räume und Slots',
+          },
+          {
+            href: organiserPaths.workshop_lists(),
+            active_paths: [
+              organiserPaths.workshop_lists(),
+              organiserPaths.workshop_workshop_list(),
+              organiserPaths.workshop_person_list(),
+              organiserPaths.workshop_family_list(),
+              organiserPaths.workshop_room_list(),
+            ],
+            label: 'Listen',
+          },
+        ]}
+      />
+      {inParticipationSection ? (
+        <div className="ml-4 border-l-2 border-border/30 pl-3">
+          <SecondaryNavigation
+            aria_label="Teilnahme-Unterbereiche"
+            items={[
+              {
+                href: organiserPaths.workshop_programme(),
+                active_paths: programmePaths,
+                label: 'Programm',
+              },
+            ]}
+          />
+        </div>
+      ) : null}
+    </div>
   )
 }
 

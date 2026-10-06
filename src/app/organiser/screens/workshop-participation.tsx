@@ -61,11 +61,7 @@ export function WorkshopParticipationScreen() {
     <div className="workshop-participation-page flex flex-1 flex-col">
       <div className="workshop-participation-screen-only space-y-8">
         <WorkshopNavigation />
-        <WorkshopScreenHeader
-          eyebrow="Workshops · Teilnahme"
-          title="Teilnahme"
-          description="Wer nimmt woran teil, und wer leitet?"
-        />
+        <WorkshopScreenHeader eyebrow="Workshops · Teilnahme" title="Teilnahme" />
       </div>
       <div className="workshop-participation-body mt-6 mb-10">
         <WorkshopParticipation

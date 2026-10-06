@@ -10,10 +10,6 @@ function personCount(count: number): string {
   return `${count} ${count === 1 ? 'Person' : 'Personen'}`
 }
 
-function workshopCount(count: number): string {
-  return `${count} ${count === 1 ? 'Workshop' : 'Workshops'}`
-}
-
 function slotCount(count: number): string {
   return `${count} ${count === 1 ? 'Slot' : 'Slots'}`
 }
@@ -56,33 +52,14 @@ function WishesLink({ person }: { person: WorkshopParticipationPerson }) {
   )
 }
 
-function RankList({ person }: { person: WorkshopParticipationPerson }) {
-  if (person.ranks.length === 0) {
-    const label =
-      person.response_status === 'Keine Präferenz'
-        ? 'Bewusst keine Präferenz'
-        : person.response_status === 'Keine Antwort'
-          ? 'Keine Rangfolge abgegeben'
-          : 'Noch keine Antwort'
-    return <span className="workshop-participation__quiet">{label}</span>
-  }
-  return (
-    <ol className="workshop-participation__rank-list">
-      {person.ranks.map((rank) => (
-        <li className={rank.received ? 'is-received' : 'is-missed'} key={rank.workshop_id}>
-          <span>{rank.rank}. </span>
-          {rank.title}
-          <span className="workshop-participation__rank-result">
-            {rank.received ? ' · erhalten' : ' · nicht erhalten'}
-          </span>
-        </li>
-      ))}
-    </ol>
-  )
-}
-
 function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
-  if (cell.kind === 'free') return <span className="workshop-participation__quiet">frei</span>
+  if (cell.kind === 'free')
+    return (
+      <span className="workshop-participation__quiet">
+        <span aria-hidden="true">-</span>
+        <span className="sr-only">freier Platz</span>
+      </span>
+    )
   if (cell.kind === 'open')
     return (
       <div className="workshop-participation__open-cell">
@@ -90,11 +67,15 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
           Offen
         </span>
         {cell.entries.map((entry) => (
-          <span className="workshop-participation__cell-detail" key={entry.workshop_id}>
-            {entry.title}
-            {entry.rank ? ` · ${entry.rank}. Wahl` : ''}
-            {entry.detail ? ` · ${entry.detail}` : ''}
-          </span>
+          <div className="workshop-participation__cell-entry" key={entry.workshop_id}>
+            <span className="workshop-participation__cell-title">{entry.title}</span>
+            {entry.rank ? (
+              <>
+                <br />
+                <span className="workshop-participation__cell-detail">{entry.rank}. Wahl</span>
+              </>
+            ) : null}
+          </div>
         ))}
       </div>
     )
@@ -106,20 +87,25 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
           className={`workshop-participation__cell-entry${cell.kind === 'leader' ? ' workshop-participation__cell-entry--leader' : ''}${cell.kind === 'sign-up' || cell.kind === 'interest' ? ' workshop-participation__cell-entry--participation' : ''}${cell.kind === 'assignment' && entry.reason === 'fixed' ? ' workshop-participation__cell-entry--fixed' : ''}`}
           key={entry.workshop_id}
         >
-          <span className="workshop-participation__cell-title">{entry.title}</span>
-          <span className="workshop-participation__cell-detail">
-            {cell.kind === 'leader'
-              ? 'leitet'
-              : cell.kind === 'sign-up'
-                ? 'Anmeldung'
-                : cell.kind === 'interest'
-                  ? 'Interesse'
-                  : entry.reason === 'fixed'
-                    ? 'fest zugeordnet'
-                    : entry.rank
-                      ? `${entry.rank}. Wahl`
-                      : 'nicht gewählt'}
-          </span>
+          {cell.kind === 'leader' ? (
+            <span className="workshop-participation__cell-title">Leitet {entry.title}</span>
+          ) : (
+            <>
+              <span className="workshop-participation__cell-title">{entry.title}</span>
+              <br />
+              <span className="workshop-participation__cell-detail">
+                {cell.kind === 'sign-up'
+                  ? 'Anmeldung'
+                  : cell.kind === 'interest'
+                    ? 'Interesse'
+                    : entry.reason === 'fixed'
+                      ? 'fest zugeordnet'
+                      : entry.rank
+                        ? `${entry.rank}. Wahl`
+                        : 'nicht gewählt'}
+              </span>
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -180,11 +166,15 @@ function WideTable({ participation }: { participation: WorkshopParticipationView
               · {personCount(participation.people.length)} · {slotCount(participation.slots.length)}
             </span>
           </caption>
+          <colgroup>
+            <col className="workshop-participation__person-column" />
+            {participation.slots.map((slot) => (
+              <col key={slot.id} />
+            ))}
+          </colgroup>
           <thead>
             <tr>
               <th scope="col">Person</th>
-              <th scope="col">Rangfolge</th>
-              <th scope="col">Work­shops</th>
               {participation.slots.map((slot) => (
                 <th scope="col" key={slot.id}>
                   <SlotLabel day={slot.day_label} starts={slot.start_label} ends={slot.end_label} />
@@ -202,10 +192,6 @@ function WideTable({ participation }: { participation: WorkshopParticipationView
                   </span>
                   {statusBadge(person)}
                 </th>
-                <td className="workshop-participation__rank-column">
-                  <RankList person={person} />
-                </td>
-                <td className="workshop-participation__count-column">{person.workshop_count}</td>
                 {person.cells.map((cell, index) => (
                   <td
                     className={`workshop-participation__slot-cell workshop-participation__slot-cell--${cell.kind} ${rankClass(cell)}${cell.kind === 'assignment' && cell.entries.some((entry) => entry.reason === 'fixed') ? ' workshop-participation__slot-cell--fixed' : ''}`}
@@ -219,7 +205,7 @@ function WideTable({ participation }: { participation: WorkshopParticipationView
           </tbody>
           <tfoot>
             <tr aria-hidden="true">
-              <td colSpan={3 + participation.slots.length} />
+              <td colSpan={1 + participation.slots.length} />
             </tr>
           </tfoot>
         </table>
@@ -241,7 +227,7 @@ function PersonCards({ participation }: { participation: WorkshopParticipationVi
             <h3 id={`workshop-participation-person-${person.id}`}>
               <WishesLink person={person} />
               <span className="workshop-participation__person-meta">
-                · {participationAgeLabel(person)} · {workshopCount(person.workshop_count)}
+                · {participationAgeLabel(person)}
               </span>
             </h3>
             {statusBadge(person) ? (
@@ -261,8 +247,6 @@ function PersonCards({ participation }: { participation: WorkshopParticipationVi
                 </li>
               ))}
             </ul>
-            <h4>Rangfolge</h4>
-            <RankList person={person} />
           </article>
         ))}
       </div>
@@ -278,14 +262,7 @@ export function WorkshopParticipation({
   max_rank: number
 }) {
   return (
-    <section className="workshop-participation" aria-labelledby="h-rank">
-      <div className="workshop-participation__section-head">
-        <h2 id="h-rank" className="sr-only">
-          Personen
-        </h2>
-        <p>Ein Name zeigt, was aus den Wünschen der Person geworden ist.</p>
-      </div>
-      <h2 className="workshop-participation__print-title">Teilnahme · Personen</h2>
+    <section className="workshop-participation" aria-label="Teilnahme">
       <Legend max_rank={maxRank} />
       <WideTable participation={participation} />
       <PersonCards participation={participation} />
