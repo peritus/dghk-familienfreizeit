@@ -85,7 +85,7 @@ the advertising and the registry claims. Each row states which side it falls on.
 | Location | What is there | Disposition |
 |---|---|---|
 | [`reports.tsx`](../../../src/app/organiser/components/workshop/reports.tsx) | thirteen exports: rosters, per-person, per-family and per-room plan tables and documents, and a list-kind switcher — the whole "Listen erzeugen" capability | No production importer. **Keep the components** for the M11/M13 reports host; remove the coverage entries and the stepper copy that promises them |
-| [`participation.tsx`](../../../src/modules/workshop-assignment/app/components/participation.tsx) | ten exports: attendance matrix, group distribution, unrequested assignments, and an open-cases worklist with a "Nächster Schritt" column | No production importer, and the owning module contributes no screen. **Keep the components**; remove the `Familie erinnern` action copy, which promises a notification path that does not exist anywhere |
+| `src/modules/workshop-assignment/app/components/participation.tsx` (deleted) | ten exports: attendance matrix, group distribution, unrequested assignments, and an open-cases worklist with a "Nächster Schritt" column | No production importer, and the owning module contributes no screen. **Keep the components**; remove the `Familie erinnern` action copy, which promises a notification path that does not exist anywhere |
 | `src/app/organiser/components/workshop/index.ts` (deleted) | a barrel re-exporting both files | **Remove.** It has zero importers and is the only thing making the two files appear reachable |
 | [`shared.tsx`](../../../src/app/components/shared/workshop/shared.tsx) | `WorkshopListPicker`, `WorkshopPrintDocument`, `WorkshopConfidentialityNotice` | Reachable only through `reports.tsx`. **Keep**; they are the print primitives the reports host needs |
 | [`surface.tsx`](../../../src/modules/room-assignment/app/components/assignment-board/surface.tsx) | a seven-member findings-and-decisions cluster referenced by nothing, not even a story | **Remove.** Its screens now live as deferred-idea examples outside the build |
@@ -260,5 +260,4 @@ D28's four-step summary and stepper labels are unchanged.
 - [src/app/organiser/screens/workshop-allocation.tsx](../../../src/app/organiser/screens/workshop-allocation.tsx)
 - [src/app/organiser/components/workshop/reports.tsx](../../../src/app/organiser/components/workshop/reports.tsx)
 - [src/modules/room-assignment/app/components/assignment-board/surface.tsx](../../../src/modules/room-assignment/app/components/assignment-board/surface.tsx)
-- [src/modules/workshop-assignment/app/components/participation.tsx](../../../src/modules/workshop-assignment/app/components/participation.tsx)
 - [test/storybook/style-guide.spec.ts](../../../test/storybook/style-guide.spec.ts)

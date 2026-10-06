@@ -506,24 +506,6 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/modules/workshop-rankings/app/components/choices.tsx',
   },
   {
-    id: 'modules-workshop-assignment-components-participation--attendance',
-    area: 'component',
-    subject: 'Workshop participation attendance',
-    source: 'src/modules/workshop-assignment/app/components/participation.tsx',
-    snapshot: false,
-    snapshot_exemption:
-      'No organiser route renders participation yet; the story is an illustrative example for a later host.',
-  },
-  {
-    id: 'modules-workshop-assignment-components-participation--cases',
-    area: 'component',
-    subject: 'Workshop participation cases',
-    source: 'src/modules/workshop-assignment/app/components/participation.tsx',
-    snapshot: false,
-    snapshot_exemption:
-      'No organiser route renders participation yet; the story is an illustrative example for a later host.',
-  },
-  {
     id: 'application-organiser-workshop-editors--forms',
     area: 'component',
     subject: 'Workshop editor forms',
