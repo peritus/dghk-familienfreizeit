@@ -60,10 +60,12 @@ including conflict notices and person tracing, without adding a persistence boun
 The **Listen** navigation entry selects the workshop roster, person plan, family
 plan, or room plan route. Each view has a page-local selector for one document with
 previous and next buttons, over the same plan as every other organiser screen.
-Roster documents show an explicit confidentiality notice and
-the responsive layout uses tables on wide screens and labelled cards on narrow
-screens. The reports are browser-printable from the shared stylesheet and expose
-no application print, download, or export control.
+The roster shows an explicit confidentiality notice above its picker. Rosters and
+family plans switch to labelled cards when the list area is narrower than 720px;
+person and room plans keep scrolling tables. The global stylesheet's print block
+prints only the selected document on A4; screen-only and print-only parts are
+marked with `workshop-screen-only` and `workshop-print-only` classes. The lists
+expose no application print, download, or export control.
 
 Family routes reuse the organiser `PrimaryNavigation` and introduce no secondary
 navigation level. `FamilyTopicNavigation` wraps the shared `TertiaryNavigation`

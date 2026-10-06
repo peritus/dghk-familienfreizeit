@@ -172,23 +172,39 @@ remain visible as review notices; the views do not create attendance or roster e
 
 Workshop list reports are read-only projections over the same world and plan as
 every other organiser screen; there is no separate data context to select. They
-provide one selected document for each of four views, with previous and next
-navigation: a workshop roster, a person plan, a family plan, and a room plan.
-Documents carry a title and metadata lines, without a kind or status header.
+follow the workshop HTML prototype's list views. Each of the four views (workshop
+roster, person plan, family plan, room plan) has a picker for one document with
+previous and next buttons; previous and next move focus to the new document's
+heading, and each view keeps its own selection in the URL query. Slots read in the
+short form "Fr 09:00–11:00"; documents carry a title and metadata lines, without a
+kind or status header, and a date and revision stamp follows the document.
 
 - Workshop rosters cover placed workshops in programme order, grouped by slot in
-  the picker. They show placement, leaders, capacity, assigned people and
-  sign-ups, and the person `food-note` as the confidential health column.
-- Person plans list people and external leaders. Every configured slot shows the
-  workshop, room, and role; fixed attendance is marked, external leaders show the
-  workshops they lead and their available slots, and people the resolver left
-  unassigned carry an **Offen** notice with its reason.
+  the picker. A one-line confidentiality notice sits above the picker. The
+  metadata gives the long slot date, room, leaders (external ones marked
+  "extern"), participants against capacity, audience and age range ("ab 18
+  Jahren" when open-ended), and how many people have a health note. The table
+  shows children's ages as numbers and adults as "erw.", and the person
+  `food-note` as the confidential health column.
+- Person plans are chosen by name search and list people and external leaders.
+  Every configured slot shows the workshop, room, and role; fixed attendance is
+  marked, external leaders show the workshops they lead and their available
+  slots, and every empty slot of a person the resolver left unassigned shows
+  **Offen** with the reason.
 - Family plans show each member's workshop, room, and leadership per slot, with
-  adults first and the same **Offen** notice per member.
+  adults first and **Offen** in every empty slot of an unassigned member.
 - Room plans list every slot, including empty ones.
 
-Wide tables switch to labelled cards on narrow screens, and browser printing uses
-the same document data without an in-app print, download, or export action.
+Rosters and family plans switch to labelled cards when the list area is narrower
+than 720px; person and room plans stay tables that scroll sideways. Placed
+workshops in the Programm grid open their roster, and the traced person in
+Wünsche › Verlauf links to their workshop plan.
+
+Browser printing (Ctrl+P) prints only the selected document on A4: black on
+white, without screen controls, with repeated table headers and rows that never
+split. Rosters add an empty "Anwesend" column and a confidentiality line for
+paper, the room plan prints larger for use as a door sign, and the stamp prints
+under the document. There is no in-app print, download, or export action.
 
 ## Current limits
 
