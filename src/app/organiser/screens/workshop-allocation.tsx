@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
+import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
+import { workshopTrack } from '../../../modules/workshop-assignment/app/workshop-track.js'
+import type { PhaseView } from '../../../derive/phases.js'
 import { organiserPathWithQuery, organiserPaths } from '../../../organiser/routes.js'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
@@ -72,12 +75,21 @@ function traceStages(
   )
 }
 
+/** The workshop area's status from the phase view, never from local answer counts. */
+function allocationStatusLabel(phases: readonly PhaseView[]): string {
+  const choice = phases.find(({ phase }) => phase === 'workshop-rankings.choice')
+  const review = phases.find(({ phase }) => phase === 'workshop-assignment.review')
+  if (choice?.status === 'closed') return 'Festgelegt'
+  if (!choice || choice.status === 'upcoming') return 'Vorbereitung'
+  return review && !review.readiness.ready ? 'Prüfung erforderlich' : 'Zuordnung prüfen'
+}
+
 export function WorkshopAllocation() {
   useDocumentTitle('Wünsche · Workshops · Familienfreizeit')
   // wouter's location is the pathname only; a traced person arrives in the query.
   const [location, navigate] = useLocation()
   const queryPersonId = new URLSearchParams(useSearch()).get('person')
-  const { world, current_plan: currentPlan } = useOrganiser()
+  const { world, current_plan: currentPlan, phases } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
   const [traceMode, setTraceMode] = useState<TraceMode>(queryPersonId ? 'highlight' : 'all')
   const [selectedPersonName, setSelectedPersonName] = useState('')
@@ -138,38 +150,13 @@ export function WorkshopAllocation() {
       />
       <WorkflowStepper
         aria_label="Ablauf der Workshopwahl"
-        steps={[
-          {
-            id: 'authoring',
-            label: 'Workshops anlegen',
-            state: projection.has_workshops ? 'complete' : 'current',
-            description: projection.has_workshops
-              ? 'Workshopplan vorhanden'
-              : 'Workshopplan vorbereiten',
-          },
-          {
-            id: 'choice',
-            label: 'Wahl öffnen',
-            state: projection.has_workshops ? 'complete' : 'upcoming',
-            description: projection.has_answers ? 'Antworten liegen vor' : 'Wünsche erfassen',
-          },
-          {
-            id: 'review',
-            label: 'Zuordnung prüfen',
-            state: projection.has_answers ? 'current' : 'upcoming',
-            description: 'Bedarf, Plätze und Konflikte kontrollieren',
-          },
-          {
-            id: 'fixed',
-            label: 'Festgelegt',
-            state: 'upcoming',
-            description: 'Plan veröffentlichen und Listen erzeugen',
-          },
-        ]}
+        steps={workshopTrack({
+          phases: phases ?? [],
+          active_workshop_count: officialWorkshopsWorld(world).workshops.length,
+          meta: activeProfile.meta,
+        })}
       />
-      <WorkshopAllocationStatus
-        label={projection.has_answers ? 'Zuordnung prüfen' : 'Vorbereitung'}
-      >
+      <WorkshopAllocationStatus label={allocationStatusLabel(phases ?? [])}>
         {projection.has_answers
           ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte.'
           : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}

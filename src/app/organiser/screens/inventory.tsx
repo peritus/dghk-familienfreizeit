@@ -23,6 +23,7 @@ import {
 import type { EventDraft } from '../../../events/types.js'
 import type { Label } from '../../../events/fold.js'
 import { activeProfile } from '../../../config/index.js'
+import { accommodationTrack } from '../../../modules/room-assignment/app/accommodation-track.js'
 import { SecondaryNavigation } from '../components/navigation.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import {
@@ -63,7 +64,7 @@ const floorlessRoomTypes = new Set(['bungalow', 'schlaffass'])
 
 export function Inventory() {
   useDocumentTitle('Unterkunft · Familienfreizeit')
-  const { world, state, stage } = useOrganiser()
+  const { world, state, stage, phases } = useOrganiser()
   const config = selectedInventoryConfig()
   const floors = config.floors.map((value) => ({
     value,
@@ -238,28 +239,7 @@ export function Inventory() {
       />
       <WorkflowStepper
         aria_label="Ablauf der Unterbringung"
-        steps={[
-          {
-            id: 'inventory',
-            label: 'Unterkunft anlegen',
-            description: hasBuildings
-              ? `${summary.buildings.length} ${summary.buildings.length === 1 ? 'Gebäude' : 'Gebäude'} erfasst`
-              : 'Gebäude, Zimmer und Schlafplätze erfassen',
-            state: hasBuildings ? 'complete' : 'current',
-          },
-          {
-            id: 'review',
-            label: 'Belegung prüfen',
-            description: 'Bedarf und passende Zimmer kontrollieren',
-            state: hasBuildings ? 'current' : 'upcoming',
-          },
-          {
-            id: 'fixed',
-            label: 'Festgelegt',
-            description: 'Plan kommunizieren',
-            state: 'upcoming',
-          },
-        ]}
+        steps={accommodationTrack({ phases: phases ?? [], meta: activeProfile.meta })}
       />
       <OrganiserScreenHeader
         title="Unterkunft"

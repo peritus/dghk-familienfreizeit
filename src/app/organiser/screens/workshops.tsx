@@ -18,6 +18,8 @@ import { SegmentedControl } from '../../components/shared/ui/segmented-control.j
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
 import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import { PhaseDecisionAction } from '../components/phase-decision.js'
+import { workshopTrack } from '../../../modules/workshop-assignment/app/workshop-track.js'
+import type { PhaseView } from '../../../derive/phases.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
@@ -685,33 +687,11 @@ export function Workshops() {
       />
       <WorkflowStepper
         aria_label="Ablauf der Workshopwahl"
-        steps={[
-          {
-            id: 'authoring',
-            label: 'Workshops anlegen',
-            state: summary.workshops.length ? 'complete' : 'current',
-            description: summary.workshops.length
-              ? `${summary.workshops.length} Workshop${summary.workshops.length === 1 ? '' : 's'} angelegt`
-              : 'Titel, Zielgruppe und Leitung erfassen',
-          },
-          {
-            id: 'choice',
-            label: 'Wahl öffnen',
-            state: choiceOpened ? 'complete' : summary.workshops.length ? 'current' : 'upcoming',
-          },
-          {
-            id: 'review',
-            label: 'Zuordnung prüfen',
-            state: 'upcoming',
-            description: 'Bedarf, Plätze und Konflikte kontrollieren',
-          },
-          {
-            id: 'fixed',
-            label: 'Festgelegt',
-            state: 'upcoming',
-            description: 'Plan veröffentlichen und Listen erzeugen',
-          },
-        ]}
+        steps={workshopTrack({
+          phases: phases ?? [],
+          active_workshop_count: officialWorkshopsWorld(world!).workshops.length,
+          meta: activeProfile.meta,
+        })}
       />
       <WorkshopPhaseNotice
         label={
@@ -941,9 +921,46 @@ export function Workshops() {
   )
 }
 
+/** The workshop review phase's readiness, with its first findings (phases.md §3, §8). */
+function ReviewReadinessNotice({ phases }: { phases: readonly PhaseView[] }) {
+  const review = phases.find(({ phase }) => phase === 'workshop-assignment.review')
+  const closed = phases.some(
+    ({ phase, status }) => phase === 'workshop-rankings.choice' && status === 'closed',
+  )
+  const findings = review && !review.readiness.ready ? review.readiness.findings : []
+  if (closed)
+    return (
+      <WorkshopPhaseNotice label="Festgelegt" tone="success">
+        Das Ergebnis ist festgelegt. Änderungen erscheinen als Abweichung vom festgelegten Ergebnis.
+      </WorkshopPhaseNotice>
+    )
+  return (
+    <WorkshopPhaseNotice
+      label={findings.length ? 'Prüfung erforderlich' : 'Zuordnung prüfen'}
+      tone={findings.length ? 'attention' : 'success'}
+      details={
+        findings.length ? (
+          <ul className="list-disc pl-5">
+            {findings.slice(0, 3).map((finding) => (
+              <li key={`${finding.id}-${finding.subject_id ?? ''}`}>{finding.message}</li>
+            ))}
+            {findings.length > 3 ? <li>… und {findings.length - 3} weitere</li> : null}
+          </ul>
+        ) : (
+          'Alle Workshops haben einen Platz. Prüfe Bedarf, Plätze und Überschneidungen.'
+        )
+      }
+    >
+      {findings.length
+        ? `${findings.length} ${findings.length === 1 ? 'Hinweis verhindert' : 'Hinweise verhindern'} das Festlegen.`
+        : 'Das Programm ist berechnet und kann auf Konflikte geprüft werden.'}
+    </WorkshopPhaseNotice>
+  )
+}
+
 export function WorkshopProgramme() {
   useDocumentTitle('Programm · Workshops · Familienfreizeit')
-  const { world } = useOrganiser()
+  const { world, phases } = useOrganiser()
   const [location, navigate] = useLocation()
   const schedule = workshopSchedulingWorld(world!)
   const spaces = workshopSpaceWorld(world!).live
@@ -1000,38 +1017,13 @@ export function WorkshopProgramme() {
       />
       <WorkflowStepper
         aria_label="Ablauf der Workshopwahl"
-        steps={[
-          {
-            id: 'authoring',
-            label: 'Workshops anlegen',
-            state: official.workshops.length ? 'complete' : 'current',
-          },
-          {
-            id: 'choice',
-            label: 'Wahl öffnen',
-            state: rankings.rankings.length ? 'complete' : 'upcoming',
-          },
-          {
-            id: 'review',
-            label: 'Zuordnung prüfen',
-            state: official.workshops.length ? 'current' : 'upcoming',
-          },
-          { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
-        ]}
+        steps={workshopTrack({
+          phases: phases ?? [],
+          active_workshop_count: officialWorkshopsWorld(world!).workshops.length,
+          meta: activeProfile.meta,
+        })}
       />
-      <WorkshopPhaseNotice
-        label={programme.unplaced.length ? 'Prüfung erforderlich' : 'Zuordnung prüfen'}
-        tone={programme.unplaced.length ? 'attention' : 'success'}
-        details={
-          programme.unplaced.length
-            ? `${programme.unplaced.length} Workshop${programme.unplaced.length === 1 ? '' : 's'} ohne passenden Platz.`
-            : 'Alle Workshops haben einen Platz. Prüfe Bedarf, Plätze und Überschneidungen.'
-        }
-      >
-        {programme.unplaced.length
-          ? 'Nicht eingeplante Workshops brauchen eine organisatorische Entscheidung.'
-          : 'Das Programm ist berechnet und kann auf Konflikte geprüft werden.'}
-      </WorkshopPhaseNotice>
+      <ReviewReadinessNotice phases={phases ?? []} />
       <TertiaryNavigation
         aria_label="Programmansicht"
         value={view}
