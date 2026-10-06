@@ -4,7 +4,7 @@ title: Define module-contributed features and their effective availability
 status: needs-decision
 severity: gap
 category: kernel
-source: split of issue 042 (design discussion about workflow phases, deadlines, and module composition)
+source: specification review of module-contributed feature availability
 related_decisions: [D11, D12, D14, D19, D20, D24, D30]
 related_milestones: [M8, M10, M12]
 opened: 2026-10-06
@@ -16,8 +16,8 @@ opened: 2026-10-06
 
 This issue has no prerequisite. It blocks
 [044 — phase activation model](044-phase-model.md), which activates the features
-defined here, and through it
-[042 — removal of hardcoded phase and feature paths](042-remove-hardcoded-phase-paths.md).
+defined here. Its design and implementation are independent of
+[042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md).
 
 ## Problem
 
@@ -44,9 +44,9 @@ whether a capability exists:
    is the de facto list of what the product can do, maintained by hand.
 4. **Orphaning.** A component tree with no route reaching it, while its copy still
    advertises the capability. This mechanism is invisible: see
-   [042](042-remove-hardcoded-phase-paths.md) for the inventory, including two
-   whole feature files with no production importer whose copy is still rendered on
-   live screens.
+   [042](042-remove-unsupported-workflow-promises-and-orphaned-ui.md) for the
+   cleanup inventory, including copy that promises capabilities represented by
+   component files with no production importer.
 
 The fourth is the strongest argument for this issue. Nothing in the repository can
 currently state that a capability is absent, so absence is expressed by deleting a
@@ -334,6 +334,12 @@ unchanged.
   implementation begins.
 - It states that email, delivery tracking and arrangement communication are out
   of scope.
+- Once the accepted feature model is implemented, replace the hand-maintained
+  "Current limits" feature inventory in
+  [`docs/application/organiser-view.md`](../../../docs/application/organiser-view.md)
+  with documentation of the verified feature view, and document feature-related
+  profile validation in
+  [`docs/architecture/profile-composition.md`](../../../docs/architecture/profile-composition.md).
 
 ## Open questions
 
@@ -365,7 +371,7 @@ unchanged.
 - [engineering/deployment.md](../../engineering/deployment.md)
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
 - [044 — phase activation model](044-phase-model.md)
-- [042 — removal of hardcoded phase and feature paths](042-remove-hardcoded-phase-paths.md)
+- [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](031-family-projection-privacy-boundary.md)
 - [docs/application/organiser-view.md](../../../docs/application/organiser-view.md)
 - [docs/architecture/profile-composition.md](../../../docs/architecture/profile-composition.md)

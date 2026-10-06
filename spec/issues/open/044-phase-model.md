@@ -4,7 +4,7 @@ title: Define phases that activate features through derived state
 status: needs-decision
 severity: gap
 category: kernel
-source: split of issue 042 (design discussion about workflow phases, deadlines, and module composition)
+source: specification review of phase activation, workflow state and deadline policy
 related_decisions: [D13, D15, D16, D26, D27, D28]
 related_milestones: [M8, M10]
 depends_on: ["043"]
@@ -18,9 +18,9 @@ opened: 2026-10-06
 Blocked by [043 — module-contributed feature model](043-feature-model.md): a
 phase activates features, so the feature contract must be accepted first.
 
-Blocks [042 — removal of hardcoded phase and feature paths](042-remove-hardcoded-phase-paths.md),
-which cannot be executed until this contract fixes what the removed paths are
-replaced by.
+The cleanup in [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
+is independent and does not block this design or implementation. This issue owns
+the phase-dependent workflow, deadline and status paths directly.
 
 ## Problem
 
@@ -61,7 +61,53 @@ commitment.** There is no `Communicated` event in the source at all, although
 [`release-control.md` §3](../../application/release-control.md#3-communication-event-and-append)
 specifies one. Every "öffnen", "schließen", "festlegen", "veröffentlichen" and
 "kommunizieren" string the product renders is therefore unbacked by
-construction. [042](042-remove-hardcoded-phase-paths.md) inventories them.
+construction. Phase-specific workflow and deadline behavior belongs here;
+[042](042-remove-unsupported-workflow-promises-and-orphaned-ui.md) covers the
+independent copy, orphaned-UI and visual-coverage cleanup.
+
+## Phase-dependent implementation scope
+
+Issue 042 covers cleanup that does not depend on the phase contract. This issue
+owns the following behavior and documentation because their correct replacement
+depends on the phase decisions below; none is a prerequisite for starting 042.
+
+| Concern | Retained scope | Required outcome |
+|---|---|---|
+| Phase tracks and stepper state | The overview and programme steppers in [`workshops.tsx`](../../../src/app/organiser/screens/workshops.tsx), the allocation stepper in [`workshop-allocation.tsx`](../../../src/app/organiser/screens/workshop-allocation.tsx), and the accommodation stepper in [`inventory.tsx`](../../../src/app/organiser/screens/inventory.tsx) derive statuses from different local facts | Use one selected phase track; keep `WorkflowStepper` as the presentation adapter and preserve D28's four-step workshop summary unless its required decision review amends it |
+| Inferred workflow and blocker state | `has_workshops` and `has_answers` in [`workshop-allocation-view.ts`](../../../src/modules/workshop-rankings/app/workshop-allocation-view.ts), three separate answer checks in the allocation screen, and the two workshop conflict notices | Replace screen-local phase/readiness inference with the accepted typed phase and readiness contract; preserve module-owned findings as their source facts |
+| Deadline configuration and copy | `deadlineNotice` in [`controls.tsx`](../../../src/modules/family-preferences/app/controls.tsx), untyped `ProfileMeta.deadlines`, hardcoded `deadline_scope` and `deadline_contact` in [`src/config/define.ts`](../../../src/config/define.ts), and [family-preferences §3](../../modules/family-preferences.md#3-parameters) | Distinguish target dates from enforced closing dates in configuration, derivation, authorization and German copy |
+| Phase-specific production and story wording | The `Festgelegt` step, publication/list and communication step descriptions, phase-label drift across stepper stories and screens, and phase states in the [v16 HTML prototype](../../html-prototypes/workshops-prototype-v16.html) | Reconcile names and copy with the accepted phase contract; do not infer commitment, release or communication from a step label |
+| Verified behavior documentation | The lifecycle-summary and deadline-policy claims in [`docs/application/organiser-view.md`](../../../docs/application/organiser-view.md); phase-related profile validation in [`docs/architecture/profile-composition.md`](../../../docs/architecture/profile-composition.md); the stepper summary statement in [`ui/frontend.md`](../../ui/frontend.md) | Update each description with the verified implementation and the accepted decision amendments in the same change |
+| Phase-dependent tests and snapshots | [`workflow-navigation.test.tsx`](../../../test/app/workflow-navigation.test.tsx), [`profile.test.ts`](../../../test/config/profile.test.ts), [`workshop-assignment-prototype-dataset.test.ts`](../../../test/solver/workshop-assignment-prototype-dataset.test.ts), and snapshots containing these steppers | Replace assertions for local inference and deadline behavior with coverage for the accepted phase projection and policies |
+
+The family-audience portion must also honor the unresolved boundary in
+[031 — family projection privacy](031-family-projection-privacy-boundary.md).
+That privacy requirement remains explicit and is not resolved by changing this
+issue's dependency on 043.
+
+Feature-inventory copy and feature-related profile validation remain in 043's
+scope so the two issue scopes update their respective claims without creating a
+second product inventory.
+
+### Implementation acceptance
+
+- Every concern in this inventory is resolved, and no phase-dependent row is
+  silently dropped.
+- The phase view is authoritative for workflow status; screens no longer infer
+  phase state locally from array lengths, and readiness remains a module-owned
+  fact rather than a second phase store.
+- Target dates and closing dates have distinct configuration, copy and
+  enforcement; an enforced closing date is checked on the authoritative write
+  path.
+- Phase-related `docs/` and `spec/` claims are updated with the implemented
+  behavior and accepted decision amendments in the same change. Feature-related
+  claims remain coordinated with 043.
+- D28 and other binding decisions are amended only after the required review,
+  and every accepted amendment is reflected in dependent documents before phase
+  implementation begins.
+- New coverage exercises the accepted status derivation, temporal policy,
+  transitions and audience boundary; existing assertions for local inference
+  are not left as an alternate contract.
 
 On the family side the same gap appears as a semantic one. The accommodation and
 workshop sections render a deadline notice built from an untyped
@@ -483,7 +529,7 @@ lies, and how a reopened phase must be re-derivable rather than tombstoned.
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
 - [ui/screens/family-preferences.md](../../ui/screens/family-preferences.md)
 - [043 — module-contributed feature model](043-feature-model.md)
-- [042 — removal of hardcoded phase and feature paths](042-remove-hardcoded-phase-paths.md)
+- [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](031-family-projection-privacy-boundary.md)
 - [archived 008 — milestone ordering and release-control prerequisites](../archived/008-milestone-ordering-release-control-prereqs.md)
 - [archived 009 — deadline concept fields underspecified](../archived/009-deadline-concept-fields-underspecified.md)
