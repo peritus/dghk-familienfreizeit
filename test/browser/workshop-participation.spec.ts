@@ -70,8 +70,10 @@ test('participation switches between the detailed table, narrow cards, and lands
   )
   const headerText = await page.locator('.workshop-participation__table thead').innerText()
   expect(headerText).not.toMatch(/Rangfolge|Workshops/u)
+  await expect(page.locator('.workshop-participation__legend')).toContainText('keine Zuordnung')
   await expect(page.locator('.workshop-participation__legend')).not.toContainText('Offen')
   await expect(page.locator('.workshop-participation__table')).not.toContainText('Offen')
+  await expect(page.locator('.workshop-participation__table')).not.toContainText(/Keine Antwort/u)
   await expect(
     page.locator('.workshop-participation__table .workshop-participation__slot-cell--open'),
   ).toHaveCount(0)
@@ -128,6 +130,7 @@ test('participation switches between the detailed table, narrow cards, and lands
   await expect(page.locator('.workshop-participation__wide')).toBeHidden()
   await expect(page.locator('.workshop-participation__card').first()).toBeVisible()
   await expect(page.locator('.workshop-participation__narrow')).not.toContainText('Offen')
+  await expect(page.locator('.workshop-participation__narrow')).not.toContainText(/Keine Antwort/u)
   await expect(page.locator('.workshop-participation__card').first()).not.toContainText(
     /Rangfolge|\d+ Workshops/u,
   )

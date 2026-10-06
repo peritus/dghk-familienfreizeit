@@ -22,17 +22,6 @@ function rankClass(cell: WorkshopParticipationCell): string {
     : `workshop-participation__slot-cell--rank-${Math.min(rank, 4)}`
 }
 
-function statusBadge(person: WorkshopParticipationPerson) {
-  if (person.response_status === 'Rangfolge') return null
-  return (
-    <span
-      className={`workshop-participation__badge${person.response_tone === 'attention' ? ' workshop-participation__badge--attention' : ' workshop-participation__badge--quiet'}`}
-    >
-      {person.response_status}
-    </span>
-  )
-}
-
 function participationAgeLabel(person: WorkshopParticipationPerson): string {
   return person.group === 'adults' ? 'erwachsen' : person.age_label
 }
@@ -57,7 +46,7 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
     return (
       <span className="workshop-participation__quiet">
         <span aria-hidden="true">-</span>
-        <span className="sr-only">freier Platz</span>
+        <span className="sr-only">keine Zuordnung</span>
       </span>
     )
   return (
@@ -116,7 +105,7 @@ function Legend({ max_rank: maxRank }: { max_rank: number }) {
       ))}
       <span>
         <i aria-hidden="true" className="workshop-participation__swatch" />
-        nicht gewählt oder freier Platz
+        keine Zuordnung
       </span>
       <span>
         <i
@@ -164,7 +153,6 @@ function WideTable({ participation }: { participation: WorkshopParticipationView
                   <span className="workshop-participation__age">
                     {participationAgeLabel(person)}
                   </span>
-                  {statusBadge(person)}
                 </th>
                 {person.cells.map((cell, index) => (
                   <td
@@ -204,9 +192,6 @@ function PersonCards({ participation }: { participation: WorkshopParticipationVi
                 · {participationAgeLabel(person)}
               </span>
             </h3>
-            {statusBadge(person) ? (
-              <div className="workshop-participation__card-badges">{statusBadge(person)}</div>
-            ) : null}
             <h4>Zuordnung</h4>
             <ul className="workshop-participation__card-slots">
               {participation.slots.map((slot, index) => (

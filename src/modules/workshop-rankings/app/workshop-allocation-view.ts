@@ -106,8 +106,6 @@ export type WorkshopParticipationPerson = {
   name: string
   age_label: string
   group: Exclude<WorkshopAllocationGroup, 'all'>
-  response_status: WorkshopAllocationAnswer['status']
-  response_tone?: WorkshopAllocationAnswer['status_tone']
   ranks: readonly WorkshopParticipationRank[]
   workshop_count: number
   cells: readonly WorkshopParticipationCell[]
@@ -725,10 +723,8 @@ export function buildWorkshopAllocationProjection(
       reason: 'interest',
     })
   }
-  const answerById = new Map(answers.map((answer) => [answer.id, answer]))
   const participationPeople: WorkshopParticipationPerson[] = people
     .map((person) => {
-      const answer = answerById.get(person.id)!
       const ranking = rankingsByPerson.get(person.id)
       const assignedWorkshopIds = new Set(
         assignment.assignments
@@ -759,8 +755,6 @@ export function buildWorkshopAllocationProjection(
         name: person.name,
         age_label: person.age_label,
         group: person.group,
-        response_status: answer.status,
-        response_tone: answer.status_tone,
         ranks,
         workshop_count:
           assignment.assignments.filter((item) => item.person_id === person.id).length +

@@ -174,7 +174,7 @@ remain visible as review notices; the views do not create attendance or roster e
 The **Teilnahme** route presents a person-by-slot overview derived from the same
 prospective world and solver plan. Its accessible table has one person column and
 equal-width slot columns. Cells show workshop titles with their rank, leader, sign-up,
-interest, fixed-assignment, or free-slot state; a dash marks a free slot. Rejected
+interest, or fixed-assignment state; a dash marks no assignment in a slot. Rejected
 choices stay in the allocation review, while this matrix shows the resulting
 programme. People sort by German name, and names link to the person's allocation
 trace. Narrow layouts show one card per person; browser print switches back to the
