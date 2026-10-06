@@ -1,5 +1,5 @@
 ---
-id: "047"
+id: "048"
 title: Family workshop plans can exceed printable page width
 status: open
 severity: gap
@@ -16,12 +16,12 @@ opened: 2026-10-06
 
 The family plan table creates one column per family member, and each member
 value cell has a minimum width of `8em`. See
-[`FamilyPlanTable`](../../../src/app/organiser/components/workshop/reports.tsx#L300-L315).
+[`FamilyPlanTable`](../../../src/app/organiser/components/workshop/reports.tsx#L298-L316).
 Workshop lists print on A4 portrait pages with 12 mm margins
-([page rule](../../../src/app/globals.css#L341-L344)); the family table uses
+([page rule](../../../src/app/globals.css#L801-L804)); the family table uses
 `0.9em` text against the print stylesheet's 10 pt base
-([family table rule](../../../src/app/globals.css#L337-L344)
-and [font rule](../../../src/app/globals.css#L482-L484)). This leaves 186 mm of
+([family table rule](../../../src/app/globals.css#L942-L944)
+and [font rule](../../../src/app/globals.css#L827-L833)). This leaves 186 mm of
 page width. Eight member columns at 8em each need about 203 mm before the
 required Slot column, so the table cannot fit that page. Seven member columns
 already use about 178 mm, leaving only about 8 mm for the Slot column, borders,
