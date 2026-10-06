@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { defineModule } from '../define.js'
+import { declaredFeatures } from '../../config/features.js'
 import type {
   FamilyControlDefinition,
   FamilyPreferencesParams,
@@ -77,4 +78,40 @@ export function familyControlDefinitions(
   profile: Pick<OccasionProfile, 'modules'>,
 ): readonly FamilyControlDefinition[] {
   return profile.modules.flatMap((module) => module.contributions.family_controls ?? [])
+}
+
+/** The label key a family control writes. */
+export function familyControlLabelKey(control: FamilyControlDefinition): string {
+  if (control.control === 'workshop-sign-up') return 'signed-up-for'
+  if (control.control === 'workshop-interest') return 'interested-in'
+  return control.key
+}
+
+/**
+ * Maps every label key written by a control in a family-governed section to the family feature
+ * governing it (spec/architecture/features.md §4). Keys absent from the map are ungoverned.
+ */
+export function familyGovernedLabelKeys(
+  profile: Pick<OccasionProfile, 'modules'>,
+): ReadonlyMap<string, string> {
+  const module = profile.modules.find(({ id }) => id === 'family-preferences')
+  if (!module) return new Map()
+  const params = module.parameters as FamilyPreferencesParams
+  const features = declaredFeatures(profile.modules)
+  const controls = new Map(
+    familyControlDefinitions(profile).map((control) => [control.key, control]),
+  )
+  const governed = new Map<string, string>()
+  for (const section of params.sections) {
+    const feature = section.features.find((id) => features.get(id)?.audience === 'family')
+    if (!feature) continue
+    for (const trait of section.traits) governed.set(trait, feature)
+    for (const control of params.module_controls.filter(
+      ({ section: key }) => key === section.key,
+    )) {
+      const definition = controls.get(control.key)
+      if (definition) governed.set(familyControlLabelKey(definition), feature)
+    }
+  }
+  return governed
 }

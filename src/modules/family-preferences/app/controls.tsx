@@ -9,7 +9,11 @@ import type {
 } from '../../../config/define.js'
 import type { FeatureAudience } from '../../../config/features.js'
 import { sectionOffered } from '../../../derive/features.js'
-import { familyControlDefinitions, familyPreferencesConfig } from '../index.js'
+import {
+  familyControlDefinitions,
+  familyControlLabelKey,
+  familyPreferencesConfig,
+} from '../index.js'
 import { Card, CardContent, CardHeader } from '../../../app/components/shared/ui/card.js'
 
 type Stage = (events: readonly EventDraft[]) => void
@@ -89,11 +93,7 @@ function labelClear(
   }
 }
 
-function controlLabelKey(control: FamilyControlDefinition): string {
-  if (control.control === 'workshop-sign-up') return 'signed-up-for'
-  if (control.control === 'workshop-interest') return 'interested-in'
-  return control.key
-}
+const controlLabelKey = familyControlLabelKey
 
 function controlTitle(
   title: string | Readonly<Record<string, string>>,

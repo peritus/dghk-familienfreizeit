@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
-import { assertAppendableWorld, derive } from '../events/fold.js'
+import { assertAppendableWorld, derive, type World } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendCanonicalEvents, readEvents, StaleHeadError } from '../events/store.js'
@@ -15,7 +15,9 @@ import {
 } from '../events/types.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
-import { authorizeEventBatch } from '../auth/authorization.js'
+import { authorizeEventBatch, type FamilyLabelOffered } from '../auth/authorization.js'
+import { deriveFeatureView, effectiveFeatureIds } from '../derive/features.js'
+import { familyGovernedLabelKeys } from '../modules/family-preferences/index.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
 import { maxEventsPerBatch } from './request-limits.js'
@@ -324,7 +326,13 @@ app.post('/api/events', async (context) => {
     })
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
       span.setAttribute('event.count', events.length)
-      return !authorizeEventBatch(principal, events, world, activeProfile.validation_view)
+      return !authorizeEventBatch(
+        principal,
+        events,
+        world,
+        activeProfile.validation_view,
+        principal.kind === 'family' ? familyLabelGate(world, context.env) : undefined,
+      )
     })
     if (forbidden) throw new Error('forbidden')
     tracing.enterSpan('events.validate_world', () =>
@@ -525,6 +533,27 @@ function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
   if (url.protocol === 'https:') context.header('Strict-Transport-Security', 'max-age=31536000')
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/'))
     context.header('Cache-Control', 'no-store')
+}
+
+/**
+ * Narrows family label writes to the sections whose family feature is effective for the world
+ * before the batch (spec/architecture/features.md §4).
+ */
+function familyLabelGate(world: World, env: Env): FamilyLabelOffered {
+  const effective = effectiveFeatureIds(
+    deriveFeatureView({
+      modules: activeProfile.modules,
+      world,
+      overrides: featureBindings(env).overrides,
+      phase_active: () => true,
+      principal: 'family',
+    }),
+  )
+  const governed = familyGovernedLabelKeys(activeProfile)
+  return (key) => {
+    const feature = governed.get(key)
+    return feature === undefined || effective.has(feature)
+  }
 }
 
 /**

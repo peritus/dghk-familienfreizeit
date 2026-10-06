@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { canAppendEvent } from '../../src/auth/authorization.js'
+import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
+import { familyGovernedLabelKeys } from '../../src/modules/family-preferences/index.js'
 import { derive } from '../../src/events/fold.js'
 import type { Event } from '../../src/events/types.js'
 
@@ -146,5 +148,47 @@ describe('event append authorization', () => {
     const world = derive(events)
     const organiserOnly = { event_authorize_dispatch: { BuildingAdded: () => false } }
     expect(canAppendEvent(organiser, moduleEvent, world, organiserOnly)).toBe(true)
+  })
+})
+
+describe('feature narrowing of family label writes', () => {
+  const config = { label_schemas: [{ key: 'flag', family_writable: true }] }
+  const world = derive(events)
+
+  test('a family write is rejected when its governing family feature is not offered', () => {
+    expect(canAppendEvent(family, labelSet, world, config, () => true)).toBe(true)
+    expect(canAppendEvent(family, labelSet, world, config, (key) => key !== 'flag')).toBe(false)
+  })
+
+  test('narrowing never grants a write ordinary authorisation refuses', () => {
+    const closed = { label_schemas: [{ key: 'flag', family_writable: false }] }
+    expect(canAppendEvent(family, labelSet, world, closed, () => true)).toBe(false)
+  })
+
+  test('aliases are narrowed by their canonical key', () => {
+    const aliased = { ...config, aliases: { old: 'flag' } }
+    const aliasSet = { ...labelSet, payload: { ...(labelSet.payload as object), key: 'old' } }
+    expect(canAppendEvent(family, aliasSet as Event, world, aliased, (key) => key !== 'flag')).toBe(
+      false,
+    )
+  })
+
+  test('organiser writes are never gated by availability', () => {
+    expect(canAppendEvent(organiser, labelSet, world, config, () => false)).toBe(true)
+  })
+})
+
+describe('family governed label keys', () => {
+  test('maps every control of a family-governed section to its family feature', () => {
+    expect(Object.fromEntries(familyGovernedLabelKeys(luebben2027Profile))).toEqual({
+      'needs-private-sanitary': 'family-preferences.family-room-wishes',
+      'needs-accessible': 'family-preferences.family-room-wishes',
+      'sole-occupancy': 'family-preferences.family-room-wishes',
+      'family-note': 'family-preferences.family-room-wishes',
+      'workshop-with': 'workshop-rankings.family-workshop-wishes',
+      'prefers-workshop': 'workshop-rankings.family-workshop-wishes',
+      'signed-up-for': 'workshop-rankings.family-workshop-wishes',
+      'interested-in': 'workshop-rankings.family-workshop-wishes',
+    })
   })
 })

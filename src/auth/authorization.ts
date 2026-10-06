@@ -38,15 +38,26 @@ export function authorizeEventBatch(
   events: readonly Event[],
   world: World,
   config: KernelConfig,
+  familyLabelOffered?: FamilyLabelOffered,
 ): boolean {
-  return events.every((event) => canAppendEvent(principal, event, world, config))
+  return events.every((event) =>
+    canAppendEvent(principal, event, world, config, familyLabelOffered),
+  )
 }
+
+/**
+ * Whether a family label write is currently offered by its governing feature
+ * (spec/architecture/features.md §4). Availability only narrows: it is consulted after every
+ * ordinary authorisation rule passes, and never for organisers.
+ */
+export type FamilyLabelOffered = (canonicalKey: string) => boolean
 
 export function canAppendEvent(
   principal: Principal,
   event: Event,
   world: World,
   config: KernelConfig,
+  familyLabelOffered?: FamilyLabelOffered,
 ): boolean {
   if (principal.kind === 'organiser') return true
   if (
@@ -55,9 +66,11 @@ export function canAppendEvent(
     event.type === 'FamilyDisplayNameChanged'
   )
     return false
-  if (event.type === 'LabelSet' || event.type === 'LabelCleared')
-    if (!isFamilyWritable(config, (event as unknown as LabelSet | LabelCleared).payload.key))
-      return false
+  if (event.type === 'LabelSet' || event.type === 'LabelCleared') {
+    const key = (event as unknown as LabelSet | LabelCleared).payload.key
+    if (!isFamilyWritable(config, key)) return false
+    if (familyLabelOffered && !familyLabelOffered(config.aliases?.[key] ?? key)) return false
+  }
   if (!kernelEntityEventTypes.has(event.type)) {
     const authorize = config.event_authorize_dispatch?.[event.type]
     return authorize ? authorize(principal, event.payload, world) : false
