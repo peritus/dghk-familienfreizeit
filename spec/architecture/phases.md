@@ -3,7 +3,14 @@
 Phases describe where an occasion stands: what families and organisers can do
 now, what comes next, and which planning results families see. They activate
 [features](features.md), give screens one shared workflow status, and decide when
-a solver result is shown to families. Nothing below is implemented yet.
+a solver result is shown to families.
+
+The organiser side — phase definitions and dates, status derivation, both
+tracks, the opening, closing and reopening events with Worker-filled payloads,
+the closing review, differences, and printed workshop lists — is implemented and
+documented in [implemented phases](../../docs/architecture/phases.md). The
+sections below keep their numbers; a delivered section points to its
+documentation, and the outstanding requirements remain here.
 
 ## 1. Terminology
 
@@ -32,188 +39,19 @@ an organiser closing event stops family input.
 
 ## 2. Phase definitions
 
-A module declares its phases alongside its features. Phase ids follow the feature
-id pattern, `<module-id>.<phase>`.
-
-```ts
-type PhaseDefinition = {
-  id: PhaseId
-  area: AreaId                               // 'accommodation' | 'workshops'
-  opens:
-    | { kind: 'always' }
-    | { kind: 'event'; event: EventType }    // a module-owned organiser event
-  target: boolean                            // whether the profile may set a Zieltermin
-  closed_by_area: boolean                    // whether the area's closing ends it
-  readiness?: PhaseReadiness                 // pure, over the module's derived facts
-}
-```
-
-Features bind to phases through `requires_phases` and `activation_mode`
-([features](features.md) §3). Bindings are positive only: a phase never lists the
-features it deactivates. A phase that is not active removes every feature bound to
-it from effective availability. Phases add no availability layer of their own.
-
-Profile composition fails when a phase id is duplicated or malformed, its area is
-unknown, its opening event is not an event of the owning module, a feature binds
-an unknown phase, two modules close the same area, or a closing or reopening event
-is not an event of the area's owning module. An area that no selected module
-closes never closes.
-
-### Profile dates
-
-Dates are profile data and change only through a deployment (D12). A typed
-`meta.phase_dates` list replaces the untyped `meta.deadlines`:
-
-```ts
-phase_dates: [
-  { phase: 'family-preferences.accommodation-preferences', target_at: '2027-03-31T21:59:59Z' },
-  { phase: 'workshop-rankings.choice', target_at: '2027-04-15T21:59:59Z' },
-]
-```
-
-Profile composition fails when an entry names an undeclared phase, a phase that
-does not accept a target, or the same phase twice. Event-backed date editing is not part of this contract.
+Delivered: [phases and dates](../../docs/architecture/phases.md#phases-and-dates). Profile dates change only through a deployment (D12); event-backed date editing is not part of this contract.
 
 ## 3. Status derivation
 
-```ts
-type PhaseStatus = 'upcoming' | 'open' | 'late' | 'closed'
-
-type PhaseView = {
-  phase: PhaseId
-  status: PhaseStatus
-  target_at: string | null
-  readiness: { ready: true } | { ready: false; findings: readonly FindingRef[] }
-  closed: { seq: number; at: string } | null
-}
-```
-
-- `upcoming` — an event-opened phase whose opening event has not been appended;
-- `open` — the phase is open and its target, if any, has not passed;
-- `late` — the phase is open and its target has passed;
-- `closed` — `closed_by_area` is set and the latest area event is a closing
-  event rather than a reopening.
-
-Readiness is separate from status. An open phase can be not ready, shown as
-**Prüfung erforderlich** or the concrete blocker. Completion is the closing event
-itself; there is no separate `complete` status.
-
-`derive(events, config)` stays pure and clock-free (D15, D26). It folds opening,
-closing, and reopening events into per-area facts. The phase view is computed
-afterwards by a pure function of the derived world, the profile dates, and `now`.
-The Worker passes the request time; the organiser application passes the browser
-time. No append validation depends on `now`, because no phase enforces a date.
+Delivered: [facts and status](../../docs/architecture/phases.md#facts-and-status). There is no enforced date-based cut-off; only an organiser closing event stops family input.
 
 ## 4. Tracks in the active profile
 
-| Track | Step | Status source |
-|---|---|---|
-| Workshops | **Workshops anlegen** | complete when the catalogue has at least one active workshop |
-| Workshops | **Wahl öffnen** | complete once `WorkshopChoiceOpened` is appended |
-| Workshops | **Zuordnung prüfen** | current while the choice phase is open or late; its readiness shows blockers |
-| Workshops | **Festgelegt** | complete while the area is closed |
-| Unterkunft | **Zimmerwünsche** | current while the preferences phase is open or late; shows the Zieltermin |
-| Unterkunft | **Zuordnung prüfen** | readiness of the room assignment |
-| Unterkunft | **Festgelegt** | complete while the area is closed |
-
-Each step's stepper state (`complete`, `current`, `upcoming`) is a fixed mapping
-in the owning module's code over the phase view. `WorkflowStepper` stays a
-presentation adapter: every caller renders the track from the phase view and no
-screen derives a step from local facts. The overview, programme, and allocation
-screens render the same workshop track.
-
-The active profile's phases:
-
-| Phase | Area | Opens | Target | Closed by area |
-|---|---|---|---|---|
-| `family-preferences.accommodation-preferences` | accommodation | always | yes | yes |
-| `room-assignment.review` | accommodation | always | no | no |
-| `workshop-rankings.choice` | workshops | `WorkshopChoiceOpened` | yes | yes |
-| `workshop-assignment.review` | workshops | always | no | no |
-
-### Feature bindings
-
-The phases activate the family wish features ([features](features.md) §8); the
-organiser wish features bind no phase, so they stay effective while an area is
-closed:
-
-| Feature | Requires phases |
-|---|---|
-| `family-preferences.family-room-wishes` | `family-preferences.accommodation-preferences` |
-| `workshop-rankings.family-workshop-wishes` | `workshop-rankings.choice` |
-
-The `workshops` section governed by `workshop-rankings.family-workshop-wishes` contains
-the ranking, sign-up, interest, and workshop-companion controls, so one phase
-opens and closes all workshop wishes together. Before workshop choice opens,
-families see no workshop.
-
-Opening workshop choice, closing, and reopening are organiser workflow actions
-of the owning modules, not features (§5). They are always present on the organiser
-screens of a selected module.
+Delivered: the workshop and accommodation tracks and the feature bindings are documented under [organiser surfaces](../../docs/architecture/phases.md#organiser-surfaces) and [facts and status](../../docs/architecture/phases.md#facts-and-status).
 
 ## 5. Organiser events
 
-| Event | Owner | Effect |
-|---|---|---|
-| `WorkshopChoiceOpened` | `workshop-rankings` | Opens the choice phase; families see the live catalogue and may rank, sign up, and register interest |
-| `WorkshopsClosed` | `workshop-assignment` | Closes the workshop area's inputs and records its result |
-| `WorkshopsReopened` | `workshop-assignment` | Opens the workshop area's inputs again |
-| `AccommodationClosed` | `room-assignment` | Closes the accommodation inputs and records its result |
-| `AccommodationReopened` | `room-assignment` | Opens the accommodation inputs again |
-
-These are organiser-only events. There is no generic phase-advance event. Opening
-workshop choice is not undone; the area's closing and reopening govern input
-afterwards.
-
-### Closing payload
-
-A closing payload records the area's solver-output slice and nothing else:
-
-```ts
-type WorkshopsClosedPayload = {
-  placements: readonly { workshop_id: string; slot_id: string; space_id: string }[]
-  attendance: readonly { person_id: string; workshop_id: string }[]
-  unassigned: readonly { person_id: string }[]
-  build_revision: string
-  compatibility_revision: number
-}
-
-type AccommodationClosedPayload = {
-  placements: readonly { family_id: string; room_id: string; place_ids: readonly string[] }[]
-  unplaced: readonly { family_id: string }[]
-  build_revision: string
-  compatibility_revision: number
-}
-```
-
-Payloads contain ids only, in a canonical order ending in ids. Titles, room
-names, slot times, and other descriptors stay live. Solver traces, scores,
-findings, and notes are never recorded. Attendance covers solver-assigned
-workshops; sign-up and interest participation stays live.
-
-The client never supplies the result. **Festlegen** stages the closing event
-with an empty payload, like any other organiser edit, and the ordinary organiser
-apply request carries the head sequence the organiser reviewed. The Worker:
-
-1. authenticates and authorises the organiser;
-2. refuses with the ordinary stale-head response when the log head differs from
-   the reviewed sequence;
-3. derives the world at the head, including the batch's preceding events, and
-   refuses while the area's review phase is not ready;
-4. computes the payload from that derivation and appends the filled event
-   atomically with the batch.
-
-A closing event with a non-empty client payload is rejected. Until the apply
-response returns the filled event, a staged closing folds as closed with its
-result pending.
-
-The solver remains the only producer of assignments (D6): the closing event
-records its output as an organiser decision and does not let anyone write an
-assignment. The revisions in the payload attribute which code produced the result;
-a later deployment does not change a closed result.
-
-Closing an already closed area records a corrected result without reopening
-inputs. Reopening has no payload.
+Delivered: [organiser decisions](../../docs/architecture/phases.md#organiser-decisions). The solver remains the only producer of assignments (D6): a closing records its output as an organiser decision, the Worker computes it, and a later deployment does not change a closed result.
 
 ## 6. What families see
 
@@ -252,17 +90,11 @@ remains authoritative for family projections.
 
 ## 7. Organiser review and differences
 
-Organisers work on the live world. For a closed area, the review screens show the
-difference between the latest closed result and the current derivation: added,
-removed and moved families or people, with affected families. A change and its
-reversal leave no difference. The organiser dashboard lists each closed area that
-differs from its closed result and links to its review screen.
-
-**Festlegen** opens a read-only review before appending: the closed result to be
-recorded, its difference from the previous closed result (or the full initial
-result), affected families, and blocking findings. Previewing appends nothing.
-Printed lists for a closed area use the closed result, so paper matches what
-families see; the list footer names the closing time.
+The closing review, the organiser differences, the dashboard Hinweis, and printed
+workshop lists from the closed result are
+[delivered](../../docs/architecture/phases.md#organiser-surfaces). Outstanding:
+printed accommodation lists for a closed area use its closed result and name the
+closing time, so paper matches what families see.
 
 ## 8. Wording
 
@@ -290,28 +122,18 @@ Die Zimmerwünsche sind festgelegt. Für Änderungen wende dich bitte an das Org
 
 ## 9. Milestones
 
-- [M8](../roadmap.md#m8--organiser-authored-workshop-programme) delivers the phase
-  contract, the phase view, both organiser tracks, the workshop and accommodation
-  opening, closing, and reopening events, the closing review, differences, and
-  printed lists from the closed result.
 - [M10](../roadmap.md#m10--family-access-and-release-control) delivers the family
-  side: target-date notices, closed-input copy, the family composition in §6, and
-  the before/after comparison.
+  side: target-date notices and closed-input copy on the family view, the family
+  composition in §6, and the before/after comparison.
+- The report host delivers printed accommodation lists from the closed result
+  (§7).
 
 ## 10. Verification
 
-- Status derivation for every status, including a target passing while open and
-  reopening after closing, with an injected `now`.
-- Profile-build failures from §2.
-- Feature availability following phase status, including the family workshop-wishes feature
-  becoming unavailable when workshops close and available again on reopening.
-- Closing: stale-head refusal, not-ready refusal, server-computed payload equal to
-  the reviewed derivation, a corrected re-close, and a payload unchanged by a
-  later deployment.
+Outstanding with the family composition:
+
 - Family composition: nothing before first closing, the closed result after it,
   live descriptors, an unavailable referenced entity, a withdrawn person, a
   cancelled workshop, and the own-family before/after comparison.
-- Organiser differences: none after closing, a moved person after an edit, none
-  after reverting it.
-- Browser coverage of every stepper caller rendering the shared track, and of the
-  closing review.
+- Family notices: Zieltermin, late, and closed-input copy on the family view.
+

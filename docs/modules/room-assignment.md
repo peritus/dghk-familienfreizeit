@@ -67,6 +67,15 @@ The placement stage remains deterministic and its output is covered directly.
 pins a digest of the whole current plan and separately pins the candidate-count
 tiebreak, which the digest occasion does not exercise.
 
+## Closing the accommodation area
+
+The module owns the `room-assignment.review` phase, its readiness, and the
+accommodation area's closed result: `AccommodationClosed` records each family's
+room and places and the unplaced families as the Worker computes them, and
+`AccommodationReopened` opens the area again. The assignment board shows the
+difference from the latest closed result. See
+[phases](../architecture/phases.md#organiser-decisions).
+
 ## Profile and fixtures
 
 The executable family-freizeit profile selects room inventory and room

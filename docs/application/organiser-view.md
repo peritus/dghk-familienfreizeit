@@ -18,7 +18,7 @@ path before persistence.
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
 | `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
-| `/organiser/workshops` | Workshop landing view with lifecycle summary, workshop creation/editing, audience filters, and typed leader selection |
+| `/organiser/workshops` | Workshop landing view with the workshop track, workshop choice and closing decisions, workshop creation/editing, audience filters, and typed leader selection |
 | `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
 | `/organiser/workshops/participation` | Read-only responsive person-by-slot matrix with linked wish traces |
 | `/organiser/workshops/slots` | Event-backed slot creation, editing, and retirement with overlap validation |
@@ -96,9 +96,11 @@ sections. Family-facing traits are grouped by their configured scope: family
 traits edit the family entity, person traits repeat for each family member, and
 module controls write the canonical labels supplied by their module. Organiser
 changes use the same ordinary `LabelSet` and `LabelCleared` drafts as the
-family-facing route. Accommodation and workshop sections show their configured
-deadline and contact copy; a passed deadline is advisory and does not disable
-editing.
+family-facing route. Accommodation and workshop sections show their phase's
+Zieltermin, the late state with the section's late copy, or a **Festgelegt**
+note while the area is closed; a passed Zieltermin never disables editing, and
+organisers keep editing a closed area. A governed section is shown only while its
+organiser [feature](../architecture/features.md) is effective.
 
 The family identity field is separate from those generic labels. A changed,
 non-empty value stages `FamilyDisplayNameChanged`, which replaces only the
@@ -138,9 +140,11 @@ detail screen adds no print/export path.
 ## Workshop behavior
 
 Workshop actions stage ordinary `Workshop*`, `WorkshopSlot*`, and
-`WorkshopSpace*` events in the shared local-first pipeline. The overview presents
-the prototype's four lifecycle phases as a summary over independent workshop,
-choice-cycle, programme, and allocation facts; it does not persist a phase enum.
+`WorkshopSpace*` events in the shared local-first pipeline. The overview,
+programme and allocation screens render the workshop track from the derived
+[phase view](../architecture/phases.md#organiser-surfaces); the overview offers
+**Wahl öffnen** before choice opens and **Festlegen**, **Erneut festlegen** and
+**Wieder öffnen** afterwards. No phase enum is persisted.
 The workshop overview provides a focused add/edit dialog for the core workshop
 fields, stages complete `WorkshopAdded` or `WorkshopUpdated` restatements, and
 updates the prospective world immediately. Its searchable leader picker preserves
@@ -229,10 +233,11 @@ There is no in-app print, download, or export action.
 
 The active profile contains the kernel `role` trait, accommodation modules, the
 profile-driven organiser family controls, and the workshop planning modules.
-Assignment review and the narrow event-backed fixed-assignment workflow are
-implemented. Family authentication and family routes, fixed workshop
-attendance/placement decisions, non-workshop generic reports, plan comparison, release, and
-communication remain later scope.
+Assignment review, the narrow event-backed fixed-assignment workflow, opening
+workshop choice, and closing and reopening both areas are implemented. Family
+authentication and family routes, the family view of closed results, fixed
+workshop attendance/placement decisions, non-workshop generic reports, plan
+comparison, and change notifications remain later scope.
 
 The verified tests cover local derivation, family display-name replacement,
 profile control validation, rendered organiser family controls, immediate and

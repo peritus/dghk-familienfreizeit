@@ -159,8 +159,8 @@ local-first state owner.
 Every secondary-navigation item declares a non-empty set of typed nested paths that
 selects it; active state uses the shared segment-aware route matcher rather than raw
 location equality.
-The four visible lifecycle phases are summary labels over independent event-backed
-facts; they are not a persisted workflow state. Audience filtering is shared by
+The workflow steppers render tracks from the derived phase view, as described in the
+[implemented frontend](../../docs/ui/frontend.md#workflow-steppers). Audience filtering is shared by
 workshop lists where relevant. Physical space inventory has its own schedule-aware
 slot context and never becomes an audience-filtered workshop list.
 

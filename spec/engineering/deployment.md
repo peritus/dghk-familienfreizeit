@@ -90,19 +90,11 @@ origins require no duplicated public-URL setting.
 
 ### Operational feature bindings
 
-Each declared [feature](../architecture/features.md) has one optional Worker
-binding, `DGHK_FEATURE_<ID>=on|off`, whose name is derived from the feature id.
-Both values are permitted in every environment, including production. The
-bindings are allowlisted deliberately like every other Worker binding, and a test
-fails when the allowlist or `src/worker/environment.d.ts` differs from the names
-derived from the composed profile.
-
-An invalid value, or a binding that names no declared feature, makes the Worker
-refuse to serve application routes; the health response and the startup log name
-each invalid binding. The health response reports the set bindings as
-`feature_overrides` next to `build_revision` and `compatibility_revision`. These
-bindings are deployment facts and must not enter either revision
-([features](../architecture/features.md) §6).
+Operational `DGHK_FEATURE_<ID>=on|off` bindings, their fail-closed validation,
+and their attribution as `feature_overrides` are implemented as documented in
+[implemented features](../../docs/architecture/features.md#operational-bindings).
+A hosted deployment configures them like any other Worker variable; they must not
+enter `build_revision` or `compatibility_revision`.
 
 ### The application bundles
 

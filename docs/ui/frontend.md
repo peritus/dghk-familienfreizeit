@@ -136,6 +136,18 @@ repeat the same first useful action; populated views do not keep creation forms
 open in their normal flow. These controls still stage the same ordinary event
 drafts through the shared local-first pipeline.
 
+## Workflow steppers
+
+`WorkflowStepper` is a presentation adapter: it renders `complete`, `current` and
+`upcoming` steps and an optional action slot, and owns no workflow state. Its
+callers render module-owned tracks over the derived
+[phase view](../architecture/phases.md#organiser-surfaces): the workshop overview,
+programme and allocation screens share the workshop track, and the inventory
+renders the accommodation track. The action slot carries the confirmed
+**Wahl öffnen**, **Festlegen**, **Erneut festlegen** and **Wieder öffnen**
+decisions. A closed area has no current step, and the mobile summary then counts
+every step.
+
 ## Frontend navigation and state invariants
 
 Internal route changes use wouter's client-side navigation and must not reload

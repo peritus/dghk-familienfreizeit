@@ -10,6 +10,8 @@ are separate claims and require separate evidence.
 - [Data model](architecture/data-model.md): the event table, KDL text fixtures and operational tables.
 - [Derived world](architecture/derived-world.md): in-memory labels, resolver, diagnostics, projections and diffs.
 - [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
+- [Features](architecture/features.md): per-audience capabilities, availability and operational bindings.
+- [Phases](architecture/phases.md): phase status, opening, closing and reopening, and closed results.
 - [Room inventory](modules/room-inventory.md): implemented accommodation entities, fixture, summaries, and organiser surface.
 - [Room assignment](modules/room-assignment.md): deterministic assignment solver and organiser review/report surfaces.
 - [Official workshops](modules/official-workshops.md): direct workshop authoring, modes, leaders, and cancellation.

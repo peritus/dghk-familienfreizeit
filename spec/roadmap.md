@@ -16,8 +16,7 @@ before the report host exists.
 <a id="m8--organiser-authored-workshop-programme"></a>
 ## M8 — Workshop planning completion
 
-Specification coverage: [features](architecture/features.md),
-[phases](architecture/phases.md), [official workshops](modules/official-workshops.md),
+Specification coverage: [official workshops](modules/official-workshops.md),
 [workshop space](modules/workshop-space.md), [workshops](modules/workshops.md),
 [workshop scheduling](modules/workshop-scheduling.md),
 [workshop rankings](modules/workshop-rankings.md),
@@ -25,35 +24,13 @@ Specification coverage: [features](architecture/features.md),
 
 The event-backed organiser foundation and deterministic automatic planner are
 implemented. Event-backed fixed attendance decisions and their resolver
-mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md));
-remaining active work is limited to the unresolved planning contract:
+mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md)),
+and so are the organiser sides of the [feature](../docs/architecture/features.md) and
+[phase](../docs/architecture/phases.md) contracts; remaining active work is limited
+to the unresolved planning contract:
 
 - complete the remaining organiser finding and open-case review surfaces over
   current and prospective programme and allocation contexts;
-- implement the [feature contract](architecture/features.md) for the family and
-  organiser wish features: the `features` contribution kind and its composition
-  checks (§5), `deselected_features`, section governance in both renderers, the
-  M8 rows of the feature set (§8), derived availability
-  and the family append narrowing (§4), fail-closed `DGHK_FEATURE_*` bindings
-  with the allowlist consistency test, `feature_overrides` in the health and log
-  responses (§6), and the room `features` → `amenities` rename. Feature
-  administration stays with the system administrator; the organiser diagnostics
-  screen remains deferred;
-- once the feature contract is verified, document the wish features and their
-  organiser-visible effects in
-  [`docs/application/organiser-view.md`](../docs/application/organiser-view.md),
-  and feature validation in
-  [`docs/architecture/profile-composition.md`](../docs/architecture/profile-composition.md).
-  The organiser "Current limits" paragraph keeps describing workflow limits that
-  are not features;
-- implement the [phase contract](architecture/phases.md) on top of the feature
-  contract: the `phases` and `closed_results` contribution kinds, typed
-  `meta.phase_dates`, the phase view with `now` outside `derive` (§2–3), both
-  organiser tracks rendered through `WorkflowStepper` by every stepper caller
-  (§4), the phase feature bindings, `WorkshopChoiceOpened`, the workshop and
-  accommodation closing and reopening events with Worker-computed payloads (§5),
-  the closing review, closed-area differences, the dashboard Hinweis, and
-  printed lists from the closed result (§7);
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
   fixtures (the capacity-reduction policy is resolved as
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
@@ -63,8 +40,6 @@ remaining active work is limited to the unresolved planning contract:
 Acceptance: organisers can inspect automatic and explicitly fixed decisions,
 every blocking outcome is explainable, capacity changes follow D30, and all
 views retain direct workshop identity with at most one placement per workshop.
-Every stepper renders its track from the phase view, and organisers can open
-workshop choice and close and reopen both areas.
 
 <a id="m10--family-access-and-release-control"></a>
 ## M10 — Family access
@@ -117,7 +92,8 @@ report portions of [UI-00](ui/design-system.md), and the selected modules' repor
 
 - Extend the shared, family, and organiser report host with the remaining audience
   projections, report contribution registration, and first host-rendered reports
-  for modules outside the M8 workshop list slice.
+  for modules outside the M8 workshop list slice, including printed accommodation
+  lists from a closed area's result ([phases](architecture/phases.md) §7).
 - Implement responsive report layout primitives, print stylesheets, repeated
   headings, page breaks, greyscale status, and confidentiality labels.
 - Keep reports derived in memory; provide no download, export, or print button.

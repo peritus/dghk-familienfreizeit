@@ -157,7 +157,9 @@ demo-login adapter and its synthetic organiser allowlist. Wrangler explicitly
 allowlists them as local Worker bindings; no `.env` file is read, and no other
 process environment values are exposed to the Worker. These values are not
 committed to `wrangler.jsonc`, so a hosted deployment does not inherit the demo
-adapter accidentally.
+adapter accidentally. The task also forwards each
+`DGHK_FEATURE_<ID>=on|off` [feature binding](../architecture/features.md#operational-bindings)
+that is set in its environment; unset bindings are not written.
 Because the Station preview uses plain HTTP on the Tailscale network, the task
 also supplies `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true`.
 That alarming local-only binding removes the `Secure` attribute from the session

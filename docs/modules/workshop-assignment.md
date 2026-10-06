@@ -35,6 +35,14 @@ that are unchanged, replace an automatic choice, have no automatic counterpart,
 or are invalid. The projection is read-only and is recalculated for prospective
 local-first organiser drafts.
 
+## Closing the workshop area
+
+The module owns the `workshop-assignment.review` phase, its readiness, and the
+workshop area's closed result: `WorkshopsClosed` records placements,
+attendance, and unassigned people as the Worker computes them, and
+`WorkshopsReopened` opens the area again. See
+[phases](../architecture/phases.md#organiser-decisions).
+
 ## Workshop list reports
 
 The organiser workshop-list projection derives four read-only document views from
@@ -46,6 +54,9 @@ typed workshop, person, family, slot, and space identities through the existing
 module summaries and solver sections; it does not persist folded report state or
 add a screen-local relationship store. The roster keeps assignments and sign-ups
 separate from interest counts, while person and family plans preserve free slots.
+
+While the workshop area is closed, the lists print its closed result with live
+descriptors, and the print stamp names the closing time.
 
 ## Attendance cost
 

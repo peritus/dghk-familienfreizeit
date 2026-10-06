@@ -10,6 +10,14 @@ demand summary to attendance assignment. The configured maximum rank is three fo
 Familienfreizeit 2027. Ranking facts remain independent from later schedule and
 allocation communication scopes.
 
+## Workshop choice
+
+The module owns the `workshop-rankings.choice` phase, opened by the
+organiser-only `WorkshopChoiceOpened` event (once, and only with an active
+workshop), and the family and organiser workshop-wishes features that govern the
+profile's `workshops` section; see [phases](../architecture/phases.md) and
+[features](../architecture/features.md).
+
 ## Workshop allocation projection
 
 The organiser allocation projection is derived in memory from the event-folded world,
