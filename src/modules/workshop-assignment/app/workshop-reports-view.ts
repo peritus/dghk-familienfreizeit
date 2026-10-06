@@ -439,8 +439,10 @@ export function buildWorkshopReportsProjection(
   const familyViews: WorkshopReportFamily[] = input.world.families
     .map((family) => {
       const labels = input.world.labels_by_entity[family.id] ?? []
-      const members = personViews
-        .filter((person) => person.family_id === family.id)
+      const members = input.world.persons
+        .filter((person) => familyIdFor(input.world, person.id) === family.id)
+        .map((person) => personById.get(person.id))
+        .filter((person): person is WorkshopReportPerson => Boolean(person))
         .map(({ id, name, age_label: ageLabel }) => ({ id, name, age_label: ageLabel }))
       return {
         id: family.id,

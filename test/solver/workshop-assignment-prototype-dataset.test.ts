@@ -25,6 +25,7 @@ import {
   buildWorkshopAllocationProjection,
   buildWorkshopAllocationTraceStages,
 } from '../../src/modules/workshop-rankings/app/workshop-allocation-view.js'
+import { buildWorkshopReportsProjection } from '../../src/modules/workshop-assignment/app/workshop-reports-view.js'
 import type { Plan, SolverInput } from '../../src/solver/types.js'
 
 // Same module selection and parameters as the real familienfreizeit-2027
@@ -179,6 +180,64 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
   const again = solveFixture()
   const attendanceAgain = again.plan.sections['workshop-assignment'] as WorkshopAssignmentSection
   expect(assignmentKey(attendanceAgain)).toEqual(assignmentKey(attendance))
+})
+
+test('projects the complete workshop list set for current and prospective plans', () => {
+  const { plan, world } = solveFixture()
+  const current = buildWorkshopReportsProjection({
+    world,
+    plan,
+    context: 'current',
+    time_zone: 'Europe/Berlin',
+  })
+  const prospective = buildWorkshopReportsProjection({
+    world,
+    plan,
+    context: 'prospective',
+    time_zone: 'Europe/Berlin',
+  })
+
+  expect(current.context).toBe('current')
+  expect(prospective.context).toBe('prospective')
+  expect(current.slots.length).toBe(8)
+  expect(current.workshops.length).toBeGreaterThan(20)
+  expect(current.persons.length).toBe(140)
+  expect(current.families.length).toBe(49)
+  expect(current.rooms.length).toBe(10)
+
+  const ceramics = current.workshops.find((workshop) => workshop.id === 'wks_keramik')
+  expect(ceramics).toMatchObject({
+    title: 'Keramik',
+    status: 'placed',
+    space_name: 'Atelier',
+    leaders: ['Sam Morgan', 'Anna Albers'],
+  })
+  expect(ceramics?.roster.length).toBeGreaterThan(0)
+
+  const unplaced = current.workshops.find((workshop) => workshop.id === 'wks_schmieden')
+  expect(unplaced).toMatchObject({ status: 'unplaced', slot_id: null, space_name: null })
+
+  const alex = current.persons.find((person) => person.name === 'Alex Morgan')
+  expect(alex?.entries).toHaveLength(8)
+  expect(alex?.entries.some((entry) => entry.status === 'assigned')).toBe(true)
+
+  const morgan = current.families.find((family) => family.id === 'fam_f0')
+  expect(morgan).toMatchObject({ name: 'Morgan', email: 'f0@example.test' })
+  expect(morgan?.slots[0]?.members.map((member) => member.name)).toEqual([
+    'Sam Morgan',
+    'Alex Morgan',
+    'Jamie Morgan',
+  ])
+
+  const atelier = current.rooms.find((room) => room.id === 'wsp_r9')
+  expect(atelier?.entries.length).toBeGreaterThan(0)
+  expect(atelier?.entries[0]).toEqual(
+    expect.objectContaining({ workshop: 'Keramik', audience: 'Kinder, 5–14 Jahre' }),
+  )
+
+  expect(prospective.workshops.map((workshop) => workshop.id)).toEqual(
+    current.workshops.map((workshop) => workshop.id),
+  )
 })
 
 test('the workshop allocation projection exposes answers, demand, and trace from the solved world', () => {

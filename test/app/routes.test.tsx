@@ -42,6 +42,11 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/workshops/allocation',
     '/organiser/workshops/allocation/demand',
     '/organiser/workshops/allocation/trace',
+    '/organiser/workshops/lists',
+    '/organiser/workshops/lists/workshops',
+    '/organiser/workshops/lists/persons',
+    '/organiser/workshops/lists/families',
+    '/organiser/workshops/lists/rooms',
   ])
 })
 
