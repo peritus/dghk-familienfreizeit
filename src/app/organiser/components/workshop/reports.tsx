@@ -46,6 +46,12 @@ function ListTable({
           <tr>{head}</tr>
         </thead>
         <tbody>{children}</tbody>
+        {/* Paper only: keeps rows clear of the footer fixed to the foot of each sheet. */}
+        <tfoot aria-hidden="true">
+          <tr>
+            <td colSpan={99} className="workshop-print-footer-space hidden" />
+          </tr>
+        </tfoot>
       </table>
     </div>
   )

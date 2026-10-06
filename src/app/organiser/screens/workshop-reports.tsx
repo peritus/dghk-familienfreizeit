@@ -185,7 +185,7 @@ function printStamp(date: Date, revision: number, drafts: number): string {
 
 /**
  * Date, time and revision of the printed data; refreshed right before printing. On
- * screen it closes the page, on paper it sits at the bottom of every sheet.
+ * screen it closes the page; on paper it is fixed to the foot of every sheet.
  */
 function PrintStamp({ revision, drafts }: { revision: number; drafts: number }) {
   const [printedAt, setPrintedAt] = useState(() => new Date())
@@ -195,14 +195,6 @@ function PrintStamp({ revision, drafts }: { revision: number; drafts: number }) 
     window.addEventListener('beforeprint', refresh)
     return () => window.removeEventListener('beforeprint', refresh)
   }, [])
-  useEffect(() => {
-    // The page margin box reads the stamp from the root element.
-    const root = document.documentElement
-    root.style.setProperty('--workshop-print-stamp', JSON.stringify(stamp))
-    return () => {
-      root.style.removeProperty('--workshop-print-stamp')
-    }
-  }, [stamp])
   return (
     <footer className="workshop-print-stamp mt-auto border-t-[1.5px] border-rule pt-2 text-xs text-muted tabular-nums">
       {stamp}

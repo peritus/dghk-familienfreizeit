@@ -130,11 +130,8 @@ test('an open case shows Offen in every empty slot with the reason', () => {
     ).toBeTruthy()
 })
 
-test('the lists close with a dated footer that also feeds the printed page footer', () => {
+test('the lists close with a dated footer', () => {
   renderLists('/workshops/lists/rooms')
   const footer = screen.getByRole('contentinfo')
   expect(footer.textContent).toMatch(/^Stand \d{1,2}\. \p{L}+ \d{4}, \d{2}:\d{2} Uhr · v\d+$/u)
-  expect(document.documentElement.style.getPropertyValue('--workshop-print-stamp')).toBe(
-    JSON.stringify(footer.textContent),
-  )
 })

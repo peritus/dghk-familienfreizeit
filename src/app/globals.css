@@ -332,49 +332,40 @@ main:has(> .workshop-lists) {
 
   /* Workshop lists (prototype `leadprint`): only the selected document, black on
      white A4. Screen controls carry `workshop-screen-only`; paper-only details carry
-     `workshop-print-only` / `workshop-print-note`. */
-  /* The stamp prints in the bottom margin of every sheet; the screen sets its text
-     on the root element as `--workshop-print-stamp`. */
+     `workshop-print-only` / `workshop-print-note`.
+
+     Type scale on paper, all relative to the 10pt base:
+       title 2em · metadata 1.05em · table 1em (room plan 1.3em, family plan 0.9em)
+       · table header and secondary lines 0.9em · paper note 0.85em · chips 0.8em
+       · footer 0.75em · "extern" badge 0.7em. */
   @page workshop-list {
     size: A4 portrait;
-    margin: 12mm 12mm 18mm;
-
-    @bottom-left {
-      content: var(--workshop-print-stamp);
-      vertical-align: top;
-      padding-top: 3mm;
-      border-top: 1px solid #777;
-      font-family: inherit;
-      font-size: 8pt;
-      color: #333;
-    }
+    margin: 12mm;
   }
 
-  /* The whole document takes the list's page type: switching page types inside
-     the flow would force a sheet break before or after the list. */
+  /* The whole document takes the list's page type (where named pages exist):
+     switching page types inside the flow would force a sheet break. */
   html:has(.workshop-lists) {
     page: workshop-list;
   }
 
-  body:has(.workshop-lists) {
+  /* Every ancestor of the list becomes a plain block with natural height, so no
+     browser carries a window-sized frame (flex column, min-height: 100dvh) onto an
+     empty extra sheet. */
+  html:has(.workshop-lists),
+  body:has(.workshop-lists),
+  body :has(.workshop-lists) {
+    display: block;
+    height: auto;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
     background: white;
   }
 
-  body:has(.workshop-lists) main {
-    max-width: none;
-    padding: 0;
-  }
-
-  /* On screen the frame fills the window; on paper that height would add sheets. */
-  body:has(.workshop-lists) :has(> main) {
-    min-height: 0;
-  }
-
-  body:has(.workshop-lists) main {
-    display: block;
-  }
-
   .workshop-lists {
+    display: block;
     color: black;
     font-size: 10pt;
     line-height: 1.45;
@@ -401,22 +392,27 @@ main:has(> .workshop-lists) {
   }
 
   .workshop-lists .workshop-list-body {
-    margin-top: 0;
+    margin: 0;
   }
 
   .workshop-lists .text-muted {
     color: #333;
   }
 
+  /* Screen sizes are rem-based; on paper every smaller line follows its context. */
+  .workshop-lists :is(.text-xs, .text-sm, .text-base) {
+    font-size: 0.9em;
+  }
+
   .workshop-lists .workshop-print-title {
     margin-top: 2px;
     padding-bottom: 4px;
-    font-size: 20pt;
+    font-size: 2em;
     break-after: avoid;
   }
 
   .workshop-lists .workshop-print-meta {
-    font-size: 10.5pt;
+    font-size: 1.05em;
   }
 
   .workshop-lists .workshop-print-meta--last {
@@ -427,7 +423,7 @@ main:has(> .workshop-lists) {
   .workshop-lists .workshop-print-note {
     display: block !important;
     margin-top: 8px;
-    font-size: 8.5pt;
+    font-size: 0.85em;
   }
 
   .workshop-lists .workshop-list-table-wrap {
@@ -439,7 +435,7 @@ main:has(> .workshop-lists) {
   }
 
   .workshop-lists .workshop-list-table {
-    font-size: 10pt;
+    font-size: 1em;
   }
 
   .workshop-lists .workshop-list-table thead {
@@ -459,7 +455,7 @@ main:has(> .workshop-lists) {
 
   .workshop-lists .workshop-list-table thead th {
     border-bottom: 2px solid black;
-    font-size: 9pt;
+    font-size: 0.9em;
   }
 
   .workshop-lists .workshop-list-table .workshop-print-only {
@@ -476,7 +472,7 @@ main:has(> .workshop-lists) {
 
   /* The room plan doubles as a door sign; the family plan has many columns. */
   .workshop-lists .workshop-list-table--room {
-    font-size: 13pt;
+    font-size: 1.3em;
   }
 
   .workshop-lists .workshop-list-table--room :is(th, td) {
@@ -484,33 +480,51 @@ main:has(> .workshop-lists) {
   }
 
   .workshop-lists .workshop-list-table--family {
-    font-size: 9pt;
+    font-size: 0.9em;
   }
 
   /* Greyscale-safe: printers and copiers turn colour fills into unreadable grey. */
-  .workshop-lists .workshop-chip {
+  .workshop-lists :is(.workshop-chip, .workshop-quiet-badge, .workshop-ext-badge) {
     min-height: 0;
-    padding: 0 5px;
-    border: 1.5px solid black;
-    background: white;
-    color: black;
-    font-size: 8pt;
-  }
-
-  .workshop-lists .workshop-quiet-badge,
-  .workshop-lists .workshop-ext-badge {
     border-color: black;
     background: white;
     color: black;
   }
 
-  .workshop-lists .workshop-ext-badge {
-    min-height: 0;
-    font-size: 7pt;
+  .workshop-lists :is(.workshop-chip, .workshop-quiet-badge) {
+    padding: 0 5px;
+    border-width: 1.5px;
+    font-size: 0.8em;
   }
 
-  /* On paper the stamp lives in the page margin instead (see `@page workshop-list`). */
+  .workshop-lists .workshop-ext-badge {
+    font-size: 0.7em;
+  }
+
+  /* The stamp repeats at the foot of every sheet. A fixed element is printed on each
+     page by Chrome, Firefox and Safari alike; the tables reserve its height with a
+     print-only spacer row in their repeated footer group. */
   .workshop-lists .workshop-print-stamp {
-    display: none;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding-top: 4px;
+    border-top: 1px solid #777;
+    background: white;
+    font-size: 0.75em;
+    color: #333;
+  }
+
+  .workshop-lists .workshop-list-table tfoot {
+    display: table-footer-group;
+  }
+
+  .workshop-lists .workshop-list-table .workshop-print-footer-space {
+    display: table-cell !important;
+    height: 10mm;
+    padding: 0;
+    border: 0;
   }
 }

@@ -205,9 +205,11 @@ Wünsche › Verlauf links to their workshop plan.
 Browser printing (Ctrl+P) prints only the selected document on A4: black on
 white, without screen controls, with repeated table headers and rows that never
 split. Rosters add an empty "Anwesend" column and a confidentiality line for
-paper, the room plan prints larger for use as a door sign, and the footer prints in
-the bottom margin of every sheet through the page's margin box (browsers without
-page margin boxes print the list without it). Markers such as **Offen**, "leitet"
+paper, the room plan prints larger for use as a door sign, and the footer is fixed
+to the foot of every sheet in all browsers, with a print-only spacer row keeping
+table rows clear of it. Print type sizes follow one scale relative to a 10pt base,
+with the footer smallest. Every ancestor of the list prints as a plain block of
+natural height, so no window-sized frame adds an empty sheet. Markers such as **Offen**, "leitet"
 and "extern" print as black outlines on white so they survive greyscale printing.
 There is no in-app print, download, or export action.
 
