@@ -8,7 +8,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Use the dashed, bordered badge for available sleeping places. Availability is a capacity status; room features use Tag instead.',
+          'Use the dashed, bordered badge for available sleeping places. Availability is a capacity status; room amenities use Tag instead.',
       },
     },
   },

@@ -60,8 +60,8 @@ const room = (overrides: Partial<RoomView> = {}): RoomView => ({
   occupied: 2,
   free: 2,
   occupants: [family],
-  features: ['Eigenes Bad', 'Barrierearm'],
-  feature_keys: ['private-sanitary', 'accessible'],
+  amenities: ['Eigenes Bad', 'Barrierearm'],
+  amenity_keys: ['private-sanitary', 'accessible'],
   beds: [
     { bed_type: 'single', count: 2, sleeps: 2 },
     { bed_type: 'bunk', count: 1, sleeps: 2 },
@@ -123,8 +123,8 @@ export const RoomCardVariants: Story = {
           occupied: 0,
           free: 4,
           occupants: [],
-          features: [],
-          feature_keys: [],
+          amenities: [],
+          amenity_keys: [],
           beds: [{ bed_type: 'double', count: 2, sleeps: 4 }],
         })}
       />

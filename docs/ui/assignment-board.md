@@ -20,7 +20,7 @@ draft pipeline.
 The prototype is a visual reference, not a source of CSS or behavior. The
 repository style guide resolves these differences:
 
-- Room features use the borderless shared `Tag`; state and requirement chips
+- Room amenities use the borderless shared `Tag`; state and requirement chips
   retain the repository's 2px black border language.
 - Fixed families do not receive the prototype's paper background. `paper` and
   `blueprint` identify browser-local draft state in the design system, so fixed

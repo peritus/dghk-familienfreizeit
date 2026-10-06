@@ -114,7 +114,7 @@ function requirements(
           ? !requirement.value ||
             !roomFamilyIds.includes(relationFamilyId(world, requirement.value))
           : requirement.capability_key
-            ? room.feature_keys.includes(requirement.capability_key)
+            ? room.amenity_keys.includes(requirement.capability_key)
             : true
       : undefined
     return [
@@ -193,8 +193,8 @@ function roomViews(
     const familyIds = [...new Set(roomAssignments.map(({ family_id: familyId }) => familyId))]
     const occupied = roomAssignments.filter(({ place_id: placeId }) => placeId !== null).length
     const free = room.place_count - occupied
-    const featureKeys = room.capabilities.filter((key) => !/^fam_.+_room$/.test(key))
-    const features = featureKeys.map((key) => {
+    const amenityKeys = room.capabilities.filter((key) => !/^fam_.+_room$/.test(key))
+    const amenities = amenityKeys.map((key) => {
       const trait = activeProfile.traits[key as keyof typeof activeProfile.traits]
       return localized(trait?.title) || 'Besonderes Merkmal'
     })
@@ -217,8 +217,8 @@ function roomViews(
       occupied,
       free,
       occupants: [],
-      features,
-      feature_keys: featureKeys,
+      amenities,
+      amenity_keys: amenityKeys,
       beds,
       fixed_family_ids: familyIds.filter((id) => fixedByFamily.get(id) === room.id),
       fixed_invalid_family_ids: familyIds.filter((id) => invalidFixed.has(id)),
@@ -339,7 +339,7 @@ export function deriveAssignmentReview(
                     ({ id }) => id === relationFamilyId(world, requirement.value!),
                   )
                 : requirement.capability_key
-                  ? room.feature_keys.includes(requirement.capability_key)
+                  ? room.amenity_keys.includes(requirement.capability_key)
                   : true,
         })),
       }))
@@ -398,7 +398,7 @@ export function deriveAssignmentReview(
               ? ('success' as const)
               : ('neutral' as const),
     },
-    notes: room.features,
+    notes: room.amenities,
   }))
   const placedFamilies = new Set(section.assignments.map(({ family_id: id }) => id))
   const print: AssignmentPrintView = {

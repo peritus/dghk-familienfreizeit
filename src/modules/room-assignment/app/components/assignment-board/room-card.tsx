@@ -28,8 +28,8 @@ export function RoomCard({
           free={room.free}
         />
         <div className="flex flex-wrap gap-1.5 text-sm text-muted">
-          {room.features.map((feature) => (
-            <Tag key={feature}>{feature}</Tag>
+          {room.amenities.map((amenity) => (
+            <Tag key={amenity}>{amenity}</Tag>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

@@ -103,7 +103,7 @@ implements a different table shape for a different need: rooms are a real
 beds, per the [expandable hierarchical tables
 pattern](../../spec/ui/design-system.md#expandable-hierarchical-tables).
 It's also the first screen with a flat stats-strip card and true/false room
-features rendered as tags rather than table columns. At narrow widths the
+amenities rendered as tags rather than table columns. At narrow widths the
 room table switches to stacked, labeled rows below the `md` breakpoint, the
 same `max-md:block`/`md:hidden` convention the editable table pattern above
 uses, applied to a table with an expandable row rather than an editable one.

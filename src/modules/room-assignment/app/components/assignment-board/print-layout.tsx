@@ -123,7 +123,7 @@ export function AssignmentPrintLayout({
                       ? 'Belegt'
                       : 'Frei'}
               </p>
-              {room.features.length > 0 ? <p>Merkmale: {room.features.join(', ')}</p> : null}
+              {room.amenities.length > 0 ? <p>Merkmale: {room.amenities.join(', ')}</p> : null}
               <ul>
                 {room.occupants.flatMap((family) =>
                   family.people.map((person) => <li key={person.id}>{person.name}</li>),

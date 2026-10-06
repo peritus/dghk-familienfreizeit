@@ -47,8 +47,8 @@ export type RoomView = {
   occupied: number
   free: number
   occupants: readonly FamilyView[]
-  features: readonly string[]
-  feature_keys: readonly string[]
+  amenities: readonly string[]
+  amenity_keys: readonly string[]
   beds: readonly BedView[]
   fixed_family_ids: readonly string[]
   fixed_invalid_family_ids: readonly string[]

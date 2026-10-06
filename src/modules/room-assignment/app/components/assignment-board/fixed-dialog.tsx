@@ -22,7 +22,7 @@ function evaluatedRequirements(family: FamilyView, room: RoomView): RequirementV
       requirement.kind === 'structural' && requirement.structural === 'no-other-families'
         ? occupants.every((id) => id === family.id)
         : requirement.capability_key
-          ? room.feature_keys.includes(requirement.capability_key)
+          ? room.amenity_keys.includes(requirement.capability_key)
           : true,
   }))
 }
