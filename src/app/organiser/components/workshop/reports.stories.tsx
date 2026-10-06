@@ -26,32 +26,32 @@ type Story = StoryObj<typeof meta>
 const entries = [
   {
     id: 'alex',
-    name: 'Alex Morgan',
+    name: 'Mara Schmidt',
     age_label: '9 Jahre',
-    health: 'Nussallergie (schwer)',
-    emergency_contact: 'Sam Morgan · 0151 555 1000',
+    health: 'Hinweis A',
+    emergency_contact: 'Notfallkontakt Beispiel A',
     attendance: true,
   },
   {
     id: 'jamie',
-    name: 'Jamie Morgan',
+    name: 'Leni Schmidt',
     age_label: '12 Jahre',
-    emergency_contact: 'Sam Morgan · 0151 555 1000',
+    emergency_contact: 'Notfallkontakt Beispiel A',
     attendance: false,
   },
   {
     id: 'mira',
-    name: 'Mira Stein',
+    name: 'Nika Weber',
     age_label: '11 Jahre',
-    health: 'Asthma. Spray immer dabei.',
-    emergency_contact: 'Eva Stein · 0151 555 1003',
+    health: 'Hinweis B',
+    emergency_contact: 'Notfallkontakt Beispiel B',
     attendance: true,
   },
   {
     id: 'noah',
-    name: 'Noah Fischer',
+    name: 'Toni Berger',
     age_label: '10 Jahre',
-    emergency_contact: 'Tim Fischer · 0151 555 1004',
+    emergency_contact: 'Notfallkontakt Beispiel C',
     attendance: false,
   },
 ]
@@ -64,7 +64,7 @@ export const Roster: Story = {
         status="Vorläufig, nicht endgültig"
         metadata={[
           'Freitag, 14. Mai 2027 · 09:00–11:00 Uhr · Atelier',
-          'Leitung: Sam Morgan, Anna Albers · 3 Personen von 10 Plätzen',
+          'Leitung: Robin Schmidt, Paula König · 3 Personen von 10 Plätzen',
         ]}
         entries={entries}
       />
@@ -76,8 +76,8 @@ export const Plans: Story = {
   render: () => (
     <div className="grid gap-8 bg-background p-6">
       <WorkshopPersonPlanDocument
-        title="Alex Morgan"
-        metadata={['9 Jahre · Familie Morgan', '2 Workshops']}
+        title="Mara Schmidt"
+        metadata={['9 Jahre · Familie Schmidt', '2 Workshops']}
         entries={[
           {
             id: 'one',
@@ -97,25 +97,25 @@ export const Plans: Story = {
         ]}
       />
       <WorkshopFamilyPlanDocument
-        title="Familie Morgan"
-        metadata={['Sam, Alex, Jamie']}
+        title="Familie Schmidt"
+        metadata={['Robin, Mara, Leni']}
         slots={[
           {
             id: 'one',
             label: 'Fr 09:00–11:00',
             members: [
-              { id: 'sam', name: 'Sam', value: 'leitet Keramik' },
-              { id: 'alex', name: 'Alex', value: 'Keramik' },
-              { id: 'jamie', name: 'Jamie', value: 'frei' },
+              { id: 'sam', name: 'Robin', value: 'leitet Keramik' },
+              { id: 'alex', name: 'Mara', value: 'Keramik' },
+              { id: 'jamie', name: 'Leni', value: 'frei' },
             ],
           },
           {
             id: 'two',
             label: 'Fr 11:30–13:30',
             members: [
-              { id: 'sam', name: 'Sam', value: 'frei' },
-              { id: 'alex', name: 'Alex', value: 'Waldexpedition' },
-              { id: 'jamie', name: 'Jamie', value: 'Waldexpedition' },
+              { id: 'sam', name: 'Robin', value: 'frei' },
+              { id: 'alex', name: 'Mara', value: 'Waldexpedition' },
+              { id: 'jamie', name: 'Leni', value: 'Waldexpedition' },
             ],
           },
         ]}
@@ -129,14 +129,14 @@ export const Plans: Story = {
             time: 'Fr 09:00–11:00',
             workshop: 'Keramik',
             audience: 'Kinder, 5–14 Jahre',
-            leaders: 'Sam Morgan, Anna Albers',
+            leaders: 'Robin Schmidt, Paula König',
           },
           {
             id: 'two',
             time: 'Sa 11:30–13:30',
             workshop: 'Aquarell',
             audience: 'Erwachsene, 18–99 Jahre',
-            leaders: 'Katrin Conrad',
+            leaders: 'Nika Weber',
           },
         ]}
       />

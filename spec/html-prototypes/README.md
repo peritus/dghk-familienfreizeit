@@ -19,7 +19,7 @@ components.
 |---|---|---|
 | [accommodation-assignment-prototype-v13.html](accommodation-assignment-prototype-v13.html) | Accommodation assignment board, overview, room cards, fixed-assignment dialog, responsive and print states | Imported standalone snapshot (2026-09-30) |
 | [organiser-family-view-prototype-v9.html](organiser-family-view-prototype-v9.html) | Organiser family list and detail views for people, room wishes, food, and workshop choices | Imported standalone snapshot (2026-10-03) |
-| [workshops-prototype-v16.html](workshops-prototype-v16.html) | Workshop organisation, choice, assignment, and list views | Imported standalone snapshot |
+| [workshops-prototype-v16.html](workshops-prototype-v16.html) | Workshop organisation, choice, assignment, and list views | Imported standalone snapshot (2026-09-29) |
 
 The listed artifacts were imported unchanged from their local source files:
 `/home/dev/assignment-board-prototype-v13.html` and

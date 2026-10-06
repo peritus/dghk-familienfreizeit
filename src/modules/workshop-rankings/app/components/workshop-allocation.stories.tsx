@@ -84,7 +84,7 @@ export const Demand: Story = {
 export const Trace: Story = {
   render: function Render() {
     const [mode, setMode] = useState<'all' | 'highlight' | 'only'>('all')
-    const [person, setPerson] = useState('Alex Morgan')
+    const [person, setPerson] = useState('Mara Schmidt')
     return (
       <div className="min-h-screen space-y-5 bg-background p-6">
         <TraceControls
@@ -92,7 +92,7 @@ export const Trace: Story = {
           onModeChange={setMode}
           selected_person={person}
           onPersonChange={setPerson}
-          people={['Alex Morgan', 'Mira Stein', 'Lena Bauer', 'Noah Fischer']}
+          people={['Mara Schmidt', 'Nika Weber', 'Jule Bauer', 'Toni Berger']}
         />
         <TraceLegend
           items={[
