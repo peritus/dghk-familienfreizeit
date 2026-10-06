@@ -9,6 +9,7 @@
     "src/events/**/*.ts",
     "src/auth/**/*.ts",
     "src/config/**/*.ts",
+    "src/derive/**/*.ts",
     "src/modules/**/*.ts",
     "src/solver/**/*.ts",
     "src/organiser/**/*.ts",

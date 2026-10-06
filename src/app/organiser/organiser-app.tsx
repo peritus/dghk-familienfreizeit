@@ -9,6 +9,7 @@ import { Button } from '../components/shared/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../solver/index.js'
+import { deriveFeatureView, effectiveFeatureIds } from '../../derive/features.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveWorld,
@@ -165,6 +166,22 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     }
   }, [state])
 
+  const effectiveFeatures = useMemo(
+    () =>
+      derivation.world
+        ? effectiveFeatureIds(
+            deriveFeatureView({
+              modules: activeProfile.modules,
+              world: derivation.world,
+              overrides: [],
+              phase_active: () => true,
+              principal: 'organiser',
+            }),
+          )
+        : new Set<string>(),
+    [derivation.world],
+  )
+
   const currentPlan = useMemo(() => {
     if (
       state.status === 'loading' ||
@@ -283,6 +300,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         stage,
         apply,
         current_plan: currentPlan,
+        effective_features: effectiveFeatures,
       }}
     >
       <OrganiserFrame profile={profile}>

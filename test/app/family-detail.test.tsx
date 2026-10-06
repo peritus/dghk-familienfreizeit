@@ -82,3 +82,23 @@ test('family detail renders workshop wishes and participation areas', () => {
   expect(screen.getByRole('heading', { name: 'Interesse' })).toBeTruthy()
   expect(screen.getAllByRole('button', { name: 'Workshops finden' }).length).toBeGreaterThan(0)
 })
+
+test('family detail omits wish sections whose organiser feature is not effective', () => {
+  const roomOnly = new Set(['family-preferences.organiser-room-wishes'])
+  const { unmount } = render(
+    <FixtureProvider effective_features={new Set(['workshop-rankings.organiser-workshop-wishes'])}>
+      <FamilyDetail family_id="fam_sonnenberg" />
+    </FixtureProvider>,
+  )
+  expect(screen.queryByRole('heading', { name: 'Zimmerwünsche' })).toBeNull()
+  expect(screen.queryAllByRole('radio', { name: 'Unbedingt' })).toHaveLength(0)
+  unmount()
+
+  render(
+    <FixtureProvider initialState={organiserFamilyDetailFixtureState} effective_features={roomOnly}>
+      <FamilyDetail family_id="fam_sonnenberg" topic="workshops" person_id="per_lena" />
+    </FixtureProvider>,
+  )
+  expect(screen.queryByRole('heading', { name: 'Wunschliste' })).toBeNull()
+  expect(screen.getByText('Workshopwünsche sind in dieser Planung ausgeschaltet.')).toBeTruthy()
+})

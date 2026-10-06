@@ -31,6 +31,8 @@ import { familyTopicLabel, FamilyTopicNavigation } from '../components/family-na
 import { organiserPaths, type FamilyTopic } from '../../../organiser/routes.js'
 import { activeProfile } from '../../../config/index.js'
 import { FamilyPreferencesControls } from '../../../modules/family-preferences/app/controls.js'
+import { familyPreferencesConfig } from '../../../modules/family-preferences/index.js'
+import { sectionOffered } from '../../../derive/features.js'
 import {
   officialWorkshopsWorld,
   type WorkshopMode,
@@ -262,12 +264,16 @@ function FamilyRoomView({
   world,
   actor,
   stage,
+  effective_features: effectiveFeatures,
+  room_wishes_offered: roomWishesOffered,
 }: {
   family_id: string
   persons: ReturnType<typeof familyPeople>
   world: World
   actor: string
   stage: (events: readonly EventDraft[]) => void
+  effective_features?: ReadonlySet<string>
+  room_wishes_offered: boolean
 }) {
   const peopleWithOwnBed = persons.filter((person) => {
     const labels = world.labels_by_entity[person.entity.id] ?? []
@@ -287,6 +293,8 @@ function FamilyRoomView({
         section_keys={['room-wishes']}
         trait_keys={['needs-private-sanitary', 'needs-accessible', 'sole-occupancy']}
         tri_state_no_answer
+        audience="organiser"
+        effective_features={effectiveFeatures}
       />
       <Card className="bg-secondary-background">
         <CardHeader>
@@ -332,7 +340,9 @@ function FamilyRoomView({
           ) : null}
         </CardContent>
       </Card>
-      <FamilyNoteEditor family_id={familyId} value={roomNote} actor={actor} stage={stage} />
+      {roomWishesOffered ? (
+        <FamilyNoteEditor family_id={familyId} value={roomNote} actor={actor} stage={stage} />
+      ) : null}
     </div>
   )
 }
@@ -1268,9 +1278,19 @@ export function FamilyDetail({
   topic?: FamilyTopic
   person_id?: string
 }) {
-  const { state, world, stage } = useOrganiser()
+  const { state, world, stage, effective_features: effectiveFeatures } = useOrganiser()
   const [, navigate] = useLocation()
   const family = familyId ? findFamily(world!, familyId) : null
+  const offered = (sectionKey: string): boolean => {
+    const section = familyPreferencesConfig(activeProfile).sections.find(
+      ({ key }) => key === sectionKey,
+    )
+    return (
+      !section ||
+      !effectiveFeatures ||
+      sectionOffered(section, 'organiser', activeProfile.modules, effectiveFeatures)
+    )
+  }
   const topic = requestedTopic
 
   if (!family || !state.principal_email) return <p role="alert">Diese Familie gibt es nicht.</p>
@@ -1340,6 +1360,8 @@ export function FamilyDetail({
               world={world!}
               actor={state.principal_email}
               stage={stage}
+              effective_features={effectiveFeatures}
+              room_wishes_offered={offered('room-wishes')}
             />
           ) : topic === 'personen' ? (
             <FamilyPeopleView
@@ -1360,6 +1382,10 @@ export function FamilyDetail({
               selected_person_id={detailPersonId}
               on_select={selectPerson}
             />
+          ) : topic === 'workshops' && !offered('workshops') ? (
+            <p className="rounded-base border-2 border-dashed border-muted p-5">
+              Workshopwünsche sind in dieser Planung ausgeschaltet.
+            </p>
           ) : topic === 'workshops' ? (
             <FamilyWorkshopView
               family_id={selectedFamilyId}

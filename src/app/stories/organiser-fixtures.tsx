@@ -849,11 +849,14 @@ export function FixtureProvider({
   children,
   initialState = organiserFixtureState,
   with_plan: withPlan = false,
+  effective_features: effectiveFeatures,
 }: {
   children: ReactNode
   initialState?: OrganiserState
   /** Solve the derived world as the organiser app does, for screens that read the current plan. */
   with_plan?: boolean
+  /** Effective organiser features; absent offers every built feature. */
+  effective_features?: ReadonlySet<string>
 }) {
   const [state, dispatch] = useState<OrganiserState>(initialState)
   const update: Dispatch<OrganiserAction> = useCallback(
@@ -884,6 +887,7 @@ export function FixtureProvider({
     stage,
     apply,
     current_plan: currentPlan,
+    effective_features: effectiveFeatures,
   }
 
   return <OrganiserContext.Provider value={value}>{children}</OrganiserContext.Provider>

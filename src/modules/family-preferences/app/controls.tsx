@@ -7,6 +7,8 @@ import type {
   OccasionProfile,
   Trait,
 } from '../../../config/define.js'
+import type { FeatureAudience } from '../../../config/features.js'
+import { sectionOffered } from '../../../derive/features.js'
 import { familyControlDefinitions, familyPreferencesConfig } from '../index.js'
 import { Card, CardContent, CardHeader } from '../../../app/components/shared/ui/card.js'
 
@@ -24,6 +26,10 @@ export type FamilyPreferencesControlsProps = {
   person_id?: string
   defer_text?: boolean
   tri_state_no_answer?: boolean
+  /** The renderer's audience; a governed section is offered only while its feature is effective. */
+  audience?: FeatureAudience
+  /** Effective features for the audience; absent offers every section (features.md §4). */
+  effective_features?: ReadonlySet<string>
 }
 
 type Target = { id: string; kind: 'family' | 'person' }
@@ -717,9 +723,17 @@ export function FamilyPreferencesControls({
   ...props
 }: FamilyPreferencesControlsProps) {
   const params = familyPreferencesConfig(profile)
-  const sections = sectionKeys
-    ? params.sections.filter((section) => sectionKeys.includes(section.key))
-    : params.sections
+  const sections = params.sections.filter(
+    (section) =>
+      (!sectionKeys || sectionKeys.includes(section.key)) &&
+      (!props.effective_features ||
+        sectionOffered(
+          section,
+          props.audience ?? 'family',
+          profile.modules,
+          props.effective_features,
+        )),
+  )
   return (
     <div className="space-y-4">
       {sections.map((section) => (

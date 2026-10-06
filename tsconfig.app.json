@@ -12,6 +12,7 @@
     "src/app/**/*.tsx",
     "src/modules/**/*.tsx",
     "src/config/**/*.ts",
+    "src/derive/**/*.ts",
     "src/events/fold.ts",
     "src/events/kdl.ts",
     "src/events/resolver.ts",

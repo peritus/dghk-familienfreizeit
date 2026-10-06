@@ -11,6 +11,8 @@ export type OrganiserContextValue = {
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>
   current_plan?: Plan | null
+  /** Effective organiser features (spec/architecture/features.md §4); absent means all built. */
+  effective_features?: ReadonlySet<string>
 }
 
 export const OrganiserContext = createContext<OrganiserContextValue | null>(null)
