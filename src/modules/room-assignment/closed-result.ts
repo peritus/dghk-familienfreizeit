@@ -19,13 +19,26 @@ const storedAccommodationClosed = accommodationResult
 export type AccommodationClosedPayload = z.infer<typeof storedAccommodationClosed>
 
 /**
+ * Text fixtures carry the structured closing result as one `result_json` property, because KDL
+ * properties are flat scalars (D17). Every other source passes the payload object directly.
+ */
+function fromFixture(raw: unknown): unknown {
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return raw
+  const value = raw as Record<string, unknown>
+  const keys = Object.keys(value)
+  return keys.length === 1 && keys[0] === 'result_json' && typeof value.result_json === 'string'
+    ? (JSON.parse(value.result_json) as unknown)
+    : raw
+}
+
+/**
  * `AccommodationClosed` is staged with an empty payload; the Worker fills the stored form on
  * apply (spec/architecture/phases.md §5). The log holds only the stored form.
  */
-export const accommodationClosedPayload = z.union([
-  z.object({}).strict(),
-  storedAccommodationClosed,
-])
+export const accommodationClosedPayload = z.preprocess(
+  fromFixture,
+  z.union([z.object({}).strict(), storedAccommodationClosed]),
+)
 
 export const accommodationReopenedPayload = z.object({}).strict()
 

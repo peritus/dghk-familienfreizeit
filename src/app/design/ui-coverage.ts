@@ -530,6 +530,24 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/components/shared/ui/workflow-stepper.tsx',
   },
   {
+    id: 'application-organiser-area-closing--review-blocked',
+    area: 'application',
+    subject: 'Area closing review with blocking findings',
+    source: 'src/app/organiser/components/area-closing.tsx',
+  },
+  {
+    id: 'application-organiser-area-closing--review-first-closing',
+    area: 'application',
+    subject: 'Area closing review for a first closing',
+    source: 'src/app/organiser/components/area-closing.tsx',
+  },
+  {
+    id: 'application-organiser-area-closing--differences',
+    area: 'application',
+    subject: 'Closed area differences and reopening',
+    source: 'src/app/organiser/components/area-closing.tsx',
+  },
+  {
     id: 'application-organiser-collection-create-action--default',
     area: 'application',
     subject: 'Collection create action',

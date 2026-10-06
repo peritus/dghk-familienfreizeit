@@ -50,6 +50,32 @@ function ChangeList({ state }: { state: ClosedAreaState }) {
 }
 
 /**
+ * The read-only closing review: the result to record, its difference from the previous closed
+ * result or the full first result, the affected families, and blocking findings (phases.md §7).
+ */
+export function AreaClosingReview({ state }: { state: ClosedAreaState }) {
+  const families = state.difference?.affected_family_ids.length ?? 0
+  return (
+    <div className="space-y-3">
+      <p className="font-bold">
+        {families} {families === 1 ? 'Familie betroffen' : 'Familien betroffen'}
+      </p>
+      <ChangeList state={state} />
+      {state.blocking.length > 0 ? (
+        <div role="alert" className="space-y-1">
+          <p className="font-bold">Prüfung erforderlich</p>
+          <ul className="list-disc pl-5 text-sm">
+            {state.blocking.map((finding) => (
+              <li key={`${finding.id}-${finding.subject_id ?? ''}`}>{finding.message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/**
  * Festlegen, erneutes Festlegen and Wieder öffnen for one area (phases.md §5, §7). The review
  * previews the result the current derivation would record; the Worker computes the stored
  * result when the staged closing is applied.
@@ -64,7 +90,6 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
     stage([{ at: new Date().toISOString(), actor, subject: null, type, payload: {} }])
   if (state.pending) return <p role="status">Das Ergebnis wird festgelegt …</p>
   const blocked = state.blocking.length > 0 || state.candidate === null
-  const families = state.difference?.affected_family_ids.length ?? 0
   return (
     <div className="flex flex-wrap items-center gap-3">
       <PhaseDecisionAction
@@ -79,22 +104,7 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
         disabled={blocked}
         on_confirm={() => stageEvent(state.contribution.close_event)}
       >
-        <div className="space-y-3">
-          <p className="font-bold">
-            {families} {families === 1 ? 'Familie betroffen' : 'Familien betroffen'}
-          </p>
-          <ChangeList state={state} />
-          {state.blocking.length > 0 ? (
-            <div role="alert" className="space-y-1">
-              <p className="font-bold">Prüfung erforderlich</p>
-              <ul className="list-disc pl-5 text-sm">
-                {state.blocking.map((finding) => (
-                  <li key={`${finding.id}-${finding.subject_id ?? ''}`}>{finding.message}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+        <AreaClosingReview state={state} />
       </PhaseDecisionAction>
       {state.closed ? (
         <PhaseDecisionAction
