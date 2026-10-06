@@ -128,6 +128,25 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
       },
     ],
     family_controls: [{ key: params.ranking_trait, control: 'ranking' }],
+    features: [
+      {
+        id: 'workshop-rankings.family-workshop-wishes',
+        audience: 'family',
+        subject_kind: 'person',
+        requires_features: [],
+        requires_phases: [],
+        activation_mode: 'all',
+        organiser_counterpart: 'workshop-rankings.organiser-workshop-wishes',
+      },
+      {
+        id: 'workshop-rankings.organiser-workshop-wishes',
+        audience: 'organiser',
+        subject_kind: 'person',
+        requires_features: [],
+        requires_phases: [],
+        activation_mode: 'all',
+      },
+    ],
     solver_input: [
       { id: 'workshop-rankings', build: (world) => workshopRankingsFromWorld(world, params) },
     ],

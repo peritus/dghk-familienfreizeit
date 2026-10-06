@@ -17,6 +17,7 @@ const familyPreferencesParams = z.object({
         title: localizedText,
         intro: localizedText.nullable(),
         traits: z.array(z.string().min(1)),
+        features: z.array(z.string().min(1)).default([]),
         deadline_scope: z.enum(['accommodation', 'workshops']).nullable(),
       }),
     )
@@ -41,7 +42,27 @@ export type { FamilyPreferencesParams, LocalizedText }
 export const familyPreferences = defineModule<FamilyPreferencesParams>({
   id: 'family-preferences',
   params: familyPreferencesParams,
-  contribute: () => ({}),
+  contribute: () => ({
+    features: [
+      {
+        id: 'family-preferences.family-room-wishes',
+        audience: 'family',
+        subject_kind: 'family',
+        requires_features: [],
+        requires_phases: [],
+        activation_mode: 'all',
+        organiser_counterpart: 'family-preferences.organiser-room-wishes',
+      },
+      {
+        id: 'family-preferences.organiser-room-wishes',
+        audience: 'organiser',
+        subject_kind: 'family',
+        requires_features: [],
+        requires_phases: [],
+        activation_mode: 'all',
+      },
+    ],
+  }),
 })
 
 export function familyPreferencesConfig(

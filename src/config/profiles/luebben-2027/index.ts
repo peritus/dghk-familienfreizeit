@@ -315,6 +315,7 @@ export const luebben2027Profile = defineOccasionProfile({
           title: { de: 'Wer kommt mit', en: 'Who is coming' },
           intro: null,
           traits: ['does-not-need-a-bed'],
+          features: [],
           deadline_scope: null,
         },
         {
@@ -322,6 +323,10 @@ export const luebben2027Profile = defineOccasionProfile({
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
           traits: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
+          features: [
+            'family-preferences.family-room-wishes',
+            'family-preferences.organiser-room-wishes',
+          ],
           deadline_scope: 'accommodation',
         },
         {
@@ -329,6 +334,7 @@ export const luebben2027Profile = defineOccasionProfile({
           title: { de: 'Essen', en: 'Food' },
           intro: null,
           traits: ['diet', 'food-note'],
+          features: [],
           deadline_scope: null,
         },
         {
@@ -336,6 +342,10 @@ export const luebben2027Profile = defineOccasionProfile({
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
           traits: ['workshop-with'],
+          features: [
+            'workshop-rankings.family-workshop-wishes',
+            'workshop-rankings.organiser-workshop-wishes',
+          ],
           deadline_scope: 'workshops',
         },
       ],

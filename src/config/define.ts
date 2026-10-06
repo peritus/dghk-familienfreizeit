@@ -12,6 +12,7 @@ import {
 } from '../events/fold.js'
 import { kernelEventTypes, kernelPayloadSchemas, type JsonValue } from '../events/types.js'
 import type { PreflightCheck, Rule, SolverInputContribution, SolverStage } from '../solver/types.js'
+import { validateFeatures, type FeatureDefinition } from './features.js'
 
 export type LocalizedText = string | Readonly<Record<string, string>>
 
@@ -64,6 +65,8 @@ export type FamilyPreferenceSection = {
   title: LocalizedText
   intro: LocalizedText | null
   traits: readonly string[]
+  /** The features governing every control in the section, at most one per audience (features.md §3). */
+  features: readonly string[]
   deadline_scope: 'accommodation' | 'workshops' | null
 }
 
@@ -168,6 +171,8 @@ export type ProfileModule = {
   requires: readonly string[]
   enhances: readonly string[]
   parameters?: Readonly<Record<string, unknown>>
+  /** Kernel-owned feature deselections of this module (profiles/contract.md §1). */
+  deselected_features: readonly string[]
   contributions: ModuleContributions
 }
 
@@ -205,6 +210,7 @@ export type ModuleContributions = {
   rules?: readonly Rule[]
   preflight_checks?: readonly PreflightCheck[]
   family_controls?: readonly FamilyControlDefinition[]
+  features?: readonly FeatureDefinition[]
 }
 
 export type ScreenDefinition = {
@@ -465,13 +471,16 @@ function validateModules(
     ),
   )
   const familyPreferences = modules.find((module) => module.id === 'family-preferences')
-  if (familyPreferences)
-    validateFamilyPreferences(
-      familyPreferences.parameters as unknown as FamilyPreferencesParams,
-      traits,
-      meta,
-      familyControlDefinitions,
-    )
+  const familyPreferencesParams = familyPreferences?.parameters as
+    | FamilyPreferencesParams
+    | undefined
+  if (familyPreferencesParams)
+    validateFamilyPreferences(familyPreferencesParams, traits, meta, familyControlDefinitions)
+  validateFeatures(
+    modules,
+    kernelEntityKinds,
+    familyPreferencesParams?.sections.map(({ features }) => features) ?? [],
+  )
 }
 
 function validateFamilyFacing(key: string, trait: Trait, meta: ProfileMeta): void {
