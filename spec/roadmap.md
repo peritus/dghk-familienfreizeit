@@ -28,8 +28,8 @@ implemented. Event-backed fixed attendance decisions and their resolver
 mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md));
 remaining active work is limited to the unresolved planning contract:
 
-- complete the remaining organiser review surfaces for current and prospective
-  programme and allocation contexts;
+- complete the remaining organiser finding and open-case review surfaces over
+  current and prospective programme and allocation contexts;
 - implement the [feature contract](architecture/features.md) for every existing
   selected surface: the `features` contribution kind and its composition checks
   (§5), `deselected_features`, the first feature set (§8), derived availability
@@ -54,8 +54,8 @@ remaining active work is limited to the unresolved planning contract:
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
   fixtures (the capacity-reduction policy is resolved as
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
-- add the remaining participation heatmap and finding views without creating
-  another workshop state store.
+- build the remaining finding views on the delivered [participation matrix](../docs/ui/frontend.md#workshop-participation-overview)
+  without creating another workshop state store.
 
 Acceptance: organisers can inspect automatic and explicitly fixed decisions,
 every blocking outcome is explainable, capacity changes follow D30, and all
