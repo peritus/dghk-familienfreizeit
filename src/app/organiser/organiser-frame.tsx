@@ -97,7 +97,7 @@ export function OrganiserFrame({
   }
 
   return (
-    <div className="min-h-dvh">
+    <div className="flex min-h-dvh flex-col">
       <header className="border-b-2 border-border bg-secondary-background px-4 py-3 print:hidden sm:px-8">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3">
           <div>
@@ -135,7 +135,11 @@ export function OrganiserFrame({
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       ) : null}
-      <main id="content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+      <main
+        id="content"
+        tabIndex={-1}
+        className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-8"
+      >
         {children}
       </main>
     </div>

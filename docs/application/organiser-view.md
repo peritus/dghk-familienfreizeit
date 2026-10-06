@@ -177,7 +177,9 @@ roster, person plan, family plan, room plan) has a picker for one document with
 previous and next buttons; previous and next move focus to the new document's
 heading, and each view keeps its own selection in the URL query. Slots read in the
 short form "Fr 09:00–11:00"; documents carry a title and metadata lines, without a
-kind or status header, and a date and revision stamp follows the document.
+kind or status header. A footer "Stand 6. Oktober 2026, 15:15 Uhr · v1396" (plus
+"mit ungespeicherten Änderungen" while drafts exist) closes the page at the bottom
+of the window.
 
 - Workshop rosters cover placed workshops in programme order, grouped by slot in
   the picker. A one-line confidentiality notice sits above the picker. The
@@ -203,8 +205,11 @@ Wünsche › Verlauf links to their workshop plan.
 Browser printing (Ctrl+P) prints only the selected document on A4: black on
 white, without screen controls, with repeated table headers and rows that never
 split. Rosters add an empty "Anwesend" column and a confidentiality line for
-paper, the room plan prints larger for use as a door sign, and the stamp prints
-under the document. There is no in-app print, download, or export action.
+paper, the room plan prints larger for use as a door sign, and the footer prints in
+the bottom margin of every sheet through the page's margin box (browsers without
+page margin boxes print the list without it). Markers such as **Offen**, "leitet"
+and "extern" print as black outlines on white so they survive greyscale printing.
+There is no in-app print, download, or export action.
 
 ## Current limits
 

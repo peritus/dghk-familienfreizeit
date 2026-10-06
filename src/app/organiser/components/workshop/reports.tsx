@@ -80,7 +80,7 @@ export function OpenChip() {
 /** Prototype `.badge`: a quiet marker such as "leitet". */
 function QuietBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="ml-1.5 inline-flex min-h-[26px] items-center rounded-base border-[1.5px] border-muted bg-secondary-background px-2 text-[13px] font-medium whitespace-nowrap">
+    <span className="workshop-quiet-badge ml-1.5 inline-flex min-h-[26px] items-center rounded-base border-[1.5px] border-muted bg-secondary-background px-2 text-[13px] font-medium whitespace-nowrap">
       {children}
     </span>
   )

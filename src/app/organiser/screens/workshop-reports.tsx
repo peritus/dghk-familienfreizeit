@@ -178,23 +178,35 @@ function personMetadata(person: WorkshopReportPerson): ReactNode[] {
 }
 
 function printStamp(date: Date, revision: number, drafts: number): string {
-  const day = date.toLocaleDateString('de-DE')
+  const day = date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })
   const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  return `${day}, ${time} · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
+  return `Stand ${day}, ${time} Uhr · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
 }
 
-/** Date, time and revision under the document; refreshed right before printing. */
+/**
+ * Date, time and revision of the printed data; refreshed right before printing. On
+ * screen it closes the page, on paper it sits at the bottom of every sheet.
+ */
 function PrintStamp({ revision, drafts }: { revision: number; drafts: number }) {
   const [printedAt, setPrintedAt] = useState(() => new Date())
+  const stamp = printStamp(printedAt, revision, drafts)
   useEffect(() => {
     const refresh = () => setPrintedAt(new Date())
     window.addEventListener('beforeprint', refresh)
     return () => window.removeEventListener('beforeprint', refresh)
   }, [])
+  useEffect(() => {
+    // The page margin box reads the stamp from the root element.
+    const root = document.documentElement
+    root.style.setProperty('--workshop-print-stamp', JSON.stringify(stamp))
+    return () => {
+      root.style.removeProperty('--workshop-print-stamp')
+    }
+  }, [stamp])
   return (
-    <p className="workshop-print-stamp mt-10 border-t-[1.5px] border-rule pt-2 text-xs text-muted tabular-nums">
-      {printStamp(printedAt, revision, drafts)}
-    </p>
+    <footer className="workshop-print-stamp mt-auto border-t-[1.5px] border-rule pt-2 text-xs text-muted tabular-nums">
+      {stamp}
+    </footer>
   )
 }
 
@@ -342,7 +354,7 @@ export function WorkshopLists() {
     )
 
   return (
-    <div className="workshop-lists">
+    <div className="workshop-lists flex flex-1 flex-col">
       <div className="workshop-screen-only space-y-8">
         <WorkshopNavigation />
         <WorkshopScreenHeader eyebrow="Workshops · Listen" title="Listen" />
@@ -352,7 +364,7 @@ export function WorkshopLists() {
           onChange={(value) => navigateWithQuery(listPath(value), {})}
         />
       </div>
-      <div className="workshop-list-body mt-6">{selectedDocument}</div>
+      <div className="workshop-list-body mt-6 mb-10">{selectedDocument}</div>
       <PrintStamp revision={state.head_seq} drafts={draftCount(state)} />
     </div>
   )

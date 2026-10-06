@@ -184,6 +184,12 @@
   }
 }
 
+/* The workshop lists close with a footer at the bottom of the window when short. */
+main:has(> .workshop-lists) {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Draft/provisional state = engineering grid (blueprint): 6px minor, 30px major lines.
    Only for things that are not yet saved for the team. Never decorative. */
 @utility blueprint {
@@ -327,9 +333,21 @@
   /* Workshop lists (prototype `leadprint`): only the selected document, black on
      white A4. Screen controls carry `workshop-screen-only`; paper-only details carry
      `workshop-print-only` / `workshop-print-note`. */
+  /* The stamp prints in the bottom margin of every sheet; the screen sets its text
+     on the root element as `--workshop-print-stamp`. */
   @page workshop-list {
     size: A4 portrait;
-    margin: 12mm;
+    margin: 12mm 12mm 18mm;
+
+    @bottom-left {
+      content: var(--workshop-print-stamp);
+      vertical-align: top;
+      padding-top: 3mm;
+      border-top: 1px solid #777;
+      font-family: inherit;
+      font-size: 8pt;
+      color: #333;
+    }
   }
 
   /* The whole document takes the list's page type: switching page types inside
@@ -345,6 +363,15 @@
   body:has(.workshop-lists) main {
     max-width: none;
     padding: 0;
+  }
+
+  /* On screen the frame fills the window; on paper that height would add sheets. */
+  body:has(.workshop-lists) :has(> main) {
+    min-height: 0;
+  }
+
+  body:has(.workshop-lists) main {
+    display: block;
   }
 
   .workshop-lists {
@@ -460,11 +487,21 @@
     font-size: 9pt;
   }
 
+  /* Greyscale-safe: printers and copiers turn colour fills into unreadable grey. */
   .workshop-lists .workshop-chip {
     min-height: 0;
     padding: 0 5px;
-    border-width: 1.5px;
+    border: 1.5px solid black;
+    background: white;
+    color: black;
     font-size: 8pt;
+  }
+
+  .workshop-lists .workshop-quiet-badge,
+  .workshop-lists .workshop-ext-badge {
+    border-color: black;
+    background: white;
+    color: black;
   }
 
   .workshop-lists .workshop-ext-badge {
@@ -472,9 +509,8 @@
     font-size: 7pt;
   }
 
+  /* On paper the stamp lives in the page margin instead (see `@page workshop-list`). */
   .workshop-lists .workshop-print-stamp {
-    margin-top: 18px;
-    font-size: 8pt;
-    color: #333;
+    display: none;
   }
 }
