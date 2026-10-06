@@ -30,6 +30,19 @@ remaining active work is limited to the unresolved planning contract:
 - complete the remaining organiser review surfaces for current and prospective
   programme and allocation contexts; released/effective contexts belong to M10
   release control;
+- deliver the independent cleanup in
+  [issue 042](issues/open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md):
+  correct unsupported workflow claims and visual-coverage gaps, remove the
+  unreachable assignment-board surface, and retain report primitives for M11/M13;
+- resolve the design and decision gates for
+  [issue 043](issues/open/043-feature-model.md) and
+  [issue 044](issues/open/044-phase-model.md);
+- implement the accepted 043 feature contract for selected workshop capabilities:
+  typed module declarations, profile selection, validated effective availability,
+  and approved operational override attribution. This layer is independent of
+  042;
+- implement the M8 workshop phase track in issue 044. It depends on 043 and
+  proceeds independently of 042;
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
   fixtures (the capacity-reduction policy is resolved as
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
@@ -39,6 +52,9 @@ remaining active work is limited to the unresolved planning contract:
 Acceptance: organisers can inspect automatic and explicitly fixed decisions,
 every blocking outcome is explainable, capacity changes follow D30, and all
 views retain direct workshop identity with at most one placement per workshop.
+Issue 042's independent cleanup leaves no unsupported workflow promises or
+silently uncovered stories, while preserving report components for their later
+host milestones.
 
 <a id="m10--family-access-and-release-control"></a>
 ## M10 — Family access and release control
@@ -60,6 +76,13 @@ Specification coverage: [authentication](application/authentication.md), [family
 - Render the shared profile-driven controls for families through the same
   definitions and ordinary event path, including deadline notices and assignment
   cards.
+- Implement 044's accepted target-date and closing-date policies for family
+  controls and notices. This phase work depends on issue 043's feature contract,
+  not on the independent cleanup in issue 042; preserve the separate privacy
+  gate in issue 031 for family projections.
+- Apply 043's accepted feature-availability contract to the selected family
+  controls and release-control capabilities; keep availability distinct from
+  authorization and phase status.
 - Let an authenticated family correct its own `display-name` from the family
   view through `FamilyDisplayNameChanged`; the family may address only its own
   entity, while organisers retain the cross-family correction path from M7.
@@ -101,7 +124,8 @@ and the selected active module contracts.
 
 - Load the active profile with every non-deferred module contribution.
 - Verify module identity, contribution registration, selected-profile routing,
-  privacy projections, fixtures, and cross-runtime agreement as one integration.
+  feature declarations and effective availability, privacy projections,
+  fixtures, and cross-runtime agreement as one integration.
 - Complete accessibility, determinism, restricted-import, naming, and profile
   validation gates for all active vertical slices.
 
