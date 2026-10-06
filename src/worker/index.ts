@@ -18,6 +18,7 @@ import { organiserAllowlist } from '../auth/allowlist.js'
 import { authorizeEventBatch } from '../auth/authorization.js'
 import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
+import { maxEventsPerBatch } from './request-limits.js'
 import {
   cleanupOperationalRows,
   consumeLoginRateLimits,
@@ -30,7 +31,6 @@ import { organiserScreenRegistry } from '../organiser/registry.js'
 
 const app = new Hono<{ Bindings: Env }>()
 const maxJsonBodyBytes = 256 * 1024
-const maxEventsPerBatch = 100
 const maxJsonDepth = 10
 const maxJsonStringLength = 4096
 const familyEventLimit = 120
