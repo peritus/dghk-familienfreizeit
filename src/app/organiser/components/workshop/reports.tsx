@@ -299,27 +299,19 @@ export function WorkshopListKinds({
 
 export function WorkshopRosterDocument({
   title,
-  status,
   metadata,
   entries,
   confidential = true,
   show_attendance: showAttendance = false,
 }: {
   title: string
-  status: string
   metadata: readonly ReactNode[]
   entries: readonly WorkshopRosterEntry[]
   confidential?: boolean
   show_attendance?: boolean
 }) {
   return (
-    <WorkshopPrintDocument
-      kind="Teilnahmeliste"
-      title={title}
-      status={status}
-      metadata={metadata}
-      confidential={confidential}
-    >
+    <WorkshopPrintDocument title={title} metadata={metadata} confidential={confidential}>
       <WorkshopResponsiveCollection
         wide={<WorkshopRosterTable entries={entries} show_attendance={showAttendance} />}
         narrow={<WorkshopRosterCards entries={entries} />}
@@ -338,12 +330,7 @@ export function WorkshopPersonPlanDocument({
   entries: readonly PersonPlanEntry[]
 }) {
   return (
-    <WorkshopPrintDocument
-      kind="Workshopplan"
-      title={title}
-      status="Vorläufig, nicht endgültig"
-      metadata={metadata}
-    >
+    <WorkshopPrintDocument title={title} metadata={metadata}>
       <WorkshopResponsiveCollection
         wide={<PersonPlanTable entries={entries} />}
         narrow={<PersonPlanCards entries={entries} />}
@@ -362,12 +349,7 @@ export function WorkshopFamilyPlanDocument({
   slots: readonly FamilyPlanSlot[]
 }) {
   return (
-    <WorkshopPrintDocument
-      kind="Workshopplan"
-      title={title}
-      status="Vorläufig, nicht endgültig"
-      metadata={metadata}
-    >
+    <WorkshopPrintDocument title={title} metadata={metadata}>
       <WorkshopResponsiveCollection
         wide={<FamilyPlanTable slots={slots} />}
         narrow={<FamilyPlanCards slots={slots} />}
@@ -386,12 +368,7 @@ export function WorkshopRoomPlanDocument({
   entries: readonly RoomPlanEntry[]
 }) {
   return (
-    <WorkshopPrintDocument
-      kind="Raumplan"
-      title={title}
-      status="Vorläufig, nicht endgültig"
-      metadata={metadata}
-    >
+    <WorkshopPrintDocument title={title} metadata={metadata}>
       <WorkshopResponsiveCollection
         wide={<RoomPlanTable entries={entries} />}
         narrow={<RoomPlanCards entries={entries} />}

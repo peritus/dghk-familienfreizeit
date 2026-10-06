@@ -193,14 +193,12 @@ export const PickerAndPrint: Story = {
           onNext={() => setValue('wald')}
         />
         <WorkshopPrintDocument
-          kind="Teilnahmeliste"
           title={value === 'keramik' ? 'Keramik' : 'Waldexpedition'}
           metadata={[
             'Freitag, 09:00–11:00 Uhr · Atelier',
             'Leitung: Sam Morgan',
             '8 Personen von 10 Plätzen',
           ]}
-          status="Vorläufig, nicht endgültig"
           confidential
         >
           <p className="text-muted">

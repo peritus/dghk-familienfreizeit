@@ -118,7 +118,6 @@ function WorkshopReport({ workshop }: { workshop: WorkshopReportWorkshop }) {
   return (
     <WorkshopRosterDocument
       title={workshop.title}
-      status={workshop.status_label}
       metadata={[
         workshop.slot_label && workshop.space_name
           ? `${workshop.slot_label} · ${workshop.space_name}`

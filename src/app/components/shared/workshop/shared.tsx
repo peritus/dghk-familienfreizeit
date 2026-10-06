@@ -381,27 +381,19 @@ export function WorkshopListPicker({
 }
 
 export function WorkshopPrintDocument({
-  kind,
   title,
   metadata,
-  status,
   confidential = false,
   children,
 }: {
-  kind: string
   title: string
   metadata: readonly ReactNode[]
-  status: string
   confidential?: boolean
   children: ReactNode
 }) {
   const titleId = useId()
   return (
     <article className="space-y-4" aria-labelledby={titleId}>
-      <div className="flex flex-wrap justify-between gap-3 border-b-2 border-border pb-3 text-sm">
-        <span>{kind}</span>
-        <strong>{status}</strong>
-      </div>
       <h2 id={titleId} className="text-3xl font-heading">
         {title}
       </h2>

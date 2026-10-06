@@ -61,7 +61,6 @@ export const Roster: Story = {
     <div className="bg-background p-6">
       <WorkshopRosterDocument
         title="Keramik"
-        status="Vorläufig, nicht endgültig"
         metadata={[
           'Freitag, 14. Mai 2027 · 09:00–11:00 Uhr · Atelier',
           'Leitung: Robin Schmidt, Paula König · 3 Personen von 10 Plätzen',

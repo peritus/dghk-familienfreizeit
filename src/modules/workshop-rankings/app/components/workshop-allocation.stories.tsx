@@ -160,10 +160,8 @@ export const Print: Story = {
   render: () => (
     <div className="bg-background p-6">
       <WorkshopPrintDocument
-        kind="Workshop allocation"
         title="Wünsche · Antworten"
         metadata={['Familienfreizeit · 14. Mai', 'Abgeleitete Vorschau']}
-        status="Vorläufig"
       >
         <WorkshopAllocationAnswers answers={answers} />
       </WorkshopPrintDocument>
