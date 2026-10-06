@@ -199,7 +199,6 @@ export const PickerAndPrint: Story = {
             'Leitung: Sam Morgan',
             '8 Personen von 10 Plätzen',
           ]}
-          confidential
         >
           <p className="text-muted">
             Die eigentliche Tabelle wird als semantische Report-Komposition eingesetzt.

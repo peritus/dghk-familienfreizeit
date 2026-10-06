@@ -1,4 +1,4 @@
-import { Fragment, useId, type ComponentProps, type ReactNode } from 'react'
+import { Fragment, useId, useState, type ComponentProps, type ReactNode, type Ref } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert.js'
 import { Badge } from '../ui/badge.js'
 import { Button } from '../ui/button.js'
@@ -345,11 +345,56 @@ function optionGroups(options: readonly WorkshopListOption[]) {
   return groups
 }
 
+function ListSearchInput({
+  value,
+  options,
+  onChange,
+}: {
+  value: string
+  options: readonly WorkshopListOption[]
+  onChange: (value: string) => void
+}) {
+  const listId = useId()
+  const [text, setText] = useState(options.find((option) => option.value === value)?.label ?? '')
+  // Commit only on a complete name, as the prototype's change event does: picking a
+  // datalist entry, pressing Enter, or leaving the field.
+  const commit = (candidate: string) => {
+    const match = options.find((option) => option.label === candidate.trim())
+    if (match && match.value !== value) onChange(match.value)
+  }
+  return (
+    <>
+      <input
+        type="search"
+        list={listId}
+        autoComplete="off"
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value)
+          const inputType = (event.nativeEvent as InputEvent).inputType
+          if (!inputType || inputType === 'insertReplacementText') commit(event.target.value)
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') commit(event.currentTarget.value)
+        }}
+        onBlur={(event) => commit(event.currentTarget.value)}
+        className="h-11 w-full rounded-base border-2 border-border bg-secondary-background px-3 text-base font-normal leading-tight"
+      />
+      <datalist id={listId}>
+        {options.map((option) => (
+          <option key={option.value} value={option.label} />
+        ))}
+      </datalist>
+    </>
+  )
+}
+
 export function WorkshopListPicker({
   label,
   value,
   options,
   onChange,
+  search = false,
   onPrevious,
   onNext,
 }: {
@@ -357,46 +402,53 @@ export function WorkshopListPicker({
   value: string
   options: readonly WorkshopListOption[]
   onChange: (value: string) => void
+  /** Use a search field with suggestions instead of a select, for long lists of people. */
+  search?: boolean
   onPrevious?: () => void
   onNext?: () => void
 }) {
+  const index = options.findIndex((option) => option.value === value)
+  const previous = index > 0 ? options[index - 1] : undefined
+  const next = index >= 0 ? options[index + 1] : undefined
   return (
-    <div className="flex flex-wrap items-end gap-3">
-      <label className="grid min-w-64 flex-1 gap-1 font-bold">
+    <div className="mb-5 flex flex-wrap items-end gap-x-4 gap-y-3">
+      <label className="grid w-full max-w-[480px] flex-[1_1_320px] gap-1.5 text-sm leading-tight font-bold">
         {label}
-        <select
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3 font-normal"
-        >
-          {optionGroups(options).map((group, index) => {
-            const items = group.options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))
-            return group.label ? (
-              <optgroup key={`${group.label}-${index}`} label={group.label}>
-                {items}
-              </optgroup>
-            ) : (
-              items
-            )
-          })}
-        </select>
+        {search ? (
+          <ListSearchInput key={value} value={value} options={options} onChange={onChange} />
+        ) : (
+          <select
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            className="select-chevron h-11 w-full rounded-base border-2 border-border bg-secondary-background pl-3 text-base font-normal leading-tight"
+          >
+            {optionGroups(options).map((group, groupIndex) => {
+              const items = group.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))
+              return group.label ? (
+                <optgroup key={`${group.label}-${groupIndex}`} label={group.label}>
+                  {items}
+                </optgroup>
+              ) : (
+                items
+              )
+            })}
+          </select>
+        )}
       </label>
-      <div className="flex gap-2">
-        {onPrevious ? (
-          <Button type="button" size="sm" variant="neutral" onClick={onPrevious}>
-            ‹ Vorherige
-          </Button>
-        ) : null}
-        {onNext ? (
-          <Button type="button" size="sm" variant="neutral" onClick={onNext}>
-            Nächste ›
-          </Button>
-        ) : null}
-      </div>
+      {onPrevious && previous ? (
+        <Button type="button" size="sm" variant="neutral" onClick={onPrevious}>
+          ‹ Vorherige<span className="sr-only">: {previous.label}</span>
+        </Button>
+      ) : null}
+      {onNext && next ? (
+        <Button type="button" size="sm" variant="neutral" onClick={onNext}>
+          Nächste ›<span className="sr-only">: {next.label}</span>
+        </Button>
+      ) : null}
     </div>
   )
 }
@@ -404,41 +456,54 @@ export function WorkshopListPicker({
 export function WorkshopPrintDocument({
   title,
   metadata,
-  confidential = false,
+  print_note: printNote,
+  heading_ref: headingRef,
   children,
 }: {
   title: string
   metadata: readonly ReactNode[]
-  confidential?: boolean
+  /** Shown only on paper, under the metadata (for example a confidentiality line). */
+  print_note?: ReactNode
+  /** Receives focus after previous/next so keyboard users land on the new document. */
+  heading_ref?: Ref<HTMLHeadingElement>
   children: ReactNode
 }) {
   const titleId = useId()
   return (
-    <article className="space-y-4" aria-labelledby={titleId}>
-      <h2 id={titleId} className="text-3xl font-heading">
+    <article className="workshop-print-document" aria-labelledby={titleId}>
+      <h2
+        id={titleId}
+        ref={headingRef}
+        tabIndex={-1}
+        className="workshop-print-title text-2xl leading-tight font-heading focus:outline-3 focus:outline-offset-4 focus:outline-border"
+      >
         {title}
       </h2>
-      <div className="grid gap-1 text-sm text-muted">
-        {metadata.map((item, index) => (
-          <div key={index}>{item}</div>
-        ))}
-      </div>
-      {confidential ? <WorkshopConfidentialityNotice /> : null}
-      {children}
+      {metadata.map((item, index) => (
+        <p key={index} className="workshop-print-meta mt-1">
+          {item}
+        </p>
+      ))}
+      {printNote ? <p className="workshop-print-note hidden">{printNote}</p> : null}
+      <div className="mt-3">{children}</div>
     </article>
   )
 }
 
 export function WorkshopConfidentialityNotice({
-  children = 'Vertraulich: enthält Gesundheitsangaben. Nur für die Workshopleitung.',
+  children = 'Enthält Allergien und Gesundheitshinweise. Nur für die Workshopleitung.',
 }: {
   children?: ReactNode
 }) {
   return (
-    <Alert>
-      <AlertTitle>Vertraulich</AlertTitle>
-      <AlertDescription>{children}</AlertDescription>
-    </Alert>
+    <div
+      role="note"
+      className="rounded-base border-2 border-l-[10px] border-border bg-secondary-background px-4 py-3.5"
+    >
+      <p>
+        <strong>Vertraulich.</strong> {children}
+      </p>
+    </div>
   )
 }
 

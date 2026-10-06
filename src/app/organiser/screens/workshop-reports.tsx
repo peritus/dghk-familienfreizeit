@@ -1,19 +1,22 @@
-import { useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import {
+  WorkshopConfidentialityNotice,
   WorkshopEmptyState,
   WorkshopErrorState,
   WorkshopLoadingState,
   WorkshopScreenHeader,
-  WorkshopStatusBadge,
   type WorkshopListOption,
 } from '../../components/shared/workshop/shared.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
+import { draftCount } from '../state.js'
 import {
+  FamilyPlanCell,
+  LeaderNames,
   WorkshopFamilyPlanDocument,
   WorkshopListKinds,
   WorkshopListPickerWithDocument,
@@ -28,7 +31,6 @@ import {
 import {
   buildWorkshopReportsProjection,
   type WorkshopReportFamily,
-  type WorkshopReportFamilyCell,
   type WorkshopReportPerson,
   type WorkshopReportRoom,
   type WorkshopReportWorkshop,
@@ -52,12 +54,27 @@ function listPath(kind: WorkshopListKind): string {
   }[kind]
 }
 
+const queryKey: Record<WorkshopListKind, string> = {
+  workshop: 'workshop',
+  person: 'person',
+  family: 'family',
+  room: 'room',
+}
+
 function personen(count: number): string {
   return `${count} ${count === 1 ? 'Person' : 'Personen'}`
 }
 
-function workshopOptions(workshops: readonly WorkshopReportWorkshop[]): WorkshopListOption[] {
-  return workshops.map((workshop) => ({
+function workshops(count: number): string {
+  return `${count} ${count === 1 ? 'Workshop' : 'Workshops'}`
+}
+
+function capitalized(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+function workshopOptions(items: readonly WorkshopReportWorkshop[]): WorkshopListOption[] {
+  return items.map((workshop) => ({
     value: workshop.id,
     label: `${workshop.title} · ${personen(workshop.participant_count)}`,
     group: workshop.slot_label,
@@ -86,7 +103,8 @@ function rosterEntries(workshop: WorkshopReportWorkshop): WorkshopRosterEntry[] 
   return workshop.roster.map((entry) => ({
     id: entry.id,
     name: entry.name,
-    age_label: entry.age_label,
+    age: entry.age_short,
+    age_long: entry.age_label,
     health: entry.health,
   }))
 }
@@ -99,47 +117,30 @@ function personPlanEntries(person: WorkshopReportPerson): PersonPlanEntry[] {
     room: entry.space ?? undefined,
     role: entry.role_label,
     status: entry.status,
+    participants: entry.participant_count,
   }))
-}
-
-function OpenNotice({ reason }: { reason: string }) {
-  return (
-    <span className="inline-flex flex-wrap items-center gap-2">
-      <WorkshopStatusBadge tone="attention">Offen</WorkshopStatusBadge>
-      {reason}
-    </span>
-  )
-}
-
-function FamilyCell({ cell }: { cell: WorkshopReportFamilyCell }) {
-  if (!cell.workshop) return <span className="text-muted">—</span>
-  return (
-    <span className="grid gap-0.5">
-      <span className="inline-flex flex-wrap items-center gap-2">
-        <strong>{cell.workshop}</strong>
-        {cell.lead ? <WorkshopStatusBadge>leitet</WorkshopStatusBadge> : null}
-      </span>
-      {cell.space ? <span className="text-sm text-muted">{cell.space}</span> : null}
-    </span>
-  )
 }
 
 function familyPlanSlots(family: WorkshopReportFamily): FamilyPlanSlot[] {
   return family.slots.map((slot) => ({
     id: slot.id,
     label: slot.label,
-    members: family.members.map((member, index) => ({
-      id: member.id,
-      name: member.first_name,
-      detail: member.open_reason ? (
-        <>
-          {member.age_label} <OpenNotice reason={member.open_reason} />
-        </>
-      ) : (
-        member.age_label
-      ),
-      value: <FamilyCell cell={slot.cells[index]!} />,
-    })),
+    members: family.members.map((member, index) => {
+      const cell = slot.cells[index]!
+      return {
+        id: member.id,
+        name: member.first_name,
+        detail: member.age_label,
+        value: (
+          <FamilyPlanCell
+            workshop={cell.workshop}
+            room={cell.space}
+            lead={cell.lead}
+            open={cell.open}
+          />
+        ),
+      }
+    }),
   }))
 }
 
@@ -149,77 +150,51 @@ function roomPlanEntries(room: WorkshopReportRoom): RoomPlanEntry[] {
     time: entry.time,
     workshop: entry.workshop ?? undefined,
     audience: entry.audience ?? undefined,
-    leaders: entry.leaders ?? undefined,
+    leaders: entry.leaders,
   }))
 }
 
-function WorkshopReport({ workshop }: { workshop: WorkshopReportWorkshop }) {
-  return (
-    <WorkshopRosterDocument
-      title={workshop.title}
-      metadata={[
-        `${workshop.slot_label} · ${workshop.space_name}`,
-        `Leitung: ${workshop.leaders.join(', ') || '—'}`,
-        <>
-          <strong>{personen(workshop.participant_count)}</strong> von {workshop.capacity}{' '}
-          {workshop.capacity === 1 ? 'Platz' : 'Plätzen'} · {workshop.audience},{' '}
-          {workshop.age_label}
-          {workshop.health_count
-            ? ` · ${personen(workshop.health_count)} mit Gesundheitshinweis`
-            : ''}
-          {workshop.interest_count ? ` · ${workshop.interest_count} Interessen` : ''}
-        </>,
-      ]}
-      entries={rosterEntries(workshop)}
-      confidential
-      show_attendance
-    />
-  )
+function workshopMetadata(workshop: WorkshopReportWorkshop): ReactNode[] {
+  return [
+    `${workshop.slot_long_label} · ${workshop.space_name}`,
+    <>
+      Leitung: <LeaderNames leaders={workshop.leaders} />
+    </>,
+    <>
+      <strong>{personen(workshop.participant_count)}</strong> von {workshop.capacity}{' '}
+      {workshop.capacity === 1 ? 'Platz' : 'Plätzen'} · {workshop.audience}, {workshop.age_label}
+      {workshop.health_count ? ` · ${personen(workshop.health_count)} mit Gesundheitshinweis` : ''}
+    </>,
+  ]
 }
 
-function PersonReport({ person }: { person: WorkshopReportPerson }) {
+function personMetadata(person: WorkshopReportPerson): ReactNode[] {
+  if (person.kind === 'external') return [person.age_label]
   const led = person.led_workshops.length ? ` · leitet ${person.led_workshops.join(', ')}` : ''
-  const metadata: ReactNode[] =
-    person.kind === 'external'
-      ? [
-          person.age_label,
-          person.led_workshops.length
-            ? `leitet ${person.led_workshops.join(', ')}`
-            : 'Leitet keinen eingeplanten Workshop',
-        ]
-      : [
-          `${person.age_label}${person.family_name ? ` · Familie ${person.family_name}` : ''}`,
-          `${person.workshop_count} ${person.workshop_count === 1 ? 'Workshop' : 'Workshops'}${led}`,
-        ]
-  if (person.open_reason) metadata.push(<OpenNotice reason={person.open_reason} />)
-  return (
-    <WorkshopPersonPlanDocument
-      title={person.name}
-      metadata={metadata}
-      entries={personPlanEntries(person)}
-    />
-  )
+  return [
+    `${capitalized(person.age_label)}${person.family_name ? ` · Familie ${person.family_name}` : ''}`,
+    `${workshops(person.workshop_count)}${led}`,
+  ]
 }
 
-function FamilyReport({ family }: { family: WorkshopReportFamily }) {
-  return (
-    <WorkshopFamilyPlanDocument
-      title={`Familie ${family.name}`}
-      metadata={[family.members.map((member) => member.first_name).join(', ')]}
-      slots={familyPlanSlots(family)}
-    />
-  )
+function printStamp(date: Date, revision: number, drafts: number): string {
+  const day = date.toLocaleDateString('de-DE')
+  const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return `${day}, ${time} · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
 }
 
-function RoomReport({ room }: { room: WorkshopReportRoom }) {
+/** Date, time and revision under the document; refreshed right before printing. */
+function PrintStamp({ revision, drafts }: { revision: number; drafts: number }) {
+  const [printedAt, setPrintedAt] = useState(() => new Date())
+  useEffect(() => {
+    const refresh = () => setPrintedAt(new Date())
+    window.addEventListener('beforeprint', refresh)
+    return () => window.removeEventListener('beforeprint', refresh)
+  }, [])
   return (
-    <WorkshopRoomPlanDocument
-      title={room.name}
-      metadata={[
-        `${room.workshop_count} ${room.workshop_count === 1 ? 'Workshop' : 'Workshops'} in diesem Raum`,
-      ]}
-      entries={roomPlanEntries(room)}
-    />
+    <p className="workshop-print-stamp mt-10 border-t-[1.5px] border-rule pt-2 text-xs text-muted tabular-nums">
+      {printStamp(printedAt, revision, drafts)}
+    </p>
   )
 }
 
@@ -230,6 +205,8 @@ export function WorkshopLists() {
   const search = useSearch()
   const { state, world, current_plan: currentPlan } = useOrganiser()
   const kind = listKind(location)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const focusDocument = useRef(false)
   const projection = useMemo(
     () =>
       world && currentPlan
@@ -242,14 +219,34 @@ export function WorkshopLists() {
     [currentPlan, world],
   )
 
+  const query = new URLSearchParams(search)
+  const selectedId = query.get(queryKey[kind])
+  useEffect(() => {
+    // After previous/next, land on the new document the way the prototype does.
+    if (!focusDocument.current) return
+    focusDocument.current = false
+    const heading = headingRef.current
+    if (!heading) return
+    heading.focus({ ['preventScroll']: true })
+    heading.scrollIntoView?.({
+      block: 'center',
+      behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    })
+  }, [kind, selectedId])
+
   const navigateWithQuery = (path: string, updates: Record<string, string | null>) => {
-    const query = new URLSearchParams(search)
+    const next = new URLSearchParams(search)
     for (const [key, value] of Object.entries(updates)) {
-      if (value === null) query.delete(key)
-      else query.set(key, value)
+      if (value === null) next.delete(key)
+      else next.set(key, value)
     }
-    const suffix = query.toString()
+    const suffix = next.toString()
     void navigate(`${path}${suffix ? `?${suffix}` : ''}`)
+  }
+  const select = (value: string) => navigateWithQuery(listPath(kind), { [queryKey[kind]]: value })
+  const step = (value: string) => {
+    focusDocument.current = true
+    select(value)
   }
 
   if (state.status === 'error' || state.status === 'stale_head') {
@@ -261,7 +258,6 @@ export function WorkshopLists() {
   }
   if (!projection) return <WorkshopLoadingState message="Workshoplisten werden berechnet …" />
 
-  const query = new URLSearchParams(search)
   const selectedWorkshop =
     projection.workshops.find((item) => item.id === query.get('workshop')) ??
     projection.workshops[0]
@@ -273,41 +269,71 @@ export function WorkshopLists() {
     projection.rooms.find((item) => item.id === query.get('room')) ?? projection.rooms[0]
 
   const selectedDocument =
-    kind === 'workshop' && selectedWorkshop ? (
-      <WorkshopListPickerWithDocument
-        label="Workshop auswählen"
-        value={selectedWorkshop.id}
-        options={workshopOptions(projection.workshops)}
-        onChange={(value) => navigateWithQuery(listPath(kind), { workshop: value })}
-      >
-        <WorkshopReport workshop={selectedWorkshop} />
-      </WorkshopListPickerWithDocument>
+    kind === 'workshop' ? (
+      selectedWorkshop ? (
+        <WorkshopListPickerWithDocument
+          label="Workshop"
+          value={selectedWorkshop.id}
+          options={workshopOptions(projection.workshops)}
+          onChange={select}
+          onStep={step}
+          notice={<WorkshopConfidentialityNotice />}
+        >
+          <WorkshopRosterDocument
+            title={selectedWorkshop.title}
+            metadata={workshopMetadata(selectedWorkshop)}
+            entries={rosterEntries(selectedWorkshop)}
+            heading_ref={headingRef}
+          />
+        </WorkshopListPickerWithDocument>
+      ) : (
+        <p className="text-muted">Sobald ein Workshop eingeplant ist, steht hier seine Liste.</p>
+      )
     ) : kind === 'person' && selectedPerson ? (
       <WorkshopListPickerWithDocument
-        label="Person auswählen"
+        label="Person suchen"
         value={selectedPerson.id}
         options={personOptions(projection.persons)}
-        onChange={(value) => navigateWithQuery(listPath(kind), { person: value })}
+        onChange={select}
+        onStep={step}
+        search
       >
-        <PersonReport person={selectedPerson} />
+        <WorkshopPersonPlanDocument
+          title={selectedPerson.name}
+          metadata={personMetadata(selectedPerson)}
+          entries={personPlanEntries(selectedPerson)}
+          heading_ref={headingRef}
+        />
       </WorkshopListPickerWithDocument>
     ) : kind === 'family' && selectedFamily ? (
       <WorkshopListPickerWithDocument
-        label="Familie auswählen"
+        label="Familie"
         value={selectedFamily.id}
         options={familyOptions(projection.families)}
-        onChange={(value) => navigateWithQuery(listPath(kind), { family: value })}
+        onChange={select}
+        onStep={step}
       >
-        <FamilyReport family={selectedFamily} />
+        <WorkshopFamilyPlanDocument
+          title={`Familie ${selectedFamily.name}`}
+          metadata={[selectedFamily.members.map((member) => member.first_name).join(', ')]}
+          slots={familyPlanSlots(selectedFamily)}
+          heading_ref={headingRef}
+        />
       </WorkshopListPickerWithDocument>
     ) : kind === 'room' && selectedRoom ? (
       <WorkshopListPickerWithDocument
-        label="Raum auswählen"
+        label="Raum"
         value={selectedRoom.id}
         options={roomOptions(projection.rooms)}
-        onChange={(value) => navigateWithQuery(listPath(kind), { room: value })}
+        onChange={select}
+        onStep={step}
       >
-        <RoomReport room={selectedRoom} />
+        <WorkshopRoomPlanDocument
+          title={selectedRoom.name}
+          metadata={[`${workshops(selectedRoom.workshop_count)} in diesem Raum`]}
+          entries={roomPlanEntries(selectedRoom)}
+          heading_ref={headingRef}
+        />
       </WorkshopListPickerWithDocument>
     ) : (
       <WorkshopEmptyState title="Noch keine Daten für diese Liste">
@@ -316,25 +342,22 @@ export function WorkshopLists() {
     )
 
   return (
-    <div className="space-y-8">
-      <WorkshopNavigation />
-      <WorkshopScreenHeader
-        eyebrow="Workshops · Listen"
-        title="Listen"
-        description="Druckbare Übersichten für Workshop, Person, Familie und Raum. Gesundheitsangaben bleiben auf die Organisationsansicht beschränkt."
-      />
-      <WorkshopListKinds
-        value={kind}
-        onChange={(value) =>
-          navigateWithQuery(listPath(value), {
-            workshop: null,
-            person: null,
-            family: null,
-            room: null,
-          })
-        }
-      />
-      {selectedDocument}
+    <div className="workshop-lists">
+      <div className="workshop-screen-only space-y-8">
+        <WorkshopNavigation />
+        <WorkshopScreenHeader
+          eyebrow="Workshops · Listen"
+          title="Listen"
+          description="Zum Ansehen und Drucken (Strg+P). Gedruckt wird die gerade gewählte Liste."
+        />
+        <WorkshopListKinds
+          value={kind}
+          // Each list keeps its own selection in the query, so switching back returns to it.
+          onChange={(value) => navigateWithQuery(listPath(value), {})}
+        />
+      </div>
+      <div className="mt-6">{selectedDocument}</div>
+      <PrintStamp revision={state.head_seq} drafts={draftCount(state)} />
     </div>
   )
 }

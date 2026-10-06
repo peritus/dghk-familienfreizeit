@@ -206,30 +206,55 @@ test('projects the complete workshop list set from the organiser plan', () => {
   expect(ceramics).toMatchObject({
     title: 'Keramik',
     space_name: 'Atelier',
-    leaders: ['Sam Morgan', 'Anna Albers'],
+    slot_label: 'Fr 09:00–11:00',
+    slot_long_label: 'Freitag, 14. Mai 2027, 09:00–11:00 Uhr',
+    leaders: [
+      { name: 'Sam Morgan', external: false },
+      { name: 'Anna Albers', external: false },
+    ],
   })
   expect(ceramics?.roster.length).toBeGreaterThan(0)
+  // Children's ages are bare numbers in the roster table, with the long form for cards.
+  expect(ceramics?.roster[0]?.age_short).toMatch(/^\d+$/)
+  expect(ceramics?.roster[0]?.age_label).toMatch(/^\d+ Jahre$/)
+  // Open-ended age ranges read "ab N Jahren"; external leaders are flagged.
+  expect(lists.workshops.some((workshop) => /^ab \d+ Jahren$/.test(workshop.age_label))).toBe(true)
+  expect(
+    lists.workshops.some((workshop) => workshop.leaders.some((leader) => leader.external)),
+  ).toBe(true)
 
   // People and external leaders share the person list.
   const externals = lists.persons.filter((person) => person.kind === 'external')
   expect(lists.persons.length - externals.length).toBe(140)
   expect(externals.length).toBeGreaterThan(0)
   const leadingExternal = externals.find((person) => person.led_workshops.length > 0)
-  expect(leadingExternal?.entries.find((entry) => entry.status === 'lead')?.role_label).toMatch(
-    /^leitet · \d+ Person/,
-  )
+  const led = leadingExternal?.entries.find((entry) => entry.status === 'lead')
+  expect(led).toMatchObject({ role_label: 'leitet' })
+  expect(led?.participant_count).toEqual(expect.any(Number))
 
   const alex = lists.persons.find((person) => person.name === 'Alex Morgan')
   expect(alex?.entries).toHaveLength(8)
   expect(alex?.entries.some((entry) => entry.status === 'assigned')).toBe(true)
-  expect(alex?.workshop_count).toBe(alex?.entries.filter((entry) => entry.status !== 'free').length)
+  expect(alex?.workshop_count).toBe(
+    alex?.entries.filter((entry) => entry.status !== 'free' && entry.status !== 'open').length,
+  )
 
   // The resolver's open cases reach the person and family lists.
   expect(attendance.unassigned.length).toBeGreaterThan(0)
   for (const item of attendance.unassigned) {
     const person = lists.persons.find((candidate) => candidate.id === item.person_id)
     expect(person?.open_reason).toBeTruthy()
+    // Every empty slot of an open case is marked open, with the reason as its role.
+    for (const entry of person!.entries.filter((candidate) => !candidate.workshop)) {
+      expect(entry).toMatchObject({ status: 'open', role_label: person!.open_reason })
+    }
   }
+  const openPerson = lists.persons.find((person) => person.open_reason)!
+  const openFamily = lists.families.find((family) => family.id === openPerson.family_id)!
+  const openColumn = openFamily.members.findIndex((member) => member.id === openPerson.id)
+  expect(openFamily.members[openColumn]?.open).toBe(true)
+  const openCells = openFamily.slots.map((slot) => slot.cells[openColumn]!)
+  expect(openCells.filter((cell) => !cell.workshop).every((cell) => cell.open)).toBe(true)
 
   const morgan = lists.families.find((family) => family.id === 'fam_f0')
   expect(morgan?.name).toBe('Morgan')

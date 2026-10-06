@@ -16,16 +16,27 @@ import { workshopSpaceWorld } from '../../workshop-space/index.js'
 
 export type WorkshopReportSlot = {
   id: string
+  /** Short form for tables and pickers, e.g. "Fr 09:00–11:00". */
   label: string
+  /** Long form for document headers, e.g. "Freitag, 14. Mai 2027, 09:00–11:00 Uhr". */
+  long_label: string
   starts_at: string
   ends_at: string
   sort_key: number
+}
+
+export type WorkshopReportLeader = {
+  name: string
+  external: boolean
 }
 
 export type WorkshopReportRosterEntry = {
   id: string
   person_id: string
   name: string
+  /** Compact table form: a child's age as a number, adults "erw.". */
+  age_short: string
+  /** Card form: "7 Jahre" or "erwachsen". */
   age_label: string
   health?: string
   source: 'assignment' | 'signup'
@@ -40,17 +51,18 @@ export type WorkshopReportWorkshop = {
   mode: WorkshopRecord['mode']
   slot_id: string
   slot_label: string
+  slot_long_label: string
   space_id: string
   space_name: string
-  leaders: readonly string[]
+  leaders: readonly WorkshopReportLeader[]
   participant_count: number
   health_count: number
-  interest_count: number
   roster: readonly WorkshopReportRosterEntry[]
 }
 
 export type WorkshopReportPersonPlanStatus =
   | 'free'
+  | 'open'
   | 'assigned'
   | 'fixed'
   | 'lead'
@@ -67,13 +79,17 @@ export type WorkshopReportPersonPlanEntry = {
   workshop: string | null
   space: string | null
   status: WorkshopReportPersonPlanStatus
+  /** Role text; empty for a free or unavailable slot. */
   role_label: string
+  /** Participants of a workshop an external leader leads in this slot. */
+  participant_count: number | null
 }
 
 export type WorkshopReportPerson = {
   id: string
   kind: 'person' | 'external'
   name: string
+  /** "9 Jahre" or "erwachsen"; "Externe Leitung" for external leaders. */
   age_label: string
   family_id: string | null
   family_name: string | null
@@ -89,7 +105,7 @@ export type WorkshopReportFamilyMember = {
   name: string
   first_name: string
   age_label: string
-  open_reason: string | null
+  open: boolean
 }
 
 export type WorkshopReportFamilyCell = {
@@ -97,6 +113,8 @@ export type WorkshopReportFamilyCell = {
   workshop: string | null
   space: string | null
   lead: boolean
+  /** The member is an open case and has nothing in this slot. */
+  open: boolean
 }
 
 export type WorkshopReportFamilySlot = {
@@ -119,7 +137,7 @@ export type WorkshopReportRoomEntry = {
   workshop_id: string | null
   workshop: string | null
   audience: string | null
-  leaders: string | null
+  leaders: readonly WorkshopReportLeader[]
 }
 
 export type WorkshopReportRoom = {
@@ -178,7 +196,12 @@ function ageOf(world: World, personId: string): number | null {
 
 function ageLabel(world: World, personId: string): string {
   const age = ageOf(world, personId)
-  return age === null ? (isAdult(world, personId) ? 'erwachsen' : 'Kind') : `${age} Jahre`
+  return isAdult(world, personId) ? 'erwachsen' : age === null ? 'Kind' : `${age} Jahre`
+}
+
+function ageShort(world: World, personId: string): string {
+  const age = ageOf(world, personId)
+  return isAdult(world, personId) ? 'erw.' : age === null ? '—' : String(age)
 }
 
 /** The profile's person note for allergies, intolerances, and emergencies. */
@@ -186,39 +209,46 @@ function healthNote(world: World, personId: string): string | undefined {
   return stringLabel(world.labels_by_entity[personId] ?? [], 'food-note') ?? undefined
 }
 
-function dateLabel(value: string, timeZone: string): string {
+function datePart(value: string, timeZone: string, options: Intl.DateTimeFormatOptions): string {
   return new globalThis.Date(value).toLocaleDateString('de-DE', {
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit',
+    ...options,
     ['timeZone']: timeZone,
   })
 }
 
 function timeLabel(startsAt: string, endsAt: string, timeZone: string): string {
-  const starts = new globalThis.Date(startsAt).toLocaleTimeString('de-DE', {
-    hour: '2-digit',
-    minute: '2-digit',
-    ['timeZone']: timeZone,
-  })
-  const ends = new globalThis.Date(endsAt).toLocaleTimeString('de-DE', {
-    hour: '2-digit',
-    minute: '2-digit',
-    ['timeZone']: timeZone,
-  })
-  return `${starts}–${ends}`
+  const time = (value: string) =>
+    new globalThis.Date(value).toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      ['timeZone']: timeZone,
+    })
+  return `${time(startsAt)}–${time(endsAt)}`
 }
 
 function slotLabel(slot: WorkshopSlot, timeZone: string): string {
-  return `${dateLabel(slot.starts_at, timeZone)} · ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}`
+  const weekday = datePart(slot.starts_at, timeZone, { weekday: 'short' }).replace(/\.$/, '')
+  return `${weekday} ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}`
+}
+
+function slotLongLabel(slot: WorkshopSlot, timeZone: string): string {
+  const date = datePart(slot.starts_at, timeZone, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+  return `${date}, ${timeLabel(slot.starts_at, slot.ends_at, timeZone)} Uhr`
 }
 
 function audienceLabel(value: string): string {
   return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[value] ?? value
 }
 
-function personenLabel(count: number): string {
-  return `${count} ${count === 1 ? 'Person' : 'Personen'}`
+function ageRangeLabel(workshop: WorkshopRecord): string {
+  return workshop.age_max >= 99
+    ? `ab ${workshop.age_min} Jahren`
+    : `${workshop.age_min}–${workshop.age_max} Jahre`
 }
 
 function openReasonLabel(reason: string): string {
@@ -232,9 +262,14 @@ function openReasonLabel(reason: string): string {
   }
 }
 
-function leaderName(world: World, externalLeaders: readonly ExternalLeader[], id: string): string {
-  if (world.entity_kind_by_id[id] === 'person') return personName(world, id)
-  return externalLeaders.find((leader) => leader.id === id)?.name ?? id
+function leader(
+  world: World,
+  externalLeaders: readonly ExternalLeader[],
+  id: string,
+): WorkshopReportLeader {
+  if (world.entity_kind_by_id[id] === 'person')
+    return { name: personName(world, id), external: false }
+  return { name: externalLeaders.find((item) => item.id === id)?.name ?? id, external: true }
 }
 
 function byName<T extends { id: string; name: string }>(left: T, right: T): number {
@@ -248,6 +283,7 @@ function reportSlots(slots: readonly WorkshopSlot[], timeZone: string): Workshop
     .map((slot) => ({
       id: slot.id,
       label: slotLabel(slot, timeZone),
+      long_label: slotLongLabel(slot, timeZone),
       starts_at: slot.starts_at,
       ends_at: slot.ends_at,
       sort_key: slot.sort_key,
@@ -270,6 +306,8 @@ type PlanContext = {
   assignment: WorkshopAssignmentSection
   /** `${leader id}:${slot id}` -> workshop ids led in that slot. */
   leader_workshops: ReadonlyMap<string, readonly string[]>
+  /** Person id -> reason the resolver left the person without any workshop. */
+  open_reasons: ReadonlyMap<string, string>
 }
 
 function buildPersonEntries(
@@ -287,6 +325,7 @@ function buildPersonEntries(
   const interestIds = context.assignment.interests
     .filter((item) => item.person_id === personId)
     .map((item) => item.workshop_id)
+  const openReason = context.open_reasons.get(personId)
   const inSlot = (ids: readonly string[], slotId: string) =>
     ids.find((id) => context.placements.get(id)?.slot_id === slotId)
   return context.slots.map((slot) => {
@@ -309,16 +348,19 @@ function buildPersonEntries(
             ? 'signup'
             : interest
               ? 'interest'
-              : 'free'
+              : openReason
+                ? 'open'
+                : 'free'
     const roleLabel = {
       lead: 'leitet',
       fixed: 'nimmt teil (fest zugeordnet)',
       assigned: assignment?.rank ? `nimmt teil (${assignment.rank}. Wahl)` : 'nimmt teil',
       signup: 'Anmeldung',
       interest: 'Interesse',
-      free: 'frei',
+      open: openReason ?? '',
+      free: '',
       available: 'verfügbar',
-      unavailable: '—',
+      unavailable: '',
     }[status]
     return {
       id: `${personId}:${slot.id}`,
@@ -329,6 +371,7 @@ function buildPersonEntries(
       space: selectedWorkshop?.space_name ?? null,
       status,
       role_label: roleLabel,
+      participant_count: null,
     }
   })
 }
@@ -353,11 +396,8 @@ function buildExternalEntries(
       workshop: workshop?.title ?? null,
       space: workshop?.space_name ?? null,
       status,
-      role_label: workshop
-        ? `leitet · ${personenLabel(workshop.participant_count)}`
-        : status === 'available'
-          ? 'verfügbar'
-          : '—',
+      role_label: workshop ? 'leitet' : status === 'available' ? 'verfügbar' : '',
+      participant_count: workshop?.participant_count ?? null,
     }
   })
 }
@@ -426,6 +466,7 @@ export function buildWorkshopReportsProjection(
             id: `${workshop.id}:${personId}`,
             person_id: personId,
             name: personName(input.world, personId),
+            age_short: ageShort(input.world, personId),
             age_label: ageLabel(input.world, personId),
             health: healthNote(input.world, personId),
             source: sources.has('assignment') ? 'assignment' : 'signup',
@@ -436,18 +477,17 @@ export function buildWorkshopReportsProjection(
         id: workshop.id,
         title: workshop.title,
         audience: audienceLabel(workshop.audience),
-        age_label: `${workshop.age_min}–${workshop.age_max} Jahre`,
+        age_label: ageRangeLabel(workshop),
         capacity: workshop.capacity,
         mode: workshop.mode,
         slot_id: slot.id,
         slot_label: slot.label,
+        slot_long_label: slot.long_label,
         space_id: space.id,
         space_name: space.name,
-        leaders: workshop.leader_ids.map((id) => leaderName(input.world, externalLeaders, id)),
+        leaders: workshop.leader_ids.map((id) => leader(input.world, externalLeaders, id)),
         participant_count: roster.length,
         health_count: roster.filter((entry) => entry.health).length,
-        interest_count: assignment.interests.filter((item) => item.workshop_id === workshop.id)
-          .length,
         roster,
       }
     })
@@ -458,6 +498,7 @@ export function buildWorkshopReportsProjection(
     placements,
     assignment,
     leader_workshops: leaderWorkshops,
+    open_reasons: openReasons,
   }
   const counted = new Set<WorkshopReportPersonPlanStatus>(['lead', 'fixed', 'assigned', 'signup'])
   const ledTitles = (entries: readonly WorkshopReportPersonPlanEntry[]) =>
@@ -482,12 +523,12 @@ export function buildWorkshopReportsProjection(
       entries,
     }
   })
-  const externalViews: WorkshopReportPerson[] = externalLeaders.map((leader) => {
-    const entries = buildExternalEntries(leader, context)
+  const externalViews: WorkshopReportPerson[] = externalLeaders.map((external) => {
+    const entries = buildExternalEntries(external, context)
     return {
-      id: leader.id,
+      id: external.id,
       kind: 'external' as const,
-      name: leader.name,
+      name: external.name,
       age_label: 'Externe Leitung',
       family_id: null,
       family_name: null,
@@ -520,7 +561,7 @@ export function buildWorkshopReportsProjection(
           name: personName(input.world, id),
           first_name: firstName(input.world, id),
           age_label: ageLabel(input.world, id),
-          open_reason: openReasons.get(id) ?? null,
+          open: openReasons.has(id),
         })),
         slots: slots.map((slot) => ({
           id: `${family.id}:${slot.id}`,
@@ -532,6 +573,7 @@ export function buildWorkshopReportsProjection(
               workshop: entry?.workshop ?? null,
               space: entry?.space ?? null,
               lead: entry?.status === 'lead',
+              open: entry?.status === 'open',
             }
           }),
         })),
@@ -557,7 +599,7 @@ export function buildWorkshopReportsProjection(
             workshop_id: workshop?.id ?? null,
             workshop: workshop?.title ?? null,
             audience: workshop ? `${workshop.audience}, ${workshop.age_label}` : null,
-            leaders: workshop ? workshop.leaders.join(', ') || '—' : null,
+            leaders: workshop?.leaders ?? [],
           }
         }),
       }
