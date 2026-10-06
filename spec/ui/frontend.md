@@ -153,11 +153,9 @@ rather than hand-written JSX ([family view](../application/family-view.md) §1):
 ### Workshop navigation and responsive behavior
 
 The organiser workshop landing route is `/organiser/workshops`. Its page-local
-section navigation visibly links only Workshops and Räume und Slots while sharing the
-same local-first state owner. Räume und Slots is current on both the space route and
-the direct slot-maintenance route `/organiser/workshops/slots`. The workshop overview
-uses local tabs for Workshops, Leitungen, and Externe Leitungen. Wünsche, Teilnahme,
-and Listen are reserved section destinations until their screens are implemented.
+section navigation, including the Teilnahme tabs, is implemented as described in the
+[implemented frontend](../../docs/ui/frontend.md); every section shares the same
+local-first state owner.
 Every secondary-navigation item declares a non-empty set of typed nested paths that
 selects it; active state uses the shared segment-aware route matcher rather than raw
 location equality.
@@ -240,6 +238,18 @@ shared draft pipeline; richer placement overrides remain deferred.
 
 The global organiser reducer and `SaveStatus` remain responsible for immediate mode,
 drafting mode, apply, discard, stale-head recovery, and pending-state navigation.
+
+### Responsive organiser matrices and printing
+
+Every person-by-slot organiser matrix keeps one semantic table as its wide-screen
+and print representation and uses labelled person cards in narrow layouts. State
+remains understandable from text and structure when printed without color.
+Multi-page print styles repeat table headers, keep person rows together, reserve
+room for a repeated fixed footer with a table-footer spacer, and reset every
+enclosing layout to natural document height. Delivery of a new matrix requires a
+browser check of both the narrow card layout and a multi-page landscape print. The
+participation overview is the verified example; see the
+[implemented frontend](../../docs/ui/frontend.md#responsive-organiser-matrices-and-printing).
 
 ### Local-first mutation cycle
 
