@@ -45,13 +45,11 @@ unavailable-history state. Reports may add report-specific aggregation and
 redaction, but they do not derive release status or compare scope content
 independently.
 
-Workshop reports label their data context explicitly as `current` (the committed
-live world) or `prospective` (committed events plus organiser-local drafts). M8
-organiser reports implement these two contexts. `released/effective` reports are
-an M10 release-control consumer: they use communicated scope content visible to
-the audience. A prospective organiser report never implies family visibility; an
-M10 released/effective report never joins current draft labels onto historical
-content.
+M8 organiser workshop reports show the organiser's one plan: the same world and
+plan every organiser screen uses. They carry no data context label and never imply
+family visibility. `released/effective` reports are an M10 release-control
+consumer: they use communicated scope content visible to the audience, label that
+context explicitly, and never join current draft labels onto historical content.
 
 The timestamp is not domain state and does not affect derivation or report
 identity. Reports are generated on demand from the world visible to the reader.
@@ -202,7 +200,7 @@ The print stylesheet must:
   page number;
 - carry the confidentiality label on every page of a confidential report;
 - remain usable on common A4 paper in portrait or landscape as appropriate.
-- print the selected current/prospective or released/effective context label.
+- print the released/effective context label on M10 released/effective reports.
 
 The mobile view must not depend on hover, wide-screen drag interactions, or a
 downloaded file. Long names, quantities, allergy text, and workshop titles must

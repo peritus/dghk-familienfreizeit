@@ -170,16 +170,27 @@ filters, person tracing, responsive tables/cards, keyboard tertiary navigation, 
 browser print use shared workshop components. Fixed violations and unassigned people
 remain visible as review notices; the views do not create attendance or roster events.
 
-Workshop list reports are read-only projections over either the committed world
-and plan (**Aktuell**) or the committed world plus local drafts (**Entwurf**).
-They provide one selected document for each of four views: a workshop roster, a
-person plan, a family plan, and a room plan. Workshop rosters show placement,
-leaders, capacity, assigned people and sign-ups; restricted health or emergency
-contact labels are rendered only in the organiser report and are marked
-confidential. Person and family plans show every configured slot, including free
-slots. Room plans show every scheduled workshop in the selected space. Wide
-tables switch to labelled cards on narrow screens, and browser printing uses the
-same document data without an in-app print, download, or export action.
+Workshop list reports are read-only projections over the same world and plan as
+every other organiser screen; there is no separate data context to select. They
+provide one selected document for each of four views, with previous and next
+navigation: a workshop roster, a person plan, a family plan, and a room plan.
+Documents carry a title and metadata lines, without a kind or status header.
+
+- Workshop rosters cover placed workshops in programme order, grouped by slot in
+  the picker. They show placement, leaders, capacity, assigned people and
+  sign-ups, and the person `food-note` as the confidential health column. A
+  screen-only organiser note counts first-choice placements, placements from a
+  ranked choice, and how often the workshop was ranked first.
+- Person plans list people and external leaders. Every configured slot shows the
+  workshop, room, and role; fixed attendance is marked, external leaders show the
+  workshops they lead and their available slots, and people the resolver left
+  unassigned carry an **Offen** notice with its reason.
+- Family plans show each member's workshop, room, and leadership per slot, with
+  adults first and the same **Offen** notice per member.
+- Room plans list every slot, including empty ones.
+
+Wide tables switch to labelled cards on narrow screens, and browser printing uses
+the same document data without an in-app print, download, or export action.
 
 ## Current limits
 

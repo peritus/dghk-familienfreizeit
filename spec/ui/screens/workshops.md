@@ -111,9 +111,9 @@ results use a separate companion design and privacy projection.
 ## Printing and visual system
 
 There is no application print or export button. Browser printing is supported
-through the shared print stylesheet for the current or prospective organiser
-plan, with the data context labelled. Released/effective printing belongs to
-M10.
+through the shared print stylesheet for the organiser plan; organiser lists carry
+no data context label because the organiser has one plan. Released/effective
+printing belongs to M10.
 
 Use the neobrutalist design system, page-local section navigation, responsive cards and
 accessible tables. All supported screen sizes are equally important. Strong

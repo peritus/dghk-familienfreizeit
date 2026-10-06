@@ -116,14 +116,13 @@ marked otherwise.
 | [`workshop-allocation.tsx`](../../../src/modules/workshop-rankings/app/components/workshop-allocation.tsx) | "Prüfe die markierten Fälle vor dem Festlegen." |
 | [`inventory.tsx`](../../../src/app/organiser/screens/inventory.tsx) | step description "Plan kommunizieren" — no `Communicated` event exists in the source |
 | four production steppers | the `Festgelegt` step, a literal `upcoming` in every caller and unreachable by construction, with the description "Plan veröffentlichen und Listen erzeugen" pointing at the orphaned report files below |
-| [`reports.tsx`](../../../src/app/organiser/components/workshop/reports.tsx) | `status="Vorläufig, nicht endgültig"` on every print document — every plan is permanently provisional because nothing can make it final |
 
 Orphaned feature code. Keep components that the real feature will reuse; delete
 the advertising and the registry claims. Each row states which side it falls on.
 
 | Location | What is there | Disposition |
 |---|---|---|
-| [`reports.tsx`](../../../src/app/organiser/components/workshop/reports.tsx) | thirteen exports: rosters, per-person, per-family and per-room plan tables and documents, and a list-kind switcher — the whole "Listen erzeugen" capability | No production importer. **Keep the components** for the M11/M13 reports host; remove the coverage entries, the permanent "Vorläufig" status, and the stepper copy that promises them |
+| [`reports.tsx`](../../../src/app/organiser/components/workshop/reports.tsx) | thirteen exports: rosters, per-person, per-family and per-room plan tables and documents, and a list-kind switcher — the whole "Listen erzeugen" capability | No production importer. **Keep the components** for the M11/M13 reports host; remove the coverage entries and the stepper copy that promises them |
 | [`participation.tsx`](../../../src/modules/workshop-assignment/app/components/participation.tsx) | ten exports: attendance matrix, group distribution, unrequested assignments, and an open-cases worklist with a "Nächster Schritt" column | No production importer, and the owning module contributes no screen. **Keep the components**; remove the `Familie erinnern` action copy, which promises a notification path that does not exist anywhere |
 | [`src/app/organiser/components/workshop/index.ts`](../../../src/app/organiser/components/workshop/index.ts) | a barrel re-exporting both files | **Remove.** It has zero importers and is the only thing making the two files appear reachable |
 | [`shared.tsx`](../../../src/app/components/shared/workshop/shared.tsx) | `WorkshopListPicker`, `WorkshopPrintDocument`, `WorkshopConfidentialityNotice` | Reachable only through `reports.tsx`. **Keep**; they are the print primitives the reports host needs |

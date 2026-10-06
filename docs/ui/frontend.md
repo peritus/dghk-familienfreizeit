@@ -58,9 +58,9 @@ and workshop navigation context and provides the URL-backed tertiary views **Ant
 including conflict notices and person tracing, without adding a persistence boundary.
 
 The **Listen** navigation entry selects the workshop roster, person plan, family
-plan, or room plan route. Each view has a page-local selector for one document and
-a **Datenstand** selector for the committed current plan or the draft-inclusive
-prospective plan. Roster documents show an explicit confidentiality notice and
+plan, or room plan route. Each view has a page-local selector for one document with
+previous and next buttons, over the same plan as every other organiser screen.
+Roster documents show an explicit confidentiality notice and
 the responsive layout uses tables on wide screens and labelled cards on narrow
 screens. The reports are browser-printable from the shared stylesheet and expose
 no application print, download, or export control.
