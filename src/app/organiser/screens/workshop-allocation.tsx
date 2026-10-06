@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useLocation } from 'wouter'
+import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
@@ -47,8 +47,8 @@ const rankLegendTones = [
 ]
 
 function allocationView(pathname: string): WorkshopAllocationView {
-  if (pathname.split('?')[0]?.endsWith('/allocation/demand')) return 'demand'
-  if (pathname.split('?')[0]?.endsWith('/allocation/trace')) return 'trace'
+  if (pathname.endsWith('/allocation/demand')) return 'demand'
+  if (pathname.endsWith('/allocation/trace')) return 'trace'
   return 'answers'
 }
 
@@ -73,10 +73,12 @@ function traceStages(
 
 export function WorkshopAllocation() {
   useDocumentTitle('Wünsche · Workshops · Familienfreizeit')
+  // wouter's location is the pathname only; a traced person arrives in the query.
   const [location, navigate] = useLocation()
+  const queryPersonId = new URLSearchParams(useSearch()).get('person')
   const { world, current_plan: currentPlan } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
-  const [traceMode, setTraceMode] = useState<TraceMode>('all')
+  const [traceMode, setTraceMode] = useState<TraceMode>(queryPersonId ? 'highlight' : 'all')
   const [selectedPersonName, setSelectedPersonName] = useState('')
   const projection = useMemo(
     () =>
@@ -96,8 +98,6 @@ export function WorkshopAllocation() {
 
   const view = allocationView(location)
   const answers = workshopAllocationPeople(projection, group)
-  const query = new URLSearchParams(location.split('?')[1] ?? '')
-  const queryPersonId = query.get('person')
   const selectedPerson =
     projection.person_names.find((person) => person.name === selectedPersonName) ??
     projection.person_names.find((person) => person.id === queryPersonId)
