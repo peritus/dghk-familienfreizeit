@@ -27,13 +27,14 @@ implemented. Event-backed fixed attendance decisions and their resolver
 mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md));
 remaining active work is limited to the unresolved planning contract:
 
-- complete organiser review surfaces for current and prospective programme and
-  allocation contexts; released/effective contexts belong to M10 release control;
+- complete the remaining organiser review surfaces for current and prospective
+  programme and allocation contexts; released/effective contexts belong to M10
+  release control;
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
   fixtures (the capacity-reduction policy is resolved as
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
-- add the remaining roster, heatmap, and finding views without creating another
-  workshop state store.
+- add the remaining participation heatmap and finding views without creating
+  another workshop state store.
 
 Acceptance: organisers can inspect automatic and explicitly fixed decisions,
 every blocking outcome is explainable, capacity changes follow D30, and all
@@ -81,9 +82,9 @@ family-access acceptance is declared complete.
 Specification coverage: [reports](application/reports.md), [D21](../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets),
 report portions of [UI-00](ui/design-system.md), and the selected modules' report contracts.
 
-- Implement shared, family, and organiser report routes, audience projections,
-  report contribution registration, and the first host-rendered reports over the
-  projections established by M10.
+- Extend the shared, family, and organiser report host with the remaining audience
+  projections, report contribution registration, and first host-rendered reports
+  for modules outside the M8 workshop list slice.
 - Implement responsive report layout primitives, print stylesheets, repeated
   headings, page breaks, greyscale status, and confidentiality labels.
 - Keep reports derived in memory; provide no download, export, or print button.

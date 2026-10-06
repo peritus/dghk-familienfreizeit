@@ -24,6 +24,10 @@ The route table is:
 | `/organiser/workshops/allocation` | Workshop allocation answers (**Wünsche · Antworten**) |
 | `/organiser/workshops/allocation/demand` | Workshop allocation demand (**Wünsche · Nachfrage**) |
 | `/organiser/workshops/allocation/trace` | Workshop allocation trace (**Wünsche · Verlauf**) |
+| `/organiser/workshops/lists/workshops` | Selected workshop roster |
+| `/organiser/workshops/lists/persons` | Selected person plan |
+| `/organiser/workshops/lists/families` | Selected family plan |
+| `/organiser/workshops/lists/rooms` | Selected room plan |
 | Other paths | Not-found message and a link back to the start |
 
 The organiser chunk probes the session and organiser log before deriving. It owns
@@ -35,7 +39,7 @@ remains the only persistence boundary; there is no separate drafting API or serv
 draft state.
 
 Workshop routes use the same reducer and draft pipeline. Their section navigation
-links **Workshops**, **Programm**, **Wünsche**, and **Räume und Slots**; the programme
+links **Workshops**, **Programm**, **Wünsche**, **Räume und Slots**, and **Listen**; the programme
 item stays current on all three programme review URLs, while the resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
 overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
@@ -52,6 +56,14 @@ an application print or export control. Workshop allocation keeps the same organ
 and workshop navigation context and provides the URL-backed tertiary views **Antworten**,
 **Nachfrage**, and **Verlauf**. These views derive from the prospective world and plan,
 including conflict notices and person tracing, without adding a persistence boundary.
+
+The **Listen** navigation entry selects the workshop roster, person plan, family
+plan, or room plan route. Each view has a page-local selector for one document and
+a **Datenstand** selector for the committed current plan or the draft-inclusive
+prospective plan. Roster documents show an explicit confidentiality notice and
+the responsive layout uses tables on wide screens and labelled cards on narrow
+screens. The reports are browser-printable from the shared stylesheet and expose
+no application print, download, or export control.
 
 Family routes reuse the organiser `PrimaryNavigation` and introduce no secondary
 navigation level. `FamilyTopicNavigation` wraps the shared `TertiaryNavigation`

@@ -14,20 +14,23 @@ remain separate URLs with page-local workshop navigation:
 | Wünsche · Antworten | `/organiser/workshops/allocation` | ranked answers, explicit no-preference, and missing-answer states |
 | Wünsche · Nachfrage | `/organiser/workshops/allocation/demand` | first-choice and ranked demand against capacity and placement |
 | Wünsche · Verlauf | `/organiser/workshops/allocation/trace` | deterministic solver trace with explanatory outcomes |
+| Workshoplisten | `/organiser/workshops/lists/workshops` | one printable roster per selected workshop, with capacity, leaders, and organiser-only sensitive fields |
+| Personenpläne | `/organiser/workshops/lists/persons` | one selected person's slot-by-slot workshop plan |
+| Familienpläne | `/organiser/workshops/lists/families` | one selected family's member-by-slot workshop plan |
+| Raumpläne | `/organiser/workshops/lists/rooms` | one selected room's scheduled workshops, audience, and leaders |
 
-The section navigation contains **Workshops**, **Programm**, **Wünsche**, and **Räume und Slots**. The
+The section navigation contains **Workshops**, **Programm**, **Wünsche**, **Räume und Slots**, and **Listen**. The
 workshop overview groups **Workshops**, **Leitungen**, and **Externe Leitungen** as
 local tabs, while **Programm** groups the three programme review URLs (**Ganzes
 Programm**, **Nicht eingeplant**, and **Überschneidungen**) as page-local tabs, and
 Räume und Slots groups the space and slot resource routes. The
 The **Wünsche** entry is selected for all three allocation URLs and its tertiary
-navigation contains **Antworten**, **Nachfrage**, and **Verlauf**. The planned product
-views **Teilnahme** and **Listen** remain reserved and are not rendered in navigation
-until their screens exist.
+navigation contains **Antworten**, **Nachfrage**, and **Verlauf**. **Listen** has
+the four URL-backed views above and defaults to the workshop roster.
 
-The overview is the landing view. Participation review and list/report views remain
-outstanding product views. Workshop allocation demand and solver traces are delivered
-through the three allocation routes above.
+The overview is the landing view. Participation review remains an outstanding
+product view. Workshop allocation demand and solver traces are delivered through
+the three allocation routes above.
 
 The four visible lifecycle summaries are:
 
@@ -95,19 +98,12 @@ save status are used for every mutation.
 Capacity reductions that would put current attendance above the new capacity
 are blocked, per [D30](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces).
 
-## Privacy and lists
-
-The organiser workspace can open these real product views:
-
-- workshop roster;
-- person plan;
-- family plan; and
-- room/space plan.
+## Privacy boundary
 
 Operational rosters may include health and emergency-contact data for the
 organiser and assigned workshop leaders only. Confidentiality is explicit in
 the report projection and on every printed page. External leader contact data
-is organiser-only.
+is organiser-only. The list reports remain organiser-only.
 
 The prototype remains organiser-only. Family rankings, sign-up, interest, and
 results use a separate companion design and privacy projection.

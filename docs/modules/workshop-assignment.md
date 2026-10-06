@@ -35,6 +35,17 @@ that are unchanged, replace an automatic choice, have no automatic counterpart,
 or are invalid. The projection is read-only and is recalculated for prospective
 local-first organiser drafts.
 
+## Workshop list reports
+
+The organiser workshop-list projection derives four read-only document views from
+the selected world and solver plan: a workshop roster, person plan, family plan,
+and room plan. It can be built for the committed current world or for the
+prospective world that includes local organiser drafts. The projection joins
+typed workshop, person, family, slot, and space identities through the existing
+module summaries and solver sections; it does not persist folded report state or
+add a screen-local relationship store. The roster keeps assignments and sign-ups
+separate from interest counts, while person and family plans preserve free slots.
+
 ## Attendance cost
 
 Attendance is resolved in deterministic Wahlrunde order over each person's

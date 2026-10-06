@@ -25,18 +25,22 @@ path before persistence.
 | `/organiser/workshops/allocation` | Workshop allocation answers (**Wünsche · Antworten**) |
 | `/organiser/workshops/allocation/demand` | Workshop allocation demand (**Wünsche · Nachfrage**) |
 | `/organiser/workshops/allocation/trace` | Workshop allocation trace (**Wünsche · Verlauf**) |
+| `/organiser/workshops/lists/workshops` | Selected workshop roster with placement, leaders, capacity, and confidential operational fields |
+| `/organiser/workshops/lists/persons` | Selected person's slot-by-slot workshop plan |
+| `/organiser/workshops/lists/families` | Selected family's member-by-slot workshop plan |
+| `/organiser/workshops/lists/rooms` | Selected room schedule with audience and leaders |
 
 The host exposes these kernel-owned and selected-module screens through one screen
 registry. The app bar presents four primary areas: Dashboard, Familien,
 Unterbringung, and Workshops. Accommodation has page-local secondary links for
 Unterkunft and Belegung. The workshop section navigation visibly links Workshops,
-Programm, Wünsche, and Räume und Slots. Programm remains selected across its programme review
-URLs, while Räume und Slots remains selected for its Räume and Slots resource routes,
-and the workshop overview provides local tabs for Workshops, Leitungen, and
-Externe Leitungen. Wünsche remains selected across its three allocation URLs, whose
-tertiary views are Antworten, Nachfrage, and Verlauf. Teilnahme and Listen remain
-reserved workshop areas and are not rendered until their screens exist. All routes
-preserve the shared local-first draft state.
+Programm, Wünsche, Räume und Slots, and Listen. Programm remains selected across
+its programme review URLs, while Räume und Slots remains selected for its Räume and
+Slots resource routes, and the workshop overview provides local tabs for Workshops,
+Leitungen, and Externe Leitungen. Wünsche remains selected across its three
+allocation URLs, whose tertiary views are Antworten, Nachfrage, and Verlauf. Listen
+provides four URL-backed document views and defaults to the workshop roster. All
+routes preserve the shared local-first draft state.
 
 The board's browser print output is rendered from the same prospective assignment
 review. Print media hides navigation and interactive review controls, then exposes
@@ -166,13 +170,24 @@ filters, person tracing, responsive tables/cards, keyboard tertiary navigation, 
 browser print use shared workshop components. Fixed violations and unassigned people
 remain visible as review notices; the views do not create attendance or roster events.
 
+Workshop list reports are read-only projections over either the committed world
+and plan (**Aktuell**) or the committed world plus local drafts (**Entwurf**).
+They provide one selected document for each of four views: a workshop roster, a
+person plan, a family plan, and a room plan. Workshop rosters show placement,
+leaders, capacity, assigned people and sign-ups; restricted health or emergency
+contact labels are rendered only in the organiser report and are marked
+confidential. Person and family plans show every configured slot, including free
+slots. Room plans show every scheduled workshop in the selected space. Wide
+tables switch to labelled cards on narrow screens, and browser printing uses the
+same document data without an in-app print, download, or export action.
+
 ## Current limits
 
 The active profile contains the kernel `role` trait, accommodation modules, the
 profile-driven organiser family controls, and the workshop planning modules.
 Assignment review and the narrow event-backed fixed-assignment workflow are
 implemented. Family authentication and family routes, fixed workshop
-attendance/placement decisions, generic reports, plan comparison, release, and
+attendance/placement decisions, non-workshop generic reports, plan comparison, release, and
 communication remain later scope.
 
 The verified tests cover local derivation, family display-name replacement,
