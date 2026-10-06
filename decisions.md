@@ -59,7 +59,7 @@ Migrations are hand-written SQL and there is no ORM
 Identical inputs produce byte-identical output, forever.
 
 *Why:* it makes every other good property possible. Re-runs are stable, so
-communicating twice does not shuffle people arbitrarily. Counterfactuals are cheap,
+closing twice does not shuffle people arbitrarily. Counterfactuals are cheap,
 so a future comparison can attribute every move to its cause without changing
 the solver contract. Regression testing is a hash comparison. Reproducing a
 complaint is `solve(solverInputAt(input_seq))`.
@@ -231,8 +231,10 @@ weight review). The exact build revision identifies the profile and parameters u
 structured values carry the workshop and rank for the one current occasion
 choice cycle, validated by the `ordered-choice` resolver operator. There is no
 round identity, session identity, dedicated ranking event, or property table.
-Late edits remain valid input to a later explicit calculation review. Rationale
-in [workshop rankings](spec/modules/workshop-rankings.md).
+Edits after the choice Zieltermin remain valid input until the organisers close
+the workshop area; the Zieltermin is advisory and never a write barrier
+([phases](spec/architecture/phases.md)). Rationale in
+[workshop rankings](spec/modules/workshop-rankings.md).
 
 ## D14 — `family_facing` in the occasion profile drives the family view
 
@@ -269,7 +271,7 @@ allowed to disagree with the real one, and a round trip per experiment.
 
 *Why:* D3 makes the solver pure and dependency-free, and the fold is pure for the
 same reason, so both run in a browser unchanged. Future comparison and change
-communication can compose separate pure derivations without adding state to the
+notification can compose separate pure derivations without adding state to the
 solver.
 
 *Consequence:* draft changes stay out of the log while drafting mode is active. An
@@ -288,37 +290,47 @@ algorithm. The first is dependency-free TypeScript and is budgeted in
 [deployment](spec/engineering/deployment.md) §1; the second is held by the cross-runtime agreement
 test in [testing](spec/engineering/testing.md) §1.
 
-## D16 — Release control determines which arrangements families see
+<a id="d16--release-control-determines-which-arrangements-families-see"></a>
+## D16 — Families see the live world, except solver results, which they see as closed
 
-*Chosen.* Release control holds back accommodation allocations as a whole, workshop
-programme details per workshop, and solver workshop allocations per slot. Organisers
-review an exact diff and choose **An Familien kommunizieren**. A `Communicated`
-event identifies the reviewed log prefix and selected scopes; each scope retains
-its last communicated content while organisers prepare changes. Own information,
-materials and permitted live participation remain current. Privacy is independent.
-Email notification is optional and does not determine visibility.
+*Chosen.* Families see the current world, privacy-projected by the Worker. The one
+exception is an area's solver result — the accommodation placement or the workshop
+placements and attendance — which families see only as recorded by the area's latest
+closing event. Closing (**Festlegen**) is an organiser decision that closes the
+area's family inputs and appends one module-owned event whose payload is the
+solver-output slice, ids only, computed by the Worker at the reviewed head.
+Reopening opens the inputs again; families keep the last closed result until the
+next closing. Descriptors such as names, titles and times stay live. Email
+notification is optional and does not determine visibility.
 
-The authoritative mechanism, event contract, dependencies, reports and acceptance
-scenarios are in [release control](spec/application/release-control.md). All content is derived
-from the event log; the family response composes ordinary worlds without creating
-another Plan type or storing a snapshot.
+The mechanism, events, family composition, organiser differences and verification
+are in [phases](spec/architecture/phases.md).
 
-*Rejected alternatives:* freezing the whole family world hides successfully saved
-answers; exposing the entire current world reveals unfinished arrangements; a single
-global boundary prevents communicating individual workshops. Releasing individual
-families' beds or individual workshops' solver participants can produce contradictory
-allocations, so accommodation and slot allocations are coherent release units.
+*Why:* the solver result is the only content that changes without anyone touching
+it — any family's late edit re-runs the solver — so it is the only content families
+must not see live. Everything else changes only when someone deliberately edits it,
+and showing it live is simpler and honest. Recording the closed result removes the
+need to re-derive history under the deployment that produced it: a later deployment
+cannot change what families were shown, and the before/after comparison is two
+payloads.
 
-*Rejected alternative:* persist communicated snapshots or a second plan type.
-They create competing domain state and bypass ordinary deterministic derivation.
-The reviewed `input_seq`, selected scopes, `build_revision`, and
-`compatibility_revision` identify the action. Release control needs no additional
-content hash; the reviewed prefix and deterministic derivation protect exact
-confirmation content even when the live head advances.
+*Rejected alternative:* hold back arrangements per release scope and re-derive the
+communicated content at a reviewed log prefix. It needs per-scope history,
+dependencies between scopes, a build-identity guard and an unavailable state for
+results that can no longer be reproduced, all to avoid storing a result that is in
+fact an organiser decision.
 
-*Consequence:* family reads combine live information with scope-specific historical
-content and apply current authorisation/privacy. Organisers need an outstanding-change
-report and a detailed confirmation preview, not a whole-log age indicator.
+*Rejected alternative:* show solver results live. Every late edit or organiser
+experiment would move other families' rooms and workshops in their view.
+
+*Rejected alternative:* let the client submit the result to record. The solver
+remains the only producer of assignments (D6); the Worker computes the payload and
+refuses a closing whose reviewed head is stale or whose area is not ready.
+
+*Consequence:* closed results are the one solver output stored in the log, as
+organiser decisions with the revisions that produced them, never traces, scores,
+findings or descriptors. Organisers see the difference between the closed result
+and the current derivation and decide whether to close again.
 
 ## D17 — KDL is the canonical development and test event-log format
 
@@ -672,11 +684,9 @@ read site). Easy to reason about locally ("was this ever set") but pushes the
 same filter into the resolver, `diff`, and every future module's fold, and
 duplicates what re-derivation already gives for free.
 
-*Why:* historical and reviewed views already work by re-deriving `derive()`
-over a truncated event slice at a specific `seq`
-([release control](spec/application/release-control.md) — confirmation
-"submits the reviewed `input_seq`" and later access is "ordinary derivation at
-the reviewed `input_seq`, using the same Plan type"). Nothing needs the
+*Why:* historical views already work by re-deriving `derive()` over a truncated
+event slice at a specific `seq`, and what families were shown is recorded by the
+closing events themselves ([phases](spec/architecture/phases.md)). Nothing needs the
 *current* world to remember what used to be true; that question is answered by
 re-deriving at the seq in question, not by keeping a tombstone around forever.
 Removing entries at fold time instead of tombstoning them means the resolver,
@@ -698,11 +708,13 @@ one slot and one physical space; there is no separate programme-session or
 scheduled-offering identity. Rankings and attendance refer directly to the
 workshop.
 
-The workshop lifecycle is represented by independent event-backed facts:
-authoring, choice visibility, calculation review, attendance/schedule release,
-and cancellation. The organiser UI summarizes those facts as four visible
-phases, but the phases do not collapse programme, schedule, attendance, or
-communication state into one flag.
+The workshop lifecycle is a derived, typed phase projection over independent
+event-backed facts: authoring, `WorkshopChoiceOpened`, allocation readiness,
+`WorkshopsClosed`/`WorkshopsReopened`, and cancellation
+([phases](spec/architecture/phases.md)). The organiser UI renders it as the four
+steps of the workshop track. Phases are open in number across the application;
+they are never one persisted phase flag and never collapse programme, schedule,
+attendance, or closing state into one value.
 
 Self-organized workshops remain deferred. A future source may contribute the
 same direct workshop boundary without introducing a second identity. The

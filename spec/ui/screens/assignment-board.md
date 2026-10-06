@@ -7,7 +7,7 @@ Those documents are authoritative for the derived board, browser-printable
 projection, fixed-assignment draft flow, diagnostics, terminology, and print
 styles.
 
-The board remains a current-state organiser surface. Plan comparison, release
-control, family access, and richer placement overrides remain outside this
+The board remains a current-state organiser surface. Plan comparison, closing the
+accommodation area, family access, and richer placement overrides remain outside this
 delivered scope; the latter is recorded in
 [`organiser-placement-overrides`](../../deferred-ideas/organiser-placement-overrides.md).

@@ -42,9 +42,9 @@ the draft workspace uses a cloud-with-pause icon and shows the numeric draft cou
 current ordered batch. A failed automatic apply keeps its events, opens the workspace,
 and activates drafting mode.
 
-Release reporting and confirmation follow [release control](release-control.md)
-and the deferred [release-control UI](../deferred-ideas/release-control-ui.md). Live coordination findings remain separate
-from held arrangements.
+Opening, closing and reopening an area, the closing review and closed-area
+differences follow [phases](../architecture/phases.md) §5–7. Live coordination
+findings remain separate from closed results.
 
 ## 2. Whole-family assignment board
 
@@ -86,4 +86,4 @@ but their prominent placement UI is deferred to
 
 The board's browser-printable output shows family-to-room assignments, unplaced families,
 capacity, and constraint findings. The later generic report catalogue covers
-workshops, attendance, and communication; it does not change the M6 data model.
+workshops, attendance, and closed results; it does not change the M6 data model.

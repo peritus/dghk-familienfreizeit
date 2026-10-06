@@ -199,11 +199,11 @@ A family may `LabelSet` / `LabelCleared` only:
   family-control contract (such as workshop participation);
 - at strengths that control permits.
 
-Deadline status is not an additional authorisation condition. The active profile's
-scoped deadlines affect family-facing notices only; a family remains able to write
-an otherwise authorised control after its deadline. Organisers can always write
-through the organiser path. Whether a late change is adopted in a plan is decided
-by the explicit review and communication flow.
+Target dates are not an additional authorisation condition. They affect
+family-facing notices only; a family remains able to write an otherwise authorised
+control after its Zieltermin until the organisers close the area. Organisers can
+always write through the organiser path. Whether a late change reaches families is
+decided by the next closing ([phases](phases.md)).
 
 Everything else is organiser-only. Organiser-only labels are never rendered in the
 family view.
@@ -329,8 +329,8 @@ mechanism, listed in its specification §9.
 ---
 
 World-level module diagnostics inspect non-solver data separately; they do not
-enter plan preflight or its hash. Release consistency uses the prospective world
-under [release control](../application/release-control.md), not an extra solver stage.
+enter plan preflight or its hash. Closing readiness uses module findings under
+[phases](phases.md), not an extra solver stage.
 
 ## 7. Ordered values
 

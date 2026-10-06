@@ -21,17 +21,16 @@ a recommendation. The spec gets edited only after you approve.
 
 ## Derivation boundaries the proposal must preserve
 
-[Release control](../application/release-control.md) is authoritative. Family responses need
-current permitted facts plus potentially several historical scope bases. Live
-workshop admission also needs the effective communicated programme and head labels.
-There is no single family cut, and a cache cannot hide a newly saved own answer.
+[Phases](../architecture/phases.md) are authoritative. A family response needs the
+current world at head plus each area's closed result, which its closing event
+already carries; no historical prefix is derived. Live workshop admission needs
+head labels. A cache cannot hide a newly saved own answer.
 
-Organiser apply still verifies solver agreement. Communication confirmation uses the
-reviewed head, scope selection, `build_revision`, and `compatibility_revision`, with no extra content hash.
-Any benchmark must exercise multi-basis family responses, live participation checks,
-release previews and ordinary apply. Do not assume saves are fold-only or that cold
-misses occur only once per communication. This proposal is outside the active
-architecture; release control introduces no persisted cache.
+Organiser apply still verifies solver agreement. Closing derives at the reviewed
+head and records the result. Any benchmark must exercise family responses, live
+participation checks, closing reviews and ordinary apply. Do not assume saves are
+fold-only. This proposal is outside the active architecture; phases introduce no
+persisted cache.
 
 ## What the measurements changed about this plan
 
@@ -97,8 +96,7 @@ removed projection tables.
      (a) fold at head, (b) cache-hit family view, (c) cold solve.
    - (a) and (b) within ~5 ms CPU → the free tier is viable for everything except a
      cold miss.
-   - Measure cold misses for head and every referenced historical basis, including
-     live saves and release previews. If (c) > 10 ms, D1 stays Paid and the cache is kept only for latency. If
+   - Measure cold misses at head, including live saves and closing reviews. If (c) > 10 ms, D1 stays Paid and the cache is kept only for latency. If
      (c) fits, D1 becomes "Free tier + derive cache", with Paid as the documented
      fallback.
    - I'd write D1 as "Free + cache, pending the benchmark; switch to Paid if the

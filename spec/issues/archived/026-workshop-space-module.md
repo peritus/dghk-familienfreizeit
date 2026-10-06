@@ -98,7 +98,7 @@ screen-local lookups over raw labels.
 Release control already treats workshop programme content and workshop
 allocation as separate scopes. It can continue to expose the scheduled space's
 safe location descriptors as programme content and publish attendance only in
-the later allocation scope ([release scopes](../../application/release-control.md#1-release-scopes)).
+the later allocation scope (`release scopes`).
 
 ## Recommendation
 
@@ -233,7 +233,7 @@ responsibility of [Issue 025](025-workshop-ranking-scheduling-lifecycle.md).
 - [modules/contract.md](../../modules/contract.md)
 - [labels-and-constraints.md](../../architecture/labels-and-constraints.md)
 - [solver-contract.md](../../architecture/solver-contract.md)
-- [release-control.md](../../application/release-control.md)
+- `release-control.md`
 - [roadmap.md](../../roadmap.md)
 - [D2](../../../decisions.md#d2--event-log-with-in-memory-read-models)
 - [D3](../../../decisions.md#d3--the-solver-is-a-pure-function)

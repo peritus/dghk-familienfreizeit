@@ -29,7 +29,7 @@ The active occasion selects these modules ([modules](../modules/contract.md) §5
 | [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, organiser board, and browser-printable assignment output |
 | [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
 | [`official-workshops`](../modules/official-workshops.md) | organiser-authored workshops, audience, participation modes, leaders, and cancellation |
-| [`workshop-scheduling`](../modules/workshop-scheduling.md) | event-backed slots, one placement per workshop, and schedule release |
+| [`workshop-scheduling`](../modules/workshop-scheduling.md) | event-backed slots and one placement per workshop |
 | [`workshop-rankings`](../modules/workshop-rankings.md) | current-cycle ordered per-person workshop rankings |
 | [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, assignment, and allocation traces |
 | [`family-preferences`](../modules/family-preferences.md) | the separate family-facing preferences projection |
@@ -42,7 +42,7 @@ profile source is [index.ts](../../src/config/profiles/luebben-2027/index.ts)
 and its canonical event fixture is
 [djh-luebben.kdl](../../test/fixtures/room-inventory/djh-luebben.kdl).
 
-Family-facing controls and release projections remain later work; the selected
+Family-facing controls and the phase projection remain later work; the selected
 organiser workshop planning modules are active in the executable profile.
 ## 3. Workshop-space inventory
 
@@ -57,8 +57,8 @@ The organiser records each space's display name, location description, physical
 capacity, event-backed availability windows, and deterministic order. Generic
 resolver labels may describe capabilities such as `accessible` or `outdoor`
 without adding a profile-specific capability vocabulary. The active profile
-does not yet expose these physical facts to families: the schedule and release
-contract remains an Issue 025 responsibility.
+does not yet expose these physical facts to families; they reach families through
+the closed workshop result ([phases](../architecture/phases.md) §5).
 
 The profile composition contract includes these independent fixtures:
 
@@ -105,7 +105,7 @@ separate sleeping-parties module.
 | | `scarce_capabilities` | `accessible: −3` | use accessible rooms for others only when it helps |
 
 Trait weights and penalties (§3) and these parameters are starting values; changing
-them is a deployment, reviewed before communicating.
+them is a deployment, reviewed before closing an area.
 
 ## 6. Workshop policy
 
@@ -131,27 +131,24 @@ Workshops explicitly choose `assigned`, `sign-up` or `interest` in their setup
 events. Module-owned `signed-up-for` and `interested-in` labels are placed in the
 workshops section through `module_controls`; the profile does not redefine them
 as traits. Shared age/audience policy applies to all participation modes. Workshop
-controls show the workshop deadline as an advisory notice; families may still
-change them after it, and organisers can review and publish a later plan when
-appropriate.
+controls show the workshop Zieltermin as an advisory notice; families may still
+change them after it until the organisers close the workshop area.
 
-The active kernel [release-control contract](../application/release-control.md) governs
-accommodation, per-workshop details and per-slot solver allocations. Family inputs
-and permitted participation stay live. Draft programme details do not
-change family admission before communication. This profile enables all three scope
-kinds through its selected modules; release policy is not executable runtime config.
+[Phases](../architecture/phases.md) govern both areas. Family inputs and permitted
+participation stay live; the workshop catalogue reaches families once workshop
+choice is opened, and solver results only when their area is closed. Phase policy
+is module code and profile dates, not executable runtime config.
 
 ## 7. Metadata, copy, and notifications
 
 The occasion runs from `2027-04-30` through `2027-05-02`, inclusive; family-facing
 German dates are 30.04.2027 to 02.05.2027. Ages are computed at `2027-04-30`.
 
-The accommodation deadline is `2027-03-31T21:59:59Z` and the workshop deadline is
-`2027-04-15T21:59:59Z`; both are displayed in `Europe/Berlin` time. They are
-advisory workflow dates, not write barriers. Families can continue to update their
-preferences after either date. Organisers decide whether late changes should be
-included in a newly reviewed and published plan; an existing published plan does
-not change automatically.
+The accommodation Zieltermin is `2027-03-31T21:59:59Z` and the workshop Zieltermin
+is `2027-04-15T21:59:59Z`; both are displayed in `Europe/Berlin` time. They are
+advisory dates, not write barriers. Families can continue to update their
+preferences after either date until the organisers close the area; a closed result
+does not change until the organisers close the area again.
 
 Family-facing copy is German with an English fallback and follows the
 [German translation guidelines](../ui/german-translation-guidelines.md). The
@@ -160,8 +157,8 @@ workshops. Food is represented by the generic person-scoped profile traits above
 it does not introduce a separate food entity or event family. Cross-family
 sharing wishes belong to the separate sleeping-parties module.
 
-Authentication invitations and reminders use the release-independent family login
-workflow. Communication and change emails remain deferred.
+Authentication invitations and reminders use the phase-independent family login
+workflow. Closing and change emails remain deferred.
 
 ## 8. First-deployment boundary
 

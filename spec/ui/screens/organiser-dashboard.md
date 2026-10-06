@@ -67,11 +67,11 @@ This screen does not surface event-log internals (a raw sequence number, a
 qualifier, describe it in organiser-facing terms ("angemeldet"), not in
 storage terms.
 
-Release-control and reminder-chasing summaries (outstanding scopes, families
-that haven't responded) are out of scope for this screen spec; they belong
-to the deferred [UI-11](../../deferred-ideas/release-control-ui.md) under **M10 — Family access and release
-control** and will get their own dashboard entry point once that milestone
-is built, rather than being designed here ahead of the underlying feature.
+Closed areas that differ from their closed result appear as Hinweise linking to
+the area's review screen ([phases](../../architecture/phases.md) §7).
+Reminder-chasing summaries (families that haven't responded) are out of scope
+for this screen spec and get their own entry point with family access (M10),
+rather than being designed here ahead of the underlying feature.
 
 ## Interaction and accessibility
 

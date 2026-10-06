@@ -26,15 +26,26 @@ assignments, unplaced families, diagnostics, and a full decision trace. Plans ar
 deterministic values derived on demand. A plan's identity is its `input_seq`,
 `build_revision`, and `compatibility_revision`.
 
-**Release control** — the kernel capability governing when selected arrangements
-become visible to families. Its authoritative contract is [06-release-control](../application/release-control.md).
+**Phase** — a typed, module-owned lifecycle context, such as workshop choice, whose
+status (`upcoming`, `open`, `late`, `closed`) is derived and which activates
+features ([phases](phases.md)).
 
-**Communication** — an organiser's reviewed release action. `Communicated` records
-the basis sequence and selected scopes; email notification is optional and separate.
+**Area** — a part of the occasion whose solver result is closed and shown to
+families as a whole: **Unterkunft** or **Workshops**.
+
+**Closed result** — the solver-output slice, ids only, recorded by an area's latest
+closing event; families see it instead of the current derivation.
+
+**Zieltermin** — an advisory target date. Passing it marks a phase late and never
+disables an action.
+
+**Closing** (**Festlegen**) — the organiser decision that closes an area's inputs
+and records its current solver result as the closed result. Reopening opens the
+inputs again; email notification is optional and separate.
 
 **World** — the complete derived state for one event prefix: projections, summaries,
-plan, diagnostics and release references. Produced by `derive(events, config)` and
-never stored. Audience responses select permitted content under release control.
+plan, diagnostics and closed results. Produced by `derive(events, config)` and
+never stored. Audience responses select permitted content under [phases](phases.md).
 
 **Draft events** — ordinary events an organiser has created in the organiser
 application but whose append has not yet been acknowledged by the Worker. They are
@@ -63,7 +74,7 @@ first-class deliverable that organisers read.
 another entity and optionally carrying a strength. Stored as a generic label.
 
 **Kernel** — the part of the application present in every deployment: event log,
-labels and resolver, derivation, solver pipeline, communication, authentication, and
+labels and resolver, derivation, solver pipeline, phases, authentication, and
 application shells.
 
 **Module** — a selectable unit of domain capability with a stable kebab-case id,

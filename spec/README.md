@@ -46,7 +46,7 @@ particular profile.
 | 3 | [Event model](architecture/events.md) | Generic event envelope, replay, and lifecycle |
 | 4 | [Labels and constraints](architecture/labels-and-constraints.md) | Trait vocabulary, resolver operators, and validation |
 | 5 | [Solver contract](architecture/solver-contract.md) | Determinism contract, solver input, pipeline, rules, and trace |
-| 6 | [Release control](application/release-control.md) | Held arrangements, communication scopes, review and visibility |
+| 6 | [Phases](architecture/phases.md) | Areas, phase status, closing and reopening, and what families see |
 | 7 | [Organiser view](application/organiser-view.md) | Organisation-team surfaces and module-provided screens |
 | 8 | [Family view](application/family-view.md) | Family-facing controls, privacy, and family workflows |
 | 9 | [Authentication](application/authentication.md) | Magic links, sessions, and threat model |
@@ -66,11 +66,11 @@ particular profile.
 | 23 | [Workshop space](modules/workshop-space.md) | Physical workshop spaces, capacity, availability, and capabilities |
 | 24 | [Official workshops](modules/official-workshops.md) | Official workshop facts and eligibility |
 | 25 | [Self-organized workshops](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred proposer-created workshops |
-| 26 | [Workshop scheduling](modules/workshop-scheduling.md) | Event-backed slots, one placement, conflicts, and schedule release |
+| 26 | [Workshop scheduling](modules/workshop-scheduling.md) | Event-backed slots, one placement, and conflicts |
 | 27 | [Workshop rankings](modules/workshop-rankings.md) | Eligibility-filtered current-cycle choices |
 | 28 | [Workshop attendance](modules/workshop-assignment.md) | Fair attendance assignment |
 | 29 | [Call for papers](deferred-ideas/call-for-papers.md) | Accepted-but-deferred proposal intake |
 | 30 | [Food preferences](deferred-ideas/food-preferences.md) | Accepted-but-deferred food aggregation, reporting, and safety-sheet scope |
 | 31 | [Materials](deferred-ideas/materials.md) | Accepted-but-deferred requests, commitments, and fulfilment |
 | 32 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
-| 33 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred communication and change emails |
+| 33 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred closing and change emails |

@@ -4,8 +4,8 @@ A feature is a product capability that a selected module offers and that can be
 selected by the profile, switched by deployment, and activated by a phase. This
 document is the contract for declaring features, composing them, and deriving
 their effective availability. Module composition is specified in
-[modules](../modules/contract.md); phase activation is specified separately in
-[issue 044](../issues/open/044-phase-model.md).
+[modules](../modules/contract.md); phase activation is specified in
+[phases](phases.md).
 
 The [implemented profile composition](../../docs/architecture/profile-composition.md)
 is the foundation this contract extends. Nothing below is implemented yet.
@@ -59,7 +59,7 @@ type FeatureDefinition = {
   subject_kind: EntityKind | null             // the entity the feature acts on, if any
   actions: readonly FeatureActionDefinition[]
   requires_features: readonly FeatureId[]     // must be effective for this one to be
-  requires_phases: readonly PhaseId[]         // empty until issue 044 lands
+  requires_phases: readonly PhaseId[]         // phases.md §4
   activation_mode: 'all' | 'any'              // over requires_phases
   surfaces: readonly FeatureSurface[]         // screens and family controls it governs
   readiness?: FeatureReadiness                // module-owned, pure, over derived facts
@@ -244,7 +244,7 @@ separately and is never folded into `build_revision` or
   when the overrides it holds differ from the Worker's, exactly as it does for
   a revision mismatch.
 
-Plans and `Communicated` events do not record operational state. Features cannot
+Plans and closing events do not record operational state. Features cannot
 change how a plan is computed, so a plan is still reproduced from `input_seq`,
 `build_revision`, and `compatibility_revision`.
 
@@ -269,8 +269,8 @@ only the effective features, with no layer detail.
 
 The first implementation declares one feature per existing selected surface and
 no feature for work that does not exist yet. Actions are declared only for event
-types the surface already writes. Phase-bound actions such as committing a
-workshop plan are added by [issue 044](../issues/open/044-phase-model.md).
+types the surface already writes. [Phases](phases.md#feature-bindings) add the
+phase bindings, the phase actions and three further features to this set.
 
 | Feature id | Audience | Governs |
 |---|---|---|
@@ -286,8 +286,8 @@ workshop plan are added by [issue 044](../issues/open/044-phase-model.md).
 | `room-assignment.assignment-board` | organiser | screen `organiser-assignment-board` |
 | `family-preferences.preferences` | both | every profile-trait family control |
 
-None declares `readiness` or `requires_phases` in the first set, so each is
-`ready` and `phase_active` by construction. A screen whose feature is not
+None declares `readiness` in the first set. Until the phase bindings are
+implemented, each is `phase_active` by construction. A screen whose feature is not
 effective is absent from navigation and its route renders the not-found view.
 
 The room-assignment board's `features` field and its uses are renamed to
@@ -295,11 +295,8 @@ The room-assignment board's `features` field and its uses are renamed to
 
 ## 9. Out of scope
 
-Email, delivery tracking, and arrangement communication stay outside this
-contract; release control governs which arrangements families see
-([release control](../application/release-control.md)). Phase definitions, status
-derivation, and deadline policy belong to
-[issue 044](../issues/open/044-phase-model.md).
+Email and delivery tracking stay outside this contract. Phase definitions, status
+derivation, target dates and closing belong to [phases](phases.md).
 
 ## 10. Verification
 

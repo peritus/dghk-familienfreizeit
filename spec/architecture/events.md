@@ -216,10 +216,10 @@ mechanism permits them. Kernel and module keys reserved for setup events remain
 protected. The resolver validates scopes, values, strengths, and references before
 append ([labels and constraints](labels-and-constraints.md) §4).
 
-Profile deadline status is advisory and is not re-evaluated during replay or used to
+Profile target dates are advisory and are not re-evaluated during replay or used to
 reject an otherwise authorised event. A late event is part of the current log just
-like any other event; release control determines whether it is included in a later
-published plan.
+like any other event. Only an area's closing event stops family input for that
+area ([phases](phases.md) §5).
 
 ### `LabelSet`
 ```ts
@@ -287,12 +287,13 @@ whether the request was automatic or explicitly started from the draft workspace
 
 ---
 
-## Communication
+## Phase events
 
-`Communicated` is the kernel event for an organiser's release decision. Its payload,
-review identity, scope dependencies and authorisation are defined in
-[release control](../application/release-control.md) §3. Its envelope supplies actor, time and
-sequence; it stores no plan or arrangement snapshot. Previewing creates no event.
+`WorkshopChoiceOpened`, `WorkshopsClosed`, `WorkshopsReopened`,
+`AccommodationClosed` and `AccommodationReopened` are module-owned organiser
+events defined in [phases](phases.md) §5. A closing event's payload is the area's
+solver-output slice, ids only, computed by the Worker at the reviewed head; the
+client never supplies it. Previewing a closing creates no event.
 
 ---
 
@@ -309,15 +310,16 @@ Worth writing down, because the boundary blurs under pressure.
 | Page views, login times | Telemetry | Workers analytics, or nowhere |
 | Entities and labels as read models | Derivation, not decision | nowhere |
 | Family placement units | Derivation | room-assignment plan section |
-| A plan, whether communicated or still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
+| A plan, including one still being reviewed | Derivation; `derive()` reproduces it from its events and `input_seq` | nowhere |
 | Draft events in an organiser's browser | Not yet committed; discarding one must leave no trace | that organiser's browser |
 
 The test is whether this records an authoritative domain fact or organiser decision,
-or merely a reproducible result. Family labels, material commitments and communication
+or merely a reproducible result. Family labels, material commitments and phase
 decisions are events even when they do not change solver output. Assignments and
-summaries are derived results. Communication records its reviewed `input_seq`, scopes and
-`build_revision` and `compatibility_revision` under [release control](../application/release-control.md), never a plan
-payload or an additional content hash.
+summaries are derived results. A closing event is the one place a solver-output
+slice enters the log: it records the organiser's decision to fix that result for
+families, with the revisions that produced it, never traces, scores, findings or
+descriptors ([phases](phases.md) §5).
 
 Draft events are the interesting case, because they are events in every respect
 except that nobody has committed to them. Immediate and drafting mode both apply

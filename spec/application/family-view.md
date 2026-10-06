@@ -5,15 +5,14 @@ The screen plans are [family preferences](../ui/screens/family-preferences.md) a
 English planning examples; family copy follows [the translation guidelines](../ui/german-translation-guidelines.md).
 
 One email per family. One login. A family can review its current information and
-communicated arrangements on the same page. The design constraint is that families
+its fixed arrangements on the same page. The design constraint is that families
 state preferences and never see machinery: no scores, solver language, organiser
 notes or other families' preferences.
 
 The Worker returns the signed-in family's server-derived, privacy-projected response
-from `GET /api/family/view`. Its composition is defined in [release control](release-control.md)
-§2; the event log, full `World`, solver and organiser-only data never reach a family's
-browser. Current inputs remain visible whether or not any arrangements have been
-communicated.
+from `GET /api/family/view`. Its composition is defined in [phases](../architecture/phases.md)
+§6; the event log, full `World`, solver and organiser-only data never reach a family's
+browser. Current inputs remain visible whether or not any area has been closed.
 
 ---
 
@@ -93,27 +92,27 @@ restores the stored value with a plain-language error. Changing the display name
 does not change the family's identity, people, memberships, email routing, or
 relationship labels.
 
-### Communicated arrangements
+### Fixed arrangements
 
-Communicated accommodation and workshop results take the top as they become
-available. Each arrangement shows its [`FamilyScopeStatus`](release-control.md) —
-`communicated` or `never-communicated`, never `changed` — and, when
-`communicated`, can expand an inline before/after diff between its two most
-recent communications. Both sides of that diff are already-released facts,
-so nothing about a currently-preparing organiser change is disclosed;
-current draft/live state never enters this computation. Current preferences
-remain accessible and editable. Communication itself does not lock controls,
-and a late edit does not alter a communicated arrangement until an organiser
-explicitly reviews and publishes a new plan. There is no single before/after
-switch for the whole page.
+Accommodation and workshop results take the top once their area is closed
+([phases](../architecture/phases.md) §6). Each shows the latest closed result for
+the family and, when the area has been closed more than once, can expand an inline
+before/after comparison between its two most recent closed results. Both sides are
+closed results, so nothing about a change the organisers are preparing is
+disclosed; the current derivation never enters this comparison. There is no single
+before/after switch for the whole page.
 
-Workshop controls use the communicated choice-cycle and programme scopes: eligible
-people rank published workshops before a schedule exists; the later communicated
-placement shows the workshop's time and location. Sign-up workshops offer join/leave
-controls and current places remaining, and interest workshops offer a non-binding
-toggle. Own responses appear immediately. A pending conflict between a sign-up and a
-communicated attendance result is explained in plain words. Uncommunicated workshop
-or schedule details are not offered as choices.
+Closing an area closes its input controls: they show the saved answers read-only
+with the closed-input notice, until the organisers reopen the area. While an area
+is open, a late edit remains valid input and changes nothing the family sees until
+the area is closed.
+
+Workshop controls appear once workshop choice is open: eligible people rank the
+live catalogue before a schedule exists; the closed result later shows each
+workshop's time and location. Sign-up workshops offer join/leave controls and
+current places remaining, and interest workshops offer a non-binding toggle. Own
+responses appear immediately. A conflict between a live sign-up and the closed
+attendance result is explained in plain words.
 
 ```
   Deine Zimmer
@@ -149,7 +148,7 @@ report's ([reports](reports.md) §5).
 
 Decided explicitly, because the defaults are wrong in both directions. The rows
 below specify disclosure; timing is governed separately by
-[release control](release-control.md).
+[phases](../architecture/phases.md).
 
 | Data | Visible to the family? |
 |---|---|
@@ -163,11 +162,12 @@ below specify disclosure; timing is governed separately by
 | Restricted values | Own-family values only where authorised; never shared or other-family |
 | `descriptive` traits | Only explicitly family-facing own inputs; internal descriptive facts remain hidden |
 
-Released arrangement fields come from their reviewed `input_seq`; current own-family
-answers and permitted live participation remain current. Current names and withdrawal
-status may annotate a released arrangement, but never change its historical placement.
-The family sees only its own projected diff, never organiser findings, notes, scores,
-traces or other-family content.
+Fixed arrangements come from the latest closed result; current own-family answers
+and permitted live participation remain current. Current names and descriptors are
+joined to the closed result, a withdrawn person is not shown, and a referenced
+entity that no longer exists is shown as unavailable. The family sees only its own
+before/after comparison, never organiser findings, notes, scores, traces or
+other-family content.
 
 Cross-family co-room requests are outside the active sleeping model, so the family
 view exposes only preferences that constrain the family's own placement unit. When
@@ -218,24 +218,24 @@ The same underlying data. Do not build a mobile drag interaction; numbered
 The ranking list contains only workshops eligible for that person in the current
 choice cycle; it does not require a slot or room.
 
-**Deadlines are stated everywhere and remain advisory.** Accommodation and workshop
-sections can show separate upcoming or passed notices with the relevant contact
-copy. A passed notice does not disable its controls: families may continue to
-update preferences, while organisers decide whether a late change belongs in a
-newly reviewed and published plan.
+**Target dates are stated everywhere and remain advisory.** Accommodation and
+workshop sections can show their **Zieltermin** and, once it has passed, a late
+notice with the relevant contact copy. A passed target does not disable its
+controls: families may continue to update preferences until the organisers close
+the area.
 
 ---
 
 ## 4. Emails
 
-Invitation and reminder emails are kernel. Communication and change messages are
-deferred under [change notifications](../deferred-ideas/change-notifications.md). The recipient
-selection and preview contract belongs to [release control](release-control.md)
-§8; email does not determine whether arrangements are visible.
+Invitation and reminder emails are kernel. Initial and change messages are
+deferred under [change notifications](../deferred-ideas/change-notifications.md), which
+selects recipients from closing events; email does not determine whether
+arrangements are visible.
 
 **Invitation:** a short explanation of the occasion and what to do, with a magic
 link. **Reminder:** names missing answers, such as a person's workshop wishes.
-**Communication:** includes the arrangements/details in the body. **Change:** gives
+**Initial:** includes the fixed arrangements in the body. **Change:** gives
 only relevant before/after details and a link, without internal explanations.
 
 Messages are plain and short. Families whose relevant visible content did not

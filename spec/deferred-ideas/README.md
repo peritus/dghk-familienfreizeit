@@ -29,7 +29,6 @@ active module path.
 - [Caching](re-introduce-caching.md)
 - [Organiser placement overrides](organiser-placement-overrides.md)
 - [Plan inspection and comparison](plan-inspection-and-comparison.md)
-- [Release control, communication, review, and history UI](release-control-ui.md)
 - [Feature availability UI](feature-availability-ui.md)
 
 The `ui/` subdirectory contains non-executable TypeScript examples moved out of

@@ -32,16 +32,18 @@ The overview is the landing view. Participation review remains an outstanding
 product view. Workshop allocation demand and solver traces are delivered through
 the three allocation routes above.
 
-The four visible lifecycle summaries are:
+The overview, programme and allocation screens render the same workshop track
+from the [phase view](../../architecture/phases.md) §4:
 
 ```text
-Workshops anlegen → Wahl offen → Zuordnung prüfen → Festgelegt
+Workshops anlegen → Wahl öffnen → Zuordnung prüfen → Festgelegt
 ```
 
-They summarize independent authoring, choice-cycle, calculation, attendance,
-and schedule facts. Communication and release state belong to M10 and do not
-appear in the M8 summary. The summary does not replace those states.
-There is one current choice cycle only.
+No screen derives a step from local facts. **Wahl öffnen** appends
+`WorkshopChoiceOpened`; **Festlegen** opens the closing review and appends
+`WorkshopsClosed`; **Wieder öffnen** appends `WorkshopsReopened`. While the area is
+closed, the screens show the difference between the closed result and the current
+derivation. There is one current choice cycle only.
 
 ## Overview behavior
 
@@ -53,8 +55,8 @@ inventory use their own profile fields instead.
 Workshop cards show title, audience, age range, capacity, participation mode,
 leaders, demand headline, placement state, and actionable attention. Cancelled
 workshops are hidden from active planning and available in a labelled history
-view. M8 does not render communication status or release diffs; M10 owns
-those release/review surfaces rather than workshop cards.
+view. Workshop cards carry no phase badges; the track and the closed-area
+difference carry that state.
 
 The implemented authoring foundation is a compact editor dialog for title,
 description, audience, age range, capacity, participation mode, resolver needs,
@@ -64,8 +66,7 @@ existing external leaders visibly distinct. The overview stages complete
 pipeline. The **Externe Leitungen** view uses the same event-backed pipeline to create and
 edit external leaders, including organiser-only phone metadata and one or more
 available workshop slots; its list shows linked workshops and derived
-availability labels. Cancellation, publication, and other release operations
-remain outstanding authoring scope.
+availability labels. Cancellation remains outstanding authoring scope.
 
 Participation modes are profile-configured:
 
@@ -111,9 +112,9 @@ results use a separate companion design and privacy projection.
 ## Printing and visual system
 
 There is no application print or export button. Browser printing is supported
-through the shared print stylesheet for the organiser plan; organiser lists carry
-no data context label because the organiser has one plan. Released/effective
-printing belongs to M10.
+through the shared print stylesheet. While the workshop area is open, lists print
+the organiser plan without a data context label; once it is closed, they print the
+closed result and name the closing time ([phases](../../architecture/phases.md) §7).
 
 Use the neobrutalist design system, page-local section navigation, responsive cards and
 accessible tables. All supported screen sizes are equally important. Strong

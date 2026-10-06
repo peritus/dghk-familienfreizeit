@@ -95,7 +95,7 @@ placement ([schedule diagnostics](../../modules/workshop-scheduling.md#2-stages)
 
 The release model also assumes that slot and room facts are already programme
 content and that allocation is subsequently released per slot
-([release scopes](../../application/release-control.md#1-release-scopes)). That is
+(`release scopes`). That is
 compatible with the desired final communication boundary, but it does not
 define the missing schedule-producing stage between ranking and attendance.
 
@@ -259,7 +259,7 @@ same specification change.
 - [labels-and-constraints.md](../../architecture/labels-and-constraints.md)
 - [familienfreizeit-2027.example.ts](../../profiles/familienfreizeit-2027.example.ts)
 - [family-view.md](../../application/family-view.md)
-- [release-control.md](../../application/release-control.md)
+- `release-control.md`
 - [workshops.md UI screen](../../ui/screens/workshops.md)
 - [roadmap.md](../../roadmap.md)
 - [D13](../../../decisions.md#d13--workshop-rankings-are-structured-labels)

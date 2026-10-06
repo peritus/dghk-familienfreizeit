@@ -19,8 +19,8 @@ surface a selected module may provide. The first consumers now exist, but the
 contract and runtime still need to stay aligned as each new contribution kind is
 introduced.
 
-The remaining direct fields absent from the runtime type are `release_scopes`,
-`change_kinds`, `family_controls`, `emails`, and `fixtures`. A module cannot
+The remaining direct fields absent from the runtime type are `phases`,
+`closed_results`, `change_kinds`, `family_controls`, `emails`, and `fixtures`. A module cannot
 contribute those through `defineOccasionProfile` until their real consumers exist.
 
 The contract's contribution-kind table also describes `event_mappings` and
@@ -53,8 +53,9 @@ corresponding consumer and composition checks exist.
 
 Extend `ModuleContributions` and `defineOccasionProfile` incrementally at the
 first real consumer. Add solver fields with the solver/room-assignment slice,
-screen and family-control fields with the application slices, release and
-change fields with release control, reports with the report host, and email
+screen and family-control fields with the application slices, phase and
+closed-result fields with the [phase contract](../../architecture/phases.md) in M8,
+change fields with their first comparison consumer, reports with the report host, and email
 fields only for active authentication email behavior. Do not add unused fields
 speculatively. Resolve `event_mappings` and `typed_contributions` during the
 same contract review as either internal composition structures or explicit API
@@ -72,7 +73,7 @@ screen-route collisions, and the worker screen registry exposes the selected
 screen. State-aware event invariant validation is also available to module event
 contributions because the inventory fold needs parent and uniqueness checks.
 
-The issue remains open for the unused contribution kinds: release scopes, change
+The issue remains open for the unused contribution kinds: phases, closed results, change
 kinds, family controls, emails, fixtures as a typed composition contract, and the unresolved
 `event_mappings`/`typed_contributions` API decision. They should be added only with
 their first real consumers.
@@ -82,7 +83,7 @@ their first real consumers.
 Room assignment now consumes the existing solver contribution fields and registers
 two organiser screens plus the first real module report identifier. The report is a
 module-owned current-state projection; the generic audience-aware report host and
-release contribution fields remain later consumers.
+closed-result contribution fields remain later consumers.
 
 ## Related files
 

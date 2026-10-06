@@ -154,8 +154,8 @@ finding; this module does not add a schedule stage to do so.
 The derived world exposes live and historical `workshop-spaces`, ordered as in
 §7. `diff` reports `workshop-space-added`, `workshop-space-changed`, and
 `workshop-space-retired` facts for organiser review. No family-facing location
-output is contributed. Release and location communication remain part of the
-schedule/release contract owned by [workshop scheduling](workshop-scheduling.md).
+output is contributed. Locations reach families through the closed workshop result
+([phases](../architecture/phases.md) §5).
 
 ## 11. Screens, controls, reports, and emails
 
@@ -164,12 +164,12 @@ schedule/release contract owned by [workshop scheduling](workshop-scheduling.md)
 | Screen | `/organiser/workshops/spaces` — maintain names, descriptions, capacity, availability, ordering, resolver-backed capabilities, and per-slot blocks ([UI-14](../ui/screens/workshop-spaces.md)) |
 | Report | Workshop-space inventory — live/retired spaces, capacity, availability, and resolved capabilities for organisers ([reports](../application/reports.md) §3.3) |
 | Controls | organiser-only add, full edit, and retire actions |
-| Family view | none until the schedule and release contract is revised by Issue 025 |
+| Family view | none; placements reach families through the closed workshop result |
 | Emails | none |
 
 The maintenance screen keeps inventory editing simple but shows schedule-aware
 occupancy and blocked-slot context. Placement decisions remain on the programme
-screen and the screen never implies a family-facing location release.
+screen and the screen never implies that a location is visible to families.
 
 ## 12. Tests
 

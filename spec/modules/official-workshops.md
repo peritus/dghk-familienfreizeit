@@ -3,7 +3,7 @@
 Module id `official-workshops` · factory `officialWorkshops`
 
 Official workshops owns the direct `workshop` identity and the facts needed to
-author, review, schedule, and communicate an organiser-created workshop. It
+author, review, and schedule an organiser-created workshop. It
 does not own ranking, placement, or attendance allocation.
 
 <a id="1-dependencies-and-ownership"></a>
@@ -83,8 +83,8 @@ workshop identity and adds only its derived slot and space placement.
 - Authoring uses compact fields with progressive disclosure for lifecycle,
   cancellation, constraints, and operational details.
 - Leaders are selected through typed searchable pickers.
-- Communication state is shown in release/review surfaces, not as badges on
-  workshop cards.
+- Phase state is shown by the workshop track and closed-area differences, not as
+  badges on workshop cards.
 - Cancelled workshops are hidden from active planning by default and remain
   available in labelled history and report contexts.
 

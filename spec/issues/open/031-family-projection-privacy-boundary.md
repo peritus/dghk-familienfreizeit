@@ -58,4 +58,4 @@ ids, diagnostics, and module summaries before M10 exposes the projection.
 - [src/events/fold.ts](../../../src/events/fold.ts)
 - [src/worker/index.ts](../../../src/worker/index.ts)
 - [application/family-view.md](../../application/family-view.md)
-- [application/release-control.md](../../application/release-control.md)
+- [architecture/phases.md](../../architecture/phases.md)

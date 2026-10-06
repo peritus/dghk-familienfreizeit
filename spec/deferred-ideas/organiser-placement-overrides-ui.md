@@ -42,7 +42,7 @@ the next useful screen. Empty state: no decisions yet; Add remains available.
 
 German copy uses **Entscheidungen des Organisationsteams**, **Entscheidung
 hinzufügen**, and **Zusätzliche Informationen** (optional). Family-facing views
-show the communicated assignment, never internal tokens or organiser notes.
+show the closed assignment, never internal tokens or organiser notes.
 
 Use headings and status text in addition to borders and color. On narrow
 screens, findings come first, then decision cards; the create form is a

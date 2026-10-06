@@ -9,15 +9,16 @@ Module id `change-notifications` · factory `changeNotifications`
 
 ## 1. Purpose and boundary
 
-This module renders communication and change emails and integrates operational
-delivery. Release control owns recipient selection, review and visibility
-([release control](../application/release-control.md) §7–8). Transport, `email_log`, invitations
-and reminders are kernel. Email failure never undoes communicated arrangements.
+This module renders emails when an area is closed and integrates operational
+delivery. [Phases](../architecture/phases.md) own closing, visibility, and the
+before/after comparison. Transport, `email_log`, invitations and reminders are
+kernel. Email failure never undoes a closing.
 
 ## 2. Dependencies
 
-Requires: none. Enhances: none. It consumes the kernel's family-visible communication
-preview, built from contributions of whichever domain modules are selected.
+Requires: none. Enhances: none. It consumes closing events and the family
+projection of their results, built from contributions of whichever domain modules
+are selected.
 
 ## 3. Parameters
 
@@ -25,7 +26,7 @@ preview, built from contributions of whichever domain modules are selected.
 type ChangeNotificationsParams = {
   include_arrangements_in_body: boolean
   copy: {
-    communication_subject: LocalizedText
+    initial_subject: LocalizedText
     change_subject: LocalizedText
   }
 }
@@ -36,9 +37,7 @@ type ChangeNotificationsParams = {
 | `include_arrangements_in_body` | `true` | — |
 | `copy` | — (required) | both subjects supplied |
 
-Recipient policy is the kernel release contract, not a configurable list of diff
-kinds that could omit a programme change. Module change kinds still support world
-comparison and organiser explanations.
+Recipient policy is fixed in §10, not a configurable list of difference kinds.
 
 ## 4. Entity kinds
 
@@ -46,8 +45,9 @@ None.
 
 ## 5. Events
 
-None of its own. `Communicated.notify` requires this module. The complete event
-contract belongs to [release control](../application/release-control.md) §3.
+None of its own. The closing review offers an optional email choice only while
+this module is selected; the choice is an operational intent recorded with
+delivery, not part of the closing payload.
 
 ## 6. Labels and trait roles
 
@@ -67,44 +67,52 @@ None.
 
 ## 10. Output and diff
 
-Render the release preview's recipients and per-family visible changes. Initial
-content and changes may occur together when a communication selects several scopes;
-send one consolidated message per family. Include time/room/title/mode/cancellation
-changes, not just changed participant ids. Do not include internal constraints or
-unselected draft content.
+Recipients come from comparing an area's new closed result with its previous one,
+after family privacy projection:
 
-The same family-visible diff semantics used inline in admin and family views supplies
-preview and delivery. Family projections and notification previews are rendered by
-the Worker; the organiser browser never supplies family privacy decisions. After successful append, execute
-the reviewed notification intent and record operational delivery outcomes. Retry
-identity, reconstruction and unknown-send handling follow release control §8. No
-email is scheduled merely because a family changes a live answer or material entry.
+- the first closing of an area addresses every family represented in its result,
+  including explicitly unassigned people;
+- a later closing addresses families whose own result changed, including
+  movement, removal, and cancellation of an attended workshop;
+- an unchanged family-visible result sends no email;
+- materials, live answers, and live descriptor edits never trigger an email;
+- families are deduplicated and sorted by family order, then id.
 
-Recipient selection and message rendering consume the family-projected
-`CommunicationScopeView`; they do not reconstruct scope status or before/after fields
-from raw communication events.
+Send one message per family per closing. Initial messages include the
+arrangement when `include_arrangements_in_body` is set; change messages give only
+the family's before/after details and a family-view link, never internal
+constraints, findings, or other families' values. Previews and messages are
+rendered by the Worker from the same family projection the family view uses.
+
+Operational `email_log` records the closing event sequence, family, kind,
+delivery status and retry identity. Retries rebuild the message from the two closed
+results named by the closing sequence, never from the current derivation. Claim
+delivery atomically and use a stable provider idempotency key where supported;
+without provider idempotency, an ambiguous send is marked unknown for explicit
+review rather than blindly retried. Current authorisation applies at send time:
+suppress recipients no longer entitled to the content and record the suppression.
 
 ## 11. Screens, controls, reports, and emails
 
 | Kind | Contribution |
 |---|---|
-| Emails | **Communication**: initial arrangements/programme details; **Change**: relevant before/after details, both with a family-view link |
-| Screen | Exact recipient/message previews and optional email checkbox in [UI-11](release-control-ui.md); delivery status separately from communication status |
+| Emails | **Initial**: the family's fixed arrangements; **Change**: relevant before/after details; both with a family-view link |
+| Screen | Exact recipient and message previews plus the optional email choice in the closing review; delivery status shown separately |
 | Reports | Change notice, limited to the reader's permitted content ([reports](../application/reports.md)) |
 | Controls | none |
 
 ## 12. Tests
 
-- Preview recipients/messages match delivery for the confirmed `input_seq` and selection,
-  after applying the same current authorisation/privacy suppression.
-- Programme-only changes can notify affected families; materials-only changes cannot.
-- Identical communicated content sends no change email.
-- A combined action sends at most one message per family; failed sends retain status.
-- Retry reconstructs the original communication and does not use current live changes.
+- Preview recipients and messages match delivery for the same closing, after the
+  same authorisation and privacy suppression.
+- A family whose result did not change receives nothing; materials-only and live
+  descriptor changes never send.
+- A closing sends at most one message per family; failed sends retain status.
+- A retry uses the closed results named by its closing sequence, not current data.
 - Unknown delivery is surfaced rather than blindly duplicated.
 
 ## 13. When not selected
 
-Release control remains available. The email option, communication/change emails
-and notification delivery views are absent. Own information and communicated
-arrangements remain visible through ordinary family views and reports.
+Closing works unchanged. The email choice, initial and change emails, and delivery
+views are absent. Own information and fixed arrangements remain visible through
+ordinary family views and reports.

@@ -9,7 +9,7 @@ The active profile is `familienfreizeit-2027`.
 Families state preferences and can join sign-up workshops. Solver allocations
 remain derived rather than directly assigned. A deterministic
 algorithm produces a complete proposal. Organisers review it, correct family or
-room configuration where needed, and later communicate a reviewed result. Exceptional
+room configuration where needed, and later close the area to fix the reviewed result for families. Exceptional
 organiser decisions remain event-backed domain capabilities but their prominent UI is
 deferred. Decisions are recorded with
 an optional note so other organisers can understand them.

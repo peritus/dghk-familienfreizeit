@@ -26,7 +26,7 @@
               diff(world, world) → what changed, and why
                                │
           organisers read ─────────┤
-          families read ──────┘  (live + communicated scopes)
+          families read ──────┘  (live + closed results)
 ```
 
 Everything flows in one direction. There is no path by which a family or an
@@ -61,8 +61,8 @@ What the plan would look like without one constraint is `derive(committed ∖ c)
 Counterfactual derivation is not a special capability; it is the ordinary use.
 
 **Changes are derived comparisons.** `diff` describes world and plan changes.
-Release control projects the scope content relevant to its outstanding-change report
-and communication review; ordinary live-world changes are not automatically held work.
+Closed areas compare their recorded result with the current derivation
+([phases](phases.md) §7); ordinary live-world changes are not held work.
 
 **Events need not be committed to be derived from.** `derive` takes a list, and it
 does not care where the list came from. That is what makes the next section
@@ -121,23 +121,21 @@ reload returns to immediate mode after loading the committed log.
 ## Planning and family reads
 
 The working organiser renders `derive(log ++ drafts)`; other organisers render
-`derive(log)`. The family response combines permitted live information with the
-last communicated content of each release scope, under the authoritative
-[release-control contract](../application/release-control.md) §1–5. The Worker applies privacy
-before responding. Reports use the same audience projection.
+`derive(log)`. The family response is the current world, except that each area's
+solver result is shown only as its latest closed result ([phases](phases.md) §6).
+The Worker applies privacy before responding. Reports use the same audience
+projection.
 
-`Communicated` records an organiser's reviewed release decision, not a stored plan.
-The kernel derives its scope references from events and uses ordinary historical
-worlds to reproduce content. There remains one Plan type, identified by `input_seq`,
-`build_revision`, and `compatibility_revision`. Release review uses its basis
-sequence, scope selection, and these implementation identities; programme details
-need not be solver output or acquire another content hash. See [release control](../application/release-control.md)
-§3–4 and [deployment](../engineering/deployment.md) §1 for identity, concurrency, and verification.
+A closing event records an organiser's decision together with the solver-output
+slice it closes, computed by the Worker at the reviewed head ([phases](phases.md)
+§5). It holds ids only, never traces, findings or descriptors. There remains one
+Plan type, identified by `input_seq`, `build_revision`, and
+`compatibility_revision`.
 
 ## Kernel and modules
 
 The application is a fixed kernel plus selectable modules. The kernel — the event
-log, labels and the resolver, `derive` and `diff`, the solver pipeline, communication,
+log, labels and the resolver, `derive` and `diff`, the solver pipeline, phases,
 authentication, and the application shells — is present in every deployment. Modules
 contribute the domain: room inventory, whole-family room and workshop assignment,
 food preferences, materials, and the surfaces that go with them. The catalogue and
@@ -230,7 +228,7 @@ Small enough to state completely:
 
 | Actor | May emit |
 |---|---|
-| Family | Person events for its own people, and label/constraint events on entities it owns, for family-facing controls; scoped deadlines do not remove this permission |
+| Family | Person events for its own people, and label/constraint events on entities it owns, for family-facing controls while the governing area is open; a passed Zieltermin does not remove this permission |
 | Allowlisted organiser | Everything, through the organiser UI |
 
 An allowlisted organiser may enter a constraint for any entity. The actor identifies
@@ -238,15 +236,15 @@ the authenticated principal and the subject identifies the affected entity. Ther
 is no separate semantic distinction between an organiser acting for themselves and
 for another family.
 
-Deadline notices are workflow guidance, not a sixth request-lifecycle gate. The
-server may include the current deadline status in a family response, but it does
-not reject a late family event. A later plan or communication is an explicit
-organiser decision based on a reviewed event-log prefix.
+Target dates are workflow guidance, not a sixth request-lifecycle gate. The server
+may include the phase status in a family response, but it does not reject a late
+family event. Only an organiser's closing event stops family input for an area,
+through feature availability ([phases](phases.md) §5).
 
 ## Read models
 
 None are stored. `World` is the read model: typed entities, labels, summaries, the
-plan, diagnostics and release references, built in memory by `derive`. Resolver
+plan, diagnostics and closed results, built in memory by `derive`. Resolver
 constraints are derived from labels and occasion configuration. Audience responses
 select permitted content. Stable URLs, authentication lookup and screens read this
 derived model.
@@ -257,7 +255,7 @@ families, rooms, or labels, or a query that reads event payloads to answer a dom
 question, it is a bug.
 
 Plans are derived rather than maintained as authoritative state. Planning screens
-read the ordinary plan; family screens use the release-control projection. `derive`
+read the ordinary plan; family screens use the closed results ([phases](phases.md) §6). `derive`
 validates assignment uniqueness before returning a world. There is no assignment
 or plan table.
 
@@ -293,18 +291,16 @@ does not bypass authentication or authorization, and must be rejected by
 production configuration. The D1 event table remains the production domain
 store and the only persisted domain state.
 
-## Release control and notifications
+## Phases and notifications
 
-The dashboard reads the outstanding-change report defined in
-[release control](../application/release-control.md) §6. Its detailed review (§7) determines
-exactly what selected scopes will make visible. Apply saves domain edits;
-**An Familien kommunizieren** releases reviewed arrangements. Live inputs do not
-wait for that action.
+[Phases](phases.md) give every screen one workflow status and decide when families
+see a solver result. The dashboard lists closed areas whose current derivation
+differs from their closed result. Apply saves domain edits; **Festlegen** closes an
+area's inputs and records its result. Live inputs do not wait for that action.
 
-Release control owns semantic scope comparison, history verification and recipient
-selection (§8). Change-notification construction and delivery remain deferred;
-authentication invitations and reminders are operational kernel email. The request still
-uses the ordinary authenticate/validate/authorise/append/respond lifecycle.
+Change-notification construction and delivery remain deferred; authentication
+invitations and reminders are operational kernel email. Closing uses the ordinary
+authenticate/validate/authorise/append/respond lifecycle.
 
 ## Source layout
 

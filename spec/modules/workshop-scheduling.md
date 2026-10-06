@@ -86,8 +86,8 @@ A reviewed calculation records the input sequence and compatibility context, so
 a later ranking edit does not alter the reviewed result until an explicit
 recalculation/review.
 
-Released/effective schedule composition belongs to M10 release control and is not
-part of the M8 organiser review surface.
+Placements reach families only through the closed workshop result
+([phases](../architecture/phases.md) §5–6).
 
 ## 4. Tests
 

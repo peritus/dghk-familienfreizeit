@@ -40,10 +40,10 @@ export default defineOccasionProfile({
     starts_on: '2027-04-30',
     ends_on: '2027-05-02',
     timezone: 'Europe/Berlin',
-    deadlines: {
-      accommodation: '2027-03-31T21:59:59Z',
-      workshops: '2027-04-15T21:59:59Z',
-    },
+    phase_dates: [
+      { phase: 'family-preferences.accommodation-preferences', target_at: '2027-03-31T21:59:59Z' },
+      { phase: 'workshop-rankings.choice', target_at: '2027-04-15T21:59:59Z' },
+    ],
     locale: 'de',
     fallback_locale: 'en',
     description: {
@@ -456,28 +456,38 @@ export default defineOccasionProfile({
           title: { de: 'Wer kommt mit', en: 'Who is coming' },
           intro: null,
           traits: ['does-not-need-a-bed'],
-          deadline_scope: null,
+          phase: null,
+          late_contact: null,
         },
         {
           key: 'room-wishes',
           title: { de: 'Zimmerwünsche', en: 'Room wishes' },
           intro: null,
           traits: ['needs-private-sanitary', 'needs-accessible', 'sole-occupancy', 'family-note'],
-          deadline_scope: 'accommodation',
+          phase: 'family-preferences.accommodation-preferences',
+          late_contact: {
+            de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
+            en: 'Please coordinate late room-preference changes with the organisers.',
+          },
         },
         {
           key: 'food',
           title: { de: 'Essen', en: 'Food' },
           intro: null,
           traits: ['diet', 'food-note'],
-          deadline_scope: null,
+          phase: null,
+          late_contact: null,
         },
         {
           key: 'workshops',
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
           traits: ['prefers-workshop', 'workshop-with'],
-          deadline_scope: 'workshops',
+          phase: 'workshop-rankings.choice',
+          late_contact: {
+            de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
+            en: 'Please coordinate late workshop changes with the organisers.',
+          },
         },
       ],
       module_controls: [
@@ -492,16 +502,6 @@ export default defineOccasionProfile({
           help: { de: 'Unverbindlich, ohne Platzreservierung.', en: 'Non-binding; no place reserved.' },
         },
       ],
-      deadline_contact: {
-        accommodation: {
-          de: 'Späte Änderungen an Zimmerwünschen bitte mit dem Organisationsteam abstimmen.',
-          en: 'Please coordinate late room-preference changes with the organisers.',
-        },
-        workshops: {
-          de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
-          en: 'Please coordinate late workshop changes with the organisers.',
-        },
-      },
     }),
 
   ],

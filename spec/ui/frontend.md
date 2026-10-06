@@ -124,11 +124,11 @@ event records and remains expanded while drafting mode is active. Only the ordin
 event list is sent to `derive` and append. There is no second state manager, API, or
 event type for drafting mode.
 
-Release badges and inline diffs are derived through the canonical
-`CommunicationScopeView` contract in [release control](../application/release-control.md).
-The organiser application computes the organiser projection from its committed log,
-draft world, communication references and the shared scope-diff function; screens
-must not implement their own status or before/after comparison.
+Phase steps, closed-area differences and inline before/after comparisons are
+derived through the [phase view](../architecture/phases.md). The organiser
+application computes them from its committed log, draft world and the shared
+comparison of a closed result with the current derivation; screens must not
+implement their own status or before/after comparison.
 
 This full-log/local-derivation path is restricted to the organiser application. The
 family bundle never downloads the event log, draft events, full organiser `World`,
@@ -136,12 +136,11 @@ solver traces, organiser labels or notes. It receives only the Worker response a
 server-side derivation and family privacy projection.
 
 **Family view state** is the family's privacy-projected response from
-`GET /api/family/view`, which the Worker derives and composes according to [release
-control](../application/release-control.md) §2 and filters to that family ([family view](../application/family-view.md)).
-The response includes family-projected communication status and diffs; it never
-transfers the source log or the organiser `World`. A control change posts the label
-event and re-renders from the response. The response's scope views are the same
-`CommunicationScopeView` shape after server-side family projection.
+`GET /api/family/view`, which the Worker derives and composes according to
+[phases](../architecture/phases.md) §6 and filters to that family ([family view](../application/family-view.md)).
+The response includes the family's closed results, phase status and own
+before/after comparisons; it never transfers the source log or the organiser
+`World`. A control change posts the label event and re-renders from the response.
 
 **Escaping.** React escapes interpolated values by default.
 `dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, organiser
@@ -193,9 +192,9 @@ The current and later screens use the following component inventory.
 | Button, Card, Badge, Alert | everywhere |
 | Label, Input, Textarea, Checkbox, Radio Group, Select | family view controls, organiser forms |
 | Combobox, Popover, Command | person picker, room picker |
-| Dialog, Alert Dialog | later organiser decisions, communicate confirmation, discard drafts |
+| Dialog, Alert Dialog | later organiser decisions, closing review, discard drafts |
 | Table, ScrollArea | families, plans, constraints, workshop capacity |
-| Tabs | building filter on the board, before and after communication in the family view |
+| Tabs | building filter on the board, before and after a closing in the family view |
 | Sonner | "Gespeichert um 14:22", "Applied", apply conflicts |
 | Sidebar, Sheet, Drawer, Breadcrumb | organiser navigation, mobile pickers |
 | Skeleton, Tooltip | loading states and hints |

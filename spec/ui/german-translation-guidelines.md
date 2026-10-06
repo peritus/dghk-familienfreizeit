@@ -48,9 +48,11 @@ emails, notifications, and help text.
 | set a label | **Eine Angabe machen** / **Angabe ändern** | Use for a family-facing action; organiser screens may say **Entscheidung hinzufügen** |
 | clear a label | **Eine Angabe aufheben** | Use when removing an existing family-facing Angabe; do not expose *LabelCleared* |
 | plan | **Einteilung** | The generated room/workshop result |
-| communicate | **An Familien kommunizieren** | Open the selected-scope review; final action: Jetzt an Familien kommunizieren |
-| communicated | **An Familien kommuniziert** | Visible in family views; email delivery is separate |
-| release control | **Freigabesteuerung** | Technical mechanism; organiser navigation uses Kommunikation |
+| close an area | **Festlegen** | Opens the closing review; the result becomes visible to families; email delivery is separate |
+| closed | **Festgelegt** | The area's inputs are closed and families see its result |
+| reopen an area | **Wieder öffnen** | Families can change their inputs again; they keep seeing the last result |
+| target date | **Zieltermin** | Advisory; never **Frist**, which implies a cut-off |
+| open workshop choice | **Wahl öffnen** | Families can see the workshops and rank them |
 | draft changes | **Änderungsentwürfe** | Browser-local changes awaiting application; other organisers cannot yet see them |
 | start drafting mode | **Entwurfsmodus starten** | The organiser control for deferring the ordinary Apply command |
 | drafting mode active | **Entwurfsmodus aktiv** | State text for the enabled local commit-timing policy |
@@ -58,7 +60,7 @@ emails, notifications, and help text.
 | draft workspace | **Entwurfsbereich** | The shared organiser area for browser-local draft changes |
 | discard drafts | **Entwürfe verwerfen** | Removes all local draft events without contacting the server |
 | apply drafts | **Änderungen speichern** | Starts the ordinary Worker append for the current draft batch; use "speichern" everywhere in the flow (button, confirmation, status, screen-reader announcements) rather than "anwenden," which reads as developer language |
-| uncommunicated | **Noch nicht an Familien kommuniziert** | Applied changes not yet made visible to families through Communicate |
+| differs from the closed result | **Weicht von der Festlegung ab** | Applied changes that families will see only after the next Festlegen |
 | organiser | **organisierende Person** | One person acting on behalf of the organisation team |
 | organisation team | **Organisationsteam** | The collective group responsible for organising the occasion |
 | member of the organisation team | **Mitglied des Organisationsteams** | Use for one person when the team relationship matters |

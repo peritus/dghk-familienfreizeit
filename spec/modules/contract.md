@@ -15,7 +15,7 @@ The **kernel** is present in every deployment and is never listed in a profile:
 | Family and person identity, invitation, and person events | [events](../architecture/events.md) |
 | Labels, fixed resolver operators, append validation | [labels and constraints](../architecture/labels-and-constraints.md) |
 | `derive`, `diff`, the solver pipeline, determinism contract, preflight framework, trace | [architecture](../architecture/overview.md), [solver contract](../architecture/solver-contract.md) |
-| Plans and release control | [solver contract](../architecture/solver-contract.md), [release control](../application/release-control.md) |
+| Plans, phases and closed results | [solver contract](../architecture/solver-contract.md), [phases](../architecture/phases.md) |
 | Authentication, sessions, organiser allowlist | [authentication](../application/authentication.md) |
 | Organiser application shell, board-independent screens, family view shell, reports framework, email transport | [organiser view](../application/organiser-view.md), [family view](../application/family-view.md), [reports](../application/reports.md), [deployment](../engineering/deployment.md) |
 
@@ -83,7 +83,8 @@ export interface ModuleContributions {
   preflight_checks: readonly PreflightCheck[]
   world_summaries: readonly WorldSummaryDefinition[]
   world_checks: readonly WorldCheck[]
-  release_scopes: readonly ReleaseScopeContribution[]
+  phases: readonly PhaseDefinition[]       // spec/architecture/phases.md
+  closed_results: readonly ClosedResultContribution[]
   change_kinds: readonly ChangeKind[]
   routes: readonly RouteDefinition[]       // Worker handlers under src/modules/<id>/worker/
   screens: readonly ScreenDefinition[]     // React screens under src/modules/<id>/app/
@@ -96,9 +97,9 @@ export interface ModuleContributions {
 ```
 
 `derive` folds facts, resolves relationships, computes world summaries/checks, builds
-solver input, solves, and exposes release references/content accessors. Summary/check
+solver input, solves, and exposes closed results. Summary/check
 functions consume resolved world data, never query event payloads or access other
-modules' tables. The kernel handles historical prefixes as specified by release control.
+modules' tables.
 
 Empty contributions are empty arrays. `contribute` is a pure function of the
 parameters and a read-only view of the rest of the profile; it performs no I/O and
@@ -120,8 +121,9 @@ is evaluated once, at profile build.
 | `preflight_checks` | Checks run before any stage, with an id, severity, and message template. |
 | `world_summaries` | Pure typed summaries built by `derive` from resolved labels, such as food, materials and live workshop participation; never persisted or inserted into Plan. |
 | `world_checks` | Diagnostics over resolved non-solver facts, with subjects, severity and check id; kept outside solver preflight. |
-| `release_scopes` | Canonical content accessors and subject attribution for kernel scope kinds defined in [release control](../application/release-control.md); no module-specific release mechanism. |
-| `change_kinds` | What `diff` reports for world facts or plan output, with subject/family attribution. Release control selects scope content differences; arbitrary world changes do not imply held work. |
+| `phases` | Module-owned phase definitions: id, area, opening, target, closing by area, and readiness ([phases](../architecture/phases.md) §2). |
+| `closed_results` | For an area-owning module: the closing and reopening events, the typed payload schema, the pure accessor that computes the payload from a derived world, and the canonical comparison used for organiser differences and family before/after ([phases](../architecture/phases.md) §5–7). |
+| `change_kinds` | What `diff` reports for world facts or plan output, with subject/family attribution. Arbitrary world changes do not imply a difference from a closed result. |
 | `routes`, `screens` | Worker handlers and organiser or family screens. A module contributes a `screens` entry only for a route it renders as its own top-level screen ([§4](#4-composition) forbids two modules contributing the same route). Content a module adds inside another module's screen is described in prose against that screen's identity, not as a second `screens` entry for the same route — a contributing (non-owning) module's `ScreenDefinition` names the host screen it targets and carries no independent `route` value, so the collision check has nothing to compare for contributed content. A route or screen of an unselected module does not exist in the build. |
 | `family_controls` | Additional `control` kinds and module-owned control definitions for the preferences renderer ([family preferences](family-preferences.md)). |
 | `features` | Module-owned feature definitions: id, audience, subject kind, actions, required features and phases, governed screens and family controls, and optional readiness ([features](../architecture/features.md) §3). Every screen and family control the module contributes is governed by exactly one of its features. |
@@ -197,7 +199,7 @@ application code never reads `sections` with a bare string.
 ### 4.2 When a module is not selected
 
 An unselected module contributes nothing: no entity kind, event type, label key,
-solver input, stage, rule, preflight check, world summary/check, release scope, plan section, route, screen, control,
+solver input, stage, rule, preflight check, world summary/check, phase, closed result, plan section, route, screen, control,
 feature, report, email, or fixture requirement. Its features are not declared, so
 no operational binding can enable them ([features](../architecture/features.md) §4). An event of a type no selected module
 defines fails replay validation, which is the signal that a profile change needs a
@@ -211,7 +213,7 @@ migration ([deployment](../engineering/deployment.md) §2).
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
-| [`workshop-scheduling`](workshop-scheduling.md) | Event-backed slots, one placement per workshop, conflicts, and schedule release | `workshop-space`, `official-workshops` | — |
+| [`workshop-scheduling`](workshop-scheduling.md) | Event-backed slots, one placement per workshop, and conflicts | `workshop-space`, `official-workshops` | — |
 | [`workshop-rankings`](workshop-rankings.md) | Ordered current-cycle per-person workshop choices | `official-workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`family-preferences`](family-preferences.md) | The profile-driven preferences page | — | — |

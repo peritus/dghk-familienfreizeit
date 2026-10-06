@@ -12,7 +12,7 @@ capability, not a family-management workflow and not a replacement for manual
 invitation.
 
 Promotion is blocked until the reports work has delivered the report host, active
-report catalogue, audience projections, communication-scope handling, privacy
+report catalogue, audience projections, closed-result handling, privacy
 rules, responsive layouts, and print acceptance. The browser report remains the
 authoritative human-readable surface before and after any future export.
 
@@ -24,13 +24,13 @@ report contract, or UI screen while it remains deferred.
 - Export is organiser-authorized and read-only.
 - Export starts from a named report or report table, never from raw event rows,
   the event log, database tables, or an ad-hoc family lookup.
-- The same derived world, audience projection, communication scope, data cut,
+- The same derived world, audience projection, closed results, data cut,
   sensitivity, and field-level privacy rules used by the report determine the
   exported rows and columns.
 - Export creates no events, operational records, stored snapshots, cache entries,
   or other domain state.
 - There is no import counterpart. CSV data cannot be uploaded to create or change
-  families, people, labels, assignments, or communications.
+  families, people, labels, assignments, or closings.
 
 ## 3. Promotion design questions
 
@@ -38,7 +38,7 @@ Before promotion, each exporting report must define:
 
 - its permitted audience and exact columns, including whether any sensitive field
   is excluded rather than merely marked;
-- the data cut and communication references shown with the export;
+- the data cut and closing times shown with the export;
 - deterministic row ordering and column ordering;
 - UTF-8 encoding, header spelling, delimiter, quoting, line endings, and formula-
   injection handling;

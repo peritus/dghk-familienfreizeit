@@ -1,0 +1,954 @@
+// Generated from spec/html-prototypes/workshops-prototype-v16.html's
+// full-mode data-generation logic (seed 7), transformed into events for
+// this repository's actual event/module schemas. See spec/html-prototypes/AGENTS.md.
+
+WorkshopSpaceAdded workshop_space_id="wsp_r9" name="Atelier" location_description="Atelier" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=9
+LabelSet entity_id="wsp_r9" key="provides" value="Tische" strength=#null note=#null
+LabelSet entity_id="wsp_r9" key="provides" value="Brennofen" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r10" name="Werkraum" location_description="Werkraum" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=10
+LabelSet entity_id="wsp_r10" key="provides" value="Werkbänke" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r11" name="Küche" location_description="Küche" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=11
+LabelSet entity_id="wsp_r11" key="provides" value="Herd" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r12" name="Halle" location_description="Halle" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=12
+LabelSet entity_id="wsp_r12" key="provides" value="Matten" strength=#null note=#null
+LabelSet entity_id="wsp_r12" key="provides" value="Musikanlage" strength=#null note=#null
+LabelSet entity_id="wsp_r12" key="provides" value="viel Platz" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r13" name="Saal" location_description="Saal" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=13
+LabelSet entity_id="wsp_r13" key="provides" value="Bühne" strength=#null note=#null
+LabelSet entity_id="wsp_r13" key="provides" value="Tische" strength=#null note=#null
+LabelSet entity_id="wsp_r13" key="provides" value="viel Platz" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r14" name="Seminarraum" location_description="Seminarraum" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=14
+LabelSet entity_id="wsp_r14" key="provides" value="Tische" strength=#null note=#null
+LabelSet entity_id="wsp_r14" key="provides" value="Beamer" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r15" name="Kaminzimmer" location_description="Kaminzimmer" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=15
+LabelSet entity_id="wsp_r15" key="provides" value="ruhig" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r16" name="Wiese" location_description="Wiese" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=16
+LabelSet entity_id="wsp_r16" key="provides" value="draußen" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r17" name="Wald" location_description="Wald" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=17
+LabelSet entity_id="wsp_r17" key="provides" value="draußen" strength=#null note=#null
+WorkshopSpaceAdded workshop_space_id="wsp_r18" name="Außenwand" location_description="Außenwand" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=18
+LabelSet entity_id="wsp_r18" key="provides" value="Kletterwand" strength=#null note=#null
+
+WorkshopSlotAdded slot_id="slot_s1" starts_at="2027-05-14T09:00:00+02:00" ends_at="2027-05-14T11:00:00+02:00" sort_key=1
+WorkshopSlotAdded slot_id="slot_s2" starts_at="2027-05-14T11:30:00+02:00" ends_at="2027-05-14T13:30:00+02:00" sort_key=2
+WorkshopSlotAdded slot_id="slot_s3" starts_at="2027-05-14T15:00:00+02:00" ends_at="2027-05-14T17:00:00+02:00" sort_key=3
+WorkshopSlotAdded slot_id="slot_s4" starts_at="2027-05-15T09:00:00+02:00" ends_at="2027-05-15T11:00:00+02:00" sort_key=4
+WorkshopSlotAdded slot_id="slot_s5" starts_at="2027-05-15T11:30:00+02:00" ends_at="2027-05-15T13:30:00+02:00" sort_key=5
+WorkshopSlotAdded slot_id="slot_s6" starts_at="2027-05-15T15:00:00+02:00" ends_at="2027-05-15T17:00:00+02:00" sort_key=6
+WorkshopSlotAdded slot_id="slot_s7" starts_at="2027-05-15T17:30:00+02:00" ends_at="2027-05-15T19:30:00+02:00" sort_key=7
+WorkshopSlotAdded slot_id="slot_s8" starts_at="2027-05-16T09:30:00+02:00" ends_at="2027-05-16T11:30:00+02:00" sort_key=8
+
+SpaceSlotBlocked block_id="blk_r13_s5" space_id="wsp_r13" slot_id="slot_s5" reason=#null
+
+ExternalLeaderAdded external_leader_id="ext_x19" name="Pereira" phone=#null sort_key=19
+LabelSet entity_id="ext_x19" key="external-leader-availability" value="slot_s1" strength=#null note=#null
+LabelSet entity_id="ext_x19" key="external-leader-availability" value="slot_s2" strength=#null note=#null
+LabelSet entity_id="ext_x19" key="external-leader-availability" value="slot_s3" strength=#null note=#null
+LabelSet entity_id="ext_x19" key="external-leader-availability" value="slot_s4" strength=#null note=#null
+LabelSet entity_id="ext_x19" key="external-leader-availability" value="slot_s5" strength=#null note=#null
+LabelSet entity_id="ext_x19" key="external-leader-availability" value="slot_s6" strength=#null note=#null
+ExternalLeaderAdded external_leader_id="ext_x20" name="Kaya" phone=#null sort_key=20
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s1" strength=#null note=#null
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s2" strength=#null note=#null
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s3" strength=#null note=#null
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s4" strength=#null note=#null
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s5" strength=#null note=#null
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s6" strength=#null note=#null
+LabelSet entity_id="ext_x20" key="external-leader-availability" value="slot_s7" strength=#null note=#null
+ExternalLeaderAdded external_leader_id="ext_x21" name="Weber" phone=#null sort_key=21
+LabelSet entity_id="ext_x21" key="external-leader-availability" value="slot_s3" strength=#null note=#null
+LabelSet entity_id="ext_x21" key="external-leader-availability" value="slot_s4" strength=#null note=#null
+LabelSet entity_id="ext_x21" key="external-leader-availability" value="slot_s5" strength=#null note=#null
+LabelSet entity_id="ext_x21" key="external-leader-availability" value="slot_s6" strength=#null note=#null
+LabelSet entity_id="ext_x21" key="external-leader-availability" value="slot_s7" strength=#null note=#null
+ExternalLeaderAdded external_leader_id="ext_x22" name="Nguyen" phone=#null sort_key=22
+LabelSet entity_id="ext_x22" key="external-leader-availability" value="slot_s4" strength=#null note=#null
+LabelSet entity_id="ext_x22" key="external-leader-availability" value="slot_s5" strength=#null note=#null
+LabelSet entity_id="ext_x22" key="external-leader-availability" value="slot_s6" strength=#null note=#null
+LabelSet entity_id="ext_x22" key="external-leader-availability" value="slot_s7" strength=#null note=#null
+ExternalLeaderAdded external_leader_id="ext_x23" name="Lindner" phone=#null sort_key=23
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s1" strength=#null note=#null
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s2" strength=#null note=#null
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s3" strength=#null note=#null
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s4" strength=#null note=#null
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s5" strength=#null note=#null
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s6" strength=#null note=#null
+LabelSet entity_id="ext_x23" key="external-leader-availability" value="slot_s7" strength=#null note=#null
+ExternalLeaderAdded external_leader_id="ext_x24" name="Dr. Aydin" phone=#null sort_key=24
+LabelSet entity_id="ext_x24" key="external-leader-availability" value="slot_s4" strength=#null note=#null
+LabelSet entity_id="ext_x24" key="external-leader-availability" value="slot_s5" strength=#null note=#null
+
+FamilyInvited family_id="fam_f0" email="f0@example.test" display_name="Morgan" locale="de"
+PersonAdded person_id="per_p0" family_id="fam_f0" given_name="Sam" family_name="Morgan" age=41 role="adult"
+PersonAdded person_id="per_p1" family_id="fam_f0" given_name="Alex" family_name="Morgan" age=9 role="child"
+PersonAdded person_id="per_p2" family_id="fam_f0" given_name="Jamie" family_name="Morgan" age=12 role="child"
+FamilyInvited family_id="fam_f1" email="f1@example.test" display_name="Bauer" locale="de"
+PersonAdded person_id="per_p3" family_id="fam_f1" given_name="Ute" family_name="Bauer" age=36 role="adult"
+PersonAdded person_id="per_p4" family_id="fam_f1" given_name="Lena" family_name="Bauer" age=4 role="child"
+FamilyInvited family_id="fam_f2" email="f2@example.test" display_name="Keller" locale="de"
+PersonAdded person_id="per_p5" family_id="fam_f2" given_name="Rolf" family_name="Keller" age=44 role="adult"
+PersonAdded person_id="per_p6" family_id="fam_f2" given_name="Jonas" family_name="Keller" age=7 role="child"
+FamilyInvited family_id="fam_f3" email="f3@example.test" display_name="Stein" locale="de"
+PersonAdded person_id="per_p7" family_id="fam_f3" given_name="Eva" family_name="Stein" age=39 role="adult"
+PersonAdded person_id="per_p8" family_id="fam_f3" given_name="Mira" family_name="Stein" age=11 role="child"
+FamilyInvited family_id="fam_f4" email="f4@example.test" display_name="Fischer" locale="de"
+PersonAdded person_id="per_p9" family_id="fam_f4" given_name="Tim" family_name="Fischer" age=42 role="adult"
+PersonAdded person_id="per_p10" family_id="fam_f4" given_name="Noah" family_name="Fischer" age=10 role="child"
+FamilyInvited family_id="fam_f5" email="f5@example.test" display_name="Albers" locale="de"
+PersonAdded person_id="per_p11" family_id="fam_f5" given_name="Anna" family_name="Albers" age=38 role="adult"
+PersonAdded person_id="per_p12" family_id="fam_f5" given_name="Frank" family_name="Albers" age=40 role="adult"
+PersonAdded person_id="per_p13" family_id="fam_f5" given_name="Paul" family_name="Albers" age=8 role="child"
+PersonAdded person_id="per_p14" family_id="fam_f5" given_name="Ida" family_name="Albers" age=5 role="child"
+FamilyInvited family_id="fam_f6" email="f6@example.test" display_name="Brandt" locale="de"
+PersonAdded person_id="per_p15" family_id="fam_f6" given_name="Jens" family_name="Brandt" age=45 role="adult"
+PersonAdded person_id="per_p16" family_id="fam_f6" given_name="Emma" family_name="Brandt" age=13 role="child"
+FamilyInvited family_id="fam_f7" email="f7@example.test" display_name="Conrad" locale="de"
+PersonAdded person_id="per_p17" family_id="fam_f7" given_name="Katrin" family_name="Conrad" age=37 role="adult"
+PersonAdded person_id="per_p18" family_id="fam_f7" given_name="Sven" family_name="Conrad" age=39 role="adult"
+PersonAdded person_id="per_p19" family_id="fam_f7" given_name="Ben" family_name="Conrad" age=7 role="child"
+FamilyInvited family_id="fam_f8" email="f8@example.test" display_name="Dietz" locale="de"
+PersonAdded person_id="per_p20" family_id="fam_f8" given_name="Stefan" family_name="Dietz" age=44 role="adult"
+PersonAdded person_id="per_p21" family_id="fam_f8" given_name="Petra" family_name="Dietz" age=42 role="adult"
+PersonAdded person_id="per_p22" family_id="fam_f8" given_name="Sofia" family_name="Dietz" age=11 role="child"
+PersonAdded person_id="per_p23" family_id="fam_f8" given_name="Linus" family_name="Dietz" age=6 role="child"
+FamilyInvited family_id="fam_f9" email="f9@example.test" display_name="Ebert" locale="de"
+PersonAdded person_id="per_p24" family_id="fam_f9" given_name="Julia" family_name="Ebert" age=35 role="adult"
+PersonAdded person_id="per_p25" family_id="fam_f9" given_name="Finn" family_name="Ebert" age=5 role="child"
+PersonAdded person_id="per_p26" family_id="fam_f9" given_name="Ella" family_name="Ebert" age=9 role="child"
+FamilyInvited family_id="fam_f10" email="f10@example.test" display_name="Frank" locale="de"
+PersonAdded person_id="per_p27" family_id="fam_f10" given_name="Markus" family_name="Frank" age=48 role="adult"
+PersonAdded person_id="per_p28" family_id="fam_f10" given_name="Heike" family_name="Frank" age=46 role="adult"
+PersonAdded person_id="per_p29" family_id="fam_f10" given_name="Lotta" family_name="Frank" age=14 role="child"
+FamilyInvited family_id="fam_f11" email="f11@example.test" display_name="Graf" locale="de"
+PersonAdded person_id="per_p30" family_id="fam_f11" given_name="Sabine" family_name="Graf" age=41 role="adult"
+PersonAdded person_id="per_p31" family_id="fam_f11" given_name="Oskar" family_name="Graf" age=10 role="child"
+FamilyInvited family_id="fam_f12" email="f12@example.test" display_name="Hess" locale="de"
+PersonAdded person_id="per_p32" family_id="fam_f12" given_name="Tobias" family_name="Hess" age=36 role="adult"
+PersonAdded person_id="per_p33" family_id="fam_f12" given_name="Silke" family_name="Hess" age=35 role="adult"
+PersonAdded person_id="per_p34" family_id="fam_f12" given_name="Mia" family_name="Hess" age=6 role="child"
+PersonAdded person_id="per_p35" family_id="fam_f12" given_name="Emil" family_name="Hess" age=8 role="child"
+FamilyInvited family_id="fam_f13" email="f13@example.test" display_name="Imhof" locale="de"
+PersonAdded person_id="per_p36" family_id="fam_f13" given_name="Miriam" family_name="Imhof" age=43 role="adult"
+PersonAdded person_id="per_p37" family_id="fam_f13" given_name="Jakob" family_name="Imhof" age=12 role="child"
+PersonAdded person_id="per_p38" family_id="fam_f13" given_name="Rosa" family_name="Imhof" age=9 role="child"
+FamilyInvited family_id="fam_f14" email="f14@example.test" display_name="Jäger" locale="de"
+PersonAdded person_id="per_p39" family_id="fam_f14" given_name="Daniel" family_name="Jäger" age=47 role="adult"
+PersonAdded person_id="per_p40" family_id="fam_f14" given_name="Karl" family_name="Jäger" age=15 role="child"
+FamilyInvited family_id="fam_f15" email="f15@example.test" display_name="Kraus" locale="de"
+PersonAdded person_id="per_p41" family_id="fam_f15" given_name="Nadine" family_name="Kraus" age=34 role="adult"
+PersonAdded person_id="per_p42" family_id="fam_f15" given_name="Holger" family_name="Kraus" age=37 role="adult"
+PersonAdded person_id="per_p43" family_id="fam_f15" given_name="Paula" family_name="Kraus" age=7 role="child"
+FamilyInvited family_id="fam_f16" email="f16@example.test" display_name="Lorenz" locale="de"
+PersonAdded person_id="per_p44" family_id="fam_f16" given_name="Christian" family_name="Lorenz" age=50 role="adult"
+PersonAdded person_id="per_p45" family_id="fam_f16" given_name="Birgit" family_name="Lorenz" age=49 role="adult"
+PersonAdded person_id="per_p46" family_id="fam_f16" given_name="Mats" family_name="Lorenz" age=15 role="child"
+PersonAdded person_id="per_p47" family_id="fam_f16" given_name="Jule" family_name="Lorenz" age=12 role="child"
+FamilyInvited family_id="fam_f17" email="f17@example.test" display_name="Nowak" locale="de"
+PersonAdded person_id="per_p48" family_id="fam_f17" given_name="Tanja" family_name="Nowak" age=39 role="adult"
+PersonAdded person_id="per_p49" family_id="fam_f17" given_name="Theo" family_name="Nowak" age=8 role="child"
+FamilyInvited family_id="fam_f18" email="f18@example.test" display_name="Otto" locale="de"
+PersonAdded person_id="per_p50" family_id="fam_f18" given_name="Uwe" family_name="Otto" age=52 role="adult"
+PersonAdded person_id="per_p51" family_id="fam_f18" given_name="Claudia" family_name="Otto" age=51 role="adult"
+FamilyInvited family_id="fam_f19" email="f19@example.test" display_name="Mayer" locale="de"
+PersonAdded person_id="per_p52" family_id="fam_f19" given_name="Jens" family_name="Mayer" age=30 role="adult"
+PersonAdded person_id="per_p53" family_id="fam_f19" given_name="Anna" family_name="Mayer" age=31 role="adult"
+PersonAdded person_id="per_p54" family_id="fam_f19" given_name="Paul" family_name="Mayer" age=12 role="child"
+FamilyInvited family_id="fam_f20" email="f20@example.test" display_name="Pohl" locale="de"
+PersonAdded person_id="per_p55" family_id="fam_f20" given_name="Katrin" family_name="Pohl" age=43 role="adult"
+PersonAdded person_id="per_p56" family_id="fam_f20" given_name="Stefan" family_name="Pohl" age=40 role="adult"
+PersonAdded person_id="per_p57" family_id="fam_f20" given_name="Emma" family_name="Pohl" age=6 role="child"
+PersonAdded person_id="per_p58" family_id="fam_f20" given_name="Ben" family_name="Pohl" age=12 role="child"
+PersonAdded person_id="per_p59" family_id="fam_f20" given_name="Sofia" family_name="Pohl" age=5 role="child"
+FamilyInvited family_id="fam_f21" email="f21@example.test" display_name="Quast" locale="de"
+PersonAdded person_id="per_p60" family_id="fam_f21" given_name="Markus" family_name="Quast" age=49 role="adult"
+PersonAdded person_id="per_p61" family_id="fam_f21" given_name="Finn" family_name="Quast" age=6 role="child"
+PersonAdded person_id="per_p62" family_id="fam_f21" given_name="Hannah" family_name="Quast" age=7 role="child"
+FamilyInvited family_id="fam_f22" email="f22@example.test" display_name="Reuter" locale="de"
+PersonAdded person_id="per_p63" family_id="fam_f22" given_name="Julia" family_name="Reuter" age=43 role="adult"
+PersonAdded person_id="per_p64" family_id="fam_f22" given_name="Tobias" family_name="Reuter" age=37 role="adult"
+PersonAdded person_id="per_p65" family_id="fam_f22" given_name="Luis" family_name="Reuter" age=6 role="child"
+FamilyInvited family_id="fam_f23" email="f23@example.test" display_name="Sauer" locale="de"
+PersonAdded person_id="per_p66" family_id="fam_f23" given_name="Daniel" family_name="Sauer" age=51 role="adult"
+PersonAdded person_id="per_p67" family_id="fam_f23" given_name="Sabine" family_name="Sauer" age=34 role="adult"
+PersonAdded person_id="per_p68" family_id="fam_f23" given_name="Marlene" family_name="Sauer" age=5 role="child"
+PersonAdded person_id="per_p69" family_id="fam_f23" given_name="Lina" family_name="Sauer" age=10 role="child"
+FamilyInvited family_id="fam_f24" email="f24@example.test" display_name="Thiel" locale="de"
+PersonAdded person_id="per_p70" family_id="fam_f24" given_name="Miriam" family_name="Thiel" age=49 role="adult"
+PersonAdded person_id="per_p71" family_id="fam_f24" given_name="Ella" family_name="Thiel" age=14 role="child"
+PersonAdded person_id="per_p72" family_id="fam_f24" given_name="Elias" family_name="Thiel" age=11 role="child"
+FamilyInvited family_id="fam_f25" email="f25@example.test" display_name="Ulrich" locale="de"
+PersonAdded person_id="per_p73" family_id="fam_f25" given_name="Christian" family_name="Ulrich" age=47 role="adult"
+PersonAdded person_id="per_p74" family_id="fam_f25" given_name="Nadine" family_name="Ulrich" age=54 role="adult"
+PersonAdded person_id="per_p75" family_id="fam_f25" given_name="Tom" family_name="Ulrich" age=15 role="child"
+PersonAdded person_id="per_p76" family_id="fam_f25" given_name="Felix" family_name="Ulrich" age=4 role="child"
+FamilyInvited family_id="fam_f26" email="f26@example.test" display_name="Vogt" locale="de"
+PersonAdded person_id="per_p77" family_id="fam_f26" given_name="Ute" family_name="Vogt" age=34 role="adult"
+PersonAdded person_id="per_p78" family_id="fam_f26" given_name="Rolf" family_name="Vogt" age=38 role="adult"
+PersonAdded person_id="per_p79" family_id="fam_f26" given_name="Clara" family_name="Vogt" age=4 role="child"
+FamilyInvited family_id="fam_f27" email="f27@example.test" display_name="Winter" locale="de"
+PersonAdded person_id="per_p80" family_id="fam_f27" given_name="Tim" family_name="Winter" age=32 role="adult"
+PersonAdded person_id="per_p81" family_id="fam_f27" given_name="Henri" family_name="Winter" age=8 role="child"
+PersonAdded person_id="per_p82" family_id="fam_f27" given_name="Maja" family_name="Winter" age=9 role="child"
+PersonAdded person_id="per_p83" family_id="fam_f27" given_name="Jakob" family_name="Winter" age=12 role="child"
+FamilyInvited family_id="fam_f28" email="f28@example.test" display_name="Yildiz" locale="de"
+PersonAdded person_id="per_p84" family_id="fam_f28" given_name="Eva" family_name="Yildiz" age=47 role="adult"
+PersonAdded person_id="per_p85" family_id="fam_f28" given_name="Frank" family_name="Yildiz" age=38 role="adult"
+PersonAdded person_id="per_p86" family_id="fam_f28" given_name="Marie" family_name="Yildiz" age=5 role="child"
+PersonAdded person_id="per_p87" family_id="fam_f28" given_name="Nele" family_name="Yildiz" age=14 role="child"
+FamilyInvited family_id="fam_f29" email="f29@example.test" display_name="Zeller" locale="de"
+PersonAdded person_id="per_p88" family_id="fam_f29" given_name="Uwe" family_name="Zeller" age=38 role="adult"
+PersonAdded person_id="per_p89" family_id="fam_f29" given_name="Petra" family_name="Zeller" age=34 role="adult"
+PersonAdded person_id="per_p90" family_id="fam_f29" given_name="Theo" family_name="Zeller" age=8 role="child"
+FamilyInvited family_id="fam_f30" email="f30@example.test" display_name="Arnold" locale="de"
+PersonAdded person_id="per_p91" family_id="fam_f30" given_name="Silke" family_name="Arnold" age=31 role="adult"
+PersonAdded person_id="per_p92" family_id="fam_f30" given_name="Leon" family_name="Arnold" age=15 role="child"
+PersonAdded person_id="per_p93" family_id="fam_f30" given_name="Anton" family_name="Arnold" age=13 role="child"
+FamilyInvited family_id="fam_f31" email="f31@example.test" display_name="Busch" locale="de"
+PersonAdded person_id="per_p94" family_id="fam_f31" given_name="Sven" family_name="Busch" age=46 role="adult"
+PersonAdded person_id="per_p95" family_id="fam_f31" given_name="Tanja" family_name="Busch" age=52 role="adult"
+PersonAdded person_id="per_p96" family_id="fam_f31" given_name="Frieda" family_name="Busch" age=10 role="child"
+PersonAdded person_id="per_p97" family_id="fam_f31" given_name="Karl" family_name="Busch" age=14 role="child"
+FamilyInvited family_id="fam_f32" email="f32@example.test" display_name="Dahl" locale="de"
+PersonAdded person_id="per_p98" family_id="fam_f32" given_name="Birgit" family_name="Dahl" age=54 role="adult"
+PersonAdded person_id="per_p99" family_id="fam_f32" given_name="Jörg" family_name="Dahl" age=50 role="adult"
+PersonAdded person_id="per_p100" family_id="fam_f32" given_name="Oskar" family_name="Dahl" age=15 role="child"
+PersonAdded person_id="per_p101" family_id="fam_f32" given_name="Jonte" family_name="Dahl" age=10 role="child"
+FamilyInvited family_id="fam_f33" email="f33@example.test" display_name="Engel" locale="de"
+PersonAdded person_id="per_p102" family_id="fam_f33" given_name="Thomas" family_name="Engel" age=50 role="adult"
+PersonAdded person_id="per_p103" family_id="fam_f33" given_name="Greta" family_name="Engel" age=10 role="child"
+FamilyInvited family_id="fam_f34" email="f34@example.test" display_name="Fuchs" locale="de"
+PersonAdded person_id="per_p104" family_id="fam_f34" given_name="Claudia" family_name="Fuchs" age=38 role="adult"
+PersonAdded person_id="per_p105" family_id="fam_f34" given_name="Michael" family_name="Fuchs" age=48 role="adult"
+PersonAdded person_id="per_p106" family_id="fam_f34" given_name="Emil" family_name="Fuchs" age=13 role="child"
+PersonAdded person_id="per_p107" family_id="fam_f34" given_name="Moritz" family_name="Fuchs" age=10 role="child"
+PersonAdded person_id="per_p108" family_id="fam_f34" given_name="Linus" family_name="Fuchs" age=9 role="child"
+FamilyInvited family_id="fam_f35" email="f35@example.test" display_name="Haas" locale="de"
+PersonAdded person_id="per_p109" family_id="fam_f35" given_name="Holger" family_name="Haas" age=46 role="adult"
+PersonAdded person_id="per_p110" family_id="fam_f35" given_name="Kerstin" family_name="Haas" age=48 role="adult"
+PersonAdded person_id="per_p111" family_id="fam_f35" given_name="Ole" family_name="Haas" age=7 role="child"
+PersonAdded person_id="per_p112" family_id="fam_f35" given_name="Luise" family_name="Haas" age=4 role="child"
+FamilyInvited family_id="fam_f36" email="f36@example.test" display_name="Kühn" locale="de"
+PersonAdded person_id="per_p113" family_id="fam_f36" given_name="Heike" family_name="Kühn" age=30 role="adult"
+PersonAdded person_id="per_p114" family_id="fam_f36" given_name="Mats" family_name="Kühn" age=14 role="child"
+FamilyInvited family_id="fam_f37" email="f37@example.test" display_name="Lang" locale="de"
+PersonAdded person_id="per_p115" family_id="fam_f37" given_name="Jens" family_name="Lang" age=45 role="adult"
+PersonAdded person_id="per_p116" family_id="fam_f37" given_name="Anna" family_name="Lang" age=30 role="adult"
+PersonAdded person_id="per_p117" family_id="fam_f37" given_name="Paul" family_name="Lang" age=11 role="child"
+PersonAdded person_id="per_p118" family_id="fam_f37" given_name="Ben" family_name="Lang" age=15 role="child"
+FamilyInvited family_id="fam_f38" email="f38@example.test" display_name="Möller" locale="de"
+PersonAdded person_id="per_p119" family_id="fam_f38" given_name="Katrin" family_name="Möller" age=36 role="adult"
+PersonAdded person_id="per_p120" family_id="fam_f38" given_name="Finn" family_name="Möller" age=11 role="child"
+PersonAdded person_id="per_p121" family_id="fam_f38" given_name="Luis" family_name="Möller" age=11 role="child"
+FamilyInvited family_id="fam_f39" email="f39@example.test" display_name="Roth" locale="de"
+PersonAdded person_id="per_p122" family_id="fam_f39" given_name="Elias" family_name="Roth" age=5 role="child"
+PersonAdded person_id="per_p123" family_id="fam_f39" given_name="Tom" family_name="Roth" age=10 role="child"
+FamilyInvited family_id="fam_f40" email="f40@example.test" display_name="Seidel" locale="de"
+PersonAdded person_id="per_p124" family_id="fam_f40" given_name="Felix" family_name="Seidel" age=5 role="child"
+FamilyInvited family_id="fam_f41" email="f41@example.test" display_name="Wolf" locale="de"
+PersonAdded person_id="per_p125" family_id="fam_f41" given_name="Mathilda" family_name="Wolf" age=6 role="child"
+PersonAdded person_id="per_p126" family_id="fam_f41" given_name="Henri" family_name="Wolf" age=14 role="child"
+PersonAdded person_id="per_p127" family_id="fam_f41" given_name="Jakob" family_name="Wolf" age=11 role="child"
+FamilyInvited family_id="fam_f42" email="f42@example.test" display_name="Ziegler" locale="de"
+PersonAdded person_id="per_p128" family_id="fam_f42" given_name="Theo" family_name="Ziegler" age=11 role="child"
+PersonAdded person_id="per_p129" family_id="fam_f42" given_name="Leon" family_name="Ziegler" age=15 role="child"
+FamilyInvited family_id="fam_f43" email="f43@example.test" display_name="Bock" locale="de"
+PersonAdded person_id="per_p130" family_id="fam_f43" given_name="Rosa" family_name="Bock" age=6 role="child"
+FamilyInvited family_id="fam_f44" email="f44@example.test" display_name="Horn" locale="de"
+PersonAdded person_id="per_p131" family_id="fam_f44" given_name="Anton" family_name="Horn" age=13 role="child"
+PersonAdded person_id="per_p132" family_id="fam_f44" given_name="Karl" family_name="Horn" age=6 role="child"
+FamilyInvited family_id="fam_f45" email="f45@example.test" display_name="Mayer-Mayer" locale="de"
+PersonAdded person_id="per_p133" family_id="fam_f45" given_name="Oskar" family_name="Mayer-Mayer" age=9 role="child"
+PersonAdded person_id="per_p134" family_id="fam_f45" given_name="Jonte" family_name="Mayer-Mayer" age=6 role="child"
+FamilyInvited family_id="fam_f46" email="f46@example.test" display_name="Pohl-Vogt" locale="de"
+PersonAdded person_id="per_p135" family_id="fam_f46" given_name="Ida" family_name="Pohl-Vogt" age=9 role="child"
+PersonAdded person_id="per_p136" family_id="fam_f46" given_name="Mia" family_name="Pohl-Vogt" age=6 role="child"
+FamilyInvited family_id="fam_f47" email="f47@example.test" display_name="Quast-Engel" locale="de"
+PersonAdded person_id="per_p137" family_id="fam_f47" given_name="Lotta" family_name="Quast-Engel" age=6 role="child"
+FamilyInvited family_id="fam_f48" email="f48@example.test" display_name="Reuter-Seidel" locale="de"
+PersonAdded person_id="per_p138" family_id="fam_f48" given_name="Paula" family_name="Reuter-Seidel" age=5 role="child"
+PersonAdded person_id="per_p139" family_id="fam_f48" given_name="Emil" family_name="Reuter-Seidel" age=15 role="child"
+
+WorkshopAdded workshop_id="wks_keramik" title="Keramik" description="Schalen und Figuren aus Ton, gebrannt bis Sonntag." audience="children" age_min=5 age_max=14 capacity=10 participation_mode="assigned" sort_key=261
+LabelSet entity_id="wks_keramik" key="leader" value="per_p0" strength=#null note=#null
+LabelSet entity_id="wks_keramik" key="leader" value="per_p11" strength=#null note=#null
+LabelSet entity_id="wks_keramik" key="need" value="Brennofen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_wald" title="Waldexpedition" description="Spuren lesen, Tiere beobachten, ein Lager bauen." audience="children" age_min=5 age_max=14 capacity=14 participation_mode="assigned" sort_key=265
+LabelSet entity_id="wks_wald" key="leader" value="per_p15" strength=#null note=#null
+LabelSet entity_id="wks_wald" key="leader" value="per_p29" strength=#null note=#null
+LabelSet entity_id="wks_wald" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_zirkus" title="Zirkus" description="Jonglieren, Balancieren und eine kleine Vorführung." audience="children" age_min=5 age_max=12 capacity=16 participation_mode="assigned" sort_key=269
+LabelSet entity_id="wks_zirkus" key="leader" value="ext_x19" strength=#null note=#null
+LabelSet entity_id="wks_zirkus" key="leader" value="per_p17" strength=#null note=#null
+LabelSet entity_id="wks_zirkus" key="need" value="Matten" strength=#null note=#null
+WorkshopAdded workshop_id="wks_koch" title="Kochwerkstatt" description="Ein Mittagessen für die eigene Gruppe kochen." audience="children" age_min=6 age_max=14 capacity=10 participation_mode="assigned" sort_key=273
+LabelSet entity_id="wks_koch" key="leader" value="per_p20" strength=#null note=#null
+LabelSet entity_id="wks_koch" key="leader" value="per_p24" strength=#null note=#null
+LabelSet entity_id="wks_koch" key="need" value="Herd" strength=#null note=#null
+WorkshopAdded workshop_id="wks_holz" title="Holzwerkstatt" description="Ein Vogelhaus sägen, bohren und zusammenbauen." audience="children" age_min=8 age_max=15 capacity=8 participation_mode="assigned" sort_key=277
+LabelSet entity_id="wks_holz" key="leader" value="ext_x20" strength=#null note=#null
+LabelSet entity_id="wks_holz" key="need" value="Werkbänke" strength=#null note=#null
+WorkshopAdded workshop_id="wks_kletter" title="Kletterwand" description="Klettern mit Sicherung, erste Knoten." audience="children" age_min=7 age_max=15 capacity=12 participation_mode="assigned" sort_key=280
+LabelSet entity_id="wks_kletter" key="leader" value="ext_x21" strength=#null note=#null
+LabelSet entity_id="wks_kletter" key="leader" value="per_p27" strength=#null note=#null
+LabelSet entity_id="wks_kletter" key="need" value="Kletterwand" strength=#null note=#null
+WorkshopAdded workshop_id="wks_papier" title="Papierschöpfen" description="Aus Altpapier neues Papier machen." audience="children" age_min=5 age_max=12 capacity=10 participation_mode="assigned" sort_key=284
+LabelSet entity_id="wks_papier" key="leader" value="per_p30" strength=#null note=#null
+LabelSet entity_id="wks_papier" key="need" value="Werkbänke" strength=#null note=#null
+WorkshopAdded workshop_id="wks_bogen" title="Bogenschießen" description="Sicher zielen und treffen, mit Einweisung." audience="children" age_min=10 age_max=15 capacity=8 participation_mode="assigned" sort_key=287
+LabelSet entity_id="wks_bogen" key="leader" value="ext_x21" strength=#null note=#null
+LabelSet entity_id="wks_bogen" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_spiele" title="Spielewerkstatt" description="Brettspiele erfinden und bauen." audience="children" age_min=5 age_max=10 capacity=14 participation_mode="assigned" sort_key=290
+LabelSet entity_id="wks_spiele" key="leader" value="per_p32" strength=#null note=#null
+LabelSet entity_id="wks_spiele" key="leader" value="per_p2" strength=#null note=#null
+LabelSet entity_id="wks_spiele" key="need" value="Tische" strength=#null note=#null
+WorkshopAdded workshop_id="wks_schmuck" title="Schmuckwerkstatt" description="Ketten und Armbänder aus Perlen und Draht." audience="children" age_min=8 age_max=15 capacity=10 participation_mode="assigned" sort_key=294
+LabelSet entity_id="wks_schmuck" key="leader" value="ext_x22" strength=#null note=#null
+LabelSet entity_id="wks_schmuck" key="need" value="Tische" strength=#null note=#null
+WorkshopAdded workshop_id="wks_geo" title="Geocaching" description="Mit GPS versteckte Schätze im Wald finden." audience="children" age_min=7 age_max=15 capacity=14 participation_mode="assigned" sort_key=297
+LabelSet entity_id="wks_geo" key="leader" value="per_p36" strength=#null note=#null
+LabelSet entity_id="wks_geo" key="leader" value="per_p39" strength=#null note=#null
+LabelSet entity_id="wks_geo" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_theater" title="Theaterwerkstatt" description="Kurze Szenen erfinden und spielen." audience="children" age_min=8 age_max=14 capacity=14 participation_mode="assigned" sort_key=301
+LabelSet entity_id="wks_theater" key="leader" value="ext_x19" strength=#null note=#null
+LabelSet entity_id="wks_theater" key="need" value="Bühne" strength=#null note=#null
+WorkshopAdded workshop_id="wks_fahrrad" title="Fahrradwerkstatt" description="Schlauch flicken, Bremsen einstellen." audience="children" age_min=10 age_max=15 capacity=8 participation_mode="assigned" sort_key=304
+LabelSet entity_id="wks_fahrrad" key="leader" value="ext_x20" strength=#null note=#null
+LabelSet entity_id="wks_fahrrad" key="need" value="Werkbänke" strength=#null note=#null
+WorkshopAdded workshop_id="wks_garten" title="Gartenwerkstatt" description="Ein Beet anlegen und Kräuter pflanzen." audience="children" age_min=5 age_max=12 capacity=12 participation_mode="assigned" sort_key=307
+LabelSet entity_id="wks_garten" key="leader" value="per_p41" strength=#null note=#null
+LabelSet entity_id="wks_garten" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_back" title="Backstube" description="Brötchen für das Abschlussfrühstück backen." audience="children" age_min=5 age_max=12 capacity=10 participation_mode="assigned" sort_key=310
+LabelSet entity_id="wks_back" key="leader" value="per_p44" strength=#null note=#null
+LabelSet entity_id="wks_back" key="leader" value="per_p40" strength=#null note=#null
+LabelSet entity_id="wks_back" key="need" value="Herd" strength=#null note=#null
+WorkshopAdded workshop_id="wks_detektiv" title="Detektivspiel" description="Einen Fall lösen, mit Spuren und Verhören." audience="children" age_min=7 age_max=12 capacity=16 participation_mode="assigned" sort_key=314
+LabelSet entity_id="wks_detektiv" key="leader" value="per_p48" strength=#null note=#null
+LabelSet entity_id="wks_detektiv" key="leader" value="per_p29" strength=#null note=#null
+LabelSet entity_id="wks_detektiv" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_filzen" title="Filzen" description="Bunte Kugeln und Tiere aus Wolle." audience="children" age_min=5 age_max=10 capacity=10 participation_mode="assigned" sort_key=318
+LabelSet entity_id="wks_filzen" key="leader" value="per_p21" strength=#null note=#null
+LabelSet entity_id="wks_filzen" key="need" value="Tische" strength=#null note=#null
+WorkshopAdded workshop_id="wks_sport" title="Sport und Spiele" description="Staffeln, Ballspiele, Bewegungslandschaft." audience="children" age_min=5 age_max=12 capacity=20 participation_mode="assigned" sort_key=321
+LabelSet entity_id="wks_sport" key="leader" value="per_p42" strength=#null note=#null
+LabelSet entity_id="wks_sport" key="leader" value="per_p46" strength=#null note=#null
+LabelSet entity_id="wks_sport" key="need" value="Matten" strength=#null note=#null
+WorkshopAdded workshop_id="wks_feuer" title="Lagerfeuerküche" description="Stockbrot und Suppe über dem Feuer." audience="children" age_min=9 age_max=15 capacity=12 participation_mode="assigned" sort_key=325
+LabelSet entity_id="wks_feuer" key="leader" value="per_p50" strength=#null note=#null
+LabelSet entity_id="wks_feuer" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_schmieden" title="Schmieden" description="Einen Haken aus Eisen schmieden." audience="children" age_min=12 age_max=15 capacity=6 participation_mode="assigned" sort_key=328
+LabelSet entity_id="wks_schmieden" key="leader" value="ext_x20" strength=#null note=#null
+LabelSet entity_id="wks_schmieden" key="need" value="Esse" strength=#null note=#null
+WorkshopAdded workshop_id="wks_musik" title="Trommeln" description="Rhythmen auf Cajón und Djembe, für Kinder und Erwachsene." audience="all" age_min=5 age_max=99 capacity=16 participation_mode="assigned" sort_key=331
+LabelSet entity_id="wks_musik" key="leader" value="ext_x23" strength=#null note=#null
+LabelSet entity_id="wks_musik" key="need" value="Musikanlage" strength=#null note=#null
+WorkshopAdded workshop_id="wks_tanz" title="Tanzen" description="Eine Choreografie für den Abschlussabend." audience="all" age_min=5 age_max=99 capacity=20 participation_mode="assigned" sort_key=334
+LabelSet entity_id="wks_tanz" key="leader" value="per_p24" strength=#null note=#null
+LabelSet entity_id="wks_tanz" key="leader" value="per_p33" strength=#null note=#null
+LabelSet entity_id="wks_tanz" key="need" value="viel Platz" strength=#null note=#null
+WorkshopAdded workshop_id="wks_yoga" title="Yoga" description="Ruhige Bewegung und Atemübungen." audience="adults" age_min=18 age_max=99 capacity=12 participation_mode="assigned" sort_key=338
+LabelSet entity_id="wks_yoga" key="leader" value="per_p11" strength=#null note=#null
+LabelSet entity_id="wks_yoga" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_chor" title="Chor" description="Mehrstimmig singen, ohne Vorkenntnisse." audience="adults" age_min=16 age_max=99 capacity=20 participation_mode="assigned" sort_key=341
+LabelSet entity_id="wks_chor" key="leader" value="ext_x23" strength=#null note=#null
+LabelSet entity_id="wks_chor" key="need" value="Bühne" strength=#null note=#null
+WorkshopAdded workshop_id="wks_aquarell" title="Aquarell" description="Landschaften mit Wasserfarben." audience="adults" age_min=18 age_max=99 capacity=10 participation_mode="assigned" sort_key=344
+LabelSet entity_id="wks_aquarell" key="leader" value="per_p17" strength=#null note=#null
+LabelSet entity_id="wks_aquarell" key="need" value="Tische" strength=#null note=#null
+WorkshopAdded workshop_id="wks_wandern" title="Wanderung" description="Zwei Stunden auf den Hausberg und zurück." audience="adults" age_min=18 age_max=99 capacity=15 participation_mode="assigned" sort_key=347
+LabelSet entity_id="wks_wandern" key="leader" value="per_p15" strength=#null note=#null
+LabelSet entity_id="wks_wandern" key="need" value="draußen" strength=#null note=#null
+WorkshopAdded workshop_id="wks_erstehilfe" title="Erste Hilfe am Kind" description="Notfälle bei Kindern erkennen und richtig handeln." audience="adults" age_min=18 age_max=99 capacity=14 participation_mode="assigned" sort_key=350
+LabelSet entity_id="wks_erstehilfe" key="leader" value="ext_x24" strength=#null note=#null
+LabelSet entity_id="wks_erstehilfe" key="need" value="Beamer" strength=#null note=#null
+WorkshopAdded workshop_id="wks_gespraech" title="Gesprächskreis Erziehung" description="Austausch über den Alltag mit Kindern." audience="adults" age_min=18 age_max=99 capacity=12 participation_mode="assigned" sort_key=353
+LabelSet entity_id="wks_gespraech" key="leader" value="per_p27" strength=#null note=#null
+LabelSet entity_id="wks_gespraech" key="need" value="ruhig" strength=#null note=#null
+WorkshopAdded workshop_id="wks_impro" title="Improtheater" description="Spontan spielen, viel lachen." audience="adults" age_min=18 age_max=99 capacity=12 participation_mode="assigned" sort_key=356
+LabelSet entity_id="wks_impro" key="leader" value="per_p32" strength=#null note=#null
+LabelSet entity_id="wks_impro" key="need" value="viel Platz" strength=#null note=#null
+WorkshopAdded workshop_id="wks_handyfoto" title="Handyfotografie" description="Bessere Fotos mit dem Telefon." audience="adults" age_min=18 age_max=99 capacity=8 participation_mode="assigned" sort_key=359
+LabelSet entity_id="wks_handyfoto" key="leader" value="ext_x22" strength=#null note=#null
+LabelSet entity_id="wks_handyfoto" key="need" value="Tische" strength=#null note=#null
+WorkshopAdded workshop_id="wks_brot" title="Sauerteigbrot" description="Ein Brot ansetzen, backen und mitnehmen." audience="adults" age_min=18 age_max=99 capacity=8 participation_mode="assigned" sort_key=362
+LabelSet entity_id="wks_brot" key="leader" value="per_p20" strength=#null note=#null
+LabelSet entity_id="wks_brot" key="need" value="Herd" strength=#null note=#null
+WorkshopAdded workshop_id="wks_still" title="Achtsamkeit" description="Stille Übungen für zwischendurch." audience="adults" age_min=18 age_max=99 capacity=12 participation_mode="assigned" sort_key=365
+LabelSet entity_id="wks_still" key="leader" value="per_p30" strength=#null note=#null
+LabelSet entity_id="wks_still" key="need" value="ruhig" strength=#null note=#null
+WorkshopAdded workshop_id="wks_band" title="Bandprobe" description="Die Jugendgruppe probt offen. Wer mitspielen will, meldet sich an." audience="all" age_min=12 age_max=99 capacity=8 participation_mode="sign-up" sort_key=368
+LabelSet entity_id="wks_band" key="leader" value="per_p46" strength=#null note=#null
+LabelSet entity_id="wks_band" key="need" value="Bühne" strength=#null note=#null
+
+LabelSet entity_id="per_p0" key="prefers-workshop" value="wks_aquarell:1" strength=#null note=#null
+LabelSet entity_id="per_p0" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p0" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p0" key="prefers-workshop" value="wks_handyfoto:4" strength=#null note=#null
+LabelSet entity_id="per_p1" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p1" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p1" key="prefers-workshop" value="wks_kletter:3" strength=#null note=#null
+LabelSet entity_id="per_p1" key="prefers-workshop" value="wks_wald:4" strength=#null note=#null
+LabelSet entity_id="per_p1" key="prefers-workshop" value="wks_musik:5" strength=#null note=#null
+LabelSet entity_id="per_p2" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p2" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p2" key="prefers-workshop" value="wks_feuer:3" strength=#null note=#null
+LabelSet entity_id="per_p2" key="prefers-workshop" value="wks_schmuck:4" strength=#null note=#null
+LabelSet entity_id="per_p2" key="prefers-workshop" value="wks_holz:5" strength=#null note=#null
+LabelSet entity_id="per_p3" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p3" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p3" key="prefers-workshop" value="wks_wandern:3" strength=#null note=#null
+LabelSet entity_id="per_p3" key="prefers-workshop" value="wks_yoga:4" strength=#null note=#null
+LabelSet entity_id="per_p5" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p5" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p5" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p5" key="prefers-workshop" value="wks_brot:4" strength=#null note=#null
+LabelSet entity_id="per_p6" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p6" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p6" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p6" key="prefers-workshop" value="wks_spiele:4" strength=#null note=#null
+LabelSet entity_id="per_p6" key="prefers-workshop" value="wks_back:5" strength=#null note=#null
+LabelSet entity_id="per_p7" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p7" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p7" key="prefers-workshop" value="wks_brot:3" strength=#null note=#null
+LabelSet entity_id="per_p7" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p8" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p8" key="prefers-workshop" value="wks_kletter:2" strength=#null note=#null
+LabelSet entity_id="per_p8" key="prefers-workshop" value="wks_keramik:3" strength=#null note=#null
+LabelSet entity_id="per_p8" key="prefers-workshop" value="wks_koch:4" strength=#null note=#null
+LabelSet entity_id="per_p8" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p9" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p9" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p9" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p9" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p11" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p11" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p11" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p11" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p12" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p12" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p12" key="prefers-workshop" value="wks_brot:3" strength=#null note=#null
+LabelSet entity_id="per_p12" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p14" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p14" key="prefers-workshop" value="wks_back:2" strength=#null note=#null
+LabelSet entity_id="per_p14" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p14" key="prefers-workshop" value="wks_sport:4" strength=#null note=#null
+LabelSet entity_id="per_p14" key="prefers-workshop" value="wks_papier:5" strength=#null note=#null
+LabelSet entity_id="per_p15" key="prefers-workshop" value="wks_chor:1" strength=#null note=#null
+LabelSet entity_id="per_p15" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p15" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p15" key="prefers-workshop" value="wks_impro:4" strength=#null note=#null
+LabelSet entity_id="per_p16" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p16" key="prefers-workshop" value="wks_schmieden:2" strength=#null note=#null
+LabelSet entity_id="per_p16" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p16" key="prefers-workshop" value="wks_theater:4" strength=#null note=#null
+LabelSet entity_id="per_p16" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p17" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p17" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p17" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p17" key="prefers-workshop" value="wks_gespraech:4" strength=#null note=#null
+LabelSet entity_id="per_p18" key="prefers-workshop" value="wks_brot:1" strength=#null note=#null
+LabelSet entity_id="per_p18" key="prefers-workshop" value="wks_tanz:2" strength=#null note=#null
+LabelSet entity_id="per_p18" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p18" key="prefers-workshop" value="wks_still:4" strength=#null note=#null
+LabelSet entity_id="per_p19" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p19" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p19" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p19" key="prefers-workshop" value="wks_keramik:4" strength=#null note=#null
+LabelSet entity_id="per_p19" key="prefers-workshop" value="wks_wald:5" strength=#null note=#null
+LabelSet entity_id="per_p21" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p21" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p21" key="prefers-workshop" value="wks_aquarell:3" strength=#null note=#null
+LabelSet entity_id="per_p21" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p22" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p22" key="prefers-workshop" value="wks_kletter:2" strength=#null note=#null
+LabelSet entity_id="per_p22" key="prefers-workshop" value="wks_zirkus:3" strength=#null note=#null
+LabelSet entity_id="per_p22" key="prefers-workshop" value="wks_sport:4" strength=#null note=#null
+LabelSet entity_id="per_p22" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p23" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p23" key="prefers-workshop" value="wks_sport:2" strength=#null note=#null
+LabelSet entity_id="per_p23" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p23" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p23" key="prefers-workshop" value="wks_back:5" strength=#null note=#null
+LabelSet entity_id="per_p24" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p24" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p24" key="prefers-workshop" value="wks_impro:3" strength=#null note=#null
+LabelSet entity_id="per_p24" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p25" key="prefers-workshop" value="wks_zirkus:1" strength=#null note=#null
+LabelSet entity_id="per_p25" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p25" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p25" key="prefers-workshop" value="wks_back:4" strength=#null note=#null
+LabelSet entity_id="per_p25" key="prefers-workshop" value="wks_sport:5" strength=#null note=#null
+LabelSet entity_id="per_p26" key="prefers-workshop" value="wks_wald:1" strength=#null note=#null
+LabelSet entity_id="per_p26" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p26" key="prefers-workshop" value="wks_geo:3" strength=#null note=#null
+LabelSet entity_id="per_p26" key="prefers-workshop" value="wks_back:4" strength=#null note=#null
+LabelSet entity_id="per_p26" key="prefers-workshop" value="wks_theater:5" strength=#null note=#null
+LabelSet entity_id="per_p27" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p27" key="prefers-workshop" value="wks_chor:2" strength=#null note=#null
+LabelSet entity_id="per_p27" key="prefers-workshop" value="wks_wandern:3" strength=#null note=#null
+LabelSet entity_id="per_p27" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p28" key="prefers-workshop" value="wks_chor:1" strength=#null note=#null
+LabelSet entity_id="per_p28" key="prefers-workshop" value="wks_tanz:2" strength=#null note=#null
+LabelSet entity_id="per_p28" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p28" key="prefers-workshop" value="wks_erstehilfe:4" strength=#null note=#null
+LabelSet entity_id="per_p29" key="prefers-workshop" value="wks_schmieden:1" strength=#null note=#null
+LabelSet entity_id="per_p29" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p29" key="prefers-workshop" value="wks_bogen:3" strength=#null note=#null
+LabelSet entity_id="per_p29" key="prefers-workshop" value="wks_geo:4" strength=#null note=#null
+LabelSet entity_id="per_p29" key="prefers-workshop" value="wks_fahrrad:5" strength=#null note=#null
+LabelSet entity_id="per_p30" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p30" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p30" key="prefers-workshop" value="wks_aquarell:3" strength=#null note=#null
+LabelSet entity_id="per_p30" key="prefers-workshop" value="wks_wandern:4" strength=#null note=#null
+LabelSet entity_id="per_p31" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p31" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p31" key="prefers-workshop" value="wks_theater:3" strength=#null note=#null
+LabelSet entity_id="per_p31" key="prefers-workshop" value="wks_geo:4" strength=#null note=#null
+LabelSet entity_id="per_p31" key="prefers-workshop" value="wks_keramik:5" strength=#null note=#null
+LabelSet entity_id="per_p32" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p32" key="prefers-workshop" value="wks_brot:2" strength=#null note=#null
+LabelSet entity_id="per_p32" key="prefers-workshop" value="wks_still:3" strength=#null note=#null
+LabelSet entity_id="per_p32" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p33" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p33" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p33" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p33" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p34" key="prefers-workshop" value="wks_wald:1" strength=#null note=#null
+LabelSet entity_id="per_p34" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p34" key="prefers-workshop" value="wks_back:3" strength=#null note=#null
+LabelSet entity_id="per_p34" key="prefers-workshop" value="wks_filzen:4" strength=#null note=#null
+LabelSet entity_id="per_p34" key="prefers-workshop" value="wks_tanz:5" strength=#null note=#null
+LabelSet entity_id="per_p35" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p35" key="prefers-workshop" value="wks_sport:2" strength=#null note=#null
+LabelSet entity_id="per_p35" key="prefers-workshop" value="wks_back:3" strength=#null note=#null
+LabelSet entity_id="per_p35" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p35" key="prefers-workshop" value="wks_keramik:5" strength=#null note=#null
+LabelSet entity_id="per_p36" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p36" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p36" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p36" key="prefers-workshop" value="wks_brot:4" strength=#null note=#null
+LabelSet entity_id="per_p37" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p37" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p37" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p37" key="prefers-workshop" value="wks_keramik:4" strength=#null note=#null
+LabelSet entity_id="per_p37" key="prefers-workshop" value="wks_holz:5" strength=#null note=#null
+LabelSet entity_id="per_p38" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p38" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p38" key="prefers-workshop" value="wks_zirkus:3" strength=#null note=#null
+LabelSet entity_id="per_p38" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p38" key="prefers-workshop" value="wks_wald:5" strength=#null note=#null
+LabelSet entity_id="per_p39" key="prefers-workshop" value="wks_aquarell:1" strength=#null note=#null
+LabelSet entity_id="per_p39" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p39" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p39" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p40" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p40" key="prefers-workshop" value="wks_geo:2" strength=#null note=#null
+LabelSet entity_id="per_p40" key="prefers-workshop" value="wks_schmieden:3" strength=#null note=#null
+LabelSet entity_id="per_p40" key="prefers-workshop" value="wks_schmuck:4" strength=#null note=#null
+LabelSet entity_id="per_p40" key="prefers-workshop" value="wks_feuer:5" strength=#null note=#null
+LabelSet entity_id="per_p41" key="prefers-workshop" value="wks_chor:1" strength=#null note=#null
+LabelSet entity_id="per_p41" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p41" key="prefers-workshop" value="wks_handyfoto:3" strength=#null note=#null
+LabelSet entity_id="per_p41" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p43" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p43" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p43" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p43" key="prefers-workshop" value="wks_kletter:4" strength=#null note=#null
+LabelSet entity_id="per_p43" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p44" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p44" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p44" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p44" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p45" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p45" key="prefers-workshop" value="wks_chor:2" strength=#null note=#null
+LabelSet entity_id="per_p45" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p45" key="prefers-workshop" value="wks_aquarell:4" strength=#null note=#null
+LabelSet entity_id="per_p46" key="prefers-workshop" value="wks_schmieden:1" strength=#null note=#null
+LabelSet entity_id="per_p46" key="prefers-workshop" value="wks_kletter:2" strength=#null note=#null
+LabelSet entity_id="per_p46" key="prefers-workshop" value="wks_geo:3" strength=#null note=#null
+LabelSet entity_id="per_p46" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p46" key="prefers-workshop" value="wks_tanz:5" strength=#null note=#null
+LabelSet entity_id="per_p47" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p47" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p47" key="prefers-workshop" value="wks_zirkus:3" strength=#null note=#null
+LabelSet entity_id="per_p47" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p47" key="prefers-workshop" value="wks_sport:5" strength=#null note=#null
+LabelSet entity_id="per_p48" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p48" key="prefers-workshop" value="wks_chor:2" strength=#null note=#null
+LabelSet entity_id="per_p48" key="prefers-workshop" value="wks_aquarell:3" strength=#null note=#null
+LabelSet entity_id="per_p48" key="prefers-workshop" value="wks_yoga:4" strength=#null note=#null
+LabelSet entity_id="per_p49" key="prefers-workshop" value="wks_koch:1" strength=#null note=#null
+LabelSet entity_id="per_p49" key="prefers-workshop" value="wks_sport:2" strength=#null note=#null
+LabelSet entity_id="per_p49" key="prefers-workshop" value="wks_theater:3" strength=#null note=#null
+LabelSet entity_id="per_p49" key="prefers-workshop" value="wks_geo:4" strength=#null note=#null
+LabelSet entity_id="per_p49" key="prefers-workshop" value="wks_musik:5" strength=#null note=#null
+LabelSet entity_id="per_p50" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p50" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p50" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p50" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p51" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p51" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p51" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p51" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p52" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p52" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p52" key="prefers-workshop" value="wks_impro:3" strength=#null note=#null
+LabelSet entity_id="per_p52" key="prefers-workshop" value="wks_yoga:4" strength=#null note=#null
+LabelSet entity_id="per_p53" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p53" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p53" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p53" key="prefers-workshop" value="wks_handyfoto:4" strength=#null note=#null
+LabelSet entity_id="per_p54" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p54" key="prefers-workshop" value="wks_bogen:2" strength=#null note=#null
+LabelSet entity_id="per_p54" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p54" key="prefers-workshop" value="wks_zirkus:4" strength=#null note=#null
+LabelSet entity_id="per_p54" key="prefers-workshop" value="wks_schmuck:5" strength=#null note=#null
+LabelSet entity_id="per_p55" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p55" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p55" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p55" key="prefers-workshop" value="wks_brot:4" strength=#null note=#null
+LabelSet entity_id="per_p56" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p56" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p56" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p56" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p58" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p58" key="prefers-workshop" value="wks_schmieden:2" strength=#null note=#null
+LabelSet entity_id="per_p58" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p58" key="prefers-workshop" value="wks_theater:4" strength=#null note=#null
+LabelSet entity_id="per_p58" key="prefers-workshop" value="wks_sport:5" strength=#null note=#null
+LabelSet entity_id="per_p59" key="prefers-workshop" value="wks_back:1" strength=#null note=#null
+LabelSet entity_id="per_p59" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p59" key="prefers-workshop" value="wks_keramik:3" strength=#null note=#null
+LabelSet entity_id="per_p59" key="prefers-workshop" value="wks_spiele:4" strength=#null note=#null
+LabelSet entity_id="per_p59" key="prefers-workshop" value="wks_zirkus:5" strength=#null note=#null
+LabelSet entity_id="per_p60" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p60" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p60" key="prefers-workshop" value="wks_brot:3" strength=#null note=#null
+LabelSet entity_id="per_p60" key="prefers-workshop" value="wks_wandern:4" strength=#null note=#null
+LabelSet entity_id="per_p61" key="prefers-workshop" value="wks_zirkus:1" strength=#null note=#null
+LabelSet entity_id="per_p61" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p61" key="prefers-workshop" value="wks_back:3" strength=#null note=#null
+LabelSet entity_id="per_p61" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p61" key="prefers-workshop" value="wks_musik:5" strength=#null note=#null
+LabelSet entity_id="per_p62" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p62" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p62" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p62" key="prefers-workshop" value="wks_keramik:4" strength=#null note=#null
+LabelSet entity_id="per_p62" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p63" key="prefers-workshop" value="wks_musik:1" strength=#null note=#null
+LabelSet entity_id="per_p63" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p63" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p63" key="prefers-workshop" value="wks_wandern:4" strength=#null note=#null
+LabelSet entity_id="per_p64" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p64" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p64" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p64" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p65" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p65" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p65" key="prefers-workshop" value="wks_zirkus:3" strength=#null note=#null
+LabelSet entity_id="per_p65" key="prefers-workshop" value="wks_sport:4" strength=#null note=#null
+LabelSet entity_id="per_p65" key="prefers-workshop" value="wks_garten:5" strength=#null note=#null
+LabelSet entity_id="per_p66" key="prefers-workshop" value="wks_tanz:1" strength=#null note=#null
+LabelSet entity_id="per_p66" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p66" key="prefers-workshop" value="wks_erstehilfe:3" strength=#null note=#null
+LabelSet entity_id="per_p66" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p67" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p67" key="prefers-workshop" value="wks_brot:2" strength=#null note=#null
+LabelSet entity_id="per_p67" key="prefers-workshop" value="wks_aquarell:3" strength=#null note=#null
+LabelSet entity_id="per_p67" key="prefers-workshop" value="wks_wandern:4" strength=#null note=#null
+LabelSet entity_id="per_p68" key="prefers-workshop" value="wks_zirkus:1" strength=#null note=#null
+LabelSet entity_id="per_p68" key="prefers-workshop" value="wks_back:2" strength=#null note=#null
+LabelSet entity_id="per_p68" key="prefers-workshop" value="wks_papier:3" strength=#null note=#null
+LabelSet entity_id="per_p68" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p68" key="prefers-workshop" value="wks_wald:5" strength=#null note=#null
+LabelSet entity_id="per_p69" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p69" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p69" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p69" key="prefers-workshop" value="wks_detektiv:4" strength=#null note=#null
+LabelSet entity_id="per_p69" key="prefers-workshop" value="wks_schmuck:5" strength=#null note=#null
+LabelSet entity_id="per_p70" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p70" key="prefers-workshop" value="wks_chor:2" strength=#null note=#null
+LabelSet entity_id="per_p70" key="prefers-workshop" value="wks_impro:3" strength=#null note=#null
+LabelSet entity_id="per_p70" key="prefers-workshop" value="wks_aquarell:4" strength=#null note=#null
+LabelSet entity_id="per_p72" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p72" key="prefers-workshop" value="wks_kletter:2" strength=#null note=#null
+LabelSet entity_id="per_p72" key="prefers-workshop" value="wks_feuer:3" strength=#null note=#null
+LabelSet entity_id="per_p72" key="prefers-workshop" value="wks_holz:4" strength=#null note=#null
+LabelSet entity_id="per_p72" key="prefers-workshop" value="wks_tanz:5" strength=#null note=#null
+LabelSet entity_id="per_p73" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p73" key="prefers-workshop" value="wks_tanz:2" strength=#null note=#null
+LabelSet entity_id="per_p73" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p73" key="prefers-workshop" value="wks_erstehilfe:4" strength=#null note=#null
+LabelSet entity_id="per_p74" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p74" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p74" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p74" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p75" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p75" key="prefers-workshop" value="wks_feuer:2" strength=#null note=#null
+LabelSet entity_id="per_p75" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p75" key="prefers-workshop" value="wks_bogen:4" strength=#null note=#null
+LabelSet entity_id="per_p75" key="prefers-workshop" value="wks_schmieden:5" strength=#null note=#null
+LabelSet entity_id="per_p77" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p77" key="prefers-workshop" value="wks_brot:2" strength=#null note=#null
+LabelSet entity_id="per_p77" key="prefers-workshop" value="wks_aquarell:3" strength=#null note=#null
+LabelSet entity_id="per_p77" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p78" key="prefers-workshop" value="wks_brot:1" strength=#null note=#null
+LabelSet entity_id="per_p78" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p78" key="prefers-workshop" value="wks_still:3" strength=#null note=#null
+LabelSet entity_id="per_p78" key="prefers-workshop" value="wks_impro:4" strength=#null note=#null
+LabelSet entity_id="per_p80" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p80" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p80" key="prefers-workshop" value="wks_wandern:3" strength=#null note=#null
+LabelSet entity_id="per_p80" key="prefers-workshop" value="wks_handyfoto:4" strength=#null note=#null
+LabelSet entity_id="per_p81" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p81" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p81" key="prefers-workshop" value="wks_sport:3" strength=#null note=#null
+LabelSet entity_id="per_p81" key="prefers-workshop" value="wks_theater:4" strength=#null note=#null
+LabelSet entity_id="per_p81" key="prefers-workshop" value="wks_wald:5" strength=#null note=#null
+LabelSet entity_id="per_p82" key="prefers-workshop" value="wks_wald:1" strength=#null note=#null
+LabelSet entity_id="per_p82" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p82" key="prefers-workshop" value="wks_kletter:3" strength=#null note=#null
+LabelSet entity_id="per_p82" key="prefers-workshop" value="wks_feuer:4" strength=#null note=#null
+LabelSet entity_id="per_p82" key="prefers-workshop" value="wks_musik:5" strength=#null note=#null
+LabelSet entity_id="per_p83" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p83" key="prefers-workshop" value="wks_bogen:2" strength=#null note=#null
+LabelSet entity_id="per_p83" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p83" key="prefers-workshop" value="wks_keramik:4" strength=#null note=#null
+LabelSet entity_id="per_p83" key="prefers-workshop" value="wks_schmieden:5" strength=#null note=#null
+LabelSet entity_id="per_p84" key="prefers-workshop" value="wks_musik:1" strength=#null note=#null
+LabelSet entity_id="per_p84" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p84" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p84" key="prefers-workshop" value="wks_impro:4" strength=#null note=#null
+LabelSet entity_id="per_p85" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p85" key="prefers-workshop" value="wks_still:2" strength=#null note=#null
+LabelSet entity_id="per_p85" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p85" key="prefers-workshop" value="wks_erstehilfe:4" strength=#null note=#null
+LabelSet entity_id="per_p86" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p86" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p86" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p86" key="prefers-workshop" value="wks_zirkus:4" strength=#null note=#null
+LabelSet entity_id="per_p86" key="prefers-workshop" value="wks_sport:5" strength=#null note=#null
+LabelSet entity_id="per_p87" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p87" key="prefers-workshop" value="wks_bogen:2" strength=#null note=#null
+LabelSet entity_id="per_p87" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p87" key="prefers-workshop" value="wks_geo:4" strength=#null note=#null
+LabelSet entity_id="per_p87" key="prefers-workshop" value="wks_theater:5" strength=#null note=#null
+LabelSet entity_id="per_p88" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p88" key="prefers-workshop" value="wks_brot:2" strength=#null note=#null
+LabelSet entity_id="per_p88" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p88" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p89" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p89" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p89" key="prefers-workshop" value="wks_chor:3" strength=#null note=#null
+LabelSet entity_id="per_p89" key="prefers-workshop" value="wks_brot:4" strength=#null note=#null
+LabelSet entity_id="per_p90" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p90" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p90" key="prefers-workshop" value="wks_theater:3" strength=#null note=#null
+LabelSet entity_id="per_p90" key="prefers-workshop" value="wks_zirkus:4" strength=#null note=#null
+LabelSet entity_id="per_p90" key="prefers-workshop" value="wks_keramik:5" strength=#null note=#null
+LabelSet entity_id="per_p91" key="prefers-workshop" value="wks_wandern:1" strength=#null note=#null
+LabelSet entity_id="per_p91" key="prefers-workshop" value="wks_musik:2" strength=#null note=#null
+LabelSet entity_id="per_p91" key="prefers-workshop" value="wks_impro:3" strength=#null note=#null
+LabelSet entity_id="per_p91" key="prefers-workshop" value="wks_handyfoto:4" strength=#null note=#null
+LabelSet entity_id="per_p92" key="prefers-workshop" value="wks_feuer:1" strength=#null note=#null
+LabelSet entity_id="per_p92" key="prefers-workshop" value="wks_holz:2" strength=#null note=#null
+LabelSet entity_id="per_p92" key="prefers-workshop" value="wks_fahrrad:3" strength=#null note=#null
+LabelSet entity_id="per_p92" key="prefers-workshop" value="wks_bogen:4" strength=#null note=#null
+LabelSet entity_id="per_p92" key="prefers-workshop" value="wks_schmuck:5" strength=#null note=#null
+LabelSet entity_id="per_p93" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p93" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p93" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p93" key="prefers-workshop" value="wks_schmieden:4" strength=#null note=#null
+LabelSet entity_id="per_p93" key="prefers-workshop" value="wks_feuer:5" strength=#null note=#null
+LabelSet entity_id="per_p95" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p95" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p95" key="prefers-workshop" value="wks_impro:3" strength=#null note=#null
+LabelSet entity_id="per_p95" key="prefers-workshop" value="wks_gespraech:4" strength=#null note=#null
+LabelSet entity_id="per_p96" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p96" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p96" key="prefers-workshop" value="wks_bogen:3" strength=#null note=#null
+LabelSet entity_id="per_p96" key="prefers-workshop" value="wks_back:4" strength=#null note=#null
+LabelSet entity_id="per_p96" key="prefers-workshop" value="wks_tanz:5" strength=#null note=#null
+LabelSet entity_id="per_p97" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p97" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p97" key="prefers-workshop" value="wks_feuer:3" strength=#null note=#null
+LabelSet entity_id="per_p97" key="prefers-workshop" value="wks_theater:4" strength=#null note=#null
+LabelSet entity_id="per_p97" key="prefers-workshop" value="wks_koch:5" strength=#null note=#null
+LabelSet entity_id="per_p98" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p98" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p98" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p98" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p99" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p99" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p99" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p99" key="prefers-workshop" value="wks_aquarell:4" strength=#null note=#null
+LabelSet entity_id="per_p101" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p101" key="prefers-workshop" value="wks_bogen:2" strength=#null note=#null
+LabelSet entity_id="per_p101" key="prefers-workshop" value="wks_schmuck:3" strength=#null note=#null
+LabelSet entity_id="per_p101" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p101" key="prefers-workshop" value="wks_theater:5" strength=#null note=#null
+LabelSet entity_id="per_p102" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p102" key="prefers-workshop" value="wks_wandern:2" strength=#null note=#null
+LabelSet entity_id="per_p102" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p102" key="prefers-workshop" value="wks_impro:4" strength=#null note=#null
+LabelSet entity_id="per_p103" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p103" key="prefers-workshop" value="wks_kletter:2" strength=#null note=#null
+LabelSet entity_id="per_p103" key="prefers-workshop" value="wks_geo:3" strength=#null note=#null
+LabelSet entity_id="per_p103" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p103" key="prefers-workshop" value="wks_back:5" strength=#null note=#null
+LabelSet entity_id="per_p104" key="prefers-workshop" value="wks_still:1" strength=#null note=#null
+LabelSet entity_id="per_p104" key="prefers-workshop" value="wks_aquarell:2" strength=#null note=#null
+LabelSet entity_id="per_p104" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p104" key="prefers-workshop" value="wks_brot:4" strength=#null note=#null
+LabelSet entity_id="per_p105" key="prefers-workshop" value="wks_yoga:1" strength=#null note=#null
+LabelSet entity_id="per_p105" key="prefers-workshop" value="wks_brot:2" strength=#null note=#null
+LabelSet entity_id="per_p105" key="prefers-workshop" value="wks_erstehilfe:3" strength=#null note=#null
+LabelSet entity_id="per_p105" key="prefers-workshop" value="wks_wandern:4" strength=#null note=#null
+LabelSet entity_id="per_p106" key="prefers-workshop" value="wks_wald:1" strength=#null note=#null
+LabelSet entity_id="per_p106" key="prefers-workshop" value="wks_schmieden:2" strength=#null note=#null
+LabelSet entity_id="per_p106" key="prefers-workshop" value="wks_keramik:3" strength=#null note=#null
+LabelSet entity_id="per_p106" key="prefers-workshop" value="wks_holz:4" strength=#null note=#null
+LabelSet entity_id="per_p106" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p107" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p107" key="prefers-workshop" value="wks_wald:2" strength=#null note=#null
+LabelSet entity_id="per_p107" key="prefers-workshop" value="wks_kletter:3" strength=#null note=#null
+LabelSet entity_id="per_p107" key="prefers-workshop" value="wks_keramik:4" strength=#null note=#null
+LabelSet entity_id="per_p107" key="prefers-workshop" value="wks_holz:5" strength=#null note=#null
+LabelSet entity_id="per_p108" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p108" key="prefers-workshop" value="wks_sport:2" strength=#null note=#null
+LabelSet entity_id="per_p108" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p108" key="prefers-workshop" value="wks_back:4" strength=#null note=#null
+LabelSet entity_id="per_p108" key="prefers-workshop" value="wks_theater:5" strength=#null note=#null
+LabelSet entity_id="per_p109" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p109" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p109" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p109" key="prefers-workshop" value="wks_aquarell:4" strength=#null note=#null
+LabelSet entity_id="per_p110" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p110" key="prefers-workshop" value="wks_chor:2" strength=#null note=#null
+LabelSet entity_id="per_p110" key="prefers-workshop" value="wks_yoga:3" strength=#null note=#null
+LabelSet entity_id="per_p110" key="prefers-workshop" value="wks_brot:4" strength=#null note=#null
+LabelSet entity_id="per_p111" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p111" key="prefers-workshop" value="wks_detektiv:2" strength=#null note=#null
+LabelSet entity_id="per_p111" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p111" key="prefers-workshop" value="wks_wald:4" strength=#null note=#null
+LabelSet entity_id="per_p111" key="prefers-workshop" value="wks_koch:5" strength=#null note=#null
+LabelSet entity_id="per_p113" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p113" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p113" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p113" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p114" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p114" key="prefers-workshop" value="wks_tanz:2" strength=#null note=#null
+LabelSet entity_id="per_p114" key="prefers-workshop" value="wks_kletter:3" strength=#null note=#null
+LabelSet entity_id="per_p114" key="prefers-workshop" value="wks_koch:4" strength=#null note=#null
+LabelSet entity_id="per_p114" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p115" key="prefers-workshop" value="wks_tanz:1" strength=#null note=#null
+LabelSet entity_id="per_p115" key="prefers-workshop" value="wks_erstehilfe:2" strength=#null note=#null
+LabelSet entity_id="per_p115" key="prefers-workshop" value="wks_brot:3" strength=#null note=#null
+LabelSet entity_id="per_p115" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p116" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p116" key="prefers-workshop" value="wks_yoga:2" strength=#null note=#null
+LabelSet entity_id="per_p116" key="prefers-workshop" value="wks_wandern:3" strength=#null note=#null
+LabelSet entity_id="per_p116" key="prefers-workshop" value="wks_chor:4" strength=#null note=#null
+LabelSet entity_id="per_p117" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p117" key="prefers-workshop" value="wks_detektiv:2" strength=#null note=#null
+LabelSet entity_id="per_p117" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p117" key="prefers-workshop" value="wks_bogen:4" strength=#null note=#null
+LabelSet entity_id="per_p117" key="prefers-workshop" value="wks_schmuck:5" strength=#null note=#null
+LabelSet entity_id="per_p118" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p118" key="prefers-workshop" value="wks_bogen:2" strength=#null note=#null
+LabelSet entity_id="per_p118" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p118" key="prefers-workshop" value="wks_feuer:4" strength=#null note=#null
+LabelSet entity_id="per_p118" key="prefers-workshop" value="wks_fahrrad:5" strength=#null note=#null
+LabelSet entity_id="per_p119" key="prefers-workshop" value="wks_erstehilfe:1" strength=#null note=#null
+LabelSet entity_id="per_p119" key="prefers-workshop" value="wks_brot:2" strength=#null note=#null
+LabelSet entity_id="per_p119" key="prefers-workshop" value="wks_aquarell:3" strength=#null note=#null
+LabelSet entity_id="per_p119" key="prefers-workshop" value="wks_handyfoto:4" strength=#null note=#null
+LabelSet entity_id="per_p120" key="prefers-workshop" value="wks_zirkus:1" strength=#null note=#null
+LabelSet entity_id="per_p120" key="prefers-workshop" value="wks_bogen:2" strength=#null note=#null
+LabelSet entity_id="per_p120" key="prefers-workshop" value="wks_holz:3" strength=#null note=#null
+LabelSet entity_id="per_p120" key="prefers-workshop" value="wks_back:4" strength=#null note=#null
+LabelSet entity_id="per_p120" key="prefers-workshop" value="wks_wald:5" strength=#null note=#null
+LabelSet entity_id="per_p121" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p121" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p121" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p121" key="prefers-workshop" value="wks_kletter:4" strength=#null note=#null
+LabelSet entity_id="per_p121" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p122" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p122" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p122" key="prefers-workshop" value="wks_tanz:3" strength=#null note=#null
+LabelSet entity_id="per_p122" key="prefers-workshop" value="wks_spiele:4" strength=#null note=#null
+LabelSet entity_id="per_p122" key="prefers-workshop" value="wks_papier:5" strength=#null note=#null
+LabelSet entity_id="per_p123" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p123" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p123" key="prefers-workshop" value="wks_holz:3" strength=#null note=#null
+LabelSet entity_id="per_p123" key="prefers-workshop" value="wks_wald:4" strength=#null note=#null
+LabelSet entity_id="per_p123" key="prefers-workshop" value="wks_kletter:5" strength=#null note=#null
+LabelSet entity_id="per_p124" key="prefers-workshop" value="wks_wald:1" strength=#null note=#null
+LabelSet entity_id="per_p124" key="prefers-workshop" value="wks_back:2" strength=#null note=#null
+LabelSet entity_id="per_p124" key="prefers-workshop" value="wks_sport:3" strength=#null note=#null
+LabelSet entity_id="per_p124" key="prefers-workshop" value="wks_garten:4" strength=#null note=#null
+LabelSet entity_id="per_p124" key="prefers-workshop" value="wks_filzen:5" strength=#null note=#null
+LabelSet entity_id="per_p125" key="prefers-workshop" value="wks_koch:1" strength=#null note=#null
+LabelSet entity_id="per_p125" key="prefers-workshop" value="wks_sport:2" strength=#null note=#null
+LabelSet entity_id="per_p125" key="prefers-workshop" value="wks_keramik:3" strength=#null note=#null
+LabelSet entity_id="per_p125" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p125" key="prefers-workshop" value="wks_garten:5" strength=#null note=#null
+LabelSet entity_id="per_p126" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p126" key="prefers-workshop" value="wks_schmieden:2" strength=#null note=#null
+LabelSet entity_id="per_p126" key="prefers-workshop" value="wks_keramik:3" strength=#null note=#null
+LabelSet entity_id="per_p126" key="prefers-workshop" value="wks_wald:4" strength=#null note=#null
+LabelSet entity_id="per_p126" key="prefers-workshop" value="wks_koch:5" strength=#null note=#null
+LabelSet entity_id="per_p127" key="prefers-workshop" value="wks_bogen:1" strength=#null note=#null
+LabelSet entity_id="per_p127" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p127" key="prefers-workshop" value="wks_kletter:3" strength=#null note=#null
+LabelSet entity_id="per_p127" key="prefers-workshop" value="wks_geo:4" strength=#null note=#null
+LabelSet entity_id="per_p127" key="prefers-workshop" value="wks_theater:5" strength=#null note=#null
+LabelSet entity_id="per_p128" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p128" key="prefers-workshop" value="wks_kletter:2" strength=#null note=#null
+LabelSet entity_id="per_p128" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p128" key="prefers-workshop" value="wks_feuer:4" strength=#null note=#null
+LabelSet entity_id="per_p128" key="prefers-workshop" value="wks_geo:5" strength=#null note=#null
+LabelSet entity_id="per_p130" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p130" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p130" key="prefers-workshop" value="wks_back:3" strength=#null note=#null
+LabelSet entity_id="per_p130" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p130" key="prefers-workshop" value="wks_sport:5" strength=#null note=#null
+LabelSet entity_id="per_p132" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p132" key="prefers-workshop" value="wks_koch:2" strength=#null note=#null
+LabelSet entity_id="per_p132" key="prefers-workshop" value="wks_zirkus:3" strength=#null note=#null
+LabelSet entity_id="per_p132" key="prefers-workshop" value="wks_back:4" strength=#null note=#null
+LabelSet entity_id="per_p132" key="prefers-workshop" value="wks_musik:5" strength=#null note=#null
+LabelSet entity_id="per_p133" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p133" key="prefers-workshop" value="wks_theater:2" strength=#null note=#null
+LabelSet entity_id="per_p133" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p133" key="prefers-workshop" value="wks_zirkus:4" strength=#null note=#null
+LabelSet entity_id="per_p133" key="prefers-workshop" value="wks_filzen:5" strength=#null note=#null
+LabelSet entity_id="per_p134" key="prefers-workshop" value="wks_koch:1" strength=#null note=#null
+LabelSet entity_id="per_p134" key="prefers-workshop" value="wks_keramik:2" strength=#null note=#null
+LabelSet entity_id="per_p134" key="prefers-workshop" value="wks_wald:3" strength=#null note=#null
+LabelSet entity_id="per_p134" key="prefers-workshop" value="wks_papier:4" strength=#null note=#null
+LabelSet entity_id="per_p134" key="prefers-workshop" value="wks_garten:5" strength=#null note=#null
+LabelSet entity_id="per_p135" key="prefers-workshop" value="wks_geo:1" strength=#null note=#null
+LabelSet entity_id="per_p135" key="prefers-workshop" value="wks_theater:2" strength=#null note=#null
+LabelSet entity_id="per_p135" key="prefers-workshop" value="wks_detektiv:3" strength=#null note=#null
+LabelSet entity_id="per_p135" key="prefers-workshop" value="wks_zirkus:4" strength=#null note=#null
+LabelSet entity_id="per_p135" key="prefers-workshop" value="wks_holz:5" strength=#null note=#null
+LabelSet entity_id="per_p136" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p136" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p136" key="prefers-workshop" value="wks_back:3" strength=#null note=#null
+LabelSet entity_id="per_p136" key="prefers-workshop" value="wks_wald:4" strength=#null note=#null
+LabelSet entity_id="per_p136" key="prefers-workshop" value="wks_tanz:5" strength=#null note=#null
+LabelSet entity_id="per_p137" key="prefers-workshop" value="wks_keramik:1" strength=#null note=#null
+LabelSet entity_id="per_p137" key="prefers-workshop" value="wks_zirkus:2" strength=#null note=#null
+LabelSet entity_id="per_p137" key="prefers-workshop" value="wks_koch:3" strength=#null note=#null
+LabelSet entity_id="per_p137" key="prefers-workshop" value="wks_spiele:4" strength=#null note=#null
+LabelSet entity_id="per_p137" key="prefers-workshop" value="wks_tanz:5" strength=#null note=#null
+LabelSet entity_id="per_p138" key="prefers-workshop" value="wks_zirkus:1" strength=#null note=#null
+LabelSet entity_id="per_p138" key="prefers-workshop" value="wks_sport:2" strength=#null note=#null
+LabelSet entity_id="per_p138" key="prefers-workshop" value="wks_keramik:3" strength=#null note=#null
+LabelSet entity_id="per_p138" key="prefers-workshop" value="wks_musik:4" strength=#null note=#null
+LabelSet entity_id="per_p138" key="prefers-workshop" value="wks_spiele:5" strength=#null note=#null
+LabelSet entity_id="per_p139" key="prefers-workshop" value="wks_kletter:1" strength=#null note=#null
+LabelSet entity_id="per_p139" key="prefers-workshop" value="wks_schmuck:2" strength=#null note=#null
+LabelSet entity_id="per_p139" key="prefers-workshop" value="wks_musik:3" strength=#null note=#null
+LabelSet entity_id="per_p139" key="prefers-workshop" value="wks_tanz:4" strength=#null note=#null
+LabelSet entity_id="per_p139" key="prefers-workshop" value="wks_feuer:5" strength=#null note=#null

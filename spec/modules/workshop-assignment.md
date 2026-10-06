@@ -174,7 +174,8 @@ converted into automatic assignments in the first place.
 ## Outstanding
 
 - Organiser review surfaces for current and prospective attendance (part of
-  [M8](../roadmap.md#m8--workshop-planning-completion)); released/effective
-  attendance belongs to M10 release control.
+  [M8](../roadmap.md#m8--workshop-planning-completion)), including
+  `WorkshopsClosed` and `WorkshopsReopened`, the closing review and the difference
+  from the closed result ([phases](../architecture/phases.md) §5–7).
 - Roster, heatmap, and finding views without a second workshop state store
   (part of M8).

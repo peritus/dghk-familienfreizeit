@@ -22,7 +22,7 @@ experimentation.
 | UI-01 | [Request login link](screens/login.md) | `/login` |
 | UI-02 | [Invalid or expired link](screens/login-link-invalid.md) | `/login/invalid` |
 | UI-03 | [Family preferences](screens/family-preferences.md) | `/family` current information |
-| UI-04 | [Family assignment](screens/family-assignment.md) | `/family` communicated arrangements |
+| UI-04 | [Family assignment](screens/family-assignment.md) | `/family` fixed arrangements |
 | UI-05 | [Organiser dashboard](screens/organiser-dashboard.md) | `/organiser` |
 | UI-06 | [Families](screens/families.md) | `/organiser/families` |
 | UI-07 | [Family detail](screens/family-detail.md) | `/organiser/families/:id` |
@@ -40,9 +40,8 @@ UI-13 organiser placement decisions are accepted but deferred in
 UI-15 feature availability is accepted but deferred in
 [`feature-availability-ui`](../deferred-ideas/feature-availability-ui.md).
 
-Release control, communication review, and communication history UI are deferred
-in [`release-control-ui`](../deferred-ideas/release-control-ui.md). The release
-control domain contract remains authoritative for its later milestone.
+UI-11 is retired. Closing, reopening and closed-area differences are part of the
+area screens ([phases](../architecture/phases.md) §7).
 
 The assignment board's browser-printable output is the compact current-state
 assignment view. The generic report host and broader catalogue remain later scope.

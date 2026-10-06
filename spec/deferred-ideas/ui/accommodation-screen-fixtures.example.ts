@@ -1,14 +1,11 @@
 import type {
   AssignmentPrintView,
   BoardView,
-  CommunicationEntryView,
-  CommunicationReviewView,
   DecisionScreenView,
   FamilyView,
   FindingView,
   PlanDiffView,
   PlanView,
-  ReleaseScopeView,
   RoomView,
 } from './types.js'
 
@@ -329,85 +326,3 @@ export const printFixture: AssignmentPrintView = {
   ],
   findings: [findingCapacity, findingRequirement],
 }
-
-export const releaseScopesFixture: readonly ReleaseScopeView[] = [
-  {
-    id: 'scope-accommodation',
-    title: 'Unterkunft',
-    detail: 'Zimmer, Schlafplätze und nicht platzierte Familien',
-    status: 'changed',
-    last_communicated: '12. April · 15:40',
-    affected_families: 3,
-    change_summary: '3 Familien bewegen sich; 1 Familie ist neu nicht platziert.',
-  },
-  {
-    id: 'scope-saturday',
-    title: 'Samstagvormittag',
-    detail: 'Workshop-Zeiten und Räume',
-    status: 'never-communicated',
-    affected_families: 0,
-    change_summary: 'Erste Veröffentlichung steht aus.',
-    blocking: 'Die Raumzuordnung für einen Workshop ist noch offen.',
-  },
-  {
-    id: 'scope-pottery',
-    title: 'Töpfern · Details',
-    detail: 'Zeit, Raum und Beschreibung',
-    status: 'communicated',
-    last_communicated: '10. April · 11:20',
-    affected_families: 0,
-    change_summary: 'Keine neuen Änderungen.',
-  },
-]
-
-export const communicationReviewFixture: CommunicationReviewView = {
-  scopes: releaseScopesFixture,
-  selected_scope_ids: ['scope-accommodation'],
-  differences: [
-    { label: 'Familie Morgan · Zimmer', before: 'Zimmer 12', after: 'Zimmer 14', kind: 'changed' },
-    {
-      label: 'Familie Seidel · Unterkunft',
-      before: 'Zimmer 14',
-      after: 'Nicht platziert',
-      kind: 'changed',
-    },
-    {
-      label: 'Jamie Morgan · Schlafplatz',
-      before: 'Bett 12-B',
-      after: 'Bett 14-A',
-      kind: 'changed',
-    },
-  ],
-  affected_families: ['Familie Morgan', 'Familie Seidel', 'Familie Lang'],
-  dependencies: [],
-  reviewed_sequence: 1482,
-  build_label: 'Profilstand · bestätigt',
-  notification_count: 3,
-}
-
-export const communicationHistoryFixture: readonly CommunicationEntryView[] = [
-  {
-    id: 'communication-1',
-    communicated_at: '12. April · 15:40',
-    actor: 'Anna Keller',
-    sequence: 1398,
-    scopes: ['Unterkunft'],
-    note: 'Erste Unterkunftsmitteilung',
-    differences: [
-      {
-        label: 'Familie Morgan · Zimmer',
-        before: 'Nicht platziert',
-        after: 'Zimmer 12',
-        kind: 'changed',
-      },
-    ],
-  },
-  {
-    id: 'communication-2',
-    communicated_at: '10. April · 11:20',
-    actor: 'Anna Keller',
-    sequence: 1371,
-    scopes: ['Töpfern · Details'],
-    differences: [{ label: 'Raum', before: 'Werkraum', after: 'Atelier 2', kind: 'changed' }],
-  },
-]

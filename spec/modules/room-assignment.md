@@ -31,7 +31,7 @@ interpreting raw profile labels or event payloads.
 ## 10. Output and diff
 
 The implemented plan output is documented with the solver behavior. Explicit
-plan comparison and release-scoped communication are separate future
+plan comparison and closing the accommodation area are separate future
 consumers; the current board is an organiser-only current-state projection.
 
 ## 11. Remaining consumers
@@ -41,5 +41,7 @@ assignment output. The following remain outside this delivered scope:
 
 - plan inspection and comparison, which is accepted but deferred in
   [`plan-inspection-and-comparison`](../deferred-ideas/plan-inspection-and-comparison.md);
-- release-scoped family/shared reports and communication, which belong to the
-  release-control and family-access milestones.
+- `AccommodationClosed` and `AccommodationReopened`, the closing review and the
+  accommodation track ([phases](../architecture/phases.md) §4–5), and family/shared
+  reports from the closed result, which belong to the M8 phase and M10
+  family-access work.

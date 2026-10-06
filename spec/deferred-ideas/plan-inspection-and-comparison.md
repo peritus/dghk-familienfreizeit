@@ -7,7 +7,7 @@ snapshot.
 
 When promoted, this work must consume the existing derived plan and diff
 contracts, remain compatible with the shared organiser draft pipeline, and keep
-release and communication semantics in the active release-control contract.
+closing and family visibility in the [phase contract](../architecture/phases.md).
 
 The former illustrative implementation is retained as non-executable examples:
 [`ui/organiser-plans.example.tsx`](ui/organiser-plans.example.tsx) and

@@ -13,15 +13,16 @@ the solver is where a bug produces a wrong answer that looks right. API routes a
 screens get smoke tests, because a bug there produces a 500 that someone notices
 immediately.
 
-### Advisory deadline coverage
+### Target-date and closing coverage
 
-Family-preference tests cover the two fixed deadline scopes independently. They
-verify that the Worker reports upcoming/passed status using server time, displays
-the matching contact copy, and leaves controls editable after a deadline. A late
-family write follows the ordinary authentication, ownership, schema, and append
-rules; it is not rejected because of the deadline. A late edit changes current
-derived state but does not alter a communicated arrangement or trigger a new plan.
-An explicit organiser review and publish may include that edit in a later plan.
+Family-preference tests cover the accommodation and workshop phases independently.
+They verify that the phase view reports open/late status from an injected `now`,
+displays the matching contact copy, and leaves controls editable after a Zieltermin.
+A late family write follows the ordinary authentication, ownership, schema, and
+append rules; it is not rejected because of the date. Once the area is closed, the
+same write is rejected and the controls show saved values read-only; after
+reopening, it is accepted again. A late edit changes current derived state but
+never alters a closed result ([phases](../architecture/phases.md) §10).
 
 ---
 
@@ -425,7 +426,7 @@ Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
 would be silent rather than loud.
 
 ```ts
-test('the full loop: invite → constraints → solve → plan → communicate', async () => {
+test('the full loop: invite → constraints → solve → plan → close', async () => {
   const db = await freshDb()
 
   await inviteFamilies(db, familyFixture)        // 55 families
@@ -438,10 +439,10 @@ test('the full loop: invite → constraints → solve → plan → communicate',
   expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
   expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
 
-  const preview = await previewCommunication(db, [{ kind: 'accommodation' }])
-  await communicate(db, preview.confirmation)   // reviewed input_seq, scopes, identities and options
-  expect(await communicationCount(db)).toBe(1)
-  expect(await familyArrangements(db)).toEqual(preview.familyArrangements)
+  const review = await previewClosing(db, 'accommodation')
+  await closeArea(db, 'accommodation', review.head_seq)   // Worker computes the payload
+  expect(await closingCount(db, 'accommodation')).toBe(1)
+  expect(await familyArrangements(db)).toEqual(review.familyArrangements)
 })
 ```
 
@@ -460,15 +461,12 @@ Also covered:
   a separate integration test; the fold itself is never persisted.
 - **Constraint enforcement**: attempt to give two people the same place and assert
   solver-input validation fails.
-- **Release control**: implement every scenario in [release control](../application/release-control.md)
-§9, including unchanged-head preview equality, selection changes, concurrent appends
-  that occur after preview and still publish the reviewed `input_seq`, shared badge
-  states, inline admin/family projections, and keyboard-accessible expansion of diffs,
-  field-level temporal/privacy cases for names, withdrawal, live answers, materials,
-  cancellations, organiser notes and unavailable historical sequences,
-  per-scope history, dependencies, privacy and build/compatibility mismatch. Communication
-  carries no extra content hash. Selected-scope errors block communication until
-  resolved; hard consistency gates cannot be bypassed.
+- **Phases**: implement every case in [phases](../architecture/phases.md) §10,
+  including stale-head and not-ready closing refusals, a server-computed payload equal
+  to the reviewed derivation, re-closing, reopening, keyboard-accessible expansion of
+  family comparisons, and field cases for names, withdrawal, live answers, materials,
+  cancellations, organiser notes and no-longer-available entities. Blocking findings
+  prevent closing and cannot be bypassed.
 - **Privacy boundary**: the organiser bundle may derive the full world locally, while
   family responses, family diffs, reports and notification previews are derived and
   projected by the Worker; event logs, draft events, full worlds and organiser-only
@@ -476,12 +474,12 @@ Also covered:
 - **Live coordination**: cover last-place races, over-capacity preservation, inactive
   rankings, sign-up fairness exclusion, interest privacy and immediate material saves
   under the module fixture contracts. These behaviours do not need a second Plan.
-- **Report contract**: check detailed initial/before/after content, unselected changes,
-  exact recipients and no writes from preview/report requests. A reverted edit clears
-  its outstanding difference; world-only changes do not create release backlog.
-- **Shared scope read model**: organiser, family, report and notification consumers
-  receive equivalent `CommunicationScopeView` statuses and diffs after their
-  audience projections; no consumer computes release status independently.
+- **Report contract**: check initial and before/after content and no writes from
+  preview or report requests. A reverted edit clears its difference from the closed
+  result; world-only changes create no difference.
+- **Shared phase read model**: organiser, family, report and notification consumers
+  receive the same phase status and comparisons after their audience projections;
+  no consumer computes phase status or differences independently.
 
 ---
 

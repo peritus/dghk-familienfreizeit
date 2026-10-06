@@ -81,7 +81,7 @@ navigation, deployment, or authentication, and text-file mode must be rejected
 by production configuration even if an environment variable is accidentally
 present.
 
-The occasion dates, scoped deadline schedule, and occasion-facing name belong in the
+The occasion dates, phase target dates, and occasion-facing name belong in the
 occasion profile's `meta` ([occasion profiles](../profiles/contract.md)) because they are solver
 or UI inputs. `EMAIL_FROM` remains a deployment fact and must not enter
 `build_revision` and `compatibility_revision`. Authentication links use the
@@ -305,7 +305,7 @@ wrangler d1 export dghk-familienfreizeit --remote --output=backup-$(date +%F).sq
 ```
 
 Put it somewhere that is not Cloudflare. Run it before every migration and before
-every communication.
+every closing.
 
 **The event log is the real backup.** Every read model, every plan, every
 assignment is derived from `event`. If everything else is lost but the event
@@ -354,14 +354,13 @@ never as a separate step someone might skip.
 
 ---
 
-## Release impact of deployment
+## Closed results and deployment
 
-Changing `build_revision` or `compatibility_revision` affects reproducibility of communicated scopes.
-Before deploying, review that impact under [release control](../application/release-control.md)
-§4 and arrange organiser review of affected scopes. Do not present a replay under
-new code as a verified historical result. Restore the matching deployment or review
-and communicate current content explicitly. Ordinary solver hashes remain useful
-for regression; they cannot recover an old result.
+A closed area's result is recorded in its closing event, so a deployment never
+changes what families see for it. A deployment can change the current derivation;
+organisers then see a difference from the closed result and decide whether to close
+again ([phases](../architecture/phases.md) §7). Ordinary solver hashes remain useful
+for regression.
 
 ## 10. Pre-event runbook
 
@@ -369,23 +368,22 @@ The week before, in order:
 
 1. **Freeze the schema.** No migrations after this point without a very good
    reason.
-2. **Verify access to the reports.** Confirm that the communicated arrangements and
+2. **Verify access to the reports.** Confirm that the fixed arrangements and
    the shared family reports are visible in the browser, and that the organiser
    reports show the expected data cut. Reports are not downloadable; print any
    paper copies needed for the occasion from their browser print views.
 3. **Review the deployed assignment parameters** against the approved profile
    configuration and confirm that the deployed weights are the ones settled on.
-4. **Confirm required scopes are ready**, including the absence of blocking solver
-   findings and release consistency failures.
+4. **Confirm both areas are ready**, including the absence of blocking solver
+   findings.
 5. **Print the required reports.** Use the report print styles for room lists per
    building, workshop lists per slot, the master sheet, and any confidential
    operational sheets. The hostel's wifi will be bad and someone will need paper.
 6. **Verify one magic link end to end** against a real address on the actual
    production domain.
-7. **Review release status** — every required scope is communicated at the intended
-   basis, `build_revision`, and `compatibility_revision` match the deployment. Use the report and detailed
-   preview defined in [release control](../application/release-control.md); communication events
-   do not carry a solver or content hash.
+7. **Review phase status** — both areas are closed, and neither shows a difference
+   between its closed result and the current derivation that the organisers have
+   not decided on ([phases](../architecture/phases.md) §7).
 8. **Nominate a laptop.** One machine, known to be logged in as an organiser, known
    to have the export. Do not rely on being able to log in from a phone in a
    building with thick walls.

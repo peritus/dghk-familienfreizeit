@@ -15,7 +15,7 @@ opened: 2026-09-19
 
 This is the highest domain-privacy risk found across both review passes.
 
-[`deferred-ideas/release-control-ui.md:18-24`](../../deferred-ideas/release-control-ui.md) defines one badge vocabulary for every
+`deferred-ideas/release-control-ui.md:18-24` defines one badge vocabulary for every
 surface: `✓` communicated, `?` changed since communication (confirmation
 needed), `—` never communicated. [`ui/screens/family-assignment.md:44-46`](../../ui/screens/family-assignment.md) puts that
 badge on family cards: "Every releasable room or workshop result carries the
@@ -23,8 +23,8 @@ shared `✓`, `?`, or `—` communication badge. Families can expand `?` to see
 their own before/after result at the reviewed `input_seq`." [`application/family-view.md:82-84`](../../application/family-view.md)
 repeats it.
 
-This is set against: [`application/release-control.md:99-100`](../../application/release-control.md) ("No accommodation or
-allocation is shown before its first communication"); [`application/release-control.md:129`](../../application/release-control.md)
+This is set against: `application/release-control.md:99-100` ("No accommodation or
+allocation is shown before its first communication"); `application/release-control.md:129`
 (communicated content is "Fixed until a later communication supersedes that
 scope; never join it to current draft descriptors"); and [`application/reports.md:71-72`](../../application/reports.md)
 ("A family report uses the release-control projection. It must not reveal
@@ -56,7 +56,7 @@ fully realizes D16's existing rejected-alternative principle ("exposing the
 entire current world reveals unfinished arrangements") rather than
 reopening it, same pattern as issue 006's D4 realization.
 
-Root cause: [`application/release-control.md`](../../application/release-control.md)'s `CommunicationScopeView` had one
+Root cause: `application/release-control.md`'s `CommunicationScopeView` had one
 `status: CommunicationScopeStatus` field reused verbatim by both audiences,
 and stated outright that "both projections use the same status and diff
 semantics." §6's derivation computes `status: 'changed'` and
@@ -68,7 +68,7 @@ that an uncommunicated change exists.
 
 Fix: introduced `FamilyScopeStatus = 'never-communicated' | 'communicated'`
 and a distinct `FamilyScopeView` type in
-[`application/release-control.md`](../../application/release-control.md) §1, computed solely from a scope's
+`application/release-control.md` §1, computed solely from a scope's
 `Communicated` event history — never from a comparison against current or
 draft world state. It deliberately has no `'changed'` member, no
 `current_input_seq`, and no `newer_events`, since all three are positioned
@@ -79,7 +79,7 @@ the existing UI text described as "before/after result at the reviewed
 status computation was the leak.
 
 Updated four consumer surfaces to match:
-1. [`application/release-control.md`](../../application/release-control.md) §6 ("Outstanding changes report") now states
+1. `application/release-control.md` §6 ("Outstanding changes report") now states
    explicitly that its `status`/`newer_events` derivation against candidate
    content is organiser-only, producing `CommunicationScopeView`.
 2. [`application/family-view.md`](../../application/family-view.md) ("Communicated arrangements") now describes
@@ -87,7 +87,7 @@ Updated four consumer surfaces to match:
    of "the shared communication status."
 3. [`ui/screens/family-assignment.md`](../../ui/screens/family-assignment.md) now describes the family's two-state
    badge (`✓`/`—`, no `?`), expanding to the previous-communication diff.
-4. [`deferred-ideas/release-control-ui.md`](../../deferred-ideas/release-control-ui.md)'s badge section is now explicitly
+4. `deferred-ideas/release-control-ui.md`'s badge section is now explicitly
    organiser-only (renamed "Organiser inline status and diff"), with a new
    paragraph describing the family's separate two-state badge and explaining
    why no "newer changes exist" indicator may appear on any family-facing
@@ -105,8 +105,8 @@ member in that issue's own pass without touching this fix.
 
 ## Related files
 
-- [deferred-ideas/release-control-ui.md](../../deferred-ideas/release-control-ui.md)
+- `deferred-ideas/release-control-ui.md`
 - [ui/screens/family-assignment.md](../../ui/screens/family-assignment.md)
 - [application/family-view.md](../../application/family-view.md)
-- [application/release-control.md](../../application/release-control.md)
+- `application/release-control.md`
 - [application/reports.md](../../application/reports.md)

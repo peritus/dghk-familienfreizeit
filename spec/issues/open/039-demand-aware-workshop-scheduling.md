@@ -163,9 +163,9 @@ runtime executable rules.
   demand-aware reassignment. Their conflicts remain explainable diagnostics.
 - Re-solving the same derived input is deterministic, including placement,
   attendance, objective values, traces, and tie-breaking.
-- A valid reviewed plan remains stable when rankings change until an organiser
-  explicitly requests recalculation, consistent with the reviewed-calculation
-  boundary in the workshop scheduling and release contracts.
+- A result families see remains stable when rankings change until an organiser
+  closes the workshop area again, consistent with the closed-result boundary in
+  [phases](../../architecture/phases.md).
 - The plan and trace expose enough information for an organiser to understand
   why a high-demand or frequently co-selected workshop was placed where it was,
   and why a requested move was rejected.

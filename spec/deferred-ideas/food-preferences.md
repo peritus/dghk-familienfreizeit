@@ -103,7 +103,7 @@ Counts use people who are not withdrawn.
 | Reports | Food service overview (aggregates, may be shared); allergy and safety sheet (organiser-only, restricted); food part of the family information sheet ([reports](../application/reports.md) §3) |
 | Emails | Reminder copy may name people without a diet |
 
-Own food values are current after every save, independent of release control.
+Own food values are current after every save, independent of any closing.
 Aggregate diet counts may be shared. Individual allergy text never leaves organiser
 and own-family views.
 

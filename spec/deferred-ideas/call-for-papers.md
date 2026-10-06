@@ -20,7 +20,8 @@ ranking values, or attendance assignments.
 Families and organisers may submit proposals. Organisers review, select, reject,
 or close them. Approval creates or updates a direct workshop identity through the
 ordinary event-backed workshop contract. A later content edit is a normal workshop
-restatement and appears in the programme release review.
+restatement and is visible live once workshop choice is open
+([phases](../architecture/phases.md) §6).
 
 The current choice cycle remains the only ranking scope. A proposal-source change
 must therefore preserve or explicitly retire affected workshop identities and

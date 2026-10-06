@@ -2,9 +2,10 @@
 
 ## Audience, purpose, and route
 
-A family sees communicated accommodation and workshop results alongside current
-information and privacy-projected inline diffs through `/family`. Governing spec:
-[family view](../../application/family-view.md) §2 and [decisions D14/D16](../../../decisions.md).
+A family sees its fixed accommodation and workshop results alongside current
+information and privacy-projected inline comparisons through `/family`. Governing
+specs: [family view](../../application/family-view.md) §1–2,
+[phases](../../architecture/phases.md) §6, and [decisions D14/D16](../../../decisions.md).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -35,22 +36,20 @@ requires a table or horizontal scrolling.
 
 ## States and privacy
 
-Support partial availability per scope: accommodation may be communicated before
-workshop allocations, and individual workshop details may be available independently.
-Also support no allocation yet, cancelled workshop, pending sign-up/allocation
-adjustment, and revision-mismatch unavailable states. Show the relevant communication
-status instead of one global page state. Own answers and live materials/participation
-remain current, including during a scope's unavailable state.
+Support each area independently: accommodation may be fixed before workshops, or
+the reverse. Also support no result yet, a cancelled workshop, a live sign-up that
+conflicts with the fixed attendance, and a referenced room or workshop that is no
+longer available. Show each area's own state instead of one global page state. Own
+answers and live materials/participation remain current.
 
-Every releasable room or workshop result carries a two-state family badge, `✓`
-communicated or `—` never communicated ([`FamilyScopeStatus`](../../application/release-control.md);
-no `?`/changed state exists on this screen). Families can expand `✓` to see the
-diff from their previous communication, when one exists. No state, badge, or
-control on this screen indicates that the organisers are preparing a change.
-Reviewing preferences opens UI-03 controls with the relevant advisory deadline notice. Workshop
-cards distinguish assigned results, live sign-ups and non-binding interest. They use
-[release control](../../application/release-control.md) and cannot join draft programme labels
-into communicated cards.
+Every room or workshop result carries a two-state family badge, `✓` fixed or `—`
+not yet fixed; no changed state exists on this screen. Families can expand `✓` to
+see the comparison with the previous fixed result, when one exists. No state,
+badge, or control on this screen indicates that the organisers are preparing a
+change. Reviewing preferences opens UI-03 controls with the relevant Zieltermin or
+closed-input notice. Workshop cards distinguish assigned results, live sign-ups and
+non-binding interest; assigned results come only from the closed result
+([phases](../../architecture/phases.md) §6).
 Never show scores, parties, solver language, organiser-only explanations, organisation-team notes,
 or another family's preferences. Read-only controls must look disabled only
 when necessary; prefer plain text and a clear result label.

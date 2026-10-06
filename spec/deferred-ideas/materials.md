@@ -154,7 +154,7 @@ to a request.
 
 None. `derive` builds a world-level summary from the current resolved material
 labels, like `FoodSummary`. Materials do not contribute solver arrays, plan sections
-or release scopes. Relationship resolution stays in the configured resolver.
+or closed results. Relationship resolution stays in the configured resolver.
 
 ## 8. Rules and scoring
 
@@ -190,13 +190,13 @@ type MaterialsSummary = {
 
 `diff` change kinds: `material-request-opened` and `material-request-fulfilled`, for
 the organiser dashboard's live coordination attention. They are world changes,
-not plan changes or uncommunicated arrangements. Material diagnostics never enter
+not plan changes or differences from a closed result. Material diagnostics never enter
 the canonical solver-output hash. The plan metadata may still reflect a newer input sequence.
 
 Own records and the permitted shared overview are immediate after append. Workshop
-reference display and privacy follow [release control](../application/release-control.md) §2;
-resolving a current material link must not expose draft programme details. Material
-changes never trigger communication emails.
+reference display and privacy follow [phases](../architecture/phases.md) §6;
+resolving a current material link must not expose a workshop before workshop choice
+is open. Material changes never trigger notification emails.
 
 ## 11. Screens, controls, reports, and emails
 
@@ -213,9 +213,11 @@ changes never trigger communication emails.
 - A request is never matched by name.
 - `MaterialFulfilmentAdded` is rejected unless `commitment_fulfills_many`.
 - A family cannot update another family's record.
-- A saved commitment is visible immediately after communication of arrangements.
-- Materials-only changes do not create release backlog or notification recipients.
-- Current links cannot disclose uncommunicated workshop titles, rooms or times.
+- A saved commitment is visible immediately, whether or not any area is closed.
+- Materials-only changes create no difference from a closed result and no
+  notification recipients.
+- Current links cannot disclose workshop titles, rooms or times before workshop
+  choice is open or the workshop area is closed, respectively.
 
 ## 13. When not selected
 

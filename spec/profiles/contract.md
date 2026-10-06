@@ -24,10 +24,10 @@ export default defineOccasionProfile({
     starts_on: 'YYYY-MM-DD',
     ends_on: 'YYYY-MM-DD',
     timezone: 'Europe/Berlin',
-    deadlines: {
-      accommodation: 'YYYY-MM-DDTHH:mm:ssZ',
-      workshops: 'YYYY-MM-DDTHH:mm:ssZ',
-    },
+    phase_dates: [
+      { phase: 'family-preferences.accommodation-preferences', target_at: 'YYYY-MM-DDTHH:mm:ssZ' },
+      { phase: 'workshop-rankings.choice', target_at: 'YYYY-MM-DDTHH:mm:ssZ' },
+    ],
     locale: 'de',
     fallback_locale: 'en',
     description: { de: '…', en: '…' },
@@ -77,16 +77,16 @@ validates that complete composition.
 | `id` | kebab-case profile id; matches the file name |
 | `name`, `description` | occasion-facing copy |
 | `starts_on`, `ends_on` | inclusive occasion dates; every age is computed at `starts_on` |
-| `timezone` | IANA timezone used when displaying occasion dates and deadline instants |
-| `deadlines` | advisory UTC instants for the fixed `accommodation` and `workshops` workflow scopes |
+| `timezone` | IANA timezone used when displaying occasion dates and target dates |
+| `phase_dates` | advisory UTC Zieltermin entries, at most one per declared phase that accepts one ([phases](../architecture/phases.md) §2) |
 | `locale`, `fallback_locale` | family-facing copy language and fallback |
 
-Deadlines are workflow notices, not authorization rules. Families may continue to
-edit their own inputs after a deadline, and organisers decide whether a late change
-belongs in a newly reviewed and published plan. A profile may leave a scope unused
-by setting no deadline for it; the family-preferences module maps controls to scopes.
-The server computes passed/upcoming status for display, but the status never changes
-append validation, authorisation, replay, or the event log.
+Target dates are workflow notices, not authorization rules. Families may continue to
+edit their own inputs after a Zieltermin until the organisers close the area. A
+profile may leave a phase without a target; the family-preferences module maps
+sections to phases. The phase view computes late status for display, but the date
+never changes append validation, authorisation, replay, or the event log. Changing a
+date is a deployment (D12).
 
 `EMAIL_FROM` and secrets are deployment facts, not profile metadata,
 and are not part of the built profile identity ([deployment](../engineering/deployment.md)).
@@ -219,6 +219,6 @@ The profile places module-owned controls through `family-preferences.module_cont
 ([family preferences](../modules/family-preferences.md) §3), supplying section and copy. It
 must not redefine `signed-up-for` or `interested-in` as profile traits. The workshops
 module owns their schemas, resolver references and authorisation. These controls
-complement trait-driven controls and inherit their section's advisory deadline scope. Release
-control is fixed kernel behaviour, specified in [06-release-control](../application/release-control.md);
-the profile supplies no executable release rules or stored communicated state.
+complement trait-driven controls and inherit their section's phase. Phases are fixed
+module and kernel behaviour, specified in [phases](../architecture/phases.md); the
+profile supplies dates only, never executable phase rules.

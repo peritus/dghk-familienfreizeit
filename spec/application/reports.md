@@ -30,26 +30,21 @@ Every report identifies:
 |---|---|
 | Report title | Human-readable name from the active occasion profile |
 | Audience | `shared`, `family`, or `organiser` |
-| Data cut | Current-data sequence; release-scoped reports additionally include communication references |
+| Data cut | Current-data sequence; reports with fixed arrangements additionally name each area's closing time |
 | Generated at | Display-only browser generation time |
-| Communication | Relevant scope and communication event references, when arrangements are included |
 | Sensitivity | The most sensitive field contained in the report |
 
 The room-assignment board's organiser-only current-state print projection is
-documented with the implemented module. Later release-scoped organiser reports consume
-`CommunicationScopeView`; family and shared reports
-consume [`FamilyScopeView`](release-control.md), never `CommunicationScopeView` —
-the same audience split as the family application ([release control](release-control.md) §1). Both
-supply communication status, scope references, before/after content, and
-unavailable-history state. Reports may add report-specific aggregation and
-redaction, but they do not derive release status or compare scope content
-independently.
+documented with the implemented module. Reports with arrangements consume the
+[phase view](../architecture/phases.md): organiser reports may show both the closed
+result and the current derivation with their difference; family and shared reports
+receive only the closed result for their audience (§6 there). Reports may add
+report-specific aggregation and redaction, but they do not derive phase status or
+compare results independently.
 
-M8 organiser workshop reports show the organiser's one plan: the same world and
-plan every organiser screen uses. They carry no data context label and never imply
-family visibility. `released/effective` reports are an M10 release-control
-consumer: they use communicated scope content visible to the audience, label that
-context explicitly, and never join current draft labels onto historical content.
+Organiser workshop reports show the organiser's one plan while the area is open,
+and the closed result once it is closed, labelled with the closing time, so paper
+matches what families see ([phases](../architecture/phases.md) §7).
 
 The timestamp is not domain state and does not affect derivation or report
 identity. Reports are generated on demand from the world visible to the reader.
@@ -59,14 +54,14 @@ identity. Reports are generated on demand from the world visible to the reader.
 Reports never have a table, event type, cache entry or stored snapshot. Organiser
 reports may render the full organiser-derived world; family/shared reports are
 derived and privacy-projected by the Worker. They render ordinary derived worlds and the audience projection defined in
-[release control](release-control.md) §2. Organisers may inspect current or pending
-worlds; family/shared reports combine current permitted facts with communicated scopes
-and use the field-level temporal/privacy matrix in [release control](release-control.md).
+[phases](../architecture/phases.md) §6. Organisers may inspect current or pending
+worlds; family/shared reports combine current permitted facts with closed results
+and use the field matrix in [phases](../architecture/phases.md) §6.
 
 Renderers aggregate, sort, group and redact. They do not query event payloads,
-perform another relationship lookup, or implement their own release cuts. The
-shared inline diff, outstanding-change overview and confirmation diff use the kernel contract in
-[release control](release-control.md) §6–7.
+perform another relationship lookup, or implement their own result cuts. The
+shared inline comparison, closed-area differences and closing review use the kernel
+contract in [phases](../architecture/phases.md) §7.
 
 Reports are shared with families when sharing supports coordination and does not
 expose personal or safety-sensitive information. Restrict fields, not whole
@@ -79,10 +74,9 @@ useful coordination report unavailable.
 | `family` | The family represented by the session | Its people, room, workshops, food entries, materials, and instructions |
 | `organiser` | Allowlisted organisers | Full contacts, detailed allergies, operational notes, unresolved issues, and audit detail |
 
-A family report uses the `FamilyScopeView` release-control projection. It must
-not reveal held arrangements or private constraint decisions — including via
-communication status, since `FamilyScopeView` has no state that can only be
-true while a draft change is being prepared. A shared report must show only
+A family report uses the family projection in [phases](../architecture/phases.md) §6.
+It must not reveal unclosed results or private constraint decisions, and it never
+shows that an area differs from its closed result. A shared report must show only
 fields that the occasion profile has declared safe for that audience.
 
 ## 3. Report catalogue
@@ -99,7 +93,7 @@ family or person where that identity is useful for coordination. It is the
 canonical shared coordination report for materials; it is not organiser-only.
 
 **Workshop programme** shows dates, times, workshops, scheduled locations, leaders, audience,
-and cancellations. Its workshop rows use communicated programme content for family readers. Live
+and cancellations. Its placements come from the closed workshop result for family readers. Live
 participation is a separate view; interest never exposes shared names.
 
 **Shared workshop roster**, when the profile permits it, shows the minimum names
@@ -110,14 +104,13 @@ email addresses, allergy text, private notes, or preference rankings.
 practical instructions, and other profile-provided information intended for all
 families.
 
-**Change notice** shows the selected communication's family-visible differences
-from the previous scope references. It contains no internal constraint explanations.
+**Change notice** shows the family-visible differences between an area's two most
+recent closed results. It contains no internal constraint explanations.
 
 ### 3.2 Family reports
 
 **Family information sheet** shows current own people, food information, materials
-and participation alongside communicated accommodation, workshop programme and
-allocation results. It includes the data/reference labels from §1.
+and participation alongside the closed accommodation and workshop results. It includes the data/reference labels from §1.
 
 The family sheet is both a review surface and a print surface. It must make it
 easy for a family to see what the system currently knows and correct its own
@@ -126,7 +119,7 @@ inputs through the ordinary family controls.
 ### 3.3 Organiser reports
 
 **Master participant overview** lists families, people, roles, contact details,
-communicated assignments, completion flags, and operational status.
+closed assignments, completion flags, and operational status.
 
 **Accommodation overview** groups occupancy by building and room, including beds,
 bed capacity, room accessibility, and the families sharing each room. It lists
@@ -147,15 +140,15 @@ shared; individual allergy text may not.
 
 **Open issues and readiness** lists unplaced families, unsatisfied hard
 constraints, incomplete registrations, missing workshop choices, unresolved
-materials, and outstanding or unavailable release scopes.
+materials, and areas that are not closed or differ from their closed result.
 
-**Uncommunicated arrangements** is the report specified in
-[release control](release-control.md) §6: outstanding scope differences,
-affected families and dependencies, with links to the detailed preview (§7).
+**Differences from the fixed result** lists, per closed area, the difference
+between its closed result and the current derivation with affected families, and
+links to the closing review ([phases](../architecture/phases.md) §7).
 
 Plan inspection and comparison are accepted but deferred in
 [`plan-inspection-and-comparison`](../deferred-ideas/plan-inspection-and-comparison.md).
-They remain distinct from the scope-selected communication preview when promoted.
+They remain distinct from the closing review when promoted.
 
 **Capacity and accommodation cost overview** shows room and bed use, free
 capacity, workshop utilization, and the configured accommodation cost estimate. It is a
@@ -164,9 +157,9 @@ planning calculation, not an invoice or billing record.
 **Workshop-space inventory** is an organiser-only physical inventory report. It
 lists live and retired workshop spaces, physical capacity, availability windows,
 deterministic order, and resolved capabilities. It does not claim that a space
-is assigned to a workshop and never substitutes for the later communicated
-programme location. Scheduled locations and their family-visible release are
-owned by the Issue 025 schedule/release contract.
+is assigned to a workshop and never substitutes for the closed programme location.
+Scheduled locations reach families through the closed workshop result
+([phases](../architecture/phases.md) §5).
 
 ## 4. Safety and responsibility
 
@@ -185,7 +178,7 @@ on every printed page.
 Reports appear as ordinary browser routes, with the same authenticated session
 rules as the corresponding family view or organiser view. They have no download,
 export, or print action. The visible controls are limited to filtering, sorting, and
-navigation. The implemented assignment board has no local mutation, release, or print
+navigation. The implemented assignment board has no local mutation, closing, or print
 control; its output is printed through the browser stylesheet.
 
 The print stylesheet must:
@@ -196,11 +189,10 @@ The print stylesheet must:
   page break can be placed before it;
 - preserve text labels, borders, status glyphs, and warnings without relying on
   colour;
-- include the occasion, report title, data cut, communication identity, and printed
-  page number;
+- include the occasion, report title, data cut, closing time where a closed result
+  is shown, and printed page number;
 - carry the confidentiality label on every page of a confidential report;
 - remain usable on common A4 paper in portrait or landscape as appropriate.
-- print the released/effective context label on M10 released/effective reports.
 
 The mobile view must not depend on hover, wide-screen drag interactions, or a
 downloaded file. Long names, quantities, allergy text, and workshop titles must
@@ -211,7 +203,7 @@ wrap rather than truncate.
 A report is ready when:
 
 1. its audience and every sensitive field are specified;
-2. it uses the correct audience projection and communication references;
+2. it uses the correct audience projection and closed results;
 3. it is usable at desktop and mobile widths;
 4. printing it from the browser with its print stylesheet produces a correct,
    legible paper document, checked against the stylesheet rules in §5;

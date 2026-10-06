@@ -10,7 +10,7 @@ control where its governing [feature](../architecture/features.md) is effective,
 grouped into the sections this module's parameters name (D14). Adding a trait
 that reuses an existing control needs no family view code.
 
-The module owns the control union, section layout, deadline notices, and the
+The module owns the control union, section layout, Zieltermin and closed-input notices, and the
 save-on-change contract. The family view shell, privacy boundaries, and the
 assignment page are specified in [family view](../application/family-view.md).
 
@@ -34,7 +34,8 @@ type FamilyPreferencesParams = {
     title: LocalizedText
     intro: LocalizedText | null
     traits: readonly string[]            // family_facing traits, in display order
-    deadline_scope: 'accommodation' | 'workshops' | null
+    phase: PhaseId | null              // governing phase, for target and closed notices
+    late_contact: LocalizedText | null // copy shown once the phase is late; required with a phase
   }[]
   module_controls: readonly {
     key: string                        // selected module-owned control key
@@ -42,21 +43,19 @@ type FamilyPreferencesParams = {
     label: LocalizedText
     help: LocalizedText | null
   }[]
-  deadline_contact: {
-    accommodation: LocalizedText
-    workshops: LocalizedText
-  }
 }
 ```
 
 | Parameter | Default | Validation |
 |---|---|---|
-| `sections` | — (required) | every `family_facing` trait appears in exactly one section; no other traits appear; each section declares its deadline scope |
+| `sections` | — (required) | every `family_facing` trait appears in exactly one section; no other traits appear; each `phase` is a declared phase or `null`; `late_contact` is set exactly when `phase` is |
 | `module_controls` | `[]` | unique selected module control keys; section exists; cannot redefine key schemas or authorisation |
-| `deadline_contact` | — (required) | copy for each configured deadline scope |
 
-The deadline instants are `meta.deadlines`; the section's `deadline_scope` selects
-which one a family sees. `null` means that the section has no deadline notice.
+The module declares the phase `family-preferences.accommodation-preferences`
+(area `accommodation`, always open, accepts a Zieltermin, closed by the area;
+[phases](../architecture/phases.md) §4). A section's `phase` selects whose
+Zieltermin and closed state the section shows; the Zieltermin comes from
+`meta.phase_dates`. `null` means that the section has no phase notice.
 
 ## 4. Entity kinds
 
@@ -147,27 +146,29 @@ trait definitions. `workshop-sign-up` and `workshop-interest` are supplied by wo
 Only the appropriate control for the effective mode appears. `ranking` remains
 contributed by workshop-rankings.
 
-Every control saves on change and renders its confirmation from the current response,
-including after arrangements have been communicated. Family composition belongs to
-[release control](../application/release-control.md), not to the control renderer. A
-failed save returns the control to its stored state and says so; nothing is queued
-in the browser.
+Every control saves on change and renders its confirmation from the current response.
+Family composition belongs to [phases](../architecture/phases.md) §6, not to the
+control renderer. A failed save returns the control to its stored state and says so;
+nothing is queued in the browser.
 
-The Worker includes the upcoming or passed status for each configured deadline and
-the corresponding `deadline_contact` in the family response. A passed deadline
-keeps its controls editable. It is a prompt to contact the organisers, not a write
-barrier. A late family change is an ordinary authorised event; it changes current
-derived state but never changes a communicated arrangement by itself. Organisers
-can review and publish a new plan when they choose.
+The Worker includes each section's phase status, Zieltermin and `late_contact` in
+the family response. A passed Zieltermin keeps the controls editable; it is a prompt
+to contact the organisers, not a write barrier. A late family change is an ordinary
+authorised event; it changes current derived state but never changes a closed
+result by itself. When the area is closed, the section's controls are not
+effective: they show saved values read-only with the closed-input notice, and a
+family write to them is rejected on append ([features](../architecture/features.md) §4)
+until the area is reopened.
 
 ## 12. Tests
 
 - Every `family_facing.control` has a renderer.
 - Every `family_facing` trait appears in exactly one section.
 - Module controls are unique, selected, authorised and do not redefine built-in keys.
-- Communication never hides saved values or independently locks controls.
-- Passed deadlines show the correct scoped notice while controls remain editable.
-- Late family writes are accepted through the ordinary ownership and label rules.
+- Closing an area never hides saved values; it shows them read-only.
+- A passed Zieltermin shows the section's late notice while controls remain editable.
+- Late family writes are accepted through the ordinary ownership and label rules
+  while the area is open, and rejected once it is closed.
 - A family cannot set an `organiser_only` trait or a strength its control does not
   allow.
 - `valid_for` failures render disabled with the reason.
@@ -175,7 +176,7 @@ can review and publish a new plan when they choose.
 ## 13. When not selected
 
 The family view has no preferences page. It still shows permitted live information,
-communicated arrangements and shared reports under release control. Organisers enter
+fixed arrangements and shared reports under [phases](../architecture/phases.md). Organisers enter
 preferences and participation through their module screens — the same D24
 parity requirement this module satisfies through the shared control union
 when it is selected.

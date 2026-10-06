@@ -25,7 +25,7 @@ compare their results without changing this contract.
 
 This is not a coding-style preference. It is the property that makes re-runs
 safe, counterfactual diffs cheap, regression testing a hash comparison, and
-communicating twice a no-op for the forty families who did not move.
+closing twice a no-op for the forty families who did not move.
 
 Seven rules. Each has a way it actually gets broken.
 
@@ -253,8 +253,8 @@ says "19 beds required, 14 available" in week two, before a single placement run
 Finding severities behave as follows:
 
 - **error** — the plan still computes so the organiser can inspect and fix the
-  problem, but communication of an affected scope is blocked until the finding
-  is resolved.
+  problem, but closing the affected area is blocked until the finding is
+  resolved ([phases](phases.md) §5).
 - **warning** — shown on the dashboard, no gate.
 - **info** — shown on the relevant screen only.
 
