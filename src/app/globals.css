@@ -323,4 +323,158 @@
     margin: 0.25rem 0 0;
     padding-left: 1.25rem;
   }
+
+  /* Workshop lists (prototype `leadprint`): only the selected document, black on
+     white A4. Screen controls carry `workshop-screen-only`; paper-only details carry
+     `workshop-print-only` / `workshop-print-note`. */
+  @page workshop-list {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  /* The whole document takes the list's page type: switching page types inside
+     the flow would force a sheet break before or after the list. */
+  html:has(.workshop-lists) {
+    page: workshop-list;
+  }
+
+  body:has(.workshop-lists) {
+    background: white;
+  }
+
+  body:has(.workshop-lists) main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .workshop-lists {
+    color: black;
+    font-size: 10pt;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .workshop-lists * {
+    box-shadow: none !important;
+  }
+
+  .workshop-lists a {
+    color: black;
+    text-decoration: none;
+  }
+
+  .workshop-lists .workshop-screen-only,
+  .workshop-lists .workshop-list-narrow {
+    display: none !important;
+  }
+
+  .workshop-lists .workshop-list-wide {
+    display: block !important;
+  }
+
+  .workshop-lists .workshop-list-body {
+    margin-top: 0;
+  }
+
+  .workshop-lists .text-muted {
+    color: #333;
+  }
+
+  .workshop-lists .workshop-print-title {
+    margin-top: 2px;
+    padding-bottom: 4px;
+    font-size: 20pt;
+    break-after: avoid;
+  }
+
+  .workshop-lists .workshop-print-meta {
+    font-size: 10.5pt;
+  }
+
+  .workshop-lists .workshop-print-meta--last {
+    padding-bottom: 8px;
+    border-bottom: 3px solid black;
+  }
+
+  .workshop-lists .workshop-print-note {
+    display: block !important;
+    margin-top: 8px;
+    font-size: 8.5pt;
+  }
+
+  .workshop-lists .workshop-list-table-wrap {
+    margin-top: 10px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  .workshop-lists .workshop-list-table {
+    font-size: 10pt;
+  }
+
+  .workshop-lists .workshop-list-table thead {
+    display: table-header-group;
+  }
+
+  .workshop-lists .workshop-list-table tr {
+    break-inside: avoid;
+  }
+
+  .workshop-lists .workshop-list-table :is(th, td) {
+    padding: 7px 6px;
+    border-top: 0;
+    border-bottom: 1px solid #777;
+    background: none;
+  }
+
+  .workshop-lists .workshop-list-table thead th {
+    border-bottom: 2px solid black;
+    font-size: 9pt;
+  }
+
+  .workshop-lists .workshop-list-table .workshop-print-only {
+    display: table-cell !important;
+  }
+
+  .workshop-lists .workshop-list-table td.workshop-print-only {
+    width: 5.5em;
+  }
+
+  .workshop-lists .workshop-check {
+    border-color: black;
+  }
+
+  /* The room plan doubles as a door sign; the family plan has many columns. */
+  .workshop-lists .workshop-list-table--room {
+    font-size: 13pt;
+  }
+
+  .workshop-lists .workshop-list-table--room :is(th, td) {
+    padding: 12px 8px;
+  }
+
+  .workshop-lists .workshop-list-table--family {
+    font-size: 9pt;
+  }
+
+  .workshop-lists .workshop-chip {
+    min-height: 0;
+    padding: 0 5px;
+    border-width: 1.5px;
+    font-size: 8pt;
+  }
+
+  .workshop-lists .workshop-ext-badge {
+    min-height: 0;
+    font-size: 7pt;
+  }
+
+  .workshop-lists .workshop-print-stamp {
+    margin-top: 18px;
+    font-size: 8pt;
+    color: #333;
+  }
 }

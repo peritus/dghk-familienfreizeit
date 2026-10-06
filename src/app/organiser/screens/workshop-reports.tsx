@@ -356,7 +356,7 @@ export function WorkshopLists() {
           onChange={(value) => navigateWithQuery(listPath(value), {})}
         />
       </div>
-      <div className="mt-6">{selectedDocument}</div>
+      <div className="workshop-list-body mt-6">{selectedDocument}</div>
       <PrintStamp revision={state.head_seq} drafts={draftCount(state)} />
     </div>
   )

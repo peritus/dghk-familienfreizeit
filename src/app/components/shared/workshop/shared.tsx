@@ -480,7 +480,13 @@ export function WorkshopPrintDocument({
         {title}
       </h2>
       {metadata.map((item, index) => (
-        <p key={index} className="workshop-print-meta mt-1">
+        <p
+          key={index}
+          className={cn(
+            'workshop-print-meta mt-1',
+            index === metadata.length - 1 && 'workshop-print-meta--last',
+          )}
+        >
           {item}
         </p>
       ))}

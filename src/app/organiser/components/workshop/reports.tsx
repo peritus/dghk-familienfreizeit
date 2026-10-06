@@ -71,7 +71,7 @@ function Muted({ children }: { children: ReactNode }) {
 /** Prototype `.chip.attn`: an open case. */
 export function OpenChip() {
   return (
-    <span className="inline-flex min-h-7 items-center rounded-base border-2 border-border bg-main px-2 text-sm font-bold whitespace-nowrap text-main-foreground">
+    <span className="workshop-chip inline-flex min-h-7 items-center rounded-base border-2 border-border bg-main px-2 text-sm font-bold whitespace-nowrap text-main-foreground">
       Offen
     </span>
   )
@@ -100,7 +100,7 @@ export function LeaderNames({ leaders }: { leaders: readonly ListLeader[] }) {
           {leader.external ? (
             <>
               {' '}
-              <span className="inline-flex min-h-[18px] items-center rounded-base border-[1.5px] border-dashed border-muted px-[5px] align-middle text-[11px] font-medium">
+              <span className="workshop-ext-badge inline-flex min-h-[18px] items-center rounded-base border-[1.5px] border-dashed border-muted px-[5px] align-middle text-[11px] font-medium">
                 extern
               </span>
             </>
@@ -161,7 +161,7 @@ export function WorkshopRosterTable({
           <PrintOnlyCell>
             <span
               aria-hidden="true"
-              className="inline-block size-4 border-[1.5px] border-border align-middle"
+              className="workshop-check inline-block size-4 border-[1.5px] border-border align-middle"
             />
           </PrintOnlyCell>
         </tr>
