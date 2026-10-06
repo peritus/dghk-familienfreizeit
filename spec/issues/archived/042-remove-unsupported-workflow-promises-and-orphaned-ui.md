@@ -17,7 +17,7 @@ opened: 2026-10-05
 This cleanup has no prerequisite. It removes misleading copy, unreachable UI
 surfaces and inaccurate visual-coverage claims without choosing a feature or
 phase contract. [043](043-feature-model.md) remains an independent feature-model
-design, and [044](../open/044-phase-model.md) depends on 043 alone.
+design, and [044](044-phase-model.md) depends on 043 alone.
 
 Phase-dependent stepper, deadline and projection behavior belongs to 044. Those
 items are itemized in its implementation scope so this issue can be completed
@@ -61,7 +61,7 @@ but mean something else. It exists to prevent collateral damage.
 
 Stepper state, local status calculations, deadline configuration and
 phase-derived copy are intentionally outside this issue. See
-[044's phase-dependent implementation scope](../open/044-phase-model.md#phase-dependent-implementation-scope)
+[044's phase-dependent implementation scope](044-phase-model.md#phase-dependent-implementation-scope)
 for the retained implementation scope and acceptance criteria.
 
 ### remove
@@ -208,7 +208,7 @@ this catalog.
 ## Resolution
 
 Every row is resolved; the phase-dependent rows remain with
-[044](../open/044-phase-model.md#phase-dependent-implementation-scope), and
+[044](044-phase-model.md#phase-dependent-implementation-scope), and
 D28's four-step summary and stepper labels are unchanged.
 
 - **Production copy.** The overview description, the `Wahl öffnen` step

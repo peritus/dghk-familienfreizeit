@@ -17,7 +17,7 @@ before the report host exists.
 ## M8 — Workshop planning completion
 
 Specification coverage: [features](architecture/features.md),
-[official workshops](modules/official-workshops.md),
+[phases](architecture/phases.md), [official workshops](modules/official-workshops.md),
 [workshop space](modules/workshop-space.md), [workshops](modules/workshops.md),
 [workshop scheduling](modules/workshop-scheduling.md),
 [workshop rankings](modules/workshop-rankings.md),
@@ -29,10 +29,7 @@ mechanics are delivered (see [workshop attendance](modules/workshop-assignment.m
 remaining active work is limited to the unresolved planning contract:
 
 - complete the remaining organiser review surfaces for current and prospective
-  programme and allocation contexts; released/effective contexts belong to M10
-  release control;
-- resolve the design and decision gates for
-  [issue 044](issues/open/044-phase-model.md);
+  programme and allocation contexts;
 - implement the [feature contract](architecture/features.md) for every existing
   selected surface: the `features` contribution kind and its composition checks
   (§5), `deselected_features`, the first feature set (§8), derived availability
@@ -46,8 +43,14 @@ remaining active work is limited to the unresolved planning contract:
   [`docs/application/organiser-view.md`](../docs/application/organiser-view.md)
   with the verified feature view, and document feature validation in
   [`docs/architecture/profile-composition.md`](../docs/architecture/profile-composition.md);
-- implement the M8 workshop phase track in issue 044. It depends on the feature
-  contract;
+- implement the [phase contract](architecture/phases.md) on top of the feature
+  contract: the `phases` and `closed_results` contribution kinds, typed
+  `meta.phase_dates`, the phase view with `now` outside `derive` (§2–3), both
+  organiser tracks rendered through `WorkflowStepper` by every stepper caller
+  (§4), the phase feature bindings, `WorkshopChoiceOpened`, the workshop and
+  accommodation closing and reopening events with Worker-computed payloads (§5),
+  the closing review, closed-area differences, the dashboard Hinweis, and
+  printed lists from the closed result (§7);
 - finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
   fixtures (the capacity-reduction policy is resolved as
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
@@ -57,14 +60,16 @@ remaining active work is limited to the unresolved planning contract:
 Acceptance: organisers can inspect automatic and explicitly fixed decisions,
 every blocking outcome is explainable, capacity changes follow D30, and all
 views retain direct workshop identity with at most one placement per workshop.
+Every stepper renders its track from the phase view, and organisers can open
+workshop choice and close and reopen both areas.
 
 <a id="m10--family-access-and-release-control"></a>
-## M10 — Family access and release control
+## M10 — Family access
 
 Specification coverage: [authentication](application/authentication.md), [family view](application/family-view.md),
-[family preferences](modules/family-preferences.md), [release control](application/release-control.md),
+[family preferences](modules/family-preferences.md), [phases](architecture/phases.md) §6,
 [UI-01](ui/screens/login.md), [UI-02](ui/screens/login-link-invalid.md), [UI-03](ui/screens/family-preferences.md),
-[UI-04](ui/screens/family-assignment.md), [deferred UI-11](deferred-ideas/release-control-ui.md), and D14/D16/D24.
+[UI-04](ui/screens/family-assignment.md), and D14/D16/D24.
 
 - Implement invite-only family magic-link authentication, single-use tokens,
   canonical identities, sessions, rate limits, privacy projections, and the
@@ -76,32 +81,28 @@ Specification coverage: [authentication](application/authentication.md), [family
   writes until the `PersonUpdated` cross-family authorization fix and its
   regression tests pass.
 - Render the shared profile-driven controls for families through the same
-  definitions and ordinary event path, including deadline notices and assignment
-  cards.
-- Implement 044's accepted target-date and closing-date policies for family
-  controls and notices. This phase work depends on the
-  [feature contract](architecture/features.md); preserve the separate privacy
-  gate in issue 031 for family projections.
+  definitions and ordinary event path, including Zieltermin and closed-input
+  notices and assignment cards.
+- Implement the family side of [phases](architecture/phases.md) §6: the live
+  family composition with each area's closed result, live descriptors,
+  unavailable referenced entities, and the own-family before/after comparison.
+  Preserve the separate privacy gate in issue 031 for family projections.
 - Apply [feature availability](architecture/features.md#4-effective-availability)
   to the family projection and family controls: only effective features reach a
   family, and a family-authored event whose feature action is not effective is
-  rejected on append. Release control is kernel and declares no features; keep
-  availability distinct from authorization, release visibility and phase status.
+  rejected on append, including writes to a closed area. Keep availability
+  distinct from authorization and phase status.
 - Let an authenticated family correct its own `display-name` from the family
   view through `FamilyDisplayNameChanged`; the family may address only its own
   entity, while organisers retain the cross-family correction path from M7.
-- Implement accommodation, programme, and per-slot allocation scopes, semantic
-  accessors, previews, reviewed-input/build/compatibility guards, blocking
-  findings, historical composition, and atomic `Communicated` append.
-- Add concurrent-confirmation, reverted-change, dependency, cancellation,
-  revision-mismatch, privacy, and family-projection fixtures.
+- Add closing, reopening, re-closing, withdrawn-person, cancelled-workshop,
+  privacy, and family-projection fixtures.
 
 Acceptance: after M9, a family can request and redeem a single-use login link
 through the M10 authentication workflow, inspect its permitted derived
-information, correct its own display name, save permitted controls, and see only
-coherent communicated arrangements. Hosted invitation and reminder delivery
-begins in M14. Organisers can preview and atomically communicate selected scopes
-without exposing drafts. Issue 041 is closed or explicitly accepted before this
+information, correct its own display name, save permitted controls while an area
+is open, and see each area's result only once it is closed. Hosted invitation and
+reminder delivery begins in M14. Issue 041 is closed or explicitly accepted before this
 family-access acceptance is declared complete.
 
 ## M11 — Reports and browser-printing host
@@ -118,7 +119,7 @@ report portions of [UI-00](ui/design-system.md), and the selected modules' repor
 - Add empty, restricted, mobile, browser-print, changed-data, and privacy fixtures.
 
 Acceptance: a selected module's report contribution renders through a real
-browser route and prints correctly from the released audience projection. Later
+browser route and prints correctly from its audience projection. Later
 feature slices own their report data; this milestone owns the shared host.
 
 ## M12 — Active-profile integration and operational readiness
@@ -143,7 +144,7 @@ Specification coverage: [reports](application/reports.md), [D21](../decisions.md
 and report contributions from all selected modules.
 
 - Complete the accommodation, programme, workshop roster, family information,
-  release, cost, open-issues, and active-profile report catalogue. Plan inspection
+  differences-from-fixed-result, cost, open-issues, and active-profile report catalogue. Plan inspection
   and comparison remain deferred in the linked deferred-ideas contract.
 - Finish cross-feature projections, restricted/changed/incomplete states,
   responsive layouts, print fixtures, and browser-print acceptance.
@@ -155,8 +156,7 @@ or export paths.
 ## M14 — Authentication delivery and operational email
 
 Specification coverage: [authentication](application/authentication.md) §2,
-[deployment](engineering/deployment.md) §§5–6, and the operational email portions
-of the [release control](application/release-control.md) contract.
+and [deployment](engineering/deployment.md) §§5–6.
 
 - Render invitation and reminder messages from M10 authentication delivery
   intents, and own their hosted dispatch.
@@ -165,7 +165,7 @@ of the [release control](application/release-control.md) contract.
   authentication email.
 - Implement operational `email_log` and delivery status separate from domain
   visibility.
-- Keep communication and change emails deferred under
+- Keep closing and change emails deferred under
   [change notifications](deferred-ideas/change-notifications.md).
 
 Acceptance: invitation and reminder delivery is reliable and idempotent, delivery

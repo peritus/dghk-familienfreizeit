@@ -15,7 +15,7 @@ opened: 2026-10-06
 ## Dependencies
 
 This issue has no prerequisite. It blocks
-[044 — phase activation model](../open/044-phase-model.md), which activates the features
+[044 — phase activation model](044-phase-model.md), which activates the features
 defined here. Its design and implementation are independent of
 [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md).
 
@@ -311,7 +311,7 @@ unchanged.
 6. Features are contributed and validated through the existing module
    composition boundary, failing closed at profile build.
 7. Phase activation is specified separately in
-   [044](../open/044-phase-model.md) and is the only mechanism that may activate or
+   [044](044-phase-model.md) and is the only mechanism that may activate or
    deactivate many features together.
 
 ## Acceptance criteria for the design
@@ -375,7 +375,7 @@ Answers to the open questions:
    meaning in code. Resolver capabilities keep their name.
 2. The first set declares one feature per existing selected organiser screen and
    family control ([features](../../architecture/features.md) §8). Phase-bound
-   actions are added by [044](../open/044-phase-model.md); call-for-papers stays
+   actions are added by [044](044-phase-model.md); call-for-papers stays
    deferred.
 3. Every declared feature of a selected module may be switched in either
    direction in every environment, including production, through one derived
@@ -421,7 +421,7 @@ carries no solver policy values, so it does not depend on that review.
 - [architecture/labels-and-constraints.md](../../architecture/labels-and-constraints.md)
 - [engineering/deployment.md](../../engineering/deployment.md)
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
-- [044 — phase activation model](../open/044-phase-model.md)
+- [044 — phase activation model](044-phase-model.md)
 - [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](../open/031-family-projection-privacy-boundary.md)
 - [docs/application/organiser-view.md](../../../docs/application/organiser-view.md)

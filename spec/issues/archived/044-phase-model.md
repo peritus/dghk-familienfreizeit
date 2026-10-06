@@ -20,9 +20,9 @@ a phase activates features. That design is resolved, and the contract this issue
 builds on is [features](../../architecture/features.md); `requires_phases` and
 `activation_mode` there are the binding points for phase activation.
 
-The cleanup in [042 — unsupported workflow promises and orphaned UI](../open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
-is independent and does not block this design or implementation. This issue owns
-the phase-dependent workflow, deadline and status paths directly.
+The independent cleanup in [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
+is resolved and did not touch phase state. This issue owns the phase-dependent
+workflow, deadline and status paths directly.
 
 ## Problem
 
@@ -64,14 +64,14 @@ commitment.** There is no `Communicated` event in the source at all, although
 specifies one. Every "öffnen", "schließen", "festlegen", "veröffentlichen" and
 "kommunizieren" string the product renders is therefore unbacked by
 construction. Phase-specific workflow and deadline behavior belongs here;
-[042](../open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md) covers the
+[042](042-remove-unsupported-workflow-promises-and-orphaned-ui.md) resolved the
 independent copy, orphaned-UI and visual-coverage cleanup.
 
 ## Phase-dependent implementation scope
 
-Issue 042 covers cleanup that does not depend on the phase contract. This issue
-owns the following behavior and documentation because their correct replacement
-depends on the phase decisions below; none is a prerequisite for starting 042.
+Issue 042 resolved the cleanup that does not depend on the phase contract. This
+issue owns the following behavior and documentation because their correct
+replacement depends on the phase decisions below.
 
 | Concern | Retained scope | Required outcome |
 |---|---|---|
@@ -579,7 +579,7 @@ release-control specification and its deferred UI-11 are retired, and issues
 - [043 — module-contributed feature model](043-feature-model.md)
 - [architecture/features.md](../../architecture/features.md)
 - [architecture/phases.md](../../architecture/phases.md)
-- [042 — unsupported workflow promises and orphaned UI](../open/042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
+- [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
 - [031 — family projection privacy boundary](../open/031-family-projection-privacy-boundary.md)
 - [archived 008 — milestone ordering and release-control prerequisites](008-milestone-ordering-release-control-prereqs.md)
 - [archived 009 — deadline concept fields underspecified](009-deadline-concept-fields-underspecified.md)
