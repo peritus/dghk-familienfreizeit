@@ -345,11 +345,7 @@ export function WorkshopLists() {
     <div className="workshop-lists">
       <div className="workshop-screen-only space-y-8">
         <WorkshopNavigation />
-        <WorkshopScreenHeader
-          eyebrow="Workshops · Listen"
-          title="Listen"
-          description="Zum Ansehen und Drucken (Strg+P). Gedruckt wird die gerade gewählte Liste."
-        />
+        <WorkshopScreenHeader eyebrow="Workshops · Listen" title="Listen" />
         <WorkshopListKinds
           value={kind}
           // Each list keeps its own selection in the query, so switching back returns to it.
