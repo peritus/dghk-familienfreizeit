@@ -2,15 +2,25 @@ export type UiCoverageEntry = {
   id: string
   area: 'foundation' | 'component' | 'application' | 'screen'
   subject: string
+  /** The renderable the story shows, never the story file itself. */
   source: string
   media?: 'screen' | 'print'
   screenshot_target?: 'root' | 'dialog'
-}
+} & (
+  | { snapshot?: true }
+  | {
+      /** Registered without a Playwright snapshot; the exemption states why. */
+      snapshot: false
+      snapshot_exemption: string
+    }
+)
 
 /**
- * The repository's review index: every current public renderable has a
- * Storybook entry and a Playwright visual check. Add to this list when adding
- * a component or screen so the contract fails closed in CI.
+ * The repository's review index. Every Storybook story and docs page has
+ * exactly one entry; `test/storybook/style-guide.spec.ts` fails when a story is
+ * missing here or an entry has no story. Every component, application and
+ * screen entry receives a Playwright visual check unless it records a snapshot
+ * exemption.
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
   {
@@ -335,13 +345,13 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     id: 'application-organiser-family-detail-components--selected-person',
     area: 'application',
     subject: 'Family detail person sidebar',
-    source: 'src/app/organiser/screens/family-detail-components.stories.tsx',
+    source: 'src/app/organiser/screens/family-detail.tsx',
   },
   {
     id: 'modules-room-assignment-screens-assignment-board--populated',
     area: 'screen',
     subject: 'Assignment board populated',
-    source: 'src/modules/room-assignment/app/screens/assignment-board.stories.tsx',
+    source: 'src/modules/room-assignment/app/screens/assignment-board.tsx',
   },
   {
     id: 'modules-room-assignment-screens-assignment-board--populated-with-shared-organiser-state',
@@ -359,44 +369,44 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     id: 'modules-room-assignment-screens-assignment-board--no-problems',
     area: 'screen',
     subject: 'Assignment board no-problems state',
-    source: 'src/modules/room-assignment/app/screens/assignment-board.stories.tsx',
+    source: 'src/modules/room-assignment/app/screens/assignment-board.tsx',
   },
   {
     id: 'modules-room-assignment-components-assignment-board--requirement-chip-variants',
     area: 'component',
     subject: 'Requirement chip variants',
-    source: 'src/modules/room-assignment/app/components/assignment-board/components.stories.tsx',
+    source: 'src/modules/room-assignment/app/components/assignment-board/chips.tsx',
   },
   {
     id: 'modules-room-assignment-components-assignment-board--room-card-variants',
     area: 'component',
     subject: 'Room card variants',
-    source: 'src/modules/room-assignment/app/components/assignment-board/components.stories.tsx',
+    source: 'src/modules/room-assignment/app/components/assignment-board/room-card.tsx',
   },
   {
     id: 'modules-room-assignment-components-assignment-board--family-entry-and-overview-rows',
     area: 'component',
     subject: 'Family entry and overview rows',
-    source: 'src/modules/room-assignment/app/components/assignment-board/components.stories.tsx',
+    source: 'src/modules/room-assignment/app/components/assignment-board/family-entry.tsx',
   },
   {
     id: 'modules-room-assignment-components-assignment-board--building-header',
     area: 'component',
     subject: 'Assignment building header',
-    source: 'src/modules/room-assignment/app/components/assignment-board/components.stories.tsx',
+    source: 'src/modules/room-assignment/app/components/assignment-board/building-section.tsx',
   },
   {
     id: 'modules-room-assignment-components-assignment-board--fixed-dialog',
     area: 'component',
     subject: 'Fixed assignment dialog',
-    source: 'src/modules/room-assignment/app/components/assignment-board/components.stories.tsx',
+    source: 'src/modules/room-assignment/app/components/assignment-board/fixed-dialog.tsx',
     screenshot_target: 'dialog',
   },
   {
     id: 'modules-room-assignment-components-assignment-board--print-layout',
     area: 'component',
     subject: 'Assignment print layout',
-    source: 'src/modules/room-assignment/app/components/assignment-board/components.stories.tsx',
+    source: 'src/modules/room-assignment/app/components/assignment-board/print-layout.tsx',
     media: 'print',
   },
   {
@@ -500,12 +510,18 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'component',
     subject: 'Workshop participation attendance',
     source: 'src/modules/workshop-assignment/app/components/participation.tsx',
+    snapshot: false,
+    snapshot_exemption:
+      'No organiser route renders participation yet; the story is an illustrative example for a later host.',
   },
   {
     id: 'modules-workshop-assignment-components-participation--cases',
     area: 'component',
     subject: 'Workshop participation cases',
     source: 'src/modules/workshop-assignment/app/components/participation.tsx',
+    snapshot: false,
+    snapshot_exemption:
+      'No organiser route renders participation yet; the story is an illustrative example for a later host.',
   },
   {
     id: 'application-organiser-workshop-editors--forms',
@@ -520,27 +536,142 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/organiser/components/workshop/editors.tsx',
   },
   {
-    id: 'screens-organiser-workshops--overview',
-    area: 'screen',
-    subject: 'Workshop overview screen',
-    source: 'src/app/organiser/screens/workshops.stories.tsx',
+    id: 'shared-primitives-badge--tones',
+    area: 'component',
+    subject: 'Status badge tone samples',
+    source: 'src/app/components/shared/ui/badge.tsx',
   },
   {
-    id: 'screens-organiser-workshops--programme',
-    area: 'screen',
-    subject: 'Workshop programme screen',
-    source: 'src/app/organiser/screens/workshops.stories.tsx',
+    id: 'shared-primitives-workflowstepper--accommodation',
+    area: 'component',
+    subject: 'Workflow stepper accommodation',
+    source: 'src/app/components/shared/ui/workflow-stepper.tsx',
   },
   {
-    id: 'screens-organiser-workshops--slots',
-    area: 'screen',
-    subject: 'Workshop slots screen',
-    source: 'src/app/organiser/screens/workshops.stories.tsx',
+    id: 'application-organiser-collection-create-action--default',
+    area: 'application',
+    subject: 'Collection create action',
+    source: 'src/app/organiser/components/collection-create-action.tsx',
   },
   {
-    id: 'screens-organiser-workshops--spaces',
+    id: 'application-organiser-collection-create-action--validation-error',
+    area: 'application',
+    subject: 'Collection create action validation error',
+    source: 'src/app/organiser/components/collection-create-action.tsx',
+  },
+  {
+    id: 'application-organiser-workshop-editors--editor-dialog',
+    area: 'component',
+    subject: 'Workshop editor dialog',
+    source: 'src/app/organiser/components/workshop/editors.tsx',
+    screenshot_target: 'dialog',
+  },
+  {
+    id: 'screens-organiser-workshops--leaders',
     area: 'screen',
-    subject: 'Workshop spaces screen',
-    source: 'src/app/organiser/screens/workshops.stories.tsx',
+    subject: 'Workshop leaders',
+    source: 'src/app/organiser/screens/workshops.tsx',
+  },
+  {
+    id: 'screens-organiser-workshops--external-leaders',
+    area: 'screen',
+    subject: 'Workshop external leaders',
+    source: 'src/app/organiser/screens/workshops.tsx',
+  },
+  {
+    id: 'screens-organiser-workshop-allocation--answers',
+    area: 'screen',
+    subject: 'Workshop allocation',
+    source: 'src/app/organiser/screens/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-availability-badge--one-place',
+    area: 'component',
+    subject: 'Availability badge one place',
+    source: 'src/modules/room-assignment/app/components/availability-badge.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-availability-badge--several-places',
+    area: 'component',
+    subject: 'Availability badge several places',
+    source: 'src/modules/room-assignment/app/components/availability-badge.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-room-capacity-summary--available',
+    area: 'component',
+    subject: 'Room capacity summary available',
+    source: 'src/modules/room-assignment/app/components/room-capacity-summary.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-room-capacity-summary--full',
+    area: 'component',
+    subject: 'Room capacity summary full',
+    source: 'src/modules/room-assignment/app/components/room-capacity-summary.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-room-capacity-summary--over-capacity',
+    area: 'component',
+    subject: 'Room capacity summary over capacity',
+    source: 'src/modules/room-assignment/app/components/room-capacity-summary.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-room-summary--available',
+    area: 'component',
+    subject: 'Room summary available',
+    source: 'src/modules/room-assignment/app/components/room-summary.tsx',
+  },
+  {
+    id: 'modules-room-assignment-components-room-summary--full',
+    area: 'component',
+    subject: 'Room summary full',
+    source: 'src/modules/room-assignment/app/components/room-summary.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--answers',
+    area: 'component',
+    subject: 'Workshop allocation answers',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--demand',
+    area: 'component',
+    subject: 'Workshop allocation demand',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--trace',
+    area: 'component',
+    subject: 'Workshop allocation trace',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--narrow-responsive',
+    area: 'component',
+    subject: 'Workshop allocation narrow responsive',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--empty',
+    area: 'component',
+    subject: 'Workshop allocation empty state',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--blocked-by-conflicts',
+    area: 'component',
+    subject: 'Workshop allocation blocked by conflicts',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--loading',
+    area: 'component',
+    subject: 'Workshop allocation loading state',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
+  },
+  {
+    id: 'modules-workshop-rankings-components-workshopallocation--print',
+    area: 'component',
+    subject: 'Workshop allocation print document',
+    source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
 ]

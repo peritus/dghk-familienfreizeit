@@ -9,6 +9,7 @@ import {
   type OrganiserAction,
   type OrganiserState,
 } from '../organiser/state.js'
+import { buildSolverInput, composeSolverContributions, solve } from '../../solver/index.js'
 
 const actor = 'organiser@example.test'
 
@@ -847,9 +848,12 @@ export function stateWithDrafts(...drafts: readonly EventDraft[][]): OrganiserSt
 export function FixtureProvider({
   children,
   initialState = organiserFixtureState,
+  with_plan: withPlan = false,
 }: {
   children: ReactNode
   initialState?: OrganiserState
+  /** Solve the derived world as the organiser app does, for screens that read the current plan. */
+  with_plan?: boolean
 }) {
   const [state, dispatch] = useState<OrganiserState>(initialState)
   const update: Dispatch<OrganiserAction> = useCallback(
@@ -862,7 +866,25 @@ export function FixtureProvider({
   )
   const apply = useCallback(async () => undefined, [])
   const world = useMemo(() => deriveWorld(state, activeProfile.validation_view), [state])
-  const value: OrganiserContextValue = { state, world, dispatch: update, stage, apply }
+  const currentPlan = useMemo(() => {
+    if (!withPlan || !world) return null
+    const contributions = composeSolverContributions(activeProfile)
+    return solve(buildSolverInput(world, contributions), contributions, {
+      build_revision: 'storybook',
+      compatibility_revision: 1,
+      event_date: activeProfile.meta.starts_on,
+      profile: activeProfile,
+      seed: null,
+    })
+  }, [withPlan, world])
+  const value: OrganiserContextValue = {
+    state,
+    world,
+    dispatch: update,
+    stage,
+    apply,
+    current_plan: currentPlan,
+  }
 
   return <OrganiserContext.Provider value={value}>{children}</OrganiserContext.Provider>
 }

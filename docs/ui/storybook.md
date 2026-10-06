@@ -15,11 +15,16 @@ and CSS-token pipeline used by the application.
   implementation.
 - `src/app/design/tokens.ts` names the CSS custom properties and their semantic
   roles without duplicating runtime values from `globals.css`.
-- `src/app/design/ui-coverage.ts` is the review index. Every current public
-  component, application composition, and screen has a Storybook id and source
-  path there.
-- `test/storybook/style-guide.spec.ts` checks that every index entry resolves and
-  takes a Playwright snapshot of every component/application/screen entry.
+- `src/app/design/ui-coverage.ts` is the review index. Every Storybook story and
+  docs page has exactly one entry with its id, subject, and the source path of
+  the renderable it shows (never the story file).
+- `test/storybook/style-guide.spec.ts` fails closed: it rejects an entry without
+  a story and a story without an entry, and takes a Playwright snapshot of every
+  component/application/screen entry. An entry may skip its snapshot only with
+  `snapshot: false` and a written `snapshot_exemption`, for example a retained
+  component that no organiser route renders yet.
+- `test/app/ui-coverage.test.tsx` rejects duplicate ids, missing source files,
+  story files as sources, and exemptions without a reason.
 
 Storybook's visible tree follows ownership rather than implementation depth:
 
@@ -67,7 +72,8 @@ When adding a component or screen:
    story's `parameters.docs.description.component` or the style-guide MDX page.
 2. Use a shared deterministic fixture for derived application state rather than
    inventing a parallel rendering path.
-3. Add the story id, subject, and source path to `uiCoverage`.
+3. Add the story id, subject, and source path to `uiCoverage`. Every story needs
+   an entry; the Storybook visual test fails on an unregistered story.
 4. Run the visual test and inspect the baseline. Keep interaction and domain
    behavior tests in Vitest or the application Playwright suite as appropriate;
    the visual test is the final rendered-contract check.

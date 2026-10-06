@@ -46,8 +46,8 @@ The implemented components and screens have a repository-local Storybook
 contract. Stories beside the React source render the real components and
 document their states; [`style-guide.mdx`](../../src/app/design/style-guide.mdx)
 records why/when guidance; [`ui-coverage.ts`](../../src/app/design/ui-coverage.ts)
-maps every current renderable to a story; and Playwright baselines verify the
-rendered result. This contract is intentionally file-based and requires no
+registers every story with the renderable it shows and fails closed on an
+unregistered story; and Playwright baselines verify the rendered result. This contract is intentionally file-based and requires no
 hosted design service or MCP integration. Outstanding screens remain
 specification work until a production renderable and coverage entry exist.
 

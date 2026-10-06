@@ -21,18 +21,28 @@ test.describe('repository-local UI contract', () => {
     expect(page.url()).toBe(roomStoryUrl)
   })
 
-  test('every coverage entry resolves to a Storybook story', async ({ request }) => {
+  test('coverage entries and Storybook entries match one to one', async ({ request }) => {
     const response = await request.get('/index.json')
     expect(response.ok()).toBeTruthy()
-    const index = (await response.json()) as { entries: Record<string, { type: string }> }
+    const index = (await response.json()) as {
+      entries: Record<string, { type: string; importPath: string }>
+    }
 
     for (const entry of uiCoverage) {
       expect(index.entries[entry.id], `${entry.subject} (${entry.source})`).toBeTruthy()
       expect(['story', 'docs']).toContain(index.entries[entry.id]?.type)
     }
+
+    const registered = new Set(uiCoverage.map(({ id }) => id))
+    const unregistered = Object.entries(index.entries)
+      .filter(([id, { type }]) => ['story', 'docs'].includes(type) && !registered.has(id))
+      .map(([id, { importPath }]) => `${id} (${importPath})`)
+    expect(unregistered, 'every story needs a uiCoverage entry').toEqual([])
   })
 
-  for (const entry of uiCoverage.filter(({ area }) => area !== 'foundation')) {
+  for (const entry of uiCoverage.filter(
+    (entry) => entry.area !== 'foundation' && entry.snapshot !== false,
+  )) {
     test(`visual contract: ${entry.area}: ${entry.subject}`, async ({ page }) => {
       await page.goto(`/iframe.html?id=${entry.id}&viewMode=story`)
       if (entry.media) await page.emulateMedia({ media: entry.media })

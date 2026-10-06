@@ -156,9 +156,10 @@ the browser route suite in the same change.
 
 `npm run storybook:build` verifies that the local Storybook documentation and
 stories compile. `npm run test:storybook` starts Storybook locally and runs
-`test/storybook/style-guide.spec.ts`: it resolves every entry in
-`src/app/design/ui-coverage.ts` and compares every current component,
-application composition, and screen with its committed Playwright PNG. The
+`test/storybook/style-guide.spec.ts`: it matches the Storybook index one to one
+against `src/app/design/ui-coverage.ts`, so an unregistered story fails the run,
+and compares every component, application composition, and screen entry with
+its committed Playwright PNG unless the entry records a snapshot exemption. The
 Nix development shell supplies Chromium, so this gate remains local and needs
 no hosted visual-regression account or MCP service.
 
