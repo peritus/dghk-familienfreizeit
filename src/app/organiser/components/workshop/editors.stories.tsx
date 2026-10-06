@@ -28,9 +28,9 @@ function ConfirmationExample() {
       <WorkshopConfirmationDialog
         open={open}
         on_open_change={setOpen}
-        title="Wahlphase schließen?"
-        description="Danach werden keine neuen Antworten mehr angenommen."
-        confirm_label="Wahlphase schließen"
+        title="Eingaben verwerfen?"
+        description="Die Eingaben in diesem Formular gehen verloren."
+        confirm_label="Verwerfen"
         on_confirm={() => setOpen(false)}
       />
     </div>

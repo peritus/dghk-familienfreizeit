@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './button.js'
 import { WorkflowStepper } from './workflow-stepper.js'
 
 const meta = {
@@ -27,16 +26,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const WorkshopChoice: Story = {
-  args: {
-    next_action: (
-      <>
-        <span className="flex-1">Familien können ihre Rangfolge abgeben.</span>
-        <Button size="sm">Wahl schließen</Button>
-      </>
-    ),
-  },
-}
+export const WorkshopChoice: Story = {}
 
 export const Accommodation: Story = {
   args: {

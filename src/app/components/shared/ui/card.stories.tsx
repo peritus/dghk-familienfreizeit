@@ -32,7 +32,7 @@ export const Complete: Story = {
       <Card className="mx-auto max-w-xl bg-secondary-background">
         <CardHeader>
           <CardTitle>Familie Weber</CardTitle>
-          <CardDescription>Vier Personen · noch nicht veröffentlicht</CardDescription>
+          <CardDescription>Vier Personen · Haus Linde</CardDescription>
           <CardAction>
             <Button size="sm" variant="neutral">
               Öffnen

@@ -26,8 +26,16 @@ export const Statuses: Story = {
       <Badge tone="attention">Prüfen</Badge>
       <Badge tone="danger">Blockiert</Badge>
       <Badge variant="pinned">Fest zugeordnet</Badge>
-      <Badge tone="draft">Entwurf</Badge>
-      <Badge tone="held">Zurückgehalten</Badge>
+    </div>
+  ),
+}
+
+/** Visual samples of the remaining tones; the labels name tones, not product states. */
+export const Tones: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-2 bg-background p-6">
+      <Badge tone="draft">Ton draft</Badge>
+      <Badge tone="held">Ton held</Badge>
     </div>
   ),
 }

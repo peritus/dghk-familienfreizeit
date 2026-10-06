@@ -56,12 +56,6 @@ export const WorkspaceChrome: Story = {
             { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
             { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
           ]}
-          next_action={
-            <>
-              <span className="flex-1">Familien können ihre Rangfolge abgeben.</span>
-              <Button size="sm">Wahl schließen</Button>
-            </>
-          }
         />
         <WorkshopPhaseNotice label="Vorläufig" tone="attention">
           Die Berechnung ändert sich mit jeder Antwort und jeder Änderung.

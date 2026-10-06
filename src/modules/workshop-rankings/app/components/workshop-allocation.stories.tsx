@@ -143,7 +143,6 @@ export const BlockedByConflicts: Story = {
       <WorkshopAllocationConflictNotice
         projection={{ ...projection, fixed_violation_count: 2, unassigned_count: 3 }}
       />
-      <p className="text-muted">Die Vorschau kann erst nach der Prüfung festgelegt werden.</p>
     </div>
   ),
 }
