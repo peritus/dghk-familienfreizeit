@@ -24,6 +24,12 @@ import { expiredSessionCookie } from '../auth/cookies.js'
 import { maxEventsPerBatch } from './request-limits.js'
 import { readFeatureBindings, type FeatureBindingState } from './feature-bindings.js'
 import {
+  AreaNotReadyError,
+  ClosingPayloadSuppliedError,
+  closingEventAreas,
+  fillClosingPayloads,
+} from './closing.js'
+import {
   cleanupOperationalRows,
   consumeLoginRateLimits,
   consumeRateLimit,
@@ -227,7 +233,14 @@ app.post('/api/organiser/apply', async (context) => {
 
   try {
     const now = new Date().toISOString()
-    const drafts = body.events.map((candidate) => eventDraft(candidate, principal.email, now))
+    const drafts = tracing.enterSpan('events.fill_closing_payloads', () =>
+      fillClosingPayloads(
+        existing,
+        (body.events as unknown[]).map((candidate) => eventDraft(candidate, principal.email, now)),
+        activeProfile,
+        { build_revision: buildRevision, compatibility_revision: compatibilityRevision },
+      ),
+    )
     const prepared = tracing.enterSpan('events.prepare_and_validate', (span) => {
       span.setAttribute('event.count', drafts.length)
       return prepareEventBatch(existing, drafts, activeProfile.validation_view)
@@ -254,6 +267,13 @@ app.post('/api/organiser/apply', async (context) => {
       feature_overrides: featureBindings(context.env).overrides,
     })
   } catch (error) {
+    if (error instanceof AreaNotReadyError)
+      return context.json(
+        { error: 'area_not_ready', area: error.area, findings: error.findings },
+        409,
+      )
+    if (error instanceof ClosingPayloadSuppliedError)
+      return context.json({ error: 'closing_payload_supplied', type: error.type }, 400)
     if (error instanceof StaleHeadError) {
       const current = await readEvents(context.env.DB, activeProfile.validation_view)
       return context.json(
@@ -317,6 +337,9 @@ app.post('/api/events', async (context) => {
   const world = deriveEventWorld(existing)
   try {
     const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
+    // Closings are filled only on the organiser apply path (phases.md §5).
+    const closings = closingEventAreas(activeProfile.modules)
+    if (drafts.some(({ type }) => closings.has(type))) throw new Error('forbidden')
     const schemas = eventPayloadSchemas(activeProfile.validation_view)
     const events = tracing.enterSpan('events.parse_and_validate', (span) => {
       const parsed = drafts.map((draft, index) =>
