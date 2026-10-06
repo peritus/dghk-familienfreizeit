@@ -19,9 +19,13 @@ export type WorkshopRosterEntry = {
 
 export function WorkshopRosterTable({
   entries,
+  show_health: showHealth = true,
+  show_contact: showContact = true,
   show_attendance: showAttendance = false,
 }: {
   entries: readonly WorkshopRosterEntry[]
+  show_health?: boolean
+  show_contact?: boolean
   show_attendance?: boolean
 }) {
   return (
@@ -30,8 +34,8 @@ export function WorkshopRosterTable({
       columns={[
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Alter' },
-        { key: 'health', label: 'Allergien und Gesundheit' },
-        { key: 'contact', label: 'Notfallkontakt' },
+        ...(showHealth ? [{ key: 'health', label: 'Allergien und Gesundheit' }] : []),
+        ...(showContact ? [{ key: 'contact', label: 'Notfallkontakt' }] : []),
         ...(showAttendance ? [{ key: 'attendance', label: 'Anwesend' }] : []),
       ]}
       rows={entries}
@@ -42,12 +46,16 @@ export function WorkshopRosterTable({
             {entry.name}
           </th>
           <td className="p-3">{entry.age_label}</td>
-          <td className="p-3">
-            {entry.health ?? <span className="text-muted">keine Angabe</span>}
-          </td>
-          <td className="p-3">
-            {entry.emergency_contact ?? <span className="text-muted">—</span>}
-          </td>
+          {showHealth ? (
+            <td className="p-3">
+              {entry.health ?? <span className="text-muted">keine Angabe</span>}
+            </td>
+          ) : null}
+          {showContact ? (
+            <td className="p-3">
+              {entry.emergency_contact ?? <span className="text-muted">—</span>}
+            </td>
+          ) : null}
           {showAttendance ? (
             <td className="p-3">
               <AttendanceCheckCell checked={entry.attendance} />
@@ -96,7 +104,7 @@ export type PersonPlanEntry = {
   workshop?: string
   room?: string
   role?: string
-  status?: 'open' | 'assigned' | 'lead' | 'free'
+  status?: 'open' | 'assigned' | 'lead' | 'signup' | 'interest' | 'free'
 }
 
 export function PersonPlanTable({ entries }: { entries: readonly PersonPlanEntry[] }) {
@@ -129,6 +137,25 @@ export function PersonPlanTable({ entries }: { entries: readonly PersonPlanEntry
         </tr>
       )}
     />
+  )
+}
+
+export function PersonPlanCards({ entries }: { entries: readonly PersonPlanEntry[] }) {
+  return (
+    <ul className="grid gap-3">
+      {entries.map((entry) => (
+        <li
+          key={entry.id}
+          className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-4"
+        >
+          <strong>{entry.slot}</strong>
+          <span>{entry.workshop ?? (entry.status === 'open' ? 'Offen' : 'frei')}</span>
+          <span className="text-sm text-muted">
+            {entry.room ?? '—'} · {entry.role ?? '—'}
+          </span>
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -229,6 +256,25 @@ export function RoomPlanTable({ entries }: { entries: readonly RoomPlanEntry[] }
   )
 }
 
+export function RoomPlanCards({ entries }: { entries: readonly RoomPlanEntry[] }) {
+  return (
+    <ul className="grid gap-3">
+      {entries.map((entry) => (
+        <li
+          key={entry.id}
+          className="grid gap-1 rounded-base border-2 border-border bg-secondary-background p-4"
+        >
+          <strong>{entry.time}</strong>
+          <span>{entry.workshop ?? '—'}</span>
+          <span className="text-sm text-muted">
+            {entry.audience ?? '—'} · {entry.leaders ?? '—'}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function WorkshopListKinds({
   value,
   onChange,
@@ -257,12 +303,14 @@ export function WorkshopRosterDocument({
   metadata,
   entries,
   confidential = true,
+  show_attendance: showAttendance = false,
 }: {
   title: string
   status: string
   metadata: readonly ReactNode[]
   entries: readonly WorkshopRosterEntry[]
   confidential?: boolean
+  show_attendance?: boolean
 }) {
   return (
     <WorkshopPrintDocument
@@ -273,7 +321,7 @@ export function WorkshopRosterDocument({
       confidential={confidential}
     >
       <WorkshopResponsiveCollection
-        wide={<WorkshopRosterTable entries={entries} show_attendance />}
+        wide={<WorkshopRosterTable entries={entries} show_attendance={showAttendance} />}
         narrow={<WorkshopRosterCards entries={entries} />}
       />
     </WorkshopPrintDocument>
@@ -296,7 +344,10 @@ export function WorkshopPersonPlanDocument({
       status="Vorläufig, nicht endgültig"
       metadata={metadata}
     >
-      <PersonPlanTable entries={entries} />
+      <WorkshopResponsiveCollection
+        wide={<PersonPlanTable entries={entries} />}
+        narrow={<PersonPlanCards entries={entries} />}
+      />
     </WorkshopPrintDocument>
   )
 }
@@ -341,7 +392,10 @@ export function WorkshopRoomPlanDocument({
       status="Vorläufig, nicht endgültig"
       metadata={metadata}
     >
-      <RoomPlanTable entries={entries} />
+      <WorkshopResponsiveCollection
+        wide={<RoomPlanTable entries={entries} />}
+        narrow={<RoomPlanCards entries={entries} />}
+      />
     </WorkshopPrintDocument>
   )
 }

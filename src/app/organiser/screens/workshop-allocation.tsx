@@ -74,22 +74,22 @@ function traceStages(
 export function WorkshopAllocation() {
   useDocumentTitle('Wünsche · Workshops · Familienfreizeit')
   const [location, navigate] = useLocation()
-  const { world, current_plan: currentPlan } = useOrganiser()
+  const { world, prospective_plan: prospectivePlan } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
   const [traceMode, setTraceMode] = useState<TraceMode>('all')
   const [selectedPersonName, setSelectedPersonName] = useState('')
   const projection = useMemo(
     () =>
-      world && currentPlan
+      world && prospectivePlan
         ? buildWorkshopAllocationProjection({
             world,
-            plan: currentPlan,
+            plan: prospectivePlan,
             event_date: activeProfile.meta.starts_on,
             time_zone: activeProfile.meta.timezone,
             max_rank: rankingLimit(),
           })
         : null,
-    [currentPlan, world],
+    [prospectivePlan, world],
   )
 
   if (!world || !projection) return null

@@ -175,7 +175,7 @@ function dateLabel(value: string, timeZone: string): string {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
 }
 
@@ -183,12 +183,12 @@ function timeLabel(startsAt: string, endsAt: string, timeZone: string): string {
   const starts = new globalThis.Date(startsAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
   const ends = new globalThis.Date(endsAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone,
+    ['timeZone']: timeZone,
   })
   return `${starts}–${ends}`
 }
@@ -247,9 +247,7 @@ function buildPersonEntries(
   leaderWorkshops: ReadonlyMap<string, readonly string[]>,
 ): WorkshopReportPersonPlanEntry[] {
   const assignmentBySlot = new Map(
-    assignments
-      .filter((item) => item.person_id === personId)
-      .map((item) => [item.slot_id, item]),
+    assignments.filter((item) => item.person_id === personId).map((item) => [item.slot_id, item]),
   )
   const signupIds = new Set(
     signups.filter((item) => item.person_id === personId).map((item) => item.workshop_id),
@@ -264,9 +262,10 @@ function buildPersonEntries(
     const signup = !workshopId
       ? [...signupIds].find((id) => placements.get(id)?.slot_id === slot.id)
       : undefined
-    const interest = !workshopId && !signup
-      ? [...interestIds].find((id) => placements.get(id)?.slot_id === slot.id)
-      : undefined
+    const interest =
+      !workshopId && !signup
+        ? [...interestIds].find((id) => placements.get(id)?.slot_id === slot.id)
+        : undefined
     const selectedWorkshopId = workshopId ?? signup ?? interest ?? null
     const selectedWorkshop = selectedWorkshopId ? workshops.get(selectedWorkshopId) : undefined
     const status: WorkshopReportPersonPlanEntry['status'] = ledWorkshopId
@@ -364,7 +363,8 @@ export function buildWorkshopReportsProjection(
               name: personName(input.world, personId),
               age_label: ageLabel(input.world, personId),
               health:
-                labelValue(input.world, personId, ['health', 'health-note', 'allergy']) ?? undefined,
+                labelValue(input.world, personId, ['health', 'health-note', 'allergy']) ??
+                undefined,
               emergency_contact:
                 labelValue(input.world, personId, [
                   'emergency-contact',
@@ -412,7 +412,7 @@ export function buildWorkshopReportsProjection(
   const personViews: WorkshopReportPerson[] = input.world.persons
     .map((person) => {
       const familyId = familyIdFor(input.world, person.id)
-      const familyLabels = familyId ? input.world.labels_by_entity[familyId] ?? [] : []
+      const familyLabels = familyId ? (input.world.labels_by_entity[familyId] ?? []) : []
       return {
         id: person.id,
         name: personName(input.world, person.id),
@@ -431,7 +431,9 @@ export function buildWorkshopReportsProjection(
         ),
       }
     })
-    .sort((left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id))
+    .sort(
+      (left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id),
+    )
 
   const personById = new Map(personViews.map((person) => [person.id, person]))
   const familyViews: WorkshopReportFamily[] = input.world.families
@@ -439,7 +441,7 @@ export function buildWorkshopReportsProjection(
       const labels = input.world.labels_by_entity[family.id] ?? []
       const members = personViews
         .filter((person) => person.family_id === family.id)
-        .map(({ id, name, age_label }) => ({ id, name, age_label }))
+        .map(({ id, name, age_label: ageLabel }) => ({ id, name, age_label: ageLabel }))
       return {
         id: family.id,
         name: stringLabel(labels, 'display-name') ?? family.id,
@@ -449,7 +451,9 @@ export function buildWorkshopReportsProjection(
           id: `${family.id}:${slot.id}`,
           label: slot.label,
           members: members.map((member) => {
-            const entry = personById.get(member.id)?.entries.find((item) => item.slot_id === slot.id)
+            const entry = personById
+              .get(member.id)
+              ?.entries.find((item) => item.slot_id === slot.id)
             const value = entry?.workshop
               ? `${entry.status === 'lead' ? 'leitet ' : ''}${entry.workshop}${
                   entry.status === 'signup'
@@ -464,7 +468,9 @@ export function buildWorkshopReportsProjection(
         })),
       }
     })
-    .sort((left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id))
+    .sort(
+      (left, right) => left.name.localeCompare(right.name, 'de') || left.id.localeCompare(right.id),
+    )
 
   const roomViews: WorkshopReportRoom[] = spaces
     .slice()
@@ -500,7 +506,8 @@ export function buildWorkshopReportsProjection(
     rooms: roomViews,
     summary: {
       workshop_count: workshopViews.length,
-      placed_workshop_count: workshopViews.filter((workshop) => workshop.status === 'placed').length,
+      placed_workshop_count: workshopViews.filter((workshop) => workshop.status === 'placed')
+        .length,
       participant_count: participantCount,
       family_count: familyViews.length,
       person_count: personViews.length,
