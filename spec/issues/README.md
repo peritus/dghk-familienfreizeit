@@ -28,6 +28,7 @@ category: <kernel | module:<name> | ui | process | tooling>
 source: <review/report this came from>
 related_decisions: [D4]          # decision IDs from decisions.md; omit/empty if none
 related_milestones: [M12]        # roadmap milestone IDs; omit/empty if none
+depends_on: ["041"]              # issue ids this one is blocked by; omit/empty if none
 opened: YYYY-MM-DD
 ---
 
@@ -51,6 +52,13 @@ applied to the spec.
 
 Numbered, only if the source posed explicit alternatives to choose between.
 
+## Dependencies
+
+Only present when the issue takes part in a dependency relation in either
+direction: one line per relation naming what blocks this issue and what this
+issue blocks, as a clickable relative link to the other issue file. An issue
+that only blocks others has this section without a `depends_on` key.
+
 ## Resolution
 
 Only present once `status` is `resolved` or `rejected`: what was found or
@@ -68,6 +76,16 @@ moving it into the body makes it both clickable and something
 `status: needs-decision` marks anything that, per `AGENTS.md`, would need to
 go through decision review before a spec file changes (it touches an
 existing `D`-numbered decision, or would create a new one).
+
+`depends_on` lists the zero-padded ids of issues that must be resolved first.
+It is optional, and its absence means the issue has no prerequisite. The key is
+ordering information only: it never implies that the issues share a milestone,
+and it is not backfilled onto issues written before the convention existed.
+Dependency order and numeric order are independent, because numbers are
+assigned when an issue is filed rather than when its prerequisites are known.
+Whenever `depends_on` is set, the body repeats the relation in a
+`## Dependencies` section so the link is clickable and
+`npm run test:docs` validates it.
 
 Naming: `NNN-slug.md`, zero-padded to 3 digits so lexicographic order equals
 numeric order. Numbers are assigned once, sequentially, and are never
