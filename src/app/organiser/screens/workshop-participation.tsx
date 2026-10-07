@@ -1,10 +1,11 @@
+import { LoadingState } from '../../components/shared/ui/screen-state.js'
 import { useEffect, useMemo, useState } from 'react'
 import { activeProfile } from '../../../config/index.js'
 import { buildWorkshopAllocationProjection } from '../../../modules/workshop-rankings/app/workshop-allocation-view.js'
 import { WorkshopParticipation } from '../../../modules/workshop-rankings/app/components/workshop-participation.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
-import { WorkshopScreenHeader } from '../../components/shared/workshop/shared.js'
-import { WorkshopNavigation } from './workshops.js'
+import { ScreenHeader, ScreenLayout } from '../../components/shared/ui/screen-layout.js'
+import { WorkshopNavigation, WorkshopParticipationNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
 import { draftCount } from '../state.js'
 
@@ -55,21 +56,30 @@ export function WorkshopParticipationScreen() {
     [currentPlan, world],
   )
 
-  if (!world || !projection) return null
+  if (!world || !projection)
+    return (
+      <ScreenLayout
+        secondary_navigation={<WorkshopNavigation />}
+        header={<ScreenHeader title="Teilnahme" />}
+      >
+        <LoadingState />
+      </ScreenLayout>
+    )
 
   return (
-    <div className="workshop-participation-page flex flex-1 flex-col">
-      <div className="workshop-participation-screen-only space-y-8">
-        <WorkshopNavigation />
-        <WorkshopScreenHeader eyebrow="Workshops · Teilnahme" title="Teilnahme" />
-      </div>
+    <ScreenLayout
+      className="workshop-participation-page"
+      secondary_navigation={<WorkshopNavigation />}
+      header={<ScreenHeader eyebrow="Workshops" title="Teilnahme" />}
+      tertiary_navigation={<WorkshopParticipationNavigation />}
+      footer={<ParticipationPrintStamp revision={state.head_seq} drafts={draftCount(state)} />}
+    >
       <div className="workshop-participation-body mt-6 mb-10">
         <WorkshopParticipation
           participation={projection.participation}
           max_rank={projection.max_rank}
         />
       </div>
-      <ParticipationPrintStamp revision={state.head_seq} drafts={draftCount(state)} />
-    </div>
+    </ScreenLayout>
   )
 }

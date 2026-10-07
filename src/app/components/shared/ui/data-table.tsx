@@ -1,6 +1,20 @@
 import { Fragment, type ReactNode } from 'react'
 import { cn } from '../../../lib/utils.js'
 
+export function TableFrame({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      data-slot="table-frame"
+      className={cn(
+        'min-w-0 overflow-x-auto rounded-base border-2 border-border bg-secondary-background',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function DataTable<T>({
   caption,
   columns,
@@ -17,12 +31,7 @@ export function DataTable<T>({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        'overflow-x-auto rounded-base border-2 border-border bg-secondary-background',
-        className,
-      )}
-    >
+    <TableFrame className={className}>
       <table className="w-full min-w-[38rem] text-left">
         <caption className="sr-only">{caption}</caption>
         <thead>
@@ -44,7 +53,7 @@ export function DataTable<T>({
           ))}
         </tbody>
       </table>
-    </div>
+    </TableFrame>
   )
 }
 

@@ -1,3 +1,4 @@
+import { ActionableNotice, StatusNotice } from '../../components/shared/ui/notice.js'
 import { activeProfile } from '../../../config/index.js'
 import type { AreaId } from '../../../config/phases.js'
 import { closedAreaState, subjectName, type ClosedAreaState } from '../closed-areas.js'
@@ -125,17 +126,23 @@ export function ClosedAreaDifferences({ area }: { area: AreaId }) {
   if (!state?.latest || state.pending) return null
   const changes = state.difference?.changes ?? []
   return (
-    <section
-      aria-label={`Abweichungen ${areaLabels[area].name}`}
-      className="space-y-2 rounded-base border-2 border-border bg-secondary-background p-4"
-    >
-      <h2 className="font-bold">
-        {changes.length === 0
-          ? 'Keine Abweichung vom festgelegten Ergebnis'
-          : `${changes.length} ${changes.length === 1 ? 'Abweichung' : 'Abweichungen'} vom festgelegten Ergebnis`}
-      </h2>
-      <p className="text-sm text-muted">Festgelegt am {formatTime(state.latest.at)}</p>
-      {changes.length > 0 ? <ChangeList state={state} /> : null}
+    <section aria-label={`Abweichungen ${areaLabels[area].name}`}>
+      {changes.length === 0 ? (
+        <StatusNotice
+          label="Festgelegt"
+          tone="success"
+          details={`Festgelegt am ${formatTime(state.latest.at)}`}
+        >
+          Keine Abweichung vom festgelegten Ergebnis
+        </StatusNotice>
+      ) : (
+        <ActionableNotice
+          title={`${changes.length} ${changes.length === 1 ? 'Abweichung' : 'Abweichungen'} vom festgelegten Ergebnis`}
+        >
+          <p className="mb-2">Festgelegt am {formatTime(state.latest.at)}</p>
+          <ChangeList state={state} />
+        </ActionableNotice>
+      )}
     </section>
   )
 }

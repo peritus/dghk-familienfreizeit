@@ -70,13 +70,21 @@ export function ScreenLayout({
         </div>
       ) : null}
       {header}
-      {notices ? <div data-slot="screen-notices">{notices}</div> : null}
+      {notices ? (
+        <div data-slot="screen-notices" className="empty:hidden">
+          {notices}
+        </div>
+      ) : null}
       {workflow ? (
-        <div data-slot="screen-workflow" className="space-y-4">
+        <div data-slot="screen-workflow" className="space-y-4 empty:hidden">
           {workflow}
         </div>
       ) : null}
-      {summary ? <div data-slot="screen-summary">{summary}</div> : null}
+      {summary ? (
+        <div data-slot="screen-summary" className="empty:hidden">
+          {summary}
+        </div>
+      ) : null}
       {tertiaryNavigation ? (
         <div data-slot="screen-tertiary-navigation" className="print:hidden">
           {tertiaryNavigation}
@@ -87,7 +95,7 @@ export function ScreenLayout({
           {children}
         </div>
       ) : null}
-      {footer ? <footer data-slot="screen-footer">{footer}</footer> : null}
+      {footer ? <div data-slot="screen-footer">{footer}</div> : null}
     </div>
   )
 }

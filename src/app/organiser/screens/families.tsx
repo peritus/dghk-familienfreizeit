@@ -1,3 +1,5 @@
+import { TableFrame } from '../../components/shared/ui/data-table.js'
+import { EmptyState } from '../../components/shared/ui/screen-state.js'
 import { TextField } from '../../components/shared/ui/field.js'
 import { Search } from 'lucide-react'
 import { randomIdPart } from '../ids.js'
@@ -15,7 +17,7 @@ import {
   ScreenHeader,
   CollectionSection,
 } from '../../components/shared/ui/screen-layout.js'
-import { CollectionCreateAction } from '../components/collection-create-action.js'
+import { CollectionCreateAction } from '../../components/shared/ui/collection-create-action.js'
 
 type FamilyFilter = 'all' | 'open' | 'complete'
 
@@ -212,68 +214,69 @@ export function Families() {
         <p className="text-sm text-muted" aria-live="polite">
           {shown.length} von {all.length} Familien
         </p>
-        <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background shadow-shadow">
-          {shown.length ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left max-md:block">
-                <caption className="sr-only">Familien</caption>
-                <thead className="border-b-2 border-border max-md:hidden">
-                  <tr>
-                    <th scope="col" className="p-4">
-                      Familie
+        {shown.length ? (
+          <TableFrame>
+            <table className="w-full text-left max-md:block">
+              <caption className="sr-only">Familien</caption>
+              <thead className="border-b-2 border-border max-md:hidden">
+                <tr>
+                  <th scope="col" className="p-4">
+                    Familie
+                  </th>
+                  <th scope="col" className="p-4">
+                    Personen
+                  </th>
+                  <th scope="col" className="p-4">
+                    Angaben
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="max-md:block">
+                {shown.map(({ row, status }) => (
+                  <tr
+                    key={row.family.id}
+                    className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-4"
+                  >
+                    <th scope="row" className="p-4 align-top max-md:block max-md:p-0">
+                      <OrganiserLink
+                        href={organiserPaths.family_detail(row.family.id)}
+                        className="text-lg font-bold underline"
+                      >
+                        {row.display_name}
+                      </OrganiserLink>
+                      <span className="mt-1 block text-sm text-muted">{row.email}</span>
                     </th>
-                    <th scope="col" className="p-4">
-                      Personen
-                    </th>
-                    <th scope="col" className="p-4">
-                      Angaben
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="max-md:block">
-                  {shown.map(({ row, status }) => (
-                    <tr
-                      key={row.family.id}
-                      className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-4"
+                    <td
+                      data-label="Personen"
+                      className="p-4 align-top max-md:flex max-md:justify-between max-md:gap-4 max-md:p-0 max-md:pt-3"
                     >
-                      <th scope="row" className="p-4 align-top max-md:block max-md:p-0">
-                        <OrganiserLink
-                          href={organiserPaths.family_detail(row.family.id)}
-                          className="text-lg font-bold underline"
-                        >
-                          {row.display_name}
-                        </OrganiserLink>
-                        <span className="mt-1 block text-sm text-muted">{row.email}</span>
-                      </th>
-                      <td
-                        data-label="Personen"
-                        className="p-4 align-top max-md:flex max-md:justify-between max-md:gap-4 max-md:p-0 max-md:pt-3"
-                      >
-                        <span className="font-bold md:sr-only">Personen</span>
-                        {row.persons.length ? row.persons.length : '—'}
-                      </td>
-                      <td
-                        data-label="Angaben"
-                        className="p-4 align-top max-md:block max-md:p-0 max-md:pt-3"
-                      >
-                        <span className="mb-2 block font-bold md:sr-only">Angaben</span>
-                        {familyStatusBadges(status.open, status.complete)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="grid justify-items-start gap-3 border-2 border-dashed border-muted p-6">
-              <p className="font-bold">Keine Familie gefunden.</p>
-              <p className="text-muted">Keine Familie passt zu Suche und Filter.</p>
+                      <span className="font-bold md:sr-only">Personen</span>
+                      {row.persons.length ? row.persons.length : '—'}
+                    </td>
+                    <td
+                      data-label="Angaben"
+                      className="p-4 align-top max-md:block max-md:p-0 max-md:pt-3"
+                    >
+                      <span className="mb-2 block font-bold md:sr-only">Angaben</span>
+                      {familyStatusBadges(status.open, status.complete)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableFrame>
+        ) : (
+          <EmptyState
+            title="Keine Familie gefunden."
+            action={
               <Button type="button" variant="neutral" onClick={resetFilters}>
                 Suche und Filter zurücksetzen
               </Button>
-            </div>
-          )}
-        </div>
+            }
+          >
+            Keine Familie passt zu Suche und Filter.
+          </EmptyState>
+        )}
       </CollectionSection>
     </ScreenLayout>
   )

@@ -1,11 +1,10 @@
 import type { ReactNode } from 'react'
 import { Badge } from '../../../../app/components/shared/ui/badge.js'
 import {
-  WorkshopCompactMeta,
-  WorkshopListRow,
-  WorkshopRowActions,
-  WorkshopStatusBadge,
-} from '../../../../app/components/shared/workshop/shared.js'
+  CompactMeta,
+  CollectionRow,
+  RowActions,
+} from '../../../../app/components/shared/ui/collection-list.js'
 
 export type WorkshopAuthoringView = {
   id: string
@@ -101,9 +100,7 @@ export function WorkshopPlacementStatus({
 }) {
   return (
     <div className="space-y-1 text-sm">
-      {placement ? (
-        <WorkshopStatusBadge tone={placement.tone}>{placement.label}</WorkshopStatusBadge>
-      ) : null}
+      {placement ? <Badge tone={placement.tone}>{placement.label}</Badge> : null}
       {attention ? <p className="font-bold text-muted">{attention}</p> : null}
     </div>
   )
@@ -133,7 +130,7 @@ export function WorkshopSummaryRow({
         <WorkshopLeaderSummary leaders={workshop.leaders} />
         <WorkshopPlacementStatus placement={workshop.placement} attention={workshop.attention} />
       </div>
-      {action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}
+      {action ? <RowActions>{action}</RowActions> : null}
     </article>
   )
 }
@@ -196,19 +193,19 @@ export function ExternalLeaderRow({
   total_slots?: number
 }) {
   return (
-    <WorkshopListRow action={action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}>
+    <CollectionRow action={action ? <RowActions>{action}</RowActions> : null}>
       <div className="space-y-1">
         <p>
           <strong>{leader.name}</strong> <Badge>extern</Badge>
           {leader.phone ? <span className="ml-2 text-sm text-muted">· {leader.phone}</span> : null}
         </p>
-        <WorkshopCompactMeta label="Leitet">
+        <CompactMeta label="Leitet">
           {leader.leads.length ? leader.leads.join(', ') : '—'}
-        </WorkshopCompactMeta>
-        <WorkshopCompactMeta label="Verfügbar">
+        </CompactMeta>
+        <CompactMeta label="Verfügbar">
           <LeaderAvailability slots={leader.availability} total_slots={totalSlots} />
-        </WorkshopCompactMeta>
+        </CompactMeta>
       </div>
-    </WorkshopListRow>
+    </CollectionRow>
   )
 }

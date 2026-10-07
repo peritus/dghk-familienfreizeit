@@ -1,10 +1,11 @@
+import { TableFrame } from '../../../components/shared/ui/data-table.js'
 import { Fragment, type ReactNode, type Ref } from 'react'
 import { TertiaryNavigation } from '../../../components/shared/ui/tertiary-navigation.js'
 import {
-  WorkshopListPicker,
-  WorkshopPrintDocument,
-  type WorkshopListOption,
-} from '../../../components/shared/workshop/shared.js'
+  EntityPicker,
+  type EntityPickerOption,
+} from '../../../components/shared/ui/entity-picker.js'
+import { PrintDocument } from '../../../components/shared/ui/print-layout.js'
 import { cn } from '../../../lib/utils.js'
 
 const tableBase =
@@ -32,7 +33,7 @@ function ListTable({
   children: ReactNode
 }) {
   return (
-    <div className="workshop-list-table-wrap overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
+    <TableFrame className="workshop-list-table-wrap overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
       <table
         className={cn(
           'workshop-list-table',
@@ -53,7 +54,7 @@ function ListTable({
           </tr>
         </tfoot>
       </table>
-    </div>
+    </TableFrame>
   )
 }
 
@@ -441,7 +442,7 @@ export function WorkshopRosterDocument({
   heading_ref: headingRef,
 }: DocumentProps & { entries: readonly WorkshopRosterEntry[] }) {
   return (
-    <WorkshopPrintDocument
+    <PrintDocument
       title={title}
       metadata={metadata}
       heading_ref={headingRef}
@@ -455,7 +456,7 @@ export function WorkshopRosterDocument({
       ) : (
         <p className="text-muted">Noch niemand zugeordnet.</p>
       )}
-    </WorkshopPrintDocument>
+    </PrintDocument>
   )
 }
 
@@ -466,9 +467,9 @@ export function WorkshopPersonPlanDocument({
   heading_ref: headingRef,
 }: DocumentProps & { entries: readonly PersonPlanEntry[] }) {
   return (
-    <WorkshopPrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
+    <PrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
       <PersonPlanTable caption={`Plan von ${title}`} entries={entries} />
-    </WorkshopPrintDocument>
+    </PrintDocument>
   )
 }
 
@@ -479,12 +480,12 @@ export function WorkshopFamilyPlanDocument({
   heading_ref: headingRef,
 }: DocumentProps & { slots: readonly FamilyPlanSlot[] }) {
   return (
-    <WorkshopPrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
+    <PrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
       <ListResponsive
         wide={<FamilyPlanTable caption={title} slots={slots} />}
         narrow={<FamilyPlanCards slots={slots} />}
       />
-    </WorkshopPrintDocument>
+    </PrintDocument>
   )
 }
 
@@ -495,9 +496,9 @@ export function WorkshopRoomPlanDocument({
   heading_ref: headingRef,
 }: DocumentProps & { entries: readonly RoomPlanEntry[] }) {
   return (
-    <WorkshopPrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
+    <PrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
       <RoomPlanTable caption={`Raumplan ${title}`} entries={entries} />
-    </WorkshopPrintDocument>
+    </PrintDocument>
   )
 }
 
@@ -513,7 +514,7 @@ export function WorkshopListPickerWithDocument({
 }: {
   label: string
   value: string
-  options: readonly WorkshopListOption[]
+  options: readonly EntityPickerOption[]
   onChange: (value: string) => void
   /** Previous/next; defaults to `onChange`. The screen moves focus to the new document. */
   onStep?: (value: string) => void
@@ -529,7 +530,7 @@ export function WorkshopListPickerWithDocument({
     <div className="@container">
       {notice ? <div className="workshop-screen-only mb-6">{notice}</div> : null}
       <div className="workshop-screen-only">
-        <WorkshopListPicker
+        <EntityPicker
           label={label}
           value={value}
           options={options}

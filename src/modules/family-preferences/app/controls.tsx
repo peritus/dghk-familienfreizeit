@@ -1,3 +1,5 @@
+import { SelectField, TextareaField } from '../../../app/components/shared/ui/field.js'
+import { Button } from '../../../app/components/shared/ui/button.js'
 import { useMemo, useState } from 'react'
 import type { Entity, World, Label } from '../../../events/fold.js'
 import type { EventDraft, JsonValue } from '../../../events/types.js'
@@ -131,20 +133,17 @@ function DeferredTextControl({
   const dirty = draft !== currentText
   return (
     <div className="grid gap-2">
-      <label className="grid gap-1">
-        <span className="font-bold">{title}</span>
-        {help ? <span className="text-sm">{help}</span> : null}
-        <textarea
-          className="min-h-24 rounded border-2 border-border px-3 py-2"
-          value={draft}
-          disabled={disabled}
-          onChange={(event) => setDraft(event.target.value)}
-        />
-      </label>
+      <TextareaField
+        label={title}
+        hint={<>{help ? <span className="text-sm">{help}</span> : null}</>}
+        value={draft}
+        disabled={disabled}
+        onChange={(event) => setDraft(event.target.value)}
+      />
       <div className="flex flex-wrap items-center gap-2">
-        <button
+        <Button
+          variant="neutral"
           type="button"
-          className="min-h-11 rounded-base border-2 border-border bg-foreground px-3 font-bold text-background disabled:cursor-not-allowed disabled:opacity-50"
           disabled={!dirty || disabled}
           onClick={() => {
             const value = draft.trim()
@@ -156,15 +155,15 @@ function DeferredTextControl({
           }}
         >
           Speichern
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="neutral"
           type="button"
-          className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3 font-bold disabled:cursor-not-allowed disabled:opacity-50"
           disabled={!dirty || disabled}
           onClick={() => setDraft(currentText)}
         >
           Verwerfen
-        </button>
+        </Button>
         {dirty ? <span className="text-sm font-bold">Änderungen offen</span> : null}
       </div>
     </div>
@@ -314,23 +313,20 @@ function TraitControl({
       )
     }
     return (
-      <label className="grid gap-1">
-        <span className="font-bold">{title}</span>
-        {help ? <span className="text-sm">{help}</span> : null}
-        <textarea
-          className="min-h-24 rounded border-2 border-border px-3 py-2"
-          defaultValue={typeof current?.value === 'string' ? current.value : ''}
-          disabled={disabled}
-          onBlur={(event) => {
-            const value = event.target.value.trim()
-            if (!value) {
-              if (current) stage([labelClear(actor, familyId, target, traitKey)])
-            } else if (current?.value !== value) {
-              stage([labelSet(actor, familyId, target, traitKey, value, null)])
-            }
-          }}
-        />
-      </label>
+      <TextareaField
+        label={title}
+        hint={<>{help ? <span className="text-sm">{help}</span> : null}</>}
+        defaultValue={typeof current?.value === 'string' ? current.value : ''}
+        disabled={disabled}
+        onBlur={(event) => {
+          const value = event.target.value.trim()
+          if (!value) {
+            if (current) stage([labelClear(actor, familyId, target, traitKey)])
+          } else if (current?.value !== value) {
+            stage([labelSet(actor, familyId, target, traitKey, value, null)])
+          }
+        }}
+      />
     )
   }
 
@@ -451,35 +447,34 @@ function TraitControl({
   }
 
   return (
-    <label className="grid gap-1">
-      <span className="font-bold">{title}</span>
-      {help ? <span className="text-sm">{help}</span> : null}
-      <select
-        className="min-h-11 rounded border-2 border-border px-3"
-        value={typeof current?.value === 'string' ? current.value : ''}
-        disabled={disabled}
-        onChange={(event) => {
-          const value = event.target.value
-          if (!value) {
-            if (current) stage([labelClear(actor, familyId, target, traitKey)])
-          } else if (current?.value !== value) {
-            stage([
-              labelSet(actor, familyId, target, traitKey, value, facing.strengths?.[0] ?? null),
-            ])
-          }
-        }}
-      >
-        <option value="">—</option>
-        {values.map((value) => (
-          <option key={value} value={value}>
-            {trait.value.kind === 'ref'
-              ? labelText(world.labels_by_entity[value] ?? [], 'display-name') || value
-              : value}
-          </option>
-        ))}
-      </select>
-      {disabledReason ? <span className="text-sm">{disabledReason}</span> : null}
-    </label>
+    <SelectField
+      label={title}
+      hint={
+        <>
+          {help ? <span className="text-sm">{help}</span> : null}
+          {disabledReason ? <span className="text-sm">{disabledReason}</span> : null}
+        </>
+      }
+      value={typeof current?.value === 'string' ? current.value : ''}
+      disabled={disabled}
+      onChange={(event) => {
+        const value = event.target.value
+        if (!value) {
+          if (current) stage([labelClear(actor, familyId, target, traitKey)])
+        } else if (current?.value !== value) {
+          stage([labelSet(actor, familyId, target, traitKey, value, facing.strengths?.[0] ?? null)])
+        }
+      }}
+    >
+      <option value="">—</option>
+      {values.map((value) => (
+        <option key={value} value={value}>
+          {trait.value.kind === 'ref'
+            ? labelText(world.labels_by_entity[value] ?? [], 'display-name') || value
+            : value}
+        </option>
+      ))}
+    </SelectField>
   )
 }
 

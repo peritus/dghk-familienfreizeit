@@ -51,7 +51,7 @@ import {
   ScreenHeader,
   SectionHeader,
 } from '../../components/shared/ui/screen-layout.js'
-import { CollectionCreateAction } from '../components/collection-create-action.js'
+import { CollectionCreateAction } from '../../components/shared/ui/collection-create-action.js'
 
 function eventTime(): string {
   return new Date().toISOString()

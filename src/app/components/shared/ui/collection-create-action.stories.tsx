@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CollectionCreateAction } from './collection-create-action.js'
 
 const meta = {
-  title: 'Application/Organiser/Collection create action',
+  title: 'Shared/Patterns/Collection create action',
   component: CollectionCreateAction,
   parameters: { layout: 'centered' },
 } satisfies Meta<typeof CollectionCreateAction>

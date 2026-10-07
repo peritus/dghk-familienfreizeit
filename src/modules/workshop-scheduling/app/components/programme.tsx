@@ -1,9 +1,8 @@
+import { TableFrame } from '../../../../app/components/shared/ui/data-table.js'
 import type { ReactNode } from 'react'
 import { Badge } from '../../../../app/components/shared/ui/badge.js'
-import {
-  WorkshopDataTable,
-  WorkshopStatusBadge,
-} from '../../../../app/components/shared/workshop/shared.js'
+import { DataTable } from '../../../../app/components/shared/ui/data-table.js'
+
 import type {
   ProgrammeCellProjection,
   ProgrammeRowProjection,
@@ -45,12 +44,8 @@ export function ProgrammeCell({ cell }: { cell: ProgrammeCellView }) {
       {cell.leaders ? <span className="mt-1 block text-sm text-muted">{cell.leaders}</span> : null}
       {cell.capacity_label || cell.demand_label ? (
         <span className="mt-2 flex flex-wrap gap-2 text-sm">
-          {cell.fixed ? (
-            <WorkshopStatusBadge variant="pinned">Festgelegt</WorkshopStatusBadge>
-          ) : null}
-          {cell.capacity_label ? (
-            <WorkshopStatusBadge variant="free">{cell.capacity_label}</WorkshopStatusBadge>
-          ) : null}
+          {cell.fixed ? <Badge variant="pinned">Festgelegt</Badge> : null}
+          {cell.capacity_label ? <Badge variant="free">{cell.capacity_label}</Badge> : null}
           {cell.demand_label ? <Badge tone="attention">{cell.demand_label}</Badge> : null}
         </span>
       ) : null}
@@ -70,7 +65,7 @@ export function ProgrammeGrid({
   rows: readonly ProgrammeRowView[]
 }) {
   return (
-    <div className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background print:overflow-visible print:rounded-none print:border">
+    <TableFrame className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background print:overflow-visible print:rounded-none print:border">
       <table className="w-full min-w-[48rem] text-left">
         <caption className="sr-only">Workshops nach Raum und Slot</caption>
         <thead>
@@ -114,7 +109,7 @@ export function ProgrammeGrid({
           })}
         </tbody>
       </table>
-    </div>
+    </TableFrame>
   )
 }
 
@@ -132,7 +127,7 @@ export function UnplacedWorkshopRow({
       <div className="min-w-0 flex-1">
         <h3 className="text-xl font-heading">{workshop.title}</h3>
         <p className="mt-1">
-          <WorkshopStatusBadge tone="attention">Nicht eingeplant</WorkshopStatusBadge>
+          <Badge tone="attention">Nicht eingeplant</Badge>
         </p>
         <p className="mt-2 text-sm text-muted">{workshop.reason}</p>
         {workshop.demand_label ? (
@@ -161,7 +156,7 @@ export function WorkshopOverlapRow({ overlap }: { overlap: WorkshopOverlapView }
 
 export function WorkshopOverlapTable({ overlaps }: { overlaps: readonly WorkshopOverlapView[] }) {
   return (
-    <WorkshopDataTable
+    <DataTable
       caption="Überschneidungen"
       columns={[
         { key: 'workshops', label: 'Workshops' },

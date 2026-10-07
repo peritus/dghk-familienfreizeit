@@ -1,12 +1,14 @@
+import { ActionableNotice } from '../../../../app/components/shared/ui/notice.js'
+import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
+import { organiserPaths } from '../../../../organiser/routes.js'
+import { buttonVariants } from '../../../../app/components/shared/ui/button.js'
 import type { ReactNode } from 'react'
 import { SegmentedControl } from '../../../../app/components/shared/ui/segmented-control.js'
-import {
-  WorkshopEmptyState,
-  WorkshopPhaseNotice,
-  WorkshopResponsiveCollection,
-  WorkshopStatsStrip,
-  WorkshopStatusBadge,
-} from '../../../../app/components/shared/workshop/shared.js'
+import { EmptyState } from '../../../../app/components/shared/ui/screen-state.js'
+import { StatusNotice } from '../../../../app/components/shared/ui/notice.js'
+import { ResponsiveCollection } from '../../../../app/components/shared/ui/data-table.js'
+import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
+import { Badge } from '../../../../app/components/shared/ui/badge.js'
 import {
   ChoiceAnswersTable,
   WorkshopDemandCards,
@@ -55,7 +57,7 @@ export function WorkshopAllocationSummary({
   const answerIds = new Set(answers.map((answer) => answer.id))
   const unassigned = projection.unassigned_person_ids.filter((id) => answerIds.has(id)).length
   return (
-    <WorkshopStatsStrip
+    <StatsStrip
       items={[
         { value: answers.length, label: 'Personen' },
         { value: ranked, label: 'mit Rangfolge' },
@@ -93,7 +95,7 @@ export function WorkshopAllocationDemand({
 }) {
   const table = <WorkshopDemandTable workshops={demand as readonly WorkshopDemandView[]} />
   const cards = <WorkshopDemandCards workshops={demand as readonly WorkshopDemandView[]} />
-  return <WorkshopResponsiveCollection wide={table} narrow={cards} />
+  return <ResponsiveCollection wide={table} narrow={cards} />
 }
 
 export function WorkshopAllocationConflictNotice({
@@ -103,15 +105,24 @@ export function WorkshopAllocationConflictNotice({
 }) {
   if (!projection.fixed_violation_count && !projection.unassigned_count) return null
   return (
-    <WorkshopPhaseNotice
-      label="Prüfung nötig"
-      tone="attention"
-      details="Die Zuordnung bleibt eine abgeleitete Vorschau. Prüfe die markierten Fälle."
+    <ActionableNotice
+      title="Prüfung nötig"
+      action={
+        <OrganiserLink
+          href={organiserPaths.workshop_allocation_trace()}
+          className={buttonVariants({ variant: 'neutral' })}
+        >
+          Fälle prüfen
+        </OrganiserLink>
+      }
     >
       {projection.fixed_violation_count
         ? `${projection.fixed_violation_count} feste Entscheidung${projection.fixed_violation_count === 1 ? '' : 'en'} konnte${projection.fixed_violation_count === 1 ? '' : 'n'} nicht erfüllt werden.`
         : `${projection.unassigned_count} Person${projection.unassigned_count === 1 ? '' : 'en'} bleiben ohne Zuordnung.`}
-    </WorkshopPhaseNotice>
+      <p className="mt-2">
+        Die Zuordnung bleibt eine abgeleitete Vorschau. Prüfe die markierten Fälle.
+      </p>
+    </ActionableNotice>
   )
 }
 
@@ -127,14 +138,12 @@ export function WorkshopAllocationEmptyState({
   const hasAnswers = hasAnswersOverride ?? projection.has_answers
   if (projection.has_workshops && hasAnswers) return null
   return (
-    <WorkshopEmptyState
-      title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Workshops'}
-    >
+    <EmptyState title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Workshops'}>
       {children ??
         (projection.has_workshops
           ? 'Sobald Personen eine Rangfolge abgegeben haben, erscheinen Antworten und Nachfrage hier.'
           : 'Lege zuerst Workshops an, damit Wünsche und Nachfrage berechnet werden können.')}
-    </WorkshopEmptyState>
+    </EmptyState>
   )
 }
 
@@ -146,8 +155,8 @@ export function WorkshopAllocationStatus({
   children: ReactNode
 }) {
   return (
-    <WorkshopPhaseNotice label={label}>
-      <WorkshopStatusBadge tone="neutral">Abgeleitet</WorkshopStatusBadge> {children}
-    </WorkshopPhaseNotice>
+    <StatusNotice label={label}>
+      <Badge tone="neutral">Abgeleitet</Badge> {children}
+    </StatusNotice>
   )
 }

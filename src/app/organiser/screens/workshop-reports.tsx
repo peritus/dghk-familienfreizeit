@@ -6,14 +6,10 @@ import { planWithWorkshopsClosedResult } from '../../../modules/workshop-assignm
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
-import {
-  WorkshopConfidentialityNotice,
-  WorkshopEmptyState,
-  WorkshopErrorState,
-  WorkshopLoadingState,
-  WorkshopScreenHeader,
-  type WorkshopListOption,
-} from '../../components/shared/workshop/shared.js'
+import { ConfidentialityNotice } from '../../components/shared/ui/notice.js'
+import { EmptyState, ErrorState, LoadingState } from '../../components/shared/ui/screen-state.js'
+import { ScreenHeader, ScreenLayout } from '../../components/shared/ui/screen-layout.js'
+import { type EntityPickerOption } from '../../components/shared/ui/entity-picker.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
 import { draftCount } from '../state.js'
@@ -76,7 +72,7 @@ function capitalized(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-function workshopOptions(items: readonly WorkshopReportWorkshop[]): WorkshopListOption[] {
+function workshopOptions(items: readonly WorkshopReportWorkshop[]): EntityPickerOption[] {
   return items.map((workshop) => ({
     value: workshop.id,
     label: `${workshop.title} · ${personen(workshop.participant_count)}`,
@@ -84,21 +80,21 @@ function workshopOptions(items: readonly WorkshopReportWorkshop[]): WorkshopList
   }))
 }
 
-function personOptions(persons: readonly WorkshopReportPerson[]): WorkshopListOption[] {
+function personOptions(persons: readonly WorkshopReportPerson[]): EntityPickerOption[] {
   return persons.map((person) => ({
     value: person.id,
     label: person.kind === 'external' ? `${person.name} (extern)` : person.name,
   }))
 }
 
-function familyOptions(families: readonly WorkshopReportFamily[]): WorkshopListOption[] {
+function familyOptions(families: readonly WorkshopReportFamily[]): EntityPickerOption[] {
   return families.map((family) => ({
     value: family.id,
     label: `${family.name} · ${personen(family.members.length)}`,
   }))
 }
 
-function roomOptions(rooms: readonly WorkshopReportRoom[]): WorkshopListOption[] {
+function roomOptions(rooms: readonly WorkshopReportRoom[]): EntityPickerOption[] {
   return rooms.map((room) => ({ value: room.id, label: room.name }))
 }
 
@@ -279,12 +275,23 @@ export function WorkshopLists() {
 
   if (state.status === 'error' || state.status === 'stale_head') {
     return (
-      <WorkshopErrorState title="Die Listen konnten nicht berechnet werden.">
-        {state.error}
-      </WorkshopErrorState>
+      <ScreenLayout
+        secondary_navigation={<WorkshopNavigation />}
+        header={<ScreenHeader title="Listen" />}
+      >
+        <ErrorState title="Die Listen konnten nicht berechnet werden.">{state.error}</ErrorState>
+      </ScreenLayout>
     )
   }
-  if (!projection) return <WorkshopLoadingState message="Workshoplisten werden berechnet …" />
+  if (!projection)
+    return (
+      <ScreenLayout
+        secondary_navigation={<WorkshopNavigation />}
+        header={<ScreenHeader title="Listen" />}
+      >
+        <LoadingState message="Workshoplisten werden berechnet …" />
+      </ScreenLayout>
+    )
 
   const selectedWorkshop =
     projection.workshops.find((item) => item.id === query.get('workshop')) ??
@@ -305,7 +312,7 @@ export function WorkshopLists() {
           options={workshopOptions(projection.workshops)}
           onChange={select}
           onStep={step}
-          notice={<WorkshopConfidentialityNotice />}
+          notice={<ConfidentialityNotice />}
         >
           <WorkshopRosterDocument
             title={selectedWorkshop.title}
@@ -364,28 +371,32 @@ export function WorkshopLists() {
         />
       </WorkshopListPickerWithDocument>
     ) : (
-      <WorkshopEmptyState title="Noch keine Daten für diese Liste">
+      <EmptyState title="Noch keine Daten für diese Liste">
         Für diese Liste gibt es noch keine passende Auswahl.
-      </WorkshopEmptyState>
+      </EmptyState>
     )
 
   return (
-    <div className="workshop-lists flex flex-1 flex-col">
-      <div className="workshop-screen-only space-y-8">
-        <WorkshopNavigation />
-        <WorkshopScreenHeader eyebrow="Workshops · Listen" title="Listen" />
+    <ScreenLayout
+      className="workshop-lists"
+      secondary_navigation={<WorkshopNavigation />}
+      header={<ScreenHeader eyebrow="Workshops" title="Listen" className="workshop-screen-only" />}
+      tertiary_navigation={
         <WorkshopListKinds
           value={kind}
           // Each list keeps its own selection in the query, so switching back returns to it.
           onChange={(value) => navigateWithQuery(listPath(value), {})}
         />
-      </div>
+      }
+      footer={
+        <PrintStamp
+          revision={state.head_seq}
+          drafts={draftCount(state)}
+          closed_at={closedResult?.at ?? null}
+        />
+      }
+    >
       <div className="workshop-list-body mt-6 mb-10">{selectedDocument}</div>
-      <PrintStamp
-        revision={state.head_seq}
-        drafts={draftCount(state)}
-        closed_at={closedResult?.at ?? null}
-      />
-    </div>
+    </ScreenLayout>
   )
 }

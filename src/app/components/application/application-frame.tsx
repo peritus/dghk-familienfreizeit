@@ -46,7 +46,7 @@ export function ApplicationFrame({
         className="mx-auto w-full min-w-0 max-w-5xl flex-1 px-4 py-10 sm:px-8"
       >
         {notices ? (
-          <div data-slot="application-notices" className="mb-6 space-y-3">
+          <div data-slot="application-notices" className="mb-6 space-y-3 empty:hidden">
             {notices}
           </div>
         ) : null}

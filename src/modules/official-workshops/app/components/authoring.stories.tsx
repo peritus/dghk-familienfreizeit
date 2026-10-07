@@ -1,7 +1,8 @@
+import { TableFrame } from '../../../../app/components/shared/ui/data-table.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from '../../../../app/components/shared/ui/button.js'
 import { ExternalLeaderRow, InternalLeaderRow, WorkshopSummaryRow } from './authoring.js'
-import { WorkshopList } from '../../../../app/components/shared/workshop/shared.js'
+import { CollectionList } from '../../../../app/components/shared/ui/collection-list.js'
 import {
   fullExternalLeaders,
   fullInternalLeaders,
@@ -45,7 +46,7 @@ export const WorkshopRows: Story = {
 export const LeaderRows: Story = {
   render: () => (
     <div className="grid gap-6 bg-background p-6">
-      <div className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
+      <TableFrame className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background">
         <table className="w-full min-w-[36rem] text-left">
           <caption className="sr-only">Leitungen aus der Veranstaltung</caption>
           <thead>
@@ -62,8 +63,8 @@ export const LeaderRows: Story = {
             ))}
           </tbody>
         </table>
-      </div>
-      <WorkshopList>
+      </TableFrame>
+      <CollectionList>
         {fullExternalLeaders.map((leader) => (
           <ExternalLeaderRow
             key={leader.id}
@@ -76,7 +77,7 @@ export const LeaderRows: Story = {
             }
           />
         ))}
-      </WorkshopList>
+      </CollectionList>
     </div>
   ),
 }

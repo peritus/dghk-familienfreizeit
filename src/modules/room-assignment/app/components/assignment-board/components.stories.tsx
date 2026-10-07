@@ -1,3 +1,5 @@
+import { CollectionList } from '../../../../../app/components/shared/ui/collection-list.js'
+import { SuccessState } from '../../../../../app/components/shared/ui/success-state.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { BuildingSection } from './building-section.js'
 import { FixedAssignmentDialog } from './fixed-dialog.js'
@@ -5,13 +7,7 @@ import { FamilyEntry } from './family-entry.js'
 import { RequirementChip } from './chips.js'
 import { RoomCard } from './room-card.js'
 import { AssignmentPrintLayout } from './print-layout.js'
-import {
-  FamilyOverviewRow,
-  FitHints,
-  OverviewList,
-  OverviewSuccess,
-  RoomOverviewRow,
-} from './overview.js'
+import { FamilyOverviewRow, FitHints, RoomOverviewRow } from './overview.js'
 import type {
   AssignmentPrintView,
   BuildingView,
@@ -152,14 +148,14 @@ export const FamilyEntryAndOverviewRows: Story = {
           <FamilyEntry family={family} onFix={() => undefined} />
         </ul>
       </div>
-      <OverviewList empty={null}>
+      <CollectionList>
         <ul>
           <FamilyOverviewRow family={family} onFix={() => undefined} />
           <RoomOverviewRow room={room({ fit_hints: [family] })} />
         </ul>
-      </OverviewList>
+      </CollectionList>
       <FitHints room={room({ fit_hints: [family] })} />
-      <OverviewSuccess>Alle Familien haben ein Zimmer</OverviewSuccess>
+      <SuccessState>Alle Familien haben ein Zimmer</SuccessState>
     </div>
   ),
 }

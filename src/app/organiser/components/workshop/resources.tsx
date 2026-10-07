@@ -2,10 +2,8 @@ import type { ReactNode } from 'react'
 import { Badge } from '../../../components/shared/ui/badge.js'
 import { Button } from '../../../components/shared/ui/button.js'
 import { Card, CardContent } from '../../../components/shared/ui/card.js'
-import {
-  WorkshopPropertyTags,
-  WorkshopRowActions,
-} from '../../../components/shared/workshop/shared.js'
+import { PropertyTags } from '../../../components/shared/ui/property-tags.js'
+import { RowActions } from '../../../components/shared/ui/collection-list.js'
 
 export type WorkshopSpaceView = {
   id: string
@@ -43,7 +41,7 @@ export function SpaceCapabilityList({ capabilities }: { capabilities: readonly s
   return (
     <div className="space-y-1 text-sm">
       <strong>Ausstattung</strong>
-      <WorkshopPropertyTags items={capabilities.length ? capabilities : ['keine Angabe']} />
+      <PropertyTags items={capabilities.length ? capabilities : ['keine Angabe']} />
     </div>
   )
 }
@@ -70,7 +68,7 @@ export function SpaceRow({ space, action }: { space: WorkshopSpaceView; action?:
           <SpaceCapabilityList capabilities={space.capabilities} />
           <BlockedSlotList blocked_slots={space.blocked_slots} />
         </div>
-        {action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}
+        {action ? <RowActions>{action}</RowActions> : null}
       </CardContent>
     </Card>
   )
@@ -113,7 +111,7 @@ export function SlotRow({ slot, action }: { slot: WorkshopSlotView; action?: Rea
           </p>
           <p className="text-sm text-muted">{slot.workshop_count} Workshops im aktuellen Stand</p>
         </div>
-        {action ? <WorkshopRowActions>{action}</WorkshopRowActions> : null}
+        {action ? <RowActions>{action}</RowActions> : null}
       </CardContent>
     </Card>
   )

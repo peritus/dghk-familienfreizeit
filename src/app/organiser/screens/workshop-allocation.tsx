@@ -1,3 +1,4 @@
+import { LoadingState } from '../../components/shared/ui/screen-state.js'
 import { useMemo, useState } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
@@ -11,10 +12,11 @@ import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { TertiaryNavigation } from '../../components/shared/ui/tertiary-navigation.js'
 import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import {
-  WorkshopScreenHeader,
-  WorkshopSectionHeader,
-  FixedDecisionReview,
-} from '../../components/shared/workshop/shared.js'
+  ScreenHeader,
+  SectionHeader,
+  ScreenLayout,
+} from '../../components/shared/ui/screen-layout.js'
+import { FixedDecisionReview } from '../../components/shared/ui/fixed-decision-review.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
 import {
@@ -108,7 +110,15 @@ export function WorkshopAllocation() {
     [currentPlan, world],
   )
 
-  if (!world || !projection) return null
+  if (!world || !projection)
+    return (
+      <ScreenLayout
+        secondary_navigation={<WorkshopNavigation />}
+        header={<ScreenHeader title="Wünsche" />}
+      >
+        <LoadingState />
+      </ScreenLayout>
+    )
 
   const view = allocationView(location)
   const answers = workshopAllocationPeople(projection, group)
@@ -142,55 +152,68 @@ export function WorkshopAllocation() {
   }
 
   return (
-    <div className="space-y-8">
-      <WorkshopNavigation />
-      <WorkshopScreenHeader
-        eyebrow="Workshops · Wünsche"
-        title="Wünsche"
-        description="Was gewünscht wurde und wie die automatische Zuordnung daraus entsteht."
-      />
-      <WorkflowStepper
-        aria_label="Ablauf der Workshopwahl"
-        steps={workshopTrack({
-          phases: phases ?? [],
-          active_workshop_count: officialWorkshopsWorld(world).workshops.length,
-          meta: activeProfile.meta,
-        })}
-        next_action={
-          phases?.some(
-            ({ phase, status }) => phase === 'workshop-rankings.choice' && status !== 'upcoming',
-          ) ? (
-            <AreaClosingActions area="workshops" />
-          ) : null
-        }
-      />
-      <WorkshopAllocationStatus label={allocationStatusLabel(phases ?? [])}>
-        {projection.has_answers
-          ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte.'
-          : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
-      </WorkshopAllocationStatus>
-      <WorkshopAllocationConflictNotice projection={projection} />
-      <ClosedAreaDifferences area="workshops" />
-      <FixedDecisionReview
-        items={projection.fixed_reviews ?? []}
-        title="Feste Teilnahmen prüfen"
-        description="Festgelegte Teilnahmen werden mit der automatischen Zuordnung ohne diese Entscheidungen verglichen."
-      />
-      <TertiaryNavigation
-        aria_label="Wünsche"
-        value={view}
-        onChange={setView}
-        controls={<WorkshopAllocationGroupFilter value={group} on_change={setGroup} />}
-        items={[
-          { value: 'answers', label: 'Antworten' },
-          { value: 'demand', label: 'Nachfrage' },
-          { value: 'trace', label: 'Verlauf' },
-        ]}
-      />
-
+    <ScreenLayout
+      secondary_navigation={<WorkshopNavigation />}
+      header={
+        <ScreenHeader
+          eyebrow="Workshops · Wünsche"
+          title="Wünsche"
+          description="Was gewünscht wurde und wie die automatische Zuordnung daraus entsteht."
+        />
+      }
+      notices={
+        <>
+          <WorkshopAllocationConflictNotice projection={projection} />
+          <ClosedAreaDifferences area="workshops" />
+          <FixedDecisionReview
+            items={projection.fixed_reviews ?? []}
+            title="Feste Teilnahmen prüfen"
+            description="Festgelegte Teilnahmen werden mit der automatischen Zuordnung ohne diese Entscheidungen verglichen."
+          />
+        </>
+      }
+      workflow={
+        <>
+          <WorkflowStepper
+            aria_label="Ablauf der Workshopwahl"
+            steps={workshopTrack({
+              phases: phases ?? [],
+              active_workshop_count: officialWorkshopsWorld(world).workshops.length,
+              meta: activeProfile.meta,
+            })}
+            next_action={
+              phases?.some(
+                ({ phase, status }) =>
+                  phase === 'workshop-rankings.choice' && status !== 'upcoming',
+              ) ? (
+                <AreaClosingActions area="workshops" />
+              ) : null
+            }
+          />
+          <WorkshopAllocationStatus label={allocationStatusLabel(phases ?? [])}>
+            {projection.has_answers
+              ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte.'
+              : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
+          </WorkshopAllocationStatus>
+        </>
+      }
+      tertiary_navigation={
+        <TertiaryNavigation
+          aria_label="Wünsche"
+          value={view}
+          onChange={setView}
+          controls={<WorkshopAllocationGroupFilter value={group} on_change={setGroup} />}
+          items={[
+            { value: 'answers', label: 'Antworten' },
+            { value: 'demand', label: 'Nachfrage' },
+            { value: 'trace', label: 'Verlauf' },
+          ]}
+        />
+      }
+    >
       {view === 'answers' ? (
         <section className="space-y-5" aria-labelledby="allocation-answers-heading">
-          <WorkshopSectionHeader
+          <SectionHeader
             title="Antworten"
             description="Die abgegebenen Rangfolgen und die daraus abgeleiteten Zuordnungen."
           />
@@ -207,10 +230,9 @@ export function WorkshopAllocation() {
           ) : null}
         </section>
       ) : null}
-
       {view === 'demand' ? (
         <section className="space-y-5" aria-labelledby="allocation-demand-heading">
-          <WorkshopSectionHeader
+          <SectionHeader
             title="Nachfrage"
             description="Erstwünsche, Rangfolgen und verfügbare Plätze je Workshop."
           />
@@ -225,10 +247,9 @@ export function WorkshopAllocation() {
           ) : null}
         </section>
       ) : null}
-
       {view === 'trace' ? (
         <section className="space-y-5" aria-labelledby="allocation-trace-heading">
-          <WorkshopSectionHeader
+          <SectionHeader
             title="Was ist aus jedem Wunsch geworden?"
             description="Runde für Runde, mit den Personen, die es betrifft."
           />
@@ -294,6 +315,6 @@ export function WorkshopAllocation() {
           ) : null}
         </section>
       ) : null}
-    </div>
+    </ScreenLayout>
   )
 }

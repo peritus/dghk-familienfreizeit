@@ -1,3 +1,4 @@
+import { TableFrame } from '../../components/shared/ui/data-table.js'
 import { ErrorState } from '../../components/shared/ui/screen-state.js'
 import { TextField } from '../../components/shared/ui/field.js'
 import { useEffect, useRef, useState } from 'react'
@@ -15,7 +16,7 @@ import {
   ScreenHeader,
   CollectionSection,
 } from '../../components/shared/ui/screen-layout.js'
-import { CollectionCreateAction } from '../components/collection-create-action.js'
+import { CollectionCreateAction } from '../../components/shared/ui/collection-create-action.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { useOrganiser } from '../context.js'
 import {
@@ -468,62 +469,60 @@ function BuildingSection({
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-secondary-background p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left max-md:block">
-              <caption className="sr-only">Zimmer in {building.name}</caption>
-              <thead className="border-b-2 border-border bg-paper max-md:hidden">
-                <tr>
-                  <th scope="col" className="p-3 font-bold">
-                    Zimmer
-                  </th>
-                  <th scope="col" className="p-3 font-bold">
-                    Etage
-                  </th>
-                  <th scope="col" className="p-3 font-bold">
-                    Typ
-                  </th>
-                  <th scope="col" className="p-3 font-bold">
-                    Bad
-                  </th>
-                  <th scope="col" className="p-3 font-bold">
-                    Betten
-                  </th>
-                  <th scope="col" className="p-3 text-right font-bold">
-                    Plätze
-                  </th>
-                  <th scope="col" className="p-3 text-right font-bold">
-                    Preis/Platz
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="max-md:block">
-                {rooms.map((room) => {
-                  const roomBeds = beds.filter((bed) => bed.room_id === room.id)
-                  const open = openRooms[room.id] ?? false
-                  return (
-                    <RoomRow
-                      key={room.id}
-                      room={room}
-                      beds={roomBeds}
-                      labels={world?.labels_by_entity[room.id] ?? []}
-                      floors={floors}
-                      room_types={roomTypes}
-                      bed_types={bedTypes}
-                      open={open}
-                      onToggle={() => onToggleRoom(room.id)}
-                      onSave={onUpdateRoom}
-                      onRemove={onRemoveRoom}
-                      onAddBed={onAddBed}
-                      onUpdateBed={onUpdateBed}
-                      onRemoveBed={onRemoveBed}
-                    />
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <TableFrame>
+          <table className="w-full text-left max-md:block">
+            <caption className="sr-only">Zimmer in {building.name}</caption>
+            <thead className="border-b-2 border-border bg-paper max-md:hidden">
+              <tr>
+                <th scope="col" className="p-3 font-bold">
+                  Zimmer
+                </th>
+                <th scope="col" className="p-3 font-bold">
+                  Etage
+                </th>
+                <th scope="col" className="p-3 font-bold">
+                  Typ
+                </th>
+                <th scope="col" className="p-3 font-bold">
+                  Bad
+                </th>
+                <th scope="col" className="p-3 font-bold">
+                  Betten
+                </th>
+                <th scope="col" className="p-3 text-right font-bold">
+                  Plätze
+                </th>
+                <th scope="col" className="p-3 text-right font-bold">
+                  Preis/Platz
+                </th>
+              </tr>
+            </thead>
+            <tbody className="max-md:block">
+              {rooms.map((room) => {
+                const roomBeds = beds.filter((bed) => bed.room_id === room.id)
+                const open = openRooms[room.id] ?? false
+                return (
+                  <RoomRow
+                    key={room.id}
+                    room={room}
+                    beds={roomBeds}
+                    labels={world?.labels_by_entity[room.id] ?? []}
+                    floors={floors}
+                    room_types={roomTypes}
+                    bed_types={bedTypes}
+                    open={open}
+                    onToggle={() => onToggleRoom(room.id)}
+                    onSave={onUpdateRoom}
+                    onRemove={onRemoveRoom}
+                    onAddBed={onAddBed}
+                    onUpdateBed={onUpdateBed}
+                    onRemoveBed={onRemoveBed}
+                  />
+                )
+              })}
+            </tbody>
+          </table>
+        </TableFrame>
       )}
     </CollectionSection>
   )

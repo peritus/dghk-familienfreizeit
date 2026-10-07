@@ -1,27 +1,21 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '../ui/button.js'
-import { SegmentedControl } from '../ui/segmented-control.js'
-import { TertiaryNavigation } from '../ui/tertiary-navigation.js'
-import { WorkflowStepper } from '../ui/workflow-stepper.js'
-import {
-  WorkshopDataTable,
-  WorkshopEmptyState,
-  WorkshopErrorState,
-  WorkshopListPicker,
-  WorkshopLoadingState,
-  WorkshopPhaseNotice,
-  WorkshopPrintDocument,
-  WorkshopPropertyTags,
-  WorkshopResponsiveCollection,
-  WorkshopScreenHeader,
-  WorkshopSectionHeader,
-  WorkshopStatsStrip,
-  WorkshopStatusBadge,
-} from './shared.js'
+import { Button } from './button.js'
+import { SegmentedControl } from './segmented-control.js'
+import { TertiaryNavigation } from './tertiary-navigation.js'
+import { WorkflowStepper } from './workflow-stepper.js'
+import { DataTable, ResponsiveCollection } from './data-table.js'
+import { EmptyState, ErrorState, LoadingState } from './screen-state.js'
+import { EntityPicker } from './entity-picker.js'
+import { StatusNotice } from './notice.js'
+import { PrintDocument } from './print-layout.js'
+import { PropertyTags } from './property-tags.js'
+import { ScreenHeader, ScreenLayout, CollectionSection } from './screen-layout.js'
+import { StatsStrip } from './stats-strip.js'
+import { Badge } from './badge.js'
 
 const meta = {
-  title: 'Shared/Workshop/Patterns',
+  title: 'Shared/Patterns/Collections',
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -41,34 +35,56 @@ export const WorkspaceChrome: Story = {
     const [group, setGroup] = useState<'all' | 'kids' | 'adults'>('all')
     const [tab, setTab] = useState('overview')
     return (
-      <div className="min-h-screen space-y-8 bg-background p-6">
-        <WorkshopScreenHeader
-          eyebrow="Workshops"
-          title="Workshopübersicht"
-          description="Anlegen, prüfen und den aktuellen Plan nachvollziehbar machen."
-          action={<Button>Workshop hinzufügen</Button>}
-        />
-        <WorkflowStepper
-          aria_label="Ablauf der Workshopwahl"
-          steps={[
-            { id: 'create', label: 'Workshops anlegen', state: 'complete' },
-            { id: 'choice', label: 'Wahl offen', state: 'current' },
-            { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
-            { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
-          ]}
-        />
-        <WorkshopPhaseNotice label="Vorläufig" tone="attention">
-          Die Berechnung ändert sich mit jeder Antwort und jeder Änderung.
-        </WorkshopPhaseNotice>
-        <TertiaryNavigation
-          aria_label="Workshopbereiche"
-          value={tab}
-          onChange={setTab}
-          items={[
-            { value: 'overview', label: 'Workshops' },
-            { value: 'leaders', label: 'Leitungen' },
-            { value: 'external', label: 'Extern' },
-          ]}
+      <ScreenLayout
+        header={
+          <ScreenHeader
+            eyebrow="Workshops"
+            title="Workshopübersicht"
+            description="Anlegen, prüfen und den aktuellen Plan nachvollziehbar machen."
+            action={<Button>Workshop hinzufügen</Button>}
+          />
+        }
+        workflow={
+          <>
+            <WorkflowStepper
+              aria_label="Ablauf der Workshopwahl"
+              steps={[
+                { id: 'create', label: 'Workshops anlegen', state: 'complete' },
+                { id: 'choice', label: 'Wahl offen', state: 'current' },
+                { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
+                { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
+              ]}
+            />
+            <StatusNotice label="Vorläufig" tone="attention">
+              Die Berechnung ändert sich mit jeder Antwort und jeder Änderung.
+            </StatusNotice>
+          </>
+        }
+        summary={
+          <StatsStrip
+            items={[
+              { value: 33, label: 'Workshops' },
+              { value: 8, label: 'Slots' },
+              { value: 10, label: 'Räume' },
+            ]}
+          />
+        }
+        tertiary_navigation={
+          <TertiaryNavigation
+            aria_label="Workshopbereiche"
+            value={tab}
+            onChange={setTab}
+            items={[
+              { value: 'overview', label: 'Workshops' },
+              { value: 'leaders', label: 'Leitungen' },
+              { value: 'external', label: 'Extern' },
+            ]}
+          />
+        }
+      >
+        <CollectionSection
+          title="Gefilterte Übersicht"
+          description="Kleine, sichtbare Auswahlgruppen bleiben vergleichbar."
           controls={
             <SegmentedControl
               label="Gruppe"
@@ -81,27 +97,17 @@ export const WorkspaceChrome: Story = {
               ]}
             />
           }
-        />
-        <WorkshopSectionHeader
-          title="Gefilterte Übersicht"
-          description="Kleine, sichtbare Auswahlgruppen bleiben vergleichbar."
-        />
-        <WorkshopPropertyTags items={['Kinder', '5–14 Jahre', 'Zugewiesen']} />
-        <div className="flex flex-wrap gap-2">
-          <WorkshopStatusBadge tone="attention">Nicht eingeplant</WorkshopStatusBadge>
-          <WorkshopStatusBadge tone="success" variant="free">
-            4 Plätze frei
-          </WorkshopStatusBadge>
-          <WorkshopStatusBadge tone="danger">Über Kapazität</WorkshopStatusBadge>
-        </div>
-        <WorkshopStatsStrip
-          items={[
-            { value: 33, label: 'Workshops' },
-            { value: 8, label: 'Slots' },
-            { value: 10, label: 'Räume' },
-          ]}
-        />
-      </div>
+        >
+          <PropertyTags items={['Kinder', '5–14 Jahre', 'Zugewiesen']} />
+          <div className="flex flex-wrap gap-2">
+            <Badge tone="attention">Nicht eingeplant</Badge>
+            <Badge tone="success" variant="free">
+              4 Plätze frei
+            </Badge>
+            <Badge tone="danger">Über Kapazität</Badge>
+          </div>
+        </CollectionSection>
+      </ScreenLayout>
     )
   },
 }
@@ -109,15 +115,12 @@ export const WorkspaceChrome: Story = {
 export const States: Story = {
   render: () => (
     <div className="grid gap-4 bg-background p-6">
-      <WorkshopLoadingState />
-      <WorkshopErrorState onRetry={() => undefined} />
-      <WorkshopEmptyState
-        title="Noch keine Workshops"
-        action={<Button>Workshop hinzufügen</Button>}
-      >
+      <LoadingState />
+      <ErrorState onRetry={() => undefined} />
+      <EmptyState title="Noch keine Workshops" action={<Button>Workshop hinzufügen</Button>}>
         Lege den ersten Workshop an. Programm und Teilnahme werden danach berechnet.
-      </WorkshopEmptyState>
-      <WorkshopEmptyState success>Alle Workshops sind eingeplant.</WorkshopEmptyState>
+      </EmptyState>
+      <EmptyState success>Alle Workshops sind eingeplant.</EmptyState>
     </div>
   ),
 }
@@ -129,7 +132,7 @@ export const TableAndResponsiveCollection: Story = {
       { id: 'wald', name: 'Waldexpedition', status: 'Voll' },
     ]
     const table = (
-      <WorkshopDataTable
+      <DataTable
         caption="Workshops"
         columns={[
           { key: 'name', label: 'Workshop' },
@@ -149,7 +152,7 @@ export const TableAndResponsiveCollection: Story = {
     )
     return (
       <div className="bg-background p-6">
-        <WorkshopResponsiveCollection
+        <ResponsiveCollection
           wide={table}
           narrow={
             <div className="grid gap-3">
@@ -175,7 +178,7 @@ export const PickerAndPrint: Story = {
     const [value, setValue] = useState('keramik')
     return (
       <div className="space-y-6 bg-background p-6">
-        <WorkshopListPicker
+        <EntityPicker
           label="Workshop"
           value={value}
           options={[
@@ -186,7 +189,7 @@ export const PickerAndPrint: Story = {
           onPrevious={() => setValue('keramik')}
           onNext={() => setValue('wald')}
         />
-        <WorkshopPrintDocument
+        <PrintDocument
           title={value === 'keramik' ? 'Keramik' : 'Waldexpedition'}
           metadata={[
             'Freitag, 09:00–11:00 Uhr · Atelier',
@@ -197,7 +200,7 @@ export const PickerAndPrint: Story = {
           <p className="text-muted">
             Die eigentliche Tabelle wird als semantische Report-Komposition eingesetzt.
           </p>
-        </WorkshopPrintDocument>
+        </PrintDocument>
       </div>
     )
   },

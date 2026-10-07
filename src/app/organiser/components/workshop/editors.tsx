@@ -1,4 +1,6 @@
-import { useId, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { SelectField, TextareaField } from '../../../components/shared/ui/field.js'
+import { EntityEditorDialog } from '../../../components/shared/ui/entity-editor-dialog.js'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,66 +13,9 @@ import {
 } from '../../../components/shared/ui/alert-dialog.js'
 import { Button } from '../../../components/shared/ui/button.js'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/shared/ui/card.js'
-import { WorkshopField } from '../../../components/shared/workshop/shared.js'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../../components/shared/ui/dialog.js'
+import { TextField } from '../../../components/shared/ui/field.js'
 
 const controlClass = 'min-h-11 rounded-base border-2 border-border px-3 font-normal'
-
-export function WorkshopSelectField({
-  label,
-  name,
-  default_value: defaultValue,
-  children,
-  hint,
-}: {
-  label: string
-  name: string
-  default_value?: string
-  children: ReactNode
-  hint?: ReactNode
-}) {
-  return (
-    <label className="grid gap-1 font-bold">
-      {label}
-      <select name={name} defaultValue={defaultValue} className={controlClass}>
-        {children}
-      </select>
-      {hint ? <span className="text-sm font-normal text-muted">{hint}</span> : null}
-    </label>
-  )
-}
-
-export function WorkshopTextareaField({
-  label,
-  name,
-  default_value: defaultValue,
-  hint,
-}: {
-  label: string
-  name: string
-  default_value?: string
-  hint?: ReactNode
-}) {
-  return (
-    <label className="grid gap-1 font-bold">
-      {label}
-      <textarea
-        name={name}
-        defaultValue={defaultValue}
-        className={`${controlClass} min-h-24 py-2`}
-      />
-      {hint ? <span className="text-sm font-normal text-muted">{hint}</span> : null}
-    </label>
-  )
-}
 
 export function WorkshopCheckboxGroup({
   legend,
@@ -192,33 +137,33 @@ export type WorkshopEditorValues = {
   needs?: string
 }
 
-function WorkshopEditorFields({
-  default_values: defaultValues,
+export function WorkshopEditorFields({
+  default_values: defaultValues = {},
   children,
 }: {
-  default_values: WorkshopEditorValues
+  default_values?: WorkshopEditorValues
   children?: ReactNode
 }) {
   return (
     <>
-      <WorkshopField label="Titel" name="title" defaultValue={defaultValues.title} required />
-      <WorkshopSelectField
+      <TextField label="Titel" name="title" defaultValue={defaultValues.title} required />
+      <SelectField
         label="Zielgruppe"
         name="audience"
-        default_value={defaultValues.audience ?? 'all'}
+        defaultValue={defaultValues.audience ?? 'all'}
       >
         <option value="all">Alle</option>
         <option value="children">Kinder</option>
         <option value="adults">Erwachsene</option>
-      </WorkshopSelectField>
+      </SelectField>
       <div className="sm:col-span-2">
-        <WorkshopTextareaField
+        <TextareaField
           label="Beschreibung für Familien"
           name="description"
-          default_value={defaultValues.description}
+          defaultValue={defaultValues.description}
         />
       </div>
-      <WorkshopField
+      <TextField
         label="Alter ab"
         name="age_min"
         type="number"
@@ -226,7 +171,7 @@ function WorkshopEditorFields({
         max="120"
         defaultValue={defaultValues.age_min ?? 0}
       />
-      <WorkshopField
+      <TextField
         label="Alter bis"
         name="age_max"
         type="number"
@@ -234,7 +179,7 @@ function WorkshopEditorFields({
         max="120"
         defaultValue={defaultValues.age_max ?? 120}
       />
-      <WorkshopField
+      <TextField
         label="Plätze"
         name="capacity"
         type="number"
@@ -243,17 +188,17 @@ function WorkshopEditorFields({
         defaultValue={defaultValues.capacity ?? 8}
         hint="Leitungen zählen nicht mit."
       />
-      <WorkshopSelectField
+      <SelectField
         label="Teilnahme"
         name="participation_mode"
-        default_value={defaultValues.participation_mode ?? 'assigned'}
+        defaultValue={defaultValues.participation_mode ?? 'assigned'}
       >
         <option value="assigned">Zuordnung</option>
         <option value="sign-up">Anmeldung</option>
         <option value="interest">Interesse</option>
-      </WorkshopSelectField>
+      </SelectField>
       <div className="sm:col-span-2">
-        <WorkshopField
+        <TextField
           label="Benötigt"
           name="needs"
           defaultValue={defaultValues.needs}
@@ -310,44 +255,22 @@ export function WorkshopEditorDialog({
   error?: ReactNode
   children?: ReactNode
 }) {
-  const formId = useId()
   const title = defaultValues.title
     ? `Workshop bearbeiten: ${defaultValues.title}`
     : 'Workshop hinzufügen'
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            Beschreibung, Zielgruppe und Rahmen für diesen Workshop festlegen.
-          </DialogDescription>
-          {error ? (
-            <p
-              role="alert"
-              className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3"
-            >
-              {error}
-            </p>
-          ) : null}
-        </DialogHeader>
-        <form id={formId} className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-          <WorkshopEditorFields default_values={defaultValues}>{children}</WorkshopEditorFields>
-        </form>
-        <DialogFooter>
-          <DialogClose
-            render={
-              <Button type="button" variant="neutral">
-                Abbrechen
-              </Button>
-            }
-          />
-          <Button type="submit" form={formId}>
-            {submitLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <EntityEditorDialog
+      title={title}
+      description="Beschreibung, Zielgruppe und Rahmen für diesen Workshop festlegen."
+      open={open}
+      on_open_change={onOpenChange}
+      on_submit={onSubmit}
+      submit_label={submitLabel}
+      error={error}
+      form_class_name="sm:grid-cols-2"
+    >
+      <WorkshopEditorFields default_values={defaultValues}>{children}</WorkshopEditorFields>
+    </EntityEditorDialog>
   )
 }
 
@@ -366,8 +289,8 @@ export function ExternalLeaderEditorFields({
 }) {
   return (
     <>
-      <WorkshopField label="Name" name="name" defaultValue={defaultValues.name} required />
-      <WorkshopField
+      <TextField label="Name" name="name" defaultValue={defaultValues.name} required />
+      <TextField
         label="Telefon"
         name="phone"
         type="tel"
@@ -453,17 +376,15 @@ export function SlotEditorForm({
       </CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-          {showDay ? (
-            <WorkshopField label="Tag" name="day" defaultValue={defaultValues.day} />
-          ) : null}
-          <WorkshopField
+          {showDay ? <TextField label="Tag" name="day" defaultValue={defaultValues.day} /> : null}
+          <TextField
             label="Beginn"
             name="starts_at"
             type="datetime-local"
             defaultValue={defaultValues.starts_at}
             required
           />
-          <WorkshopField
+          <TextField
             label="Dauer (Minuten)"
             name="duration_minutes"
             type="number"
@@ -507,32 +428,22 @@ export function SpaceEditorForm({
       <CardContent>
         <form className="grid gap-4" onSubmit={onSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <WorkshopField
-              label="Raumname"
-              name="name"
-              defaultValue={defaultValues.name}
-              required
-            />
-            <WorkshopField
-              label="Ort"
-              name="location"
-              defaultValue={defaultValues.location}
-              required
-            />
-            <WorkshopField
+            <TextField label="Raumname" name="name" defaultValue={defaultValues.name} required />
+            <TextField label="Ort" name="location" defaultValue={defaultValues.location} required />
+            <TextField
               label="Kapazität"
               name="capacity"
               type="number"
               min="0"
               defaultValue={defaultValues.capacity ?? 8}
             />
-            <WorkshopField
+            <TextField
               label="Verfügbar ab"
               name="availability_start"
               type="datetime-local"
               defaultValue={defaultValues.availability_start}
             />
-            <WorkshopField
+            <TextField
               label="Verfügbar bis"
               name="availability_end"
               type="datetime-local"

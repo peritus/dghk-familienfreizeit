@@ -1,3 +1,5 @@
+import { CollectionList } from '../../../../app/components/shared/ui/collection-list.js'
+import { SuccessState } from '../../../../app/components/shared/ui/success-state.js'
 import { useState } from 'react'
 import { ClosedAreaDifferences } from '../../../../app/organiser/components/area-closing.js'
 import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
@@ -17,12 +19,7 @@ import type {
 } from './assignment-board/types.js'
 import { BuildingSection } from '../components/assignment-board/building-section.js'
 import { FixedAssignmentDialog } from '../components/assignment-board/fixed-dialog.js'
-import {
-  FamilyOverviewRow,
-  OverviewList,
-  OverviewSuccess,
-  RoomOverviewRow,
-} from '../components/assignment-board/overview.js'
+import { FamilyOverviewRow, RoomOverviewRow } from '../components/assignment-board/overview.js'
 import { AssignmentPrintLayout } from '../components/assignment-board/print-layout.js'
 import { AccommodationNavigation } from '../../../../app/organiser/components/accommodation-navigation.js'
 import { AccommodationWorkflow } from '../../../../app/organiser/components/accommodation-workflow.js'
@@ -45,9 +42,9 @@ function FamilyList(props: {
   empty_message: string
 }) {
   const { families, onFix, empty_message: emptyMessage } = props
-  if (families.length === 0) return <OverviewSuccess>{emptyMessage}</OverviewSuccess>
+  if (families.length === 0) return <SuccessState>{emptyMessage}</SuccessState>
   return (
-    <OverviewList empty={null}>
+    <CollectionList>
       <ul className="divide-y-2 divide-border">
         {families.map((family) => (
           <FamilyOverviewRow
@@ -63,21 +60,21 @@ function FamilyList(props: {
           />
         ))}
       </ul>
-    </OverviewList>
+    </CollectionList>
   )
 }
 
 function RoomList(props: { rooms: readonly RoomView[]; empty_message: string }) {
   const { rooms, empty_message: emptyMessage } = props
-  if (rooms.length === 0) return <OverviewSuccess>{emptyMessage}</OverviewSuccess>
+  if (rooms.length === 0) return <SuccessState>{emptyMessage}</SuccessState>
   return (
-    <OverviewList empty={null}>
+    <CollectionList>
       <ul className="divide-y-2 divide-border">
         {rooms.map((room) => (
           <RoomOverviewRow key={room.id} room={room} />
         ))}
       </ul>
-    </OverviewList>
+    </CollectionList>
   )
 }
 

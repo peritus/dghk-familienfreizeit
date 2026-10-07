@@ -76,3 +76,20 @@ export function StatusNotice({
     </div>
   )
 }
+
+export function ConfidentialityNotice({
+  children = 'Enthält Allergien und Gesundheitshinweise. Nur für die Workshopleitung.',
+}: {
+  children?: ReactNode
+}) {
+  return (
+    <div
+      role="note"
+      className="rounded-base border-2 border-l-[10px] border-border bg-secondary-background px-4 py-3.5"
+    >
+      <p>
+        <strong>Vertraulich.</strong> {children}
+      </p>
+    </div>
+  )
+}

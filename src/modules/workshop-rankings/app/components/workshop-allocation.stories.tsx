@@ -18,10 +18,8 @@ import type {
   WorkshopAllocationAnswer,
   WorkshopAllocationProjection,
 } from '../workshop-allocation-view.js'
-import {
-  WorkshopLoadingState,
-  WorkshopPrintDocument,
-} from '../../../../app/components/shared/workshop/shared.js'
+import { LoadingState } from '../../../../app/components/shared/ui/screen-state.js'
+import { PrintDocument } from '../../../../app/components/shared/ui/print-layout.js'
 
 const answers: readonly WorkshopAllocationAnswer[] = fullChoiceAnswers.map((answer, index) => ({
   ...answer,
@@ -151,7 +149,7 @@ export const BlockedByConflicts: Story = {
 export const Loading: Story = {
   render: () => (
     <div className="max-w-2xl bg-background p-6">
-      <WorkshopLoadingState message="Wünsche werden berechnet" />
+      <LoadingState message="Wünsche werden berechnet" />
     </div>
   ),
 }
@@ -159,12 +157,12 @@ export const Loading: Story = {
 export const Print: Story = {
   render: () => (
     <div className="bg-background p-6">
-      <WorkshopPrintDocument
+      <PrintDocument
         title="Wünsche · Antworten"
         metadata={['Familienfreizeit · 14. Mai', 'Abgeleitete Vorschau']}
       >
         <WorkshopAllocationAnswers answers={answers} />
-      </WorkshopPrintDocument>
+      </PrintDocument>
     </div>
   ),
 }

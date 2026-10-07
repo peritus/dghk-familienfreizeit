@@ -1,7 +1,5 @@
 import { OrganiserLink } from '../../../../../app/components/application/organiser-link.js'
-import type { ReactNode } from 'react'
 import { RoomSummary } from '../room-summary.js'
-import { SuccessState } from '../../../../../app/components/shared/ui/success-state.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../../organiser/routes.js'
 import type { FamilyView, RoomView } from '../../screens/assignment-board/types.js'
 import { RequirementChip } from './chips.js'
@@ -87,22 +85,6 @@ export function FitHints({ room }: { room: RoomView }) {
       ) : (
         <span className="text-muted">Keine passende Familie</span>
       )}
-    </div>
-  )
-}
-
-export function OverviewList({ children, empty }: { children: ReactNode; empty: ReactNode }) {
-  return (
-    <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background">
-      {children || empty}
-    </div>
-  )
-}
-
-export function OverviewSuccess({ children }: { children: ReactNode }) {
-  return (
-    <div className="rounded-base border border-border bg-secondary-background p-4">
-      <SuccessState>{children}</SuccessState>
     </div>
   )
 }

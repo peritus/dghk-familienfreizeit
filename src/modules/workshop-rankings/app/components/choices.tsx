@@ -1,10 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
-import {
-  WorkshopDataTable,
-  WorkshopResponsiveCollection,
-  WorkshopStatsStrip,
-  WorkshopStatusBadge,
-} from '../../../../app/components/shared/workshop/shared.js'
+import { DataTable, ResponsiveCollection } from '../../../../app/components/shared/ui/data-table.js'
+import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
+import { Badge } from '../../../../app/components/shared/ui/badge.js'
 
 export type ChoiceAnswerView = {
   id: string
@@ -58,7 +55,7 @@ export function ChoiceAnswerRow({
       </th>
       <td className="p-3">{answer.age_label}</td>
       <td className="p-3">
-        <WorkshopStatusBadge tone={answer.status_tone}>{answer.status}</WorkshopStatusBadge>
+        <Badge tone={answer.status_tone}>{answer.status}</Badge>
       </td>
       {[0, 1, 2, 3, 4].map((index) => (
         <td key={index} className="p-3">
@@ -93,7 +90,7 @@ export function ChoiceAnswerCard({
         )}{' '}
         <span className="text-muted">· {answer.age_label}</span>
       </p>
-      <WorkshopStatusBadge tone={answer.status_tone}>{answer.status}</WorkshopStatusBadge>
+      <Badge tone={answer.status_tone}>{answer.status}</Badge>
       <ChoiceRankList ranks={answer.ranks} />
     </li>
   )
@@ -107,7 +104,7 @@ export function ChoiceAnswersTable({
   on_open?: (answer: ChoiceAnswerView) => void
 }) {
   const table = (
-    <WorkshopDataTable
+    <DataTable
       caption="Antworten"
       columns={[
         { key: 'person', label: 'Person' },
@@ -121,7 +118,7 @@ export function ChoiceAnswersTable({
     />
   )
   return (
-    <WorkshopResponsiveCollection
+    <ResponsiveCollection
       wide={table}
       narrow={
         <ul className="grid gap-3">
@@ -206,7 +203,7 @@ export function WorkshopDemandTable({ workshops }: { workshops: readonly Worksho
     ...workshops.flatMap((workshop) => [workshop.capacity, workshop.first_choices]),
   )
   return (
-    <WorkshopDataTable
+    <DataTable
       caption="Nachfrage pro Workshop"
       columns={[
         { key: 'workshop', label: 'Workshop' },
@@ -682,7 +679,7 @@ export function ChoiceTraceTable({
   selected_person_id?: string
 }) {
   const table = (
-    <WorkshopDataTable
+    <DataTable
       caption="Verlauf der Wünsche Schritt für Schritt"
       columns={[
         { key: 'stage', label: 'Schritt' },
@@ -760,7 +757,7 @@ export function ChoiceTraceTable({
       ))}
     </ul>
   )
-  return <WorkshopResponsiveCollection wide={table} narrow={cards} />
+  return <ResponsiveCollection wide={table} narrow={cards} />
 }
 
 export function ChoiceSummary({
@@ -768,5 +765,5 @@ export function ChoiceSummary({
 }: {
   items: readonly { value: string | number; label: string }[]
 }) {
-  return <WorkshopStatsStrip items={items} />
+  return <StatsStrip items={items} />
 }
