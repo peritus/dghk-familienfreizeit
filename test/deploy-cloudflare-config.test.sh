@@ -38,7 +38,7 @@ chmod 600 \
   "$FAKE_HOME/.config/dghk-familienfreizeit/cloudflare/dghk-familienfreizeit/target.json" \
   "$FAKE_HOME/.config/dghk-familienfreizeit/cloudflare/dghk-familienfreizeit/api-token"
 
-cat > "$FAKE_BIN/npm" <<'EOF'
+cat > "$FAKE_BIN/pnpm" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -120,7 +120,7 @@ printf '%s\n' "$*" >> "${WRANGLER_LOG:?}"
 printf '%s\n' "$config" > "${WRANGLER_PATH_RECORD:?}"
 EOF
 
-chmod 755 "$FAKE_BIN/npm" "$FAKE_BIN/curl" "$FAKE_BIN/wrangler"
+chmod 755 "$FAKE_BIN/pnpm" "$FAKE_BIN/curl" "$FAKE_BIN/wrangler"
 
 run_deploy() {
   HOME="$FAKE_HOME" \

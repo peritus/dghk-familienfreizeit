@@ -124,7 +124,7 @@ trap cleanup EXIT
 
 log "building application"
 cd "$ROOT_DIR"
-npm run build >/dev/null
+pnpm run build >/dev/null
 
 mkdir -p "$SITE_DIR" "$WORKER_DIR" "$MIGRATIONS_DIR"
 cp -R "$ROOT_DIR/dist/client/." "$SITE_DIR/" ||

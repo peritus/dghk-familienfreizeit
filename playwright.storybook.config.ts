@@ -15,7 +15,7 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
   },
   webServer: {
-    command: 'npm run storybook -- --ci --host 127.0.0.1 --port 6006',
+    command: 'pnpm run storybook --ci --host 127.0.0.1 --port 6006',
     url: 'http://127.0.0.1:6006',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
