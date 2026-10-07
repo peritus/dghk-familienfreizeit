@@ -1,7 +1,7 @@
-import { useId, type ComponentProps, type ReactNode } from 'react'
+import { useId, useState, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '../../../lib/utils.js'
 
-type FieldProps = { label: string; hint?: ReactNode; error?: ReactNode; id?: string }
+type FieldProps = { label: ReactNode; hint?: ReactNode; error?: ReactNode; id?: string }
 
 type FieldControlProps = { id: string; 'aria-describedby'?: string; 'aria-invalid'?: true }
 
@@ -48,19 +48,33 @@ export const fieldControlClass =
 export type TextFieldProps = FieldProps & ComponentProps<'input'>
 
 export function TextField({ label, hint, error, id, className, ...props }: TextFieldProps) {
+  const [displayValue, setDisplayValue] = useState(() => String(props.defaultValue ?? ''))
+  const printValue = props.type === 'password' ? '••••••' : String(props.value ?? displayValue)
   return (
     <Field label={label} hint={hint} error={error} id={id}>
       {(control) => (
-        <input
-          {...props}
-          {...control}
-          aria-describedby={
-            [control['aria-describedby'], props['aria-describedby']].filter(Boolean).join(' ') ||
-            undefined
-          }
-          aria-invalid={control['aria-invalid'] ?? props['aria-invalid']}
-          className={cn(fieldControlClass, className)}
-        />
+        <>
+          <input
+            data-slot="print-field-control"
+            {...props}
+            onChange={(event) => {
+              setDisplayValue(event.currentTarget.value)
+              props.onChange?.(event)
+            }}
+            {...control}
+            aria-describedby={
+              [control['aria-describedby'], props['aria-describedby']].filter(Boolean).join(' ') ||
+              undefined
+            }
+            aria-invalid={control['aria-invalid'] ?? props['aria-invalid']}
+            className={cn(fieldControlClass, className)}
+          />
+          <span
+            data-slot="print-field-value"
+            data-print-value={printValue || '—'}
+            className="hidden print:block"
+          />
+        </>
       )}
     </Field>
   )
@@ -100,20 +114,53 @@ export function TextareaField({
   className,
   ...props
 }: FieldProps & ComponentProps<'textarea'>) {
+  const [displayValue, setDisplayValue] = useState(() => String(props.defaultValue ?? ''))
+  const printValue = String(props.value ?? displayValue)
   return (
     <Field label={label} hint={hint} error={error} id={id}>
       {(control) => (
-        <textarea
-          {...props}
-          {...control}
-          aria-describedby={
-            [control['aria-describedby'], props['aria-describedby']].filter(Boolean).join(' ') ||
-            undefined
-          }
-          aria-invalid={control['aria-invalid'] ?? props['aria-invalid']}
-          className={cn(fieldControlClass, 'min-h-24 py-2', className)}
-        />
+        <>
+          <textarea
+            data-slot="print-field-control"
+            {...props}
+            onChange={(event) => {
+              setDisplayValue(event.currentTarget.value)
+              props.onChange?.(event)
+            }}
+            {...control}
+            aria-describedby={
+              [control['aria-describedby'], props['aria-describedby']].filter(Boolean).join(' ') ||
+              undefined
+            }
+            aria-invalid={control['aria-invalid'] ?? props['aria-invalid']}
+            className={cn(fieldControlClass, 'min-h-24 py-2', className)}
+          />
+          <span
+            data-slot="print-field-value"
+            data-print-value={printValue || '—'}
+            className="hidden print:block"
+          />
+        </>
       )}
     </Field>
+  )
+}
+
+/** Labelled native choice, shared by configuration-driven and domain forms. */
+export function ChoiceField({
+  label,
+  control_class_name: controlClassName,
+  className,
+  ...props
+}: Omit<ComponentProps<'input'>, 'type'> & {
+  label: ReactNode
+  type?: 'checkbox' | 'radio'
+  control_class_name?: string
+}) {
+  return (
+    <label data-slot="choice-field" className={cn('flex min-h-11 items-center gap-3', className)}>
+      <input type="checkbox" className={controlClassName} {...props} />
+      {label}
+    </label>
   )
 }

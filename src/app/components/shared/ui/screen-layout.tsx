@@ -43,6 +43,8 @@ export function ScreenHeader({
 /** Screen-wide context stays mounted above local views; collection content follows them. */
 export function ScreenLayout({
   header,
+  print_context: printContext,
+  print_orientation: printOrientation = 'portrait',
   secondary_navigation: secondaryNavigation,
   notices,
   workflow,
@@ -53,6 +55,8 @@ export function ScreenLayout({
   className,
 }: {
   header: ReactNode
+  print_context?: ReactNode
+  print_orientation?: 'portrait' | 'landscape'
   secondary_navigation?: ReactNode
   notices?: ReactNode
   workflow?: ReactNode
@@ -63,13 +67,22 @@ export function ScreenLayout({
   className?: string
 }) {
   return (
-    <div data-slot="screen-layout" className={cn('w-full min-w-0 space-y-8', className)}>
+    <div
+      data-slot="screen-layout"
+      data-print-orientation={printOrientation}
+      className={cn('w-full min-w-0 space-y-8', className)}
+    >
       {secondaryNavigation ? (
         <div data-slot="screen-secondary-navigation" className="print:hidden">
           {secondaryNavigation}
         </div>
       ) : null}
       {header}
+      {printContext ? (
+        <div data-slot="print-context" className="hidden print:block">
+          {printContext}
+        </div>
+      ) : null}
       {notices ? (
         <div data-slot="screen-notices" className="empty:hidden">
           {notices}

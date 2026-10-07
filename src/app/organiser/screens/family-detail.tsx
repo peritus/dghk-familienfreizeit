@@ -1,3 +1,5 @@
+import { TextareaField } from '../../components/shared/ui/field.js'
+import { ChoiceField } from '../../components/shared/ui/field.js'
 import { TextField } from '../../components/shared/ui/field.js'
 import { StatusNotice } from '../../components/shared/ui/notice.js'
 import { ErrorState } from '../../components/shared/ui/screen-state.js'
@@ -236,8 +238,8 @@ function FamilyNoteEditor({
         <p>Alles, was oben nicht vorkommt.</p>
       </CardHeader>
       <CardContent className="grid gap-3">
-        <textarea
-          aria-label="Sonstiges zum Zimmer"
+        <TextareaField
+          label="Sonstiges zum Zimmer"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           className="min-h-32 rounded-base border-2 border-border px-3 py-2"
@@ -317,24 +319,28 @@ function FamilyRoomView({
               const labels = world.labels_by_entity[person.entity.id] ?? []
               const withParents = labelBoolean(labels, 'does-not-need-a-bed') === true
               return (
-                <label key={person.entity.id} className="flex min-h-11 items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={withParents}
-                    onChange={(event) =>
-                      stage([
-                        labelEvent(
-                          actor,
-                          familyId,
-                          person.entity.id,
-                          'does-not-need-a-bed',
-                          event.target.checked,
-                        ),
-                      ])
-                    }
-                  />
-                  <span>{personName(person)} schläft im Bett der Eltern</span>
-                </label>
+                <ChoiceField
+                  key={person.entity.id}
+                  className="flex min-h-11 items-center gap-3"
+                  type="checkbox"
+                  checked={withParents}
+                  onChange={(event) =>
+                    stage([
+                      labelEvent(
+                        actor,
+                        familyId,
+                        person.entity.id,
+                        'does-not-need-a-bed',
+                        event.target.checked,
+                      ),
+                    ])
+                  }
+                  label={
+                    <>
+                      <span>{personName(person)} schläft im Bett der Eltern</span>
+                    </>
+                  }
+                />
               )
             })
           ) : (
@@ -926,14 +932,13 @@ function WorkshopFinder({
           autoComplete="off"
         />
         {unsuitable ? (
-          <label className="flex min-h-11 items-center gap-3 self-end font-bold">
-            <input
-              type="checkbox"
-              checked={showAll}
-              onChange={(event) => setShowAll(event.target.checked)}
-            />
-            Auch zeigen, was nicht zu {person.given_name} passt
-          </label>
+          <ChoiceField
+            className="flex min-h-11 items-center gap-3 self-end font-bold"
+            type="checkbox"
+            checked={showAll}
+            onChange={(event) => setShowAll(event.target.checked)}
+            label={<>Auch zeigen, was nicht zu {person.given_name} passt</>}
+          />
         ) : null}
       </div>
       <p className="text-sm font-bold" aria-live="polite">
@@ -1347,6 +1352,7 @@ export function FamilyDetail({
 
   return (
     <ScreenLayout
+      print_context={<p>Ansicht: {familyTopicLabel(topic)}</p>}
       header={
         <ScreenHeader
           title={displayName}

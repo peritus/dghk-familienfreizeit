@@ -19,6 +19,7 @@ export function Shell({
   if (organiserSection && !forceFrame) return <>{children}</>
   return (
     <ApplicationFrame
+      print_title={profileEventTitle(profile)}
       brand={
         <Link href="~/" className="inline-flex min-h-11 items-center gap-2 text-xl font-heading">
           <ProfileBrand branding={profile?.branding} className="size-8 shrink-0 object-contain" />

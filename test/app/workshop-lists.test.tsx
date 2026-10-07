@@ -113,9 +113,7 @@ test('the roster shows the confidentiality notice and keeps attendance boxes for
       .getAllByRole('columnheader', { name: 'Anwesend' })[0]!
       .classList.contains('workshop-print-only'),
   ).toBe(true)
-  expect(screen.getByText(/Nach der Veranstaltung vernichten/).classList).toContain(
-    'workshop-print-note',
-  )
+  expect(screen.getByText(/Nach der Veranstaltung vernichten/).classList).toContain('print-note')
 })
 
 test('an open case shows Offen in every empty slot with the reason', () => {
@@ -134,7 +132,9 @@ test('an open case shows Offen in every empty slot with the reason', () => {
 test('the lists close with a dated footer', () => {
   renderLists('/workshops/lists/rooms')
   const footer = screen.getByRole('contentinfo')
-  expect(footer.textContent).toMatch(/^Stand \d{1,2}\. \p{L}+ \d{4}, \d{2}:\d{2} Uhr · v\d+$/u)
+  expect(footer.textContent).toMatch(
+    /^Stand \d{1,2}\. \p{L}+ \d{4} um \d{2}:\d{2} Uhr · Datenstand v\d+/u,
+  )
 })
 
 test('a closed workshop area prints its closed result and names the closing time', () => {
@@ -168,6 +168,6 @@ test('a closed workshop area prints its closed result and names the closing time
   )
   renderLists('/workshops/lists/workshops', closedWorld)
   expect(document.querySelector('.workshop-print-stamp')?.textContent).toMatch(
-    /^Festgelegt am 20\. April 2027, \d{2}:\d{2} Uhr · Stand /,
+    /^Festgelegt am 20\. April 2027 um \d{2}:\d{2} Uhr · Stand /,
   )
 })

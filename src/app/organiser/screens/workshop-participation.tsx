@@ -1,5 +1,6 @@
+import { PrintFooter } from '../../components/shared/ui/print-layout.js'
 import { LoadingState } from '../../components/shared/ui/screen-state.js'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { activeProfile } from '../../../config/index.js'
 import { buildWorkshopAllocationProjection } from '../../../modules/workshop-rankings/app/workshop-allocation-view.js'
 import { WorkshopParticipation } from '../../../modules/workshop-rankings/app/components/workshop-participation.js'
@@ -12,31 +13,6 @@ import { draftCount } from '../state.js'
 function rankingLimit(): number {
   const module = activeProfile.modules.find((item) => item.id === 'workshop-rankings')
   return typeof module?.parameters?.max_rank === 'number' ? module.parameters.max_rank : 3
-}
-
-function printStamp(date: Date, revision: number, drafts: number): string {
-  const day = date.toLocaleDateString('de-DE', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-  const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  return `Stand ${day}, ${time} Uhr · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
-}
-
-function ParticipationPrintStamp({ revision, drafts }: { revision: number; drafts: number }) {
-  const [printedAt, setPrintedAt] = useState(() => new Date())
-  useEffect(() => {
-    const refresh = () => setPrintedAt(new Date())
-    window.addEventListener('beforeprint', refresh)
-    return () => window.removeEventListener('beforeprint', refresh)
-  }, [])
-
-  return (
-    <footer className="workshop-participation__print-stamp">
-      {printStamp(printedAt, revision, drafts)}
-    </footer>
-  )
 }
 
 export function WorkshopParticipationScreen() {
@@ -69,10 +45,18 @@ export function WorkshopParticipationScreen() {
   return (
     <ScreenLayout
       className="workshop-participation-page"
+      print_orientation="landscape"
       secondary_navigation={<WorkshopNavigation />}
       header={<ScreenHeader eyebrow="Workshops" title="Teilnahme" />}
       tertiary_navigation={<WorkshopParticipationNavigation />}
-      footer={<ParticipationPrintStamp revision={state.head_seq} drafts={draftCount(state)} />}
+      footer={
+        <PrintFooter
+          className="workshop-participation__print-stamp"
+          time_zone={activeProfile.meta.timezone}
+          revision={state.head_seq}
+          drafts={draftCount(state)}
+        />
+      }
     >
       <div className="workshop-participation-body mt-6 mb-10">
         <WorkshopParticipation

@@ -1,3 +1,4 @@
+import { ChoiceField } from '../../../app/components/shared/ui/field.js'
 import { SelectField, TextareaField } from '../../../app/components/shared/ui/field.js'
 import { Button } from '../../../app/components/shared/ui/button.js'
 import { useMemo, useState } from 'react'
@@ -239,34 +240,34 @@ function TraitControl({
         {disabledReason ? <p role="note">{disabledReason}</p> : null}
         <div className="flex flex-wrap gap-3">
           {choices.map((choice) => (
-            <label key={choice.value} className="flex min-h-11 items-center gap-2">
-              <input
-                type="radio"
-                name={`${target.id}-${traitKey}`}
-                checked={selected === choice.value}
-                onChange={() => {
-                  setUnpersistedTriState(choice.value)
-                  if (choice.value === 'indifferent' || choice.value === 'none') {
-                    if (current) stage([labelClear(actor, familyId, target, traitKey)])
-                    return
-                  }
-                  const value = values[0]
-                  if (!value || (current?.value === value && current.strength === choice.value))
-                    return
-                  stage([
-                    labelSet(
-                      actor,
-                      familyId,
-                      target,
-                      traitKey,
-                      value,
-                      choice.value as 'required' | 'preferred',
-                    ),
-                  ])
-                }}
-              />
-              {choice.label}
-            </label>
+            <ChoiceField
+              key={choice.value}
+              className="flex min-h-11 items-center gap-2"
+              type="radio"
+              name={`${target.id}-${traitKey}`}
+              checked={selected === choice.value}
+              onChange={() => {
+                setUnpersistedTriState(choice.value)
+                if (choice.value === 'indifferent' || choice.value === 'none') {
+                  if (current) stage([labelClear(actor, familyId, target, traitKey)])
+                  return
+                }
+                const value = values[0]
+                if (!value || (current?.value === value && current.strength === choice.value))
+                  return
+                stage([
+                  labelSet(
+                    actor,
+                    familyId,
+                    target,
+                    traitKey,
+                    value,
+                    choice.value as 'required' | 'preferred',
+                  ),
+                ])
+              }}
+              label={<>{choice.label}</>}
+            />
           ))}
         </div>
       </fieldset>
@@ -276,23 +277,26 @@ function TraitControl({
   if (facing.control === 'toggle') {
     const checked = current?.value === true
     return (
-      <label className="flex min-h-11 items-center gap-3">
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled={disabled}
-          onChange={(event) => {
-            if (event.target.checked) {
-              if (!checked) stage([labelSet(actor, familyId, target, traitKey, true, null)])
-            } else if (checked) stage([labelClear(actor, familyId, target, traitKey)])
-          }}
-        />
-        <span>
-          <span className="block font-bold">{title}</span>
-          {help ? <span className="block text-sm">{help}</span> : null}
-          {disabledReason ? <span className="block text-sm">{disabledReason}</span> : null}
-        </span>
-      </label>
+      <ChoiceField
+        className="flex min-h-11 items-center gap-3"
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(event) => {
+          if (event.target.checked) {
+            if (!checked) stage([labelSet(actor, familyId, target, traitKey, true, null)])
+          } else if (checked) stage([labelClear(actor, familyId, target, traitKey)])
+        }}
+        label={
+          <>
+            <span>
+              <span className="block font-bold">{title}</span>
+              {help ? <span className="block text-sm">{help}</span> : null}
+              {disabledReason ? <span className="block text-sm">{disabledReason}</span> : null}
+            </span>
+          </>
+        }
+      />
     )
   }
 
@@ -338,34 +342,30 @@ function TraitControl({
         <legend className="font-bold">{title}</legend>
         {help ? <p className="text-sm">{help}</p> : null}
         <div className="flex flex-wrap gap-2">
-          <label className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border px-3 font-bold">
-            <input
-              type="radio"
-              name={`${target.id}-${traitKey}`}
-              checked={selected === ''}
-              onChange={() => current && stage([labelClear(actor, familyId, target, traitKey)])}
-            />
-            Keine Angabe
-          </label>
+          <ChoiceField
+            className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border px-3 font-bold"
+            type="radio"
+            name={`${target.id}-${traitKey}`}
+            checked={selected === ''}
+            onChange={() => current && stage([labelClear(actor, familyId, target, traitKey)])}
+            label={<>Keine Angabe</>}
+          />
           {choices.map((choice) => {
             const copy = trait.kind === 'property' ? trait.copy?.[choice] : undefined
             const label = copy ? controlTitle(copy, meta) : choice
             return (
-              <label
+              <ChoiceField
                 key={choice}
                 className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border px-3 font-bold"
-              >
-                <input
-                  type="radio"
-                  name={`${target.id}-${traitKey}`}
-                  checked={selected === choice}
-                  onChange={() => {
-                    if (selected !== choice)
-                      stage([labelSet(actor, familyId, target, traitKey, choice, null)])
-                  }}
-                />
-                {label}
-              </label>
+                type="radio"
+                name={`${target.id}-${traitKey}`}
+                checked={selected === choice}
+                onChange={() => {
+                  if (selected !== choice)
+                    stage([labelSet(actor, familyId, target, traitKey, choice, null)])
+                }}
+                label={<>{label}</>}
+              />
             )
           })}
         </div>
@@ -388,22 +388,22 @@ function TraitControl({
         {world.families.map((family) => {
           const familyLabels = world.labels_by_entity[family.id] ?? []
           return (
-            <label key={family.id} className="flex min-h-11 items-center gap-3">
-              <input
-                type="checkbox"
-                checked={selected.has(family.id)}
-                onChange={(event) => {
-                  const next = new Set(selected)
-                  if (event.target.checked) next.add(family.id)
-                  else next.delete(family.id)
-                  const events: EventDraft[] = [labelClear(actor, familyId, target, traitKey)]
-                  for (const value of [...next].sort())
-                    events.push(labelSet(actor, familyId, target, traitKey, value, null))
-                  stage(events)
-                }}
-              />
-              {labelText(familyLabels, 'display-name') || family.id}
-            </label>
+            <ChoiceField
+              key={family.id}
+              className="flex min-h-11 items-center gap-3"
+              type="checkbox"
+              checked={selected.has(family.id)}
+              onChange={(event) => {
+                const next = new Set(selected)
+                if (event.target.checked) next.add(family.id)
+                else next.delete(family.id)
+                const events: EventDraft[] = [labelClear(actor, familyId, target, traitKey)]
+                for (const value of [...next].sort())
+                  events.push(labelSet(actor, familyId, target, traitKey, value, null))
+                stage(events)
+              }}
+              label={<>{labelText(familyLabels, 'display-name') || family.id}</>}
+            />
           )
         })}
       </fieldset>
@@ -424,22 +424,22 @@ function TraitControl({
           const personName =
             `${labelText(personLabels, 'given-name')} ${labelText(personLabels, 'family-name')}`.trim()
           return (
-            <label key={person.id} className="flex min-h-11 items-center gap-3">
-              <input
-                type="checkbox"
-                checked={selected.has(person.id)}
-                onChange={(event) => {
-                  const next = new Set(selected)
-                  if (event.target.checked) next.add(person.id)
-                  else next.delete(person.id)
-                  const events: EventDraft[] = [labelClear(actor, familyId, target, traitKey)]
-                  for (const value of [...next].sort())
-                    events.push(labelSet(actor, familyId, target, traitKey, value, 'required'))
-                  stage(events)
-                }}
-              />
-              {personName || person.id}
-            </label>
+            <ChoiceField
+              key={person.id}
+              className="flex min-h-11 items-center gap-3"
+              type="checkbox"
+              checked={selected.has(person.id)}
+              onChange={(event) => {
+                const next = new Set(selected)
+                if (event.target.checked) next.add(person.id)
+                else next.delete(person.id)
+                const events: EventDraft[] = [labelClear(actor, familyId, target, traitKey)]
+                for (const value of [...next].sort())
+                  events.push(labelSet(actor, familyId, target, traitKey, value, 'required'))
+                stage(events)
+              }}
+              label={<>{personName || person.id}</>}
+            />
           )
         })}
       </fieldset>
@@ -542,38 +542,36 @@ function WorkshopControls({
         <legend className="font-bold">{title}</legend>
         {help ? <p className="text-sm">{controlTitle(help, meta)}</p> : null}
         {[1, 2, 3].map((rank) => (
-          <label key={rank} className="grid gap-1">
-            <span>{rank}. Wunsch</span>
-            <select
-              className="min-h-11 rounded border-2 border-border px-3"
-              value={selected.get(rank) ?? ''}
-              onChange={(event) => {
-                const next = new Map(selected)
-                if (event.target.value) next.set(rank, event.target.value)
-                else next.delete(rank)
-                const events: EventDraft[] = [labelClear(actor, familyId, target, labelKey)]
-                for (const [nextRank, workshopId] of [...next.entries()].sort(([a], [b]) => a - b))
-                  events.push(
-                    labelSet(
-                      actor,
-                      familyId,
-                      target,
-                      labelKey,
-                      { workshop_id: workshopId, rank: nextRank },
-                      null,
-                    ),
-                  )
-                stage(events)
-              }}
-            >
-              <option value="">—</option>
-              {workshops.map((workshop) => (
-                <option key={workshop.id} value={workshop.id}>
-                  {labelText(world.labels_by_entity[workshop.id] ?? [], 'title') || workshop.id}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SelectField
+            key={rank}
+            label={`${rank}. Wunsch`}
+            value={selected.get(rank) ?? ''}
+            onChange={(event) => {
+              const next = new Map(selected)
+              if (event.target.value) next.set(rank, event.target.value)
+              else next.delete(rank)
+              const events: EventDraft[] = [labelClear(actor, familyId, target, labelKey)]
+              for (const [nextRank, workshopId] of [...next.entries()].sort(([a], [b]) => a - b))
+                events.push(
+                  labelSet(
+                    actor,
+                    familyId,
+                    target,
+                    labelKey,
+                    { workshop_id: workshopId, rank: nextRank },
+                    null,
+                  ),
+                )
+              stage(events)
+            }}
+          >
+            <option value="">—</option>
+            {workshops.map((workshop) => (
+              <option key={workshop.id} value={workshop.id}>
+                {labelText(world.labels_by_entity[workshop.id] ?? [], 'title') || workshop.id}
+              </option>
+            ))}
+          </SelectField>
         ))}
       </fieldset>
     )
@@ -591,18 +589,18 @@ function WorkshopControls({
           control.control === 'workshop-sign-up' ? mode === 'sign-up' : mode === 'interest'
         if (!available) return null
         return (
-          <label key={workshop.id} className="flex min-h-11 items-center gap-3">
-            <input
-              type="checkbox"
-              checked={current.has(workshop.id)}
-              onChange={(event) => {
-                if (event.target.checked)
-                  stage([labelSet(actor, familyId, target, labelKey, workshop.id, null)])
-                else stage([labelClear(actor, familyId, target, labelKey, workshop.id)])
-              }}
-            />
-            {labelText(workshopLabels, 'title') || workshop.id}
-          </label>
+          <ChoiceField
+            key={workshop.id}
+            className="flex min-h-11 items-center gap-3"
+            type="checkbox"
+            checked={current.has(workshop.id)}
+            onChange={(event) => {
+              if (event.target.checked)
+                stage([labelSet(actor, familyId, target, labelKey, workshop.id, null)])
+              else stage([labelClear(actor, familyId, target, labelKey, workshop.id)])
+            }}
+            label={<>{labelText(workshopLabels, 'title') || workshop.id}</>}
+          />
         )
       })}
     </fieldset>

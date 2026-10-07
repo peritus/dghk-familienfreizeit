@@ -23,8 +23,14 @@ export function AlertDialogContent({
 }: ComponentProps<typeof AlertDialogPrimitive.Popup>) {
   return (
     <AlertDialogPrimitive.Portal>
-      <AlertDialogPrimitive.Backdrop className="fixed inset-0 bg-black/40" />
-      <AlertDialogPrimitive.Viewport className="fixed inset-0 flex items-center justify-center p-4">
+      <AlertDialogPrimitive.Backdrop
+        data-slot="dialog-overlay"
+        className="fixed inset-0 bg-black/40"
+      />
+      <AlertDialogPrimitive.Viewport
+        data-slot="dialog-overlay"
+        className="fixed inset-0 flex items-center justify-center p-4"
+      >
         <AlertDialogPrimitive.Popup
           className={cn(
             'w-full max-w-md space-y-4 rounded-base border-2 border-border bg-secondary-background p-6 shadow-shadow',

@@ -1,3 +1,5 @@
+import { SelectField } from '../../components/shared/ui/field.js'
+import { ChoiceField } from '../../components/shared/ui/field.js'
 import { TableFrame } from '../../components/shared/ui/data-table.js'
 import { ErrorState } from '../../components/shared/ui/screen-state.js'
 import { TextField } from '../../components/shared/ui/field.js'
@@ -1069,17 +1071,19 @@ function BedForm({
           options={bedTypes}
           render_icon={(value) => <BedIcon bed_type={value} className="size-5" />}
         />
-        <label className="grid gap-1">
-          <span className="font-bold">
-            Bezeichnung <span className="font-normal text-muted">(optional)</span>
-          </span>
-          <input
-            value={label}
-            onChange={(event) => setLabel(event.target.value)}
-            placeholder="z. B. am Fenster"
-            className="min-h-11 rounded-base border-2 border-border px-3"
-          />
-        </label>
+        <TextField
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          placeholder="z. B. am Fenster"
+          className="min-h-11 rounded-base border-2 border-border px-3"
+          label={
+            <>
+              <span className="font-bold">
+                Bezeichnung <span className="font-normal text-muted">(optional)</span>
+              </span>
+            </>
+          }
+        />
       </div>
       {isApartment ? (
         <SegmentedControl
@@ -1204,15 +1208,15 @@ function TraitFields({
         const value = values[key]
         if (trait.value.kind === 'bool')
           return (
-            <label key={key} className="flex min-h-11 items-center gap-2 font-bold">
-              <input
-                type="checkbox"
-                checked={value === true}
-                onChange={(event) => onChange(key, event.target.checked)}
-                className="size-5 accent-main-deep"
-              />
-              {labelText(trait.title)}
-            </label>
+            <ChoiceField
+              key={key}
+              className="flex min-h-11 items-center gap-2 font-bold"
+              type="checkbox"
+              checked={value === true}
+              onChange={(event) => onChange(key, event.target.checked)}
+              control_class_name="size-5 accent-main-deep"
+              label={<>{labelText(trait.title)}</>}
+            />
           )
         if (options)
           return (
@@ -1225,16 +1229,19 @@ function TraitFields({
             />
           )
         return (
-          <label key={key} className="grid gap-1">
-            <span className="font-bold">{labelText(trait.title)}</span>
-            <input
-              type={trait.value.kind === 'text' ? 'text' : 'number'}
-              step={trait.value.kind === 'decimal' ? '0.01' : '1'}
-              value={value === null || value === undefined ? '' : String(value)}
-              onChange={(event) => onChange(key, event.target.value)}
-              className="min-h-11 rounded-base border-2 border-border px-3"
-            />
-          </label>
+          <TextField
+            key={key}
+            type={trait.value.kind === 'text' ? 'text' : 'number'}
+            step={trait.value.kind === 'decimal' ? '0.01' : '1'}
+            value={value === null || value === undefined ? '' : String(value)}
+            onChange={(event) => onChange(key, event.target.value)}
+            className="min-h-11 rounded-base border-2 border-border px-3"
+            label={
+              <>
+                <span className="font-bold">{labelText(trait.title)}</span>
+              </>
+            }
+          />
         )
       })}
     </fieldset>
@@ -1265,20 +1272,18 @@ function Select({
   options: readonly { value: string; label: string }[]
 }) {
   return (
-    <label className="grid gap-1">
-      <span className="font-bold">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <SelectField
+      label={label}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="min-h-11 rounded-base border-2 border-border bg-secondary-background px-3"
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </SelectField>
   )
 }
 

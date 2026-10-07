@@ -8,7 +8,7 @@ import { ActionableNotices, ActionableNotice, StatusNotice } from './notice.js'
 import { CollectionCreateAction } from './collection-create-action.js'
 import { TertiaryNavigation } from './tertiary-navigation.js'
 import { StatsStrip } from './stats-strip.js'
-import { TextField, SelectField } from './field.js'
+import { TextField, SelectField, TextareaField, ChoiceField } from './field.js'
 import { Button } from './button.js'
 
 const meta = {
@@ -174,6 +174,55 @@ export const Frame: Story = {
     >
       <ScreenLayout header={<ScreenHeader title="Willkommen" />}>
         <p>Inhalt im gemeinsamen Anwendungsrahmen.</p>
+      </ScreenLayout>
+    </ApplicationFrame>
+  ),
+}
+
+export const Print: Story = {
+  parameters: { backgrounds: { disable: true } },
+  render: () => (
+    <ApplicationFrame
+      brand="Familienfreizeit"
+      print_title="Familienfreizeit Lübben 2027"
+      role="Organisationsteam"
+      print_footer={{
+        generated_at: new Date('2027-04-15T08:00:00Z'),
+        revision: 42,
+        drafts: 1,
+        confidentiality: 'Vertraulich: Nur für das Organisationsteam.',
+      }}
+    >
+      <ScreenLayout
+        header={<ScreenHeader title="Familie Weber" />}
+        print_context={<p>Ansicht: Essen · Anna Weber</p>}
+        notices={
+          <ActionableNotice title="Allergiehinweis prüfen" action={<Button>Prüfen</Button>}>
+            Eine Rückfrage ist offen.
+          </ActionableNotice>
+        }
+        summary={
+          <StatsStrip
+            items={[
+              { label: 'Personen', value: 4 },
+              { label: 'Kinder', value: 2 },
+            ]}
+          />
+        }
+      >
+        <CollectionSection title="Angaben" action={<Button>Person hinzufügen</Button>}>
+          <TextField label="Name" value="Anna Weber" readOnly />
+          <TextareaField
+            label="Hinweise"
+            value={'Erdnussallergie.\nBitte vor der Essensausgabe Rücksprache halten.'}
+            readOnly
+          />
+          <SelectField label="Ernährung" value="vegetarian" onChange={() => {}}>
+            <option value="vegetarian">Vegetarisch</option>
+            <option value="all">Alles</option>
+          </SelectField>
+          <ChoiceField label="Eigener Schlafplatz" checked readOnly />
+        </CollectionSection>
       </ScreenLayout>
     </ApplicationFrame>
   ),

@@ -669,21 +669,214 @@ main:has(> .workshop-lists) {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 22mm;
+    @bottom-right {
+      content: counter(page) ' / ' counter(pages);
+      font: 8pt sans-serif;
+      color: #333;
+    }
+  }
+
+  @page screen-landscape {
+    size: A4 landscape;
+    margin: 12mm 12mm 22mm;
+    @bottom-right {
+      content: counter(page) ' / ' counter(pages);
+      font: 8pt sans-serif;
+      color: #333;
+    }
+  }
+
+  html:has([data-print-orientation='landscape']):not(:has(.workshop-participation)) {
+    page: screen-landscape;
+  }
+
+  html,
+  body,
+  #root,
+  [data-slot='application-frame'],
+  [data-slot='application-frame'] > main {
+    display: block;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    background: white;
+    color: black;
+    font-size: 10pt;
+    line-height: 1.4;
+  }
+
+  [data-slot='application-frame'] * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  [data-slot='application-frame'] :is(h1, h2, h3, h4, [data-slot='section-header']) {
+    break-after: avoid;
+  }
+
+  [data-slot='screen-header'] h1 {
+    font-size: 22pt;
+  }
+  [data-slot='section-header'] h2 {
+    font-size: 16pt;
+  }
+  [data-slot='section-header'] :is(h3, h4) {
+    font-size: 13pt;
+  }
+  [data-slot='screen-layout'] > * + * {
+    margin-top: 5mm;
+  }
+  [data-slot='screen-content'] {
+    margin-top: 5mm;
+  }
+
+  [data-slot='print-identity'] {
+    margin-bottom: 4mm;
+    border-bottom: 1px solid black;
+    padding-bottom: 2mm;
+    font-size: 9pt;
+  }
+
+  [data-slot='print-identity'] img {
+    filter: none;
+  }
+
+  [data-slot='skip-link'],
+  [data-slot='dialog-overlay'],
+  [data-slot='button'],
+  [data-slot='collection-controls'],
+  [data-slot='screen-actions'],
+  [data-slot='collection-actions'],
+  [data-slot='row-actions'],
+  [data-slot='print-field-control'] {
+    display: none !important;
+  }
+
+  [data-slot='print-field-value']::before {
+    content: attr(data-print-value);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  [data-slot='form-field'] select {
+    min-height: 0;
+    border: 0;
+    padding: 0;
+    appearance: none;
+    background: none;
+    color: black;
+  }
+
+  /* Some plain buttons contain entity names or programme cells. Keep their data. */
+  [data-slot='application-frame'] button:not([data-slot='button']) {
+    box-shadow: none;
+    background: none;
+    color: black;
+    transform: none;
+  }
+
+  [data-slot='application-frame'] [role='tab'][aria-selected='false'] {
+    display: none;
+  }
+
+  [data-slot='workflow-stepper'] ol {
+    grid-template-columns: repeat(auto-fit, minmax(30mm, 1fr));
+  }
+
+  [data-slot='workflow-stepper'] li {
+    display: block;
+    padding: 0;
+    break-inside: avoid;
+  }
+
+  [data-slot='workflow-stepper'] li > span[aria-hidden='true'] {
+    position: static;
+    transform: none;
+  }
+
+  [data-slot='workflow-stepper'] li > span[aria-hidden='true']:first-child:not(:last-child) {
+    border-top: 0;
+  }
+
+  [data-slot='table-frame'] {
+    overflow: visible;
+    border-width: 1px;
+  }
+  [data-slot='responsive-wide'] {
+    display: block !important;
+  }
+  [data-slot='responsive-narrow'] {
+    display: none !important;
+  }
+  [data-slot='table-frame'] table {
+    display: table !important;
+    width: 100%;
+    min-width: 0;
+  }
+  [data-slot='table-frame'] thead {
+    display: table-header-group !important;
+  }
+  [data-slot='table-frame'] tbody {
+    display: table-row-group !important;
+  }
+  [data-slot='table-frame'] tr {
+    display: table-row !important;
+    break-inside: avoid;
+  }
+  [data-slot='table-frame'] :is(th, td) {
+    display: table-cell !important;
+    padding: 2mm;
+    overflow-wrap: anywhere;
+    background: white;
+  }
+  [data-slot='table-frame'] :is(th, td) > span[class*='md:hidden'] {
+    display: none;
+  }
+  [data-slot='collection-row'] {
+    break-inside: avoid;
+  }
+
+  [data-slot='print-footer'] {
+    position: fixed;
+    right: 0;
+    bottom: -15mm;
+    left: 0;
+    margin: 0;
+    padding-top: 2mm;
+    background: white;
+    color: #333;
+    font-size: 8pt;
+    padding-right: 15mm;
+  }
+
+  [data-slot='application-frame']:has(main [data-slot='print-footer'])
+    > [data-slot='application-print-footer'] {
+    display: none;
+  }
+
   :root {
     color-scheme: light;
-    --background: hsl(33 100% 92%);
+    --background: white;
     --secondary-background: white;
-    --paper: #fffaf0;
+    --paper: white;
     --input: white;
     --foreground: black;
     --border: black;
     --ring: black;
     --shadow-c: black;
     --shadow: 4px 4px 0 0 var(--shadow-c);
-    --main: hsl(28 100% 51%);
+    --main: white;
     --main-deep: var(--main);
     --main-foreground: black;
-    --danger: hsl(2 90% 66%);
+    --danger: #eee;
     --danger-foreground: black;
     --muted: hsl(30 10% 32%);
     --offline: hsl(30 8% 80%);
@@ -705,7 +898,7 @@ main:has(> .workshop-lists) {
   }
 
   .assignment-print-header h1,
-  .assignment-print-building h1 {
+  .assignment-print-building h2 {
     margin: 0;
     font-size: 1.5rem;
   }
@@ -763,7 +956,7 @@ main:has(> .workshop-lists) {
     padding: 0.5rem;
   }
 
-  .assignment-print-room h2 {
+  .assignment-print-room h3 {
     margin: 0;
   }
 
@@ -788,7 +981,7 @@ main:has(> .workshop-lists) {
 
   /* Workshop lists (prototype `leadprint`): only the selected document, black on
      white A4. Screen controls carry `workshop-screen-only`; paper-only details carry
-     `workshop-print-only` / `workshop-print-note`.
+     `workshop-print-only` / `print-note`.
 
      Type scale on paper, all relative to the 10pt base:
        title 2em · metadata 1.05em · table 1em (room plan 1.3em, family plan 0.9em)
@@ -860,23 +1053,23 @@ main:has(> .workshop-lists) {
     font-size: 0.9em;
   }
 
-  .workshop-lists .workshop-print-title {
+  .workshop-lists .print-title {
     margin-top: 2px;
     padding-bottom: 4px;
     font-size: 2em;
     break-after: avoid;
   }
 
-  .workshop-lists .workshop-print-meta {
+  .workshop-lists .print-meta {
     font-size: 1.05em;
   }
 
-  .workshop-lists .workshop-print-meta--last {
+  .workshop-lists .print-meta--last {
     padding-bottom: 8px;
     border-bottom: 3px solid black;
   }
 
-  .workshop-lists .workshop-print-note {
+  .workshop-lists .print-note {
     display: block !important;
     margin-top: 8px;
     font-size: 0.85em;
@@ -982,5 +1175,30 @@ main:has(> .workshop-lists) {
     height: 10mm;
     padding: 0;
     border: 0;
+  }
+}
+
+@media print {
+  [data-slot='print-footer'].workshop-participation__print-stamp {
+    bottom: 0;
+  }
+  [data-slot='workflow-stepper'] li > span[aria-hidden='true']:first-child:nth-last-child(4) {
+    display: none;
+  }
+}
+
+@media print {
+  [data-slot='segmented-control'] [aria-pressed='false'] {
+    display: none;
+  }
+  [data-slot='segmented-control'] [role='group'] {
+    display: block;
+    border: 0;
+  }
+  [data-slot='segmented-control'] button {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    justify-content: start;
   }
 }

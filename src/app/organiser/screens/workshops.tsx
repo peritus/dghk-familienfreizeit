@@ -564,6 +564,17 @@ export function Workshops({
   }
   return (
     <ScreenLayout
+      print_context={
+        <p>
+          Ansicht:{' '}
+          {view === 'workshops'
+            ? 'Workshops'
+            : view === 'leaders'
+              ? 'Leitungen'
+              : 'Externe Leitungen'}
+          {view === 'workshops' ? ` · Zielgruppe: ${audienceLabel(audienceFilter)}` : ''}
+        </p>
+      }
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader
@@ -900,6 +911,17 @@ export function WorkshopProgramme() {
   })
   return (
     <ScreenLayout
+      print_orientation={view === 'programme' ? 'landscape' : 'portrait'}
+      print_context={
+        <p>
+          Ansicht:{' '}
+          {view === 'programme'
+            ? 'Programm'
+            : view === 'unplaced'
+              ? 'Nicht eingeplant'
+              : 'Überschneidungen'}
+        </p>
+      }
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader

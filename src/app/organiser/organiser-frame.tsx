@@ -1,3 +1,5 @@
+import { activeProfile } from '../../config/index.js'
+import { draftCount } from './state.js'
 import { ApplicationFrame } from '../components/application/application-frame.js'
 import { useState, type ReactNode } from 'react'
 import { useOrganiser } from './context.js'
@@ -48,6 +50,7 @@ export function OrganiserMinimalFrame({
 }) {
   return (
     <ApplicationFrame
+      print_title={profileEventTitle(profile)}
       brand={
         <OrganiserLink
           href={organiserHomePath}
@@ -88,6 +91,14 @@ export function OrganiserFrame({
 
   return (
     <ApplicationFrame
+      print_title={profileEventTitle(profile)}
+      print_footer={{
+        revision: state.head_seq,
+        drafts: draftCount(state),
+        time_zone: activeProfile.meta.timezone,
+        context: 'Arbeitsansicht · Organisationsteam',
+        confidentiality: 'Vertraulich: Nur für das Organisationsteam.',
+      }}
       brand={
         <OrganiserLink
           href={organiserHomePath}

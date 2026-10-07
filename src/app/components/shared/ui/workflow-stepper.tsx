@@ -29,7 +29,11 @@ export function WorkflowStepper({
   const visibleStep = currentIndex >= 0 ? currentIndex + 1 : steps.length
 
   return (
-    <section aria-label={ariaLabel} className={cn('space-y-4', className)}>
+    <section
+      data-slot="workflow-stepper"
+      aria-label={ariaLabel}
+      className={cn('space-y-4', className)}
+    >
       <ol
         id={listId}
         className="grid gap-3 sm:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] sm:gap-0"
@@ -85,7 +89,7 @@ export function WorkflowStepper({
       </ol>
       <button
         type="button"
-        className="text-sm underline underline-offset-4 sm:hidden"
+        className="print:hidden text-sm underline underline-offset-4 sm:hidden"
         aria-expanded={expanded}
         aria-controls={listId}
         onClick={() => setExpanded((value) => !value)}
@@ -93,7 +97,7 @@ export function WorkflowStepper({
         {expanded ? 'Weniger' : `Alle Schritte (${visibleStep} von ${steps.length})`}
       </button>
       {nextAction ? (
-        <div className="flex flex-wrap items-center gap-3 border-t-2 border-border pt-3">
+        <div className="print:hidden flex flex-wrap items-center gap-3 border-t-2 border-border pt-3">
           {nextAction}
         </div>
       ) : null}

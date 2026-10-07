@@ -78,7 +78,7 @@ export function StatusNotice({
 }
 
 export function ConfidentialityNotice({
-  children = 'Enthält Allergien und Gesundheitshinweise. Nur für die Workshopleitung.',
+  children = 'Nur für die angegebene Zielgruppe bestimmt.',
 }: {
   children?: ReactNode
 }) {

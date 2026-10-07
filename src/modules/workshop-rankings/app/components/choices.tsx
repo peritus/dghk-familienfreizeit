@@ -1,3 +1,4 @@
+import { ChoiceField } from '../../../../app/components/shared/ui/field.js'
 import type { CSSProperties, ReactNode } from 'react'
 import { DataTable, ResponsiveCollection } from '../../../../app/components/shared/ui/data-table.js'
 import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
@@ -289,19 +290,16 @@ export function TraceControls({
             ['only', 'Nur diese Person'],
           ] as const
         ).map(([value, label]) => (
-          <label
+          <ChoiceField
             key={value}
             className="flex min-h-11 items-center gap-2 border-2 border-l-0 border-border bg-secondary-background px-3 font-bold first:rounded-l-base first:border-l-2 last:rounded-r-base max-sm:border-l-2 max-sm:border-t-0 max-sm:first:rounded-l-none max-sm:first:rounded-t-base max-sm:last:rounded-r-none max-sm:last:rounded-b-base has-[:checked]:bg-main"
-          >
-            <input
-              type="radio"
-              name="trace-mode"
-              value={value}
-              checked={mode === value}
-              onChange={() => onModeChange(value)}
-            />
-            {label}
-          </label>
+            type="radio"
+            name="trace-mode"
+            value={value}
+            checked={mode === value}
+            onChange={() => onModeChange(value)}
+            label={<>{label}</>}
+          />
         ))}
       </fieldset>
       {mode !== 'all' && people && onPersonChange ? (

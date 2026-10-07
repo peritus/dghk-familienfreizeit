@@ -93,16 +93,16 @@ export function AssignmentPrintLayout({
 
       {buildings.map((building) => (
         <section key={building.id} className="assignment-print-building">
-          <h1>{building.name}</h1>
+          <h2>{building.name}</h2>
           {building.rooms.map((room) => (
             <article key={room.id} className="assignment-print-room">
-              <h2>
+              <h3>
                 <OrganiserLink
                   href={organiserPathWithHash(organiserPaths.inventory(), `#room=${room.id}`)}
                 >
                   {room.name}
                 </OrganiserLink>
-              </h2>
+              </h3>
               <p>
                 {room.floor} · {room.capacity} {room.capacity === 1 ? 'Platz' : 'Plätze'}
               </p>

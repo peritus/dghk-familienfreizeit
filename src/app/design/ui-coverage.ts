@@ -24,6 +24,14 @@ export type UiCoverageEntry = {
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
   {
+    id: 'shared-patterns-screen-layout--print',
+    area: 'component',
+    subject: 'Universal browser print layout',
+    source: 'src/app/components/shared/ui/print-layout.tsx',
+    media: 'print',
+  },
+
+  {
     id: 'foundations-design-tokens--catalog',
     area: 'foundation',
     subject: 'Design tokens',

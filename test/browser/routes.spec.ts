@@ -60,8 +60,71 @@ test('direct navigation reaches every implemented organiser route', async ({ pag
     await page.goto(route.test_path)
     await expect(page.getByRole('heading', { name: 'Diese Seite gibt es nicht' })).toHaveCount(0)
     await expect(page.locator('main')).toBeVisible()
+    await expect(page.locator('[data-slot="screen-layout"]')).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
+    await expect(page.locator('[data-slot="application-frame"]')).toHaveCount(1)
   }
 }, 60_000)
+
+test('every route shares the screen order, width, and browser print contract', async ({ page }) => {
+  test.setTimeout(120_000)
+  for (const route of organiserRouteDefinitions) {
+    await page.emulateMedia({ media: 'screen' })
+    await page.setViewportSize({ width: 1440, height: 1000 })
+    await page.goto(route.test_path)
+    await expect(page.locator('[data-slot="application-bar"]')).toContainText('Organisationsteam')
+    await expect(page.getByRole('heading', { name: 'Ansicht laden' })).toHaveCount(0)
+    const main = page.locator('main')
+    const box = await main.boundingBox()
+    expect(box!.width, route.test_path).toBe(1024)
+    const order = await page.locator('[data-slot="screen-layout"]').evaluate((screen) =>
+      Array.from(screen.children)
+        .map((child) => child.getAttribute('data-slot'))
+        .filter((slot) => slot && slot !== 'print-context'),
+    )
+    const expected = [
+      'screen-secondary-navigation',
+      'screen-header',
+      'screen-notices',
+      'screen-workflow',
+      'screen-summary',
+      'screen-tertiary-navigation',
+      'screen-content',
+      'screen-footer',
+    ]
+    expect(order, route.test_path).toEqual(expected.filter((slot) => order.includes(slot)))
+    await page.setViewportSize({ width: 390, height: 844 })
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+      route.test_path,
+    ).toBeLessThanOrEqual(391)
+    await page.emulateMedia({ media: 'print', colorScheme: 'dark' })
+    await expect(page.locator('[data-slot="application-bar"]')).toBeHidden()
+    const visibleFooters = await page
+      .locator('[data-slot="print-footer"]')
+      .evaluateAll(
+        (footers) => footers.filter((footer) => footer.getBoundingClientRect().height > 0).length,
+      )
+    expect(visibleFooters, route.test_path).toBe(1)
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+    for (const action of await page.locator('[data-slot="button"]').all())
+      await expect(action).toBeHidden()
+  }
+})
+
+test('public, login, and unknown screens print through the shared frame', async ({ page }) => {
+  for (const route of ['/', '/login', '/unknown-screen']) {
+    await page.emulateMedia({ media: 'screen' })
+    await page.goto(route)
+    await expect(page.getByRole('heading', { name: 'Ansicht laden' })).toHaveCount(0)
+    await expect(page.locator('[data-slot="screen-layout"]')).toHaveCount(1)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
+    await page.emulateMedia({ media: 'print', colorScheme: 'dark' })
+    await expect(page.locator('[data-slot="print-identity"]')).toBeVisible()
+    await expect(page.locator('[data-slot="print-footer"]')).toBeVisible()
+    await expect(page.locator('[data-slot="application-bar"]')).toBeHidden()
+  }
+})
 
 test('dashboard, families, and family detail form one working navigation chain', async ({
   page,

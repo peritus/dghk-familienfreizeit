@@ -28,7 +28,7 @@ export function SegmentedControl<T extends string>({
   className?: string
 }) {
   return (
-    <div className={cn('grid gap-1', className)}>
+    <div data-slot="segmented-control" className={cn('grid gap-1', className)}>
       <span className="font-bold">{label}</span>
       <div
         role="group"

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { PrintFooter } from '../../components/shared/ui/print-layout.js'
+import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { deriveAreaView } from '../../../derive/phases.js'
 import { workshopsClosedResult } from '../../../modules/workshop-assignment/closed-result.js'
@@ -176,44 +177,6 @@ function personMetadata(person: WorkshopReportPerson): ReactNode[] {
   ]
 }
 
-function dayAndTime(date: Date): string {
-  const day = date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })
-  const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  return `${day}, ${time} Uhr`
-}
-
-function printStamp(date: Date, revision: number, drafts: number, closedAt: string | null): string {
-  const closed = closedAt ? `Festgelegt am ${dayAndTime(new Date(closedAt))} · ` : ''
-  return `${closed}Stand ${dayAndTime(date)} · v${revision}${drafts ? ' · mit ungespeicherten Änderungen' : ''}`
-}
-
-/**
- * Date, time and revision of the printed data; refreshed right before printing. On
- * screen it closes the page; on paper it is fixed to the foot of every sheet.
- */
-function PrintStamp({
-  revision,
-  drafts,
-  closed_at: closedAt,
-}: {
-  revision: number
-  drafts: number
-  closed_at: string | null
-}) {
-  const [printedAt, setPrintedAt] = useState(() => new Date())
-  const stamp = printStamp(printedAt, revision, drafts, closedAt)
-  useEffect(() => {
-    const refresh = () => setPrintedAt(new Date())
-    window.addEventListener('beforeprint', refresh)
-    return () => window.removeEventListener('beforeprint', refresh)
-  }, [])
-  return (
-    <footer className="workshop-print-stamp mt-auto border-t-[1.5px] border-rule pt-2 text-xs text-muted tabular-nums">
-      {stamp}
-    </footer>
-  )
-}
-
 export function WorkshopLists() {
   useDocumentTitle('Listen · Workshops · Familienfreizeit')
   // wouter's location is the pathname only; the selected documents live in the query.
@@ -312,7 +275,11 @@ export function WorkshopLists() {
           options={workshopOptions(projection.workshops)}
           onChange={select}
           onStep={step}
-          notice={<ConfidentialityNotice />}
+          notice={
+            <ConfidentialityNotice>
+              Enthält Allergien und Gesundheitshinweise. Nur für die Workshopleitung.
+            </ConfidentialityNotice>
+          }
         >
           <WorkshopRosterDocument
             title={selectedWorkshop.title}
@@ -389,7 +356,15 @@ export function WorkshopLists() {
         />
       }
       footer={
-        <PrintStamp
+        <PrintFooter
+          className="workshop-print-stamp"
+          screen_visible
+          time_zone={activeProfile.meta.timezone}
+          confidentiality={
+            kind === 'workshop'
+              ? 'Vertraulich: Nur für Workshop-Leitungen bestimmt.'
+              : 'Vertraulich: Nur für das Organisationsteam.'
+          }
           revision={state.head_seq}
           drafts={draftCount(state)}
           closed_at={closedResult?.at ?? null}

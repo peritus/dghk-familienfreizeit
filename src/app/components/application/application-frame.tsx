@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react'
+import { PrintFooter, type PrintFooterProps } from '../shared/ui/print-layout.js'
 
 /** One landmark pair and width contract for public, authenticated and recovery screens. */
 export function ApplicationFrame({
   brand,
+  print_title: printTitle,
+  print_footer: printFooter,
   role,
   primary_navigation: primaryNavigation,
   controls,
@@ -10,6 +13,8 @@ export function ApplicationFrame({
   children,
 }: {
   brand: ReactNode
+  print_title?: string
+  print_footer?: PrintFooterProps
   role?: string
   primary_navigation?: ReactNode
   controls?: ReactNode
@@ -40,6 +45,10 @@ export function ApplicationFrame({
           {controls ? <div className="ml-auto flex items-center gap-3">{controls}</div> : null}
         </div>
       </header>
+      <div data-slot="print-identity" className="hidden print:block">
+        {printTitle ?? brand}
+        {role ? <span> · {role}</span> : null}
+      </div>
       <main
         id="content"
         tabIndex={-1}
@@ -52,6 +61,9 @@ export function ApplicationFrame({
         ) : null}
         {children}
       </main>
+      <div data-slot="application-print-footer">
+        <PrintFooter {...printFooter} />
+      </div>
     </div>
   )
 }

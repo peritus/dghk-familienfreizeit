@@ -1,3 +1,4 @@
+import { ChoiceField } from '../../../components/shared/ui/field.js'
 import { SelectField, TextareaField } from '../../../components/shared/ui/field.js'
 import { EntityEditorDialog } from '../../../components/shared/ui/entity-editor-dialog.js'
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
@@ -31,18 +32,15 @@ export function WorkshopCheckboxGroup({
       <legend className="font-bold">{legend}</legend>
       <div className="grid gap-2 sm:grid-cols-2">
         {options.map((option) => (
-          <label
+          <ChoiceField
             key={option.value}
             className="flex min-h-11 items-center gap-2 rounded-base border-2 border-border bg-secondary-background px-3"
-          >
-            <input
-              type="checkbox"
-              name="capabilities"
-              value={option.value}
-              defaultChecked={defaultValues.includes(option.value)}
-            />
-            {option.label}
-          </label>
+            type="checkbox"
+            name="capabilities"
+            value={option.value}
+            defaultChecked={defaultValues.includes(option.value)}
+            label={<>{option.label}</>}
+          />
         ))}
       </div>
     </fieldset>
@@ -74,9 +72,9 @@ export function WorkshopLeaderPicker({
       <p className="text-sm font-normal text-muted" id="workshop-leader-hint">
         Suche nach Personen aus der Veranstaltung oder bereits angelegten externen Leitungen.
       </p>
-      <input
+      <TextField
         type="search"
-        aria-label="Leitungen durchsuchen"
+        label="Leitungen durchsuchen"
         placeholder="Leitung suchen …"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -95,25 +93,29 @@ export function WorkshopLeaderPicker({
             <div key={group.label} className="grid gap-2">
               <p className="text-sm font-bold text-muted">{group.label}</p>
               {groupLeaders.map((leader) => (
-                <label key={leader.id} className="flex min-h-11 items-center gap-3">
-                  <input
-                    type="checkbox"
-                    name="leader_ids"
-                    value={leader.id}
-                    checked={selected.includes(leader.id)}
-                    onChange={(event) =>
-                      setSelected((current) =>
-                        event.target.checked
-                          ? [...current, leader.id]
-                          : current.filter((id) => id !== leader.id),
-                      )
-                    }
-                  />
-                  <span>
-                    {leader.label}
-                    {leader.external ? ' (extern)' : ''}
-                  </span>
-                </label>
+                <ChoiceField
+                  key={leader.id}
+                  className="flex min-h-11 items-center gap-3"
+                  type="checkbox"
+                  name="leader_ids"
+                  value={leader.id}
+                  checked={selected.includes(leader.id)}
+                  onChange={(event) =>
+                    setSelected((current) =>
+                      event.target.checked
+                        ? [...current, leader.id]
+                        : current.filter((id) => id !== leader.id),
+                    )
+                  }
+                  label={
+                    <>
+                      <span>
+                        {leader.label}
+                        {leader.external ? ' (extern)' : ''}
+                      </span>
+                    </>
+                  }
+                />
               ))}
             </div>
           )
@@ -302,16 +304,16 @@ export function ExternalLeaderEditorFields({
         {slots.length ? (
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {slots.map((slot) => (
-              <label key={slot.value} className="inline-flex min-h-11 items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="availability"
-                  value={slot.value}
-                  defaultChecked={defaultValues.availability?.includes(slot.value)}
-                  className="size-5 accent-main-deep"
-                />
-                {slot.label}
-              </label>
+              <ChoiceField
+                key={slot.value}
+                className="inline-flex min-h-11 items-center gap-2"
+                type="checkbox"
+                name="availability"
+                value={slot.value}
+                defaultChecked={defaultValues.availability?.includes(slot.value)}
+                control_class_name="size-5 accent-main-deep"
+                label={<>{slot.label}</>}
+              />
             ))}
           </div>
         ) : (

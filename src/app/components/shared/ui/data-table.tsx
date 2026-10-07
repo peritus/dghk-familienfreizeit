@@ -60,8 +60,12 @@ export function DataTable<T>({
 export function ResponsiveCollection({ wide, narrow }: { wide: ReactNode; narrow: ReactNode }) {
   return (
     <>
-      <div className="max-md:hidden print:hidden print:block">{wide}</div>
-      <div className="md:hidden print:hidden">{narrow}</div>
+      <div data-slot="responsive-wide" className="max-md:hidden print:block">
+        {wide}
+      </div>
+      <div data-slot="responsive-narrow" className="md:hidden print:hidden">
+        {narrow}
+      </div>
     </>
   )
 }

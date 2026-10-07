@@ -8,7 +8,8 @@ import {
 } from '../../src/app/components/shared/ui/screen-layout.js'
 import { ActionableNotice, ActionableNotices } from '../../src/app/components/shared/ui/notice.js'
 import { TertiaryNavigation } from '../../src/app/components/shared/ui/tertiary-navigation.js'
-import { TextField } from '../../src/app/components/shared/ui/field.js'
+import { TextField, TextareaField } from '../../src/app/components/shared/ui/field.js'
+import { PrintFooter } from '../../src/app/components/shared/ui/print-layout.js'
 
 afterEach(cleanup)
 
@@ -91,4 +92,45 @@ test('repeated field labels receive distinct ids and connected hints and validat
   expect(document.getElementById(fields[1]!.getAttribute('aria-describedby')!)?.textContent).toBe(
     'Bitte ausfüllen',
   )
+})
+
+test('print values follow unsaved input without changing the domain handler', () => {
+  let changed = ''
+  const { container, rerender } = render(
+    <TextareaField
+      label="Hinweise"
+      defaultValue="Erste Zeile"
+      onChange={(event) => {
+        changed = event.currentTarget.value
+      }}
+    />,
+  )
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Mehrere\nZeilen' } })
+  expect(changed).toBe('Mehrere\nZeilen')
+  expect(container.querySelector('[data-print-value]')?.getAttribute('data-print-value')).toBe(
+    changed,
+  )
+  rerender(<TextareaField label="Hinweise" value="Gespeicherter Wert" readOnly />)
+  expect(container.querySelector('[data-print-value]')?.getAttribute('data-print-value')).toBe(
+    'Gespeicherter Wert',
+  )
+})
+
+test('print footer reports data status and refreshes for browser printing', () => {
+  render(
+    <PrintFooter
+      revision={42}
+      drafts={1}
+      closed_at="2027-04-15T08:00:00Z"
+      generated_at={new Date('2027-04-16T08:00:00Z')}
+      confidentiality="Nur für Leitungen"
+    />,
+  )
+  fireEvent(window, new Event('beforeprint'))
+  const footer = document.querySelector('[data-slot="print-footer"]')!
+  expect(footer.textContent).toContain('Datenstand v42')
+  expect(footer.textContent).toContain('mit ungespeicherten Änderungen')
+  expect(footer.textContent).toContain('Festgelegt am 15. April 2027')
+  expect(footer.textContent).toContain('Stand 16. April 2027')
+  expect(footer.textContent).toContain('Nur für Leitungen')
 })

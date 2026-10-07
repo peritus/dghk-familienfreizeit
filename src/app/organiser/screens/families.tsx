@@ -1,7 +1,6 @@
 import { TableFrame } from '../../components/shared/ui/data-table.js'
 import { EmptyState } from '../../components/shared/ui/screen-state.js'
 import { TextField } from '../../components/shared/ui/field.js'
-import { Search } from 'lucide-react'
 import { randomIdPart } from '../ids.js'
 import { useMemo, useState, type FormEvent } from 'react'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
@@ -133,7 +132,15 @@ export function Families() {
   }
 
   return (
-    <ScreenLayout header={<ScreenHeader title="Familien" />}>
+    <ScreenLayout
+      print_context={
+        <p>
+          Ansicht: {filterOptions.find((option) => option.value === filter)?.label}
+          {query ? ` · Suche: ${query}` : ''} · {shown.length} Familien
+        </p>
+      }
+      header={<ScreenHeader title="Familien" />}
+    >
       <CollectionSection
         title="Familienliste"
         action={
@@ -184,21 +191,16 @@ export function Families() {
         }
         controls={
           <div className="flex flex-wrap items-end gap-4">
-            <label className="relative min-w-64 flex-1 sm:max-w-md">
-              <span className="sr-only">Familien durchsuchen</span>
-              <Search
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2"
-              />
-              <input
+            <div className="min-w-64 flex-1 sm:max-w-md">
+              <TextField
+                label="Familien durchsuchen"
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Familie, E-Mail oder Person"
                 autoComplete="off"
-                className="min-h-12 w-full rounded-base border-2 border-border bg-secondary-background pr-3 pl-10"
               />
-            </label>
+            </div>
             <SegmentedControl
               label="Familien filtern"
               value={filter}

@@ -13,8 +13,14 @@ export function DialogContent({
 }: ComponentProps<typeof DialogPrimitive.Popup>) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Backdrop className="fixed inset-0 z-30 bg-black/40" />
-      <DialogPrimitive.Viewport className="fixed inset-0 z-30 flex items-end justify-center p-4 sm:items-center">
+      <DialogPrimitive.Backdrop
+        data-slot="dialog-overlay"
+        className="fixed inset-0 z-30 bg-black/40"
+      />
+      <DialogPrimitive.Viewport
+        data-slot="dialog-overlay"
+        className="fixed inset-0 z-30 flex items-end justify-center p-4 sm:items-center"
+      >
         <DialogPrimitive.Popup
           className={cn(
             'max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-base border-2 border-border bg-secondary-background p-6 shadow-shadow',
