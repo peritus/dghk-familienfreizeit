@@ -1,3 +1,4 @@
+import * as ScreenLayoutStories from '../components/shared/ui/screen-layout.stories'
 import { Canvas, Meta, Stories, Title } from '@storybook/addon-docs/blocks'
 import * as AlertStories from '../components/shared/ui/alert.stories'
 import * as ButtonStories from '../components/shared/ui/button.stories'
@@ -26,6 +27,18 @@ import * as WorkshopScreenStories from '../organiser/screens/workshops.stories'
 
 This is the local visual contract for the React application. Stories are the
 executable examples; this page records the usage decisions around them.
+
+## Universal screen composition
+
+Every screen uses `ScreenLayout`: secondary navigation, `ScreenHeader`, screen-wide
+`ActionableNotices`, workflow/status, `StatsStrip`, tertiary navigation, then content.
+Optional slots collapse. Screen-wide context stays visible across local tabs.
+Create actions belong to `CollectionSection` headers, including nested collections;
+use the same `CollectionCreateAction` and an explicit result-oriented label at each
+scope. Filters follow the collection they affect. `PrimaryNavigation`,
+`SecondaryNavigation` and `TertiaryNavigation` name the three navigation levels.
+
+<Canvas of={ScreenLayoutStories.NestedCollections} />
 
 ## How to choose a primitive
 

@@ -1,4 +1,5 @@
-export type StatusTone = 'neutral' | 'success' | 'attention' | 'danger' | 'draft' | 'held'
+import type { StatusTone } from '../components/shared/ui/status-tone.js'
+export type { StatusTone } from '../components/shared/ui/status-tone.js'
 
 export type StatusLabel = {
   label: string

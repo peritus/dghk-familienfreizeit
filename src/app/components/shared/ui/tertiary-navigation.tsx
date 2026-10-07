@@ -45,8 +45,9 @@ export function TertiaryNavigation({
 
   return (
     <div
+      data-slot="tertiary-navigation"
       className={cn(
-        'flex flex-wrap items-end justify-between gap-x-6 gap-y-0 border-b-2 border-border/30 max-sm:flex-col max-sm:items-stretch',
+        'print:hidden flex flex-wrap items-end justify-between gap-x-6 gap-y-0 border-b-2 border-border/30 max-sm:flex-col max-sm:items-stretch',
         className,
       )}
     >

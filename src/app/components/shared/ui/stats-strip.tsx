@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import type { StatusTone } from '../../../organiser/ui-types.js'
+import type { StatusTone } from './status-tone.js'
 import { Card } from './card.js'
 
 export type StatsStripItem = {

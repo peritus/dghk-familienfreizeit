@@ -197,3 +197,13 @@ occasion data, and no persisted folded domain state.
 Removing a report, screen, module contribution, or email kind requires marking
 its specification coverage as deferred here and removing its selected profile
 contribution where necessary.
+
+## M16 — Universal screen hierarchy and printing
+
+Specification coverage: [UI-00](ui/design-system.md) and [D21](../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets).
+
+- Share the application frame, navigation levels, ordered screen context, collection actions, notices, metrics and reusable presentation across every mounted route and screen state.
+- Provide universal browser-print styling and preserve specialised matrices, reports and assignment output.
+- Verify narrow and wide layouts, scope-correct creation, client-side navigation, accessibility and multipage printing.
+
+Acceptance: every mounted screen uses the shared hierarchy, every collection owns its create action, screen-wide context remains above tertiary navigation, and all screens print correctly through the browser.

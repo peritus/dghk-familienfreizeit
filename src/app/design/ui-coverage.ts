@@ -674,4 +674,40 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     subject: 'Workshop allocation print document',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
+  {
+    id: 'shared-patterns-screen-layout--nested-collections',
+    area: 'component',
+    subject: 'Universal screen hierarchy with nested collection actions and persistent notices',
+    source: 'src/app/components/shared/ui/screen-layout.tsx',
+  },
+  {
+    id: 'shared-patterns-screen-layout--notices',
+    area: 'component',
+    subject: 'Screen and collection notices',
+    source: 'src/app/components/shared/ui/notice.tsx',
+  },
+  {
+    id: 'shared-patterns-screen-layout--fields',
+    area: 'component',
+    subject: 'Shared accessible form fields',
+    source: 'src/app/components/shared/ui/field.tsx',
+  },
+  {
+    id: 'shared-patterns-screen-layout--navigation-levels',
+    area: 'component',
+    subject: 'Primary and secondary navigation',
+    source: 'src/app/components/shared/ui/navigation.tsx',
+  },
+  {
+    id: 'shared-patterns-screen-layout--states',
+    area: 'component',
+    subject: 'Shared loading error and empty states',
+    source: 'src/app/components/shared/ui/screen-state.tsx',
+  },
+  {
+    id: 'shared-patterns-screen-layout--frame',
+    area: 'component',
+    subject: 'Universal application landmark frame',
+    source: 'src/app/components/application/application-frame.tsx',
+  },
 ]

@@ -1,98 +1,42 @@
-import { Fragment, useId, useState, type ComponentProps, type ReactNode, type Ref } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert.js'
+import { Tag } from '../ui/tag.js'
+import {
+  CollectionList as WorkshopList,
+  CollectionRow as WorkshopListRow,
+} from '../ui/collection-list.js'
+export {
+  ScreenHeader as WorkshopScreenHeader,
+  SectionHeader as WorkshopSectionHeader,
+} from '../ui/screen-layout.js'
+
+export { StatusNotice as WorkshopPhaseNotice } from '../ui/notice.js'
+
+export { Badge as WorkshopStatusBadge } from '../ui/badge.js'
+
+export { StatsStrip as WorkshopStatsStrip } from '../ui/stats-strip.js'
+
+export {
+  EmptyState as WorkshopEmptyState,
+  LoadingState as WorkshopLoadingState,
+  ErrorState as WorkshopErrorState,
+} from '../ui/screen-state.js'
+
+export { TextField as WorkshopField } from '../ui/field.js'
+
+export {
+  CollectionList as WorkshopList,
+  CollectionRow as WorkshopListRow,
+} from '../ui/collection-list.js'
+
+export {
+  DataTable as WorkshopDataTable,
+  ResponsiveCollection as WorkshopResponsiveCollection,
+} from '../ui/data-table.js'
+import { useId, useState, type ReactNode, type Ref } from 'react'
 import { Badge } from '../ui/badge.js'
 import { Button } from '../ui/button.js'
-import { Card, CardContent } from '../ui/card.js'
-import { StatsStrip, type StatsStripItem } from '../ui/stats-strip.js'
-import { SuccessState } from '../ui/success-state.js'
 import { cn } from '../../../lib/utils.js'
 
-export type WorkshopStatusTone = 'neutral' | 'success' | 'attention' | 'danger' | 'draft' | 'held'
-
-export function WorkshopScreenHeader({
-  eyebrow,
-  title,
-  description,
-  action,
-  className,
-}: {
-  eyebrow?: string
-  title: string
-  description?: string
-  action?: ReactNode
-  className?: string
-}) {
-  return (
-    <header className={cn('flex flex-wrap items-end justify-between gap-4', className)}>
-      <div>
-        {eyebrow ? <p className="font-bold uppercase tracking-wide text-muted">{eyebrow}</p> : null}
-        <h1 className="mt-1 text-3xl font-heading sm:text-4xl">{title}</h1>
-        {description ? <p className="mt-2 max-w-3xl text-muted">{description}</p> : null}
-      </div>
-      {action ? <div className="flex flex-wrap gap-2">{action}</div> : null}
-    </header>
-  )
-}
-
-export function WorkshopSectionHeader({
-  title,
-  description,
-  action,
-  className,
-}: {
-  title: string
-  description?: string
-  action?: ReactNode
-  className?: string
-}) {
-  return (
-    <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
-      <div>
-        <h2 className="text-2xl font-heading">{title}</h2>
-        {description ? <p className="mt-1 text-sm text-muted">{description}</p> : null}
-      </div>
-      {action ? <div className="flex flex-wrap gap-2">{action}</div> : null}
-    </div>
-  )
-}
-
-export function WorkshopPhaseNotice({
-  label,
-  tone = 'neutral',
-  children,
-  details,
-}: {
-  label: string
-  tone?: WorkshopStatusTone
-  children: ReactNode
-  details?: ReactNode
-}) {
-  return (
-    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-base border-2 border-dashed border-border bg-paper px-4 py-3">
-      <Badge tone={tone}>{label}</Badge>
-      <div className="min-w-0 flex-1 text-sm">{children}</div>
-      {details ? <div className="basis-full text-sm text-muted">{details}</div> : null}
-    </div>
-  )
-}
-
-export function WorkshopStatusBadge({
-  children,
-  tone = 'neutral',
-  variant,
-  className,
-}: {
-  children: ReactNode
-  tone?: WorkshopStatusTone
-  variant?: 'default' | 'free' | 'pinned'
-  className?: string
-}) {
-  return (
-    <Badge tone={tone} variant={variant} className={className}>
-      {children}
-    </Badge>
-  )
-}
+export type { StatusTone as WorkshopStatusTone } from '../ui/status-tone.js'
 
 export type FixedDecisionReviewItem = {
   id: string
@@ -133,7 +77,7 @@ export function FixedDecisionReview({
             <WorkshopListRow key={item.id}>
               <div className="flex flex-wrap items-center gap-2">
                 <strong>{item.subject}</strong>
-                <WorkshopStatusBadge tone={state.tone}>{state.label}</WorkshopStatusBadge>
+                <Badge tone={state.tone}>{state.label}</Badge>
               </div>
               <p className="mt-1 text-sm">
                 Fest: <strong>{item.fixed_target}</strong>
@@ -157,9 +101,7 @@ export function WorkshopPropertyTags({ items }: { items: readonly string[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((item) => (
-        <span key={item} className="rounded-base bg-background px-2 py-0.5 text-sm text-muted">
-          {item}
-        </span>
+        <Tag key={item}>{item}</Tag>
       ))}
     </div>
   )
@@ -173,164 +115,8 @@ export function WorkshopCompactMeta({ label, children }: { label: string; childr
   )
 }
 
-export function WorkshopList({ children }: { children: ReactNode }) {
-  return (
-    <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background [&>*+*]:border-t-2 [&>*+*]:border-border">
-      {children}
-    </div>
-  )
-}
-
-export function WorkshopListRow({ children, action }: { children: ReactNode; action?: ReactNode }) {
-  return (
-    <article className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-5">
-      <div className="min-w-0 flex-1">{children}</div>
-      {action ? <div className="flex flex-wrap items-start gap-2">{action}</div> : null}
-    </article>
-  )
-}
-
-export function WorkshopStatsStrip({ items }: { items: readonly StatsStripItem[] }) {
-  return <StatsStrip items={items} />
-}
-
-export function WorkshopEmptyState({
-  title,
-  children,
-  action,
-  success = false,
-}: {
-  title?: string
-  children: ReactNode
-  action?: ReactNode
-  success?: boolean
-}) {
-  if (success) {
-    return (
-      <div className="space-y-3">
-        <SuccessState>{children}</SuccessState>
-        {action}
-      </div>
-    )
-  }
-  return (
-    <Card size="sm" className="bg-secondary-background">
-      <CardContent className="space-y-3">
-        {title ? <h3 className="text-xl font-heading">{title}</h3> : null}
-        <div className="text-muted">{children}</div>
-        {action}
-      </CardContent>
-    </Card>
-  )
-}
-
-export function WorkshopLoadingState({
-  message = 'Workshops werden geladen …',
-}: {
-  message?: string
-}) {
-  return (
-    <div
-      role="status"
-      className="flex items-center gap-3 rounded-base border-2 border-dashed border-muted bg-secondary-background p-6"
-    >
-      <span
-        aria-hidden="true"
-        className="size-5 animate-spin rounded-full border-2 border-border border-t-transparent"
-      />
-      <span>{message}</span>
-    </div>
-  )
-}
-
-export function WorkshopErrorState({
-  title = 'Workshops konnten nicht geladen werden.',
-  children = 'Bitte erneut versuchen.',
-  onRetry,
-}: {
-  title?: string
-  children?: ReactNode
-  onRetry?: () => void
-}) {
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>
-        <p>{children}</p>
-        {onRetry ? (
-          <Button type="button" variant="neutral" size="sm" onClick={onRetry}>
-            Erneut laden
-          </Button>
-        ) : null}
-      </AlertDescription>
-    </Alert>
-  )
-}
-
 export function WorkshopRowActions({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap items-start justify-end gap-2">{children}</div>
-}
-
-export function WorkshopDataTable<T>({
-  caption,
-  columns,
-  rows,
-  rowKey,
-  renderRow,
-  className,
-}: {
-  caption: string
-  columns: readonly { key: string; label: ReactNode; numeric?: boolean }[]
-  rows: readonly T[]
-  rowKey: (row: T) => string
-  renderRow: (row: T) => ReactNode
-  className?: string
-}) {
-  return (
-    <div
-      className={cn(
-        'overflow-x-auto rounded-base border-2 border-border bg-secondary-background',
-        className,
-      )}
-    >
-      <table className="w-full min-w-[38rem] text-left">
-        <caption className="sr-only">{caption}</caption>
-        <thead>
-          <tr className="border-b-2 border-border">
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                scope="col"
-                className={cn('p-3', column.numeric && 'text-right')}
-              >
-                {column.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <Fragment key={rowKey(row)}>{renderRow(row)}</Fragment>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-export function WorkshopResponsiveCollection({
-  wide,
-  narrow,
-}: {
-  wide: ReactNode
-  narrow: ReactNode
-}) {
-  return (
-    <>
-      <div className="max-md:hidden">{wide}</div>
-      <div className="md:hidden">{narrow}</div>
-    </>
-  )
 }
 
 export type WorkshopListOption = { value: string; label: string; group?: string }
@@ -513,22 +299,6 @@ export function WorkshopConfidentialityNotice({
   )
 }
 
-export type WorkshopFieldProps = ComponentProps<'input'> & { label: string; hint?: ReactNode }
+export type { ComponentProps } from 'react'
 
-export function WorkshopField({ label, hint, id, ...props }: WorkshopFieldProps) {
-  const fieldId = id ?? `workshop-field-${label.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}`
-  return (
-    <label htmlFor={fieldId} className="grid gap-1 font-bold">
-      {label}
-      <input
-        {...props}
-        id={fieldId}
-        className={cn(
-          'min-h-11 rounded-base border-2 border-border px-3 font-normal',
-          props.className,
-        )}
-      />
-      {hint ? <span className="text-sm font-normal text-muted">{hint}</span> : null}
-    </label>
-  )
-}
+export type WorkshopFieldProps = import('../ui/field.js').TextFieldProps
