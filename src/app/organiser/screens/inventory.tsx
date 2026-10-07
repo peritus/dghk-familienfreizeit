@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { randomIdPart } from '../ids.js'
 import { BedIcon } from '../../components/shared/icons/bed-icons.js'
 import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
 import { Card, CardContent } from '../../components/shared/ui/card'
@@ -52,8 +53,7 @@ type BedUpdatePayload = {
 }
 
 function id(prefix: string): string {
-  const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-  return `${prefix}${random.replaceAll('-', '').slice(0, 16)}`
+  return `${prefix}${randomIdPart()}`
 }
 
 function draft(actor: string, type: string, payload: EventDraft['payload']): EventDraft {

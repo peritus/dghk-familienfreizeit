@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { randomIdPart } from '../ids.js'
 import { useLocation } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import type { World } from '../../../events/fold.js'
@@ -69,8 +70,7 @@ import {
 } from '../../components/shared/ui/dialog.js'
 
 function id(prefix: string): string {
-  const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-  return `${prefix}${random.replaceAll('-', '').slice(0, 16)}`
+  return `${prefix}${randomIdPart()}`
 }
 
 function draft(actor: string, type: string, payload: EventDraft['payload']): EventDraft {

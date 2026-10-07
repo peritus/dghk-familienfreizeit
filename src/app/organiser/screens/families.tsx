@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import { randomIdPart } from '../ids.js'
 import { useMemo, useState, type FormEvent } from 'react'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import type { EventDraft } from '../../../events/types.js'
@@ -20,8 +21,7 @@ const filterOptions = [
 ] as const
 
 function id(prefix: string): string {
-  const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-  return `${prefix}${random.replaceAll('-', '').slice(0, 16)}`
+  return `${prefix}${randomIdPart()}`
 }
 
 function familyStatusBadges(open: readonly string[], complete: boolean) {

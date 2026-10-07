@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { randomIdPart } from '../ids.js'
 import { useLocation } from 'wouter'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import type { World } from '../../../events/fold.js'
@@ -355,8 +356,7 @@ function FamilyRoomView({
 }
 
 function makePersonId(givenName: string): string {
-  const random = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-  return `per_${random.replaceAll('-', '').slice(0, 16)}_${givenName.toLowerCase()}`
+  return `per_${randomIdPart()}_${givenName.toLowerCase()}`
 }
 
 const personRoleOptions = [
