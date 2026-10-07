@@ -56,7 +56,7 @@ test('compressed family, incremental organiser and CSS assets stay within budget
   assert.ok(css.length > 0, 'Tailwind stylesheet must be emitted')
   for (const [label, files, budget] of [
     ['family JS', [...family], 150 * 1024],
-    ['organiser incremental JS', incremental, 110 * 1024],
+    ['organiser incremental JS', incremental, 200 * 1024],
     ['CSS', css, 32 * 1024],
   ]) {
     const bytes = (

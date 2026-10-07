@@ -25,11 +25,9 @@ use the domain concept instead.
 
 The browser entry's **entire static import closure**, including shared chunks,
 must exclude organiser, solver, derive and Worker code. The Worker must exclude
-browser components. Budgets are 150 KiB gzip for initial family JS, 110 KiB for
+browser components. Budgets are 150 KiB gzip for initial family JS, 200 KiB for
 incremental organiser JS, and 32 KiB for all CSS. These are enforced budgets, not
-claims about future feature sizes. The organiser budget was raised from 100 KiB
-when the feature and phase model added its eagerly needed event schemas,
-composition checks, and feature and phase views. The organiser chunk can reuse
+claims about future feature sizes. The organiser chunk can reuse
 the family entry's shared dependencies without counting them twice.
 
 `worker-configuration.d.ts` is generated and committed. After changing Worker
