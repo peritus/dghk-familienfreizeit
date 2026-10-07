@@ -15,7 +15,9 @@ The route table is:
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/accommodation/assignment` | Read-only deterministic assignment review with browser-printable assignment output |
-| `/organiser/workshops` | Workshop overview and authoring |
+| `/organiser/workshops` | Shared workshop overview with Workshops, Leitungen and Externe Leitungen views |
+| `/organiser/workshops/leaders` | The same overview with the derived internal-leader collection selected |
+| `/organiser/workshops/external-leaders` | The same overview with external-leader authoring selected |
 | `/organiser/workshops/programme` | Whole programme: workshop placements by slot and room |
 | `/organiser/workshops/programme/unplaced` | Workshops without a feasible placement and their reasons |
 | `/organiser/workshops/programme/overlaps` | Ranked workshop pairs that occupy the same slot |
@@ -41,15 +43,14 @@ draft state.
 
 Workshop routes use the same reducer and draft pipeline. Their section navigation
 links **Workshops**, **Teilnahme**, **Wünsche**, **Räume und Slots**, and **Listen**.
-Within Teilnahme, the shared third-level tabs switch between **Personen** and
-**Programm**; Programm stays selected on all three programme review URLs. The resource item stays current
+Within Teilnahme, one shared tertiary group selects **Personen**, **Programm**,
+**Nicht eingeplant**, or **Überschneidungen**, each backed by its existing URL. The resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
 overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
 Moving between workshop routes preserves staged events because navigation does not
 create another state boundary. The overview may filter by configured audience; the
 space inventory remains physical inventory with schedule-aware slot context.
-Programme review is split across three URLs with page-local tabs for **Ganzes
-Programm**, **Nicht eingeplant**, and **Überschneidungen**. All three preserve the
+Programme review keeps its three URLs within that participation context. All three preserve the
 same organiser and workshop navigation context. The whole-programme view exposes
 one derived placement per workshop; the unscheduled view gives each missing
 placement an explainable reason; and the overlap view shows people whose ranked
@@ -106,8 +107,9 @@ for the four sibling topics. The person picker inside Personen, Essen, and
 Workshops is a nested selector for the current family and does not change the
 global navigation hierarchy. Topic and person ids are opaque route segments.
 
-All organiser screens use the shared `OrganiserScreenHeader` for their primary
-heading and action row. Overview metrics use `StatsStrip`; quiet properties use
+All current screens, including public and recovery states, use `ScreenLayout` and
+`ScreenHeader`. The [design system](design-system.md#screen-hierarchy) defines
+the ordered slots, shared frame, navigation levels and collection ownership. Overview metrics use `StatsStrip`; quiet properties use
 `Tag`; state and attention labels use `Badge`; completed or empty-success states
 use `SuccessState`. Removal and retirement actions use the shared
 `DestructiveActionDialog`, with dependent entities blocked inline until they are
@@ -129,7 +131,8 @@ back to immediate mode -- there is no state where drafts are at zero and draftin
 stays on. Local events added during an in-flight request remain queued after the
 submitted prefix.
 Collection creation uses the shared `CollectionCreateAction`: its labelled action
-sits in the relevant screen or immediate parent-section header and opens an
+sits beside its own collection heading, below tertiary navigation when the
+collection is a local view and opens an
 accessible dialog. Workshops, external leaders, workshop spaces and slots,
 families, people, buildings, rooms, and beds follow this pattern. Empty states
 repeat the same first useful action; populated views do not keep creation forms
@@ -143,7 +146,8 @@ drafts through the shared local-first pipeline.
 callers render module-owned tracks over the derived
 [phase view](../architecture/phases.md#organiser-surfaces): the workshop overview,
 programme and allocation screens share the workshop track, and the inventory
-renders the accommodation track. The action slot carries the confirmed
+and assignment board render the shared accommodation track. Inventory supplies
+the closing action; the assignment board shares status only and remains read-only. The action slot carries the confirmed
 **Wahl öffnen**, **Festlegen**, **Erneut festlegen** and **Wieder öffnen**
 decisions. A closed area has no current step, and the mobile summary then counts
 every step.
@@ -189,3 +193,15 @@ comparisons.
 See the [design system](design-system.md) for primitives and styling, the
 [implemented organiser view](../application/organiser-view.md), and the
 [frontend specification](../../spec/ui/frontend.md) for outstanding behavior.
+
+## Universal print composition
+
+All mounted routes use the [shared paper layer](design-system.md#browser-printing-on-every-screen),
+including login, initial loading and recoverable errors. `ApplicationFrame` owns
+identity and a default `PrintFooter`; a specialised screen may supply its footer
+through `ScreenLayout`. Text fields print current values, while selected view and
+filter context remains explicit after navigation/actions disappear. Domain
+projections and event commands are unaffected. Browser route checks verify one
+frame/H1, uniform width, ordered screen slots, narrow overflow and print visibility.
+The populated participation test additionally verifies landscape tables and
+multi-page PDF output; Storybook provides a generic print composition.

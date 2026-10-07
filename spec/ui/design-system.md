@@ -11,26 +11,14 @@ Governing decisions: [D8](../../decisions.md#d8--react-for-every-screen),
 
 ## Shared shell
 
-```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ Familienfreizeit                         [help] [account] [sign out]   │
-├──────────────────────────────────────────────────────────────────────┤
-│ page title                                      status / last saved      │
-│                                                                      │
-│ screen content                                                       │
-└──────────────────────────────────────────────────────────────────────┘
-```
+The implemented frame, screen order, navigation levels and collection-action
+ownership are documented in the [design system](../../docs/ui/design-system.md#screen-hierarchy).
+Use that composition for every future screen, including family authentication,
+family-facing results and the report host.
 
-The family shell removes the organiser navigation and uses a compact header:
-
-```text
-┌──────────────────────────────┐
-│ Familienfreizeit       [•••] │
-├──────────────────────────────┤
-│ page title                   │
-│ content                      │
-└──────────────────────────────┘
-```
+The outstanding family shell removes dense organiser navigation and uses a compact
+header with help, account and sign-out access. These controls must remain usable at
+360px; the family-facing host and its account menu are not implemented.
 
 ## Visual language
 
@@ -42,14 +30,10 @@ organiser data. Extend the component inventory below only deliberately.
 
 ## Local visual contract
 
-The implemented components and screens have a repository-local Storybook
-contract. Stories beside the React source render the real components and
-document their states; [`style-guide.mdx`](../../src/app/design/style-guide.mdx)
-records why/when guidance; [`ui-coverage.ts`](../../src/app/design/ui-coverage.ts)
-registers every story with the renderable it shows and fails closed on an
-unregistered story; and Playwright baselines verify the rendered result. This contract is intentionally file-based and requires no
-hosted design service or MCP integration. Outstanding screens remain
-specification work until a production renderable and coverage entry exist.
+New screens and reusable components extend the implemented
+[Storybook contract](../../docs/ui/design-system.md): production renderables,
+state fixtures, coverage entries and reviewed browser baselines. A story alone does
+not establish an available application route.
 
 ## Responsive rules
 
@@ -101,42 +85,23 @@ element to render in place of the primitive's default and merges the primitive's
 props and accessible semantics into it. Every interactive control follows this
 API and keeps those semantics intact.
 
-**Implemented** as `AlertDialog`/`AlertDialogContent`/`AlertDialogHeader`/
-`AlertDialogFooter`/`AlertDialogTitle`/`AlertDialogDescription`/
-`AlertDialogCancel`/`AlertDialogAction`
-([`src/app/components/shared/ui/alert-dialog.tsx`](../../src/app/components/shared/ui/alert-dialog.tsx)),
-composing Base UI's `AlertDialog` (portal, backdrop, focus trap, Esc/
-outside-click handling) with `Button` through the `render` prop. The
-app-facing [`DestructiveActionDialog`](../../src/app/components/shared/ui/destructive-action-dialog.tsx)
-composes this primitive for every removal and retirement action, requires visible
-consequence text, and keeps the safe cancel action beside the danger action.
+The implemented destructive-action composition is documented in the
+[design system](../../docs/ui/design-system.md). Verify this contract for
+outstanding consequential controls.
 
 ## Pressable elements and hit areas
 
-**Implemented** as the `pressable`/`blueprint`/`blueprint-on-main` utilities and the
-base-layer `cursor: pointer` rule in [globals.css](../../src/app/globals.css); see
-[design system](../../docs/ui/design-system.md) for the rule ("a hard shadow means
-pressable") and the `Button`/`Card` components that use it.
-
-**Outstanding:** the `rounded-base` (5px, not the smaller default `rounded`) radius
-rule is enforced in the organiser app bar, dashboard, and inventory screen, but not
-yet swept across the rest of the app (family screens, other organiser forms still
-use `rounded` in places) — a follow-up pass, not part of this change.
+Use the implemented pressable utility, focus treatment and shared controls in the
+[design system](../../docs/ui/design-system.md). Verify the standard radius and
+44px hit areas for future family screens and domain-specific controls.
 
 ## Disabled state (outstanding)
 
-Avoid disabled buttons where possible: hide an action that doesn't apply
-rather than showing it disabled, or keep it enabled and explain the
-constraint on use. When a control must be disabled, it must not read as a
-washed-out version of the primary/accent button — that looks like a pale
-brand button, not an unavailable action, and tends to fail contrast. Use a
-white background, a dashed border (the one place a dashed border is
-allowed, because a disabled control has no shadow to clash with), muted
-text, no shadow, and `cursor: not-allowed`.
-
-Not yet built: the shared `Button` still uses the generic
-`disabled:opacity-50` from its base classes. This dedicated disabled style is
-scoped to whichever control needs it next, not applied speculatively.
+The shared Button's disabled appearance is documented in the
+[design system](../../docs/ui/design-system.md). For outstanding controls, avoid
+unexplained disabled actions: omit an action that does not apply, or explain the
+constraint. Verify contrast, keyboard semantics and an explicit reason when an
+action must remain unavailable.
 
 ## Save-status control and provisional-state pattern
 
@@ -166,19 +131,17 @@ implemented in [globals.css](../../src/app/globals.css) and documented alongside
 
 ## Dashboard structure
 
-**Implemented** for `/organiser` (UI-05): the headline-first principle — the page's
-single `<h1>` states the question it answers, with the Hinweise list (including its
-positive empty state) directly below, before the overview section — plus the merged
-single app bar. See [UI-05](screens/organiser-dashboard.md) and
-[Frontend](../../docs/ui/frontend.md).
+The implemented dashboard composition is documented in
+[Frontend](../../docs/ui/frontend.md). Outstanding domain findings follow the
+same screen-wide notice slot and retain the acceptance criteria in
+[UI-05](screens/organiser-dashboard.md).
 
 ## Editable table and card pattern
 
 For every current or future screen that creates or edits records in a table:
 
 - use a semantic table on desktop and larger tablet layouts;
-- put the empty creation row first and distinguish it with a subtle surface
-  treatment, not an extra visual row label;
+- use the shared collection-header creation action and accessible dialog;
 - name the creation action explicitly, such as **Neue Person hinzufügen** or
   **Familie einladen**;
 - keep existing record fields editable within their own row;
@@ -197,22 +160,16 @@ For every current or future screen that creates or edits records in a table:
 
 ## Collection creation actions
 
-Every organiser collection creates an item through the shared
-`CollectionCreateAction`. Place its visible, explicitly labelled trigger in the
-collection's screen header or immediate parent-section header; it opens an
-accessible dialog with cancellation before the result-specific primary action.
-Use the same action in an empty state. Do not leave a creation form persistently
-visible in a populated collection. This applies to workshops, external leaders,
-workshop spaces, slots, families, people, buildings, rooms, and beds.
+Use the implemented [collection action contract](../../docs/ui/design-system.md#collection-actions-and-context)
+on every current and future screen. The action belongs to its own collection's
+heading, including nested collections and views below tertiary navigation. A
+derived collection does not invent a create action. Future screens must verify
+empty/populated states, result-oriented labels, cancellation, focus return and
+ordinary event staging.
 
-When an implementation introduces a potentially reusable pattern, follow the
-general-rule promotion process in [AGENTS.md](../../AGENTS.md): name the
-candidate in the plan, obtain explicit user approval, and update this section
-in the same change when it is approved.
-
-The description states the concrete consequence. `AlertDialogAction` is the
-high-contrast offset-shadow primary action; `AlertDialogCancel` is the quieter
-outlined alternative.
+Reusable-rule promotion follows [AGENTS.md](../../AGENTS.md): name the candidate,
+scope, canonical location and verification in the plan, and obtain explicit user
+approval before promoting it.
 
 ## Expandable hierarchical tables
 
@@ -238,46 +195,28 @@ else this shape could apply.
 
 ## Tags and badges
 
-- **Tag** (a true property, shown only when true): cream `--background`
-  fill, no border, small bold text, tight padding.
-- **Badge — needs action**: `--main` fill, 2px black border, bold text.
-  Example: an inventory room with zero beds shows **Keine Betten**. Orange
-  stays reserved for "needs action."
-
-**Implemented** for inventory room tags/badges; **outstanding** as a shared
-component — each screen currently composes the utility classes itself.
+`Tag`, `Badge` and `PropertyTags` are shared implemented components; see the
+[design system](../../docs/ui/design-system.md#shared-presentation). Outstanding
+screens must preserve quiet true-property tags and text-labelled action/status
+badges, without relying on colour alone.
 
 ## Page states
 
-Every data screen defines four states explicitly, and never shows "0" or an
-empty list for data that failed to load (a load failure that looks like real
-empty data invites duplicate re-entry):
+Use the implemented `LoadingState`, `ErrorState`, `EmptyState` and `SuccessState`
+within the [shared composition](../../docs/ui/design-system.md#shared-presentation).
+Never render zero metrics or empty records for data that failed to load. Initial
+organiser loading/error recovery remains whole-app because it loads one event log.
 
-| State | Shows |
-|---|---|
-| Loading | Skeleton or nothing; never zeros |
-| Load failed | One error block; no stats, lists, or forms for the data that failed |
-| Empty | Only the first useful action |
-| Loaded | Content first, then tools |
-
-**Implemented:** the organiser shell now distinguishes a load failure
-(`state.status === 'load_error'`, whole app, no nav/save-status) from a save
-failure (`state.status === 'error'`, save-status shows "Speichern
-fehlgeschlagen") — see [Frontend](../../docs/ui/frontend.md). Because the
-organiser app loads one shared event log rather than per-screen data, a load
-failure is necessarily whole-app; a screen-scoped notice for "this area's
-data failed, the rest of the page still works" has no current trigger and is
-not implemented.
+For future independently loaded hosts, define loading, failed, empty and loaded
+states and scope recovery to the data that actually failed. Verify keyboard and
+screen-reader behavior as well as the visual contract.
 
 ## Stats strip
 
-One flat card, equal cells divided by 2px lines (not separate tiles).
-Numbers large and bold with `leading-none`, label bold below. Include every
-level the screen manages. Never repeat a stat elsewhere on the same page.
-Mobile: a 2-column grid, never a 2+1 wrap.
-
-**Implemented** for `/organiser/accommodation/inventory`; **outstanding** as a shared
-component.
+`StatsStrip` is the implemented shared metrics component. Its placement and scope
+are defined in the [design system](../../docs/ui/design-system.md#collection-actions-and-context).
+Future screens must label the measured scope, avoid duplicated totals, omit
+unavailable metrics, and verify narrow layouts for their actual cell counts.
 
 ## Segmented controls
 
@@ -314,17 +253,16 @@ used for the inventory bed-type choice; **outstanding** for any other
 - Destructive actions never sit directly next to "Speichern"/the primary
   save action.
 
-**Implemented** for the inventory forms; **outstanding** as a shared
-convention enforced elsewhere (other organiser forms predate this pass).
+The shared field primitives and current screen reuse are documented in the
+[design system](../../docs/ui/design-system.md#shared-presentation). Currency entry,
+future domain controls and exhaustive accessibility verification remain outstanding
+where not covered by current controls and tests.
 
 ## Component inventory
 
-| Need | Component |
-|---|---|
-| hierarchy and status | `Card`, `Badge`, `Alert` |
-| actions | `Button`, `AlertDialog` |
-| data entry | `Label`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `Select` |
-| search and selection | `Combobox`, `Popover`, `Command` |
-| dense data | `Table`, `Tabs`, `ScrollArea` |
-| navigation and mobile | `Sidebar`, `Sheet`, `Drawer`, `Breadcrumb` |
-| feedback and loading | `Sonner`, `Skeleton`, `Tooltip` |
+The implemented generic inventory is authoritative in the
+[design system](../../docs/ui/design-system.md#shared-presentation). New screens
+reuse it before proposing another primitive. Search/selection patterns beyond the
+current entity picker, family account menus, compact mobile sheets and additional
+feedback controls remain future host requirements; choose their implementation
+from actual needs and verify their accessible behavior.

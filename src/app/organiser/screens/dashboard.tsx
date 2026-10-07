@@ -61,7 +61,7 @@ export function Dashboard() {
         />
       }
     >
-      <CollectionSection title="Überblick">
+      <CollectionSection title="Überblick" className="print:hidden">
         <OrganiserLink
           href={organiserPaths.families()}
           className={buttonVariants({ variant: 'neutral' })}

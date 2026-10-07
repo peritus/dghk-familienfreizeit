@@ -1,12 +1,145 @@
 # Implemented design system
 
-[The shell](../../src/app/components/application/shell.tsx) contains a German skip link and
-focusable main content on every route. On public routes (`/`, `/login`) it
-also renders its own brand header and `<main id="content">`. On `/organiser*` routes
-it renders neither -- the organiser section owns a single app bar and
-`<main id="content">` pair of its own (see [Frontend](frontend.md) and
-`src/app/organiser/organiser-frame.tsx`), so the two never nest. Account, help,
-sign-out and domain navigation controls are not implemented for the public shell.
+Every mounted route uses the shared
+[ApplicationFrame](../../src/app/components/application/application-frame.tsx):
+one German skip link, one brand/app bar, one focusable `<main id="content">`, and
+one width contract (`max-w-5xl`, full width with responsive padding). Public,
+authenticated organiser, route-loading and recovery adapters compose that frame;
+frames never nest. Public routes currently have no domain primary navigation or
+account controls. Family authentication and the family-facing application remain
+outstanding; the same composition contract applies when those screens are built.
+
+## Screen hierarchy
+
+[ScreenLayout](../../src/app/components/shared/ui/screen-layout.tsx) owns the order
+below the app bar. Optional slots collapse; callers supply content rather than
+recreating spacing, widths or heading markup.
+
+```text
+ApplicationFrame
++------------------------------------------------------------------+
+| Brand / role       PrimaryNavigation            Save / account    |
++------------------------------------------------------------------+
+| SecondaryNavigation                                              |
+| ScreenHeader: eyebrow, H1, description       [screen-wide action]  |
+| ActionableNotices: what needs attention              [resolve]    |
+| WorkflowStepper / StatusNotice                                    |
+| StatsStrip:         value | value | value                         |
+| TertiaryNavigation                                                |
+| CollectionSection                                                |
+|   SectionHeader: H2                         [create collection item]|
+|   Collection controls: search / filters                          |
+|   List, table, cards or specialised domain view                   |
+|   Nested CollectionSection: H3              [create nested item] |
+| Screen footer                                                    |
++------------------------------------------------------------------+
+```
+
+The three names describe scope, independently of button emphasis:
+
+| Component | Scope | Current examples |
+|---|---|---|
+| `PrimaryNavigation` | Application areas | Dashboard, Familien, Unterbringung, Workshops |
+| `SecondaryNavigation` | Routes within an area | Inventar / Belegung; workshop areas |
+| `TertiaryNavigation` | Sibling views within the active context | Workshop collections; participation views; family topics |
+
+Primary and secondary navigation share presentation primitives; organiser adapters
+retain typed routes and active-match rules. Tertiary views may use URLs or local UI
+state. A person/entity picker is a selector, not another navigation level.
+
+`ScreenHeader` supplies the screen's single H1. Its action slot is for a
+screen-wide operation, such as editing the current family's identity.
+`CollectionSection` composes an accessible labelled region, `SectionHeader`, a
+right-aligned action, scoped controls and content. Nested collections use H3/H4
+through `heading_level`; responsive wrapping preserves heading-before-action order.
+
+## Collection actions and context
+
+[CollectionCreateAction](../../src/app/components/shared/ui/collection-create-action.tsx)
+belongs beside its collection heading, below tertiary navigation when that
+collection is a local view. Its explicit label names the entity and result. The
+shared [EntityEditorDialog](../../src/app/components/shared/ui/entity-editor-dialog.tsx)
+owns the accessible dialog/form frame, validation area and cancel/submit footer;
+domain adapters own fields, validation and ordinary event commands.
+
+Workshop overview views create workshops, provide no create action for derived
+internal leaders, and create external leaders respectively. The standalone leader
+URLs render those same collections. Inventory nests Gebäude (H2, add building),
+named building (H3, add room), and room beds (H4, add bed). Empty and populated
+collections use the same action component. Forms do not remain open in a populated
+collection's normal flow.
+
+[ActionableNotices](../../src/app/components/shared/ui/notice.tsx) provides a named
+region; `ActionableNotice` states a finding and offers its resolution action.
+Screen-wide findings appear immediately after the H1, above tertiary navigation,
+so local view changes do not hide them. Findings affecting only a record or one
+collection stay with that scope. Status notices report phase/context without
+inventing an action. Existing findings and configured resolver results supply the
+meaning; presentation components do not calculate new domain rules.
+
+[StatsStrip](../../src/app/components/shared/ui/stats-strip.tsx) is the shared metrics
+component: one flat card with equal divided cells. Screen-wide totals precede
+tertiary navigation. Labels state scope; collection-specific counts and filters
+remain with that collection. Failed/loading data never produces plausible zero
+metrics.
+
+## Shared presentation
+
+Generic components live in `src/app/components/shared/ui/` and have no workshop or
+organiser prefix. They include `Field`, `TextField`, `SelectField`, `TextareaField`,
+`ChoiceField`, `CollectionList`, `CollectionRow`, `TableFrame`, `DataTable`,
+`ResponsiveCollection`, `PropertyTags`, `EntityPicker`, `FixedDecisionReview`,
+`LoadingState`, `ErrorState`, `EmptyState` and `SuccessState`. Field labels use
+unique ids and connect hints/errors through `aria-describedby`; invalid fields
+also expose `aria-invalid`.
+
+Reuse the table frame around specialised semantic cells rather than duplicating
+borders/overflow. Shared responsive collections choose the wide semantic table on
+paper. Module-owned programme grids, participation matrices, room cards, ranking
+controls and resolver-specific findings keep their domain renderers. Their frames,
+fields, states, labels and actions compose the same generic primitives.
+
+## Browser printing on every screen
+
+[D21](../../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets)
+applies to every current and future screen. Use the browser print dialog. The
+application adds no print/export/download control.
+
+The shared paper layer in [globals.css](../../src/app/globals.css) forces a white
+light palette, natural document height, readable A4 typography, wrapping values,
+flat borders and deliberate row/heading page breaks. It hides application and
+secondary/tertiary navigation, filters, action controls and dialog overlays.
+Ordinary buttons containing entity names or programme cells retain their data.
+`print_context` identifies a selected view or filter when its controls disappear;
+`print_orientation` selects portrait or landscape.
+
+Text and textarea fields print their current value, including unsaved multi-line
+input, through a wrapping paper representation. Selects print their selected label;
+checkboxes/radios retain selected state. Printing does not stage or persist events.
+Inventory prints the current room summaries and any expanded bed details; it does
+not open collapsed collections or fabricate another domain projection.
+
+[PrintFooter](../../src/app/components/shared/ui/print-layout.tsx) refreshes its
+timestamp on `beforeprint`, uses the configured timezone, and can report the data
+revision, unsaved changes, closing time, audience/context and confidentiality.
+Authenticated organiser output carries its restricted audience. Public/recovery
+screens omit unavailable revision information. A specialised screen footer
+replaces the frame default so paper has one footer. Chromium's page-margin counters
+provide page numbers; footer text occupies reserved space. Other browsers' pagination
+and margin-counter support have not been verified in this change.
+
+The accommodation assignment view retains its dedicated occupancy projection;
+workshop lists print the selected document and the closed result where applicable;
+the participation matrix retains landscape paper, repeated table headers and its
+repeated footer spacer. Report-specific audience projections, running report titles
+and the outstanding report catalogue remain in the
+[report specification](../../spec/application/reports.md).
+
+Verification includes all registered organiser URLs plus public/login/not-found
+screens, 390px overflow and desktop width/order checks, current-field/footer tests,
+Storybook print fixtures and a populated multi-page participation PDF and populated family/inventory/assignment PDFs in Chromium.
+This establishes local browser behavior, not hosted deployment or cross-browser
+paper equivalence.
 
 [Global CSS](../../src/app/globals.css) integrates Tailwind v4 and animation
 utilities. The orange theme uses semantic tokens for warm light surfaces and a
@@ -82,6 +215,8 @@ Copied source and its adaptations are attributed in
 [THIRD_PARTY.md](../../THIRD_PARTY.md). The Button uses Base UI's `render`
 composition API, supports variants (including a `danger` variant for
 destructive confirmations) and sizes, and includes reduced-motion handling.
+Disabled Buttons retain an opaque offline surface, dashed border and muted text;
+they remove the pressable shadow and expose the disabled semantics.
 AlertDialog composes Base UI's `AlertDialog` (portal, backdrop, focus trap)
 with Button the same way. `DestructiveActionDialog` is the canonical app-facing
 composition for removal and retirement actions; it requires consequence copy and
@@ -91,9 +226,8 @@ components. Components are editable application source.
 
 Editable organiser data uses the inline table pattern described in the [UI
 specification](../../spec/ui/design-system.md#editable-table-and-card-pattern).
-The families view puts the invitation controls in the first table row, and the
-family-detail people view uses a semantic editable table with a first-row
-creation action and same-row save/delete controls. At narrow widths, these
+Families and family people put creation in the collection heading and retain
+record-specific edit/save/delete controls with the affected record. At narrow widths, these
 tables become labeled stacked cards while preserving field and action order.
 
 The accommodation screen (`/organiser/accommodation/inventory`,
@@ -102,8 +236,8 @@ implements a different table shape for a different need: rooms are a real
 `<table>` whose rows expand into a full-width detail row holding that room's
 beds, per the [expandable hierarchical tables
 pattern](../../spec/ui/design-system.md#expandable-hierarchical-tables).
-It's also the first screen with a flat stats-strip card and true/false room
-amenities rendered as tags rather than table columns. At narrow widths the
+Screen totals use the shared stats strip, and true/false room amenities use tags
+rather than table columns. At narrow widths the
 room table switches to stacked, labeled rows below the `md` breakpoint, the
 same `max-md:block`/`md:hidden` convention the editable table pattern above
 uses, applied to a table with an expandable row rather than an editable one.
@@ -132,11 +266,11 @@ save-status control remains the one shared persistence indicator across all
 organiser screens; domain screens do not add their own draft bars or technical
 state counters.
 
-The route loading state is a centered, calm preparation panel with a reduced-
+The route loading state follows the shared H1 with a calm preparation panel with a reduced-
 motion-safe spinner and the message **Ansicht wird vorbereitet …**. It does not
 use skeleton fragments for a short route transition.
 
 Accessibility checks exercise semantic route/loading/error behavior in jsdom.
-They do not establish contrast, 360px visual layout, or real-browser keyboard
-behavior. Those checks and the additional domain controls remain requirements in
+Real-browser route and 390px layout checks complement these tests. They do not
+establish exhaustive contrast or every 360px/domain-control keyboard interaction. Those checks and the additional domain controls remain requirements in
 [the design-system specification](../../spec/ui/design-system.md).

@@ -94,8 +94,9 @@ report portions of [UI-00](ui/design-system.md), and the selected modules' repor
   projections, report contribution registration, and first host-rendered reports
   for modules outside the M8 workshop list slice, including printed accommodation
   lists from a closed area's result ([phases](architecture/phases.md) §7).
-- Implement responsive report layout primitives, print stylesheets, repeated
-  headings, page breaks, greyscale status, and confidentiality labels.
+- Extend the [implemented screen and print foundation](../docs/ui/design-system.md)
+  with report-specific repeated titles, audience metadata and host-rendered
+  layouts; verify their pagination and confidentiality for each projection.
 - Keep reports derived in memory; provide no download, export, or print button.
 - Add empty, restricted, mobile, browser-print, changed-data, and privacy fixtures.
 
@@ -198,12 +199,3 @@ Removing a report, screen, module contribution, or email kind requires marking
 its specification coverage as deferred here and removing its selected profile
 contribution where necessary.
 
-## M16 — Universal screen hierarchy and printing
-
-Specification coverage: [UI-00](ui/design-system.md) and [D21](../decisions.md#d21--print-through-the-browser-no-export-no-print-button-perfect-print-stylesheets).
-
-- Share the application frame, navigation levels, ordered screen context, collection actions, notices, metrics and reusable presentation across every mounted route and screen state.
-- Provide universal browser-print styling and preserve specialised matrices, reports and assignment output.
-- Verify narrow and wide layouts, scope-correct creation, client-side navigation, accessibility and multipage printing.
-
-Acceptance: every mounted screen uses the shared hierarchy, every collection owns its create action, screen-wide context remains above tertiary navigation, and all screens print correctly through the browser.

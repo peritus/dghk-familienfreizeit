@@ -22,7 +22,7 @@ export function NotFound() {
         />
       }
     >
-      <Link href="~/" className={buttonVariants({ variant: 'neutral' })}>
+      <Link data-slot="button" href="~/" className={buttonVariants({ variant: 'neutral' })}>
         Zur Startseite
       </Link>
     </ScreenLayout>

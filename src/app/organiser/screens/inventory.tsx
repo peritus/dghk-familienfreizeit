@@ -235,7 +235,7 @@ export function Inventory() {
           description="Gebäude, Zimmer und Betten für diese Freizeit."
         />
       }
-      workflow={<AccommodationWorkflow />}
+      workflow={<AccommodationWorkflow actions />}
       notices={
         error ? (
           <ErrorState title="Unterkunft konnte nicht geändert werden">{error}</ErrorState>
@@ -557,11 +557,14 @@ function BuildingEditor({
 
   return (
     <details
+      data-slot="inline-entity-editor"
       className="mt-2 text-sm"
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
-      <summary className="cursor-pointer font-bold underline">Gebäude bearbeiten</summary>
+      <summary className="print:hidden cursor-pointer font-bold underline">
+        Gebäude bearbeiten
+      </summary>
       <div className="mt-2 space-y-3 rounded-base border-2 border-border bg-paper p-3">
         <form
           className="flex flex-wrap items-end gap-2"

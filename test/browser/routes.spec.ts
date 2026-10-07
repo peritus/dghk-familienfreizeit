@@ -66,9 +66,8 @@ test('direct navigation reaches every implemented organiser route', async ({ pag
   }
 }, 60_000)
 
-test('every route shares the screen order, width, and browser print contract', async ({ page }) => {
-  test.setTimeout(120_000)
-  for (const route of organiserRouteDefinitions) {
+for (const route of organiserRouteDefinitions) {
+  test(`screen and print contract: ${route.id}`, async ({ page }) => {
     await page.emulateMedia({ media: 'screen' })
     await page.setViewportSize({ width: 1440, height: 1000 })
     await page.goto(route.test_path)
@@ -109,8 +108,8 @@ test('every route shares the screen order, width, and browser print contract', a
     await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
     for (const action of await page.locator('[data-slot="button"]').all())
       await expect(action).toBeHidden()
-  }
-})
+  })
+}
 
 test('public, login, and unknown screens print through the shared frame', async ({ page }) => {
   for (const route of ['/', '/login', '/unknown-screen']) {

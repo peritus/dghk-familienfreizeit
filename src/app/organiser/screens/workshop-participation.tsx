@@ -52,6 +52,7 @@ export function WorkshopParticipationScreen() {
       footer={
         <PrintFooter
           className="workshop-participation__print-stamp"
+          confidentiality="Vertraulich: Nur für das Organisationsteam."
           time_zone={activeProfile.meta.timezone}
           revision={state.head_seq}
           drafts={draftCount(state)}

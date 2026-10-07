@@ -679,7 +679,7 @@ function FamilyPeopleView({
           </CardContent>
         </Card>
         <section
-          className="grid gap-3 rounded-base border-2 border-dashed border-muted p-5"
+          className="print:hidden grid gap-3 rounded-base border-2 border-dashed border-muted p-5"
           aria-labelledby="remove-person-title"
         >
           <h3 id="remove-person-title" className="font-bold">

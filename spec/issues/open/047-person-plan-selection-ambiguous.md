@@ -18,7 +18,7 @@ label. See [`personOptions`](../../../src/app/organiser/screens/workshop-reports
 `ListSearchInput` commits the first option whose label exactly matches the
 entered text, so people with the same rendered label cannot be distinguished and
 selecting the later suggestion still resolves to the first matching person. See
-[`ListSearchInput`](../../../src/app/components/shared/workshop/shared.tsx#L361-L364).
+[`ListSearchInput`](../../../src/app/components/shared/ui/entity-picker.tsx).
 
 The allocation trace view has the same ambiguity: it resolves the selected
 person's name before using the person ID from the query. A duplicate name can

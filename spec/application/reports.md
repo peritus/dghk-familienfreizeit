@@ -175,6 +175,11 @@ on every printed page.
 
 ## 5. UI and print behavior
 
+Every screen uses the implemented [browser-print foundation](../../docs/ui/design-system.md#browser-printing-on-every-screen).
+The requirements below add report-specific audience, closed-result, running-title
+and document acceptance obligations. The shared stylesheet and footer do not
+complete the outstanding report host or catalogue.
+
 Reports appear as ordinary browser routes, with the same authenticated session
 rules as the corresponding family view or organiser view. They have no download,
 export, or print action. The visible controls are limited to filtering, sorting, and

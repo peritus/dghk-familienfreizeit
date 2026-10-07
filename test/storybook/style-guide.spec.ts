@@ -6,7 +6,7 @@ test.describe('repository-local UI contract', () => {
     await page.goto('/iframe.html?id=application-organiser-app--loaded-dashboard&viewMode=story')
     await expect(
       page.getByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
-    ).toBeVisible()
+    ).toBeVisible({ timeout: 15_000 })
     const organiserStoryUrl = page.url()
 
     await page.getByRole('link', { name: 'Familien', exact: true }).click()

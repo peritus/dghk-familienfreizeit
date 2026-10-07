@@ -488,8 +488,10 @@ id replaces it ([solver contract](spec/architecture/solver-contract.md) §4).
 *Chosen.* The application offers no PDF export, no download, no file attachment, and
 no print button. People print with the browser — `Ctrl+P` or the browser menu — and
 save a PDF from the browser's print dialog if they want one. In exchange, every
-report and every page families are expected to print ships a print stylesheet that
-produces a correct paper document, and that stylesheet is a requirement with
+screen, including public, authenticated, loading, empty and error views, ships a
+print stylesheet that produces a legible paper document. Shared screen composition
+owns the paper layout, current selection, meaningful field values and footer.
+Specialised reports and matrices extend that foundation. Printing is a requirement with
 acceptance criteria, not a polish item ([reports](spec/application/reports.md) §5–6).
 
 *Rejected alternative:* generated PDF exports. A second rendering path for the same

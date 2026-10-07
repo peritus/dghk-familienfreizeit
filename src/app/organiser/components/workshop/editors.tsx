@@ -16,8 +16,6 @@ import { Button } from '../../../components/shared/ui/button.js'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/shared/ui/card.js'
 import { TextField } from '../../../components/shared/ui/field.js'
 
-const controlClass = 'min-h-11 rounded-base border-2 border-border px-3 font-normal'
-
 export function WorkshopCheckboxGroup({
   legend,
   options,
@@ -78,7 +76,6 @@ export function WorkshopLeaderPicker({
         placeholder="Leitung suchen …"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        className={controlClass}
       />
       <div
         aria-describedby="workshop-leader-hint"

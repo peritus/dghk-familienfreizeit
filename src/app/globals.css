@@ -1202,3 +1202,20 @@ main:has(> .workshop-lists) {
     justify-content: start;
   }
 }
+
+@media print {
+  input:is([type='checkbox'], [type='radio']) {
+    accent-color: black;
+  }
+}
+
+@media print {
+  [data-slot='inline-entity-editor']:not([open]) {
+    display: none;
+  }
+  [data-slot='table-frame'] [class~='md:hidden'],
+  [data-slot='table-frame'] [class~='md:sr-only'],
+  [data-slot='table-frame'] button[aria-expanded] > svg {
+    display: none !important;
+  }
+}

@@ -1,3 +1,5 @@
+import { FixtureProvider } from '../../src/app/stories/organiser-fixtures.js'
+import { AccommodationWorkflow } from '../../src/app/organiser/components/accommodation-workflow.js'
 import { useState } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, expect, test } from 'vitest'
@@ -133,4 +135,19 @@ test('print footer reports data status and refreshes for browser printing', () =
   expect(footer.textContent).toContain('Festgelegt am 15. April 2027')
   expect(footer.textContent).toContain('Stand 16. April 2027')
   expect(footer.textContent).toContain('Nur für Leitungen')
+})
+
+test('shared accommodation status keeps closing actions opt-in for editing routes', () => {
+  const { rerender } = render(
+    <FixtureProvider>
+      <AccommodationWorkflow />
+    </FixtureProvider>,
+  )
+  expect(screen.queryByRole('button', { name: 'Festlegen' })).toBeNull()
+  rerender(
+    <FixtureProvider>
+      <AccommodationWorkflow actions />
+    </FixtureProvider>,
+  )
+  expect(screen.getByRole('button', { name: 'Festlegen' })).toBeTruthy()
 })

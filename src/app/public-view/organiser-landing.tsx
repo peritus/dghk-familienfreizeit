@@ -21,7 +21,7 @@ export function OrganiserLanding({ profile }: { profile?: ProfilePresentation })
         className="grid overflow-hidden rounded-base border-2 border-border bg-secondary-background lg:grid-cols-2"
       >
         <div className="flex items-center p-6 sm:p-10">
-          <Link href="/login" className={buttonVariants({ size: 'lg' })}>
+          <Link data-slot="button" href="/login" className={buttonVariants({ size: 'lg' })}>
             Als Organisator anmelden
           </Link>
         </div>

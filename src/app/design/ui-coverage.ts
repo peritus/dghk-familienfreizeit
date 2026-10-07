@@ -420,25 +420,25 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
   {
     id: 'shared-patterns-collections--workspace-chrome',
     area: 'component',
-    subject: 'Workshop shared composition chrome',
+    subject: 'Shared collection composition',
     source: 'src/app/components/shared/ui/screen-layout.tsx',
   },
   {
     id: 'shared-patterns-collections--states',
     area: 'component',
-    subject: 'Workshop loading, error, and empty states',
+    subject: 'Shared loading, error, and empty states',
     source: 'src/app/components/shared/ui/screen-state.tsx',
   },
   {
     id: 'shared-patterns-collections--table-and-responsive-collection',
     area: 'component',
-    subject: 'Workshop tables and responsive collections',
+    subject: 'Shared tables and responsive collections',
     source: 'src/app/components/shared/ui/data-table.tsx',
   },
   {
     id: 'shared-patterns-collections--picker-and-print',
     area: 'component',
-    subject: 'Workshop list picker and print document',
+    subject: 'Shared entity picker and print document',
     source: 'src/app/components/shared/ui/print-layout.tsx',
   },
   {

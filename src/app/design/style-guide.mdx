@@ -30,7 +30,8 @@ executable examples; this page records the usage decisions around them.
 
 ## Universal screen composition
 
-Every screen uses `ScreenLayout`: secondary navigation, `ScreenHeader`, screen-wide
+Every current and future screen uses `ApplicationFrame` for landmarks and width,
+then `ScreenLayout`: secondary navigation, `ScreenHeader`, screen-wide
 `ActionableNotices`, workflow/status, `StatsStrip`, tertiary navigation, then content.
 Optional slots collapse. Screen-wide context stays visible across local tabs.
 Create actions belong to `CollectionSection` headers, including nested collections;
@@ -109,10 +110,29 @@ screen's derived view and it never changes domain state itself.
 
 Primary navigation moves between organiser-wide areas. Secondary navigation
 moves between routes in one area. Use `TertiaryNavigation` only for sibling
-views within the already active route; its optional controls filter the current
-view and do not create a fourth navigation level.
+views within the active context, using local state or existing URLs. Filters
+belong to the affected collection, below its heading. Person/entity selectors do
+not introduce another navigation level.
 
 <Canvas of={TertiaryNavigationStories.WorkshopViews} />
+
+## Shared collection patterns
+
+Generic fields, notices, lists, rows, table frames, entity pickers, states and print
+composition live in `shared/ui`. Use their semantic APIs before writing another
+layout wrapper. Domain modules retain specialised cells and their event handlers.
+
+## Printing every screen
+
+Use the browser print dialog on every screen. `ApplicationFrame` provides event
+identity and the shared `PrintFooter`; specialised reports reuse that footer and
+extend the paper layout. Printing hides navigation/actions/dialog overlays, shows
+current field values and selected view/filter context, and forces white paper.
+Use portrait by default; matrices and whole-programme grids use landscape.
+Reserve footer space, repeat table headers and test multi-page output. No
+application print or export button is added.
+
+<Canvas of={ScreenLayoutStories.Print} />
 
 ## Workshop semantic component catalogue
 
