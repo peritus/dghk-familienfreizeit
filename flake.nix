@@ -23,6 +23,7 @@
             pkgs.gnumake
             pkgs.jq
             pkgs.nodejs_22
+            pkgs.pnpm
             pkgs.wrangler
           ] ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.chromium;
           shellHook = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
