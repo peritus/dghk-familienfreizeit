@@ -7,6 +7,7 @@ import {
   workshopsReopenedPayload,
 } from './closed-result.js'
 import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
+import { officialWorkshopsWorld } from '../official-workshops/index.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult, TraceEntry } from '../../solver/types.js'
 import type {
@@ -483,12 +484,18 @@ export function workshopAssignmentSection(plan: {
 export type { WorkshopMode }
 
 /**
- * The workshop review is ready once workshop choice has been opened, every active workshop is
- * placed, every fixed placement and attendance decision holds, and no workshop preflight finding
+ * The workshop review is ready once at least one active workshop exists, workshop choice has
+ * been opened, every active workshop is placed, every fixed placement and attendance decision holds, and no workshop preflight finding
  * blocks the plan (spec/architecture/phases.md §4).
  */
 export const workshopReviewReadiness: PhaseReadiness = ({ world, plan }) => {
   const findings: FindingRef[] = []
+  if (officialWorkshopsWorld(world).workshops.length === 0)
+    findings.push({
+      id: 'workshop-assignment.no-workshops',
+      subject_id: null,
+      message: 'Es ist noch kein aktiver Workshop angelegt.',
+    })
   if (world.phase_facts.opened['workshop-rankings.choice'] === undefined)
     findings.push({
       id: 'workshop-rankings.choice-not-opened',

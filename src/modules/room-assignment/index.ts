@@ -1026,35 +1026,35 @@ function compareScore(left: RoomScore, right: RoomScore): number {
 }
 
 /**
- * The accommodation review is ready when the current plan has no blocking room-assignment
- * preflight finding and every fixed room decision holds (spec/architecture/phases.md §4).
+ * The accommodation review is ready when at least one family is registered, the current plan
+ * has no blocking room-assignment preflight finding, and every fixed room decision holds
+ * (spec/architecture/phases.md §4).
  */
-export const roomReviewReadiness: PhaseReadiness = ({ plan }) => {
-  if (!plan)
-    return {
-      ready: false,
-      findings: [
-        {
-          id: 'phase.plan-unavailable',
-          subject_id: null,
-          message: 'Die Zuordnung ist noch nicht berechnet.',
-        },
-      ],
-    }
+export const roomReviewReadiness: PhaseReadiness = ({ world, plan }) => {
+  const findings: FindingRef[] = []
+  if (world.families.length === 0)
+    findings.push({
+      id: 'room-assignment.no-families',
+      subject_id: null,
+      message: 'Es ist noch keine Familie eingetragen.',
+    })
+  if (!plan) {
+    findings.push({
+      id: 'phase.plan-unavailable',
+      subject_id: null,
+      message: 'Die Zuordnung ist noch nicht berechnet.',
+    })
+    return { ready: false, findings }
+  }
   const section = plan.sections['room-assignment'] as RoomAssignmentSection | undefined
-  const findings: FindingRef[] = [
-    ...plan.preflight
-      .filter(({ check, severity }) => severity === 'error' && check.startsWith('room-assignment.'))
-      .map(({ check, subjects, text }) => ({
-        id: check,
-        subject_id: subjects[0] ?? null,
-        message: text,
-      })),
-    ...(section?.fixed_violations ?? []).map((violation) => ({
+  for (const { check, severity, subjects, text } of plan.preflight)
+    if (severity === 'error' && check.startsWith('room-assignment.'))
+      findings.push({ id: check, subject_id: subjects[0] ?? null, message: text })
+  for (const violation of section?.fixed_violations ?? [])
+    findings.push({
       id: 'room-assignment.fixed-invalid',
       subject_id: violation.family_id,
       message: `Feste Zimmerentscheidung für ${violation.family_id} ist nicht erfüllbar.`,
-    })),
-  ]
+    })
   return findings.length === 0 ? { ready: true } : { ready: false, findings }
 }

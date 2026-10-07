@@ -113,7 +113,9 @@ test('a closing whose review phase is not ready is refused with its findings', a
   expect(response.body).toMatchObject({
     error: 'area_not_ready',
     area: 'workshops',
-    findings: [expect.objectContaining({ id: 'workshop-rankings.choice-not-opened' })],
+    findings: expect.arrayContaining([
+      expect.objectContaining({ id: 'workshop-rankings.choice-not-opened' }),
+    ]),
   })
   expect(await stored()).toEqual([])
 })
@@ -145,5 +147,25 @@ test('closings cannot be appended outside the organiser apply path', async () =>
     organiserEnv,
   )
   expect(response.status).toBe(403)
+  expect(await stored()).toEqual([])
+})
+
+test('an area without content cannot be closed', async () => {
+  const cookie = await organiserCookie()
+  const accommodation = await apply(cookie, 0, [{ type: 'AccommodationClosed', payload: {} }])
+  expect(accommodation.status).toBe(409)
+  expect(accommodation.body).toMatchObject({
+    error: 'area_not_ready',
+    area: 'accommodation',
+    findings: [expect.objectContaining({ id: 'room-assignment.no-families' })],
+  })
+  const workshops = await apply(cookie, 0, [{ type: 'WorkshopsClosed', payload: {} }])
+  expect(workshops.status).toBe(409)
+  expect(workshops.body).toMatchObject({
+    area: 'workshops',
+    findings: expect.arrayContaining([
+      expect.objectContaining({ id: 'workshop-assignment.no-workshops' }),
+    ]),
+  })
   expect(await stored()).toEqual([])
 })
