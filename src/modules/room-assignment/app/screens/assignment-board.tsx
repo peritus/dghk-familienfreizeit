@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { ClosedAreaDifferences } from '../../../../app/organiser/components/area-closing.js'
 import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
-import { OrganiserSectionHeader } from '../../../../app/organiser/components/layout.js'
+import {
+  ScreenLayout,
+  ScreenHeader,
+  SectionHeader,
+} from '../../../../app/components/shared/ui/screen-layout.js'
 import { useOrganiser } from '../../../../app/organiser/context.js'
 import type { EventDraft } from '../../../../events/types.js'
 import { deriveAssignmentReview } from './assignment-board/review.js'
@@ -20,9 +24,10 @@ import {
   RoomOverviewRow,
 } from '../components/assignment-board/overview.js'
 import { AssignmentPrintLayout } from '../components/assignment-board/print-layout.js'
-import { ScreenFrame } from '../components/assignment-board/surface.js'
-import { SecondaryNavigation } from '../../../../app/organiser/components/navigation.js'
-import { organiserPaths } from '../../../../organiser/routes.js'
+import { AccommodationNavigation } from '../../../../app/organiser/components/accommodation-navigation.js'
+import { AccommodationWorkflow } from '../../../../app/organiser/components/accommodation-workflow.js'
+import { ActionableNotices, ActionableNotice } from '../../../../app/components/shared/ui/notice.js'
+import { Button } from '../../../../app/components/shared/ui/button.js'
 
 function event(type: string, payload: EventDraft['payload']): EventDraft {
   return {
@@ -113,39 +118,68 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
   return (
     <>
       <div className="assignment-board-screen">
-        <ScreenFrame title="Wer schläft wo?">
-          <ClosedAreaDifferences area="accommodation" />
-          <StatsStrip
-            items={[
-              { value: view.stats.families, label: 'Familien' },
-              ...(view.stats.without_room > 0
-                ? [
-                    {
-                      value: view.stats.without_room,
-                      label: 'Ohne Zimmer',
-                      tone: 'attention' as const,
-                    },
-                  ]
-                : []),
-              ...(view.stats.without_match > 0
-                ? [
-                    {
-                      value: view.stats.without_match,
-                      label: 'Ohne passendes Zimmer',
-                      tone: 'attention' as const,
-                    },
-                  ]
-                : []),
-              ...(view.stats.fixed > 0
-                ? [{ value: view.stats.fixed, label: 'Fest zugeordnet' }]
-                : []),
-              { value: view.stats.free_places, label: 'Freie Schlafplätze' },
-            ]}
-          />
+        <ScreenLayout
+          secondary_navigation={<AccommodationNavigation />}
+          header={<ScreenHeader title="Wer schläft wo?" />}
+          notices={
+            <ActionableNotices>
+              {view.stats.without_room > 0 ? (
+                <ActionableNotice
+                  title={`${view.stats.without_room} Familien ohne Zimmer`}
+                  action={
+                    <Button
+                      variant="neutral"
+                      onClick={() => {
+                        const target = document.getElementById('unplaced-families')
+                        target?.scrollIntoView({ block: 'start' })
+                        target?.focus()
+                      }}
+                    >
+                      Familien prüfen
+                    </Button>
+                  }
+                >
+                  Prüfe die Schlafplätze und die Anforderungen der betroffenen Familien.
+                </ActionableNotice>
+              ) : null}
+              <ClosedAreaDifferences area="accommodation" />
+            </ActionableNotices>
+          }
+          workflow={<AccommodationWorkflow />}
+          summary={
+            <StatsStrip
+              items={[
+                { value: view.stats.families, label: 'Familien' },
+                ...(view.stats.without_room > 0
+                  ? [
+                      {
+                        value: view.stats.without_room,
+                        label: 'Ohne Zimmer',
+                        tone: 'attention' as const,
+                      },
+                    ]
+                  : []),
+                ...(view.stats.without_match > 0
+                  ? [
+                      {
+                        value: view.stats.without_match,
+                        label: 'Ohne passendes Zimmer',
+                        tone: 'attention' as const,
+                      },
+                    ]
+                  : []),
+                ...(view.stats.fixed > 0
+                  ? [{ value: view.stats.fixed, label: 'Fest zugeordnet' }]
+                  : []),
+                { value: view.stats.free_places, label: 'Freie Schlafplätze' },
+              ]}
+            />
+          }
+        >
           <div className="grid items-start gap-8 lg:grid-cols-2">
             <div className="space-y-8">
               <section className="space-y-3">
-                <OrganiserSectionHeader title="Ohne Zimmer" />
+                <SectionHeader title="Ohne Zimmer" />
                 <FamilyList
                   families={withoutRoom}
                   onFix={setDialogFamily}
@@ -158,7 +192,7 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
               </section>
               {view.without_match.length > 0 ? (
                 <section className="space-y-3">
-                  <OrganiserSectionHeader title="Ohne passendes Zimmer" />
+                  <SectionHeader title="Ohne passendes Zimmer" />
                   <FamilyList
                     families={view.without_match}
                     onFix={setDialogFamily}
@@ -169,11 +203,11 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
             </div>
             <div className="space-y-8">
               <section className="space-y-3">
-                <OrganiserSectionHeader title="Freie Zimmer" />
+                <SectionHeader title="Freie Zimmer" />
                 <RoomList rooms={view.free_rooms} empty_message="Alle Zimmer sind belegt" />
               </section>
               <section className="space-y-3">
-                <OrganiserSectionHeader title="Teilweise freie Zimmer" />
+                <SectionHeader title="Teilweise freie Zimmer" />
                 <RoomList
                   rooms={view.partial_rooms}
                   empty_message="Alle belegten Zimmer sind voll"
@@ -192,7 +226,7 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
               />
             ))}
           </div>
-        </ScreenFrame>
+        </ScreenLayout>
       </div>
       <AssignmentPrintLayout buildings={view.buildings} print={print} />
       <FixedAssignmentDialog
@@ -212,24 +246,5 @@ export function AssignmentBoardScreen() {
   const { world } = useOrganiser()
   if (!world) return null
   const review = deriveAssignmentReview(world)
-  return (
-    <>
-      <SecondaryNavigation
-        aria_label="Unterbringungsbereiche"
-        items={[
-          {
-            href: organiserPaths.inventory(),
-            active_paths: [organiserPaths.inventory()],
-            label: 'Unterkunft',
-          },
-          {
-            href: organiserPaths.assignment_board(),
-            active_paths: [organiserPaths.assignment_board()],
-            label: 'Belegung',
-          },
-        ]}
-      />
-      <AssignmentBoard view={review.board} print={review.print} />
-    </>
-  )
+  return <AssignmentBoard view={review.board} print={review.print} />
 }

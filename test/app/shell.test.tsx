@@ -320,7 +320,7 @@ test('ordinary route navigation preserves the user-controlled focus', async () =
   familiesLink.focus()
   fireEvent.click(familiesLink)
 
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
   expect(document.activeElement).toBe(familiesLink)
 })
 
@@ -667,7 +667,7 @@ test('organiser state survives client-side route and history navigation', async 
 
   await enableDraftMode()
   fireEvent.click(screen.getByRole('link', { name: /Alle Familien ansehen/ }))
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
 
   const inviteDialog = await openFamilyInviteDialog()
   fireEvent.change(inviteDialog.getByLabelText('Familienname'), {
@@ -682,7 +682,7 @@ test('organiser state survives client-side route and history navigation', async 
   expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
   fireEvent.click(screen.getByRole('link', { name: '← Familien' }))
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Neue Familie' })).toBeTruthy()
   expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
@@ -694,7 +694,7 @@ test('organiser state survives client-side route and history navigation', async 
 
   window.history.pushState({}, '', '/organiser/families')
   fireEvent(window, new PopStateEvent('popstate'))
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
   expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
   expect(
     fetchMock?.mock.calls.filter(([input]) => String(input).endsWith('/api/organiser/log')),
@@ -724,7 +724,7 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
 
 test('organiser draft mode replaces the upload control with its workspace', async () => {
   open('/organiser/families')
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
 
   await enableDraftMode()
   expect(screen.getByRole('heading', { name: 'Noch keine Entwürfe' })).toBeTruthy()
@@ -795,7 +795,7 @@ test('family history includes staged events before they are applied', async () =
 
 test('immediate mode sends the same staged event through apply automatically', async () => {
   const { fetchMock } = open('/organiser/families')
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
 
   const inviteDialog = await openFamilyInviteDialog()
   fireEvent.change(inviteDialog.getByLabelText('Familienname'), {
@@ -864,7 +864,7 @@ test('families keeps manual invitation without a bulk-import surface', async () 
 
 test('families validate invitations', async () => {
   open('/organiser/families')
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
   expect(screen.getByLabelText('Familien durchsuchen')).toBeTruthy()
 
   const inviteDialog = await openFamilyInviteDialog()
@@ -932,7 +932,7 @@ test('an apply response with changed feature overrides asks for a reload', async
   open('/organiser/families', [], activeProfilePresentation, [
     { feature: 'family-preferences.family-room-wishes', value: 'off' },
   ])
-  expect(await screen.findByRole('heading', { name: /Familien/ })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
 
   const inviteDialog = await openFamilyInviteDialog()
   fireEvent.change(inviteDialog.getByLabelText('Familienname'), {

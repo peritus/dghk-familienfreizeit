@@ -1,3 +1,6 @@
+import { TextField } from '../../components/shared/ui/field.js'
+import { StatusNotice } from '../../components/shared/ui/notice.js'
+import { ErrorState } from '../../components/shared/ui/screen-state.js'
 import { useState, type FormEvent } from 'react'
 import { randomIdPart } from '../ids.js'
 import { useLocation } from 'wouter'
@@ -43,7 +46,11 @@ import {
   type WorkshopMode,
   type WorkshopRecord,
 } from '../../../modules/official-workshops/index.js'
-import { OrganiserScreenHeader } from '../components/layout.js'
+import {
+  ScreenLayout,
+  ScreenHeader,
+  SectionHeader,
+} from '../../components/shared/ui/screen-layout.js'
 import { CollectionCreateAction } from '../components/collection-create-action.js'
 
 function eventTime(): string {
@@ -173,32 +180,24 @@ function FamilyEditDialog({
           </p>
         ) : null}
         <form id="family-edit-form" className="mt-5 grid gap-4" onSubmit={submit}>
-          <label htmlFor="family-edit-name" className="grid gap-1">
-            <span className="font-bold">Familienname</span>
-            <span className="text-sm text-muted">
-              So erscheint die Familie in Listen und Zimmerplänen.
-            </span>
-            <input
-              id="family-edit-name"
-              aria-label="Familienname"
-              required
-              value={nextName}
-              onChange={(event) => setNextName(event.target.value)}
-              className="min-h-11 rounded-base border-2 border-border px-3"
-            />
-          </label>
-          <label htmlFor="family-edit-email" className="grid gap-1">
-            <span className="font-bold">E-Mail</span>
-            <input
-              id="family-edit-email"
-              aria-label="E-Mail"
-              required
-              type="email"
-              value={nextEmail}
-              onChange={(event) => setNextEmail(event.target.value)}
-              className="min-h-11 rounded-base border-2 border-border px-3"
-            />
-          </label>
+          <TextField
+            label="Familienname"
+            hint="So erscheint die Familie in Listen und Zimmerplänen."
+            id="family-edit-name"
+            aria-label="Familienname"
+            required
+            value={nextName}
+            onChange={(event) => setNextName(event.target.value)}
+          />
+          <TextField
+            label="E-Mail"
+            id="family-edit-email"
+            aria-label="E-Mail"
+            required
+            type="email"
+            value={nextEmail}
+            onChange={(event) => setNextEmail(event.target.value)}
+          />
         </form>
         <DialogFooter>
           <DialogClose
@@ -389,6 +388,26 @@ export function FamilyPersonSidebar({
   const [, navigate] = useLocation()
   return (
     <aside className="grid content-start gap-3" aria-label="Person auswählen">
+      <SectionHeader
+        title="Personen"
+        action={
+          <CollectionCreateAction
+            label="Person hinzufügen"
+            title="Person hinzufügen"
+            description="Lege eine Person in dieser Familie an."
+            open={adding}
+            on_open_change={onAddChange}
+          >
+            <PersonForm
+              family_id={familyId}
+              actor={actor}
+              stage={stage}
+              on_done={() => onAddChange(false)}
+              is_new
+            />
+          </CollectionCreateAction>
+        }
+      />
       {persons.length ? (
         <div
           role="tablist"
@@ -433,21 +452,6 @@ export function FamilyPersonSidebar({
           Noch niemand eingetragen.
         </p>
       )}
-      <CollectionCreateAction
-        label="Person hinzufügen"
-        title="Person hinzufügen"
-        description="Lege eine Person in dieser Familie an."
-        open={adding}
-        on_open_change={onAddChange}
-      >
-        <PersonForm
-          family_id={familyId}
-          actor={actor}
-          stage={stage}
-          on_done={() => onAddChange(false)}
-          is_new
-        />
-      </CollectionCreateAction>
     </aside>
   )
 }
@@ -541,39 +545,30 @@ function PersonForm({
         options={personRoleOptions}
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1">
-          <span className="font-bold">Vorname</span>
-          <input
-            required
-            value={givenName}
-            onChange={(event) => setGivenName(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-border px-3"
-          />
-        </label>
-        <label className="grid gap-1">
-          <span className="font-bold">Nachname</span>
-          <input
-            required
-            value={familyName}
-            onChange={(event) => setFamilyName(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-border px-3"
-          />
-        </label>
+        <TextField
+          label="Vorname"
+          required
+          value={givenName}
+          onChange={(event) => setGivenName(event.target.value)}
+        />
+        <TextField
+          label="Nachname"
+          required
+          value={familyName}
+          onChange={(event) => setFamilyName(event.target.value)}
+        />
       </div>
       {role === 'child' ? (
-        <label className="grid max-w-xs gap-1">
-          <span className="font-bold">Alter</span>
-          <input
-            type="number"
-            min="1"
-            max="17"
-            step="1"
-            inputMode="numeric"
-            value={age}
-            onChange={(event) => setAge(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-border px-3"
-          />
-        </label>
+        <TextField
+          label="Alter"
+          type="number"
+          min="1"
+          max="17"
+          step="1"
+          inputMode="numeric"
+          value={age}
+          onChange={(event) => setAge(event.target.value)}
+        />
       ) : null}
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="neutral" onClick={onCancel}>
@@ -609,25 +604,29 @@ function FamilyPeopleView({
     return (
       <Card className="bg-secondary-background">
         <CardHeader>
-          <h3 className="text-xl">Personen</h3>
+          <SectionHeader
+            title="Personen"
+            action={
+              <CollectionCreateAction
+                label="Person hinzufügen"
+                title="Person hinzufügen"
+                description="Lege eine Person in dieser Familie an."
+                open={adding}
+                on_open_change={setAdding}
+              >
+                <PersonForm
+                  family_id={familyId}
+                  actor={actor}
+                  stage={stage}
+                  on_done={() => setAdding(false)}
+                  is_new
+                />
+              </CollectionCreateAction>
+            }
+          />
         </CardHeader>
         <CardContent className="grid gap-4">
           <p>Noch niemand eingetragen. Mit „Person hinzufügen“ geht es los.</p>
-          <CollectionCreateAction
-            label="Person hinzufügen"
-            title="Person hinzufügen"
-            description="Lege eine Person in dieser Familie an."
-            open={adding}
-            on_open_change={setAdding}
-          >
-            <PersonForm
-              family_id={familyId}
-              actor={actor}
-              stage={stage}
-              on_done={() => setAdding(false)}
-              is_new
-            />
-          </CollectionCreateAction>
         </CardContent>
       </Card>
     )
@@ -918,17 +917,14 @@ function WorkshopFinder({
       </Button>
       <h3 className="text-xl">{title}</h3>
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-1">
-          <span className="font-bold">Suchen</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Titel oder Stichwort"
-            autoComplete="off"
-            className="min-h-11 rounded-base border-2 border-border px-3"
-          />
-        </label>
+        <TextField
+          label="Suchen"
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Titel oder Stichwort"
+          autoComplete="off"
+        />
         {unsuitable ? (
           <label className="flex min-h-11 items-center gap-3 self-end font-bold">
             <input
@@ -1306,7 +1302,16 @@ export function FamilyDetail({
   }
   const topic = requestedTopic
 
-  if (!family || !state.principal_email) return <p role="alert">Diese Familie gibt es nicht.</p>
+  if (!family || !state.principal_email)
+    return (
+      <ScreenLayout header={<ScreenHeader title="Familie nicht gefunden" />}>
+        <ErrorState title="Diese Familie gibt es nicht.">
+          <OrganiserLink href={organiserPaths.families()} className="underline">
+            Zur Familienliste
+          </OrganiserLink>
+        </ErrorState>
+      </ScreenLayout>
+    )
 
   const selectedFamilyId = family.family.id
   const labels = world!.labels_by_entity[selectedFamilyId] ?? []
@@ -1341,85 +1346,90 @@ export function FamilyDetail({
   }
 
   return (
-    <div className="space-y-6">
-      <OrganiserLink href={organiserPaths.families()} className="inline-block underline">
-        ← Familien
-      </OrganiserLink>
-      <OrganiserScreenHeader
-        title={displayName}
-        actions={
-          <FamilyEditDialog
+    <ScreenLayout
+      header={
+        <ScreenHeader
+          title={displayName}
+          eyebrow={
+            <OrganiserLink href={organiserPaths.families()} className="inline-block underline">
+              ← Familien
+            </OrganiserLink>
+          }
+          description={email || 'Keine E-Mail'}
+          action={
+            <FamilyEditDialog
+              family_id={selectedFamilyId}
+              display_name={displayName}
+              email={email}
+              actor={state.principal_email}
+              stage={stage}
+            />
+          }
+        />
+      }
+      workflow={
+        status.complete ? (
+          <StatusNotice label="Vollständig" tone="success">
+            Alles angegeben.
+          </StatusNotice>
+        ) : null
+      }
+      tertiary_navigation={<FamilyTopicNavigation value={topic} onChange={changeTopic} />}
+    >
+      <div role="tabpanel" aria-label={familyTopicLabel(topic)}>
+        {topic === 'zimmer' ? (
+          <FamilyRoomView
             family_id={selectedFamilyId}
-            display_name={displayName}
-            email={email}
+            persons={people}
+            world={world!}
             actor={state.principal_email}
             stage={stage}
+            effective_features={effectiveFeatures}
+            room_wishes_offered={offered('room-wishes')}
+            phases={phases}
           />
-        }
-      />
-      <p className="-mt-4 text-muted">{email || 'Keine E-Mail'}</p>
-      <section aria-label="Familienbereiche" className="space-y-5">
-        <FamilyTopicNavigation value={topic} onChange={changeTopic} />
-        {status.complete ? (
-          <p className="flex items-center gap-2 rounded-base border-2 border-border bg-secondary-background p-3 font-bold">
-            <span aria-hidden="true">✓</span> Alles angegeben.
+        ) : topic === 'personen' ? (
+          <FamilyPeopleView
+            family_id={selectedFamilyId}
+            persons={people}
+            actor={state.principal_email}
+            stage={stage}
+            selected_person_id={detailPersonId}
+            on_select={selectPerson}
+          />
+        ) : topic === 'essen' ? (
+          <FamilyFoodView
+            family_id={selectedFamilyId}
+            persons={people}
+            actor={state.principal_email}
+            world={world!}
+            stage={stage}
+            selected_person_id={detailPersonId}
+            on_select={selectPerson}
+          />
+        ) : topic === 'workshops' && !offered('workshops') ? (
+          <p className="rounded-base border-2 border-dashed border-muted p-5">
+            Workshopwünsche sind in dieser Planung ausgeschaltet.
           </p>
-        ) : null}
-        <div role="tabpanel" aria-label={familyTopicLabel(topic)}>
-          {topic === 'zimmer' ? (
-            <FamilyRoomView
+        ) : topic === 'workshops' ? (
+          <>
+            {workshopNotice ? <p role="note">{workshopNotice}</p> : null}
+            <FamilyWorkshopView
               family_id={selectedFamilyId}
               persons={people}
               world={world!}
               actor={state.principal_email}
               stage={stage}
-              effective_features={effectiveFeatures}
-              room_wishes_offered={offered('room-wishes')}
-              phases={phases}
-            />
-          ) : topic === 'personen' ? (
-            <FamilyPeopleView
-              family_id={selectedFamilyId}
-              persons={people}
-              actor={state.principal_email}
-              stage={stage}
               selected_person_id={detailPersonId}
               on_select={selectPerson}
             />
-          ) : topic === 'essen' ? (
-            <FamilyFoodView
-              family_id={selectedFamilyId}
-              persons={people}
-              actor={state.principal_email}
-              world={world!}
-              stage={stage}
-              selected_person_id={detailPersonId}
-              on_select={selectPerson}
-            />
-          ) : topic === 'workshops' && !offered('workshops') ? (
-            <p className="rounded-base border-2 border-dashed border-muted p-5">
-              Workshopwünsche sind in dieser Planung ausgeschaltet.
-            </p>
-          ) : topic === 'workshops' ? (
-            <>
-              {workshopNotice ? <p role="note">{workshopNotice}</p> : null}
-              <FamilyWorkshopView
-                family_id={selectedFamilyId}
-                persons={people}
-                world={world!}
-                actor={state.principal_email}
-                stage={stage}
-                selected_person_id={detailPersonId}
-                on_select={selectPerson}
-              />
-            </>
-          ) : (
-            <p className="rounded-base border-2 border-dashed border-muted p-5">
-              Dieser Bereich wird noch aufgebaut.
-            </p>
-          )}
-        </div>
-      </section>
-    </div>
+          </>
+        ) : (
+          <p className="rounded-base border-2 border-dashed border-muted p-5">
+            Dieser Bereich wird noch aufgebaut.
+          </p>
+        )}
+      </div>
+    </ScreenLayout>
   )
 }

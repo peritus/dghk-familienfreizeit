@@ -10,7 +10,7 @@ test.describe('repository-local UI contract', () => {
     const organiserStoryUrl = page.url()
 
     await page.getByRole('link', { name: 'Familien', exact: true }).click()
-    await expect(page.getByRole('heading', { name: /Familien/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Familien/, level: 1 })).toBeVisible()
     expect(page.url()).toBe(organiserStoryUrl)
 
     await page.goto(

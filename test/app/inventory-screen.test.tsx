@@ -67,7 +67,7 @@ test('empty state offers only the first step, no stats strip', async () => {
   fireEvent.click(await screen.findByRole('button', { name: 'Gebäude hinzufügen' }))
   expect(await screen.findByText('Noch keine Unterkunft angelegt')).toBeTruthy()
   expect(screen.queryByText('Schlafplätze')).toBeNull()
-  expect(screen.queryByText('Gebäude')).toBeNull()
+  expect(document.querySelector('[data-slot="screen-summary"]')).toBeNull()
 })
 
 test('adding a building, then a room with a duplicate number, is rejected', async () => {

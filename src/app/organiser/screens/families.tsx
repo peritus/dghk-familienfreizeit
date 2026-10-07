@@ -1,3 +1,4 @@
+import { TextField } from '../../components/shared/ui/field.js'
 import { Search } from 'lucide-react'
 import { randomIdPart } from '../ids.js'
 import { useMemo, useState, type FormEvent } from 'react'
@@ -9,7 +10,11 @@ import { SegmentedControl } from '../../components/shared/ui/segmented-control.j
 import { useOrganiser } from '../context.js'
 import { familyRows, familyStatus } from '../family-data.js'
 import { organiserPaths } from '../../../organiser/routes.js'
-import { OrganiserScreenHeader } from '../components/layout.js'
+import {
+  ScreenLayout,
+  ScreenHeader,
+  CollectionSection,
+} from '../../components/shared/ui/screen-layout.js'
 import { CollectionCreateAction } from '../components/collection-create-action.js'
 
 type FamilyFilter = 'all' | 'open' | 'complete'
@@ -126,10 +131,10 @@ export function Families() {
   }
 
   return (
-    <div className="space-y-6">
-      <OrganiserScreenHeader
-        title="Familien"
-        actions={
+    <ScreenLayout header={<ScreenHeader title="Familien" />}>
+      <CollectionSection
+        title="Familienliste"
+        action={
           <CollectionCreateAction
             label="Familie hinzufügen"
             title="Familie hinzufügen"
@@ -142,38 +147,30 @@ export function Families() {
             error={inviteError}
           >
             <form className="mt-5 grid gap-4" noValidate onSubmit={invite}>
-              <label htmlFor="family-invite-name" className="grid gap-1">
-                <span className="font-bold">Familienname</span>
-                <span className="text-sm text-muted">
-                  So erscheint die Familie in Listen und Zimmerplänen.
-                </span>
-                <input
-                  id="family-invite-name"
-                  aria-label="Familienname"
-                  required
-                  value={displayName}
-                  onChange={(event) => {
-                    setDisplayName(event.target.value)
-                    setInviteError(null)
-                  }}
-                  className="min-h-11 rounded-base border-2 border-border px-3"
-                />
-              </label>
-              <label htmlFor="family-invite-email" className="grid gap-1">
-                <span className="font-bold">E-Mail</span>
-                <input
-                  id="family-invite-email"
-                  aria-label="E-Mail"
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(event) => {
-                    setEmail(event.target.value)
-                    setInviteError(null)
-                  }}
-                  className="min-h-11 rounded-base border-2 border-border px-3"
-                />
-              </label>
+              <TextField
+                label="Familienname"
+                hint="So erscheint die Familie in Listen und Zimmerplänen."
+                id="family-invite-name"
+                aria-label="Familienname"
+                required
+                value={displayName}
+                onChange={(event) => {
+                  setDisplayName(event.target.value)
+                  setInviteError(null)
+                }}
+              />
+              <TextField
+                label="E-Mail"
+                id="family-invite-email"
+                aria-label="E-Mail"
+                required
+                type="email"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  setInviteError(null)
+                }}
+              />
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="neutral" onClick={() => setAddingFamily(false)}>
                   Abbrechen
@@ -183,101 +180,101 @@ export function Families() {
             </form>
           </CollectionCreateAction>
         }
-      />
-
-      <div className="flex flex-wrap items-end gap-4">
-        <label className="relative min-w-64 flex-1 sm:max-w-md">
-          <span className="sr-only">Familien durchsuchen</span>
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2"
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Familie, E-Mail oder Person"
-            autoComplete="off"
-            className="min-h-12 w-full rounded-base border-2 border-border bg-secondary-background pr-3 pl-10"
-          />
-        </label>
-        <SegmentedControl
-          label="Familien filtern"
-          value={filter}
-          onChange={setFilter}
-          options={filterOptions.map((option) => ({
-            ...option,
-            label: `${option.label} ${counts[option.value]}`,
-          }))}
-        />
-      </div>
-
-      <p className="text-sm text-muted" aria-live="polite">
-        {shown.length} von {all.length} Familien
-      </p>
-
-      <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background shadow-shadow">
-        {shown.length ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left max-md:block">
-              <caption className="sr-only">Familien</caption>
-              <thead className="border-b-2 border-border max-md:hidden">
-                <tr>
-                  <th scope="col" className="p-4">
-                    Familie
-                  </th>
-                  <th scope="col" className="p-4">
-                    Personen
-                  </th>
-                  <th scope="col" className="p-4">
-                    Angaben
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="max-md:block">
-                {shown.map(({ row, status }) => (
-                  <tr
-                    key={row.family.id}
-                    className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-4"
-                  >
-                    <th scope="row" className="p-4 align-top max-md:block max-md:p-0">
-                      <OrganiserLink
-                        href={organiserPaths.family_detail(row.family.id)}
-                        className="text-lg font-bold underline"
-                      >
-                        {row.display_name}
-                      </OrganiserLink>
-                      <span className="mt-1 block text-sm text-muted">{row.email}</span>
+        controls={
+          <div className="flex flex-wrap items-end gap-4">
+            <label className="relative min-w-64 flex-1 sm:max-w-md">
+              <span className="sr-only">Familien durchsuchen</span>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Familie, E-Mail oder Person"
+                autoComplete="off"
+                className="min-h-12 w-full rounded-base border-2 border-border bg-secondary-background pr-3 pl-10"
+              />
+            </label>
+            <SegmentedControl
+              label="Familien filtern"
+              value={filter}
+              onChange={setFilter}
+              options={filterOptions.map((option) => ({
+                ...option,
+                label: `${option.label} ${counts[option.value]}`,
+              }))}
+            />
+          </div>
+        }
+      >
+        <p className="text-sm text-muted" aria-live="polite">
+          {shown.length} von {all.length} Familien
+        </p>
+        <div className="overflow-hidden rounded-base border-2 border-border bg-secondary-background shadow-shadow">
+          {shown.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left max-md:block">
+                <caption className="sr-only">Familien</caption>
+                <thead className="border-b-2 border-border max-md:hidden">
+                  <tr>
+                    <th scope="col" className="p-4">
+                      Familie
                     </th>
-                    <td
-                      data-label="Personen"
-                      className="p-4 align-top max-md:flex max-md:justify-between max-md:gap-4 max-md:p-0 max-md:pt-3"
-                    >
-                      <span className="font-bold md:sr-only">Personen</span>
-                      {row.persons.length ? row.persons.length : '—'}
-                    </td>
-                    <td
-                      data-label="Angaben"
-                      className="p-4 align-top max-md:block max-md:p-0 max-md:pt-3"
-                    >
-                      <span className="mb-2 block font-bold md:sr-only">Angaben</span>
-                      {familyStatusBadges(status.open, status.complete)}
-                    </td>
+                    <th scope="col" className="p-4">
+                      Personen
+                    </th>
+                    <th scope="col" className="p-4">
+                      Angaben
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="grid justify-items-start gap-3 border-2 border-dashed border-muted p-6">
-            <p className="font-bold">Keine Familie gefunden.</p>
-            <p className="text-muted">Keine Familie passt zu Suche und Filter.</p>
-            <Button type="button" variant="neutral" onClick={resetFilters}>
-              Suche und Filter zurücksetzen
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+                </thead>
+                <tbody className="max-md:block">
+                  {shown.map(({ row, status }) => (
+                    <tr
+                      key={row.family.id}
+                      className="border-b border-border last:border-b-0 max-md:mb-3 max-md:block max-md:border-2 max-md:p-4"
+                    >
+                      <th scope="row" className="p-4 align-top max-md:block max-md:p-0">
+                        <OrganiserLink
+                          href={organiserPaths.family_detail(row.family.id)}
+                          className="text-lg font-bold underline"
+                        >
+                          {row.display_name}
+                        </OrganiserLink>
+                        <span className="mt-1 block text-sm text-muted">{row.email}</span>
+                      </th>
+                      <td
+                        data-label="Personen"
+                        className="p-4 align-top max-md:flex max-md:justify-between max-md:gap-4 max-md:p-0 max-md:pt-3"
+                      >
+                        <span className="font-bold md:sr-only">Personen</span>
+                        {row.persons.length ? row.persons.length : '—'}
+                      </td>
+                      <td
+                        data-label="Angaben"
+                        className="p-4 align-top max-md:block max-md:p-0 max-md:pt-3"
+                      >
+                        <span className="mb-2 block font-bold md:sr-only">Angaben</span>
+                        {familyStatusBadges(status.open, status.complete)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="grid justify-items-start gap-3 border-2 border-dashed border-muted p-6">
+              <p className="font-bold">Keine Familie gefunden.</p>
+              <p className="text-muted">Keine Familie passt zu Suche und Filter.</p>
+              <Button type="button" variant="neutral" onClick={resetFilters}>
+                Suche und Filter zurücksetzen
+              </Button>
+            </div>
+          )}
+        </div>
+      </CollectionSection>
+    </ScreenLayout>
   )
 }

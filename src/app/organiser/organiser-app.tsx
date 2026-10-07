@@ -1,10 +1,11 @@
+import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
+import { ErrorState } from '../components/shared/ui/screen-state.js'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
 import type { EventDraft } from '../../events/types.js'
 import { NotFound, RouteLoading } from '../components/application/route-states'
-import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { Button } from '../components/shared/ui/button'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
@@ -290,32 +291,46 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
   if (state.status === 'unauthorized' || state.status === 'stale_build')
     return (
       <OrganiserMinimalFrame profile={profile}>
-        <p role="alert">{state.error}</p>
+        <ScreenLayout header={<ScreenHeader title="Ansicht nicht verfügbar" />}>
+          <ErrorState
+            title="Zugang oder Versionsstand prüfen"
+            onRetry={() => window.location.reload()}
+            retry_label="Neu laden"
+          >
+            {state.error}
+          </ErrorState>
+        </ScreenLayout>
       </OrganiserMinimalFrame>
     )
   if (state.status === 'load_error')
     return (
       <OrganiserMinimalFrame profile={profile}>
-        <Alert role="alert" className="bg-secondary-background">
-          <AlertTitle>Die Organisationsdaten konnten nicht geladen werden</AlertTitle>
-          <AlertDescription>
+        <ScreenLayout header={<ScreenHeader title="Organisationsdaten nicht verfügbar" />}>
+          <ErrorState
+            title="Die Organisationsdaten konnten nicht geladen werden"
+            onRetry={() => window.location.reload()}
+            retry_label="Neu laden"
+          >
             <p>{state.error} Solange die Daten fehlen, zeigt diese Ansicht keine Zahlen an.</p>
-            <Button className="mt-4" onClick={() => window.location.reload()}>
-              Neu laden
-            </Button>
-          </AlertDescription>
-        </Alert>
+          </ErrorState>
+        </ScreenLayout>
       </OrganiserMinimalFrame>
     )
   if (!derivation.world)
     return (
       <OrganiserMinimalFrame profile={profile}>
-        <div className="space-y-4" role="alert">
-          <p>{derivation.error ?? state.error}</p>
-          <Button variant="neutral" onClick={() => dispatch({ type: 'discard' })}>
-            Änderungsentwürfe verwerfen
-          </Button>
-        </div>
+        <ScreenLayout header={<ScreenHeader title="Planung prüfen" />}>
+          <ErrorState title="Die Planung konnte nicht berechnet werden">
+            {derivation.error ?? state.error}
+            <Button
+              variant="neutral"
+              className="mt-4"
+              onClick={() => dispatch({ type: 'discard' })}
+            >
+              Änderungsentwürfe verwerfen
+            </Button>
+          </ErrorState>
+        </ScreenLayout>
       </OrganiserMinimalFrame>
     )
 

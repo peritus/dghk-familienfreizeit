@@ -1,5 +1,7 @@
 import { OrganiserLink } from '../../components/application/organiser-link.js'
-import { Card } from '../../components/shared/ui/card'
+import { ActionableNotice } from '../../components/shared/ui/notice.js'
+import { SectionHeader } from '../../components/shared/ui/screen-layout.js'
+import { buttonVariants } from '../../components/shared/ui/button.js'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { closedAreaState } from '../closed-areas.js'
@@ -32,24 +34,19 @@ export function ClosedAreaHints() {
   })
   if (differing.length === 0) return null
   return (
-    <div>
-      <h2 className="text-xl font-bold">Abweichungen vom festgelegten Ergebnis</h2>
-      <Card className="mt-4 bg-secondary-background p-0">
-        <ul className="divide-y-2 divide-border">
-          {differing.map((entry) => (
-            <li key={entry.area} className="flex flex-wrap items-center justify-between gap-3 p-5">
-              <p>
-                {entry.label}: {entry.changes} {entry.changes === 1 ? 'Abweichung' : 'Abweichungen'}{' '}
-                vom festgelegten Ergebnis ({entry.families}{' '}
-                {entry.families === 1 ? 'Familie' : 'Familien'})
-              </p>
-              <OrganiserLink href={entry.href} className="underline">
-                Prüfen
-              </OrganiserLink>
-            </li>
-          ))}
-        </ul>
-      </Card>
+    <div className="space-y-3">
+      <SectionHeader title="Abweichungen vom festgelegten Ergebnis" />
+      {differing.map((entry) => (
+        <ActionableNotice
+          key={entry.area}
+          title={`${entry.label}: ${entry.changes} ${entry.changes === 1 ? 'Abweichung' : 'Abweichungen'} vom festgelegten Ergebnis (${entry.families} ${entry.families === 1 ? 'Familie' : 'Familien'})`}
+          action={
+            <OrganiserLink href={entry.href} className={buttonVariants({ variant: 'neutral' })}>
+              Prüfen
+            </OrganiserLink>
+          }
+        />
+      ))}
     </div>
   )
 }

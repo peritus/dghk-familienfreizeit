@@ -1,3 +1,5 @@
+import { ErrorState } from '../../components/shared/ui/screen-state.js'
+import { TextField } from '../../components/shared/ui/field.js'
 import { useEffect, useRef, useState } from 'react'
 import { randomIdPart } from '../ids.js'
 import { BedIcon } from '../../components/shared/icons/bed-icons.js'
@@ -6,13 +8,15 @@ import { Card, CardContent } from '../../components/shared/ui/card'
 import { Button } from '../../components/shared/ui/button'
 import { Badge } from '../../components/shared/ui/badge.js'
 import { SegmentedControl } from '../../components/shared/ui/segmented-control.js'
-import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import { StatsStrip } from '../../components/shared/ui/stats-strip.js'
 import { Tag } from '../../components/shared/ui/tag.js'
-import { OrganiserScreenHeader } from '../components/layout.js'
+import {
+  ScreenLayout,
+  ScreenHeader,
+  CollectionSection,
+} from '../../components/shared/ui/screen-layout.js'
 import { CollectionCreateAction } from '../components/collection-create-action.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
-import { pluralDe } from '../../lib/plural-de.js'
 import { useOrganiser } from '../context.js'
 import {
   inventoryWorld,
@@ -24,10 +28,8 @@ import {
 import type { EventDraft } from '../../../events/types.js'
 import type { Label } from '../../../events/fold.js'
 import { activeProfile } from '../../../config/index.js'
-import { AreaClosingActions } from '../components/area-closing.js'
-import { accommodationTrack } from '../../../modules/room-assignment/app/accommodation-track.js'
-import { SecondaryNavigation } from '../components/navigation.js'
-import { organiserPaths } from '../../../organiser/routes.js'
+import { AccommodationWorkflow } from '../components/accommodation-workflow.js'
+import { AccommodationNavigation } from '../components/accommodation-navigation.js'
 import {
   labelText,
   roomPropertyDefinitions,
@@ -65,7 +67,7 @@ const floorlessRoomTypes = new Set(['bungalow', 'schlaffass'])
 
 export function Inventory() {
   useDocumentTitle('Unterkunft · Familienfreizeit')
-  const { world, state, stage, phases } = useOrganiser()
+  const { world, state, stage } = useOrganiser()
   const config = selectedInventoryConfig()
   const floors = config.floors.map((value) => ({
     value,
@@ -222,30 +224,37 @@ export function Inventory() {
   const hasBuildings = summary.buildings.length > 0
 
   return (
-    <div className="space-y-8">
-      <SecondaryNavigation
-        aria_label="Unterbringungsbereiche"
-        items={[
-          {
-            href: organiserPaths.inventory(),
-            active_paths: [organiserPaths.inventory()],
-            label: 'Unterkunft',
-          },
-          {
-            href: organiserPaths.assignment_board(),
-            active_paths: [organiserPaths.assignment_board()],
-            label: 'Belegung',
-          },
-        ]}
-      />
-      <WorkflowStepper
-        aria_label="Ablauf der Unterbringung"
-        steps={accommodationTrack({ phases: phases ?? [], meta: activeProfile.meta })}
-        next_action={<AreaClosingActions area="accommodation" />}
-      />
-      <OrganiserScreenHeader
-        title="Unterkunft"
-        actions={
+    <ScreenLayout
+      secondary_navigation={<AccommodationNavigation />}
+      header={
+        <ScreenHeader
+          title="Unterkunft"
+          description="Gebäude, Zimmer und Betten für diese Freizeit."
+        />
+      }
+      workflow={<AccommodationWorkflow />}
+      notices={
+        error ? (
+          <ErrorState title="Unterkunft konnte nicht geändert werden">{error}</ErrorState>
+        ) : null
+      }
+      summary={
+        hasBuildings ? (
+          <StatsStrip
+            items={[
+              { value: summary.buildings.length, label: 'Gebäude' },
+              { value: summary.rooms.length, label: 'Zimmer' },
+              { value: summary.beds.length, label: 'Betten' },
+              { value: summary.capacity, label: 'Schlafplätze' },
+              { value: formatEuro(summary.cost_eur, 0), label: 'Kosten pro Nacht' },
+            ]}
+          />
+        ) : null
+      }
+    >
+      <CollectionSection
+        title="Gebäude"
+        action={
           <CollectionCreateAction
             label="Gebäude hinzufügen"
             title="Gebäude hinzufügen"
@@ -265,67 +274,45 @@ export function Inventory() {
             />
           </CollectionCreateAction>
         }
-      />
-      <p className="-mt-4 text-muted">Gebäude, Zimmer und Betten für diese Freizeit.</p>
-
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-base border-2 border-border bg-danger text-danger-foreground p-3"
-        >
-          {error}
-        </p>
-      ) : null}
-
-      {hasBuildings ? (
-        <StatsStrip
-          items={[
-            { value: summary.buildings.length, label: 'Gebäude' },
-            { value: summary.rooms.length, label: 'Zimmer' },
-            { value: summary.beds.length, label: 'Betten' },
-            { value: summary.capacity, label: 'Schlafplätze' },
-            { value: formatEuro(summary.cost_eur, 0), label: 'Kosten pro Nacht' },
-          ]}
-        />
-      ) : null}
-
-      <div className="space-y-10">
-        {summary.buildings.map((building) => {
-          const rooms = summary.rooms.filter((room) => room.building_id === building.id)
-          return (
-            <BuildingSection
-              key={building.id}
-              building={building}
-              rooms={rooms}
-              beds={summary.beds}
-              world={world}
-              floors={floors}
-              room_types={roomTypes}
-              bed_types={bedTypes}
-              room_form_open={openRoomForms[building.id] ?? false}
-              onToggleRoomForm={() =>
-                setOpenRoomForms((current) => ({
-                  ...current,
-                  [building.id]: !current[building.id],
-                }))
-              }
-              open_rooms={openRooms}
-              onToggleRoom={(roomId) =>
-                setOpenRooms((current) => ({ ...current, [roomId]: !current[roomId] }))
-              }
-              onUpdateBuilding={updateBuilding}
-              onRemoveBuilding={removeBuilding}
-              onAddRoom={addRoom}
-              onUpdateRoom={updateRoom}
-              onRemoveRoom={removeRoom}
-              onAddBed={addBed}
-              onUpdateBed={updateBed}
-              onRemoveBed={removeBed}
-            />
-          )
-        })}
-      </div>
-    </div>
+      >
+        <div className="space-y-10">
+          {summary.buildings.map((building) => {
+            const rooms = summary.rooms.filter((room) => room.building_id === building.id)
+            return (
+              <BuildingSection
+                key={building.id}
+                building={building}
+                rooms={rooms}
+                beds={summary.beds}
+                world={world}
+                floors={floors}
+                room_types={roomTypes}
+                bed_types={bedTypes}
+                room_form_open={openRoomForms[building.id] ?? false}
+                onToggleRoomForm={() =>
+                  setOpenRoomForms((current) => ({
+                    ...current,
+                    [building.id]: !current[building.id],
+                  }))
+                }
+                open_rooms={openRooms}
+                onToggleRoom={(roomId) =>
+                  setOpenRooms((current) => ({ ...current, [roomId]: !current[roomId] }))
+                }
+                onUpdateBuilding={updateBuilding}
+                onRemoveBuilding={removeBuilding}
+                onAddRoom={addRoom}
+                onUpdateRoom={updateRoom}
+                onRemoveRoom={removeRoom}
+                onAddBed={addBed}
+                onUpdateBed={updateBed}
+                onRemoveBed={removeBed}
+              />
+            )
+          })}
+        </div>
+      </CollectionSection>
+    </ScreenLayout>
   )
 }
 
@@ -363,15 +350,12 @@ function NewBuildingForm({
             setError(null)
           }}
         >
-          <label className="grid gap-1">
-            <span className="font-bold">Name des Gebäudes</span>
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="z. B. Haupthaus"
-              className="min-h-11 rounded-base border-2 border-border px-3"
-            />
-          </label>
+          <TextField
+            label="Name des Gebäudes"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="z. B. Haupthaus"
+          />
           {error ? (
             <p role="alert" className="font-bold text-danger-foreground">
               {error}
@@ -449,20 +433,11 @@ function BuildingSection({
 }) {
   const places = rooms.reduce((sum, room) => sum + room.place_count, 0)
   return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-heading">{building.name}</h2>
-          <p className="text-muted">
-            {rooms.length} {pluralDe(rooms.length, 'Zimmer', 'Zimmer')}, {places}{' '}
-            {pluralDe(places, 'Schlafplatz', 'Schlafplätze')}
-          </p>
-          <BuildingEditor
-            building={building}
-            onSave={onUpdateBuilding}
-            onRemove={onRemoveBuilding}
-          />
-        </div>
+    <CollectionSection
+      title={building.name}
+      heading_level={3}
+      description={`${rooms.length} Zimmer, ${places} Schlafplätze`}
+      action={
         <CollectionCreateAction
           label="Zimmer hinzufügen"
           title={`Zimmer in ${building.name} hinzufügen`}
@@ -480,8 +455,9 @@ function BuildingSection({
             onSubmit={(payload, values) => onAddRoom(building.id, payload, values)}
           />
         </CollectionCreateAction>
-      </div>
-
+      }
+    >
+      <BuildingEditor building={building} onSave={onUpdateBuilding} onRemove={onRemoveBuilding} />
       {rooms.length === 0 ? (
         <Card className="bg-secondary-background">
           <CardContent>
@@ -549,7 +525,7 @@ function BuildingSection({
           </div>
         </Card>
       )}
-    </section>
+    </CollectionSection>
   )
 }
 
@@ -594,14 +570,11 @@ function BuildingEditor({
             if (value) onSave(building.id, value, building.sort_key)
           }}
         >
-          <label className="grid gap-1">
-            <span className="font-bold">Name des Gebäudes</span>
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="min-h-11 rounded-base border-2 border-border px-3"
-            />
-          </label>
+          <TextField
+            label="Name des Gebäudes"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
           <Button type="submit" variant="neutral">
             Speichern
           </Button>
@@ -858,7 +831,6 @@ function RoomDetail({
           {blockedReason}
         </p>
       ) : null}
-
       {editing ? (
         <RoomForm
           floors={floors}
@@ -883,8 +855,35 @@ function RoomDetail({
           }}
         />
       ) : null}
-
-      <div className="space-y-3">
+      <CollectionSection
+        title={`Betten in Zimmer ${room.number}`}
+        heading_level={4}
+        action={
+          <CollectionCreateAction
+            label="Bett hinzufügen"
+            title={`Bett in Zimmer ${room.number} hinzufügen`}
+            description="Ein Bett ergänzt die abgeleitete Schlafplatzkapazität dieses Zimmers."
+            open={addingBed}
+            on_open_change={setAddingBed}
+          >
+            <BedForm
+              bed_types={bedTypes}
+              is_apartment={room.room_type === 'apartment'}
+              existing_schlafraeume={Array.from(
+                new Set(
+                  beds
+                    .map((bed) => bed.sleeping_room)
+                    .filter((value): value is number => value !== null),
+                ),
+              ).sort((a, b) => a - b)}
+              onSubmit={(payload) => {
+                onAddBed(room.id, payload)
+                setAddingBed(false)
+              }}
+            />
+          </CollectionCreateAction>
+        }
+      >
         {beds.length === 0 ? (
           <p>Noch keine Betten. Füg das erste Bett hinzu, dann hat das Zimmer Schlafplätze.</p>
         ) : (
@@ -907,30 +906,7 @@ function RoomDetail({
             </div>
           ))
         )}
-        <CollectionCreateAction
-          label="Bett hinzufügen"
-          title={`Bett in Zimmer ${room.number} hinzufügen`}
-          description="Ein Bett ergänzt die abgeleitete Schlafplatzkapazität dieses Zimmers."
-          open={addingBed}
-          on_open_change={setAddingBed}
-        >
-          <BedForm
-            bed_types={bedTypes}
-            is_apartment={room.room_type === 'apartment'}
-            existing_schlafraeume={Array.from(
-              new Set(
-                beds
-                  .map((bed) => bed.sleeping_room)
-                  .filter((value): value is number => value !== null),
-              ),
-            ).sort((a, b) => a - b)}
-            onSubmit={(payload) => {
-              onAddBed(room.id, payload)
-              setAddingBed(false)
-            }}
-          />
-        </CollectionCreateAction>
-      </div>
+      </CollectionSection>
     </div>
   )
 }
@@ -992,14 +968,11 @@ function BedRow({
           setEditing(false)
         }}
       >
-        <label className="grid gap-1">
-          <span className="font-bold">Bezeichnung</span>
-          <input
-            value={label}
-            onChange={(event) => setLabel(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-border px-3"
-          />
-        </label>
+        <TextField
+          label="Bezeichnung"
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+        />
         <SegmentedControl
           label="Bettart"
           value={bedType}
@@ -1185,15 +1158,12 @@ function RoomForm({
           }}
         >
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="grid gap-1">
-              <span className="font-bold">Nummer oder Name</span>
-              <input
-                value={number}
-                onChange={(event) => setNumber(event.target.value)}
-                placeholder="z. B. 203 oder Eichhörnchen"
-                className="min-h-11 rounded-base border-2 border-border px-3"
-              />
-            </label>
+            <TextField
+              label="Nummer oder Name"
+              value={number}
+              onChange={(event) => setNumber(event.target.value)}
+              placeholder="z. B. 203 oder Eichhörnchen"
+            />
             {floorless ? null : (
               <Select label="Etage" value={floor} onChange={setFloor} options={floors} />
             )}

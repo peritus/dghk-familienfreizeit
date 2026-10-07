@@ -13,7 +13,18 @@ export function App({ profile }: { profile?: ProfilePresentation } = {}) {
 
   return (
     <Shell profile={profile}>
-      <RouteBoundary reset_key={location}>
+      <RouteBoundary
+        reset_key={location}
+        render_fallback={
+          location === '/organiser' || location.startsWith('/organiser/')
+            ? (content) => (
+                <Shell profile={profile} force_frame>
+                  {content}
+                </Shell>
+              )
+            : undefined
+        }
+      >
         <Switch>
           <Route path="/">
             <OrganiserLanding profile={profile} />
@@ -22,7 +33,13 @@ export function App({ profile }: { profile?: ProfilePresentation } = {}) {
             <Login />
           </Route>
           <Route path="/organiser" nest>
-            <Suspense fallback={<RouteLoading />}>
+            <Suspense
+              fallback={
+                <Shell profile={profile} force_frame>
+                  <RouteLoading />
+                </Shell>
+              }
+            >
               <OrganiserApp profile={profile} />
             </Suspense>
           </Route>
