@@ -27,10 +27,6 @@
   container-type: inline-size;
 }
 
-main:has(> .workshop-participation-page) {
-  max-width: 90rem;
-}
-
 .workshop-participation {
   color: var(--foreground);
   --participation-rank-1: color-mix(in srgb, var(--main) 46%, var(--secondary-background));
