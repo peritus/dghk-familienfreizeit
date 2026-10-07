@@ -54,7 +54,7 @@ the deployment.
 Install the lockfile dependencies inside the Nix development environment:
 
 ```sh
-nix develop -c pnpm ci
+nix develop -c pnpm install --frozen-lockfile
 ```
 
 Run the deployment only through the project entrypoint:

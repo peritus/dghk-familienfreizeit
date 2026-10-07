@@ -41,25 +41,25 @@ separately from unresolved conflicts at the current tip.
 3. Run the cheap static gates through the flake:
 
    ```sh
-   npm run format:check
-   npm run test:docs
-   npm run typecheck
-   npm run lint
+   pnpm run format:check
+   pnpm run test:docs
+   pnpm run typecheck
+   pnpm run lint
    ```
 
-   Run `npm audit --omit=dev --json` separately from the full audit so
+   Run `pnpm audit --prod --json` separately from the full audit so
    production dependency risk is not confused with development-tool risk.
 
 4. Run deterministic tests and artifact checks:
 
    ```sh
-   npm test
-   npm run bench:check
-   npm run build
-   npm run test:build
-   npm run storybook:build
-   npm run test:storybook
-   npm run test:browser
+   pnpm test
+   pnpm run bench:check
+   pnpm run build
+   pnpm run test:build
+   pnpm run storybook:build
+   pnpm run test:storybook
+   pnpm run test:browser
    ```
 
    If the full browser or Storybook command cannot start because the flake

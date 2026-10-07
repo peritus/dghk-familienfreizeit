@@ -64,7 +64,7 @@ require_file "Wrangler template" "$TEMPLATE"
 require_mode_600 "target config" "$TARGET_CONFIG"
 require_mode_600 "API token" "$TOKEN_FILE"
 
-for command_name in curl jq npm wrangler; do
+for command_name in curl jq pnpm wrangler; do
   require_command "$command_name"
 done
 
