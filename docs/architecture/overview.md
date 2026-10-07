@@ -13,7 +13,7 @@ the organiser planning slice.
 ## Runtime and build
 
 [Vite configuration](../../vite.config.ts) composes React, Tailwind, the bundle
-graph recorder and the Cloudflare plugin. `npm run build` emits `dist/client` and
+graph recorder and the Cloudflare plugin. `pnpm run build` emits `dist/client` and
 `dist/dghk_familienfreizeit`. The browser alias `@/` resolves to `src/app/`.
 The lockfile records the installed package versions; dependency examples in the
 specification are not the installed compatibility matrix.
@@ -68,7 +68,7 @@ enforced by lint rules over `src/events/fold.ts` and `src/events/resolver.ts`
 Separate strict TypeScript projects check browser, Worker and build-tool code.
 They enable `noUncheckedIndexedAccess`. Worker bindings are generated and committed
 in [worker-configuration.d.ts](../../worker-configuration.d.ts); regenerate them
-with `npm run typegen` when bindings or compatibility settings change.
+with `pnpm run typegen` when bindings or compatibility settings change.
 The illustrative profile is intentionally outside these projects.
 
 [Outstanding architecture](../../spec/architecture/overview.md) specifies the

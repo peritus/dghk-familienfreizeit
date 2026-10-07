@@ -51,9 +51,9 @@ stories themselves render production React components. The coverage registry
 and Playwright snapshots cover every current component, application composition,
 and screen without requiring a hosted design tool or service.
 
-Use `nix develop -c npm run storybook` while developing. Before implementation,
+Use `nix develop -c pnpm run storybook` while developing. Before implementation,
 add or adjust the story and its usage guidance, then use
-`nix develop -c npm run test:storybook` as the drift check. Intentional visual
+`nix develop -c pnpm run test:storybook` as the drift check. Intentional visual
 changes require the explicit `test:storybook:update` command and a review of
 the committed PNG baseline.
 

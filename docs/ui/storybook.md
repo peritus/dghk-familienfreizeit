@@ -55,10 +55,10 @@ unchanged.
 ## Local workflow
 
 ```sh
-nix develop -c npm run storybook
-nix develop -c npm run storybook:build
-nix develop -c npm run test:storybook
-nix develop -c npm run test:storybook:update
+nix develop -c pnpm run storybook
+nix develop -c pnpm run storybook:build
+nix develop -c pnpm run test:storybook
+nix develop -c pnpm run test:storybook:update
 ```
 
 Run the update command only when the visual change is intentional and the new

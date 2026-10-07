@@ -88,7 +88,7 @@ requirements, and pure-function edge cases.
 Run the domain coverage gate with:
 
 ```sh
-nix develop -c npm run test:room-assignment:coverage
+nix develop -c pnpm run test:room-assignment:coverage
 ```
 
 The current gate reports 99.77% statements, 87.38% branches, 100% functions,

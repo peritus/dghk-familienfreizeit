@@ -43,7 +43,7 @@ change to make quietly.
 `normalizeEvents` returns the state it folded while running those validators,
 and `derive` projects that state instead of folding a second time.
 
-Known residual costs, all measured by `npm run bench` rather than reasoned
+Known residual costs, all measured by `pnpm run bench` rather than reasoned
 about:
 
 - Uniqueness validators in `room-inventory` scan a whole entity kind per event:
@@ -61,6 +61,6 @@ Both are recorded in
 the incremental-derivation options that would address the remaining growth.
 
 KDL fixtures in `test/fixtures/derived-world/` exercise replay, resolver, cardinality, privacy,
-and shuffle-stable derivation. Run `npm test` for the domain suite, and
-`npm run bench` for the cost sweep described in the
+and shuffle-stable derivation. Run `pnpm test` for the domain suite, and
+`pnpm run bench` for the cost sweep described in the
 [testing documentation](../engineering/testing.md#derivation-benchmarks).
