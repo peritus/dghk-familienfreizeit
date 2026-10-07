@@ -675,16 +675,6 @@ export function Workshops() {
         eyebrow="Workshops"
         title="Workshopübersicht"
         description="Workshops anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten."
-        action={
-          <Button
-            onClick={() => {
-              setEditor('new')
-              setError(null)
-            }}
-          >
-            Workshop hinzufügen
-          </Button>
-        }
       />
       <WorkflowStepper
         aria_label="Ablauf der Workshopwahl"
@@ -808,7 +798,19 @@ export function Workshops() {
       />
       {view === 'workshops' ? (
         <section aria-label="Aktive Workshops" className="space-y-3">
-          <WorkshopSectionHeader title="Aktive Workshops" />
+          <WorkshopSectionHeader
+            title="Aktive Workshops"
+            action={
+              <Button
+                onClick={() => {
+                  setEditor('new')
+                  setError(null)
+                }}
+              >
+                Workshop hinzufügen
+              </Button>
+            }
+          />
           {activeWorkshops.length ? (
             <div className="divide-y-2 divide-border overflow-hidden rounded-base border-2 border-border bg-secondary-background">
               {activeWorkshops.map((workshop) => (
