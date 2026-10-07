@@ -58,8 +58,8 @@ an active roadmap milestone before implementation.
 
 ## Local link checks
 
-`npm run check:docs` checks local Markdown file/directory destinations and heading
-anchors. `npm run test:docs` exercises the checker and then checks the repository.
+`pnpm run check:docs` checks local Markdown file/directory destinations and heading
+anchors. `pnpm run test:docs` exercises the checker and then checks the repository.
 CI includes `test:docs`. Code examples are excluded from link extraction; links
 to external URLs are not fetched. Root-relative paths resolve from the repository
 root, and directory links are checked for existence.

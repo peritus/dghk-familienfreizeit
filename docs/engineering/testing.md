@@ -6,7 +6,7 @@ Test names, fixture filenames, and fixture directories are domain-oriented. Do
 not encode roadmap milestone IDs or historical implementation labels in them;
 use the domain concept instead.
 
-`npm run ci` executes:
+`pnpm run ci` executes:
 
 1. Local Markdown link/anchor checks and checker regression tests.
 2. Separate strict browser, Worker and build-tool TypeScript projects, with
@@ -31,7 +31,7 @@ claims about future feature sizes. The organiser chunk can reuse
 the family entry's shared dependencies without counting them twice.
 
 `worker-configuration.d.ts` is generated and committed. After changing Worker
-bindings or compatibility settings, run `npm run typegen`, review the diff and
+bindings or compatibility settings, run `pnpm run typegen`, review the diff and
 run CI. Application checks load the executable room-inventory profile. The
 illustrative profile example remains outside the runtime build and is still
 linted for naming and purity, with negative tests covering the `spec/profiles/`
@@ -53,9 +53,9 @@ in jsdom, not pixel appearance or real-browser keyboard layout.
 
 ## Solver cost gates
 
-`npm run bench:check` runs the two gates that protect derivation cost. Both are
-ordinary tests under `test/solver/`, so `npm test` — and therefore
-`npm run ci` — already runs them; the script exists to run just those two when
+`pnpm run bench:check` runs the two gates that protect derivation cost. Both are
+ordinary tests under `test/solver/`, so `pnpm test` — and therefore
+`pnpm run ci` — already runs them; the script exists to run just those two when
 that is all you want.
 
 They assert different things, and neither measures time:
@@ -83,7 +83,7 @@ They assert different things, and neither measures time:
 runner are either loose enough to miss a real regression or tight enough to fail
 on a busy machine, and a gate that does both gets muted. What has actually
 regressed in this area is how often the code walks a collection, which is
-deterministic and identical on every machine. `npm run bench` remains the tool
+deterministic and identical on every machine. `pnpm run bench` remains the tool
 for comparing wall clock between two runs on one machine.
 
 Budgets are tripwires, not targets. Tripping one means either a regression or a
@@ -96,9 +96,9 @@ budget of 11000.
 
 ## Derivation benchmarks
 
-`npm run bench` runs `test/bench/` under its own
+`pnpm run bench` runs `test/bench/` under its own
 [Vitest configuration](../../vitest.bench.config.ts). It is deliberately outside
-`npm run ci`: it measures cost rather than asserting behavior, and wall-clock
+`pnpm run ci`: it measures cost rather than asserting behavior, and wall-clock
 timings from a shared runner are not a gate anyone should block a merge on.
 
 `test/bench/log.ts` generates a deterministic event log valid for the
@@ -128,11 +128,11 @@ complexity regression visible on a machine whose absolute speed is unknown.
 
 ## Browser route and link gate
 
-`npm run test:browser` runs the Playwright Chromium suite against a local
-`npm run dev` server. The runner waits for `/api/health`, reuses an existing
+`pnpm run test:browser` runs the Playwright Chromium suite against a local
+`pnpm run dev` server. The runner waits for `/api/health`, reuses an existing
 local server outside CI, and runs independent tests in parallel. Use
-`npm run test:browser:headed` when diagnosing a navigation failure. CI installs
-only Chromium and runs this suite as part of `npm run ci`; the Nix development
+`pnpm run test:browser:headed` when diagnosing a navigation failure. CI installs
+only Chromium and runs this suite as part of `pnpm run ci`; the Nix development
 shell also provides a matching Chromium runtime for NixOS.
 
 The route suite uses deterministic organiser API fixtures so link and client
@@ -154,8 +154,8 @@ the browser route suite in the same change.
 
 ## Storybook visual contract
 
-`npm run storybook:build` verifies that the local Storybook documentation and
-stories compile. `npm run test:storybook` starts Storybook locally and runs
+`pnpm run storybook:build` verifies that the local Storybook documentation and
+stories compile. `pnpm run test:storybook` starts Storybook locally and runs
 `test/storybook/style-guide.spec.ts`: it matches the Storybook index one to one
 against `src/app/design/ui-coverage.ts`, so an unregistered story fails the run,
 and compares every component, application composition, and screen entry with
@@ -163,7 +163,7 @@ its committed Playwright PNG unless the entry records a snapshot exemption. The
 Nix development shell supplies Chromium, so this gate remains local and needs
 no hosted visual-regression account or MCP service.
 
-Use `npm run test:storybook:update` only after reviewing an intentional visual
+Use `pnpm run test:storybook:update` only after reviewing an intentional visual
 change. The style-guide MDX page documents why/when decisions; the TypeScript
 stories and snapshots verify what the browser actually renders.
 

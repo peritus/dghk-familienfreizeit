@@ -12,16 +12,22 @@ discoverable by `station task list`:
 | `storybook` | Installs the lockfile, starts the repository-local Storybook workbench; Station can inject its host and port |
 
 Both use the repository's `nix develop` shell. With Node 22.12+ (22.x) already
-available, the equivalent commands are `npm ci && npm run ci` and
-`npm ci && npm run dev`. The dev script applies unapplied local D1 migrations
+available, the equivalent commands are `pnpm install --frozen-lockfile && pnpm run ci` and
+`pnpm install --frozen-lockfile && pnpm run dev`. The dev script applies unapplied local D1 migrations
 before starting Vite.
 Do not run both tasks concurrently in the same directory: each installs dependencies.
-The npm lockfile is committed; Nix supplies Node and npm, not application dependencies.
+The pnpm lockfile is committed; Nix supplies Node and pnpm, not application dependencies.
 
-For a direct shell, run `nix develop`, then `npm ci`. The flake lock file pins the
-Nix package set, and `nix flake check` verifies that the development shell
-evaluates on supported systems. To initialize or repair the local database
-without starting Vite, run `npm run db:migrate:local`.
+For a direct shell, run `nix develop`, then `pnpm install --frozen-lockfile`. The
+`packageManager` field pins pnpm, and the Nix shell provides that version. The
+pnpm content-addressable store shares package files between projects where the
+filesystem supports links from the store; each project still has its own
+`node_modules` links. The project uses pnpm's hoisted node linker because the
+isolated layout made TypeScript reject inferred Storybook declaration paths.
+Install scripts are allowed only for `esbuild` and `workerd`. The flake lock file pins the Nix package set, and
+`nix flake check` verifies that the development shell evaluates on supported
+systems. To initialize or repair the local database without starting Vite, run
+`pnpm run db:migrate:local`.
 
 ### Importing a fixture through the HTTP API
 
@@ -39,8 +45,8 @@ prints the single-use link in its terminal, and the login form also shows it as
 a demo link:
 
 ```sh
-nix develop --command npm run dev
-nix develop --command npm run db:import-fixture -- \
+nix develop --command pnpm run dev
+nix develop --command pnpm run db:import-fixture -- \
   --base-url http://127.0.0.1:5173 \
   --magic-link 'http://127.0.0.1:5173/auth/<single-use-token>' \
   test/fixtures/room-inventory/djh-luebben.kdl \
@@ -52,7 +58,7 @@ For a Cloudflare preview or another deployed Worker, use its HTTPS URL and a
 single-use organiser magic link from the normal authentication flow:
 
 ```sh
-nix develop --command npm run db:import-fixture -- \
+nix develop --command pnpm run db:import-fixture -- \
   --base-url https://preview.example.test \
   --magic-link 'https://preview.example.test/auth/<single-use-token>' \
   test/fixtures/room-inventory/djh-luebben.kdl \
@@ -78,19 +84,19 @@ fixture prefix. It refuses mismatched logs. The event API is append-only, so
 the importer never resets or deletes a remote log.
 
 To run the full browser route suite locally, use
-`nix develop --command npm run test:browser`. It starts the local Vite/Worker
+`nix develop --command pnpm run test:browser`. It starts the local Vite/Worker
 preview on port 5173, waits for `/api/health`, and runs the Chromium tests in
-parallel. Use `npm run test:browser:headed` for interactive debugging. Do not
+parallel. Use `pnpm run test:browser:headed` for interactive debugging. Do not
 run this command concurrently with `dev-preview` in the same directory unless
 the existing server is the intended target.
 
 To work on the local component and screen contract, use
-`nix develop --command npm run storybook`. It starts Storybook on its local
-default (`127.0.0.1:6006`), does not open a browser automatically, and reads only repository files. `npm run test:storybook` checks the coverage index
-and visual baselines; `npm run test:storybook:update` records an intentional
+`nix develop --command pnpm run storybook`. It starts Storybook on its local
+default (`127.0.0.1:6006`), does not open a browser automatically, and reads only repository files. `pnpm run test:storybook` checks the coverage index
+and visual baselines; `pnpm run test:storybook:update` records an intentional
 visual change after review. No account, hosted service, or MCP server is needed.
 
-The [GitHub workflow](../../.github/workflows/ci.yml) runs the same `npm run ci` target
+The [GitHub workflow](../../.github/workflows/ci.yml) runs the same `pnpm run ci` target
 on pushes, pull requests and manual dispatch. It requires no Cloudflare credentials
 and does not deploy. Its first GitHub execution is left to the repository owner.
 Task definitions are provided without launching either Station task.
@@ -133,7 +139,7 @@ hostname or port is committed.
 
 `wrangler.jsonc` uses a local-only placeholder D1 id with `remote: false`. It needs
 no account or hosted secrets to run the local foundation and organiser tests.
-`npm run dev` applies `migrations/` to that local database before serving the app,
+`pnpm run dev` applies `migrations/` to that local database before serving the app,
 so a new checkout does not fail with `D1_ERROR: no such table: event`.
 `/api/health`
 checks the actual local D1 binding, returning `200 {"status":"ok"}` or a
@@ -173,8 +179,8 @@ automatic deployment target in M0.
 ## Verification
 
 See [testing](testing.md) for the CI checks, bundle budgets, and verification
-limits. Run `npm run check:docs` to validate local Markdown links and anchors;
-`npm run test:docs` also tests the checker itself. Both are included in CI.
+limits. Run `pnpm run check:docs` to validate local Markdown links and anchors;
+`pnpm run test:docs` also tests the checker itself. Both are included in CI.
 
 ## Implemented scope
 

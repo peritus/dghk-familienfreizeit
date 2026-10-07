@@ -43,6 +43,12 @@ servers. Do not rely on globally installed Node or project tools, and do not
 bypass the flake for a command because it appears to work outside the
 development environment.
 
+For JavaScript tooling, keep the exact package-manager version in the
+`packageManager` field of `package.json` and provide it in both the Nix
+development shell and CI. Commit only that manager's lockfile, use frozen
+installs in automation, and use the same manager in scripts and documented
+commands.
+
 For frontend work, follow the binding lifecycle and navigation rules in
 [docs/ui/frontend.md](docs/ui/frontend.md).
 
@@ -74,7 +80,7 @@ For frontend work, follow the binding lifecycle and navigation rules in
   When implemented and verified, move runtime configuration into `profiles/` (or
   its normal source directory), document it in `docs/`, and retain only outstanding
   requirements in `spec/`.
-- Run `npm run test:docs` for documentation changes. CI must check local Markdown
+- Run `pnpm run test:docs` for documentation changes. CI must check local Markdown
   destinations and heading anchors; update links and tooling paths when moving
   files. Automated link checks do not prove implementation status.
 - When a code or specification change introduces behavior, constraints,
