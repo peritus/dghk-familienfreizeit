@@ -5,7 +5,7 @@ import viteConfig from './vite.config.ts'
  * Benchmarks are deliberately outside `vitest.config.ts`. They measure cost
  * rather than assert behavior, they take minutes rather than seconds, and CI
  * must not gate on wall-clock timings from a shared runner. Run them with
- * `npm run bench`.
+ * `pnpm run bench`.
  */
 export default mergeConfig(
   viteConfig,

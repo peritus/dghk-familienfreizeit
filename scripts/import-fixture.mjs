@@ -7,7 +7,7 @@ const defaultBaseUrl = 'http://127.0.0.1:5173'
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 export function usage() {
-  return `Usage: npm run db:import-fixture -- [options] <fixture.kdl> [fixture.kdl ...]
+  return `Usage: pnpm run db:import-fixture -- [options] <fixture.kdl> [fixture.kdl ...]
 
 Options:
   --base-url URL             Worker URL (default: ${defaultBaseUrl})

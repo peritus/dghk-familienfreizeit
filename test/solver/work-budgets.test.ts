@@ -13,7 +13,7 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
 /**
  * A cost gate that does not measure time.
  *
- * `npm run bench` reports wall clock, which is the right thing for a human
+ * `pnpm run bench` reports wall clock, which is the right thing for a human
  * comparing two runs on one machine and the wrong thing for CI: a shared runner
  * makes an absolute millisecond budget either flaky or so loose it catches
  * nothing. What actually regressed every time in this area was never time, it

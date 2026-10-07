@@ -154,7 +154,7 @@ when the contract revision moved, rather than reporting an opaque mismatch:
 ```ts
 test.each(goldenCases)('golden: $name', ({ log_path, expected_hash, compatibility_revision }) => {
   if (currentCompatibilityRevision() !== compatibility_revision) {
-    throw new Error(`golden: $name was recorded against a different contract revision — review with npm run test:record`)
+    throw new Error(`golden: $name was recorded against a different contract revision — review with pnpm run test:record`)
   }
   const world = derive(loadEventLog(log_path), defaultConfig)
   expect(sha256(canonical(world.plan))).toBe(expected_hash)
@@ -172,7 +172,7 @@ golden: full-event — output changed
      fam_0012  rm_0009 → rm_0014
      fam_0022  rm_0031 → rm_0031  (place changed within room)
   total_score 412 → 419
-  Re-record with: npm run test:record
+  Re-record with: pnpm run test:record
 ```
 
 Without that diff renderer, developers re-record goldens reflexively and the

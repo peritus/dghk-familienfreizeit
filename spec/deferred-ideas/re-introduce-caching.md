@@ -45,7 +45,7 @@ close to linear — 73 ms and 731 ms at those two sizes — which is what makes
 "always refold" a true statement rather than a hopeful one.
 
 The benchmark this plan made the D1 revision conditional on now exists as
-`npm run bench`; see [testing](../../docs/engineering/testing.md#derivation-benchmarks).
+`pnpm run bench`; see [testing](../../docs/engineering/testing.md#derivation-benchmarks).
 It also shows where the cost actually sits, and it is not the fold: at 2 367
 events `solve` is 23 442 ms against the fold's 72 ms. A plan cache would hide
 that from a repeat reader at an unchanged head, and from nobody else — not a

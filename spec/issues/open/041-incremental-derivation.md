@@ -63,11 +63,11 @@ often it rescans, which is a design question.
 
 Cost is now guarded rather than only measured:
 [solver cost gates](../../../docs/engineering/testing.md#solver-cost-gates) run
-in `npm test` and fail on a work-count regression or a change in plan output.
+in `pnpm test` and fail on a work-count regression or a change in plan output.
 
 ## Evidence
 
-`npm run bench`, one machine, median of repeated runs, `familienfreizeit-2027`
+`pnpm run bench`, one machine, median of repeated runs, `familienfreizeit-2027`
 profile. `derive` before and after the fold fixes:
 
 | events | before | after | factor |

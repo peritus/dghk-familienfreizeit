@@ -70,7 +70,7 @@ Every spec file the issue concerns, as a clickable relative link, e.g.
 `- [modules/room-assignment.md](../../modules/room-assignment.md)`. This
 replaces what used to be a plain-string `related_files:` frontmatter list —
 moving it into the body makes it both clickable and something
-`npm run test:docs`'s link checker actually validates.
+`pnpm run test:docs`'s link checker actually validates.
 ```
 
 `status: needs-decision` marks anything that, per `AGENTS.md`, would need to
@@ -85,7 +85,7 @@ Dependency order and numeric order are independent, because numbers are
 assigned when an issue is filed rather than when its prerequisites are known.
 Whenever `depends_on` is set, the body repeats the relation in a
 `## Dependencies` section so the link is clickable and
-`npm run test:docs` validates it.
+`pnpm run test:docs` validates it.
 
 Naming: `NNN-slug.md`, zero-padded to 3 digits so lexicographic order equals
 numeric order. Numbers are assigned once, sequentially, and are never

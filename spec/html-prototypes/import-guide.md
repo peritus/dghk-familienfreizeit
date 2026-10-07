@@ -174,13 +174,13 @@ Run commands through the repository flake. For a library import, the minimum
 verification set is:
 
 ```sh
-nix develop -c npm run format:check
-nix develop -c npm run lint
-nix develop -c npm run typecheck
-nix develop -c npm run test
-nix develop -c npm run storybook:build
-nix develop -c npm run test:storybook
-nix develop -c npm run test:docs
+nix develop -c pnpm run format:check
+nix develop -c pnpm run lint
+nix develop -c pnpm run typecheck
+nix develop -c pnpm run test
+nix develop -c pnpm run storybook:build
+nix develop -c pnpm run test:storybook
+nix develop -c pnpm run test:docs
 ```
 
 Also inspect the rendered stories at wide and narrow widths when responsive
