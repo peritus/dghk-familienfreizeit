@@ -19,6 +19,26 @@ const fixture = readFileSync(
   'utf-8',
 )
 const world = derive(loadKdl(fixture, activeProfile.validation_view), activeProfile.validation_view)
+const duplicatePersonId = 'per_dupe'
+const duplicatePersonEvent = {
+  seq: loadKdl(fixture, activeProfile.validation_view).length + 1,
+  at: '2027-05-01T00:00:00Z',
+  actor: 'organiser@example.test',
+  subject: null,
+  type: 'PersonAdded',
+  payload: {
+    person_id: duplicatePersonId,
+    family_id: 'fam_f0',
+    given_name: 'Alex',
+    family_name: 'Morgan',
+    age: 8,
+    role: 'child',
+  },
+} as const
+const duplicateWorld = derive(
+  [...loadKdl(fixture, activeProfile.validation_view), duplicatePersonEvent],
+  activeProfile.validation_view,
+)
 const contributions = composeSolverContributions(activeProfile)
 const plan = solve(buildSolverInput(world, contributions), contributions, {
   build_revision: 'test',
@@ -51,4 +71,32 @@ test('a trace link opens with the person from its query highlighted', () => {
     true,
   )
   expect((screen.getByLabelText('Person suchen') as HTMLInputElement).value).toBe('Alex Morgan')
+})
+
+test('a trace URL keeps the selected person ID when names are identical', () => {
+  const location = memoryLocation({
+    path: `/workshops/allocation/trace?person=${duplicatePersonId}`,
+    record: true,
+  })
+  render(
+    <OrganiserContext.Provider
+      value={{
+        state: organiserFixtureState,
+        world: duplicateWorld,
+        dispatch: () => undefined,
+        stage: () => undefined,
+        apply: async () => undefined,
+        current_plan: plan,
+      }}
+    >
+      <Router hook={location.hook} searchHook={location.searchHook}>
+        <WorkshopAllocation />
+      </Router>
+    </OrganiserContext.Provider>,
+  )
+
+  const selectedLabel = 'Alex Morgan · Familie Morgan · dupe'
+  expect((screen.getByLabelText('Person suchen') as HTMLInputElement).value).toBe(selectedLabel)
+  expect(screen.getByRole('columnheader', { name: selectedLabel })).toBeTruthy()
+  expect(location.history.at(-1)).toBe(`/workshops/allocation/trace?person=${duplicatePersonId}`)
 })

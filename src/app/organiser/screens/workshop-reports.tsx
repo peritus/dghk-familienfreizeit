@@ -14,6 +14,7 @@ import { type EntityPickerOption } from '../../components/shared/ui/entity-picke
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
 import { draftCount } from '../state.js'
+import { personPickerOptions } from '../person-picker-options.js'
 import {
   FamilyPlanCell,
   LeaderNames,
@@ -82,10 +83,14 @@ function workshopOptions(items: readonly WorkshopReportWorkshop[]): EntityPicker
 }
 
 function personOptions(persons: readonly WorkshopReportPerson[]): EntityPickerOption[] {
-  return persons.map((person) => ({
-    value: person.id,
-    label: person.kind === 'external' ? `${person.name} (extern)` : person.name,
-  }))
+  return personPickerOptions(
+    persons.map((person) => ({
+      id: person.id,
+      name: person.name,
+      family_name: person.family_name,
+      external: person.kind === 'external',
+    })),
+  ).map(({ id, label }) => ({ value: id, label }))
 }
 
 function familyOptions(families: readonly WorkshopReportFamily[]): EntityPickerOption[] {

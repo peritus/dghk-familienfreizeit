@@ -123,7 +123,7 @@ export type WorkshopAllocationProjection = {
   demand: readonly WorkshopAllocationDemand[]
   trace_events: readonly WorkshopAllocationTraceEvent[]
   trace_people: readonly WorkshopAllocationTracePerson[]
-  person_names: readonly { id: string; name: string }[]
+  person_names: readonly { id: string; name: string; family_name?: string | null }[]
   unassigned_person_ids: readonly string[]
   fixed_violation_count: number
   fixed_reviews?: readonly {
@@ -178,6 +178,7 @@ export type WorkshopAllocationTraceDetailItem = {
 type AllocationPerson = {
   id: string
   name: string
+  family_name: string | null
   group: Exclude<WorkshopAllocationGroup, 'all'>
   age_label: string
 }
@@ -207,6 +208,11 @@ function personName(world: World, personId: string): string {
       .filter((value): value is string => Boolean(value))
       .join(' ') || personId
   )
+}
+
+function familyName(world: World, personId: string): string | null {
+  const familyId = labelValue(world.labels_by_entity[personId] ?? [], 'member-of')
+  return familyId ? labelValue(world.labels_by_entity[familyId] ?? [], 'display-name') : null
 }
 
 function personGroup(world: World, personId: string): Exclude<WorkshopAllocationGroup, 'all'> {
@@ -451,6 +457,7 @@ export function buildWorkshopAllocationProjection(
     .map((person) => ({
       id: person.id,
       name: personName(input.world, person.id),
+      family_name: familyName(input.world, person.id),
       group: personGroup(input.world, person.id),
       age_label: ageLabel(input.world, person.id),
     }))
@@ -806,7 +813,11 @@ export function buildWorkshopAllocationProjection(
     demand,
     trace_events: traceEvents,
     trace_people: tracePeople,
-    person_names: people.map(({ id, name }) => ({ id, name })),
+    person_names: people.map(({ id, name, family_name: familyName }) => ({
+      id,
+      name,
+      family_name: familyName,
+    })),
     unassigned_person_ids: assignment.unassigned.map(({ person_id: personId }) => personId),
     fixed_violation_count: assignment.fixed_violations.length,
     fixed_reviews: fixedReview,

@@ -54,9 +54,13 @@ export const Trace: Story = {
         <TraceControls
           mode={mode}
           onModeChange={setMode}
-          selected_person="Mara Schmidt"
+          selected_person_id="per_mara"
           onPersonChange={() => undefined}
-          people={['Mara Schmidt', 'Leni Schmidt', 'Nika Weber']}
+          people={[
+            { id: 'per_mara', label: 'Mara Schmidt' },
+            { id: 'per_leni', label: 'Leni Schmidt' },
+            { id: 'per_nika', label: 'Nika Weber' },
+          ]}
         />
         <TraceLegend
           items={[

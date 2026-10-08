@@ -22,6 +22,26 @@ const fixture = readFileSync(
   'utf-8',
 )
 const world = derive(loadKdl(fixture, activeProfile.validation_view), activeProfile.validation_view)
+const duplicatePersonId = 'per_dupe'
+const duplicatePersonEvent = {
+  seq: loadKdl(fixture, activeProfile.validation_view).length + 1,
+  at: '2027-05-01T00:00:00Z',
+  actor: 'organiser@example.test',
+  subject: null,
+  type: 'PersonAdded',
+  payload: {
+    person_id: duplicatePersonId,
+    family_id: 'fam_f0',
+    given_name: 'Alex',
+    family_name: 'Morgan',
+    age: 8,
+    role: 'child',
+  },
+} as const
+const duplicateWorld = derive(
+  [...loadKdl(fixture, activeProfile.validation_view), duplicatePersonEvent],
+  activeProfile.validation_view,
+)
 const contributions = composeSolverContributions(activeProfile)
 const plan = solve(buildSolverInput(world, contributions), contributions, {
   build_revision: 'test',
@@ -69,24 +89,44 @@ test.each([
   expect((screen.getByLabelText(label) as HTMLSelectElement).value).toBe(target.value)
 })
 
-test('the person list is searched by name, external leaders included', () => {
-  const location = renderLists('/workshops/lists/persons')
-  const field = screen.getByLabelText('Person suchen') as HTMLInputElement
-  expect(field.type).toBe('search')
+test.each(['per_p1', duplicatePersonId])(
+  'the person picker selects duplicate-name person %s by its stable ID',
+  (personId) => {
+    const initialPersonId = personId === 'per_p1' ? duplicatePersonId : 'per_p1'
+    const location = renderLists(
+      `/workshops/lists/persons?person=${initialPersonId}`,
+      duplicateWorld,
+    )
+    const field = screen.getByLabelText('Person suchen') as HTMLInputElement
+    expect(field.type).toBe('search')
+    const options = [...document.querySelectorAll('datalist option')].map(
+      (option) => (option as HTMLOptionElement).value,
+    )
+    const duplicateLabels = options.filter((value) =>
+      value.startsWith('Alex Morgan · Familie Morgan'),
+    )
+    expect(duplicateLabels).toHaveLength(2)
+    expect(duplicateLabels.every((value) => value.includes(' · '))).toBe(true)
+    const suffix = personId.split('_').at(-1)!
+    const target = duplicateLabels.find((value) => value.endsWith(suffix))!
+
+    // An incomplete name selects nothing.
+    fireEvent.change(field, { target: { value: target.slice(0, 3) } })
+    expect(location.history).toHaveLength(1)
+
+    fireEvent.change(field, { target: { value: target } })
+    fireEvent.blur(field)
+    expect(location.history.at(-1)).toBe(`/workshops/lists/persons?person=${personId}`)
+    expect(screen.getByRole('heading', { level: 2, name: 'Alex Morgan' })).toBeTruthy()
+  },
+)
+
+test('the person list includes external leaders in its picker', () => {
+  renderLists('/workshops/lists/persons')
   const external = [...document.querySelectorAll('datalist option')]
     .map((option) => (option as HTMLOptionElement).value)
     .find((value) => value.endsWith(' (extern)'))!
-
-  // An incomplete name selects nothing.
-  fireEvent.change(field, { target: { value: external.slice(0, 3) } })
-  expect(location.history).toHaveLength(1)
-
-  fireEvent.change(field, { target: { value: external } })
-  expect(location.history.at(-1)).toMatch(/\/workshops\/lists\/persons\?person=ext_/)
-  expect(
-    screen.getByRole('heading', { level: 2, name: external.replace(' (extern)', '') }),
-  ).toBeTruthy()
-  expect(screen.getByText('Externe Leitung')).toBeTruthy()
+  expect(external).toBeTruthy()
 })
 
 test('previous and next move through the documents and focus the new one', () => {

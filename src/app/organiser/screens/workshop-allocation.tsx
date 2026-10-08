@@ -17,6 +17,7 @@ import {
   ScreenLayout,
 } from '../../components/shared/ui/screen-layout.js'
 import { FixedDecisionReview } from '../../components/shared/ui/fixed-decision-review.js'
+import { personPickerOptions } from '../person-picker-options.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
 import {
@@ -95,7 +96,7 @@ export function WorkshopAllocation() {
   const { world, current_plan: currentPlan, phases } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
   const [traceMode, setTraceMode] = useState<TraceMode>(queryPersonId ? 'highlight' : 'all')
-  const [selectedPersonName, setSelectedPersonName] = useState('')
+  const [selectedPersonId, setSelectedPersonId] = useState(queryPersonId ?? '')
   const projection = useMemo(
     () =>
       world && currentPlan
@@ -123,14 +124,23 @@ export function WorkshopAllocation() {
   const view = allocationView(location)
   const answers = workshopAllocationPeople(projection, group)
   const selectedPerson =
-    projection.person_names.find((person) => person.name === selectedPersonName) ??
-    projection.person_names.find((person) => person.id === queryPersonId)
-  const people = projection.answers
-    .filter((answer) => group === 'all' || answer.group === group)
-    .map((answer) => answer.name)
-    .sort((left, right) => left.localeCompare(right, 'de'))
+    projection.person_names.find((person) => person.id === queryPersonId) ??
+    projection.person_names.find((person) => person.id === selectedPersonId)
+  const personNames = projection.person_names
+    .filter((person) => answers.some((answer) => answer.id === person.id))
+    .map((person) => ({
+      id: person.id,
+      name: person.name,
+      family_name: person.family_name ?? null,
+    }))
+  if (selectedPerson && !personNames.some((person) => person.id === selectedPerson.id))
+    personNames.push({ ...selectedPerson, family_name: selectedPerson.family_name ?? null })
+  const people = personPickerOptions(personNames)
   const stages = traceStages(projection, group, selectedPerson?.id, traceMode)
-  const selectedLabel = traceMode === 'all' ? undefined : selectedPerson?.name
+  const selectedLabel =
+    traceMode === 'all'
+      ? undefined
+      : people.find((person) => person.id === selectedPerson?.id)?.label
   const activeSelectedPersonId = traceMode === 'all' ? undefined : selectedPerson?.id
 
   const setView = (next: string) => {
@@ -142,13 +152,21 @@ export function WorkshopAllocation() {
     void navigate(paths[next as WorkshopAllocationView] ?? paths.answers)
   }
 
+  const selectTracePerson = (personId: string) => {
+    setSelectedPersonId(personId)
+    void navigate(
+      `${organiserPaths.workshop_allocation_trace()}?person=${encodeURIComponent(personId)}`,
+    )
+  }
+
   const openTrace = (answer: { id: string }) => {
     const person = projection.person_names.find((item) => item.id === answer.id)
-    if (person) setSelectedPersonName(person.name)
     if (traceMode === 'all') setTraceMode('highlight')
-    void navigate(
-      `${organiserPaths.workshop_allocation_trace()}?person=${encodeURIComponent(answer.id)}`,
-    )
+    if (person) selectTracePerson(person.id)
+    else
+      void navigate(
+        `${organiserPaths.workshop_allocation_trace()}?person=${encodeURIComponent(answer.id)}`,
+      )
   }
 
   return (
@@ -257,14 +275,12 @@ export function WorkshopAllocation() {
             mode={traceMode}
             onModeChange={(mode) => {
               setTraceMode(mode)
-              if (mode === 'all') {
-                setSelectedPersonName('')
-              } else if (!selectedPerson && people[0]) {
-                setSelectedPersonName(people[0])
+              if (mode !== 'all' && !selectedPerson && people[0]) {
+                selectTracePerson(people[0].id)
               }
             }}
-            selected_person={selectedPersonName || selectedPerson?.name}
-            onPersonChange={setSelectedPersonName}
+            selected_person_id={activeSelectedPersonId}
+            onPersonChange={selectTracePerson}
             people={people}
           />
           <TraceLegend

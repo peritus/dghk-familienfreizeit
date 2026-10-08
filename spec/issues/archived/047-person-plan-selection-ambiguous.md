@@ -1,7 +1,7 @@
 ---
 id: "047"
 title: Person plan selection is ambiguous for duplicate names
-status: open
+status: resolved
 severity: gap
 category: ui
 source: review of lists-print-fallback against main
@@ -33,14 +33,19 @@ display the wrong person's explanation. The organiser person and family plans
 are part of the workshop list surface described in [UI-12](../../ui/screens/workshops.md)
 and the [workshop attendance report contract](../../modules/workshop-assignment.md).
 
-## Recommendation
+## Resolution
 
-Keep selection tied to person IDs end to end. Give options with duplicate
-rendered names enough permitted organiser context to distinguish them, and
-resolve a trace by its explicit person ID before using a display-name fallback.
-Add regression coverage showing that either of two people with the same name
-can be selected for a plan and that a trace URL with an explicit ID shows that
-same person.
+Person plan picker options and allocation trace controls now preserve stable
+person IDs. Duplicate names include family display context; if names still
+collide, a short stable ID suffix distinguishes them, with the full ID as a
+final collision fallback. The trace uses the explicit `person` query ID before
+any local fallback.
+
+Regression coverage selects both people with the same name in their person
+plans and verifies that a trace URL for the second ID keeps that identity in
+the picker and selected trace heading. See [workshop list tests](../../../test/app/workshop-lists.test.tsx)
+and [allocation query tests](../../../test/app/workshop-allocation-query.test.tsx).
+The verified behavior is documented in [frontend guidance](../../../docs/ui/frontend.md).
 
 ## Related files
 

@@ -63,6 +63,10 @@ including conflict notices and person tracing, without adding a persistence boun
 The **Listen** navigation entry selects the workshop roster, person plan, family
 plan, or room plan route. Each view has a page-local selector for one document with
 previous and next buttons, over the same plan as every other organiser screen.
+Person selection keeps the person ID from picker option through the URL. Duplicate
+names include the family's display name, with a short stable ID suffix when that
+still leaves a collision. The allocation trace likewise resolves the `person`
+query ID before displaying the selected person's trace.
 The roster shows an explicit confidentiality notice above its picker. Rosters and
 family plans switch to labelled cards when the list area is narrower than 720px;
 person and room plans keep scrolling tables. The global stylesheet's print block

@@ -1,5 +1,5 @@
 import { ChoiceField } from '../../../../app/components/shared/ui/field.js'
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { DataTable, ResponsiveCollection } from '../../../../app/components/shared/ui/data-table.js'
 import { StatsStrip } from '../../../../app/components/shared/ui/stats-strip.js'
 import { Badge } from '../../../../app/components/shared/ui/badge.js'
@@ -261,20 +261,68 @@ export function WorkshopDemandCards({ workshops }: { workshops: readonly Worksho
 }
 
 export type TraceMode = 'all' | 'highlight' | 'only'
+type TracePersonOption = { id: string; label: string }
+
+function TracePersonSearch({
+  selected_label: selectedLabel,
+  selected_person_id: selectedPersonId,
+  on_person_change: onPersonChange,
+  people,
+}: {
+  selected_label?: string
+  selected_person_id?: string
+  on_person_change: (personId: string) => void
+  people: readonly TracePersonOption[]
+}) {
+  const [text, setText] = useState(selectedLabel ?? '')
+  const commit = (candidate: string) => {
+    const match = people.find((person) => person.label === candidate.trim())
+    if (match && match.id !== selectedPersonId) onPersonChange(match.id)
+  }
+
+  return (
+    <label className="grid min-w-64 flex-1 gap-1 font-bold">
+      Person suchen
+      <input
+        list="trace-people"
+        type="search"
+        autoComplete="off"
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value)
+          const inputType = (event.nativeEvent as InputEvent).inputType
+          if (!inputType || inputType === 'insertReplacementText') commit(event.target.value)
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') commit(event.currentTarget.value)
+        }}
+        onBlur={(event) => commit(event.currentTarget.value)}
+        className="min-h-11 rounded-base border-2 border-border px-3 font-normal"
+      />
+      <datalist id="trace-people">
+        {people.map((person) => (
+          <option key={person.id} value={person.label} />
+        ))}
+      </datalist>
+    </label>
+  )
+}
 
 export function TraceControls({
   mode,
   onModeChange,
-  selected_person: selectedPerson,
+  selected_person_id: selectedPersonId,
   onPersonChange,
   people,
 }: {
   mode: TraceMode
   onModeChange: (mode: TraceMode) => void
-  selected_person?: string
-  onPersonChange?: (value: string) => void
-  people?: readonly string[]
+  selected_person_id?: string
+  onPersonChange?: (personId: string) => void
+  people?: readonly TracePersonOption[]
 }) {
+  const selectedPerson = people?.find((person) => person.id === selectedPersonId)
+
   return (
     <div
       className="sticky top-0 z-10 flex flex-wrap items-end gap-4 rounded-base border-2 border-border bg-background p-4 shadow-shadow"
@@ -303,22 +351,13 @@ export function TraceControls({
         ))}
       </fieldset>
       {mode !== 'all' && people && onPersonChange ? (
-        <label className="grid min-w-64 flex-1 gap-1 font-bold">
-          Person suchen
-          <input
-            list="trace-people"
-            type="search"
-            autoComplete="off"
-            value={selectedPerson ?? ''}
-            onChange={(event) => onPersonChange(event.target.value)}
-            className="min-h-11 rounded-base border-2 border-border px-3 font-normal"
-          />
-          <datalist id="trace-people">
-            {people.map((person) => (
-              <option key={person} value={person} />
-            ))}
-          </datalist>
-        </label>
+        <TracePersonSearch
+          key={selectedPersonId ?? ''}
+          selected_label={selectedPerson?.label}
+          selected_person_id={selectedPersonId}
+          on_person_change={onPersonChange}
+          people={people}
+        />
       ) : null}
     </div>
   )
