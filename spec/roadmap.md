@@ -72,7 +72,7 @@ Specification coverage: [authentication](application/authentication.md), [family
 - Implement the family side of [phases](architecture/phases.md) §6: the live
   family composition with each area's closed result, live descriptors,
   unavailable referenced entities, and the own-family before/after comparison.
-  Preserve the separate privacy gate in issue 031 for family projections.
+  The returned family projection is subject to the privacy gate below.
 - Declare the allocation features of the [feature set](architecture/features.md#8-feature-set)
   together with the family results they govern, and apply
   [feature availability](architecture/features.md#4-effective-availability)
@@ -86,12 +86,36 @@ Specification coverage: [authentication](application/authentication.md), [family
 - Add closing, reopening, re-closing, withdrawn-person, cancelled-workshop,
   privacy, and family-projection fixtures.
 
+### Family projection privacy gate
+
+Before `/api/family/view` returns any derived family data, diffs, badges,
+reports, or notification previews:
+
+- Build the projection from an explicit family-visible allowlist; do not
+  shallow-copy the organiser world. Recompute or filter every derived
+  collection, including diagnostics, summaries, capabilities, constraints,
+  indexes, relation values, and metadata, and prevent facts derived from
+  restricted labels or identifiers for hidden entities from crossing this
+  boundary.
+- Decide which diagnostics and world summaries, if any, are family-visible.
+  Decide whether relation values that point outside the family are omitted,
+  redacted, or replaced by stable non-identifying status values. Do not expose
+  the projection until those decisions are explicit and enforced.
+- Add adversarial family-projection tests with restricted labels, hidden entity
+  identifiers, diagnostics, module summaries, and relation targets outside the
+  family.
+
+M10 is not complete until this gate is implemented and its adversarial tests
+pass.
+
 Acceptance: after M8, a family can request and redeem a single-use login link
 through the M10 authentication workflow, inspect its permitted derived
 information, correct its own display name, save permitted controls while an area
-is open, and see each area's result only once it is closed. Hosted invitation and
-reminder delivery begins in M14. Issue 041 is closed or explicitly accepted before this
-family-access acceptance is declared complete.
+is open, and see each area's result only once it is closed. The family projection
+privacy gate is implemented and its adversarial tests pass. Hosted invitation
+and reminder delivery begins in M14.
+Issue 041 is closed or explicitly accepted before this family-access
+acceptance is declared complete.
 
 ## M11 — Reports and browser-printing host
 

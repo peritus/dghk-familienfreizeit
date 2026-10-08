@@ -1,7 +1,7 @@
 ---
 id: "031"
 title: Family world projection retains organiser-only derived data
-status: needs-decision
+status: resolved
 severity: privacy
 category: kernel
 source: semantic-coherence-sweep-after-fix
@@ -45,11 +45,14 @@ diagnostics, summaries, capabilities, constraints, indexes, relation values,
 and metadata. Add adversarial tests containing restricted labels, hidden entity
 ids, diagnostics, and module summaries before M10 exposes the projection.
 
-## Open questions
+## Resolution
 
-1. Which diagnostics and world summaries, if any, are intentionally family-visible?
-2. Should family-visible relation values be redacted, omitted, or replaced with
-   stable non-identifying status values when their target is outside the family?
+This issue is resolved as a separate tracking item. Its explicit-allowlist,
+derived-data filtering, and adversarial-test requirements, including the two
+unresolved privacy choices now stated in M10, are now the hard
+[M10 family projection privacy gate](../../roadmap.md#family-projection-privacy-gate).
+This transfer does not mean the runtime behavior is implemented: M10 remains
+incomplete until the gate is implemented and its adversarial tests pass.
 
 ## Related files
 
@@ -59,3 +62,4 @@ ids, diagnostics, and module summaries before M10 exposes the projection.
 - [src/worker/index.ts](../../../src/worker/index.ts)
 - [application/family-view.md](../../application/family-view.md)
 - [architecture/phases.md](../../architecture/phases.md)
+- [roadmap.md](../../roadmap.md#family-projection-privacy-gate)
