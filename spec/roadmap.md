@@ -29,17 +29,29 @@ and so are the organiser sides of the [feature](../docs/architecture/features.md
 [phase](../docs/architecture/phases.md) contracts; remaining active work is limited
 to the unresolved planning contract:
 
-- complete the remaining organiser finding and open-case review surfaces over
-  current and prospective programme and allocation contexts;
-- finish capacity-race, fairness-repair, cancellation, slot-change, and privacy
-  fixtures (the capacity-reduction policy is resolved as
-  [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces));
-- build the remaining finding views on the delivered [participation matrix](../docs/ui/frontend.md#workshop-participation-overview)
-  without creating another workshop state store.
+- add organiser authoring for workshop cancellation through the existing
+  event-backed workshop workflow;
+- complete finding and open-case review surfaces for current and prospective
+  programme and allocation contexts, building on the delivered
+  [participation matrix](../docs/ui/frontend.md#workshop-participation-overview)
+  and traces without creating another workshop state store;
+- complete fixtures for capacity races, deterministic ranked-round allocation,
+  fixed attendance, cancellation, slot changes, and privacy, exercising the
+  allocation and capacity policies in [D4](../decisions.md#d4--stable-sorted-greedy-not-integer-programming),
+  [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces),
+  and [D31](../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops);
+- reconcile the workshop contract terms for reservations, individual attendance
+  cancellation, separation, and age eligibility. Record whether current behavior
+  covers each term, it remains active M8 work, or it requires an explicit scope
+  decision before M8 can close.
 
-Acceptance: organisers can inspect automatic and explicitly fixed decisions,
-every blocking outcome is explainable, capacity changes follow D30, and all
-views retain direct workshop identity with at most one placement per workshop.
+Acceptance: organisers can inspect automatic and explicitly fixed placements
+and attendance, including finding and open-case outcomes; eligible rankings can
+be recorded before placement is known, with no-preference represented explicitly;
+every blocking outcome and allocation decision is traceable; cancellation is
+authorable; capacity changes follow D30; each workshop has at most one placement
+and each person has at most one assignment per overlapping period; and every
+reconciled contract term has a recorded disposition.
 
 <a id="m10--family-access-and-release-control"></a>
 ## M10 — Family access
@@ -74,7 +86,7 @@ Specification coverage: [authentication](application/authentication.md), [family
 - Add closing, reopening, re-closing, withdrawn-person, cancelled-workshop,
   privacy, and family-projection fixtures.
 
-Acceptance: after M9, a family can request and redeem a single-use login link
+Acceptance: after M8, a family can request and redeem a single-use login link
 through the M10 authentication workflow, inspect its permitted derived
 information, correct its own display name, save permitted controls while an area
 is open, and see each area's result only once it is closed. Hosted invitation and

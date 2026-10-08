@@ -173,9 +173,7 @@ converted into automatic assignments in the first place.
 
 ## Outstanding
 
-- Organiser review surfaces for current and prospective attendance (part of
-  [M8](../roadmap.md#m8--workshop-planning-completion)), including
-  `WorkshopsClosed` and `WorkshopsReopened`, the closing review and the difference
-  from the closed result ([phases](../architecture/phases.md) §5–7).
-- Roster, heatmap, and finding views without a second workshop state store
-  (part of M8).
+- Finding and open-case review surfaces for current and prospective attendance
+  remain in [M8](../roadmap.md#m8--workshop-planning-completion). Build them on
+  the derived attendance results, delivered participation matrix, and traces
+  without adding a second workshop state store.
