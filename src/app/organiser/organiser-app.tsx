@@ -6,7 +6,7 @@ import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
 import type { EventDraft } from '../../events/types.js'
 import { NotFound, RouteLoading } from '../components/application/route-states'
-import { Button } from '../components/shared/ui/button'
+import { OrganiserDerivationError } from './derivation-error-state.js'
 import { applyOrganiserEvents, loadOrganiserLog, OrganiserApiError, staleResponse } from './api.js'
 import { OrganiserContext } from './context.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../solver/index.js'
@@ -19,6 +19,7 @@ import { derivePhaseView, phaseActivation } from '../../derive/phases.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   deriveWorld,
+  draftCount,
   initialOrganiserState,
   materializeDraftEvents,
   organiserReducer,
@@ -320,16 +321,16 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     return (
       <OrganiserMinimalFrame profile={profile}>
         <ScreenLayout header={<ScreenHeader title="Planung prüfen" />}>
-          <ErrorState title="Die Planung konnte nicht berechnet werden">
-            {derivation.error ?? state.error}
-            <Button
-              variant="neutral"
-              className="mt-4"
-              onClick={() => dispatch({ type: 'discard' })}
-            >
-              Änderungsentwürfe verwerfen
-            </Button>
-          </ErrorState>
+          <OrganiserDerivationError
+            has_drafts={draftCount(state) > 0}
+            message={
+              draftCount(state) > 0
+                ? (derivation.error ?? state.error ?? 'Die Planung konnte nicht berechnet werden.')
+                : 'Der gespeicherte Ereignisstand kann mit dieser Konfiguration nicht abgeleitet werden.'
+            }
+            onDiscard={() => dispatch({ type: 'discard' })}
+            onReload={() => window.location.reload()}
+          />
         </ScreenLayout>
       </OrganiserMinimalFrame>
     )

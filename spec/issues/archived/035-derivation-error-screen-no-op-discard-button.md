@@ -1,7 +1,7 @@
 ---
 id: "035"
 title: Derivation-error screen shows a discard-drafts button that can be a no-op
-status: open
+status: resolved
 severity: gap
 category: ui
 source: live testing of the inventory redesign (organiser-handoff follow-up session)
@@ -69,6 +69,13 @@ Branch the `!derivation.world` screen on `draftCount(state) > 0`:
 
 This is generic organiser-shell code, not specific to the inventory screen
 that surfaced it — the fix applies to every organiser route.
+
+## Resolution
+
+The organiser derivation-error screen now offers draft discard only when
+pending drafts exist. With no drafts, it identifies the stored event log as the
+source of the failure and offers reload. Regression tests cover both actions in
+[`derivation-error-state.test.tsx`](../../../test/app/derivation-error-state.test.tsx).
 
 ## Related files
 
