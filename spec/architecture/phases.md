@@ -77,7 +77,7 @@ exception: an area's solver result is visible only as its latest closed result.
 The family view never shows the difference between a closed result and the
 current derivation, never shows that an area is being prepared, and never receives
 findings, traces, scores, notes, or other families' restricted values. The privacy
-boundary in [issue 031](../issues/open/031-family-projection-privacy-boundary.md)
+boundary in [issue 031](../issues/archived/031-family-projection-privacy-boundary.md)
 remains authoritative for family projections.
 
 | Field | Source | Organiser | Family |
@@ -136,4 +136,3 @@ Outstanding with the family composition:
   live descriptors, an unavailable referenced entity, a withdrawn person, a
   cancelled workshop, and the own-family before/after comparison.
 - Family notices: Zieltermin, late, and closed-input copy on the family view.
-

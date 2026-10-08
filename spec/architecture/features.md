@@ -60,7 +60,7 @@ The family projection contains only family features that are effective for that
 family. A feature that is not effective is absent: the family view does not
 reveal its existence, timing, or reason. Explaining what comes next to a family
 belongs to the phase view, under the
-[family projection privacy boundary](../issues/open/031-family-projection-privacy-boundary.md).
+[family projection privacy boundary](../issues/archived/031-family-projection-privacy-boundary.md).
 
 The family view offers a governed section only while its family feature is effective.
 
