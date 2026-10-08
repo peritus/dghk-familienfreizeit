@@ -13,6 +13,10 @@ reports are separate audience and presentation slices; an organiser milestone
 does not claim family behavior, and a domain milestone does not require reports
 before the report host exists.
 
+## Compact organiser presentation
+
+Deliver the [compact organiser requirements](ui/design-system.md#compact-organiser-presentation) through the existing shell and shared presentation components. Acceptance: code, Storybook, typography at five widths, all save states, keyboard and focus behavior, reduced motion, print, and documentation pass together. Preserve desktop save presentation and current draft transitions.
+
 <a id="m8--organiser-authored-workshop-programme"></a>
 ## M8 — Workshop planning completion
 

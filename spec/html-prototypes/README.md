@@ -28,3 +28,7 @@ The listed artifacts were imported unchanged from their local source files:
 `/home/dev/organiser-family-view-prototype-v9.html`. Their fixture data is
 synthetic and must be treated as sensitive-looking test data, not participant
 data.
+
+## Compact organiser presentation
+
+[Compact header, phone typography and workflow references](workshops-redesign-delta/delta-1-todo.md) include eight offline HTML mockups. They are frozen design inputs; production components and [verified guidance](../../docs/ui/design-system.md) remain authoritative for implemented behavior.
