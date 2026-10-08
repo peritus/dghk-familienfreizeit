@@ -127,3 +127,22 @@ test('applying acknowledges only the submitted draft prefix', () => {
   expect(draftCount(completed)).toBe(0)
   expect(completed.change_mode).toBe('immediate')
 })
+
+test('last saved time is successful browser-session metadata, never inferred from log events', () => {
+  const loaded = loadedState()
+  expect(loaded.last_saved_at).toBeUndefined()
+  const staged = organiserReducer(loaded, { type: 'stage', events: [family] })
+  expect(staged.last_saved_at).toBeUndefined()
+  const applying = organiserReducer(staged, { type: 'applying' })
+  const saved = organiserReducer(applying, {
+    type: 'applied',
+    count: 1,
+    events: [{ ...family, seq: 1 }],
+    saved_at: '2026-10-08T19:45:00.000Z',
+  })
+  expect(saved.last_saved_at).toBe('2026-10-08T19:45:00.000Z')
+  expect(saved.change_mode).toBe('immediate')
+  const failed = organiserReducer(saved, { type: 'failed', status: 'error', error: 'Save failed' })
+  expect(failed.last_saved_at).toBe(saved.last_saved_at)
+  expect(organiserReducer(failed, { type: 'discard' }).last_saved_at).toBe(saved.last_saved_at)
+})

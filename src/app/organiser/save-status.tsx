@@ -2,13 +2,10 @@ import { useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
 import { Switch } from '@base-ui/react/switch'
 import { Check, ChevronDown, Pencil, TriangleAlert } from 'lucide-react'
-import { useOrganiser } from './context.js'
-import { draftCount, saveStatusView } from './state.js'
+import { useSaveControls } from './save-controls.js'
 import { changeCountLabel, pluralDe } from '../lib/plural-de.js'
 import { Button } from '../components/shared/ui/button'
 import { cn } from '../lib/utils.js'
-
-type ConfirmStep = 'discard' | 'leave-draft' | null
 
 /**
  * A single persistent status control replacing the old cloud-icon toggle and
@@ -28,50 +25,24 @@ type ConfirmStep = 'discard' | 'leave-draft' | null
  *   connection, so the fourth look from the design spec has no trigger here.
  */
 export function SaveStatus() {
-  const { state, dispatch, apply } = useOrganiser()
+  const {
+    state,
+    view,
+    count,
+    saving,
+    drafting,
+    confirm,
+    set_confirm: setConfirm,
+    announcement,
+    switch_mode: handleSwitchChange,
+    discard: handleDiscard,
+    discard_and_leave: handleDiscardAndLeaveDraftMode,
+    save: handleSave,
+  } = useSaveControls()
   const [open, setOpen] = useState(false)
-  const [confirm, setConfirm] = useState<ConfirmStep>(null)
-  const [announcement, setAnnouncement] = useState('')
-
-  const view = saveStatusView(state)
-  const count = draftCount(state)
-  const saving = state.status === 'applying'
-  const drafting = state.change_mode === 'drafting'
-
   function handleOpenChange(next: boolean) {
     setOpen(next)
     if (!next) setConfirm(null)
-  }
-
-  function handleSwitchChange(checked: boolean) {
-    if (checked) {
-      dispatch({ type: 'toggle_drafting' })
-      setAnnouncement('Entwurfsmodus eingeschaltet.')
-      return
-    }
-    if (count === 0) {
-      dispatch({ type: 'toggle_drafting' })
-      setAnnouncement('Entwurfsmodus ausgeschaltet. Änderungen werden sofort gespeichert.')
-      return
-    }
-    setConfirm('leave-draft')
-  }
-
-  function handleDiscard() {
-    dispatch({ type: 'discard' })
-    setAnnouncement('Änderungen verworfen.')
-    setConfirm(null)
-  }
-
-  function handleDiscardAndLeaveDraftMode() {
-    dispatch({ type: 'discard' })
-    setAnnouncement('Änderungen verworfen, Entwurfsmodus ausgeschaltet.')
-    setConfirm(null)
-  }
-
-  function handleSave() {
-    setConfirm(null)
-    void apply()
   }
 
   const ariaLabel = (() => {

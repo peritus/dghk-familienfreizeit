@@ -248,7 +248,12 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         })
         return
       }
-      dispatch({ type: 'applied', count: drafts.length, events: result.events })
+      dispatch({
+        type: 'applied',
+        count: drafts.length,
+        events: result.events,
+        saved_at: new Date().toISOString(),
+      })
     } catch (error: unknown) {
       if (error instanceof OrganiserApiError) {
         const stale = staleResponse(error)

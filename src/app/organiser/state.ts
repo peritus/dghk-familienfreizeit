@@ -20,6 +20,8 @@ export type OrganiserStatus =
   | 'error'
 
 export type OrganiserState = {
+  /** Browser-session UI metadata; absent until this session successfully saves. */
+  last_saved_at?: string
   committed: readonly Event[]
   drafts: readonly DraftBatch[]
   change_mode: OrganiserChangeMode
@@ -59,7 +61,7 @@ export type OrganiserAction =
   | { type: 'toggle_drafting' }
   | { type: 'discard' }
   | { type: 'applying' }
-  | { type: 'applied'; count: number; events: readonly Event[] }
+  | { type: 'applied'; count: number; events: readonly Event[]; saved_at?: string }
   | { type: 'rebased'; events: readonly Event[] }
   | {
       type: 'failed'
@@ -73,6 +75,7 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       return {
         ...state,
         committed: action.events,
+        last_saved_at: undefined,
         drafts: [],
         change_mode: 'immediate',
         head_seq: action.events.length,
@@ -99,6 +102,7 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       return {
         ...state,
         committed: [...state.committed, ...action.events],
+        last_saved_at: action.saved_at ?? state.last_saved_at,
         drafts,
         change_mode: drafts.length === 0 ? 'immediate' : 'drafting',
         head_seq: state.head_seq + action.events.length,
