@@ -1,4 +1,4 @@
-# Assignment board UI
+# UI-10 — Assignment board
 
 The organiser assignment board is composed from shared UI primitives and
 room-assignment-specific components. Shared `Badge`, `Tag`, `StatsStrip`,

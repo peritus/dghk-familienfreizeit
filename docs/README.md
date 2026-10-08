@@ -14,7 +14,7 @@ are separate claims and require separate evidence.
 - [Phases](architecture/phases.md): phase status, opening, closing and reopening, and closed results.
 - [Room inventory](modules/room-inventory.md): implemented accommodation entities, fixture, summaries, and organiser surface.
 - [Room assignment](modules/room-assignment.md): deterministic assignment solver and organiser review/report surfaces.
-- [Official workshops](modules/official-workshops.md): direct workshop authoring, modes, leaders, and cancellation.
+- [Official workshops](modules/official-workshops.md): workshop authoring, participation modes, leader handling, and cancellation event semantics.
 - [Workshop space](modules/workshop-space.md): physical workshop spaces and schedule context.
 - [Workshop scheduling](modules/workshop-scheduling.md): slots and one-placement scheduling.
 - [Workshop rankings](modules/workshop-rankings.md): current-cycle structured choices.

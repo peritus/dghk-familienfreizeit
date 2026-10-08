@@ -14,7 +14,7 @@ The route table is:
 | `/organiser/families/:id/:topic/:person_id` | URL-backed person-scoped topic route for Personen, Essen, or Workshops |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
-| `/organiser/accommodation/assignment` | Read-only deterministic assignment review with browser-printable assignment output |
+| `/organiser/accommodation/assignment` | Deterministic assignment review with a fixed-assignment action and browser-printable output |
 | `/organiser/workshops` | Shared workshop overview with Workshops, Leitungen and Externe Leitungen views |
 | `/organiser/workshops/leaders` | The same overview with the derived internal-leader collection selected |
 | `/organiser/workshops/external-leaders` | The same overview with external-leader authoring selected |
@@ -106,8 +106,8 @@ repeated fixed footer with a table-footer spacer, and reset every enclosing layo
 to natural document height. Verify both the narrow card layout and a multi-page
 landscape print in a browser before delivery.
 
-Family routes reuse the organiser `PrimaryNavigation` and introduce no secondary
-navigation level. `FamilyTopicNavigation` wraps the shared `TertiaryNavigation`
+Organiser family-detail routes reuse the organiser `PrimaryNavigation` and
+introduce no secondary navigation level. `FamilyTopicNavigation` wraps the shared `TertiaryNavigation`
 for the four sibling topics. The person picker inside Personen, Essen, and
 Workshops is a nested selector for the current family and does not change the
 global navigation hierarchy. Topic and person ids are opaque route segments.
@@ -155,7 +155,8 @@ callers render module-owned tracks over the derived
 [phase view](../architecture/phases.md#organiser-surfaces): the workshop overview,
 programme and allocation screens share the workshop track, and the inventory
 and assignment board render the shared accommodation track. Inventory supplies
-the closing action; the assignment board shares status only and remains read-only. The action slot carries the confirmed
+the close and reopen actions; the assignment board shares track status and has a
+fixed-assignment action, but no close or reopen control. The action slot carries the confirmed
 **Wahl öffnen**, **Festlegen**, **Erneut festlegen** and **Wieder öffnen**
 decisions. A closed area has no current step, and the mobile summary then counts
 every step.

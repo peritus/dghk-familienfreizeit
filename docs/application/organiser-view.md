@@ -11,13 +11,13 @@ path before persistence.
 | Route | Behavior |
 |---|---|
 | `/organiser` | Dashboard with family/person counts, diagnostics, and draft-change status |
-| `/organiser/families` | Derived family table and manual invitation staging from the header dialog |
+| `UI-06` · `/organiser/families` | Derived family table and manual invitation staging from the header dialog |
 | `/organiser/families/:id` | Derived family detail shell; defaults to Zimmer and exposes the four family topics |
 | `/organiser/families/:id/:topic` | Family topic route for `zimmer`, `personen`, `essen`, or `workshops` |
 | `/organiser/families/:id/:topic/:person_id` | Person-scoped Personen, Essen, or Workshops route with an opaque person id |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Room-inventory buildings, rooms, beds, capacity, traits, cost summary, and creation staging |
-| `/organiser/accommodation/assignment` | Read-only deterministic family-to-room assignment review with browser-printable output |
+| `/organiser/accommodation/assignment` | Deterministic family-to-room review, fixed-assignment action, and browser-printable output |
 | `/organiser/workshops` | Workshop landing view with the workshop track, workshop choice and closing decisions, workshop creation/editing, audience filters, and typed leader selection |
 | `/organiser/workshops/programme` | Derived one-placement-per-workshop programme review with unscheduled outcomes |
 | `/organiser/workshops/participation` | Read-only responsive person-by-slot matrix with linked wish traces |
@@ -235,9 +235,14 @@ The active profile contains the kernel `role` trait, accommodation modules, the
 profile-driven organiser family controls, and the workshop planning modules.
 Assignment review, the narrow event-backed fixed-assignment workflow, opening
 workshop choice, and closing and reopening both areas are implemented. Family
-authentication and family routes, the family view of closed results, fixed
-workshop attendance/placement decisions, non-workshop generic reports, plan
-comparison, and change notifications remain later scope.
+magic-link authentication and the minimal family principal endpoint are also
+implemented; the family-facing application and full family view of closed results
+remain later scope. Workshop fixed attendance and placement decisions are
+supported by the event model and read-only review, but the organiser UI has no
+controls to author or clear them; the scope question is tracked in
+[issue 050](../../spec/issues/open/050-workshop-fixed-decision-authoring.md).
+Non-workshop generic reports, plan comparison, and change notifications remain
+later scope.
 
 The verified tests cover local derivation, family display-name replacement,
 profile control validation, rendered organiser family controls, immediate and

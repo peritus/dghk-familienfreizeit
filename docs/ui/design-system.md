@@ -6,8 +6,9 @@ one German skip link, one brand/app bar, one focusable `<main id="content">`, an
 one width contract (`max-w-5xl`, full width with responsive padding). Public,
 authenticated organiser, route-loading and recovery adapters compose that frame;
 frames never nest. Public routes currently have no domain primary navigation or
-account controls. Family authentication and the family-facing application remain
-outstanding; the same composition contract applies when those screens are built.
+account controls. The Worker supports family authentication, while the
+family-facing application remains outstanding; the same composition contract
+applies when those screens are built.
 
 ## Screen hierarchy
 
@@ -177,8 +178,10 @@ Workshop screens reuse the same neobrutalist language at every viewport width:
 thick semantic outlines, offset shadows for actionable controls, flat information
 cards, and wrapping horizontal tabs. Orange is reserved for actionable attention
 and is paired with a text or glyph meaning; status must never be communicated by
-colour alone. Workshop filters, unscheduled reasons, cancelled history, and save
-state therefore include visible labels. Browser print hides navigation and controls;
+colour alone. Workshop filters, unscheduled reasons, and save state therefore
+include visible labels. Cancellation authoring and a labelled cancellation-history
+view remain in [M8](../../spec/roadmap.md#m8--organiser-authored-workshop-programme).
+Browser print hides navigation and controls;
 the application does not add a print or export button. Printing forces the light
 palette, and mobile browser chrome follows the active preference through the
 light and dark `theme-color` metadata in `index.html`.

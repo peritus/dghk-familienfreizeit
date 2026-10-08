@@ -35,6 +35,11 @@ that are unchanged, replace an automatic choice, have no automatic counterpart,
 or are invalid. The projection is read-only and is recalculated for prospective
 local-first organiser drafts.
 
+The event model accepts `WorkshopAttendanceFixed`, but no organiser screen control
+currently authors or clears that event. The review shows decisions already
+present in the world. Whether a UI authoring control is required remains under
+[investigation](../../spec/issues/open/050-workshop-fixed-decision-authoring.md).
+
 ## Closing the workshop area
 
 The module owns the `workshop-assignment.review` phase, its readiness, and the
