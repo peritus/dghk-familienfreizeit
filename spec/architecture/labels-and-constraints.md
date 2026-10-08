@@ -298,8 +298,8 @@ re-implements matching:
 |---|---|
 | [room assignment](../modules/room-assignment.md) | requirements against room/place capabilities; keep-apart effects; exclusions; resolved placement decisions |
 | [workshops](../modules/workshops.md) | participation references, capacity admission and effective programme/slot resolution |
-| [workshop rankings](../modules/workshop-rankings.md) | the `ordered-choice` operator |
-| [workshop assignment](../modules/workshop-assignment.md) | needs/provides matching, exclusions, eligibility, separation, and decisions naming workshops within their slot |
+| [workshop rankings](../../docs/modules/workshop-rankings.md) | the `ordered-choice` operator |
+| [workshop assignment](../../docs/modules/workshop-assignment.md) | needs/provides matching, exclusions, eligibility, separation, and decisions naming workshops within their slot |
 
 Relation symmetry is declared on the trait and interpreted by the resolver:
 
@@ -343,7 +343,7 @@ enter plan preflight or its hash. Closing readiness uses module findings under
 carrying a scope entity, a choice, and a rank. It validates unique, dense ranks per
 holder and scope entity. Rank is not strength: strength is how binding a preference
 is, rank is a position in a list. The workshop ranking that uses it, including the
-"no preference" value, is specified in [workshop rankings](../modules/workshop-rankings.md).
+"no preference" value, is implemented in [workshop rankings](../../docs/modules/workshop-rankings.md).
 
 ---
 

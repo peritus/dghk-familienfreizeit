@@ -154,12 +154,12 @@ They remain distinct from the closing review when promoted.
 capacity, workshop utilization, and the configured accommodation cost estimate. It is a
 planning calculation, not an invoice or billing record.
 
-**Workshop-space inventory** is an organiser-only physical inventory report. It
-lists live and retired workshop spaces, physical capacity, availability windows,
-deterministic order, and resolved capabilities. It does not claim that a space
-is assigned to a workshop and never substitutes for the closed programme location.
-Scheduled locations reach families through the closed workshop result
-([phases](../architecture/phases.md) §5).
+**Workshop-space inventory** is an organiser-only report contributed by the
+selected module. Its fields and treatment of retired spaces are defined in the
+[workshop-space report requirement](../modules/workshop-space.md). It does not
+claim that a space is assigned to a workshop and never substitutes for the
+closed programme location. Scheduled locations reach families through the closed
+workshop result ([phases](../architecture/phases.md) §5).
 
 ## 4. Safety and responsibility
 
@@ -182,9 +182,11 @@ complete the outstanding report host or catalogue.
 
 Reports appear as ordinary browser routes, with the same authenticated session
 rules as the corresponding family view or organiser view. They have no download,
-export, or print action. The visible controls are limited to filtering, sorting, and
-navigation. The implemented assignment board has no local mutation, closing, or print
-control; its output is printed through the browser stylesheet.
+export, or in-app print action. Report-specific controls are limited to filtering,
+sorting, and navigation. The implemented assignment board is a separate module
+surface: it has a local fixed-assignment action and browser-printable projection,
+while accommodation closing and reopening are controlled from inventory. That
+board output does not provide the generic report host or catalogue described here.
 
 The print stylesheet must:
 

@@ -153,8 +153,8 @@ Organiser only. Carries the old value so the history reads correctly without
 replaying to that point.
 
 *Consequence:* the old address stops resolving to this family on the next request,
-so its sessions lose access without a cleanup step
-([authentication](../application/authentication.md) §3, rule 8).
+so its sessions lose access without a cleanup step; see the implemented
+[authentication boundary](../../docs/application/authentication.md).
 
 ### `PersonAdded`
 ```ts
@@ -199,7 +199,7 @@ authorisation are specified in the module documents.
 | Module | Event types |
 |---|---|
 | [room inventory](../modules/room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `BuildingRemoved`, `RoomAdded`, `RoomUpdated`, `RoomRemoved`, `BedAdded`, `BedUpdated`, `BedRemoved` |
-| [workshop space](../modules/workshop-space.md) §5 | `WorkshopSpaceAdded`, `WorkshopSpaceUpdated`, `WorkshopSpaceRetired` |
+| [workshop space](../../docs/modules/workshop-space.md) | `WorkshopSpaceAdded`, `WorkshopSpaceUpdated`, `WorkshopSpaceRetired` |
 | [official workshops](../modules/official-workshops.md) | Workshop content, eligibility, cancellation, and leader facts |
 
 Workshop rankings, food preferences, and organiser decisions add no event types;
@@ -263,7 +263,7 @@ mechanism; the note is context for organisers and never changes the derived plan
 identifies the application to clear. The original label event remains in the log.
 
 Workshop rankings are `LabelSet` and `LabelCleared` events with structured values
-(D13); see [workshop rankings](../modules/workshop-rankings.md).
+(D13); see [workshop rankings](../../docs/modules/workshop-rankings.md).
 
 ---
 

@@ -6,8 +6,9 @@ they must not require new typed property columns or domain foreign keys.
 
 The event table, its KDL development representation, and the operational tables
 are implemented; see the [implemented write side and text fixtures](../../docs/architecture/data-model.md).
-This document covers the remaining, still-outstanding layers of the model:
-typed entity identity for module-owned kinds, generic labels, and capacity.
+Module-owned typed entity identity is implemented; see the
+[implemented data model](../../docs/architecture/data-model.md). This document
+retains the remaining label/resolver and capacity requirements.
 
 The model has three layers:
 
@@ -53,11 +54,12 @@ The generic `Entity` shape, the kernel's `family`/`person` kinds, and the
 mechanism a selected module uses to contribute any other kind are implemented;
 see [implemented typed entity identity](../../docs/architecture/data-model.md).
 
-The generic kernel world intentionally keeps one `entities_by_kind` boundary.
-The selected room-inventory module currently exposes its typed ordered
-buildings/rooms/beds/places view through `inventoryWorld(world)`. A future
-generic per-kind accessor surface (`world.rooms`, …) remains a separate contract
-decision and must not add persisted property columns or relationship tables.
+The generic kernel world exposes one `entities_by_kind` index. Selected modules
+may provide typed views over their own kinds; room inventory exposes its ordered
+buildings/rooms/beds/places through `inventoryWorld(world)`, while workshop
+modules expose their own typed identities and summaries. The current contract
+does not add parallel top-level per-kind collections or persisted property and
+relationship columns.
 
 ## 2. Labels
 
@@ -131,5 +133,5 @@ Capacity is represented by entities and labels, not special property columns: a
 place is the atomic sleeping position, located in a bed, located in a room
 ([room inventory](../modules/room-inventory.md) §4). Ordered preferences are structured
 label values validated by the `ordered-choice` operator
-([workshop rankings](../modules/workshop-rankings.md) §6), which keeps the core model
+([workshop rankings](../../docs/modules/workshop-rankings.md)), which keeps the core model
 generic while preserving that an ordered preference is not an unordered set.

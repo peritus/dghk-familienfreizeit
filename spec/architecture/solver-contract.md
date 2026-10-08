@@ -333,7 +333,7 @@ including the alternatives rejected. Every number in it traces to a named weight
 stored configuration, so an organiser who disagrees can point at the term rather than
 the outcome.
 
-Plan sections are specified by their selected modules: [room assignment](../modules/room-assignment.md) §10,
-[workshop scheduling](../modules/workshop-scheduling.md), and
-[workshop attendance](../modules/workshop-assignment.md). Food and materials contribute
+Plan sections are specified by their selected modules: [room assignment](../../docs/modules/room-assignment.md),
+[workshop scheduling](../../docs/modules/workshop-scheduling.md), and
+[workshop attendance](../../docs/modules/workshop-assignment.md). Food and materials contribute
 world summaries, not solver sections.

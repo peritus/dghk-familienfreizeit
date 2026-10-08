@@ -112,7 +112,7 @@ renderer in `src/modules/<module-id>/app/controls/`.
 | `person-picker` | this module | people within the same family | one `LabelSet` per selection, value = person id |
 | `workshop-sign-up` | [`workshops`](workshops.md) | join/leave with availability | `signed-up-for` set/clear |
 | `workshop-interest` | [`workshops`](workshops.md) | non-binding interest toggle | `interested-in` set/clear |
-| `ranking` | [`workshop-rankings`](workshop-rankings.md) | ordered choices in the current workshop choice cycle | clears the cycle's labels and sets the new ones in one append |
+| `ranking` | [implemented workshop rankings](../../docs/modules/workshop-rankings.md) | ordered choices in the current workshop choice cycle | clears the cycle's labels and sets the new ones in one append |
 
 `invert: true` flips the wording so a positively named trait can read negatively, for
 example "Zimmer teilen: gerne / lieber nicht / auf keinen Fall", while the stored
@@ -152,7 +152,7 @@ Module-owned controls are placed by `module_controls`, after the section's trait
 configured order. They reuse module schemas and authorisation, not duplicate profile
 trait definitions. `workshop-sign-up` and `workshop-interest` are supplied by workshops.
 Only the appropriate control for the effective mode appears. `ranking` remains
-contributed by workshop-rankings.
+contributed by the implemented [workshop-rankings module](../../docs/modules/workshop-rankings.md).
 
 Every control saves on change and renders its confirmation from the current response.
 Family composition belongs to [phases](../architecture/phases.md) §6, not to the

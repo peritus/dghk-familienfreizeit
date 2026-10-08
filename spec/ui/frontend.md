@@ -339,7 +339,7 @@ auditable by someone who does not know this stack. React never reaches into it.
 | A table library | 55 rows from the derived world |
 | tRPC | Shared zod schemas type both ends |
 | An ORM | Only the event log and operational tables are stored; see [data model](../architecture/data-model.md) |
-| An auth library | See [authentication](../application/authentication.md) |
+| An auth library | [D10](../../decisions.md#d10--hand-rolled-magic-link-no-auth-library) and the [implemented authentication flow](../../docs/application/authentication.md) |
 | A solver or LP library | Reviewability beats optimality here |
 | A date library | Person age is stored as an integer; scheduling uses native datetime values |
 | A CSS-in-JS library | Tailwind and the registry's tokens |

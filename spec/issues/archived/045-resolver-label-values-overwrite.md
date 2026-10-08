@@ -96,5 +96,5 @@ the prototype dataset's sole unscheduled workshop (`wks_schmieden`) with
 
 - [architecture/labels-and-constraints.md](../../architecture/labels-and-constraints.md)
 - [modules/workshop-space.md](../../modules/workshop-space.md)
-- [modules/workshop-scheduling.md](../../modules/workshop-scheduling.md)
+- [implemented workshop scheduling](../../../docs/modules/workshop-scheduling.md)
 - [modules/room-assignment.md](../../modules/room-assignment.md)

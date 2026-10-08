@@ -12,9 +12,10 @@ This is one scrolling page, not a wizard. Controls come from the active
 occasion profile's `family_facing` entries.
 
 The organiser family-detail screen already uses this same control contract and
-section configuration. This document specifies the later family route; it does
-not imply that family authentication or family response delivery is present on
-the organiser route.
+section configuration. This document specifies the later family route. Family
+magic-link authentication is implemented, but the family-facing application and
+full family-view response remain outstanding; organiser controls do not provide
+those family-facing functions.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
