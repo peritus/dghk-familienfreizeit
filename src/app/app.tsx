@@ -3,7 +3,7 @@ import { Route, Switch, useLocation } from 'wouter'
 import { Shell } from './components/application/shell'
 import { NotFound, RouteBoundary, RouteLoading } from './components/application/route-states'
 import { Login } from './auth/login'
-import { OrganiserLanding } from './public-view/organiser-landing'
+import { OccasionLanding } from './public-view/occasion-landing'
 import type { ProfilePresentation } from '../config/presentation.js'
 
 const OrganiserApp = lazy(() => import('./organiser/organiser-app'))
@@ -27,7 +27,7 @@ export function App({ profile }: { profile?: ProfilePresentation } = {}) {
       >
         <Switch>
           <Route path="/">
-            <OrganiserLanding profile={profile} />
+            {profile ? <OccasionLanding profile={profile} /> : null}
           </Route>
           <Route path="/login">
             <Login />

@@ -219,6 +219,42 @@ test('the root renders the active profile landing copy', () => {
   expect(screen.getByText('Profile-specific intro')).toBeTruthy()
 })
 
+test('the occasion landing renders configured route and external actions', () => {
+  window.history.replaceState({}, '', '/')
+  const profile = {
+    ...activeProfilePresentation,
+    meta: {
+      ...activeProfilePresentation.meta,
+      public_landing: {
+        ...activeProfilePresentation.meta.public_landing,
+        actions: [
+          {
+            id: 'organiser-login',
+            label: { de: 'Als Organisator anmelden', en: 'Organiser login' },
+            emphasis: 'primary' as const,
+            destination: { kind: 'route' as const, to: '/login' },
+          },
+          {
+            id: 'schedule',
+            label: { de: 'Programm ansehen', en: 'View schedule' },
+            emphasis: 'secondary' as const,
+            destination: { kind: 'external' as const, href: 'https://example.org/schedule' },
+          },
+        ],
+      },
+    },
+  }
+  render(<App profile={profile} />)
+
+  const organiser = screen.getByRole('link', { name: 'Als Organisator anmelden' })
+  expect(organiser.getAttribute('href')).toBe('/login')
+  expect(organiser.className).toContain('bg-main')
+
+  const schedule = screen.getByRole('link', { name: 'Programm ansehen' })
+  expect(schedule.getAttribute('href')).toBe('https://example.org/schedule')
+  expect(schedule.className).toContain('bg-secondary-background')
+})
+
 test('the active profile logo is inverted for dark mode', () => {
   window.history.replaceState({}, '', '/')
   render(<App profile={activeProfilePresentation} />)
