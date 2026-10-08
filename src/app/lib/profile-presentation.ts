@@ -36,3 +36,10 @@ export function profileEventDetails(
   const date = `${dateFormat.format(new Date(`${profile.meta.starts_on}T12:00:00Z`))} – ${dateFormat.format(new Date(`${profile.meta.ends_on}T12:00:00Z`))}`
   return { place: localizedProfileText(profile, event.place), date }
 }
+
+export function profileOrganiserTitle(profile: ProfilePresentation | undefined): string {
+  return localizedProfileText(profile, profile?.meta.event?.organiser_title) || profileEventTitle(profile)
+}
+export function profileOrganisation(profile: ProfilePresentation | undefined): string {
+  return localizedProfileText(profile, profile?.meta.event?.organisation)
+}

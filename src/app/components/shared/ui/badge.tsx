@@ -6,7 +6,7 @@ import type { StatusTone } from './status-tone.js'
 const toneClasses: Record<StatusTone, string> = {
   neutral: 'bg-secondary-background text-foreground',
   success: 'bg-secondary-background text-foreground',
-  attention: 'bg-main text-main-foreground',
+  attention: 'border-dashed bg-warning-bg text-foreground',
   danger: 'bg-danger text-foreground',
   draft: 'blueprint bg-paper text-foreground',
   held: 'bg-secondary-background text-muted',

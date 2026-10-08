@@ -251,7 +251,7 @@ export function SaveStatus() {
               variant="neutral"
               aria-label={ariaLabel}
               className={cn(
-                'gap-2 px-3',
+                'draft-status-control gap-2 px-3',
                 view.kind === 'draft-empty' && 'blueprint',
                 view.kind === 'draft-pending' && 'bg-main blueprint blueprint-on-main',
                 view.kind === 'failed' && 'bg-danger',
@@ -288,7 +288,7 @@ export function SaveStatus() {
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner side="bottom" align="end" sideOffset={12}>
-            <Popover.Popup className="w-[min(26rem,calc(100vw-2rem))] rounded-base border-2 border-border bg-paper p-5 shadow-shadow">
+            <Popover.Popup className="draft-status-surface w-[min(26rem,calc(100vw-2rem))] rounded-base border-2 border-border bg-paper p-5 shadow-shadow">
               {renderContent()}
             </Popover.Popup>
           </Popover.Positioner>

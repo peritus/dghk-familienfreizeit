@@ -9,6 +9,10 @@
   --input: var(--secondary-background);
   --main: hsl(28 100% 51%);
   --main-deep: var(--main);
+  --main-soft: color-mix(in srgb, var(--main) 45%, white);
+  --warning-bg: hsl(33 100% 96%);
+  --hard-shadow-sm: 2px 2px 0 0 var(--shadow-c);
+  --hard-shadow-md: 3px 3px 0 0 var(--shadow-c);
   --main-foreground: black;
   --danger: hsl(2 90% 66%);
   --danger-foreground: black;
@@ -41,7 +45,7 @@
   align-items: center;
   gap: 0.375rem 0.875rem;
   margin-bottom: 0.75rem;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 }
 
 .workshop-participation__legend > span {
@@ -96,7 +100,7 @@
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 }
 
 .workshop-participation__person-column {
@@ -106,7 +110,7 @@
 .workshop-participation__table caption {
   padding: 0.75rem 1rem;
   border-bottom: 2px solid var(--border);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 700;
   text-align: left;
 }
@@ -127,7 +131,7 @@
 .workshop-participation__table thead th {
   border-top: 0;
   border-bottom: 2px solid var(--border);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -183,7 +187,7 @@
 
 .workshop-participation__age {
   display: block;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -236,7 +240,7 @@
 }
 
 .workshop-participation__cell-detail {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   line-height: 1.3;
 }
 
@@ -514,6 +518,8 @@
     --shadow-c: oklch(0.4 0.02 60);
     --main: oklch(0.78 0.15 58);
     --main-deep: oklch(0.74 0.17 58);
+    --main-soft: color-mix(in srgb, var(--main) 25%, var(--secondary-background));
+    --warning-bg: color-mix(in srgb, var(--main) 8%, var(--secondary-background));
     --main-foreground: oklch(0.18 0.02 58);
     --danger: oklch(0.56 0.21 27);
     --danger-foreground: oklch(1 0 0);
@@ -529,6 +535,10 @@
   --color-paper: var(--paper);
   --color-input: var(--input);
   --color-main: var(--main);
+  --color-main-soft: var(--main-soft);
+  --color-warning-bg: var(--warning-bg);
+  --shadow-sm: var(--hard-shadow-sm);
+  --shadow-md: var(--hard-shadow-md);
   --color-main-deep: var(--main-deep);
   --color-danger: var(--danger);
   --color-danger-foreground: var(--danger-foreground);
@@ -565,7 +575,7 @@
   button:focus-visible,
   input:focus-visible,
   select:focus-visible {
-    @apply outline-2 outline-offset-4 outline-ring;
+    @apply outline-2 outline-offset-2 outline-ring;
   }
   main:focus {
     outline: none;
@@ -601,11 +611,8 @@
     translate 120ms,
     box-shadow 120ms;
 
-  &:hover,
-  &:active {
-    translate: 4px 4px;
-    box-shadow: none;
-  }
+  &:hover { translate: 2px 2px; box-shadow: var(--hard-shadow-sm); }
+  &:active { translate: 4px 4px; box-shadow: none; }
 
   /* Keep the original footprint clickable while the element slides 4px into its shadow.
      Without this, the top and left edges move out from under the cursor. (-4px travel, -2px border) */
@@ -874,6 +881,8 @@ main:has(> .workshop-lists) {
     --shadow-c: black;
     --shadow: 4px 4px 0 0 var(--shadow-c);
     --main: white;
+    --main-soft: white;
+    --warning-bg: white;
     --main-deep: var(--main);
     --main-foreground: black;
     --danger: #eee;
@@ -1230,5 +1239,29 @@ main:has(> .workshop-lists) {
   [data-slot='table-frame'] [class~='md:sr-only'],
   [data-slot='table-frame'] button[aria-expanded] > svg {
     display: none !important;
+  }
+}
+
+@utility liftable {
+  transition: translate 100ms, box-shadow 100ms;
+  &:not([aria-current]):hover {
+    translate: -2px -2px;
+    box-shadow: var(--hard-shadow-sm);
+    border-color: var(--border);
+    background: var(--secondary-background);
+  }
+  @media (prefers-reduced-motion: reduce) { transition: none; &:hover { translate: none; } }
+}
+/* The approved save control keeps its established appearance and motion. */
+.draft-status-control:hover, .draft-status-control:active,
+.draft-status-surface .pressable:hover, .draft-status-surface .pressable:active {
+  translate: 4px 4px;
+  box-shadow: none;
+}
+.draft-status-control:focus-visible, .draft-status-surface :focus-visible { outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .draft-status-control:hover, .draft-status-control:active,
+  .draft-status-surface .pressable:hover, .draft-status-surface .pressable:active {
+    translate: none; box-shadow: var(--shadow);
   }
 }

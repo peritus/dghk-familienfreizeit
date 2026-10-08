@@ -16,7 +16,9 @@ export const designTokens = {
     },
     { name: 'paper', cssVariable: '--paper', use: 'paper and provisional surfaces' },
     { name: 'input', cssVariable: '--input', use: 'field backgrounds' },
-    { name: 'main', cssVariable: '--main', use: 'primary action and attention' },
+    { name: 'main', cssVariable: '--main', use: 'primary action' },
+    { name: 'mainSoft', cssVariable: '--main-soft', use: 'navigation context' },
+    { name: 'warningBackground', cssVariable: '--warning-bg', use: 'advisory findings' },
     { name: 'mainDeep', cssVariable: '--main-deep', use: 'small accent controls and rules' },
     { name: 'mainForeground', cssVariable: '--main-foreground', use: 'text on primary actions' },
     { name: 'danger', cssVariable: '--danger', use: 'destructive action or failure' },
@@ -34,6 +36,8 @@ export const designTokens = {
   ],
   geometry: [
     { name: 'baseRadius', cssVariable: '--radius-base', use: 'shared corner radius' },
+    { name: 'smallShadow', cssVariable: '--hard-shadow-sm', use: 'hover lift and partial press' },
+    { name: 'mediumShadow', cssVariable: '--hard-shadow-md', use: 'current section' },
     { name: 'shadow', cssVariable: '--shadow', use: 'pressable offset shadow' },
   ],
   typography: [

@@ -26,6 +26,8 @@ import {
 export type LocalizedText = string | Readonly<Record<string, string>>
 
 export type ProfileEvent = {
+  organiser_title?: LocalizedText
+  organisation?: LocalizedText
   title: LocalizedText
   subheading: LocalizedText
   place?: LocalizedText | null
@@ -326,6 +328,8 @@ function validateMeta(meta: ProfileMeta): void {
   if (!meta.locale || !meta.fallback_locale) throw new Error('profile locales are required')
   validatePublicLanding(meta, meta.public_landing)
   if (meta.event) {
+    if (meta.event.organiser_title) validateCopy(meta, meta.event.organiser_title)
+    if (meta.event.organisation) validateCopy(meta, meta.event.organisation)
     validateCopy(meta, meta.event.title)
     validateCopy(meta, meta.event.subheading)
     if (meta.event.place) validateCopy(meta, meta.event.place)

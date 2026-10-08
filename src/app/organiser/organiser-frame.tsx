@@ -12,7 +12,7 @@ import { logout } from '../auth/session.js'
 import { Button } from '../components/shared/ui/button'
 import type { ProfilePresentation } from '../../config/presentation.js'
 import { ProfileBrand } from '../components/application/profile-brand.js'
-import { profileEventTitle } from '../lib/profile-presentation.js'
+import { profileEventTitle, profileOrganiserTitle, profileOrganisation } from '../lib/profile-presentation.js'
 
 const primaryNavItems = [
   {
@@ -54,10 +54,10 @@ export function OrganiserMinimalFrame({
       brand={
         <OrganiserLink
           href={organiserHomePath}
-          className="inline-flex min-h-11 items-center gap-2 text-xl font-heading"
+          className="inline-flex min-h-11 items-center gap-2 text-lg font-heading"
         >
-          <ProfileBrand branding={profile?.branding} className="size-8 shrink-0 object-contain" />
-          {profileEventTitle(profile)}
+          <ProfileBrand branding={profile?.branding} className="size-9 shrink-0 rounded-base border-2 border-border bg-main-soft p-1 shadow-sm object-contain" />
+          {profileOrganiserTitle(profile)}
         </OrganiserLink>
       }
     >
@@ -102,13 +102,14 @@ export function OrganiserFrame({
       brand={
         <OrganiserLink
           href={organiserHomePath}
-          className="inline-flex min-h-11 items-center gap-2 text-xl font-heading"
+          className="inline-flex min-h-11 items-center gap-2 text-lg font-heading"
         >
-          <ProfileBrand branding={profile?.branding} className="size-8 shrink-0 object-contain" />
-          {profileEventTitle(profile)}
+          <ProfileBrand branding={profile?.branding} className="size-9 shrink-0 rounded-base border-2 border-border bg-main-soft p-1 shadow-sm object-contain" />
+          {profileOrganiserTitle(profile)}
         </OrganiserLink>
       }
       role="Organisationsteam"
+      brand_subtitle={[profileOrganisation(profile), "Organisationsteam"].filter(Boolean).join(" · ")}
       primary_navigation={<PrimaryNavigation items={primaryNavItems} />}
       controls={
         <>

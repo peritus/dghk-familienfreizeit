@@ -26,6 +26,8 @@ export const luebben2027Meta = {
     ],
   },
   event: {
+    organiser_title: { de: 'Familienfreizeit Lübben 2027', en: 'Family retreat Lübben 2027' },
+    organisation: { de: 'DGHK Berlin-Brandenburg', en: 'DGHK Berlin-Brandenburg' },
     title: {
       de: 'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027',
       en: 'DGHK Berlin-Brandenburg family retreat Lübben 2027',

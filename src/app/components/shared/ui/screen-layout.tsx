@@ -1,4 +1,6 @@
-import { useId, type ReactNode } from 'react'
+import { useContext, useId, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { FrameNavigationTarget } from '../../application/application-frame.js'
 import { cn } from '../../../lib/utils.js'
 
 export type ScreenHeaderProps = {
@@ -11,7 +13,6 @@ export type ScreenHeaderProps = {
 
 export function ScreenHeader({
   title,
-  eyebrow,
   description,
   action,
   className,
@@ -20,16 +21,13 @@ export function ScreenHeader({
     <header
       data-slot="screen-header"
       className={cn(
-        'flex flex-wrap items-end justify-between gap-4 border-b-2 border-border pb-5',
+        'flex flex-wrap items-end justify-between gap-4 ',
         className,
       )}
     >
       <div className="min-w-0">
-        {eyebrow ? (
-          <p className="mb-1 text-sm font-bold uppercase tracking-wide text-muted">{eyebrow}</p>
-        ) : null}
-        <h1 className="text-3xl leading-tight font-heading sm:text-4xl">{title}</h1>
-        {description ? <div className="mt-2 max-w-3xl text-muted">{description}</div> : null}
+        <h1 className="text-3xl leading-tight font-heading tracking-[-0.01em]">{title}</h1>
+        {description ? <div className="mt-2 max-w-3xl font-normal text-muted">{description}</div> : null}
       </div>
       {action ? (
         <div data-slot="screen-actions" className="ml-auto flex flex-wrap gap-2 print:hidden">
@@ -66,16 +64,15 @@ export function ScreenLayout({
   children?: ReactNode
   className?: string
 }) {
+  const navigationTarget = useContext(FrameNavigationTarget)
   return (
     <div
       data-slot="screen-layout"
       data-print-orientation={printOrientation}
-      className={cn('w-full min-w-0 space-y-8', className)}
+      className={cn('w-full min-w-0 space-y-6 sm:space-y-8', className)}
     >
-      {secondaryNavigation ? (
-        <div data-slot="screen-secondary-navigation" className="print:hidden">
-          {secondaryNavigation}
-        </div>
+      {secondaryNavigation ? navigationTarget ? createPortal(secondaryNavigation, navigationTarget) : (
+        <div data-slot="screen-secondary-navigation" className="border-b-2 border-border bg-main-soft print:hidden">{secondaryNavigation}</div>
       ) : null}
       {header}
       {printContext ? (
@@ -88,16 +85,11 @@ export function ScreenLayout({
           {notices}
         </div>
       ) : null}
-      {workflow ? (
-        <div data-slot="screen-workflow" className="space-y-4 empty:hidden">
-          {workflow}
-        </div>
-      ) : null}
-      {summary ? (
-        <div data-slot="screen-summary" className="empty:hidden">
-          {summary}
-        </div>
-      ) : null}
+      {workflow || summary ? <div data-slot="screen-status" className="space-y-4">
+        {workflow ? <div data-slot="screen-workflow" className="space-y-4 empty:hidden">{workflow}</div> : null}
+        {summary ? <div data-slot="screen-summary" className="empty:hidden">{summary}</div> : null}
+      </div> : null}
+
       {tertiaryNavigation ? (
         <div data-slot="screen-tertiary-navigation" className="print:hidden">
           {tertiaryNavigation}

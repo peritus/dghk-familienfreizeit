@@ -35,7 +35,7 @@ export function ActionableNotice({
       className={cn(
         'flex flex-wrap items-center justify-between gap-3 rounded-base border-2 border-border p-4',
         tone === 'attention'
-          ? 'bg-main text-main-foreground'
+          ? 'border-dashed bg-warning-bg text-foreground'
           : tone === 'danger'
             ? 'bg-danger text-danger-foreground'
             : 'bg-secondary-background',
