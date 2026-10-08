@@ -24,12 +24,17 @@ experimentation.
 | UI-03 | [Family preferences](screens/family-preferences.md) | `/family` current information |
 | UI-04 | [Family assignment](screens/family-assignment.md) | `/family` fixed arrangements |
 | UI-05 | [Organiser dashboard](screens/organiser-dashboard.md) | `/organiser` |
-| UI-06 | [Families](screens/families.md) | `/organiser/families` |
 | UI-07 | [Family detail](screens/family-detail.md) | `/organiser/families/:id` |
 | UI-08 | [Inventory](screens/inventory.md) | `/organiser/accommodation/inventory` |
-| UI-14 | [Workshop spaces](screens/workshop-spaces.md) | `/organiser/workshops/spaces` |
-| UI-10 | [Assignment board](screens/assignment-board.md) | `/organiser/accommodation/assignment` |
 | UI-12 | [Workshops](screens/workshops.md) | `/organiser/workshops` |
+| UI-14 | [Workshop spaces](screens/workshop-spaces.md) | `/organiser/workshops/spaces` |
+
+Implemented screen IDs remain stable and link to current behavior:
+
+| ID | Screen | Implemented documentation |
+|---|---|---|
+| UI-06 | Families | [Organiser view](../../docs/application/organiser-view.md#delivered-routes) |
+| UI-10 | Assignment board | [Assignment board](../../docs/ui/assignment-board.md) |
 
 The party-review screen belongs to the separate sleeping modules. Its design sketch
 is kept in [`spec/deferred-ideas/party-review.md`](../deferred-ideas/party-review.md).

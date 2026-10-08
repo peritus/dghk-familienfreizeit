@@ -223,7 +223,7 @@ Adopting this module requires updating:
 - [`spec/architecture/solver-contract.md`](../architecture/solver-contract.md) and [`spec/architecture/events.md`](../architecture/events.md)
   for the plan section and derived-stage contract;
 - [`spec/application/organiser-view.md`](../application/organiser-view.md), [`party-review.md`](party-review.md),
-  and [`spec/ui/screens/assignment-board.md`](../ui/screens/assignment-board.md) for party review;
+  and the implemented [assignment board](../../docs/ui/assignment-board.md) as the current whole-family board reference;
 - [`spec/engineering/testing.md`](../engineering/testing.md), fixtures, reports, and the family-facing
   co-room controls.
 
