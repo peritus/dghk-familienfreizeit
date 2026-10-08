@@ -6,6 +6,7 @@ import { useOrganiser } from './context.js'
 import { OrganiserLink, organiserHomePath } from '../components/application/organiser-link.js'
 import { PrimaryNavigation } from './components/navigation.js'
 import { SaveStatus } from './save-status.js'
+import { HeaderMenu } from './header-menu.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
 import { logout } from '../auth/session.js'
@@ -144,10 +145,15 @@ export function OrganiserFrame({
       primary_navigation={<PrimaryNavigation items={primaryNavItems} />}
       controls={
         <>
-          <SaveStatus />
-          <Button type="button" variant="neutral" disabled={loggingOut} onClick={signOut}>
-            {loggingOut ? 'Abmeldung …' : 'Abmelden'}
-          </Button>
+          <div className="md:hidden">
+            <HeaderMenu on_logout={signOut} logging_out={loggingOut} />
+          </div>
+          <div className="hidden items-center gap-3 md:flex">
+            <SaveStatus />
+            <Button type="button" variant="neutral" disabled={loggingOut} onClick={signOut}>
+              {loggingOut ? 'Abmeldung …' : 'Abmelden'}
+            </Button>
+          </div>
         </>
       }
       notices={
