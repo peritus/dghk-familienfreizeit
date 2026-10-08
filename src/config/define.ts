@@ -34,6 +34,16 @@ export type ProfileEvent = {
 export type ProfilePublicLanding = {
   heading: LocalizedText
   intro: LocalizedText
+  actions: readonly ProfileLandingAction[]
+}
+
+export type ProfileLandingAction = {
+  id: string
+  label: LocalizedText
+  emphasis: 'primary' | 'secondary'
+  destination:
+    | { kind: 'route'; to: string }
+    | { kind: 'external'; href: string }
 }
 
 export type EntityScope = 'family' | 'person' | (string & {})
@@ -316,10 +326,51 @@ function validateMeta(meta: ProfileMeta): void {
   if (!meta.starts_on || !meta.ends_on || meta.starts_on > meta.ends_on)
     throw new Error('profile dates are invalid')
   if (!meta.locale || !meta.fallback_locale) throw new Error('profile locales are required')
+  validatePublicLanding(meta, meta.public_landing)
   if (meta.event) {
     validateCopy(meta, meta.event.title)
     validateCopy(meta, meta.event.subheading)
     if (meta.event.place) validateCopy(meta, meta.event.place)
+  }
+}
+
+function validatePublicLanding(meta: ProfileMeta, landing: ProfilePublicLanding): void {
+  validateCopy(meta, landing.heading)
+  validateCopy(meta, landing.intro)
+  if (!Array.isArray(landing.actions) || landing.actions.length === 0)
+    throw new Error('public landing needs at least one action')
+
+  const actionIds = new Set<string>()
+  for (const action of landing.actions) {
+    if (!kebab(action.id)) throw new Error(`public landing action id must be kebab-case: ${action.id}`)
+    if (actionIds.has(action.id)) throw new Error(`duplicate public landing action: ${action.id}`)
+    actionIds.add(action.id)
+    validateCopy(meta, action.label)
+
+    if (action.emphasis !== 'primary' && action.emphasis !== 'secondary')
+      throw new Error(`invalid emphasis for public landing action: ${action.id}`)
+
+    if (action.destination.kind === 'route') {
+      const { to } = action.destination
+      if (
+        !to.startsWith('/') ||
+        to.startsWith('//') ||
+        to.includes('\\') ||
+        new URL(to, 'https://occasion.invalid').origin !== 'https://occasion.invalid'
+      )
+        throw new Error(`public landing route must be an in-app path: ${action.id}`)
+    } else if (action.destination.kind === 'external') {
+      let url: URL
+      try {
+        url = new URL(action.destination.href)
+      } catch {
+        throw new Error(`public landing external action needs an HTTPS URL: ${action.id}`)
+      }
+      if (url.protocol !== 'https:')
+        throw new Error(`public landing external action needs an HTTPS URL: ${action.id}`)
+    } else {
+      throw new Error(`invalid destination for public landing action: ${action.id}`)
+    }
   }
 }
 
