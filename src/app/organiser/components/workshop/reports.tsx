@@ -481,10 +481,12 @@ export function WorkshopFamilyPlanDocument({
 }: DocumentProps & { slots: readonly FamilyPlanSlot[] }) {
   return (
     <PrintDocument title={title} metadata={metadata} heading_ref={headingRef}>
-      <ListResponsive
-        wide={<FamilyPlanTable caption={title} slots={slots} />}
-        narrow={<FamilyPlanCards slots={slots} />}
-      />
+      <div className="workshop-family-plan-print-cards">
+        <ListResponsive
+          wide={<FamilyPlanTable caption={title} slots={slots} />}
+          narrow={<FamilyPlanCards slots={slots} />}
+        />
+      </div>
     </PrintDocument>
   )
 }

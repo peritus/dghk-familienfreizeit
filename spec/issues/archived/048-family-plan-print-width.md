@@ -1,7 +1,7 @@
 ---
 id: "048"
 title: Family workshop plans can exceed printable page width
-status: open
+status: resolved
 severity: gap
 category: ui
 source: review of lists-print-fallback against main
@@ -33,12 +33,14 @@ hard to read. This falls short of the [reports print contract](../../application
 which requires legible browser output on common A4 paper in portrait or
 landscape as appropriate.
 
-## Recommendation
+## Resolution
 
-Give large family plans a print layout that keeps the member-to-slot mapping
-legible and fits the paper, such as a compact table, a suitable page orientation,
-or a labelled stacked layout. Add a browser-print fixture with at least eight
-members and verify that no columns are clipped and the result remains readable.
+Family plan print output now uses the existing labelled slot cards on A4
+portrait paper, while the screen keeps its responsive table/card behavior. Each
+slot card is kept together across printed pages. A browser fixture with eight
+family members verifies the wide-screen table, print card layout, all member
+names and slot content, and a generated PDF. See the [browser print test](../../../test/browser/workshop-family-plan-print.spec.ts)
+and [frontend guidance](../../../docs/ui/frontend.md).
 
 ## Related files
 

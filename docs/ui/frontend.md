@@ -69,10 +69,11 @@ still leaves a collision. The allocation trace likewise resolves the `person`
 query ID before displaying the selected person's trace.
 The roster shows an explicit confidentiality notice above its picker. Rosters and
 family plans switch to labelled cards when the list area is narrower than 720px;
-person and room plans keep scrolling tables. The global stylesheet's print block
-prints only the selected document on A4; screen-only and print-only parts are
-marked with `workshop-screen-only` and `workshop-print-only` classes. The lists
-expose no application print, download, or export control.
+family plans also use those cards when printed on A4 portrait paper. Person and
+room plans keep scrolling tables. The global stylesheet's print block prints only
+the selected document; screen-only and print-only parts are marked with
+`workshop-screen-only` and `workshop-print-only` classes. The lists expose no
+application print, download, or export control.
 
 ## Workshop participation overview
 

@@ -1040,6 +1040,19 @@ main:has(> .workshop-lists) {
     display: block !important;
   }
 
+  .workshop-lists .workshop-family-plan-print-cards .workshop-list-wide {
+    display: none !important;
+  }
+
+  .workshop-lists .workshop-family-plan-print-cards .workshop-list-narrow {
+    display: block !important;
+  }
+
+  .workshop-lists .workshop-family-plan-print-cards .workshop-list-narrow > ul > li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .workshop-lists .workshop-list-body {
     margin: 0;
   }
