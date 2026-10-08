@@ -1,3 +1,4 @@
+import * as TokenStories from './tokens.stories'
 import * as ScreenLayoutStories from '../components/shared/ui/screen-layout.stories'
 import { Canvas, Meta, Stories, Title } from '@storybook/addon-docs/blocks'
 import * as AlertStories from '../components/shared/ui/alert.stories'
@@ -223,3 +224,14 @@ result shown in the main views. Acknowledgement belongs to one finalisation atte
 <Canvas of={WorkflowStepperStories.Print} />
 
 <Canvas of={StatsStories.Filter} />
+
+## Responsive typography
+
+Use role utilities (`text-h1`, `text-figure`, `text-metric`, `text-title`,
+`text-body`, `text-nav1`, `text-nav2`, `text-subtitle`) in reusable components
+and their current consumers. Below 40rem, these use one smaller scale step;
+controls keep their touch height. Running text has a 14px floor and captions a
+12px floor. Print uses its independent typography.
+
+<Canvas of={TokenStories.PhoneTypography} />
+<Canvas of={TokenStories.TabletTypography} />

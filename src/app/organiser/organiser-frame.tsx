@@ -64,12 +64,15 @@ export function OrganiserMinimalFrame({
       brand={
         <OrganiserLink
           href={organiserHomePath}
-          className="inline-flex min-h-11 items-center gap-2 text-lg font-heading"
+          className="flex min-h-11 min-w-0 items-center gap-2 text-title md:inline-flex font-heading"
         >
-          <span className="grid size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
-            <ProfileBrand branding={profile?.branding} className="size-7 object-contain" />
+          <span className="grid size-8 sm:size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
+            <ProfileBrand
+              branding={profile?.branding}
+              className="size-6 object-contain sm:size-7"
+            />
           </span>
-          {profileOrganiserTitle(profile)}
+          <span className="truncate">{profileOrganiserTitle(profile)}</span>
         </OrganiserLink>
       }
     >
@@ -123,12 +126,15 @@ export function OrganiserFrame({
       brand={
         <OrganiserLink
           href={organiserHomePath}
-          className="inline-flex min-h-11 items-center gap-2 text-lg font-heading"
+          className="flex min-h-11 min-w-0 items-center gap-2 text-title md:inline-flex font-heading"
         >
-          <span className="grid size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
-            <ProfileBrand branding={profile?.branding} className="size-7 object-contain" />
+          <span className="grid size-8 sm:size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
+            <ProfileBrand
+              branding={profile?.branding}
+              className="size-6 object-contain sm:size-7"
+            />
           </span>
-          {profileOrganiserTitle(profile)}
+          <span className="truncate">{profileOrganiserTitle(profile)}</span>
         </OrganiserLink>
       }
       role="Organisationsteam"

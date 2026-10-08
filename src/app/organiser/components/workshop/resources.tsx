@@ -25,7 +25,7 @@ export function SpaceIdentity({
 }) {
   return (
     <div>
-      <h3 className="text-xl font-heading">{name}</h3>
+      <h3 className="text-metric font-heading">{name}</h3>
       {location || capacity !== undefined ? (
         <p className="mt-1 text-sm text-muted">
           {location ?? '—'}
@@ -128,7 +128,7 @@ export function SlotDayGroup({
 }) {
   return (
     <section aria-labelledby={`workshop-day-${dayLabel}`} className="space-y-3">
-      <h3 id={`workshop-day-${dayLabel}`} className="text-xl font-heading">
+      <h3 id={`workshop-day-${dayLabel}`} className="text-metric font-heading">
         {dayLabel}
       </h3>
       {slots.length ? (

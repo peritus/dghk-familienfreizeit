@@ -33,7 +33,7 @@ export type WorkshopAuthoringView = {
 export function WorkshopIdentity({ title, description }: { title: string; description?: string }) {
   return (
     <div>
-      <h3 className="text-lg font-heading">{title}</h3>
+      <h3 className="text-title font-heading">{title}</h3>
       {description ? <p className="mt-1 text-sm font-normal text-muted">{description}</p> : null}
     </div>
   )
@@ -134,7 +134,7 @@ export function WorkshopSummaryRow({
     workshop.count !== undefined ? (
       <div className="space-y-1 text-sm">
         <p>
-          <strong className="text-xl tabular-nums">
+          <strong className="text-metric tabular-nums">
             {count}/{workshop.capacity}
           </strong>
           <span className="text-xs text-muted">

@@ -125,7 +125,7 @@ export function UnplacedWorkshopRow({
   return (
     <li className="flex flex-wrap items-start justify-between gap-4 border-b border-border/30 bg-secondary-background p-4 last:border-b-0 print:break-inside-avoid">
       <div className="min-w-0 flex-1">
-        <h3 className="text-xl font-heading">{workshop.title}</h3>
+        <h3 className="text-metric font-heading">{workshop.title}</h3>
         <p className="mt-1">
           <Badge tone="attention">Nicht eingeplant</Badge>
         </p>

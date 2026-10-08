@@ -44,7 +44,7 @@ export function PrintDocument({
         id={titleId}
         ref={headingRef}
         tabIndex={-1}
-        className="print-title text-2xl leading-tight font-heading focus:outline-3 focus:outline-offset-4 focus:outline-border"
+        className="print-title text-figure leading-tight font-heading focus:outline-3 focus:outline-offset-4 focus:outline-border"
       >
         {title}
       </h2>

@@ -674,7 +674,7 @@ export function FamilyPreferenceSection({
   return (
     <Card className="bg-secondary-background">
       <CardHeader>
-        <h3 className="text-xl">
+        <h3 className="text-metric">
           {localized(section.title, profile.meta.locale, profile.meta.fallback_locale)}
         </h3>
         {section.intro ? (

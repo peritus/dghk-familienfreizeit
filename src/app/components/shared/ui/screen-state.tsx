@@ -28,7 +28,7 @@ export function LoadingState({
               className="mt-0.5 size-6 shrink-0 motion-safe:animate-spin motion-reduce:animate-none"
             />
             <div>
-              <p className="text-xl font-heading">{message}</p>
+              <p className="text-metric font-heading">{message}</p>
               {description ? <div className="mt-1 text-muted">{description}</div> : null}
             </div>
           </div>
@@ -85,7 +85,7 @@ export function EmptyState({
   return (
     <Card data-slot="empty-state" size="sm" className="bg-secondary-background">
       <CardContent className="space-y-3">
-        {title ? <h3 className="text-xl font-heading">{title}</h3> : null}
+        {title ? <h3 className="text-metric font-heading">{title}</h3> : null}
         <div className="text-muted">{children}</div>
         {action ? <div className="print:hidden">{action}</div> : null}
       </CardContent>

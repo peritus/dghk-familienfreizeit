@@ -40,20 +40,22 @@ export function ApplicationFrame({
         </a>
         <header
           data-slot="application-bar"
-          className="border-b-2 border-border bg-secondary-background px-4 pt-3 print:hidden"
+          className="border-b-2 border-border bg-secondary-background px-4 pt-2.5 sm:pt-3 print:hidden"
         >
           <div className="mx-auto max-w-5xl">
-            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 pb-3">
-              <div className="min-w-0">
+            <div className="flex items-center justify-between gap-2.5 pb-2.5 sm:gap-3 sm:pb-3 md:flex-wrap md:gap-x-6">
+              <div className="min-w-0 flex-1 md:flex-none">
                 {brand}
                 {brandSubtitle || role ? (
-                  <div className="mt-0.5 text-sm font-normal text-muted">
+                  <div className="mt-0.5 truncate text-subtitle font-normal text-muted">
                     {brandSubtitle ?? role}
                   </div>
                 ) : null}
               </div>
               {controls ? (
-                <div className="flex flex-wrap items-center gap-3">{controls}</div>
+                <div className="flex shrink-0 items-center gap-2 md:flex-wrap md:gap-3">
+                  {controls}
+                </div>
               ) : null}
             </div>
             {primaryNavigation}

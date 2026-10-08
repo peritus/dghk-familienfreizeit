@@ -1147,7 +1147,7 @@ export function WorkshopProgramme() {
       {view === 'overlaps' ? (
         <section className="space-y-4" aria-labelledby="programme-overlaps-heading">
           <div>
-            <h2 id="programme-overlaps-heading" className="text-2xl font-heading">
+            <h2 id="programme-overlaps-heading" className="text-figure font-heading">
               Überschneidungen
             </h2>
             <p className="mt-1 max-w-3xl text-muted">

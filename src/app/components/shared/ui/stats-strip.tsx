@@ -31,7 +31,7 @@ export function StatsStrip({ items }: { items: readonly StatsStripItem[] }) {
           <>
             <p
               data-slot="stat-value"
-              className="flex items-center gap-2 text-2xl font-bold leading-none tabular-nums"
+              className="flex items-center gap-2 text-figure font-bold leading-none tabular-nums"
             >
               {warning ? <TriangleAlert aria-hidden="true" className="size-5" /> : null}
               {item.value}

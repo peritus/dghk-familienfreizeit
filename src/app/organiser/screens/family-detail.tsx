@@ -234,7 +234,7 @@ function FamilyNoteEditor({
   return (
     <Card className="bg-secondary-background">
       <CardHeader>
-        <h3 className="text-xl">Sonstiges zum Zimmer</h3>
+        <h3 className="text-metric">Sonstiges zum Zimmer</h3>
         <p>Alles, was oben nicht vorkommt.</p>
       </CardHeader>
       <CardContent className="grid gap-3">
@@ -307,11 +307,11 @@ function FamilyRoomView({
       />
       <Card className="bg-secondary-background">
         <CardHeader>
-          <h3 className="text-xl">Schlafen</h3>
+          <h3 className="text-metric">Schlafen</h3>
         </CardHeader>
         <CardContent className="grid gap-4">
           <p className="flex flex-wrap items-baseline gap-2">
-            <strong className="text-3xl">{peopleWithOwnBed.length}</strong>
+            <strong className="text-h1">{peopleWithOwnBed.length}</strong>
             <span>{peopleWithOwnBed.length === 1 ? 'Schlafplatz' : 'Schlafplätze'} nötig</span>
           </p>
           {infants.length ? (
@@ -654,7 +654,7 @@ function FamilyPeopleView({
       <div className="grid min-w-0 gap-5">
         <Card className="bg-secondary-background">
           <CardHeader>
-            <h3 className="text-xl">Person</h3>
+            <h3 className="text-metric">Person</h3>
             <p className="text-muted">
               {personName(selected) || selected.entity.id} ·{' '}
               {selected.role === 'adult'
@@ -921,7 +921,7 @@ function WorkshopFinder({
       <Button type="button" variant="neutral" className="justify-self-start" onClick={onBack}>
         ← Zurück
       </Button>
-      <h3 className="text-xl">{title}</h3>
+      <h3 className="text-metric">{title}</h3>
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
           label="Suchen"
@@ -958,7 +958,7 @@ function WorkshopFinder({
                 className={`grid content-start gap-3 rounded-base border-2 border-border p-4 shadow-shadow ${eligibility.ok ? 'bg-secondary-background' : 'border-dashed bg-paper shadow-none'}`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <h4 className="text-lg font-bold">{workshop.title}</h4>
+                  <h4 className="text-title font-bold">{workshop.title}</h4>
                   {!eligibility.ok ? <Badge tone="neutral">✕ Passt nicht</Badge> : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1139,7 +1139,7 @@ function FamilyWorkshopView({
           aria-labelledby="workshop-wishes-title"
         >
           <div>
-            <h3 id="workshop-wishes-title" className="text-xl">
+            <h3 id="workshop-wishes-title" className="text-metric">
               Wunschliste
             </h3>
             <p className="text-sm text-muted">Bis zu 3 Workshops, geordnet nach Wunsch.</p>
@@ -1227,7 +1227,7 @@ function FamilyWorkshopView({
               className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4 shadow-shadow"
             >
               <div>
-                <h3 className="text-xl">{title}</h3>
+                <h3 className="text-metric">{title}</h3>
                 <p className="text-sm text-muted">{hint}</p>
               </div>
               {ids.length ? (

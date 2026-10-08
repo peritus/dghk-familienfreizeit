@@ -21,7 +21,7 @@ export function BuildingSection(props: {
     <section className="space-y-4" aria-labelledby={`${roomsId}-heading`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-border pb-3">
         <div>
-          <h2 id={`${roomsId}-heading`} className="text-2xl font-heading">
+          <h2 id={`${roomsId}-heading`} className="text-figure font-heading">
             {building.name}
           </h2>
           <p className="text-sm text-muted">
@@ -62,7 +62,7 @@ export function BuildingSection(props: {
         <div id={roomsId} className="space-y-5">
           {[...new Set(building.rooms.map((room) => room.floor))].map((floor) => (
             <div key={floor} className="space-y-3">
-              <h3 className="border-b border-border pb-1 text-lg font-heading">{floor}</h3>
+              <h3 className="border-b border-border pb-1 text-title font-heading">{floor}</h3>
               <div className="grid gap-4 xl:grid-cols-2">
                 {building.rooms
                   .filter((room) => room.floor === floor)

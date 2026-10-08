@@ -26,6 +26,30 @@
   --shadow: 4px 4px 0 0 var(--shadow-c);
 }
 
+/* Responsive roles retain the existing scale and a 12px caption floor. */
+:root {
+  --fs-h1: 1.5rem;
+  --fs-figure: 1.25rem;
+  --fs-metric: 1.125rem;
+  --fs-title: 1rem;
+  --fs-body: 0.875rem;
+  --fs-nav1: 0.875rem;
+  --fs-nav2: 0.75rem;
+  --fs-sub: 0.75rem;
+}
+@media (width >= 40rem), print {
+  :root {
+    --fs-h1: 1.875rem;
+    --fs-figure: 1.5rem;
+    --fs-metric: 1.25rem;
+    --fs-title: 1.125rem;
+    --fs-body: 1rem;
+    --fs-nav1: 1rem;
+    --fs-nav2: 0.875rem;
+    --fs-sub: 0.875rem;
+  }
+}
+
 .workshop-participation-page {
   container-name: workshop-participation;
   container-type: inline-size;
@@ -530,6 +554,22 @@
 }
 
 @theme inline {
+  --text-h1: var(--fs-h1);
+  --text-h1--line-height: 1.2;
+  --text-figure: var(--fs-figure);
+  --text-figure--line-height: calc(32 / 24);
+  --text-metric: var(--fs-metric);
+  --text-metric--line-height: 1.4;
+  --text-title: var(--fs-title);
+  --text-title--line-height: calc(28 / 18);
+  --text-body: var(--fs-body);
+  --text-body--line-height: 1.5;
+  --text-nav1: var(--fs-nav1);
+  --text-nav1--line-height: 1.5;
+  --text-nav2: var(--fs-nav2);
+  --text-nav2--line-height: calc(20 / 14);
+  --text-subtitle: var(--fs-sub);
+  --text-subtitle--line-height: calc(20 / 14);
   --color-background: var(--background);
   --color-secondary-background: var(--secondary-background);
   --color-paper: var(--paper);
@@ -561,7 +601,7 @@
 
 @layer base {
   body {
-    @apply m-0 bg-background font-sans text-base leading-relaxed text-foreground;
+    @apply m-0 bg-background font-sans text-body leading-relaxed text-foreground;
   }
   h1,
   h2,
@@ -1086,7 +1126,7 @@ main:has(> .workshop-lists) {
   }
 
   /* Screen sizes are rem-based; on paper every smaller line follows its context. */
-  .workshop-lists :is(.text-xs, .text-sm, .text-base) {
+  .workshop-lists :is(.text-xs, .text-sm, .text-base, .text-body) {
     font-size: 0.9em;
   }
 

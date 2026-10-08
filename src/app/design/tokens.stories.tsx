@@ -69,3 +69,28 @@ export const Catalog: Story = {
     </div>
   ),
 }
+
+const typographyRoles = [
+  ['H1', 'text-h1'],
+  ['Kennzahl', 'text-figure'],
+  ['Listenmetrik', 'text-metric'],
+  ['Titel', 'text-title'],
+  ['Fließtext', 'text-body'],
+  ['Navigation 1', 'text-nav1'],
+  ['Navigation 2', 'text-nav2'],
+  ['Untertitel', 'text-subtitle'],
+] as const
+function TypographyRoles() {
+  return (
+    <div className="space-y-4 bg-background p-4">
+      {typographyRoles.map(([name, style]) => (
+        <p key={name} data-typography-role={name} className={style}>
+          {name}: Familienfreizeit
+        </p>
+      ))}
+    </div>
+  )
+}
+export const PhoneTypography: Story = { render: () => <TypographyRoles /> }
+
+export const TabletTypography: Story = { render: () => <TypographyRoles /> }

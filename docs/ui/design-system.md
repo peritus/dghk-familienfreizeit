@@ -157,7 +157,7 @@ utilities. The orange theme uses semantic tokens for warm light surfaces and a
 dark system-preference variant with near-black surfaces, cream outlines, and
 accessible foreground colors. Cards and popovers use `secondary-background`,
 fields use `input`, pressable shadows use `shadow-c`, and native checkboxes and
-radios use `main-deep` as their accent. Base text is 16px with relaxed line
+radios use `main-deep` as their accent. Base text is 14px below 40rem and 16px above, with relaxed line
 height. Links and buttons have visible keyboard focus through the `ring` token.
 `cursor: pointer` is an explicit base-layer rule for every interactive element,
 since Tailwind v4's preflight resets buttons to `cursor: default`.
@@ -330,3 +330,33 @@ Verification covers the full workshop fixture at 390, 640, 768, 1024 and 1280px;
 appearance, reduced motion, disclosure storage failure, keyboard review focus, filter
 synchronisation and multi-page Chromium printing. Original save-status visual baselines
 remain unchanged. This is local implementation evidence, not hosted deployment evidence.
+
+## Responsive typography roles
+
+Shared roles use CSS variables exposed as Tailwind utilities, so current pages
+and module renderers inherit the same presentation. Existing scale utilities
+remain available for fixed-size controls and captions.
+
+| Role / utility | Below 40rem | From 40rem |
+|---|---|---|
+| H1 / `text-h1` | 24px | 30px |
+| Figure / `text-figure` | 20px | 24px |
+| Row metric / `text-metric` | 18px | 20px |
+| App, row and phase title / `text-title` | 16px | 18px |
+| Body / `text-body` | 14px | 16px |
+| Primary navigation / `text-nav1` | 14px | 16px |
+| Section navigation / `text-nav2` | 12px | 14px |
+| App subtitle / `text-subtitle` | 12px | 14px |
+
+Running text stays at least 14px and captions at least 12px. Phone tabs are 44px
+high with 12px side padding and a −14px navigation offset. Section chips remain
+at least 40px high with 10px side padding; their band uses 4px gaps and 8px vertical
+padding. Header top padding and row gaps are 10px, with a 32px logo tile.
+From 40rem, existing wider type and geometry apply. Active horizontal navigation
+still centers its selected destination without scrolling the document vertically.
+Print resets responsive role values and retains the dedicated point-size rules.
+
+| Responsive concern | Below 40rem | 40–48rem | From 48rem |
+|---|---|---|---|
+| Type and navigation | Compact roles and geometry | Wider roles | Wider roles |
+| Header controls | Compact menu sheet | Compact modal popover | Save button and Abmelden |

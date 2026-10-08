@@ -341,7 +341,7 @@ function NewBuildingForm({
   return (
     <Card className="bg-secondary-background">
       <CardContent>
-        {heading ? <h2 className="text-2xl font-heading">{heading}</h2> : null}
+        {heading ? <h2 className="text-figure font-heading">{heading}</h2> : null}
         {intro ? <p className="mt-1 text-muted">{intro}</p> : null}
         <form
           className={heading ? 'mt-4 space-y-3' : 'space-y-3'}
@@ -894,7 +894,7 @@ function RoomDetail({
           bedGroups(beds, room.room_type === 'apartment').map((group) => (
             <div key={group.heading ?? '_'}>
               {group.heading ? (
-                <h3 className="mb-1 font-heading text-lg">{group.heading}</h3>
+                <h3 className="mb-1 font-heading text-title">{group.heading}</h3>
               ) : null}
               <div className="divide-y-2 divide-border rounded-base border-2 border-border bg-secondary-background">
                 {group.beds.map((bed) => (
@@ -1149,7 +1149,7 @@ function RoomForm({
   return (
     <Card className="border-t-2 bg-paper">
       <CardContent>
-        {heading ? <h3 className="text-xl font-heading">{heading}</h3> : null}
+        {heading ? <h3 className="text-metric font-heading">{heading}</h3> : null}
         {intro ? <p className="mt-1 text-sm text-muted">{intro}</p> : null}
         <form
           className={heading ? 'mt-4 space-y-3' : 'space-y-3'}
@@ -1205,7 +1205,7 @@ function TraitFields({
 }) {
   return (
     <fieldset className="space-y-3 border-t-2 border-border pt-3">
-      <legend className="font-heading text-lg">Merkmale</legend>
+      <legend className="font-heading text-title">Merkmale</legend>
       {roomPropertyDefinitions.map(({ key, trait }) => {
         const options = traitOptions(trait)
         const value = values[key]

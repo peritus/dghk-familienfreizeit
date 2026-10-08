@@ -199,7 +199,7 @@ export function WorkflowStepper({
           </div>
           <div className="workflow-panel flex flex-wrap items-start gap-x-6 gap-y-3 px-4 py-4">
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-heading">
+              <h2 className="text-title font-heading">
                 {panel?.heading ??
                   (terminal
                     ? current?.label

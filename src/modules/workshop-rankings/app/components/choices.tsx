@@ -229,7 +229,7 @@ export function WorkshopDemandCards({ workshops }: { workshops: readonly Worksho
     <ul className="grid gap-3">
       {workshops.map((workshop) => (
         <li key={workshop.id} className="rounded-base border-2 border-black bg-white p-4">
-          <h3 className="text-xl font-heading">{workshop.title}</h3>
+          <h3 className="text-metric font-heading">{workshop.title}</h3>
           <p className="mt-1 text-sm text-muted">
             {workshop.audience} · {workshop.slot}
           </p>
@@ -744,7 +744,7 @@ export function ChoiceTraceTable({
       {stages.map((stage, index) => (
         <li key={stage.id} className="rounded-base border-2 border-black bg-white p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-lg font-heading">{stage.label}</h3>
+            <h3 className="text-title font-heading">{stage.label}</h3>
             <span className="text-sm text-muted">{stage.description}</span>
           </div>
           <div className="mt-3">

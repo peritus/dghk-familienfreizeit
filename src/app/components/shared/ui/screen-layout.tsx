@@ -18,7 +18,7 @@ export function ScreenHeader({ title, description, action, className }: ScreenHe
       className={cn('flex flex-wrap items-end justify-between gap-4 ', className)}
     >
       <div className="min-w-0">
-        <h1 className="text-3xl leading-tight font-heading tracking-[-0.01em]">{title}</h1>
+        <h1 className="text-h1 leading-tight font-heading tracking-[-0.01em]">{title}</h1>
         {description ? (
           <div className="mt-2 max-w-3xl font-normal text-muted">{description}</div>
         ) : null}
@@ -149,7 +149,7 @@ export function SectionHeader({
       <div className="min-w-0">
         <Heading
           id={id}
-          className={cn('font-heading', headingLevel === 2 ? 'text-2xl' : 'text-xl')}
+          className={cn('font-heading', headingLevel === 2 ? 'text-figure' : 'text-metric')}
         >
           {title}
         </Heading>

@@ -40,8 +40,8 @@ function Navigation({
       className={cn(
         'flex whitespace-nowrap print:hidden',
         level === 'primary'
-          ? '-mb-0.5 -ml-4 items-end gap-0.5 overflow-x-auto'
-          : 'mx-auto max-w-5xl gap-2 overflow-x-auto py-2.5 pr-4 pl-0.5',
+          ? '-mb-0.5 -ml-[14px] sm:-ml-4 items-end gap-0.5 overflow-x-auto'
+          : 'mx-auto max-w-5xl gap-1 sm:gap-2 overflow-x-auto py-2 sm:py-2.5 pr-4 pl-0.5',
       )}
     >
       {items.map((item) =>
@@ -51,10 +51,10 @@ function Navigation({
             key: item.id,
             'aria-current': item.active ? 'page' : undefined,
             className: cn(
-              'inline-flex flex-none items-center border-2 text-sm focus-visible:outline-offset-[-2px]',
+              'inline-flex flex-none items-center border-2 focus-visible:outline-offset-[-2px]',
               level === 'primary'
-                ? 'h-12 rounded-t-[6px] border-b-0 px-4 text-base font-bold'
-                : 'min-h-11 rounded-base px-3',
+                ? 'h-11 sm:h-12 rounded-t-[6px] border-b-0 px-3 sm:px-4 text-nav1 font-bold'
+                : 'min-h-10 sm:min-h-11 rounded-base px-2.5 sm:px-3 text-nav2',
               item.active
                 ? level === 'primary'
                   ? 'border-border bg-main-soft'

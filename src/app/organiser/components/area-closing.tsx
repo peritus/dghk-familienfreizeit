@@ -153,7 +153,7 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
             ref={reviewHeading}
             tabIndex={-1}
             id="workshop-review-title"
-            className="font-heading text-lg"
+            className="font-heading text-title"
           >
             Hinweise vor dem Festlegen
           </h3>

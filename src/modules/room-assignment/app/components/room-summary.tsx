@@ -28,7 +28,7 @@ export function RoomSummary({
     <div className="space-y-2">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <OrganiserLink
-          className="text-xl font-heading underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
+          className="text-metric font-heading underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
           href={href}
         >
           {name}

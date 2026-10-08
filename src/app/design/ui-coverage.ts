@@ -26,6 +26,20 @@ export type UiCoverageEntry = {
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
   {
+    id: 'foundations-design-tokens--phone-typography',
+    area: 'foundation',
+    subject: 'Phone typography roles',
+    source: 'src/app/globals.css',
+    viewport: { width: 390, height: 800 },
+  },
+  {
+    id: 'foundations-design-tokens--tablet-typography',
+    area: 'foundation',
+    subject: 'Tablet typography roles',
+    source: 'src/app/globals.css',
+    viewport: { width: 640, height: 800 },
+  },
+  {
     id: 'application-organiser-area-closing--advisory-actions',
     area: 'application',
     subject: 'Workshop advisory finalisation actions',

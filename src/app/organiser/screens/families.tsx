@@ -242,7 +242,7 @@ export function Families() {
                     <th scope="row" className="p-4 align-top max-md:block max-md:p-0">
                       <OrganiserLink
                         href={organiserPaths.family_detail(row.family.id)}
-                        className="text-lg font-bold underline"
+                        className="text-title font-bold underline"
                       >
                         {row.display_name}
                       </OrganiserLink>

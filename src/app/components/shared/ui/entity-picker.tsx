@@ -45,7 +45,7 @@ function ListSearchInput({
           if (event.key === 'Enter') commit(event.currentTarget.value)
         }}
         onBlur={(event) => commit(event.currentTarget.value)}
-        className="h-11 w-full rounded-base border-2 border-border bg-secondary-background px-3 text-base font-normal leading-tight"
+        className="h-11 w-full rounded-base border-2 border-border bg-secondary-background px-3 text-body font-normal leading-tight"
       />
       <datalist id={listId}>
         {options.map((option) => (
@@ -87,7 +87,7 @@ export function EntityPicker({
           <select
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            className="select-chevron h-11 w-full rounded-base border-2 border-border bg-secondary-background pl-3 text-base font-normal leading-tight"
+            className="select-chevron h-11 w-full rounded-base border-2 border-border bg-secondary-background pl-3 text-body font-normal leading-tight"
           >
             {optionGroups(options).map((group, groupIndex) => {
               const items = group.options.map((option) => (

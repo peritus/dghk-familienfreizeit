@@ -21,9 +21,12 @@ export function Shell({
     <ApplicationFrame
       print_title={profileEventTitle(profile)}
       brand={
-        <Link href="~/" className="inline-flex min-h-11 items-center gap-2 text-lg font-heading">
+        <Link
+          href="~/"
+          className="flex min-h-11 min-w-0 items-center gap-2 text-title md:inline-flex font-heading"
+        >
           <ProfileBrand branding={profile?.branding} className="size-8 shrink-0 object-contain" />
-          {profileEventTitle(profile)}
+          <span className="truncate">{profileEventTitle(profile)}</span>
         </Link>
       }
     >
