@@ -15,6 +15,14 @@ export const kernelProfile = defineOccasionProfile({
         de: 'Ausführbares Profil ohne Fachmodule.',
         en: 'Executable profile without domain modules.',
       },
+      actions: [
+        {
+          id: 'organiser-login',
+          label: { de: 'Als Organisator anmelden', en: 'Organiser login' },
+          emphasis: 'primary',
+          destination: { kind: 'route', to: '/login' },
+        },
+      ],
     },
     starts_on: '2027-05-14',
     ends_on: '2027-05-16',

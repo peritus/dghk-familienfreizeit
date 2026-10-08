@@ -16,6 +16,18 @@ const meta = {
   timezone: 'Europe/Berlin',
   locale: 'de',
   fallback_locale: 'en',
+  public_landing: {
+    heading: { de: 'Test', en: 'Test' },
+    intro: { de: 'Test', en: 'Test' },
+    actions: [
+      {
+        id: 'organiser-login',
+        label: { de: 'Als Organisator anmelden', en: 'Organiser login' },
+        emphasis: 'primary' as const,
+        destination: { kind: 'route' as const, to: '/login' },
+      },
+    ],
+  },
 }
 
 describe('occasion profile', () => {
@@ -32,6 +44,14 @@ describe('occasion profile', () => {
         de: 'Planungswerkzeug für die Familienfreizeit.',
         en: 'Planning tool for the family retreat.',
       },
+      actions: [
+        {
+          id: 'organiser-login',
+          label: { de: 'Als Organisator anmelden', en: 'Organiser login' },
+          emphasis: 'primary',
+          destination: { kind: 'route', to: '/login' },
+        },
+      ],
     })
     expect(luebben2027Profile.traits['room-status']).toEqual(
       expect.objectContaining({

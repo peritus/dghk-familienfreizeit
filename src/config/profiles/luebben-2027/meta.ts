@@ -16,6 +16,14 @@ export const luebben2027Meta = {
       de: 'Planungswerkzeug für die Familienfreizeit.',
       en: 'Planning tool for the family retreat.',
     },
+    actions: [
+      {
+        id: 'organiser-login',
+        label: { de: 'Als Organisator anmelden', en: 'Organiser login' },
+        emphasis: 'primary',
+        destination: { kind: 'route', to: '/login' },
+      },
+    ],
   },
   event: {
     title: {
