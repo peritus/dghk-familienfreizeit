@@ -41,9 +41,7 @@ export type ProfileLandingAction = {
   id: string
   label: LocalizedText
   emphasis: 'primary' | 'secondary'
-  destination:
-    | { kind: 'route'; to: string }
-    | { kind: 'external'; href: string }
+  destination: { kind: 'route'; to: string } | { kind: 'external'; href: string }
 }
 
 export type EntityScope = 'family' | 'person' | (string & {})
@@ -342,7 +340,8 @@ function validatePublicLanding(meta: ProfileMeta, landing: ProfilePublicLanding)
 
   const actionIds = new Set<string>()
   for (const action of landing.actions) {
-    if (!kebab(action.id)) throw new Error(`public landing action id must be kebab-case: ${action.id}`)
+    if (!kebab(action.id))
+      throw new Error(`public landing action id must be kebab-case: ${action.id}`)
     if (actionIds.has(action.id)) throw new Error(`duplicate public landing action: ${action.id}`)
     actionIds.add(action.id)
     validateCopy(meta, action.label)

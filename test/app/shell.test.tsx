@@ -209,6 +209,7 @@ test('the root renders the active profile landing copy', () => {
       public_landing: {
         heading: 'Profile-specific heading',
         intro: 'Profile-specific intro',
+        actions: activeProfilePresentation.meta.public_landing.actions,
       },
     },
   }

@@ -218,10 +218,16 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/auth/login.tsx',
   },
   {
-    id: 'screens-public-organiser-landing--default',
+    id: 'screens-public-occasion-landing--default',
     area: 'screen',
-    subject: 'Organiser landing',
-    source: 'src/app/public-view/organiser-landing.tsx',
+    subject: 'Occasion landing',
+    source: 'src/app/public-view/occasion-landing.tsx',
+  },
+  {
+    id: 'screens-public-occasion-landing--multiple-actions',
+    area: 'screen',
+    subject: 'Occasion landing with multiple actions',
+    source: 'src/app/public-view/occasion-landing.tsx',
   },
   {
     id: 'screens-organiser-dashboard--healthy',

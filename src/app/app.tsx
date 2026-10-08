@@ -26,9 +26,7 @@ export function App({ profile }: { profile?: ProfilePresentation } = {}) {
         }
       >
         <Switch>
-          <Route path="/">
-            {profile ? <OccasionLanding profile={profile} /> : null}
-          </Route>
+          <Route path="/">{profile ? <OccasionLanding profile={profile} /> : null}</Route>
           <Route path="/login">
             <Login />
           </Route>

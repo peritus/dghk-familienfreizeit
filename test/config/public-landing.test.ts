@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import {
-  defineOccasionProfile,
-  type ProfileLandingAction,
-} from '../../src/config/define.js'
+import { defineOccasionProfile, type ProfileLandingAction } from '../../src/config/define.js'
 
 const action = {
   id: 'organiser-login',
@@ -57,9 +54,9 @@ describe('public landing profile actions', () => {
     expect(() =>
       profile([{ ...action, label: { de: 'Anmelden' } } as unknown as ProfileLandingAction]),
     ).toThrow(/localized copy misses profile locale/)
-    expect(() => profile([{ ...action, destination: { kind: 'route', to: '//example.org' } }])).toThrow(
-      /in-app path/,
-    )
+    expect(() =>
+      profile([{ ...action, destination: { kind: 'route', to: '//example.org' } }]),
+    ).toThrow(/in-app path/)
     expect(() =>
       profile([
         {
