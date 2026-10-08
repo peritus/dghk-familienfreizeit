@@ -148,7 +148,13 @@ programme and allocation screens render the workshop track from the derived
 The workshop overview provides a focused add/edit dialog for the core workshop
 fields, stages complete `WorkshopAdded` or `WorkshopUpdated` restatements, and
 updates the prospective world immediately. Its searchable leader picker preserves
-typed internal and existing external leader identities. The overview resolves
+typed internal and existing external leader identities. Each active row also offers
+**Löschen**, with a confirmation that stages `WorkshopRetired` through the same
+pipeline. The workshop and its own labels leave the current derived world;
+existing wishes and decisions remain traceable, and the solver reports the
+resulting open cases. Discarding the deletion draft restores the committed view.
+Configured resolver references can block persistence through the shared append
+validation and apply error path. The overview resolves
 audience and participation labels, leader names, demand counts, and one derived
 placement per workshop. The programme review derives one slot and one physical
 space per workshop and keeps unscheduled workshops visible with a reason; its cells
@@ -165,6 +171,8 @@ still owned by the selected profile/module contract rather than a screen-local f
 Browser print is the only print path; these screens add no export or print button.
 External leader contacts are organiser-only, and cancelled workshops leave active
 planning. No organiser screen cancels a workshop or lists cancelled workshops.
+Cancellation authoring and its labelled history view are
+[accepted but deferred](../../spec/deferred-ideas/workshop-cancellation.md).
 
 Workshop allocation is a read-only projection over the current derived world and
 solver plan. Antworten shows ranked, no-preference, and missing-answer states;

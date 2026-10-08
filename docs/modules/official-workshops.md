@@ -5,6 +5,20 @@ log. The overview route `/organiser/workshops` creates and reviews full workshop
 restatements, including audience, age range, capacity, participation mode,
 resolver-backed needs, and typed internal or external leaders.
 
+Each active workshop row offers **Löschen** through the shared confirmation dialog.
+Dismissal returns keyboard focus to that action; confirming deletion moves focus
+to the page heading once the workshop row disappears.
+Confirming stages `WorkshopRetired` through the ordinary organiser event pipeline.
+The prospective workshop disappears immediately; discarding that draft restores
+the committed view. Retirement removes the live workshop and its own labels under
+[D27](../../decisions.md#d27--entities-and-labels-are-hard-removed-on-retirementclear-history-is-re-derived-not-tombstoned),
+while the event log remains available for prefix replay. Existing wishes,
+sign-ups, interests, and fixed attendance facts are retained. The solver reports
+unassigned ranked people and invalid fixed attendance decisions for the removed
+workshop. A surviving configured resolver constraint that references the workshop
+causes the append boundary to reject retirement; the ordinary organiser apply
+error path exposes that failure without persisting the removal.
+
 The `/organiser/workshops/external-leaders` view follows the workshop authoring
 pattern for external leaders: it lists each external leader with an explicit external
 badge, organiser-only phone metadata, linked workshops, and derived slot
@@ -16,7 +30,8 @@ The supported modes are automatic assignment, sign-up, and organiser-visible
 interest. The current choice cycle is independent of schedule placement. The
 `WorkshopCancelled` event removes a workshop from active planning while preserving
 its event history. The organiser UI currently has no cancellation action or
-labelled cancellation-history view; both remain in [M8](../../spec/roadmap.md#m8--organiser-authored-workshop-programme).
+labelled cancellation-history view; that organiser surface is
+[accepted but deferred](../../spec/deferred-ideas/workshop-cancellation.md).
 Retiring a workshop removes it from the live world; historical views replay the
 earlier event prefix when needed.
 
