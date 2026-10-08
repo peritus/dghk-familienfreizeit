@@ -5,6 +5,11 @@ typed entities, active and historical generic labels, normalized constraints and
 capabilities, diagnostics, and module-contributed summaries and checks. No derived
 domain state is persisted.
 
+The fixed resolver keys `needs`, `provides`, `excludes`, `groups-with`, and
+`separates-from` retain multiple values per entity by default. An explicit label
+schema can narrow a key's cardinality; `LabelCleared` with a value removes only
+that value. Repeating a value updates its strength, note, and sequence metadata.
+
 Profile traits compile their sensitivity, validity evaluator, resolver role, and
 capability derivation into the kernel configuration. A capability is either assigned
 through `provides` or derived from labels; a derived capability cannot also be

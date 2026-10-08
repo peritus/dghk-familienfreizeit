@@ -1,7 +1,7 @@
 ---
 id: "045"
 title: Fixed resolver labels keep only their last value
-status: open
+status: resolved
 severity: contract-contradiction
 category: kernel
 source: review of the workshop list reports against the prototype dataset
@@ -74,31 +74,23 @@ replaces the first family's `provides` token on that room, and pinning a family
 replaces any other `needs` value the family already holds. A test does not yet
 cover this.
 
-## Recommendation
+## Resolution
 
-1. Treat the five fixed resolver keys as `zero-or-more` when no schema
-   overrides them, and keep replacement for other keys without a schema. Keep
-   the existing single list of fixed keys as the source, rather than repeating
-   it in `fold.ts` and `resolver.ts`.
-2. State the cardinality of the fixed resolver keys in
-   [labels and constraints §2](../../architecture/labels-and-constraints.md#2-representation),
-   and record the implemented behavior in
-   [derived world](../../../docs/architecture/derived-world.md).
-3. Report an unscheduled workshop's reason as the rule that rejects every
-   candidate when one exists, otherwise the most frequent rule.
-4. Add regression coverage:
-   - two `provides` values on one entity both produce capabilities;
-   - `LabelCleared` with a value removes only that value;
-   - on the prototype dataset only `wks_schmieden` is unscheduled, with
-     `hard.missing-capability`;
-   - pinning two families to one room keeps both tokens.
+All five fixed resolver keys now default to `zero-or-more`; an explicit label
+schema can override the default. The fold and resolver share one fixed-key set.
+Repeating the same value updates its metadata, and clearing one value preserves
+other values under that key.
 
-## Open questions
+Unscheduled workshop diagnostics now prefer a rule that rejects every candidate.
+When no rule is universal, the reason is the most frequent rejection, with ties
+resolved by the first rule encountered during candidate traversal.
 
-1. Is a restatement of the same `needs`/`provides` value a no-op, or does it
-   update strength and note on the existing label?
-2. Should `excludes` and `separates-from` share the multi-valued default, or do
-   they need a profile schema first?
+Regression coverage verifies multiple capabilities, schema overrides,
+same-value metadata updates, value-specific clears, two family room pins, and
+the prototype dataset's sole unscheduled workshop (`wks_schmieden`) with
+`hard.missing-capability`. See [derived world tests](../../../test/events/derived-world.test.ts),
+[room assignment tests](../../../test/events/room-assignment.test.ts), and the
+[prototype dataset solver test](../../../test/solver/workshop-assignment-prototype-dataset.test.ts).
 
 ## Related files
 

@@ -618,6 +618,30 @@ LabelSet entity_id=fam_open key=provides value=fam_access_room strength=#null no
     expect(input?.fixed_assignments).toEqual([])
   })
 
+  test('keeps two family pins on the same room', () => {
+    const world = derive(
+      loadKdl(
+        `${fixture}
+LabelSet entity_id=fam_access key=needs value=fam_access_room strength=required note=#null
+LabelSet entity_id=rm_access key=provides value=fam_access_room strength=#null note=#null
+LabelSet entity_id=fam_open key=needs value=fam_open_room strength=required note=#null
+LabelSet entity_id=rm_access key=provides value=fam_open_room strength=#null note=#null`,
+        profile.validation_view,
+      ),
+      profile.validation_view,
+    )
+    const input = buildSolverInput(world, contributions).module_inputs['room-assignment'] as
+      | RoomAssignmentInput
+      | undefined
+
+    expect(input?.room_constraints).toEqual(
+      expect.arrayContaining([
+        { family_id: 'fam_access', room_ids: ['rm_access'] },
+        { family_id: 'fam_open', room_ids: ['rm_access'] },
+      ]),
+    )
+  })
+
   test('reports unplaced families and assigns no-bed people without places', () => {
     const impossible = runRoomAssignment(
       assignmentInput(

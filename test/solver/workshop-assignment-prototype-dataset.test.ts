@@ -105,9 +105,11 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
     workshopRankingsWorld(world).rankings.map((ranking) => [ranking.person_id, ranking]),
   )
   const unscheduledIds = new Set(schedule.unscheduled.map(({ workshop_id: id }) => id))
-  // 'wks_schmieden' needs 'Esse', which no room in the dataset provides —
-  // it must come out unscheduled, exercising that this never crashes.
-  expect(unscheduledIds.has('wks_schmieden')).toBe(true)
+  // All declared workshop-space capabilities survive folding. Schmieden still
+  // needs the one capability that no space provides.
+  expect(schedule.unscheduled).toEqual([
+    { workshop_id: 'wks_schmieden', reason: 'hard.missing-capability' },
+  ])
 
   const roleOf = (personId: string): unknown =>
     input.labels.find((label) => label.entity_id === personId && label.key === 'role')?.value

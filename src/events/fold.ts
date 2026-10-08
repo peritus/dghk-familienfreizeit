@@ -14,6 +14,7 @@ import {
   type PersonWithdrawn,
 } from './types.js'
 import {
+  fixedResolverKeys,
   resolve,
   type Diagnostic,
   type ResolvedConstraint,
@@ -861,7 +862,9 @@ function setConfiguredLabel(
   )
     throw new Error(`derived capability cannot be assigned: ${value}`)
   assertConfiguredLabelMutation(config, entityId, canonicalKey, allowSetupOnly, target)
-  if (schema?.cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
+  const cardinality =
+    schema?.cardinality ?? (fixedResolverKeys.has(canonicalKey) ? 'zero-or-more' : undefined)
+  if (cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
   const error = schema?.validate?.(value)
   if (error) throw new Error(error)
   setLabel(
@@ -900,11 +903,10 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
       `label key is setup-owned and cannot be written via LabelSet/LabelCleared: ${canonicalKey}`,
     )
   const schemas = config.label_schemas ?? []
-  const resolverKeys = new Set(
-    (config.resolver_descriptors ?? []).map((descriptor) => descriptor.key),
-  )
-  for (const key of ['needs', 'provides', 'excludes', 'groups-with', 'separates-from'])
-    resolverKeys.add(key)
+  const resolverKeys = new Set([
+    ...(config.resolver_descriptors ?? []).map((descriptor) => descriptor.key),
+    ...fixedResolverKeys,
+  ])
   if (
     schemas.length > 0 &&
     !schemas.some((schema) => schema.key === canonicalKey) &&

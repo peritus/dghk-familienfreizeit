@@ -122,6 +122,112 @@ test('clears every value for a key when LabelCleared carries a null value', () =
   expect(world.labels.filter((label) => label.key === 'needs')).toHaveLength(0)
 })
 
+test('fixed resolver keys keep multiple values without a label schema', () => {
+  const values = {
+    needs: ['quiet-room', 'garden-view'],
+    provides: ['tables', 'oven'],
+    excludes: ['dogs', 'smoking'],
+    'groups-with': ['same-room', 'nearby'],
+    'separates-from': ['stairs', 'noise'],
+  } as const
+  let seq = 3
+  const additions: Event[] = Object.entries(values).flatMap(([key, entries]) =>
+    entries.map((value) => ({
+      seq: seq++,
+      at: '2027-01-01T00:00:02Z',
+      actor: 'org@test.invalid',
+      subject: null,
+      type: 'LabelSet' as const,
+      payload: { entity_id: 'fam_1', key, value, strength: null, note: null },
+    })),
+  )
+
+  const world = derive([...events, ...additions])
+
+  for (const [key, expected] of Object.entries(values))
+    expect(
+      world.labels
+        .filter((label) => label.entity_id === 'fam_1' && label.key === key)
+        .map((label) => label.value),
+    ).toEqual(expect.arrayContaining(expected))
+  expect(
+    world.capabilities.filter((item) => item.entity_id === 'fam_1').map(({ key }) => key),
+  ).toEqual(expect.arrayContaining(['tables', 'oven']))
+})
+
+test('a fixed resolver label schema can override the multi-value default', () => {
+  const secondNeed: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelSet',
+    payload: { entity_id: 'fam_1', key: 'needs', value: 'garden-view', strength: null, note: null },
+  }
+  const world = derive([...events, secondNeed], {
+    label_schemas: [
+      { key: 'needs', scopes: ['family'] as const, cardinality: 'zero-or-one' as const },
+    ],
+  })
+
+  expect(
+    world.labels.filter((label) => label.entity_id === 'fam_1' && label.key === 'needs'),
+  ).toEqual([expect.objectContaining({ value: 'garden-view', set_seq: 3 })])
+})
+
+test('setting the same fixed resolver value again updates its metadata', () => {
+  const restatement: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelSet',
+    payload: {
+      entity_id: 'fam_1',
+      key: 'needs',
+      value: 'quiet-room',
+      strength: 'preferred',
+      note: 'updated note',
+    },
+  }
+  const world = derive([...events, restatement])
+
+  expect(
+    world.labels.filter((label) => label.entity_id === 'fam_1' && label.key === 'needs'),
+  ).toEqual([
+    expect.objectContaining({
+      value: 'quiet-room',
+      strength: 'preferred',
+      note: 'updated note',
+      set_seq: 3,
+    }),
+  ])
+})
+
+test('clearing one fixed resolver value preserves the other values', () => {
+  const secondNeed: Event = {
+    seq: 3,
+    at: '2027-01-01T00:00:02Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelSet',
+    payload: { entity_id: 'fam_1', key: 'needs', value: 'garden-view', strength: null, note: null },
+  }
+  const clearFirst: Event = {
+    seq: 4,
+    at: '2027-01-01T00:00:03Z',
+    actor: 'org@test.invalid',
+    subject: null,
+    type: 'LabelCleared',
+    payload: { entity_id: 'fam_1', key: 'needs', value: 'quiet-room' },
+  }
+  const world = derive([...events, secondNeed, clearFirst])
+
+  expect(
+    world.labels.filter((label) => label.entity_id === 'fam_1' && label.key === 'needs'),
+  ).toEqual([expect.objectContaining({ value: 'garden-view' })])
+})
+
 test('PersonWithdrawn hard-removes the person and their labels instead of tombstoning them (D27)', () => {
   const personAdded: Event = {
     seq: 3,
@@ -319,6 +425,11 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
 })
 
 test('derives draft events and stable world changes without persistence', () => {
+  const config = {
+    label_schemas: [
+      { key: 'needs', scopes: ['family'] as const, cardinality: 'zero-or-one' as const },
+    ],
+  }
   const draft: Event = {
     seq: 3,
     at: '2027-01-01T00:00:02Z',
@@ -327,8 +438,8 @@ test('derives draft events and stable world changes without persistence', () => 
     type: 'LabelSet',
     payload: { entity_id: 'fam_1', key: 'needs', value: 'garden', strength: null, note: null },
   }
-  const before = derive(events)
-  const after = deriveDraftWorld(events, [draft])
+  const before = derive(events, config)
+  const after = deriveDraftWorld(events, [draft], config)
   expect(after.head_seq).toBe(3)
   expect(diff(before, after)).toEqual([
     { kind: 'label-cleared', subject_id: 'fam_1', key: 'needs', value: '"quiet-room"' },

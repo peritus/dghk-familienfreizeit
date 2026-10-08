@@ -8,6 +8,14 @@ import type {
 } from './fold.js'
 import type { JsonValue } from './types.js'
 
+export const fixedResolverKeys: ReadonlySet<string> = new Set([
+  'needs',
+  'provides',
+  'excludes',
+  'groups-with',
+  'separates-from',
+])
+
 export type ResolvedConstraint = {
   key: string
   holder_id: string
@@ -104,9 +112,7 @@ export function resolve(
     const entity = entityById.get(label.entity_id)
     const schema = schemas.get(label.key)
     const descriptor = descriptors.get(label.key)
-    const fixed = ['needs', 'provides', 'excludes', 'groups-with', 'separates-from'].includes(
-      label.key,
-    )
+    const fixed = fixedResolverKeys.has(label.key)
     const kernel = [
       'display-name',
       'email',

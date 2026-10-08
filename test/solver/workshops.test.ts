@@ -192,6 +192,7 @@ function workshop(
   sortKey: number,
   seq: number,
   leaderIds: readonly string[] = [],
+  needs: readonly string[] = [],
 ): Event {
   return event(
     'WorkshopAdded',
@@ -205,7 +206,7 @@ function workshop(
       capacity,
       participation_mode: 'assigned',
       leader_ids: leaderIds,
-      needs: [],
+      needs,
       sort_key: sortKey,
     },
     seq,
@@ -385,6 +386,55 @@ test('fixed placements colliding for one space remain deterministic and explain 
       workshop_id: 'wks_second',
       reasons: ['hard.space-occupied'],
     }),
+  ])
+})
+
+test('an unscheduled reason uses the most frequent rejection and keeps first-seen ties', () => {
+  const section = schedulingSection([
+    venue('wsp_blocked', 1),
+    venue('wsp_without_capability', 2),
+    slot(3),
+    event(
+      'WorkshopSlotAdded',
+      {
+        slot_id: 'slot_afternoon',
+        starts_at: '2027-04-30T15:00:00Z',
+        ends_at: '2027-04-30T17:00:00Z',
+        sort_key: 2,
+      },
+      4,
+    ),
+    workshop('wks_unplaced', 8, 1, 5, [], ['quiet-area']),
+    event(
+      'LabelSet',
+      {
+        entity_id: 'wsp_blocked',
+        key: 'provides',
+        value: 'quiet-area',
+        strength: null,
+        note: null,
+      },
+      6,
+    ),
+    event(
+      'SpaceSlotBlocked',
+      { block_id: 'blk_morning', space_id: 'wsp_blocked', slot_id: 'slot_morning', reason: null },
+      7,
+    ),
+    event(
+      'SpaceSlotBlocked',
+      {
+        block_id: 'blk_afternoon',
+        space_id: 'wsp_blocked',
+        slot_id: 'slot_afternoon',
+        reason: null,
+      },
+      8,
+    ),
+  ])
+
+  expect(section.unscheduled).toEqual([
+    { workshop_id: 'wks_unplaced', reason: 'hard.space-slot-blocked' },
   ])
 })
 

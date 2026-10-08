@@ -102,6 +102,11 @@ bounds are what let the same fold run to an earlier point in the log.
 profile-defined or organiser-supplied free-form matching tokens, with entity
 references validated where the mechanism requires them.
 
+The fixed resolver keys `needs`, `provides`, `excludes`, `groups-with`, and
+`separates-from` default to `zero-or-more` labels per entity. A configured label
+schema may override that cardinality when an occasion needs a narrower contract.
+Other keys without a schema keep the fold's replacement behavior.
+
 ### Matching is a resolver lookup
 
 ```ts

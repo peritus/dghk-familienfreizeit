@@ -276,6 +276,37 @@ function placementRejections(
   return rejected
 }
 
+function unscheduledReason(
+  rejected: readonly PlacementRejection[],
+  candidateCount: number,
+): string | undefined {
+  const targetsByRule = new Map<string, Set<string>>()
+  const ruleOrder: string[] = []
+  for (const { target, rule } of rejected) {
+    let targets = targetsByRule.get(rule)
+    if (!targets) {
+      targets = new Set()
+      targetsByRule.set(rule, targets)
+      ruleOrder.push(rule)
+    }
+    targets.add(target)
+  }
+
+  const universal = ruleOrder.find((rule) => targetsByRule.get(rule)?.size === candidateCount)
+  if (universal) return universal
+
+  let mostFrequent: string | undefined
+  let mostFrequentCount = 0
+  for (const rule of ruleOrder) {
+    const count = targetsByRule.get(rule)?.size ?? 0
+    if (count > mostFrequentCount) {
+      mostFrequent = rule
+      mostFrequentCount = count
+    }
+  }
+  return mostFrequent
+}
+
 function placementStage(includeComparison = true): SolverStage<WorkshopSchedulingSection> {
   return {
     id: 'workshop-scheduling.placement',
@@ -387,7 +418,9 @@ function placementStage(includeComparison = true): SolverStage<WorkshopSchedulin
           if (selected) break
         }
         if (!selected) {
-          const reason = rejected[0]?.rule ?? 'hard.no-slot-or-space'
+          const reason =
+            unscheduledReason(rejected, schedule.slots.length * schedule.spaces.length) ??
+            'hard.no-slot-or-space'
           unscheduled.push({ workshop_id: workshop.id, reason })
           diagnostics.push({
             check: 'workshop-scheduling.unscheduled',
