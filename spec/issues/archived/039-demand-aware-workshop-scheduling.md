@@ -40,15 +40,13 @@ without changing any person's submitted ranking. The current allocator does
 not rearrange rooms, workshops, or attendance after its deterministic passes,
 so it cannot resolve a high-volume slot conflict.
 
-The specification already describes demand and profile-defined scoring as
-deterministic soft inputs to scheduling in
-[`workshop-scheduling.md` §2](../../modules/workshop-scheduling.md#2-stages),
-but the implemented scheduler does not yet consume those inputs. The current
-implemented documentation correspondingly describes scheduling as independent
-of attendance demand in
-[`docs/modules/workshop-scheduling.md`](../../../docs/modules/workshop-scheduling.md)
-and describes attendance as operating on an already placed schedule in
-[`docs/modules/workshop-assignment.md`](../../../docs/modules/workshop-assignment.md).
+The accepted [deferred scheduling idea](../../deferred-ideas/demand-aware-workshop-scheduling.md)
+records demand and profile-defined scoring as future inputs. The implemented
+scheduler does not consume those inputs. The current
+[scheduling documentation](../../../docs/modules/workshop-scheduling.md) keeps
+placement independent of attendance demand, and
+[attendance documentation](../../../docs/modules/workshop-assignment.md) describes
+allocation over an already placed schedule.
 
 ## Why this matters
 
@@ -111,11 +109,10 @@ or [D31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-
 
 ## Related files
 
-- [modules/workshop-scheduling.md](../../modules/workshop-scheduling.md)
+- [implemented workshop scheduling](../../../docs/modules/workshop-scheduling.md)
 - [modules/workshop-assignment.md](../../modules/workshop-assignment.md)
 - [modules/workshop-rankings.md](../../modules/workshop-rankings.md)
 - [roadmap.md — M8](../../roadmap.md#m8--organiser-authored-workshop-programme)
 - [decisions.md — D4](../../../decisions.md#d4--stable-sorted-greedy-not-integer-programming)
 - [issue 037](../archived/037-workshop-assignment-fill-retention-instability.md)
-- [docs/modules/workshop-scheduling.md](../../../docs/modules/workshop-scheduling.md)
 - [docs/modules/workshop-assignment.md](../../../docs/modules/workshop-assignment.md)

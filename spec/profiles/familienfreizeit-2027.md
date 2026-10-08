@@ -29,7 +29,7 @@ The active occasion selects these modules ([modules](../modules/contract.md) §5
 | [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, organiser board, and browser-printable assignment output |
 | [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
 | [`official-workshops`](../modules/official-workshops.md) | organiser-authored workshops, audience, participation modes, leaders, and cancellation |
-| [`workshop-scheduling`](../modules/workshop-scheduling.md) | event-backed slots and one placement per workshop |
+| [`workshop-scheduling`](../../docs/modules/workshop-scheduling.md) | event-backed slots and one placement per workshop |
 | [`workshop-rankings`](../modules/workshop-rankings.md) | current-cycle ordered per-person workshop rankings |
 | [`workshop-assignment`](../modules/workshop-assignment.md) | eligibility, capacity, cancellation, assignment, and allocation traces |
 | [`family-preferences`](../modules/family-preferences.md) | the separate family-facing preferences projection |

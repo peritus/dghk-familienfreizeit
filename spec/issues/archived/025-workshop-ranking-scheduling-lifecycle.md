@@ -91,7 +91,7 @@ It can enforce participant eligibility, capacity, exclusions, and separation
 while choosing people, but it never chooses a workshop's slot, day, or room.
 The workshop module reports `room-clash` as a world diagnostic when two already
 scheduled workshops overlap in one room; this is detection, not solver
-placement ([schedule diagnostics](../../modules/workshop-scheduling.md#2-stages)).
+placement ([schedule diagnostics](../../../docs/modules/workshop-scheduling.md)).
 
 The release model also assumes that slot and room facts are already programme
 content and that allocation is subsequently released per slot

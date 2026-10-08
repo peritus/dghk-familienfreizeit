@@ -16,7 +16,7 @@ The **kernel** is present in every deployment and is never listed in a profile:
 | Labels, fixed resolver operators, append validation | [labels and constraints](../architecture/labels-and-constraints.md) |
 | `derive`, `diff`, the solver pipeline, determinism contract, preflight framework, trace | [architecture](../architecture/overview.md), [solver contract](../architecture/solver-contract.md) |
 | Plans, phases and closed results | [solver contract](../architecture/solver-contract.md), [phases](../architecture/phases.md) |
-| Authentication, sessions, organiser allowlist | [authentication](../application/authentication.md) |
+| Authentication, sessions, organiser allowlist | [implemented authentication](../../docs/application/authentication.md); [remaining delivery scope](../application/authentication.md) |
 | Organiser application shell, board-independent screens, family view shell, reports framework, email transport | [organiser view](../application/organiser-view.md), [family view](../application/family-view.md), [reports](../application/reports.md), [deployment](../engineering/deployment.md) |
 
 A **module** is a selectable unit of domain capability. It owns a mechanism — entity
@@ -213,7 +213,7 @@ migration ([deployment](../engineering/deployment.md) §2).
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
-| [`workshop-scheduling`](workshop-scheduling.md) | Event-backed slots, one placement per workshop, and conflicts | `workshop-space`, `official-workshops` | — |
+| [`workshop-scheduling`](../../docs/modules/workshop-scheduling.md) | Event-backed slots, one placement per workshop, and conflicts | `workshop-space`, `official-workshops` | — |
 | [`workshop-rankings`](workshop-rankings.md) | Ordered current-cycle per-person workshop choices | `official-workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`family-preferences`](family-preferences.md) | The profile-driven preferences page | — | — |

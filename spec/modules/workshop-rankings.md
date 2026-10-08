@@ -1,59 +1,33 @@
 # Workshop rankings
 
-Module id `workshop-rankings` · factory `workshopRankings`
-
-Workshop rankings records an eligible person's ordered choices for the one
-current workshop choice cycle. It does not create identity, placement, or
-attendance results.
+The current-cycle label schema, eligibility validation, demand projection, and
+organiser review are implemented in [workshop rankings](../../docs/modules/workshop-rankings.md).
+The remaining product work is the family-facing ranking control under
+[M10](../roadmap.md#m10--family-access-and-release-control), owned by the
+[family preferences contract](family-preferences.md).
 
 <a id="1-purpose-and-boundary"></a>
-## 1. Parameters
+## Implemented module boundary
 
-```ts
-type WorkshopRankingsParams = {
-  ranking_trait: string
-  max_rank: number
-  allow_no_preference: boolean
-}
-```
-
-The active profile supplies these values. There is no hard-coded ranking count
-in the module or UI.
+See the [implemented ranking contract](../../docs/modules/workshop-rankings.md).
 
 <a id="3-events-and-value-shape"></a>
-## 2. Structured labels
+## Implemented label shape
 
-Rankings remain ordinary `LabelSet` and `LabelCleared` events. A ranking value
-contains the direct workshop identity and rank:
-
-```ts
-type RankingValue =
-  | { workshop_id: string; rank: number }
-  | { workshop_id: null; rank: null }
-```
-
-The null form is explicit “no preference”. No response is the absence of a
-ranking label. Re-ranking clears the person's current-cycle ranking labels and
-sets the new values in one append.
+See the [implemented ranking contract](../../docs/modules/workshop-rankings.md).
 
 <a id="4-validation-and-visibility"></a>
-## 3. Validation and demand
+## Implemented validation and demand
 
-The ordered-choice resolver role is scoped to `person`, with `per: 'occasion'`
-and a `workshop` choice. Validation requires eligible current workshops,
-dense unique ranks, configured maximum rank, and exclusive no-preference.
+See the [implemented ranking contract](../../docs/modules/workshop-rankings.md).
 
-The module contributes deterministic demand summaries by workshop and audience
-group for organiser review. Active scheduling does not consume those summaries
-or co-selection counts. The module never produces person-to-workshop assignments.
+## M10 — Family ranking control
 
-Late edits are accepted while the choice cycle remains active. A previously
-reviewed calculation remains stable until an organiser explicitly recalculates
-and reviews it.
+The family-facing control records eligible choices in the active cycle before a
+schedule exists. It must use the configured rank limit, preserve dense unique
+ranks, provide explicit no-preference, and save through the ordinary family event
+path. Its control schema and route behavior belong to the shared family-preferences
+contract; this module contributes only its ranking semantics.
 
-## 4. Tests
-
-- Append and replay validation covers rank density, duplicate choices,
-  eligibility, no-preference, and current-cycle visibility.
-- Demand summaries are deterministic, shuffle-invariant, and group-filterable.
-- Late edits do not mutate a reviewed calculation without explicit review.
+The policy for whether a reviewed calculation stays fixed after ranking changes
+is unresolved and remains in the [deferred scheduling idea](../deferred-ideas/demand-aware-workshop-scheduling.md).
