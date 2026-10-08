@@ -54,10 +54,6 @@ Specification coverage: [authentication](application/authentication.md), [family
   authentication delivery intent. M10 may print the link in development, but
   does not render hosted messages, call provider transport, or record delivery
   outcomes.
-- Treat [issue 041](issues/open/041-person-updated-cross-family-authorization.md)
-  as a blocking gate: do not enable family login, family sessions, or family
-  writes until the `PersonUpdated` cross-family authorization fix and its
-  regression tests pass.
 - Render the shared profile-driven controls for families through the same
   definitions and ordinary event path, including Zieltermin and closed-input
   notices and assignment cards.
@@ -198,4 +194,3 @@ occasion data, and no persisted folded domain state.
 Removing a report, screen, module contribution, or email kind requires marking
 its specification coverage as deferred here and removing its selected profile
 contribution where necessary.
-

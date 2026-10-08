@@ -1,7 +1,7 @@
 ---
-id: "041"
+id: "049"
 title: PersonUpdated cross-family authorization boundary
-status: open
+status: resolved
 severity: privacy
 category: kernel
 source: Deep security review
@@ -63,6 +63,19 @@ regression tests pass.
 - Organiser updates continue to work.
 - Unit and Worker/API regression tests cover the cases above.
 - M10 family login remains blocked until these checks are green.
+
+## Resolution
+
+Family event authorization now identifies a `PersonUpdated` target by its
+existing `person_id` and resolves ownership from that person's current
+`member-of` label. The fold also rejects an update whose submitted `family_id`
+differs from the existing membership. The Worker regression test attempts a
+cross-family update with a forged `family_id`, expects HTTP 403, and verifies
+that the event count remains unchanged. Organiser corrections remain allowed
+by the organiser authorization path. The focused Worker authorization suite
+passed all 10 tests, including the forged-family regression; see
+[authorization](../../../src/auth/authorization.ts),
+[person fold](../../../src/events/fold.ts), and the [Worker authorization regression test](../../../test/worker/auth.test.ts).
 
 ## Related files
 
