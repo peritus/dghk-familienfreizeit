@@ -1,21 +1,16 @@
-# Official workshops
+# Workshop cancellation authoring and history
 
-The event-backed workshop model, cancellation fact, organiser authoring foundation,
-and current module behavior are documented in [official workshops](../../docs/modules/official-workshops.md).
-This spec retains only the organiser cancellation and history work that remains
-in [M8](../roadmap.md#m8--organiser-authored-workshop-programme).
+This contract is accepted but deferred, outside the active roadmap and the M8
+acceptance gate. Promotion follows the [deferred-scope policy](README.md):
+explicit user scope approval, review of affected binding decisions, and
+reinsertion into an active roadmap milestone.
 
-<a id="1-dependencies-and-ownership"></a>
-## Implemented boundary
+The event-backed workshop model, cancellation fact, organiser authoring
+foundation, and current module behavior are documented in
+[official workshops](../../docs/modules/official-workshops.md).
+The remaining work is the organiser cancellation surface and its verification.
 
-See the [implemented module documentation](../../docs/modules/official-workshops.md).
-
-<a id="2-schedule-boundary"></a>
-## Implemented event boundary
-
-See the [implemented module documentation](../../docs/modules/official-workshops.md).
-
-## M8 — Cancellation authoring and history
+## Cancellation authoring and history
 
 - Add an organiser action that emits the existing `WorkshopCancelled` event,
   including its optional reason, through the shared local-first workflow.

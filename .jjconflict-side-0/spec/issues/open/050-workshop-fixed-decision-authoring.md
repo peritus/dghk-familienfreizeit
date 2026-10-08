@@ -25,7 +25,7 @@ decision is whether UI-13 covers these controls or another accepted scope is nee
 ## Evidence
 
 The active event and attendance contracts describe fixed-decision semantics in
-[official workshops](../../modules/official-workshops.md) and
+[official workshops](../../../docs/modules/official-workshops.md) and
 [workshop attendance](../../modules/workshop-assignment.md). The implemented
 [attendance review](../../../docs/modules/workshop-assignment.md) and
 [placement review](../../../docs/modules/workshop-scheduling.md) are read-only.
@@ -46,7 +46,6 @@ approval and review of affected binding decisions.
 ## Related files
 
 - [roadmap.md](../../roadmap.md)
-- [modules/official-workshops.md](../../modules/official-workshops.md)
 - [modules/workshop-attendance.md](../../modules/workshop-assignment.md)
 - [deferred UI-13 contract](../../deferred-ideas/organiser-placement-overrides-ui.md)
 - [docs/modules/official-workshops.md](../../../docs/modules/official-workshops.md)

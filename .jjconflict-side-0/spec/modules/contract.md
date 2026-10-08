@@ -209,7 +209,7 @@ migration ([deployment](../engineering/deployment.md) §2).
 
 | Module | Owns | Requires | Enhances |
 |---|---|---|---|
-| [`official-workshops`](official-workshops.md) | Direct workshop identity, authoring facts, participation modes, leaders, and cancellation | — | — |
+| [`official-workshops`](../../docs/modules/official-workshops.md) | Direct workshop identity, authoring facts, participation modes, leaders, and cancellation | — | — |
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
 | [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |

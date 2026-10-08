@@ -21,7 +21,7 @@ fulfilment, and the materials resolver.
 
 ## 2. Dependencies
 
-Requires: none. Enhances: [`official workshops`](../modules/official-workshops.md) — when selected,
+Requires: none. Enhances: [`official workshops`](../../docs/modules/official-workshops.md) — when selected,
 records may be linked to a workshop.
 
 ## 3. Parameters

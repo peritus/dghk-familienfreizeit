@@ -16,8 +16,7 @@ before the report host exists.
 <a id="m8--organiser-authored-workshop-programme"></a>
 ## M8 — Workshop planning completion
 
-Specification coverage: [official workshops](modules/official-workshops.md),
-[workshops](modules/workshops.md),
+Specification coverage: [workshops](modules/workshops.md),
 [workshop attendance](modules/workshop-assignment.md), and [UI-12](ui/screens/workshops.md).
 
 The event-backed organiser foundation and deterministic automatic planner are
@@ -27,15 +26,12 @@ and so are the organiser sides of the [feature](../docs/architecture/features.md
 [phase](../docs/architecture/phases.md) contracts; remaining active work is limited
 to the unresolved planning contract:
 
-- add organiser authoring for workshop cancellation through the existing
-  event-backed workshop workflow, with a labelled history view for cancelled
-  workshops;
 - complete finding and open-case review surfaces for current and prospective
   programme and allocation contexts, building on the delivered
   [participation matrix](../docs/ui/frontend.md#workshop-participation-overview)
   and traces without creating another workshop state store;
 - complete fixtures for capacity races, deterministic ranked-round allocation,
-  fixed attendance, cancellation, slot changes, and privacy, exercising the
+  fixed attendance, slot changes, and privacy, exercising the
   allocation and capacity policies in [D4](../decisions.md#d4--stable-sorted-greedy-not-integer-programming),
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces),
   and [D31](../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops);
@@ -47,8 +43,8 @@ to the unresolved planning contract:
 Acceptance: organisers can inspect automatic and explicitly fixed placements
 and attendance, including finding and open-case outcomes; eligible rankings can
 be recorded before placement is known, with no-preference represented explicitly;
-every blocking outcome and allocation decision is traceable; cancellation is
-authorable and remains accessible in labelled history; capacity changes follow D30; each workshop has at most one placement
+every blocking outcome and allocation decision is traceable; capacity changes
+follow D30; each workshop has at most one placement
 and each person has at most one assignment per overlapping period; and every
 reconciled contract term has a recorded disposition.
 
@@ -219,6 +215,7 @@ binding decisions, and reinsertion into an active roadmap milestone.
 - [Room adjacency](deferred-ideas/room-adjacency.md)
 - [Caching](deferred-ideas/re-introduce-caching.md)
 - [Demand-aware workshop scheduling](deferred-ideas/demand-aware-workshop-scheduling.md)
+- [Workshop cancellation authoring and history](deferred-ideas/workshop-cancellation.md)
 
 ## Cross-cutting acceptance and cut lines
 

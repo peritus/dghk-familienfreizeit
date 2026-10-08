@@ -62,7 +62,7 @@ particular profile.
 | 19 | [Room assignment](modules/room-assignment.md) | Remaining placement extensions and consumers |
 | 20 | [Workshops](modules/workshops.md) | Selected workshop modules and their remaining family-facing integration |
 | 21 | [Workshop space](modules/workshop-space.md) | Remaining workshop-space inventory report contribution |
-| 22 | [Official workshops](modules/official-workshops.md) | Remaining cancellation authoring and history view |
+| 22 | [Workshop cancellation](deferred-ideas/workshop-cancellation.md) | Accepted-but-deferred cancellation authoring and history view |
 | 23 | [Self-organized workshops](deferred-ideas/self-organized-sessions.md) | Accepted-but-deferred proposer-created workshops |
 | 24 | [Workshop rankings](modules/workshop-rankings.md) | Remaining family ranking-control integration |
 | 25 | [Workshop attendance](modules/workshop-assignment.md) | Remaining findings, open cases, and contract reconciliation |

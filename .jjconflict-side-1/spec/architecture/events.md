@@ -200,7 +200,7 @@ authorisation are specified in the module documents.
 |---|---|
 | [room inventory](../modules/room-inventory.md) §5 | `BuildingAdded`, `BuildingUpdated`, `BuildingRemoved`, `RoomAdded`, `RoomUpdated`, `RoomRemoved`, `BedAdded`, `BedUpdated`, `BedRemoved` |
 | [workshop space](../../docs/modules/workshop-space.md) | `WorkshopSpaceAdded`, `WorkshopSpaceUpdated`, `WorkshopSpaceRetired` |
-| [official workshops](../modules/official-workshops.md) | Workshop content, eligibility, cancellation, and leader facts |
+| [official workshops](../../docs/modules/official-workshops.md) | Workshop content, eligibility, cancellation, and leader facts |
 
 Workshop rankings, food preferences, and organiser decisions add no event types;
 they are `LabelSet` and `LabelCleared` events.
