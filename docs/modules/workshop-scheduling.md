@@ -11,8 +11,10 @@ Workshop capacity belongs to workshops and physical capacity belongs to spaces.
 
 The automatic stage is deterministic. It checks slot ordering and overlap, space
 availability and capacity, explicit space-slot blocks, resolver capabilities, and
-leader conflicts. A workshop without a feasible placement remains visible in the
-programme review with an explainable unscheduled result.
+leader conflicts, then chooses the first feasible slot/space candidate in stable
+order. Ranking demand summaries and co-selection do not affect placement. A
+workshop without a feasible placement remains visible in the programme review
+with an explainable unscheduled result.
 
 Organisers maintain slots at `/organiser/workshops/slots` and review the programme
 at `/organiser/workshops/programme`. Its companion views are

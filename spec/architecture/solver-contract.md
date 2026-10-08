@@ -190,6 +190,11 @@ scheduleable workshop input, ranking provides a current-cycle demand summary,
 scheduling provides one placement per workshop, and attendance reads rankings and
 placements. No stage reads another module's raw event payloads.
 
+The current-cycle demand summary is available for organiser review; active
+workshop scheduling does not consume it or co-selection counts. See the accepted
+[deferred proposal](../deferred-ideas/demand-aware-workshop-scheduling.md) for a
+future scope that could change this boundary.
+
 `SolverLabel` omits the display-only note from the derived `Label` shape. Free-form
 organiser values resolve through the same fixed mechanisms as profile vocabulary;
 they do not require a separate declaration. Source label references

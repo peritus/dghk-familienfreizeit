@@ -44,7 +44,8 @@ and a `workshop` choice. Validation requires eligible current workshops,
 dense unique ranks, configured maximum rank, and exclusive no-preference.
 
 The module contributes deterministic demand summaries by workshop and audience
-group. It never produces person-to-workshop assignments.
+group for organiser review. Active scheduling does not consume those summaries
+or co-selection counts. The module never produces person-to-workshop assignments.
 
 Late edits are accepted while the choice cycle remains active. A previously
 reviewed calculation remains stable until an organiser explicitly recalculates

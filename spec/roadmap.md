@@ -195,6 +195,7 @@ binding decisions, and reinsertion into an active roadmap milestone.
 - [Party review](deferred-ideas/party-review.md)
 - [Room adjacency](deferred-ideas/room-adjacency.md)
 - [Caching](deferred-ideas/re-introduce-caching.md)
+- [Demand-aware workshop scheduling](deferred-ideas/demand-aware-workshop-scheduling.md)
 
 ## Cross-cutting acceptance and cut lines
 

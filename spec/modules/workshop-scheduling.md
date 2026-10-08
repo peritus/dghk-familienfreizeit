@@ -3,8 +3,9 @@
 Module id `workshop-scheduling` · factory `workshopScheduling`
 
 Workshop scheduling owns event-backed workshop slots and derives one placement
-per workshop from slots, spaces, resolved capabilities, demand, leaders, and
-organiser decisions.
+per workshop from slots, spaces, resolved capabilities, leaders, and organiser
+decisions. The active placement contract does not use ranking demand or
+co-selection.
 
 ## 1. Slots
 
@@ -70,8 +71,12 @@ placement result or create a second placement identity.
 
 Hard checks cover slot overlap, space availability and capacity, explicit
 space-slot blocks, leader availability/conflicts, workshop needs/provided
-capabilities, cancellation, and organiser-fixed placement decisions. Demand and
-profile-defined scoring terms are deterministic soft inputs.
+capabilities, cancellation, and organiser-fixed placement decisions. The
+automatic pass visits workshops and slot/space candidates in stable order and
+chooses the first feasible candidate. It does not optimize placement from
+individual demand or co-selection. Workshop-ranking demand remains a derived
+summary for organiser review; see the accepted [deferred idea for demand-aware
+scheduling](../deferred-ideas/demand-aware-workshop-scheduling.md).
 
 ## 3. Organiser review
 
