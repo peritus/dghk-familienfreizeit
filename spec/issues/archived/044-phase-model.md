@@ -83,7 +83,7 @@ replacement depends on the phase decisions below.
 | Phase-dependent tests and snapshots | [`workflow-navigation.test.tsx`](../../../test/app/workflow-navigation.test.tsx), [`profile.test.ts`](../../../test/config/profile.test.ts), [`workshop-assignment-prototype-dataset.test.ts`](../../../test/solver/workshop-assignment-prototype-dataset.test.ts), and snapshots containing these steppers | Replace assertions for local inference and deadline behavior with coverage for the accepted phase projection and policies |
 
 The family-audience portion must also honor the unresolved boundary in
-[031 — family projection privacy](../open/031-family-projection-privacy-boundary.md).
+[031 — family projection privacy](031-family-projection-privacy-boundary.md).
 That privacy requirement remains explicit and is not resolved by changing this
 issue's dependency on 043.
 
@@ -580,7 +580,7 @@ release-control specification and its deferred UI-11 are retired, and issues
 - [architecture/features.md](../../architecture/features.md)
 - [architecture/phases.md](../../architecture/phases.md)
 - [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
-- [031 — family projection privacy boundary](../open/031-family-projection-privacy-boundary.md)
+- [031 — family projection privacy boundary](031-family-projection-privacy-boundary.md)
 - [archived 008 — milestone ordering and release-control prerequisites](008-milestone-ordering-release-control-prereqs.md)
 - [archived 009 — deadline concept fields underspecified](009-deadline-concept-fields-underspecified.md)
 - [docs/application/organiser-view.md](../../../docs/application/organiser-view.md)

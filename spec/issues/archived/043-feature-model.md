@@ -389,7 +389,7 @@ Answers to the open questions:
    layers are not yet legible to organisers in the UI. The organiser feature view
    still carries every layer. Plans do not record operational state.
 5. A family view reveals nothing about a feature that is not effective; what comes
-   next is a phase-view concern under [031](../open/031-family-projection-privacy-boundary.md).
+   next is a phase-view concern under [031](031-family-projection-privacy-boundary.md).
 6. Audience is not an authorisation audience. It is enforced at profile
    composition to require an organiser equivalent for every family action, and
    availability can only narrow the family append path.
@@ -423,7 +423,7 @@ carries no solver policy values, so it does not depend on that review.
 - [ui/screens/workshops.md](../../ui/screens/workshops.md)
 - [044 — phase activation model](044-phase-model.md)
 - [042 — unsupported workflow promises and orphaned UI](042-remove-unsupported-workflow-promises-and-orphaned-ui.md)
-- [031 — family projection privacy boundary](../open/031-family-projection-privacy-boundary.md)
+- [031 — family projection privacy boundary](031-family-projection-privacy-boundary.md)
 - [docs/application/organiser-view.md](../../../docs/application/organiser-view.md)
 - [docs/architecture/profile-composition.md](../../../docs/architecture/profile-composition.md)
 - [docs/engineering/development.md](../../../docs/engineering/development.md)
