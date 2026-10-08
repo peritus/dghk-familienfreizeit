@@ -23,7 +23,13 @@ export function FamilyTopicNavigation({
     <TertiaryNavigation
       aria_label="Familienbereiche"
       value={value}
-      items={familyTopics.map((topic) => ({ value: topic, label: topicLabels[topic], link: familyId ? <OrganiserLink href={organiserPaths.family_topic(familyId, topic)} /> : undefined }))}
+      items={familyTopics.map((topic) => ({
+        value: topic,
+        label: topicLabels[topic],
+        link: familyId ? (
+          <OrganiserLink href={organiserPaths.family_topic(familyId, topic)} />
+        ) : undefined,
+      }))}
       onChange={(next) => {
         if (familyTopics.includes(next as FamilyTopic)) onChange(next as FamilyTopic)
       }}

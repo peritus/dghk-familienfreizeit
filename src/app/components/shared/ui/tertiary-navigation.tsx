@@ -1,4 +1,11 @@
-import { cloneElement, useId, useRef, type KeyboardEvent, type ReactNode, type ReactElement } from 'react'
+import {
+  cloneElement,
+  useId,
+  useRef,
+  type KeyboardEvent,
+  type ReactNode,
+  type ReactElement,
+} from 'react'
 import { useActiveNavigation } from './navigation.js'
 import { cn } from '@/lib/utils'
 
@@ -56,15 +63,37 @@ export function TertiaryNavigation({
         className,
       )}
     >
-      <nav ref={navigationRef} role={routeBacked ? undefined : "tablist"} aria-label={ariaLabel} className="flex max-w-full gap-x-5 overflow-x-auto whitespace-nowrap">
+      <nav
+        ref={navigationRef}
+        role={routeBacked ? undefined : 'tablist'}
+        aria-label={ariaLabel}
+        className="flex max-w-full gap-x-5 overflow-x-auto whitespace-nowrap"
+      >
         {items.map((item, index) => {
           const selected = item.value === value
           const tabId = `${idPrefix}-${item.value}`
-          const label = <>{item.label}{item.count !== undefined ? <span className="ml-1 font-normal text-muted">{item.count}</span> : null}</>
-          if (item.link) return cloneElement(item.link, {
-            key: item.value, 'aria-current': selected ? 'page' : undefined,
-            className: cn('inline-flex min-h-11 flex-none items-center border-b-2 border-transparent px-0.5 py-2 text-sm font-medium text-muted hover:border-border/35 hover:text-foreground focus-visible:outline-offset-[-2px]', selected && 'border-border font-bold text-foreground', item.link.props.className),
-          }, label)
+          const label = (
+            <>
+              {item.label}
+              {item.count !== undefined ? (
+                <span className="ml-1 font-normal text-muted">{item.count}</span>
+              ) : null}
+            </>
+          )
+          if (item.link)
+            return cloneElement(
+              item.link,
+              {
+                key: item.value,
+                'aria-current': selected ? 'page' : undefined,
+                className: cn(
+                  'inline-flex min-h-11 flex-none items-center border-b-2 border-transparent px-0.5 py-2 text-sm font-medium text-muted hover:border-border/35 hover:text-foreground focus-visible:outline-offset-[-2px]',
+                  selected && 'border-border font-bold text-foreground',
+                  item.link.props.className,
+                ),
+              },
+              label,
+            )
           return (
             <button
               key={item.value}

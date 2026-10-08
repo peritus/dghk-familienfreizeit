@@ -1,6 +1,27 @@
-import { useEffect, useId, useState, type ReactNode, type Ref } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode, type Ref } from 'react'
 import { flushSync } from 'react-dom'
 import { cn } from '../../../lib/utils.js'
+/** Read the same footer metadata the DOM exposes; a specialised screen footer wins. */
+function setPaperMarginFooter(element: HTMLElement | null): (() => void) | undefined {
+  if (!element) return
+  const frame = element.closest('[data-slot="application-frame"]')
+  const specialised = frame?.querySelector('main [data-slot="print-footer"]')
+  if (specialised && specialised !== element) return
+  const text = Array.from(element.childNodes)
+    .map(
+      (node) =>
+        `${node instanceof HTMLElement && node.tagName === 'P' ? '\n' : ''}${node.textContent ?? ''}`,
+    )
+    .join('')
+  const value = JSON.stringify(text).replace(/\\n/g, '\\a ')
+  const root = document.documentElement
+  root.style.setProperty('--print-footer-text', value)
+  return () => {
+    if (root.style.getPropertyValue('--print-footer-text') === value)
+      root.style.removeProperty('--print-footer-text')
+  }
+}
+
 export function PrintDocument({
   title,
   metadata,
@@ -65,9 +86,13 @@ export function PrintFooter({
   className,
   screen_visible: screenVisible = false,
 }: PrintFooterProps) {
+  const footerElement = useRef<HTMLElement>(null)
   const [printedAt, setPrintedAt] = useState(() => generatedAt ?? new Date())
   useEffect(() => {
-    const refresh = () => flushSync(() => setPrintedAt(generatedAt ?? new Date()))
+    const refresh = () => {
+      flushSync(() => setPrintedAt(generatedAt ?? new Date()))
+      setPaperMarginFooter(footerElement.current)
+    }
     window.addEventListener('beforeprint', refresh)
     return () => window.removeEventListener('beforeprint', refresh)
   }, [generatedAt])
@@ -80,8 +105,13 @@ export function PrintFooter({
       // eslint-disable-next-line @typescript-eslint/naming-convention
       timeStyle: 'short',
     }).format(date)
+  useEffect(
+    () => setPaperMarginFooter(footerElement.current),
+    [printedAt, revision, drafts, closedAt, context, confidentiality, timeZone],
+  )
   return (
     <footer
+      ref={footerElement}
       data-slot="print-footer"
       className={cn(
         'border-t border-border pt-2 text-xs text-muted tabular-nums',

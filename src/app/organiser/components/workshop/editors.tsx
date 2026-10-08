@@ -212,7 +212,14 @@ export function WorkshopEditorFields({
           hint="Mehrere Fähigkeiten mit Komma trennen; die Prüfung erfolgt über den Resolver."
         />
       </div>
-      {warning ? <p role="status" className="sm:col-span-2 rounded-base border-2 border-dashed border-border bg-warning-bg p-3 text-sm">{warning} Du kannst diese Angaben speichern.</p> : null}
+      {warning ? (
+        <p
+          role="status"
+          className="sm:col-span-2 rounded-base border-2 border-dashed border-border bg-warning-bg p-3 text-sm"
+        >
+          {warning} Du kannst diese Angaben speichern.
+        </p>
+      ) : null}
       {children}
     </>
   )

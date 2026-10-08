@@ -106,12 +106,30 @@ test('workshop allocation keeps the workshop area active across all three views'
 
 test('workflow disclosure persists independently for each organiser and survives unavailable storage', () => {
   const steps = [{ id: 'review', label: 'Prüfen', state: 'current' as const }]
-  const { rerender } = render(<WorkflowStepper aria_label="Ablauf" steps={steps} storage_key="example.phase.expanded" storage_user="one" />)
+  const { rerender } = render(
+    <WorkflowStepper
+      aria_label="Ablauf"
+      steps={steps}
+      storage_key="example.phase.expanded"
+      storage_user="one"
+    />,
+  )
   fireEvent.click(screen.getByRole('button', { name: 'Alle Schritte' }))
   expect(window.localStorage.getItem('one:example.phase.expanded')).toBe('true')
-  rerender(<WorkflowStepper aria_label="Ablauf" steps={steps} storage_key="example.phase.expanded" storage_user="two" />)
-  expect(screen.getByRole('button', { name: 'Alle Schritte' }).getAttribute('aria-expanded')).toBe('false')
-  const storage = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('unavailable') })
+  rerender(
+    <WorkflowStepper
+      aria_label="Ablauf"
+      steps={steps}
+      storage_key="example.phase.expanded"
+      storage_user="two"
+    />,
+  )
+  expect(screen.getByRole('button', { name: 'Alle Schritte' }).getAttribute('aria-expanded')).toBe(
+    'false',
+  )
+  const storage = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new Error('unavailable')
+  })
   fireEvent.click(screen.getByRole('button', { name: 'Alle Schritte' }))
   expect(screen.getByRole('button', { name: 'Weniger' }).getAttribute('aria-expanded')).toBe('true')
   storage.mockRestore()

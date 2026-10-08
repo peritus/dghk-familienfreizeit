@@ -1,6 +1,9 @@
 import { derive } from '../../src/events/fold.js'
 import { officialWorkshopsWorld } from '../../src/modules/official-workshops/index.js'
-import { workshopNotes, workshopAdvisoryFingerprint } from '../../src/modules/official-workshops/checks.js'
+import {
+  workshopNotes,
+  workshopAdvisoryFingerprint,
+} from '../../src/modules/official-workshops/checks.js'
 import { expect, test } from 'vitest'
 import { env } from 'cloudflare:workers'
 import { app } from '../../src/worker/index.js'
@@ -174,33 +177,98 @@ test('an area without content cannot be closed', async () => {
 })
 
 const readyWorkshops = [
-  { type: 'WorkshopSpaceAdded', payload: { workshop_space_id: 'wsp_test', name: 'Raum', location_description: '', capacity: 10, availability_starts_at: '2027-04-30T08:00:00+02:00', availability_ends_at: '2027-05-02T20:00:00+02:00', sort_key: 1 } },
-  { type: 'WorkshopSlotAdded', payload: { slot_id: 'slot_test', starts_at: '2027-05-01T09:00:00+02:00', ends_at: '2027-05-01T11:00:00+02:00', sort_key: 1 } },
-  { type: 'WorkshopAdded', payload: { workshop_id: 'wks_test', title: 'Workshop', description: '', audience: 'adults', age_min: 12, age_max: 99, capacity: 4, participation_mode: 'assigned', leader_ids: [], needs: [], sort_key: 1 } },
+  {
+    type: 'WorkshopSpaceAdded',
+    payload: {
+      workshop_space_id: 'wsp_test',
+      name: 'Raum',
+      location_description: 'Erdgeschoss',
+      capacity: 10,
+      availability_starts_at: '2027-04-30T08:00:00+02:00',
+      availability_ends_at: '2027-05-02T20:00:00+02:00',
+      sort_key: 1,
+    },
+  },
+  {
+    type: 'WorkshopSlotAdded',
+    payload: {
+      slot_id: 'slot_test',
+      starts_at: '2027-05-01T09:00:00+02:00',
+      ends_at: '2027-05-01T11:00:00+02:00',
+      sort_key: 1,
+    },
+  },
+  {
+    type: 'WorkshopAdded',
+    payload: {
+      workshop_id: 'wks_test',
+      title: 'Workshop',
+      description: '',
+      audience: 'adults',
+      age_min: 12,
+      age_max: 99,
+      capacity: 4,
+      participation_mode: 'assigned',
+      leader_ids: [],
+      needs: [],
+      sort_key: 1,
+    },
+  },
   { type: 'WorkshopChoiceOpened', payload: {} },
 ]
 
 test('a team acknowledgement applies only to the immediately following new closing attempt', async () => {
   const cookie = await organiserCookie()
-  expect((await apply(cookie, 0, readyWorkshops)).status).toBe(200)
+  expect(await apply(cookie, 0, readyWorkshops)).toMatchObject({ status: 200 })
   const before = await stored()
   const world = derive(before, luebben2027Profile.validation_view)
-  const fingerprint = workshopAdvisoryFingerprint(workshopNotes(officialWorkshopsWorld(world).workshops, new Set()))
+  const fingerprint = workshopAdvisoryFingerprint(
+    workshopNotes(officialWorkshopsWorld(world).workshops, new Set()),
+  )
   const ack = { type: 'WorkshopWarningsAcknowledged', payload: { fingerprint } }
-  expect((await apply(cookie, before.length, [{ type: 'WorkshopsClosed', payload: {} }])).body).toMatchObject({ error: 'workshop_review_required' })
+  expect(
+    (await apply(cookie, before.length, [{ type: 'WorkshopsClosed', payload: {} }])).body,
+  ).toMatchObject({ error: 'workshop_review_required' })
   expect((await apply(cookie, before.length, [ack])).status).toBe(409)
-  expect((await apply(cookie, before.length, [{ ...ack, payload: { fingerprint: '0000000000000000' } }, { type: 'WorkshopsClosed', payload: {} }])).status).toBe(409)
+  expect(
+    (
+      await apply(cookie, before.length, [
+        { ...ack, payload: { fingerprint: '0000000000000000' } },
+        { type: 'WorkshopsClosed', payload: {} },
+      ])
+    ).status,
+  ).toBe(409)
   expect(await stored()).toEqual(before)
-  expect((await apply(cookie, before.length, [ack, { type: 'WorkshopsClosed', payload: {} }])).status).toBe(200)
+  expect(
+    (await apply(cookie, before.length, [ack, { type: 'WorkshopsClosed', payload: {} }])).status,
+  ).toBe(200)
   const closed = await stored()
-  expect(closed.at(-2)).toMatchObject({ type: 'WorkshopWarningsAcknowledged', actor: 'organiser@example.test', payload: { fingerprint } })
-  expect(closed.at(-1)?.payload).toMatchObject({ placements: [{ workshop_id: 'wks_test', slot_id: 'slot_test', space_id: 'wsp_test' }], build_revision: buildRevision })
-  expect((await apply(cookie, closed.length, [{ type: 'WorkshopsClosed', payload: {} }])).status).toBe(409)
-  expect((await apply(cookie, closed.length, [ack, { type: 'WorkshopsClosed', payload: {} }])).status).toBe(200)
+  expect(closed.at(-2)).toMatchObject({
+    type: 'WorkshopWarningsAcknowledged',
+    actor: 'organiser@example.test',
+    payload: { fingerprint },
+  })
+  expect(closed.at(-1)?.payload).toMatchObject({
+    placements: [{ workshop_id: 'wks_test', slot_id: 'slot_test', space_id: 'wsp_test' }],
+    build_revision: buildRevision,
+  })
+  expect(
+    (await apply(cookie, closed.length, [{ type: 'WorkshopsClosed', payload: {} }])).status,
+  ).toBe(409)
+  expect(
+    (await apply(cookie, closed.length, [ack, { type: 'WorkshopsClosed', payload: {} }])).status,
+  ).toBe(200)
 })
 
 test('acknowledgement does not weaken existing readiness blockers', async () => {
   const cookie = await organiserCookie()
-  expect((await apply(cookie, 0, [{ type: 'WorkshopWarningsAcknowledged', payload: { fingerprint: '0000000000000000' } }, { type: 'WorkshopsClosed', payload: {} }])).body).toMatchObject({ error: 'area_not_ready' })
+  expect(
+    (
+      await apply(cookie, 0, [
+        { type: 'WorkshopWarningsAcknowledged', payload: { fingerprint: '0000000000000000' } },
+        { type: 'WorkshopsClosed', payload: {} },
+      ])
+    ).body,
+  ).toMatchObject({ error: 'area_not_ready' })
   expect(await stored()).toEqual([])
 })

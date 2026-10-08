@@ -39,3 +39,32 @@ than a rejected event.
 The module exposes typed summaries to scheduling, rankings, attendance, reports,
 and the organiser UI. It does not persist a folded summary or an independent
 relationship table.
+
+## Organiser review presentation
+
+The overview uses the shared header, workflow card, metric tiles, route links, filters
+and collection rows. Workshops with audience `all` contribute to both audience counts.
+The unscheduled metric and checkbox share one filter; the live result count describes
+the intersection with audience and advisory filters. Rows show exception participation
+chips, profile-timezone placement text, open-ended age labels, leader names and a
+separate attendance/capacity bar with all-ranked-choice demand. Missing leaders appear
+as an unknown-person count with an advisory, never as a raw leader identity.
+
+Audience/age mismatches are advisory: adult minimum age below 16 or child maximum age
+above 17. The editor warns and still allows saving. Missing or unresolved leaders also
+produce advisory notes. These checks feed row notes and the inline finalisation review.
+More wishes than places is information and needs no acknowledgement. Existing solver
+readiness findings remain blocking. Voting stays open until the existing closing action.
+
+Before each Festlegen attempt, one organiser may acknowledge all current advisories
+for the team. The inline review shows up to five linked notes, with access to the full
+filtered collection. Opening or cancelling it stages nothing; keyboard focus enters its
+heading and returns to the action. A consequential confirmation does not repeat the full
+result. The server records acknowledgement and closing in one atomic batch; another
+Festlegen attempt requires acknowledgement again. See [phase decisions](../architecture/phases.md).
+
+The browser print view shows the actual view, audience and selected filters, result
+count and current workflow. All workflow steps expand on paper; controls disappear.
+Rows paginate naturally into a text and metric column, with a continuation title and
+the shared footer. The fixture contains 33 workshops; no fake page breaks or fixture
+statistics enter runtime rendering.

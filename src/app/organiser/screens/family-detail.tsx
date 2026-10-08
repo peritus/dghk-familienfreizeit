@@ -1380,7 +1380,9 @@ export function FamilyDetail({
           </StatusNotice>
         ) : null
       }
-      tertiary_navigation={<FamilyTopicNavigation family_id={selectedFamilyId} value={topic} onChange={changeTopic} />}
+      tertiary_navigation={
+        <FamilyTopicNavigation family_id={selectedFamilyId} value={topic} onChange={changeTopic} />
+      }
     >
       <div role="tabpanel" aria-label={familyTopicLabel(topic)}>
         {topic === 'zimmer' ? (

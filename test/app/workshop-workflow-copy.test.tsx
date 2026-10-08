@@ -77,7 +77,7 @@ test('the workshop overview describes only what the screen can do', () => {
   ).toBeTruthy()
   expectNoUnsupportedPromise()
 
-  fireEvent.click(screen.getByRole('tab', { name: 'Externe Leitungen' }))
+  fireEvent.click(screen.getByRole('link', { name: /Externe Leitungen/ }))
   expectNoUnsupportedPromise()
 })
 

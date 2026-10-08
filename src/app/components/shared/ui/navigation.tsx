@@ -22,32 +22,71 @@ export function useActiveNavigation(activeId: string | undefined) {
   return ref
 }
 
-function Navigation({ items, aria_label: ariaLabel, level }: {
+function Navigation({
+  items,
+  aria_label: ariaLabel,
+  level,
+}: {
   items: readonly NavigationItem[]
   aria_label: string
   level: 'primary' | 'secondary'
 }) {
   const ref = useActiveNavigation(items.find((item) => item.active)?.id)
   return (
-    <nav ref={ref} data-slot={`${level}-navigation`} aria-label={ariaLabel}
-      className={cn('flex whitespace-nowrap print:hidden', level === 'primary'
-        ? '-mb-0.5 -ml-4 items-end gap-0.5 overflow-x-auto'
-        : 'mx-auto max-w-5xl gap-2 overflow-x-auto py-2.5 pr-4 pl-0.5')}>
-      {items.map((item) => cloneElement(item.link, {
-        key: item.id,
-        'aria-current': item.active ? 'page' : undefined,
-        className: cn('inline-flex flex-none items-center border-2 text-sm focus-visible:outline-offset-[-2px]',
-          level === 'primary' ? 'h-12 rounded-t-[6px] border-b-0 px-4 text-base font-bold' : 'min-h-11 rounded-base px-3',
-          item.active ? level === 'primary' ? 'border-border bg-main-soft' : 'border-border bg-secondary-background font-bold shadow-md'
-            : level === 'primary' ? 'border-transparent hover:border-border/30 hover:bg-paper' : 'liftable border-transparent font-medium',
-          item.link.props.className),
-      }, item.label))}
+    <nav
+      ref={ref}
+      data-slot={`${level}-navigation`}
+      aria-label={ariaLabel}
+      className={cn(
+        'flex whitespace-nowrap print:hidden',
+        level === 'primary'
+          ? '-mb-0.5 -ml-4 items-end gap-0.5 overflow-x-auto'
+          : 'mx-auto max-w-5xl gap-2 overflow-x-auto py-2.5 pr-4 pl-0.5',
+      )}
+    >
+      {items.map((item) =>
+        cloneElement(
+          item.link,
+          {
+            key: item.id,
+            'aria-current': item.active ? 'page' : undefined,
+            className: cn(
+              'inline-flex flex-none items-center border-2 text-sm focus-visible:outline-offset-[-2px]',
+              level === 'primary'
+                ? 'h-12 rounded-t-[6px] border-b-0 px-4 text-base font-bold'
+                : 'min-h-11 rounded-base px-3',
+              item.active
+                ? level === 'primary'
+                  ? 'border-border bg-main-soft'
+                  : 'border-border bg-secondary-background font-bold shadow-md'
+                : level === 'primary'
+                  ? 'border-transparent hover:border-border/30 hover:bg-paper'
+                  : 'liftable border-transparent font-medium',
+              item.link.props.className,
+            ),
+          },
+          item.label,
+        ),
+      )}
     </nav>
   )
 }
-export function PrimaryNavigation({ items, aria_label: ariaLabel = 'Hauptnavigation' }: { items: readonly NavigationItem[]; aria_label?: string }) {
+export function PrimaryNavigation({
+  items,
+  aria_label: ariaLabel = 'Hauptnavigation',
+}: {
+  items: readonly NavigationItem[]
+  aria_label?: string
+}) {
   return <Navigation items={items} aria_label={ariaLabel} level="primary" />
 }
-export function SecondaryNavigation({ items, aria_label: ariaLabel }: { items: readonly NavigationItem[]; aria_label: string }) {
+
+export function SecondaryNavigation({
+  items,
+  aria_label: ariaLabel,
+}: {
+  items: readonly NavigationItem[]
+  aria_label: string
+}) {
   return <Navigation items={items} aria_label={ariaLabel} level="secondary" />
 }

@@ -36,6 +36,18 @@ const profile = defineOccasionProfile({
     timezone: 'Europe/Berlin',
     locale: 'de',
     fallback_locale: 'en',
+    public_landing: {
+      heading: 'Test',
+      intro: 'Test',
+      actions: [
+        {
+          id: 'login',
+          label: 'Anmelden',
+          emphasis: 'primary',
+          destination: { kind: 'route', to: '/login' },
+        },
+      ],
+    },
   },
   traits: {
     role: property({ title: 'Role', scopes: ['person'], value: enumOf(['adult']) }),

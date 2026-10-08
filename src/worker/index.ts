@@ -342,7 +342,8 @@ app.post('/api/events', async (context) => {
     const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
     // Closings are filled only on the organiser apply path (phases.md §5).
     const closings = closingEventAreas(activeProfile.modules)
-    if (drafts.some(({ type }) => closings.has(type) || type === 'WorkshopWarningsAcknowledged')) throw new Error('forbidden')
+    if (drafts.some(({ type }) => closings.has(type) || type === 'WorkshopWarningsAcknowledged'))
+      throw new Error('forbidden')
     const schemas = eventPayloadSchemas(activeProfile.validation_view)
     const events = tracing.enterSpan('events.parse_and_validate', (span) => {
       const parsed = drafts.map((draft, index) =>

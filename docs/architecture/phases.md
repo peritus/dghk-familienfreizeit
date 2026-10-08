@@ -53,6 +53,7 @@ late; the organiser wish features require none.
 | Event | Owner | Effect |
 |---|---|---|
 | `WorkshopChoiceOpened` | `workshop-rankings` | Opens workshop choice; once only, and only with an active workshop |
+| `WorkshopWarningsAcknowledged` | `workshop-assignment` | Record organiser acknowledgement for the immediately following closing |
 | `WorkshopsClosed`, `WorkshopsReopened` | `workshop-assignment` | Close or reopen the workshop area |
 | `AccommodationClosed`, `AccommodationReopened` | `room-assignment` | Close or reopen the accommodation area |
 
@@ -83,9 +84,10 @@ Text fixtures write a closing result as one `result_json` property.
   through `WorkflowStepper`.
 - **Decisions.** **Wahl öffnen**, **Festlegen**, **Erneut festlegen** and
   **Wieder öffnen** are confirmed decisions in the stepper actions. The closing
-  review shows the affected families, the difference from the previous closed
-  result or the full first result, and the blocking findings, and cannot be
-  confirmed while not ready. A staged closing shows as pending until the filled
+  confirmation shows affected families and blocking findings, and cannot be
+  confirmed while not ready. The full result and differences remain in the main
+  review views. Workshop advisory warnings are reviewed inline for each new
+  Festlegen attempt; one organiser acknowledges them for the team. A staged closing shows as pending until the filled
   event returns.
 - **Differences.** The allocation screen and the assignment board show the
   difference between the latest closed result and the current derivation; the
@@ -107,3 +109,10 @@ track, notice, organiser surface and browser tests live in
 `test/worker/closing.test.ts`, `test/app/area-closing.test.tsx`,
 `test/app/phase-notice.test.tsx`, `test/app/workshop-choice.test.tsx`,
 `test/app/workshop-lists.test.tsx`, and `test/browser/phases.spec.ts`.
+
+Workshop acknowledgement is an organiser-only event carrying an opaque advisory
+fingerprint. It folds no domain state. The Worker accepts it only immediately before
+`WorkshopsClosed` in the same apply batch, validates the current derived advisories,
+and stamps its actor and timestamp. An older acknowledgement never authorises another
+closing. Existing head validation and readiness blockers apply before recording any
+result. Neither event can be submitted through `/api/events`.

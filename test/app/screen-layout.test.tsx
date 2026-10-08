@@ -150,14 +150,17 @@ test('shared accommodation status keeps closing actions opt-in for editing route
       <AccommodationWorkflow actions />
     </FixtureProvider>,
   )
+  fireEvent.click(screen.getByRole('button', { name: 'Alle Schritte' }))
   expect(screen.getByRole('button', { name: 'Festlegen' })).toBeTruthy()
 })
 
 test('section navigation belongs to the frame band and disappears with its screen', () => {
   const { rerender } = render(
     <ApplicationFrame brand="Veranstaltung">
-      <ScreenLayout header={<ScreenHeader title="Workshops" />}
-        secondary_navigation={<nav aria-label="Workshopbereiche">Übersicht</nav>}>
+      <ScreenLayout
+        header={<ScreenHeader title="Workshops" />}
+        secondary_navigation={<nav aria-label="Workshopbereiche">Übersicht</nav>}
+      >
         <p>Workshopliste</p>
       </ScreenLayout>
     </ApplicationFrame>,
@@ -165,6 +168,10 @@ test('section navigation belongs to the frame band and disappears with its scree
   const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
   expect(navigation.closest('[data-slot="application-section-band"]')).toBeTruthy()
   expect(screen.getByRole('main').contains(navigation)).toBe(false)
-  rerender(<ApplicationFrame brand="Veranstaltung"><ScreenLayout header={<ScreenHeader title="Familien" />} /></ApplicationFrame>)
+  rerender(
+    <ApplicationFrame brand="Veranstaltung">
+      <ScreenLayout header={<ScreenHeader title="Familien" />} />
+    </ApplicationFrame>,
+  )
   expect(screen.queryByRole('navigation', { name: 'Workshopbereiche' })).toBeNull()
 })

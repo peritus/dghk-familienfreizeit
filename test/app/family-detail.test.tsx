@@ -24,7 +24,7 @@ test('organiser can rename a family and edit profile-driven controls', () => {
   fireEvent.click(within(dialog).getByRole('button', { name: 'Änderungen speichern' }))
 
   expect(screen.getByRole('heading', { name: 'Familie Abendrot' })).toBeTruthy()
-  expect(screen.getByRole('tab', { name: 'Zimmer' }).getAttribute('aria-selected')).toBe('true')
+  expect(screen.getByRole('link', { name: 'Zimmer' }).getAttribute('aria-current')).toBe('page')
 })
 
 test('organiser controls save their ordinary label events on change', () => {

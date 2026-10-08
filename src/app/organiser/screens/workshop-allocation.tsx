@@ -93,7 +93,7 @@ export function WorkshopAllocation() {
   // wouter's location is the pathname only; a traced person arrives in the query.
   const [location, navigate] = useLocation()
   const queryPersonId = new URLSearchParams(useSearch()).get('person')
-  const { world, current_plan: currentPlan, phases } = useOrganiser()
+  const { world, current_plan: currentPlan, phases, state } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
   const [traceMode, setTraceMode] = useState<TraceMode>(queryPersonId ? 'highlight' : 'all')
   const [selectedPersonId, setSelectedPersonId] = useState(queryPersonId ?? '')
@@ -194,6 +194,8 @@ export function WorkshopAllocation() {
         <>
           <WorkflowStepper
             aria_label="Ablauf der Workshopwahl"
+            storage_key="workshops.allocation.expanded"
+            storage_user={state.principal_email}
             steps={workshopTrack({
               phases: phases ?? [],
               active_workshop_count: officialWorkshopsWorld(world).workshops.length,
@@ -222,9 +224,21 @@ export function WorkshopAllocation() {
           onChange={setView}
           controls={<WorkshopAllocationGroupFilter value={group} on_change={setGroup} />}
           items={[
-            { value: 'answers', label: 'Antworten', link: <OrganiserLink href={organiserPaths.workshop_allocation()} /> },
-            { value: 'demand', label: 'Nachfrage', link: <OrganiserLink href={organiserPaths.workshop_allocation_demand()} /> },
-            { value: 'trace', label: 'Verlauf', link: <OrganiserLink href={organiserPaths.workshop_allocation_trace()} /> },
+            {
+              value: 'answers',
+              label: 'Antworten',
+              link: <OrganiserLink href={organiserPaths.workshop_allocation()} />,
+            },
+            {
+              value: 'demand',
+              label: 'Nachfrage',
+              link: <OrganiserLink href={organiserPaths.workshop_allocation_demand()} />,
+            },
+            {
+              value: 'trace',
+              label: 'Verlauf',
+              link: <OrganiserLink href={organiserPaths.workshop_allocation_trace()} />,
+            },
           ]}
         />
       }

@@ -26,7 +26,18 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const WorkshopChoice: Story = { name: 'Example: Workshops', args: { aria_label: 'Ablauf der Workshopwahl', steps: [{ id: 'create', label: 'Workshops anlegen', state: 'complete' }, { id: 'open', label: 'Wahl öffnen', state: 'current' }, { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' }, { id: 'fixed', label: 'Festgelegt', state: 'upcoming' }] } }
+export const WorkshopChoice: Story = {
+  name: 'Example: Workshops',
+  args: {
+    aria_label: 'Ablauf der Workshopwahl',
+    steps: [
+      { id: 'create', label: 'Workshops anlegen', state: 'complete' },
+      { id: 'open', label: 'Wahl öffnen', state: 'current' },
+      { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
+      { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
+    ],
+  },
+}
 
 export const Accommodation: Story = {
   name: 'Example: Unterbringung',
@@ -51,15 +62,39 @@ export const Accommodation: Story = {
 }
 
 export const States: Story = {
-  render: () => <div className="space-y-6 bg-background p-4">
-    {[0, 1, 2].flatMap((current) => [false, true].map((expanded) =>
-      <WorkflowStepper key={`${current}-${expanded}`} aria_label="Ablauf der Vorbereitung" expanded={expanded}
-        steps={['Vorbereiten', 'Prüfen', 'Abgeschlossen'].map((label, index) => ({
-          id: String(index), label, description: index === current ? 'Aktueller Stand' : 'Kurze Erklärung',
-          state: current === 2 ? 'complete' : index < current ? 'complete' : index === current ? 'current' : 'upcoming',
-        }))}
-        panel={{ text: current === 2 ? 'Der Vorgang ist abgeschlossen.' : 'Prüfe die Angaben im Hauptbereich.', note: 'Die Ansicht zeigt den aktuellen Stand.' }} />,
-    ))}
-  </div>,
+  render: () => (
+    <div className="space-y-6 bg-background p-4">
+      {[0, 1, 2].flatMap((current) =>
+        [false, true].map((expanded) => (
+          <WorkflowStepper
+            key={`${current}-${expanded}`}
+            aria_label="Ablauf der Vorbereitung"
+            expanded={expanded}
+            steps={['Vorbereiten', 'Prüfen', 'Abgeschlossen'].map((label, index) => ({
+              id: String(index),
+              label,
+              description: index === current ? 'Aktueller Stand' : 'Kurze Erklärung',
+              state:
+                current === 2
+                  ? 'complete'
+                  : index < current
+                    ? 'complete'
+                    : index === current
+                      ? 'current'
+                      : 'upcoming',
+            }))}
+            panel={{
+              text:
+                current === 2
+                  ? 'Der Vorgang ist abgeschlossen.'
+                  : 'Prüfe die Angaben im Hauptbereich.',
+              note: 'Die Ansicht zeigt den aktuellen Stand.',
+            }}
+          />
+        )),
+      )}
+    </div>
+  ),
 }
+
 export const Print: Story = { ...States, parameters: { layout: 'fullscreen' } }

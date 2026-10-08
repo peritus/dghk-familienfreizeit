@@ -38,7 +38,13 @@ export function PhaseDecisionAction({
 }) {
   const [open, setOpen] = useState(false)
   return (
-    <AlertDialog open={open} onOpenChange={(value) => { setOpen(value); onOpenChange?.(value) }}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value)
+        onOpenChange?.(value)
+      }}
+    >
       <Button type="button" onClick={() => setOpen(true)}>
         {label}
       </Button>

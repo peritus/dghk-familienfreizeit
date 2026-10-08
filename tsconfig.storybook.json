@@ -16,6 +16,7 @@
     "src/config/**/*.ts",
     "src/derive/**/*.ts",
     "src/events/fold.ts",
+    "src/events/kdl.ts",
     "src/events/resolver.ts",
     "src/events/types.ts",
     "src/events/world.ts",

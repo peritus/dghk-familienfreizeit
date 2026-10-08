@@ -391,13 +391,13 @@ test('workshop navigation exposes the intended areas and switches resource views
     within(navigation)
       .getAllByRole('link')
       .map((link) => link.textContent),
-  ).toEqual(['Workshops', 'Teilnahme', 'Wünsche', 'Räume und Slots', 'Listen'])
+  ).toEqual(['Übersicht', 'Teilnahme', 'Wünsche', 'Räume und Slots', 'Listen'])
   expect(
     within(navigation).getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current'),
   ).toBe('page')
-  expect(screen.getByRole('tablist', { name: 'Räume und Slots' })).toBeTruthy()
-  expect(screen.getByRole('tab', { name: 'Slots' }).getAttribute('aria-selected')).toBe('true')
-  fireEvent.click(screen.getByRole('tab', { name: 'Räume' }))
+  expect(screen.getByRole('navigation', { name: 'Räume und Slots' })).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Slots' }).getAttribute('aria-current')).toBe('page')
+  fireEvent.click(screen.getByRole('link', { name: 'Räume' }))
   expect(await screen.findByRole('heading', { name: 'Räume und Slots' })).toBeTruthy()
 })
 
@@ -411,12 +411,12 @@ test('workshop participation shows the responsive person overview and links to w
   ).toBeNull()
   expect(screen.queryByText('4.–5. Wahl')).toBeNull()
   expect(
-    within(screen.getByRole('tablist', { name: 'Teilnahmeansichten' })).getByRole('tab', {
+    within(screen.getByRole('navigation', { name: 'Teilnahmeansichten' })).getByRole('link', {
       name: 'Personen',
     }),
   ).toBeTruthy()
   expect(
-    within(screen.getByRole('tablist', { name: 'Teilnahmeansichten' })).getByRole('tab', {
+    within(screen.getByRole('navigation', { name: 'Teilnahmeansichten' })).getByRole('link', {
       name: 'Programm',
     }),
   ).toBeTruthy()
@@ -482,19 +482,19 @@ test('workshop allocation exposes three URL-backed Wunsch views', async () => {
   open('/organiser/workshops/allocation', workshopFixtureEvents())
   expect(await screen.findByRole('heading', { name: 'Wünsche' })).toBeTruthy()
 
-  const navigation = screen.getByRole('tablist', { name: 'Wünsche' })
+  const navigation = screen.getByRole('navigation', { name: 'Wünsche' })
   expect(
     within(navigation)
-      .getAllByRole('tab')
+      .getAllByRole('link')
       .map((tab) => tab.textContent),
   ).toEqual(['Antworten', 'Nachfrage', 'Verlauf'])
-  expect(screen.getByRole('tab', { name: 'Antworten' }).getAttribute('aria-selected')).toBe('true')
+  expect(screen.getByRole('link', { name: 'Antworten' }).getAttribute('aria-current')).toBe('page')
 
-  fireEvent.click(screen.getByRole('tab', { name: 'Nachfrage' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Nachfrage' }))
   expect(await screen.findByRole('heading', { name: 'Nachfrage' })).toBeTruthy()
   expect(window.location.pathname).toBe('/organiser/workshops/allocation/demand')
 
-  fireEvent.click(screen.getByRole('tab', { name: 'Verlauf' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Verlauf' }))
   expect(
     await screen.findByRole('heading', { name: 'Was ist aus jedem Wunsch geworden?' }),
   ).toBeTruthy()
@@ -503,13 +503,13 @@ test('workshop allocation exposes three URL-backed Wunsch views', async () => {
 
 test('the workshop overview uses the prototype view labels', async () => {
   open('/organiser/workshops', workshopFixtureEvents())
-  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
 
-  const views = screen.getByRole('tablist', { name: 'Workshopansichten' })
+  const views = screen.getByRole('navigation', { name: 'Workshopansichten' })
   expect(
     within(views)
-      .getAllByRole('tab')
-      .map((tab) => tab.textContent),
+      .getAllByRole('link')
+      .map((tab) => tab.textContent?.replace(/\d+/g, '').trim()),
   ).toEqual(['Workshops', 'Leitungen', 'Externe Leitungen'])
 })
 
@@ -546,9 +546,9 @@ test('the external leaders view follows the prototype list and stages a complete
 test('the workshop overview presents resolved labels and derived placement data', async () => {
   open('/organiser/workshops', workshopFixtureEvents())
 
-  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
   expect(screen.getAllByText('Kinder').length).toBeGreaterThan(0)
-  expect(screen.getByText('Automatische Zuordnung')).toBeTruthy()
+  expect(screen.queryByText('Automatische Zuordnung')).toBeNull()
   expect(screen.getByText(/Mira Stein/)).toBeTruthy()
   expect(screen.getByText(/Atelier/)).toBeTruthy()
 })
@@ -557,7 +557,7 @@ test('workshop authoring uses the focused editor dialog to create a workshop', a
   const { fetchMock } = open('/organiser/workshops', workshopFixtureEvents())
   if (!fetchMock) throw new Error('organiser fetch mock not installed')
 
-  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Workshop hinzufügen' }))
 
   expect(screen.getByRole('dialog')).toBeTruthy()
@@ -588,7 +588,7 @@ test('workshop authoring opens existing values and stages a complete update', as
   const { fetchMock } = open('/organiser/workshops', workshopFixtureEvents())
   if (!fetchMock) throw new Error('organiser fetch mock not installed')
 
-  expect(await screen.findByRole('heading', { name: 'Workshopübersicht' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Keramik' }))
 
   expect(screen.getByRole('heading', { name: 'Workshop bearbeiten: Keramik' })).toBeTruthy()
@@ -623,18 +623,22 @@ test('the programme review keeps each view at its own URL and avoids false roste
 
   expect(await screen.findByRole('heading', { name: 'Programm' })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Teilnahme' }).getAttribute('aria-current')).toBe('page')
-  expect(screen.getByRole('tab', { name: 'Programm' }).getAttribute('aria-selected')).toBe('true')
+  expect(screen.getByRole('link', { name: 'Programm' }).getAttribute('aria-current')).toBe('page')
   expect(screen.getByText(/Freitag/)).toBeTruthy()
   expect(screen.getByText('Keramik')).toBeTruthy()
   expect(screen.queryByRole('button', { name: 'Keramik' })).toBeNull()
 
-  fireEvent.click(screen.getByRole('tab', { name: 'Nicht eingeplant' }))
-  expect(await screen.findByRole('tab', { name: 'Nicht eingeplant', selected: true })).toBeTruthy()
+  fireEvent.click(screen.getByRole('link', { name: 'Nicht eingeplant' }))
+  expect(
+    await screen.findByRole('link', { name: 'Nicht eingeplant', current: 'page' }),
+  ).toBeTruthy()
   expect(window.location.pathname).toBe('/organiser/workshops/programme/unplaced')
   expect(screen.getByText('Nicht eingeplant')).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('tab', { name: 'Überschneidungen' }))
-  expect(await screen.findByRole('tab', { name: 'Überschneidungen', selected: true })).toBeTruthy()
+  fireEvent.click(screen.getByRole('link', { name: 'Überschneidungen' }))
+  expect(
+    await screen.findByRole('link', { name: 'Überschneidungen', current: 'page' }),
+  ).toBeTruthy()
   expect(window.location.pathname).toBe('/organiser/workshops/programme/overlaps')
   expect(screen.getByRole('heading', { name: 'Überschneidungen' })).toBeTruthy()
 })
@@ -720,7 +724,7 @@ test('organiser state survives client-side route and history navigation', async 
   expect(await screen.findByRole('heading', { name: 'Bestehende Familie' })).toBeTruthy()
   expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
 
-  fireEvent.click(screen.getByRole('link', { name: '← Familien' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Familien' }))
   expect(await screen.findByRole('heading', { name: /Familien/, level: 1 })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Neue Familie' })).toBeTruthy()
   expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
@@ -746,9 +750,7 @@ test('leaving and re-entering the organiser starts a fresh in-memory session', a
     await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' }),
   ).toBeTruthy()
 
-  fireEvent.click(
-    screen.getByRole('link', { name: 'DGHK Berlin-Brandenburg Familienfreizeit Lübben 2027' }),
-  )
+  fireEvent.click(screen.getByRole('link', { name: 'Familienfreizeit Lübben 2027' }))
   expect(await screen.findByRole('heading', { name: 'Lübben 2027' })).toBeTruthy()
 
   window.history.pushState({}, '', '/organiser')
@@ -820,7 +822,7 @@ test('family history includes staged events before they are applied', async () =
   fireEvent.click(await screen.findByRole('link', { name: 'Lokale Familie' }))
   expect(await screen.findByRole('heading', { name: 'Lokale Familie' })).toBeTruthy()
   await enableDraftMode()
-  fireEvent.click(screen.getByRole('tab', { name: 'Personen' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Personen' }))
   const addPerson = await screen.findByRole('button', { name: 'Person hinzufügen' })
   fireEvent.click(addPerson)
   const personDialog = await screen.findByRole('dialog')
@@ -888,7 +890,7 @@ test('family links use an opaque route ID and open the matching detail view', as
   expect(familyLink.getAttribute('href')).toBe('/organiser/families/6b4b44137d724c1e')
   fireEvent.click(familyLink)
   expect(await screen.findByRole('heading', { name: 'Foo Familie' })).toBeTruthy()
-  fireEvent.click(screen.getByRole('tab', { name: 'Personen' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Personen' }))
   expect(await screen.findByRole('tab', { name: /Ada Beispiel/ })).toBeTruthy()
 })
 

@@ -73,6 +73,18 @@ const profile = defineOccasionProfile({
     timezone: 'Europe/Berlin',
     locale: 'de',
     fallback_locale: 'en',
+    public_landing: {
+      heading: 'Test',
+      intro: 'Test',
+      actions: [
+        {
+          id: 'login',
+          label: 'Anmelden',
+          emphasis: 'primary',
+          destination: { kind: 'route', to: '/login' },
+        },
+      ],
+    },
     phase_dates: [{ phase: 'wishes.choice', target_at: '2027-03-31T21:59:59Z' }],
   },
   traits: {

@@ -28,11 +28,19 @@ export const Filter: Story = {
   args: { items: [] },
   render: function Render() {
     const [active, setActive] = useState(false)
-    return <StatsStrip items={[
-      { value: 24, label: 'Einträge' },
-      { value: 3, label: 'mit Hinweisen', filter: { active, onToggle: () => setActive(!active) } },
-      { value: 8, label: 'Ressourcen' },
-      { value: 2, label: 'Teams' },
-    ]} />
+    return (
+      <StatsStrip
+        items={[
+          { value: 24, label: 'Einträge' },
+          {
+            value: 3,
+            label: 'mit Hinweisen',
+            filter: { active, onToggle: () => setActive(!active) },
+          },
+          { value: 8, label: 'Ressourcen' },
+          { value: 2, label: 'Teams' },
+        ]}
+      />
+    )
   },
 }

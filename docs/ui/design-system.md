@@ -87,7 +87,8 @@ inventing an action. Existing findings and configured resolver results supply th
 meaning; presentation components do not calculate new domain rules.
 
 [StatsStrip](../../src/app/components/shared/ui/stats-strip.tsx) is the shared metrics
-component: one flat card with equal divided cells. Screen-wide totals precede
+component: separate bordered tiles, two columns below 768px and up to four above it.
+A filter tile is a native button with `aria-pressed`, sharing the collection filter state. Screen-wide totals precede
 tertiary navigation. Labels state scope; collection-specific counts and filters
 remain with that collection. Failed/loading data never produces plausible zero
 metrics.
@@ -134,7 +135,8 @@ revision, unsaved changes, closing time, audience/context and confidentiality.
 Authenticated organiser output carries its restricted audience. Public/recovery
 screens omit unavailable revision information. A specialised screen footer
 replaces the frame default so paper has one footer. Chromium's page-margin counters
-provide page numbers; footer text occupies reserved space. Other browsers' pagination
+provide page numbers and footer text in reserved margin boxes. The footer's DOM
+metadata remains the shared source, including the specialised screen footer when present. Other browsers' pagination
 and margin-counter support have not been verified in this change.
 
 The accommodation assignment view retains its dedicated occupancy projection;
@@ -163,7 +165,8 @@ since Tailwind v4's preflight resets buttons to `cursor: default`.
 A hard offset shadow means "pressable": the shared `pressable` utility applies it to
 buttons and whole-card links, with an `::after` overlay that keeps the original hit
 area clickable while the element slides 4px into its shadow on press. Information-only
-cards and navigation links stay flat.
+cards stay flat. Active secondary navigation chips use a 3px hard shadow; inactive
+chips lift 2px on hover. Folder tabs use an outline and soft context colour.
 
 `OccasionLanding` is reusable across occasion profiles. Each profile supplies
 localized heading and introduction copy plus an ordered list of public actions.
@@ -176,8 +179,8 @@ landing component does not create routes or domain behavior.
 
 Workshop screens reuse the same neobrutalist language at every viewport width:
 thick semantic outlines, offset shadows for actionable controls, flat information
-cards, and wrapping horizontal tabs. Orange is reserved for actionable attention
-and is paired with a text or glyph meaning; status must never be communicated by
+cards, and scrollable horizontal navigation. Full orange is reserved for primary actions
+and dashed cream warnings have a text or glyph meaning; status must never be communicated by
 colour alone. Workshop filters, unscheduled reasons, and save state therefore
 include visible labels. Cancellation authoring and a labelled cancellation-history
 view remain in [M8](../../spec/roadmap.md#m8--organiser-authored-workshop-programme).
@@ -291,3 +294,39 @@ Accessibility checks exercise semantic route/loading/error behavior in jsdom.
 Real-browser route and 390px layout checks complement these tests. They do not
 establish exhaustive contrast or every 360px/domain-control keyboard interaction. Those checks and the additional domain controls remain requirements in
 [the design-system specification](../../spec/ui/design-system.md).
+
+## Organiser visual foundations
+
+The existing canonical components supply this presentation to every applicable organiser
+page; specialised workshop renderers compose them on workshop pages. The application bar
+shows the short event title, organisation subtitle and configured logo. Primary folder
+tabs occupy its bottom edge; secondary navigation is portalled into the full-width soft
+context band beneath it. Route-backed tertiary views use native links with `aria-current`;
+local tabs retain arrow/Home/End keyboard navigation. Horizontal navigation scrolls the
+current item into view without moving the page vertically.
+
+The type scale is 12/14/16/18/20/24/30px. H1 is 30px, row and panel headings 18px, metric
+values 24px and row values 20px. Metadata and control labels are 14px; small captions are
+12px. Borders are 2px with 5px corners; row dividers are 1.5px. Context uses `main-soft`,
+primary actions `main`, and warnings dashed borders with `warning-bg`. Pressable controls
+move 2px into a 2px shadow on hover, then 4px into no shadow on active press. Reduced motion
+keeps the control stationary. Group spacing is 24px on phones and 32px on desktop.
+The save-status control is an explicit exception: its existing UI and mechanics are retained.
+
+`WorkflowStepper` starts collapsed at every width and persists its disclosure preference
+per organiser and page. Storage failure does not prevent toggling. Expanded tracks are
+horizontal from 640px and vertical below it; completed connectors are solid and future
+connectors dashed. The current marker is black; terminal state uses a white checkmark.
+Module tracks remain responsible for lifecycle state and completion dates. Reopening
+controls sit outside the terminal card. Browser print always expands the workflow.
+
+`CollectionRow` supplies optional text and metric columns, an identifiable focus target
+and contextual actions. Workshops place counts and creation in the tertiary view row;
+filters follow beneath it. Other pages keep their existing content composition and use
+the same revised shared components. Neutral component stories and labelled workshop
+examples describe the APIs in the [executable style guide](storybook.md).
+
+Verification covers the full workshop fixture at 390, 640, 768, 1024 and 1280px; dark
+appearance, reduced motion, disclosure storage failure, keyboard review focus, filter
+synchronisation and multi-page Chromium printing. Original save-status visual baselines
+remain unchanged. This is local implementation evidence, not hosted deployment evidence.

@@ -246,7 +246,6 @@ function audienceLabel(value: string): string {
   return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[value] ?? value
 }
 
-
 function openReasonLabel(reason: string): string {
   switch (reason) {
     case 'no eligible capacity':

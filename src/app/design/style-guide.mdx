@@ -31,7 +31,7 @@ executable examples; this page records the usage decisions around them.
 ## Universal screen composition
 
 Every current and future screen uses `ApplicationFrame` for landmarks and width,
-then `ScreenLayout`: secondary navigation, `ScreenHeader`, screen-wide
+then `ScreenLayout`: `ScreenHeader`, screen-wide
 `ActionableNotices`, workflow/status, `StatsStrip`, tertiary navigation, then content.
 Optional slots collapse. Screen-wide context stays visible across local tabs.
 Create actions belong to `CollectionSection` headers, including nested collections;
@@ -189,3 +189,37 @@ not evidence of an available action.
 <Canvas of={WorkshopScreenStories.Spaces} />
 
 <Stories includePrimary={false} />
+
+## Organiser presentation
+
+The application bar uses the short event title, the configured organisation and the real
+logo. Folder tabs form its bottom edge; secondary navigation occupies the full width band
+below it. Route-backed tertiary views are native links with `aria-current`; local choices
+retain tab keyboard navigation. Active horizontal navigation stays in view.
+
+Use the 12/14/16/18/20/24/30px type scale, 2px outlines and 5px corners. Primary action orange
+is distinct from the soft context colour and dashed cream advisory surfaces. Pressable
+controls have a 4px shadow, a 2px hover press and a full active press; reduced motion keeps
+the control stationary. The established save-status control is an explicit exception and
+keeps its presentation and behaviour.
+
+Metrics use separate bordered tiles, two columns on phones and up to four on desktop.
+A filter metric uses a native button with `aria-pressed` and shares the collection checkbox
+state. Collection rows can supply a right metric column; identity, muted metadata and
+record advisories stay in the text column. Avoid default-state badges.
+
+Workflow disclosure starts collapsed at every width. Its preference is scoped to the
+organiser and page. Expanded content shows the next action; a completed workflow shows the
+completion date supplied by its module, with reopening outside the card. Paper expands
+all steps and hides controls. Disclosure does not change a domain phase.
+
+The workshop examples use every ranked wish for demand and include an all-audience workshop
+in both audience filters. Oversubscription is information. Age/audience and missing-leader
+advisories allow saving. Festlegen reviews those advisories inline, without duplicating the
+result shown in the main views. Acknowledgement belongs to one finalisation attempt.
+
+<Canvas of={WorkflowStepperStories.States} />
+
+<Canvas of={WorkflowStepperStories.Print} />
+
+<Canvas of={StatsStories.Filter} />

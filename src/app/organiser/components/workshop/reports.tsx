@@ -424,10 +424,34 @@ export function WorkshopListKinds({
       value={value}
       onChange={(next) => onChange(next as 'workshop' | 'person' | 'family' | 'room')}
       items={[
-        { value: 'workshop', label: 'Workshop', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_workshop_list()} /> : undefined },
-        { value: 'person', label: 'Person', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_person_list()} /> : undefined },
-        { value: 'family', label: 'Familie', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_family_list()} /> : undefined },
-        { value: 'room', label: 'Raum', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_room_list()} /> : undefined },
+        {
+          value: 'workshop',
+          label: 'Workshop',
+          link: routeLinks ? (
+            <OrganiserLink href={organiserPaths.workshop_workshop_list()} />
+          ) : undefined,
+        },
+        {
+          value: 'person',
+          label: 'Person',
+          link: routeLinks ? (
+            <OrganiserLink href={organiserPaths.workshop_person_list()} />
+          ) : undefined,
+        },
+        {
+          value: 'family',
+          label: 'Familie',
+          link: routeLinks ? (
+            <OrganiserLink href={organiserPaths.workshop_family_list()} />
+          ) : undefined,
+        },
+        {
+          value: 'room',
+          label: 'Raum',
+          link: routeLinks ? (
+            <OrganiserLink href={organiserPaths.workshop_room_list()} />
+          ) : undefined,
+        },
       ]}
     />
   )

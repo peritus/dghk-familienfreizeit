@@ -13,12 +13,6 @@ reports are separate audience and presentation slices; an organiser milestone
 does not claim family behavior, and a domain milestone does not require reports
 before the report host exists.
 
-## M16 — Shared organiser presentation
-
-Deliver the [shared presentation completion](ui/design-system.md#shared-presentation-completion) through existing reusable components and all their current consumers, with Workshops as the first composition. Preserve the draft-status UI, lifecycle and solver semantics. Workshop advisory review is scoped to each finalisation attempt.
-
-Acceptance: the approved component contracts, workshop content, responsive widths, accessibility, dark appearance, browser printing, Storybook coverage and documentation are verified together. No new page-specific components are introduced for other pages.
-
 <a id="m8--organiser-authored-workshop-programme"></a>
 ## M8 — Workshop planning completion
 

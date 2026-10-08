@@ -11,23 +11,17 @@ export type ScreenHeaderProps = {
   className?: string
 }
 
-export function ScreenHeader({
-  title,
-  description,
-  action,
-  className,
-}: ScreenHeaderProps) {
+export function ScreenHeader({ title, description, action, className }: ScreenHeaderProps) {
   return (
     <header
       data-slot="screen-header"
-      className={cn(
-        'flex flex-wrap items-end justify-between gap-4 ',
-        className,
-      )}
+      className={cn('flex flex-wrap items-end justify-between gap-4 ', className)}
     >
       <div className="min-w-0">
         <h1 className="text-3xl leading-tight font-heading tracking-[-0.01em]">{title}</h1>
-        {description ? <div className="mt-2 max-w-3xl font-normal text-muted">{description}</div> : null}
+        {description ? (
+          <div className="mt-2 max-w-3xl font-normal text-muted">{description}</div>
+        ) : null}
       </div>
       {action ? (
         <div data-slot="screen-actions" className="ml-auto flex flex-wrap gap-2 print:hidden">
@@ -42,6 +36,7 @@ export function ScreenHeader({
 export function ScreenLayout({
   header,
   print_context: printContext,
+  print_running_title: printRunningTitle,
   print_orientation: printOrientation = 'portrait',
   secondary_navigation: secondaryNavigation,
   notices,
@@ -53,6 +48,7 @@ export function ScreenLayout({
   className,
 }: {
   header: ReactNode
+  print_running_title?: string
   print_context?: ReactNode
   print_orientation?: 'portrait' | 'landscape'
   secondary_navigation?: ReactNode
@@ -71,8 +67,20 @@ export function ScreenLayout({
       data-print-orientation={printOrientation}
       className={cn('w-full min-w-0 space-y-6 sm:space-y-8', className)}
     >
-      {secondaryNavigation ? navigationTarget ? createPortal(secondaryNavigation, navigationTarget) : (
-        <div data-slot="screen-secondary-navigation" className="border-b-2 border-border bg-main-soft print:hidden">{secondaryNavigation}</div>
+      {printRunningTitle ? (
+        <style>{`@media print { @page { @top-left { content: ${JSON.stringify(printRunningTitle + ' · Fortsetzung')}; font: 9pt sans-serif; } } @page:first { @top-left { content: none; } } }`}</style>
+      ) : null}
+      {secondaryNavigation ? (
+        navigationTarget ? (
+          createPortal(secondaryNavigation, navigationTarget)
+        ) : (
+          <div
+            data-slot="screen-secondary-navigation"
+            className="border-b-2 border-border bg-main-soft print:hidden"
+          >
+            {secondaryNavigation}
+          </div>
+        )
       ) : null}
       {header}
       {printContext ? (
@@ -85,10 +93,20 @@ export function ScreenLayout({
           {notices}
         </div>
       ) : null}
-      {workflow || summary ? <div data-slot="screen-status" className="space-y-4">
-        {workflow ? <div data-slot="screen-workflow" className="space-y-4 empty:hidden">{workflow}</div> : null}
-        {summary ? <div data-slot="screen-summary" className="empty:hidden">{summary}</div> : null}
-      </div> : null}
+      {workflow || summary ? (
+        <div data-slot="screen-status" className="space-y-4">
+          {workflow ? (
+            <div data-slot="screen-workflow" className="space-y-4 empty:hidden">
+              {workflow}
+            </div>
+          ) : null}
+          {summary ? (
+            <div data-slot="screen-summary" className="empty:hidden">
+              {summary}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {tertiaryNavigation ? (
         <div data-slot="screen-tertiary-navigation" className="print:hidden">
@@ -166,13 +184,17 @@ export function CollectionSection({
       aria-label={!title ? label : undefined}
       className={cn('min-w-0 space-y-4', className)}
     >
-      {title ? <SectionHeader
-        id={headingId}
-        title={title}
-        description={description}
-        action={action}
-        heading_level={headingLevel}
-      /> : action ? <div data-slot="collection-actions">{action}</div> : null}
+      {title ? (
+        <SectionHeader
+          id={headingId}
+          title={title}
+          description={description}
+          action={action}
+          heading_level={headingLevel}
+        />
+      ) : action ? (
+        <div data-slot="collection-actions">{action}</div>
+      ) : null}
       {controls ? (
         <div data-slot="collection-controls" className="print:hidden">
           {controls}

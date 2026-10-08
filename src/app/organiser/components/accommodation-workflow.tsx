@@ -9,7 +9,11 @@ export function AccommodationWorkflow({ actions = false }: { actions?: boolean }
   return (
     <WorkflowStepper
       aria_label="Ablauf der Unterbringung"
-      storage_key={actions ? "accommodation.inventory.phase.expanded" : "accommodation.assignment.phase.expanded"}
+      storage_key={
+        actions
+          ? 'accommodation.inventory.phase.expanded'
+          : 'accommodation.assignment.phase.expanded'
+      }
       storage_user={state.principal_email}
       steps={accommodationTrack({ phases: phases ?? [], meta: activeProfile.meta })}
       next_action={actions ? <AreaClosingActions area="accommodation" /> : undefined}

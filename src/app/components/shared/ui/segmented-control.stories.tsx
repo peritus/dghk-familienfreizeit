@@ -61,7 +61,14 @@ export const Narrow: Story = {
 }
 
 export const Filter: Story = {
-  args: { label: 'Kategorie', value: 'all', presentation: 'filter', options: [
-    { value: 'all', label: 'Alle 24' }, { value: 'one', label: 'Kategorie A 12' }, { value: 'two', label: 'Kategorie B 16' },
-  ] },
+  args: {
+    label: 'Kategorie',
+    value: 'all',
+    presentation: 'filter',
+    options: [
+      { value: 'all', label: 'Alle 24' },
+      { value: 'one', label: 'Kategorie A 12' },
+      { value: 'two', label: 'Kategorie B 16' },
+    ],
+  },
 }

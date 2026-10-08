@@ -12,7 +12,11 @@ import { logout } from '../auth/session.js'
 import { Button } from '../components/shared/ui/button'
 import type { ProfilePresentation } from '../../config/presentation.js'
 import { ProfileBrand } from '../components/application/profile-brand.js'
-import { profileEventTitle, profileOrganiserTitle, profileOrganisation } from '../lib/profile-presentation.js'
+import {
+  profileEventTitle,
+  profileOrganiserTitle,
+  profileOrganisation,
+} from '../lib/profile-presentation.js'
 
 const primaryNavItems = [
   {
@@ -51,12 +55,20 @@ export function OrganiserMinimalFrame({
   return (
     <ApplicationFrame
       print_title={profileEventTitle(profile)}
+      print_brand={
+        <div className="flex items-center gap-2">
+          <ProfileBrand branding={profile?.branding} className="size-9 object-contain" />
+          <span>{profileOrganiserTitle(profile)}</span>
+        </div>
+      }
       brand={
         <OrganiserLink
           href={organiserHomePath}
           className="inline-flex min-h-11 items-center gap-2 text-lg font-heading"
         >
-          <ProfileBrand branding={profile?.branding} className="size-9 shrink-0 rounded-base border-2 border-border bg-main-soft p-1 shadow-sm object-contain" />
+          <span className="grid size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
+            <ProfileBrand branding={profile?.branding} className="size-7 object-contain" />
+          </span>
           {profileOrganiserTitle(profile)}
         </OrganiserLink>
       }
@@ -69,8 +81,10 @@ export function OrganiserMinimalFrame({
 export function OrganiserFrame({
   children,
   profile,
+  print_generated_at: printGeneratedAt,
 }: {
   children: ReactNode
+  print_generated_at?: Date
   profile?: ProfilePresentation
 }) {
   const { state } = useOrganiser()
@@ -92,7 +106,14 @@ export function OrganiserFrame({
   return (
     <ApplicationFrame
       print_title={profileEventTitle(profile)}
+      print_brand={
+        <div className="flex items-center gap-2">
+          <ProfileBrand branding={profile?.branding} className="size-9 object-contain" />
+          <span>{profileOrganiserTitle(profile)}</span>
+        </div>
+      }
       print_footer={{
+        generated_at: printGeneratedAt,
         revision: state.head_seq,
         drafts: draftCount(state),
         time_zone: activeProfile.meta.timezone,
@@ -104,12 +125,16 @@ export function OrganiserFrame({
           href={organiserHomePath}
           className="inline-flex min-h-11 items-center gap-2 text-lg font-heading"
         >
-          <ProfileBrand branding={profile?.branding} className="size-9 shrink-0 rounded-base border-2 border-border bg-main-soft p-1 shadow-sm object-contain" />
+          <span className="grid size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
+            <ProfileBrand branding={profile?.branding} className="size-7 object-contain" />
+          </span>
           {profileOrganiserTitle(profile)}
         </OrganiserLink>
       }
       role="Organisationsteam"
-      brand_subtitle={[profileOrganisation(profile), "Organisationsteam"].filter(Boolean).join(" · ")}
+      brand_subtitle={[profileOrganisation(profile), 'Organisationsteam']
+        .filter(Boolean)
+        .join(' · ')}
       primary_navigation={<PrimaryNavigation items={primaryNavItems} />}
       controls={
         <>

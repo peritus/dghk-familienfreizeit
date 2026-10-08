@@ -110,11 +110,14 @@ test('organisers open workshop choice, close the area, and reopen it', async ({ 
   await page.goto('/organiser/workshops')
   await expect(track(page).nth(1)).toHaveAttribute('aria-current', 'step')
 
+  await page.getByRole('button', { name: 'Alle Schritte' }).click()
   await page.getByRole('button', { name: 'Wahl öffnen' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Wahl öffnen' }).click()
-  await expect(page.getByText('Die Workshopwahl ist geöffnet.')).toBeVisible()
+  await expect(page.getByText(/bis zum Festlegen weiter ändern/)).toBeVisible()
   await expect(track(page).nth(2)).toHaveAttribute('aria-current', 'step')
 
+  await page.getByRole('button', { name: 'Festlegen' }).click()
+  await page.getByRole('button', { name: 'Hinweise zur Kenntnis genommen' }).click()
   await page.getByRole('button', { name: 'Festlegen' }).click()
   const review = page.getByRole('alertdialog')
   await expect(review.getByRole('heading', { name: 'Workshops festlegen?' })).toBeVisible()
@@ -146,6 +149,7 @@ test('every workshop stepper caller renders the same track', async ({ page }) =>
   ]) {
     await page.goto(path)
     await expect(track(page).first()).toBeVisible()
+    await page.getByRole('button', { name: 'Alle Schritte' }).click()
     tracks.push(
       await track(page).evaluateAll((items) =>
         items.map((item) => `${item.textContent}|${item.getAttribute('aria-current') ?? ''}`),

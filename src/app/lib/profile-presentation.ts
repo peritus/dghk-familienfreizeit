@@ -38,8 +38,12 @@ export function profileEventDetails(
 }
 
 export function profileOrganiserTitle(profile: ProfilePresentation | undefined): string {
-  return localizedProfileText(profile, profile?.meta.event?.organiser_title) || profileEventTitle(profile)
+  return (
+    localizedProfileText(profile, profile?.meta.event?.organiser_title) ||
+    profileEventTitle(profile)
+  )
 }
+
 export function profileOrganisation(profile: ProfilePresentation | undefined): string {
   return localizedProfileText(profile, profile?.meta.event?.organisation)
 }

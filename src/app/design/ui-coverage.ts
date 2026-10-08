@@ -5,7 +5,9 @@ export type UiCoverageEntry = {
   /** The renderable the story shows, never the story file itself. */
   source: string
   media?: 'screen' | 'print'
+  viewport?: { width: number; height: number }
   screenshot_target?: 'root' | 'dialog'
+  ready_selector?: string
 } & (
   | { snapshot?: true }
   | {
@@ -23,10 +25,87 @@ export type UiCoverageEntry = {
  * exemption.
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
-  { id: 'shared-primitives-workflowstepper--states', area: 'component', subject: 'Generic workflow disclosure and terminal states', source: 'src/app/components/shared/ui/workflow-stepper.tsx' },
-  { id: 'shared-primitives-workflowstepper--print', area: 'component', subject: 'Expanded workflow printing', source: 'src/app/components/shared/ui/workflow-stepper.tsx', media: 'print' },
-  { id: 'shared-primitives-stats-strip--filter', area: 'component', subject: 'Actionable metric filter', source: 'src/app/components/shared/ui/stats-strip.tsx' },
-  { id: 'shared-primitives-segmentedcontrol--filter', area: 'component', subject: 'Collection filter', source: 'src/app/components/shared/ui/segmented-control.tsx' },
+  {
+    id: 'application-organiser-area-closing--advisory-actions',
+    area: 'application',
+    subject: 'Workshop advisory finalisation actions',
+    source: 'src/app/organiser/components/area-closing.tsx',
+  },
+  {
+    id: 'application-organiser-area-closing--advisory-review',
+    area: 'application',
+    subject: 'Workshop inline advisory review',
+    source: 'src/app/organiser/components/area-closing.tsx',
+    ready_selector: '[data-slot="warning-review"]',
+  },
+  {
+    id: 'screens-organiser-workshops--width-390',
+    area: 'screen',
+    subject: 'Workshop overview at 390px',
+    source: 'src/app/organiser/screens/workshops.tsx',
+    viewport: { width: 390, height: 900 },
+  },
+  {
+    id: 'screens-organiser-workshops--width-640',
+    area: 'screen',
+    subject: 'Workshop overview at 640px',
+    source: 'src/app/organiser/screens/workshops.tsx',
+    viewport: { width: 640, height: 900 },
+  },
+  {
+    id: 'screens-organiser-workshops--width-768',
+    area: 'screen',
+    subject: 'Workshop overview at 768px',
+    source: 'src/app/organiser/screens/workshops.tsx',
+    viewport: { width: 768, height: 900 },
+  },
+  {
+    id: 'screens-organiser-workshops--width-1024',
+    area: 'screen',
+    subject: 'Workshop overview at 1024px',
+    source: 'src/app/organiser/screens/workshops.tsx',
+    viewport: { width: 1024, height: 900 },
+  },
+  {
+    id: 'screens-organiser-workshops--width-1280',
+    area: 'screen',
+    subject: 'Workshop overview at 1280px',
+    source: 'src/app/organiser/screens/workshops.tsx',
+    viewport: { width: 1280, height: 900 },
+  },
+  {
+    id: 'screens-organiser-workshops--print',
+    area: 'screen',
+    subject: 'Workshop overview printing',
+    source: 'src/app/organiser/screens/workshops.tsx',
+    media: 'print',
+  },
+
+  {
+    id: 'shared-primitives-workflowstepper--states',
+    area: 'component',
+    subject: 'Generic workflow disclosure and terminal states',
+    source: 'src/app/components/shared/ui/workflow-stepper.tsx',
+  },
+  {
+    id: 'shared-primitives-workflowstepper--print',
+    area: 'component',
+    subject: 'Expanded workflow printing',
+    source: 'src/app/components/shared/ui/workflow-stepper.tsx',
+    media: 'print',
+  },
+  {
+    id: 'shared-primitives-stats-strip--filter',
+    area: 'component',
+    subject: 'Actionable metric filter',
+    source: 'src/app/components/shared/ui/stats-strip.tsx',
+  },
+  {
+    id: 'shared-primitives-segmentedcontrol--filter',
+    area: 'component',
+    subject: 'Collection filter',
+    source: 'src/app/components/shared/ui/segmented-control.tsx',
+  },
   {
     id: 'shared-patterns-screen-layout--print',
     area: 'component',

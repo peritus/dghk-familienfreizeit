@@ -85,8 +85,7 @@ for (const route of organiserRouteDefinitions) {
       'screen-secondary-navigation',
       'screen-header',
       'screen-notices',
-      'screen-workflow',
-      'screen-summary',
+      'screen-status',
       'screen-tertiary-navigation',
       'screen-content',
       'screen-footer',
@@ -116,7 +115,8 @@ test('public, login, and unknown screens print through the shared frame', async 
     await page.emulateMedia({ media: 'screen' })
     await page.goto(route)
     await expect(page.getByRole('heading', { name: 'Ansicht laden' })).toHaveCount(0)
-    await expect(page.locator('[data-slot="screen-layout"]')).toHaveCount(1)
+    if (route !== '/') await expect(page.locator('[data-slot="screen-layout"]')).toHaveCount(1)
+    await expect(page.locator('[data-slot="application-frame"]')).toHaveCount(1)
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
     await page.emulateMedia({ media: 'print', colorScheme: 'dark' })
     await expect(page.locator('[data-slot="print-identity"]')).toBeVisible()
@@ -145,7 +145,7 @@ test('dashboard, families, and family detail form one working navigation chain',
   await expect(page).toHaveURL(new RegExp(`${familyRoute}$`))
   await expect(page.getByRole('heading', { name: 'Foo Familie' })).toBeVisible()
 
-  await page.getByRole('link', { name: '← Familien' }).click()
+  await page.getByRole('link', { name: 'Familien', exact: true }).click()
   await expect(page).toHaveURL(/\/organiser\/families$/)
   await page.goBack()
   await expect(page).toHaveURL(new RegExp(`${familyRoute}$`))
@@ -173,7 +173,7 @@ test('accommodation parent redirects to inventory and workshop spaces links to s
 
   await page.goto('/organiser/workshops/spaces')
   await expect(page.getByRole('heading', { name: 'Räume und Slots' })).toBeVisible()
-  await page.getByRole('tab', { name: 'Slots' }).click()
+  await page.getByRole('link', { name: 'Slots', exact: true }).click()
   await expect(page).toHaveURL(/\/organiser\/workshops\/slots$/)
 })
 
