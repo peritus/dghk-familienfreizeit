@@ -23,6 +23,8 @@ export type UiCoverageEntry = {
  * exemption.
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
+  { id: 'shared-primitives-workflowstepper--states', area: 'component', subject: 'Generic workflow disclosure and terminal states', source: 'src/app/components/shared/ui/workflow-stepper.tsx' },
+  { id: 'shared-primitives-workflowstepper--print', area: 'component', subject: 'Expanded workflow printing', source: 'src/app/components/shared/ui/workflow-stepper.tsx', media: 'print' },
   { id: 'shared-primitives-stats-strip--filter', area: 'component', subject: 'Actionable metric filter', source: 'src/app/components/shared/ui/stats-strip.tsx' },
   { id: 'shared-primitives-segmentedcontrol--filter', area: 'component', subject: 'Collection filter', source: 'src/app/components/shared/ui/segmented-control.tsx' },
   {

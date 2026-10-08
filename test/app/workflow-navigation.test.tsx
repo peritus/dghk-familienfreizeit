@@ -6,6 +6,7 @@ import { WorkflowStepper } from '../../src/app/components/shared/ui/workflow-ste
 import { organiserPaths } from '../../src/organiser/routes.js'
 
 afterEach(() => {
+  window.localStorage.clear()
   cleanup()
   window.history.replaceState({}, '', '/')
 })
@@ -22,7 +23,7 @@ test('workflow stepper exposes the current mobile summary and can expand all ste
     />,
   )
 
-  const toggle = screen.getByRole('button', { name: 'Alle Schritte (2 von 3)' })
+  const toggle = screen.getByRole('button', { name: 'Alle Schritte' })
   expect(toggle.getAttribute('aria-expanded')).toBe('false')
   fireEvent.click(toggle)
   expect(screen.getByRole('button', { name: 'Weniger' }).getAttribute('aria-expanded')).toBe('true')
@@ -101,4 +102,17 @@ test('workshop allocation keeps the workshop area active across all three views'
   )
 
   expect(screen.getByRole('link', { name: 'Wünsche' }).getAttribute('aria-current')).toBe('page')
+})
+
+test('workflow disclosure persists independently for each organiser and survives unavailable storage', () => {
+  const steps = [{ id: 'review', label: 'Prüfen', state: 'current' as const }]
+  const { rerender } = render(<WorkflowStepper aria_label="Ablauf" steps={steps} storage_key="example.phase.expanded" storage_user="one" />)
+  fireEvent.click(screen.getByRole('button', { name: 'Alle Schritte' }))
+  expect(window.localStorage.getItem('one:example.phase.expanded')).toBe('true')
+  rerender(<WorkflowStepper aria_label="Ablauf" steps={steps} storage_key="example.phase.expanded" storage_user="two" />)
+  expect(screen.getByRole('button', { name: 'Alle Schritte' }).getAttribute('aria-expanded')).toBe('false')
+  const storage = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('unavailable') })
+  fireEvent.click(screen.getByRole('button', { name: 'Alle Schritte' }))
+  expect(screen.getByRole('button', { name: 'Weniger' }).getAttribute('aria-expanded')).toBe('true')
+  storage.mockRestore()
 })
