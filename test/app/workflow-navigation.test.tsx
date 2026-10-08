@@ -134,3 +134,27 @@ test('workflow disclosure persists independently for each organiser and survives
   expect(screen.getByRole('button', { name: 'Weniger' }).getAttribute('aria-expanded')).toBe('true')
   storage.mockRestore()
 })
+
+test('collapsed workflow row expands once and leaves its list semantic; expanded content is not a toggle', () => {
+  const changed = vi.fn()
+  const { container } = render(
+    <WorkflowStepper
+      aria_label="Ablauf"
+      steps={[{ id: 'review', label: 'Prüfen', state: 'current' }]}
+      on_expanded_change={changed}
+    />,
+  )
+  const compact = container.querySelector('.workflow-compact')!
+  expect(compact.getAttribute('role')).toBeNull()
+  expect(compact.getAttribute('tabindex')).toBeNull()
+  fireEvent.click(compact.querySelector('ol')!)
+  expect(changed).toHaveBeenCalledExactlyOnceWith(true)
+  expect(screen.getByRole('button', { name: 'Weniger' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('heading', { name: 'Nächster Schritt: Prüfen' }))
+  expect(changed).toHaveBeenCalledTimes(1)
+  fireEvent.click(screen.getByRole('button', { name: 'Weniger' }))
+  expect(changed).toHaveBeenLastCalledWith(false)
+  changed.mockClear()
+  fireEvent.click(screen.getByRole('button', { name: 'Alle Schritte' }))
+  expect(changed).toHaveBeenCalledExactlyOnceWith(true)
+})

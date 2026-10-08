@@ -1,3 +1,4 @@
+import { expect, userEvent, within } from 'storybook/test'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { WorkflowStepper } from './workflow-stepper.js'
 
@@ -98,3 +99,29 @@ export const States: Story = {
 }
 
 export const Print: Story = { ...States, parameters: { layout: 'fullscreen' } }
+
+export const CollapsedHover: Story = {
+  args: { expanded: false },
+  play: async ({ canvasElement }) => {
+    await userEvent.hover(within(canvasElement).getByRole('list'))
+  },
+}
+
+export const RowInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('list'))
+    await expect(canvas.getByRole('button', { name: 'Weniger' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Weniger' }))
+    const toggle = canvas.getByRole('button', { name: 'Alle Schritte' })
+    toggle.focus()
+    await userEvent.keyboard('{Enter}')
+    await expect(canvas.getByRole('button', { name: 'Weniger' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+  },
+}

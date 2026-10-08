@@ -27,7 +27,7 @@ hierarchy.
 ```text
 ApplicationFrame
 +------------------------------------------------------------------+
-| Brand / role       PrimaryNavigation            Save / account    |
+| Brand / role       PrimaryNavigation            Save / session    |
 +------------------------------------------------------------------+
 | SecondaryNavigation                                              |
 | ScreenHeader: eyebrow, H1, description       [screen-wide action]  |
@@ -212,7 +212,7 @@ the committed PNG baseline.
 
 ## Save-status control
 
-The organiser app bar's save-status button (`src/app/organiser/save-status.tsx`)
+From 48rem, the organiser app bar's save-status button (`src/app/organiser/save-status.tsx`)
 shows one of four looks -- plain white (saved), white with a provisional pattern
 (draft mode, empty), accent-filled with the same pattern (draft mode, pending, with a
 count badge), or red (a save that failed) -- using Lucide `check`, `pencil`, and
@@ -360,3 +360,55 @@ Print resets responsive role values and retains the dedicated point-size rules.
 |---|---|---|---|
 | Type and navigation | Compact roles and geometry | Wider roles | Wider roles |
 | Header controls | Compact menu sheet | Compact modal popover | Save button and Abmelden |
+
+### Compact presentation below 48rem: menu toggle and menu
+
+The organiser header uses the existing save button and Abmelden from 48rem.
+Below it, [HeaderMenu](../../src/app/organiser/header-menu.tsx) presents the same
+organiser state and [save handlers](../../src/app/organiser/save-controls.ts) in one
+40px status pill. The controls icon opens general controls, with no account name,
+person icon or account wording. The title and subtitle truncate within the space
+left by the fixed-width controls.
+
+```text
+< 48rem: [logo] Title …     [Save / retry when needed] [state | controls]
+                 Subtitle …
+          Primary navigation
+          Section navigation
+```
+
+| Save state | Status segment | Border | Adjacent action |
+|---|---|---|---|
+| Saved automatically | White, check | Solid | None |
+| Saving | White, spinner and polite announcement | Solid | None |
+| Drafts pending | Soft orange, pencil and count | Dashed | Speichern |
+| Draft mode empty | Soft orange, pencil | Dashed | None |
+| Save error | Red, exclamation | Solid | Wiederholen |
+
+The pill's label includes Speichern, Abmelden and the current state; its trigger
+exposes `aria-haspopup="dialog"` and `aria-expanded`. Reduced motion keeps the
+spinner and pill stationary. One native radiogroup selects Automatisch speichern
+or Entwurfsmodus, with the existing explanations. Leaving draft mode with pending
+changes opens the same safe save/discard/cancel decision; discarding also requires
+confirmation. Saving or discarding all drafts still returns to automatic mode.
+Save and retry call the existing apply pipeline. A successful apply records its
+actual completion time in browser-session UI metadata; the menu omits the timestamp
+before that first successful save. It is not persisted domain state.
+
+Below 40rem the canonical dialog presents a full-width bottom sheet, with a 14px
+top radius, 40×4px handle, a maximum height of 85dvh, scrolling and safe-area bottom
+padding. Its backdrop is translucent. Between 40rem and 48rem it is a 340px modal
+popover under the header, with a transparent outside-click backdrop. Both have the
+same labelled save and session groups and no placeholder groups. Base UI moves
+focus into the modal, traps it, locks background scrolling and closes on Escape,
+X or outside click, returning focus to the trigger. Crossing 48rem closes the
+compact dialog. Printing hides these controls and overlays.
+
+### Collapsed workflow pointer convenience
+
+Clicking anywhere on a collapsed `WorkflowStepper` row expands the card. Its
+pointer cursor, paper hover surface and tinted toggle expose that affordance.
+The existing native Alle Schritte button remains the sole keyboard control with
+`aria-expanded` and `aria-controls`; the row has no button role or tab stop and
+its ordered list stays a list. Button clicks toggle exactly once. Expanded
+content is not a click target: only Weniger collapses it. Print remains expanded.

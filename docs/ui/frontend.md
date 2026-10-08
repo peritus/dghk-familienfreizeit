@@ -125,12 +125,12 @@ handled.
 
 One app bar (brand, role, navigation, and the save-status control) covers every
 `/organiser*` route; there is no separate site shell header or boxed page header
-there. The save-status control is a single persistent button in the app bar with a
-popover, not a toggle that disappears: it shows one of **Gespeichert**,
-**Entwurfsmodus** (empty or with a pending count), or **Speichern fehlgeschlagen** at
-a glance, and opens a popover with the same state, a draft-mode switch, and the
-save/discard actions. See [design system](design-system.md#save-status-control) for
-the states, icons, and the provisional-state (blueprint) marking.
+there. From 48rem the established save-status button and popover remain beside
+Abmelden. Below 48rem a compact status pill opens the same save and session controls
+in a modal sheet (below 40rem) or anchored modal popover. Both presentations read
+one organiser reducer and share save, mode and safe confirmation handlers. See
+[design system](design-system.md#compact-presentation-below-48rem-menu-toggle-and-menu)
+for the responsive presentation, states and focus behavior.
 
 Immediate mode is the session default; the draft-mode switch inside the popover turns
 on **Entwurfsmodus**, which collects changes as browser-local drafts until the person
@@ -214,3 +214,8 @@ projections and event commands are unaffected. Browser route checks verify one
 frame/H1, uniform width, ordered screen slots, narrow overflow and print visibility.
 The populated participation test additionally verifies landscape tables and
 multi-page PDF output; Storybook provides a generic print composition.
+
+A collapsed workflow row expands on pointer click; the native Alle Schritte toggle
+remains the sole keyboard control. Expanded content and module-owned actions keep
+their existing interaction boundaries. Responsive typography uses the shared
+[role tokens](design-system.md#responsive-typography-roles) across current consumers.

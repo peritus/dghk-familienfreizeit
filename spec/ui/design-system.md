@@ -266,13 +266,3 @@ reuse it before proposing another primitive. Search/selection patterns beyond th
 current entity picker, family account menus, compact mobile sheets and additional
 feedback controls remain future host requirements; choose their implementation
 from actual needs and verify their accessible behavior.
-
-## Compact organiser presentation
-
-The [frozen design references](../html-prototypes/workshops-redesign-delta/delta-1-todo.md) define three shared presentation requirements:
-
-- Below 48rem, use one status pill for a save/session dialog: a bottom sheet below 40rem and an anchored modal popover above it. Keep saved, saving, draft-empty, draft-pending and error states visible. Share existing command and confirmation logic with the desktop save control. Use a real successful-save timestamp, never a fixture timestamp.
-- Below 40rem, use role-based typography tokens with the specified smaller type and compact primary/secondary navigation. Keep running text at least 14px and captions at least 12px. Preserve desktop sizes, minimum touch heights, active navigation visibility and print typography.
-- Expand a collapsed workflow card when its row is clicked. Keep the native toggle as its sole keyboard control; do not make the row or list into another button. Expanded content retains existing behavior.
-
-Verified behavior belongs in [design-system documentation](../../docs/ui/design-system.md).

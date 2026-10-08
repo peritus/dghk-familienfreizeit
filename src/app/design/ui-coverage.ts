@@ -26,6 +26,19 @@ export type UiCoverageEntry = {
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
   {
+    id: 'shared-primitives-workflowstepper--collapsed-hover',
+    area: 'component',
+    subject: 'Collapsed workflow whole-row hover',
+    source: 'src/app/components/shared/ui/workflow-stepper.tsx',
+  },
+  {
+    id: 'shared-primitives-workflowstepper--row-interaction',
+    area: 'component',
+    subject: 'Collapsed workflow pointer and keyboard interaction',
+    source: 'src/app/components/shared/ui/workflow-stepper.tsx',
+  },
+
+  {
     id: 'application-organiser-header-menu--saved-390',
     area: 'application',
     subject: 'Compact header saved at 390px',

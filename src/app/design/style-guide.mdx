@@ -1,3 +1,4 @@
+import * as HeaderMenuStories from '../organiser/header-menu.stories'
 import * as TokenStories from './tokens.stories'
 import * as ScreenLayoutStories from '../components/shared/ui/screen-layout.stories'
 import { Canvas, Meta, Stories, Title } from '@storybook/addon-docs/blocks'
@@ -235,3 +236,18 @@ controls keep their touch height. Running text has a 14px floor and captions a
 
 <Canvas of={TokenStories.PhoneTypography} />
 <Canvas of={TokenStories.TabletTypography} />
+
+## Compact organiser controls
+
+Below 48rem the shared organiser frame uses a status pill for save/session controls.
+Its canonical dialog is a bottom sheet below 40rem and a modal popover above it.
+The desktop save UI, reducer and confirmations retain their established behavior.
+The menu uses shared commands and one state source; successful-save time is real
+session metadata. No account identity or placeholder controls appear.
+
+<Canvas of={HeaderMenuStories.Saved390} />
+<Canvas of={HeaderMenuStories.SheetPending} />
+<Canvas of={HeaderMenuStories.PopoverAutomatic} />
+
+The whole collapsed workflow row expands on pointer click. Alle Schritte remains
+the only keyboard control, and expanded actions are independent of the toggle.

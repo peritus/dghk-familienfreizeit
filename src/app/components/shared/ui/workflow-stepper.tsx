@@ -61,10 +61,16 @@ export function WorkflowStepper({
   const toggleButton = (
     <button
       type="button"
-      className="workflow-toggle inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-base px-2 text-sm print:hidden"
+      className={cn(
+        'workflow-toggle inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-base px-2 text-sm print:hidden',
+        !expanded && 'hover:bg-main-soft group-hover:bg-main-soft',
+      )}
       aria-expanded={expanded}
       aria-controls={detailsId}
-      onClick={toggle}
+      onClick={(event) => {
+        event.stopPropagation()
+        toggle()
+      }}
     >
       <span className="sr-only sm:not-sr-only">{expanded ? 'Weniger' : 'Alle Schritte'}</span>
       <ChevronDown aria-hidden="true" className={cn('size-4', expanded && 'rotate-180')} />
@@ -93,8 +99,9 @@ export function WorkflowStepper({
       <div className="workflow-card rounded-base border-2 border-border bg-secondary-background">
         <div
           hidden={expanded}
+          onClick={expanded ? undefined : toggle}
           className={cn(
-            'workflow-compact flex min-w-0 items-center gap-2 px-4 py-2.5 print:hidden',
+            'workflow-compact group flex min-w-0 cursor-pointer items-center select-none hover:bg-paper gap-2 px-4 py-2.5 print:hidden',
             expanded && 'hidden',
           )}
         >
