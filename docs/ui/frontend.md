@@ -5,7 +5,7 @@ The route table is:
 
 | Route | Implemented behavior |
 |---|---|
-| `/` | Public organiser landing with organiser login link |
+| `/` | Profile-configured public occasion landing and actions |
 | `/login` | Public organiser magic-link login |
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with header-dialog invitation staging |
@@ -112,9 +112,12 @@ for the four sibling topics. The person picker inside Personen, Essen, and
 Workshops is a nested selector for the current family and does not change the
 global navigation hierarchy. Topic and person ids are opaque route segments.
 
-All current screens, including public and recovery states, use `ScreenLayout` and
-`ScreenHeader`. The [design system](design-system.md#screen-hierarchy) defines
-the ordered slots, shared frame, navigation levels and collection ownership. Overview metrics use `StatsStrip`; quiet properties use
+Workflow and recovery screens use `ScreenLayout` and `ScreenHeader`. The public
+root route renders `OccasionLanding`, the branded landing archetype documented as
+an exception in the [design system](design-system.md#screen-hierarchy). It stays
+inside the shared application frame and reads its localized copy and route/HTTPS
+actions from the active profile. The screen hierarchy defines the ordered slots,
+navigation levels and collection ownership. Overview metrics use `StatsStrip`; quiet properties use
 `Tag`; state and attention labels use `Badge`; completed or empty-success states
 use `SuccessState`. Removal and retirement actions use the shared
 `DestructiveActionDialog`, with dependent entities blocked inline until they are

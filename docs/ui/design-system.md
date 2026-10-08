@@ -15,6 +15,14 @@ outstanding; the same composition contract applies when those screens are built.
 below the app bar. Optional slots collapse; callers supply content rather than
 recreating spacing, widths or heading markup.
 
+`OccasionLanding` is the public branded landing archetype and an intentional
+exception to `ScreenLayout` and `ScreenHeader`. It uses a compact hero composition
+to establish the occasion's identity and present its configured public actions.
+It remains inside `ApplicationFrame`, uses the shared theme and button tokens, and
+keeps the single-page H1, responsive layout, keyboard access, and browser-print
+contract. Other workflow and recovery screens continue to use the shared screen
+hierarchy.
+
 ```text
 ApplicationFrame
 +------------------------------------------------------------------+
@@ -156,8 +164,14 @@ buttons and whole-card links, with an `::after` overlay that keeps the original 
 area clickable while the element slides 4px into its shadow on press. Information-only
 cards and navigation links stay flat.
 
-The public organiser landing uses a responsive hero card with a prominent organiser login
-action and a small inline drafting-compass illustration.
+`OccasionLanding` is reusable across occasion profiles. Each profile supplies
+localized heading and introduction copy plus an ordered list of public actions.
+Actions may navigate to an internal route or an HTTPS URL, and each chooses primary
+or secondary emphasis. External links open in the current tab. The landing keeps
+the occasion-branded hero card and decorative illustration, with its action list
+forming the public entry points for that occasion. Add a family login or schedule
+action through profile configuration when those destinations are implemented; the
+landing component does not create routes or domain behavior.
 
 Workshop screens reuse the same neobrutalist language at every viewport width:
 thick semantic outlines, offset shadows for actionable controls, flat information

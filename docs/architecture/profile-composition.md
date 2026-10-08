@@ -5,6 +5,13 @@ The active profile is a statically composed TypeScript value exported from
 `defineOccasionProfile`, which validates occasion metadata, localized trait
 vocabulary, aliases, default values, and deterministic trait evaluators.
 
+`meta.public_landing` supplies the public occasion landing's localized heading
+and introduction and its ordered actions. Each action has a localized label, an
+`primary` or `secondary` emphasis, and either an internal route or an HTTPS URL.
+This is presentation configuration: it selects links and their prominence but
+does not define runtime behavior or add routes. External actions open in the
+current tab.
+
 The executable `familienfreizeit-2027` profile supplies the kernel `role` trait,
 the room-inventory profile traits and capabilities, and selects the accommodation,
 family-preferences, and workshop planning modules. Family-facing trait metadata,
