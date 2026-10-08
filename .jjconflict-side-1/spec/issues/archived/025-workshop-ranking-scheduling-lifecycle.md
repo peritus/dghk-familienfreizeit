@@ -66,10 +66,10 @@ per time slot” and `per: 'slot'`
 `WorkshopAdded` requires a `slot_id`, and its `room_id` is a direct workshop
 field. The module therefore models the proposed activity and its scheduled
 offering as one object:
-[`official-workshops.md`](../../modules/official-workshops.md).
+[`official-workshops.md`](../../../docs/modules/official-workshops.md).
 The module's input likewise exposes only workshops that already have
 `slot_id` and `room_id`, and says that slots are already processed in
-chronological order ([solver boundary](../../modules/official-workshops.md#2-schedule-boundary)).
+chronological order ([solver boundary](../../../docs/modules/official-workshops.md)).
 There is no proposal state or “selected for ranking” state in the documented
 entity, event, or label model.
 
@@ -77,7 +77,7 @@ The current workshop module does distinguish `assigned`, `sign-up`, and
 `interest` participation modes, but that is a participation mode, not a
 proposal/ranking/scheduling lifecycle. Interest labels are live participation
 facts and can be set on several workshops in one existing slot
-([live participation](../../modules/official-workshops.md#1-dependencies-and-ownership)).
+([live participation](../../../docs/modules/official-workshops.md)).
 They do not provide the selected candidate set or a solver input representing
 the interest groups that must be separated.
 

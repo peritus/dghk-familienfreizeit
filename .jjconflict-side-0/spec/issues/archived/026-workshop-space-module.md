@@ -66,14 +66,14 @@ has no workshop-location stage ([room inventory solver input](../../modules/room
 ### Workshops currently depend on accommodation rooms
 
 The current module contract says that `workshops` enhances `room-inventory` when
-a workshop may be held in a room ([workshop dependencies](../../modules/official-workshops.md#1-dependencies-and-ownership)).
+a workshop may be held in a room ([workshop dependencies](../../../docs/modules/official-workshops.md)).
 `WorkshopAdded` and `WorkshopUpdated` carry `room_id`, and the field maps to the
 workshop's `held-in` label. The invariant requires a live room when
-`room-inventory` is selected ([workshop events](../../modules/official-workshops.md#1-dependencies-and-ownership)).
+`room-inventory` is selected ([workshop events](../../../docs/modules/official-workshops.md)).
 
 The workshop solver input repeats this coupling with `room_id` on each workshop,
 while the module contributes no scheduling stage of its own
-([workshop solver input](../../modules/official-workshops.md#2-schedule-boundary)).
+([workshop solver input](../../../docs/modules/official-workshops.md)).
 The result is a direct programme property, not an assignment produced by a
 workshop scheduling solver.
 

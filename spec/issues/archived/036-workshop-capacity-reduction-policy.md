@@ -51,7 +51,7 @@ an interim rule; it now cites D30 instead of this issue.
 
 ## Related files
 
-- [official workshops](../../modules/official-workshops.md)
+- [official workshops](../../../docs/modules/official-workshops.md)
 - [workshop attendance](../../modules/workshop-assignment.md)
 - `release control`
 - [workshops UI](../../ui/screens/workshops.md)
