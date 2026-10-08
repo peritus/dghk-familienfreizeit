@@ -266,3 +266,19 @@ reuse it before proposing another primitive. Search/selection patterns beyond th
 current entity picker, family account menus, compact mobile sheets and additional
 feedback controls remain future host requirements; choose their implementation
 from actual needs and verify their accessible behavior.
+
+## Shared presentation completion
+
+The approved organiser presentation uses the [design references](../html-prototypes/workshops-redesign/mockups/index.html) through the existing canonical components. Shared component changes apply to every existing applicable consumer. Workshop-specific composition belongs to workshop pages. Other pages gain no new page-specific components. The public occasion landing retains its existing archetype.
+
+Outstanding requirements:
+
+- Extend the existing tokens, typography, spacing, navigation, headers, metrics, collection controls and rows. Primary navigation uses folder tabs, section navigation a soft-orange band, and route-backed views links. Full orange marks primary actions; warnings use dashed borders. Type sizes are 12, 14, 16, 18, 20, 24 and 30 pixels, with smaller print typography defined independently.
+- Keep the draft-status control and its underlying reducer mechanics unchanged, including its popover, labels, provisional pattern, and transitions after saving or discarding. Its presentation is an explicit exception to the shared redesign.
+- Extend the existing workflow stepper into a collapsible card, collapsed by default, with user/page-scoped preference, horizontal and vertical tracks, a terminal checkmark, and an always-expanded print representation. The module remains the lifecycle authority.
+- Compose Workshops with inclusive audience counts, one shared unscheduled filter, actionable metrics, exception-only participation chips, structured occupancy and demand, consistent German plurals, profile-timezone times and open-ended age ranges.
+- Show audience/age mismatches as advisory warnings: adults with minimum age below 16, children with maximum age above 17. Allow these records. Oversubscription uses all ranked choices and is informational. Existing readiness blockers remain blocking.
+- Review advisory warnings inline only during each finalisation attempt; one organiser may acknowledge them for the team. Record the acknowledgement with the closing decision on the server. The complete plan remains in the main UI; confirmation does not repeat it. Voting remains open until finalisation, and reopening and repeated finalisation retain their current semantics.
+- Verify five viewport widths, dark appearance, reduced motion, keyboard behavior, storage failures and multi-page browser printing. Keep every component's stories, coverage entry, usage guidance and Markdown documentation aligned. Print the actual selected view/filter context and current workflow, without controls or fixed fixture pagination.
+
+Implemented requirements move to [design-system documentation](../../docs/ui/design-system.md) in the same change that verifies them.

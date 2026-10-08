@@ -17,6 +17,7 @@ components.
 
 | Artifact | Scope | Status |
 |---|---|---|
+| [Workshop redesign bundle](workshops-redesign/mockups/index.html) | Shared organiser presentation, workshop overview, responsive widths, workflow review states, and A4 references | Imported unchanged design reference; approved concepts follow the UI contract |
 | [accommodation-assignment-prototype-v13.html](accommodation-assignment-prototype-v13.html) | Accommodation assignment board, overview, room cards, fixed-assignment dialog, responsive and print states | Imported standalone snapshot (2026-09-30) |
 | [organiser-family-view-prototype-v9.html](organiser-family-view-prototype-v9.html) | Organiser family list and detail views for people, room wishes, food, and workshop choices | Imported standalone snapshot (2026-10-03) |
 | [workshops-prototype-v16.html](workshops-prototype-v16.html) | Workshop organisation, choice, assignment, and list views | Imported standalone snapshot (2026-09-29) |
