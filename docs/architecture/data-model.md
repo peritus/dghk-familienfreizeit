@@ -178,9 +178,11 @@ deleted.
 
 ## Limits
 
-Named per-kind entity accessors, generic labels, and their resolver semantics
-are specified in [outstanding data model](../../spec/architecture/data-model.md)
-§§1–3 and [labels and constraints](../../spec/architecture/labels-and-constraints.md)
-— the label shapes described there are only partially implemented today (see
-[event kernel](events.md) Limits). No real module exists yet to select and
-exercise the entity-kind mechanism above outside tests.
+Some generic label, resolver, and capacity requirements remain in the
+[outstanding data model](../../spec/architecture/data-model.md) and
+[labels and constraints](../../spec/architecture/labels-and-constraints.md); the
+label shapes there are only partially implemented today (see [event kernel](events.md)
+Limits). The derived world exposes `entities_by_kind`, not parallel top-level
+collections such as `world.rooms`. Selected room-inventory and workshop modules
+exercise typed entity kinds in the runtime; their verified views are documented
+in [room inventory](../modules/room-inventory.md) and the workshop module pages.

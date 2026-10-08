@@ -5,10 +5,11 @@ authentication foundation, profile composition, generic labels, fixed resolver
 operators and `derive(events, config)`, the organiser host with kernel family
 surfaces, profile-driven organiser family controls, room inventory, workshop
 planning, and deterministic assignment business logic. The room-assignment board
-and workshop review surfaces are implemented organiser projections. Family
-authentication, family-facing responses, generic reports, and release
-communication remain future work; workshop family projections are separate from
-the organiser planning slice.
+and workshop review surfaces are implemented organiser projections. The Worker
+also implements family magic-link authentication; `/api/family/view` currently
+returns only the authenticated family ID. The full family view and family-facing result projections,
+generic reports, and release communication remain future work; workshop family
+projections are separate from the organiser planning slice.
 
 ## Runtime and build
 

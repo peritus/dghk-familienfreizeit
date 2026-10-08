@@ -42,6 +42,7 @@ Profile composition does not implement solver stages. The selected room-inventor
 and workshop modules contribute entity kinds, events, labels, typed summaries, world
 checks, solver stages, and organiser screens through the composed validation view.
 Room assignment and workshop planning each contribute deterministic solver output
-and review screens. Family authentication and family-facing response hosting
-remain in the outstanding milestone specifications; the organiser-side family
-controls are implemented from the same profile definitions.
+and review screens. The Worker resolves family principals and currently returns
+only the family ID from `/api/family/view`; the family application and its full
+privacy-projected response remain in the outstanding milestone specifications. Organiser-side
+family controls are implemented from the same profile definitions.

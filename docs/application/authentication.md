@@ -51,10 +51,12 @@ the runtime allowlist on every request. Family status is resolved from the
 current folded event world, so a family email change invalidates the old address
 without session cleanup.
 
-`/api/family/view` requires a family principal. Organiser API subroutes return
-JSON 401 to unauthenticated or non-organiser requests; the base `/api/organiser`
-route intentionally returns JSON 404 to conceal the organiser surface. `/api/me`
-exposes only the current principal kind and identity needed by the shell.
+`/api/family/view` requires a family principal and currently returns only
+`{ family_id }`; the family projection and family-facing application are not
+implemented. Organiser API subroutes return JSON 401 to unauthenticated or
+non-organiser requests; the base `/api/organiser` route intentionally returns
+JSON 404 to conceal the organiser surface. `/api/me` exposes only the current
+principal kind and identity needed by the shell.
 `POST /api/events` sets the verified actor server-side, requires a same-origin
 `Origin`, rejects stale heads, accepts at most 100 events per request, bounds
 request size and batch shape, rate-limits family writes, and permits family
@@ -75,4 +77,7 @@ must remain unset outside that demo. The local `dev-preview` task creates a
 temporary ignored `.dev.vars` file with the synthetic identity
 `demo-organiser@example.invalid`; it does not put these values in committed
 Wrangler configuration. Email delivery, family forms, and hosted secrets remain
-separate deployment work.
+separate deployment work. A family's mailbox is its authentication boundary:
+anyone who can use the shared mailbox can sign in, and a forwarded link can be
+redeemed once before its 15-minute expiry. The application does not provide
+per-person family accounts or prevent a recipient from forwarding a live link.

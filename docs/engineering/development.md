@@ -144,8 +144,9 @@ so a new checkout does not fail with `D1_ERROR: no such table: event`.
 `/api/health`
 checks the actual local D1 binding, returning `200 {"status":"ok"}` or a
 sanitized `503`. The Worker provides login, magic-link, principal, and
-organiser log/apply boundaries. `/` and `/login` are public organiser foundation
-routes; organiser routes require an organiser session. There is no family login route.
+organiser log/apply boundaries. `/` is the public organiser landing and the shared
+`/login` route accepts family and organiser identities; organiser routes require
+an organiser session. There is no separate family-facing application or login route.
 
 To exercise the organiser browser locally, run the preview and open
 `http://127.0.0.1:5173/login`. Submit `demo-organiser@example.invalid`, then
