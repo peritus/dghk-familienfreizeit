@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest'
 import { defineOccasionProfile } from '../../src/config/define.js'
 import { derive } from '../../src/events/fold.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
+import { prepareEventBatch } from '../../src/events/prepare.js'
+import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
 import {
   officialWorkshops,
   officialWorkshopsWorld,
@@ -16,7 +18,12 @@ import {
   workshopRankingsFromWorld,
   workshopRankingsWorld,
 } from '../../src/modules/workshop-rankings/index.js'
-import { workshopAssignment } from '../../src/modules/workshop-assignment/index.js'
+import {
+  workshopAssignment,
+  workshopReviewReadiness,
+  type WorkshopAssignmentSection,
+} from '../../src/modules/workshop-assignment/index.js'
+import type { WorkshopSchedulingSection } from '../../src/modules/workshop-scheduling/index.js'
 
 const profile = defineOccasionProfile({
   meta: {
@@ -201,6 +208,136 @@ describe('workshop domain events', () => {
     )
     expect(officialWorkshopsWorld(world).workshops).toHaveLength(0)
     expect(officialWorkshopsWorld(world).cancelled.map(({ id }) => id)).toEqual(['wks_ceramics'])
+  })
+
+  test('retirement removes the live workshop and preserves wishes, fixed decisions and prefix replay', () => {
+    const committed = [
+      ...baseEvents,
+      event(
+        'FamilyInvited',
+        { family_id: 'fam_a', email: 'a@example.test', display_name: 'A', locale: 'de' },
+        5,
+      ),
+      event(
+        'PersonAdded',
+        {
+          person_id: 'per_a',
+          family_id: 'fam_a',
+          given_name: 'Ada',
+          family_name: 'A',
+          age: 12,
+          role: 'child',
+        },
+        6,
+      ),
+      event(
+        'LabelSet',
+        {
+          entity_id: 'per_a',
+          key: 'prefers-workshop',
+          value: { workshop_id: 'wks_ceramics', rank: 1 },
+          strength: null,
+          note: null,
+        },
+        7,
+      ),
+      event('WorkshopAttendanceFixed', { person_id: 'per_a', workshop_ids: ['wks_ceramics'] }, 8),
+      event(
+        'LabelSet',
+        {
+          entity_id: 'per_a',
+          key: 'signed-up-for',
+          value: 'wks_ceramics',
+          strength: null,
+          note: null,
+        },
+        9,
+      ),
+      event(
+        'LabelSet',
+        {
+          entity_id: 'per_a',
+          key: 'interested-in',
+          value: 'wks_ceramics',
+          strength: null,
+          note: null,
+        },
+        10,
+      ),
+    ]
+    const before = derive(committed, profile.validation_view)
+    const retirement = event(
+      'WorkshopRetired',
+      { workshop_id: 'wks_ceramics', reason: 'Entfernt' },
+      11,
+    )
+    const { world: after, events: appended } = prepareEventBatch(
+      committed,
+      [retirement],
+      profile.validation_view,
+    )
+    expect(officialWorkshopsWorld(after).workshops).toEqual([])
+    expect(officialWorkshopsWorld(after).cancelled).toEqual([])
+    expect(after.entities_by_kind.workshop ?? []).toEqual([])
+    expect(after.labels_by_entity['wks_ceramics']).toBeUndefined()
+    expect(after.labels_by_entity['per_a']).toEqual(before.labels_by_entity['per_a'])
+
+    const contributions = composeSolverContributions(profile)
+    const plan = solve(buildSolverInput(after, contributions), contributions, {
+      build_revision: 'test',
+      compatibility_revision: 1,
+      event_date: profile.meta.starts_on,
+      profile,
+      seed: null,
+    })
+    expect((plan.sections['workshop-scheduling'] as WorkshopSchedulingSection).placements).toEqual(
+      [],
+    )
+    const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+    expect(attendance.assignments).toEqual([])
+    expect(attendance.fixed_violations).toContainEqual({
+      person_id: 'per_a',
+      workshop_id: 'wks_ceramics',
+      reasons: ['hard.cancellation'],
+    })
+    expect(attendance.unassigned.map(({ person_id }) => person_id)).toContain('per_a')
+    expect(
+      workshopReviewReadiness({ world: after, plan }).findings.some(
+        ({ id }) => id === 'workshop-assignment.fixed-invalid',
+      ),
+    ).toBe(true)
+    const prefix = [...committed, ...appended].slice(0, committed.length)
+    expect(officialWorkshopsWorld(derive(prefix, profile.validation_view))).toEqual(
+      officialWorkshopsWorld(before),
+    )
+  })
+
+  test('retirement cannot append a dangling resolver constraint', () => {
+    const committed = [
+      ...baseEvents,
+      event(
+        'LabelSet',
+        {
+          entity_id: 'ext_anna',
+          key: 'excludes',
+          value: 'wks_ceramics',
+          strength: 'required',
+          note: null,
+        },
+        5,
+      ),
+    ]
+    expect(() => prepareEventBatch(committed, [], profile.validation_view)).not.toThrow()
+    expect(() =>
+      prepareEventBatch(
+        committed,
+        [event('WorkshopRetired', { workshop_id: 'wks_ceramics', reason: null }, 6)],
+        profile.validation_view,
+      ),
+    ).toThrow(/kernel.dangling-reference/)
+    expect(
+      officialWorkshopsWorld(derive(committed, profile.validation_view)).workshops,
+    ).toHaveLength(1)
   })
 
   test('rejects overlapping or touching slots during replay', () => {
