@@ -1,47 +1,24 @@
-import type { ReactNode } from 'react'
+import { Children, type ReactNode } from 'react'
+import { cn } from '../../../lib/utils.js'
 
 export function CollectionList({ children }: { children: ReactNode }) {
-  return (
-    <div
-      data-slot="collection-list"
-      className="min-w-0 overflow-hidden rounded-base border-2 border-border bg-secondary-background [&>*+*]:border-t-2 [&>*+*]:border-border"
-    >
-      {children}
-    </div>
-  )
+  return <ul data-slot="collection-list" className="m-0 min-w-0 list-none overflow-hidden rounded-base border-2 border-border bg-secondary-background p-0 [&>*+*]:border-t-[1.5px] [&>*+*]:border-rule">
+    {Children.map(children, (child) => <li>{child}</li>)}
+  </ul>
 }
-
-export function CollectionRow({ children, action }: { children: ReactNode; action?: ReactNode }) {
-  return (
-    <article
-      data-slot="collection-row"
-      className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-5"
-    >
-      <div className="min-w-0 flex-1">{children}</div>
-      {action ? (
-        <div data-slot="row-actions" className="flex flex-wrap items-start gap-2 print:hidden">
-          {action}
-        </div>
-      ) : null}
-    </article>
-  )
+export function CollectionRow({ children, action, metric, id, className }: {
+  children: ReactNode; action?: ReactNode; metric?: ReactNode; id?: string; className?: string
+}) {
+  return <article data-slot="collection-row" id={id} tabIndex={id ? -1 : undefined}
+    className={cn('flex flex-wrap items-start gap-x-6 gap-y-3 p-4 sm:p-5', className)}>
+    <div className="min-w-0 flex-[999_1_320px]">{children}</div>
+    {metric ? <div data-slot="row-metric" className="w-full max-w-[260px] flex-[1_1_190px]">{metric}</div> : null}
+    {action ? <div data-slot="row-actions" className="ml-auto flex flex-none flex-wrap items-start gap-2 print:hidden">{action}</div> : null}
+  </article>
 }
-
 export function CompactMeta({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <p className="text-sm text-muted">
-      <strong className="text-foreground">{label}:</strong> {children}
-    </p>
-  )
+  return <p className="text-sm font-normal text-muted"><span>{label}</span> {children}</p>
 }
-
 export function RowActions({ children }: { children: ReactNode }) {
-  return (
-    <div
-      data-slot="row-actions"
-      className="flex flex-wrap items-start justify-end gap-2 print:hidden"
-    >
-      {children}
-    </div>
-  )
+  return <div data-slot="row-actions" className="flex flex-wrap items-start justify-end gap-2 print:hidden">{children}</div>
 }

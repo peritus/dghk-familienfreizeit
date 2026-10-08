@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StatsStrip } from './stats-strip.js'
 
@@ -21,4 +22,17 @@ export const DynamicColumns: Story = {
       />
     </div>
   ),
+}
+
+export const Filter: Story = {
+  args: { items: [] },
+  render: function Render() {
+    const [active, setActive] = useState(false)
+    return <StatsStrip items={[
+      { value: 24, label: 'Einträge' },
+      { value: 3, label: 'mit Hinweisen', filter: { active, onToggle: () => setActive(!active) } },
+      { value: 8, label: 'Ressourcen' },
+      { value: 2, label: 'Teams' },
+    ]} />
+  },
 }

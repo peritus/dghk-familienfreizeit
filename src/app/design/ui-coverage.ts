@@ -23,6 +23,8 @@ export type UiCoverageEntry = {
  * exemption.
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
+  { id: 'shared-primitives-stats-strip--filter', area: 'component', subject: 'Actionable metric filter', source: 'src/app/components/shared/ui/stats-strip.tsx' },
+  { id: 'shared-primitives-segmentedcontrol--filter', area: 'component', subject: 'Collection filter', source: 'src/app/components/shared/ui/segmented-control.tsx' },
   {
     id: 'shared-patterns-screen-layout--print',
     area: 'component',

@@ -152,25 +152,27 @@ export function CollectionSection({
   action,
   heading_level: headingLevel,
   controls,
+  label,
   children,
   className,
   id,
-}: SectionHeaderProps & { controls?: ReactNode; children: ReactNode }) {
+}: SectionHeaderProps & { label?: string; controls?: ReactNode; children: ReactNode }) {
   const generatedId = useId()
   const headingId = id ?? `collection-${generatedId}`
   return (
     <section
       data-slot="collection-section"
-      aria-labelledby={headingId}
+      aria-labelledby={title ? headingId : undefined}
+      aria-label={!title ? label : undefined}
       className={cn('min-w-0 space-y-4', className)}
     >
-      <SectionHeader
+      {title ? <SectionHeader
         id={headingId}
         title={title}
         description={description}
         action={action}
         heading_level={headingLevel}
-      />
+      /> : action ? <div data-slot="collection-actions">{action}</div> : null}
       {controls ? (
         <div data-slot="collection-controls" className="print:hidden">
           {controls}

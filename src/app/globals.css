@@ -1265,3 +1265,15 @@ main:has(> .workshop-lists) {
     translate: none; box-shadow: var(--shadow);
   }
 }
+
+@media print {
+  [data-slot='stats-strip'] { display: flex; gap: 0; border: 1px solid black; }
+  [data-slot='stats-strip'] > * { flex: 1; border: 0; border-left: 1px solid black; border-radius: 0; padding: 2mm 3mm; background: white; }
+  [data-slot='stats-strip'] > :first-child { border-left: 0; }
+  [data-slot='stats-strip'] > [aria-pressed] { border-left-style: dashed; }
+  [data-slot='stat-value'] { font-size: 16pt; }
+  [data-slot='stats-strip'] p + p { font-size: 9pt; }
+  [data-slot='collection-row'] { break-inside: avoid; display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 3mm; padding: 2mm 0; }
+  [data-slot='collection-row']:not(:has([data-slot='row-metric'])) { display: block; }
+  [data-slot='row-metric'] { width: auto; max-width: none; }
+}
