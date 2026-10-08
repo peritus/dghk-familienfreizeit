@@ -17,9 +17,7 @@ before the report host exists.
 ## M8 — Workshop planning completion
 
 Specification coverage: [official workshops](modules/official-workshops.md),
-[workshop space](modules/workshop-space.md), [workshops](modules/workshops.md),
-[workshop scheduling](modules/workshop-scheduling.md),
-[workshop rankings](modules/workshop-rankings.md),
+[workshops](modules/workshops.md),
 [workshop attendance](modules/workshop-assignment.md), and [UI-12](ui/screens/workshops.md).
 
 The event-backed organiser foundation and deterministic automatic planner are
@@ -30,7 +28,8 @@ and so are the organiser sides of the [feature](../docs/architecture/features.md
 to the unresolved planning contract:
 
 - add organiser authoring for workshop cancellation through the existing
-  event-backed workshop workflow;
+  event-backed workshop workflow, with a labelled history view for cancelled
+  workshops;
 - complete finding and open-case review surfaces for current and prospective
   programme and allocation contexts, building on the delivered
   [participation matrix](../docs/ui/frontend.md#workshop-participation-overview)
@@ -49,23 +48,24 @@ Acceptance: organisers can inspect automatic and explicitly fixed placements
 and attendance, including finding and open-case outcomes; eligible rankings can
 be recorded before placement is known, with no-preference represented explicitly;
 every blocking outcome and allocation decision is traceable; cancellation is
-authorable; capacity changes follow D30; each workshop has at most one placement
+authorable and remains accessible in labelled history; capacity changes follow D30; each workshop has at most one placement
 and each person has at most one assignment per overlapping period; and every
 reconciled contract term has a recorded disposition.
 
 <a id="m10--family-access-and-release-control"></a>
 ## M10 — Family access
 
-Specification coverage: [authentication](application/authentication.md), [family view](application/family-view.md),
+Specification coverage: [authentication delivery intent](application/authentication.md#m10-delivery-intent), [family view](application/family-view.md),
 [family preferences](modules/family-preferences.md), [phases](architecture/phases.md) §6,
 [UI-01](ui/screens/login.md), [UI-02](ui/screens/login-link-invalid.md), [UI-03](ui/screens/family-preferences.md),
 [UI-04](ui/screens/family-assignment.md), and D14/D16/D24.
 
-- Implement invite-only family magic-link authentication, single-use tokens,
-  canonical identities, sessions, rate limits, privacy projections, and the
-  authentication delivery intent. M10 may print the link in development, but
-  does not render hosted messages, call provider transport, or record delivery
-  outcomes.
+- Create the authentication delivery intent for an eligible family login
+  request. Family magic-link authentication, single-use tokens, canonical
+  identities, sessions, rate limits, and request authorization are implemented
+  in the [current authentication foundation](../docs/application/authentication.md).
+  M10 may expose the link in development, but does not render hosted messages,
+  call provider transport, or record delivery outcomes.
 - Render the shared profile-driven controls for families through the same
   definitions and ordinary event path, including Zieltermin and closed-input
   notices and assignment cards.
@@ -108,8 +108,7 @@ reports, or notification previews:
 M10 is not complete until this gate is implemented and its adversarial tests
 pass.
 
-Acceptance: after M8, a family can request and redeem a single-use login link
-through the M10 authentication workflow, inspect its permitted derived
+Acceptance: after M8, an authenticated family can inspect its permitted derived
 information, correct its own display name, save permitted controls while an area
 is open, and see each area's result only once it is closed. The family projection
 privacy gate is implemented and its adversarial tests pass. Hosted invitation
@@ -169,7 +168,7 @@ or export paths.
 
 ## M14 — Authentication delivery and operational email
 
-Specification coverage: [authentication](application/authentication.md) §2,
+Specification coverage: [authentication delivery](application/authentication.md#m14-hosted-delivery),
 and [deployment](engineering/deployment.md) §§5–6.
 
 - Render invitation and reminder messages from M10 authentication delivery
@@ -188,7 +187,7 @@ deferred notification contributions.
 
 ## M15 — Deployment, security, and launch hardening
 
-Specification coverage: [deployment](engineering/deployment.md), [authentication](application/authentication.md),
+Specification coverage: [deployment](engineering/deployment.md), [authentication delivery](application/authentication.md#m15-organiser-perimeter),
 [testing](engineering/testing.md) §§5–8, [translation guidelines](ui/german-translation-guidelines.md),
 and cross-cutting frontend requirements.
 
