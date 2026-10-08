@@ -5,7 +5,7 @@ import { ChoiceField } from '../../components/shared/ui/field.js'
 import { ActionableNotice } from '../../components/shared/ui/notice.js'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { buttonVariants } from '../../components/shared/ui/button.js'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { randomIdPart } from '../ids.js'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
@@ -113,19 +113,30 @@ function dateTimeLocal(value: string): string {
 
 function WorkshopRetireAction({
   label,
+  aria_label: ariaLabel,
   title,
   description,
+  confirm_label: confirmLabel,
   onConfirm,
 }: {
   label: string
+  aria_label?: string
   title: string
   description: string
+  confirm_label?: string
   onConfirm: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const trigger = useRef<HTMLButtonElement>(null)
   return (
     <>
-      <Button size="sm" variant="danger" onClick={() => setOpen(true)}>
+      <Button
+        ref={trigger}
+        size="sm"
+        variant="danger"
+        aria-label={ariaLabel}
+        onClick={() => setOpen(true)}
+      >
         {label}
       </Button>
       <DestructiveActionDialog
@@ -133,6 +144,13 @@ function WorkshopRetireAction({
         onOpenChange={setOpen}
         title={title}
         description={description}
+        confirm_label={confirmLabel}
+        final_focus={() => {
+          if (trigger.current?.isConnected) return trigger.current
+          const heading = document.querySelector<HTMLElement>('h1')
+          if (heading) heading.tabIndex = -1
+          return heading
+        }}
         onConfirm={() => {
           onConfirm()
           setOpen(false)
@@ -917,17 +935,34 @@ export function Workshops({
                     },
                   }}
                   action={
-                    <Button
-                      size="sm"
-                      variant="neutral"
-                      onClick={() => {
-                        setEditor(workshop.id)
-                        setError(null)
-                      }}
-                    >
-                      Bearbeiten
-                      <span className="sr-only">: {workshop.title}</span>
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="neutral"
+                        onClick={() => {
+                          setEditor(workshop.id)
+                          setError(null)
+                        }}
+                      >
+                        Bearbeiten
+                        <span className="sr-only">: {workshop.title}</span>
+                      </Button>
+                      <WorkshopRetireAction
+                        label="Löschen"
+                        aria_label={`Workshop löschen: ${workshop.title}`}
+                        title={`Workshop löschen: ${workshop.title}?`}
+                        description="Der Workshop wird aus dem aktuellen Programm entfernt. Bereits erfasste Wünsche und Entscheidungen bleiben erhalten. Prüfe anschließend die offenen Fälle unter Wünsche · Verlauf."
+                        confirm_label="Ja, löschen"
+                        onConfirm={() =>
+                          stage([
+                            draft(state.principal_email ?? '', 'WorkshopRetired', {
+                              workshop_id: workshop.id,
+                              reason: 'Organisatorisch entfernt',
+                            }),
+                          ])
+                        }
+                      />
+                    </>
                   }
                 />
               ))}

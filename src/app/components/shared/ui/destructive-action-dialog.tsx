@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +23,7 @@ export function DestructiveActionDialog({
   description,
   confirm_label: confirmLabel = 'Ja, entfernen',
   cancel_label: cancelLabel = 'Behalten',
+  final_focus: finalFocus,
   onConfirm,
 }: {
   open: boolean
@@ -31,11 +32,12 @@ export function DestructiveActionDialog({
   description: ReactNode
   confirm_label?: string
   cancel_label?: string
+  final_focus?: ComponentProps<typeof AlertDialogContent>['finalFocus']
   onConfirm: () => void
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent finalFocus={finalFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

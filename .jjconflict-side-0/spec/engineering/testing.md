@@ -1,0 +1,512 @@
+# Testing
+
+Testing is layered like the application. Generic module contract tests prove
+reusable behavior; each occasion profile supplies fixtures, golden plans, trait
+validation cases, and enabled-module integration cases. A profile never needs
+tests for modules it did not select.
+
+Vitest with `@cloudflare/vitest-pool-workers`, which runs tests inside `workerd`
+against a real D1 instance rather than a mock.
+
+The testing effort is deliberately lopsided. The solver gets most of it, because
+the solver is where a bug produces a wrong answer that looks right. API routes and
+screens get smoke tests, because a bug there produces a 500 that someone notices
+immediately.
+
+### Target-date and closing coverage
+
+Family-preference tests cover the accommodation and workshop phases independently.
+They verify that the phase view reports open/late status from an injected `now`,
+displays the matching contact copy, and leaves controls editable after a Zieltermin.
+A late family write follows the ordinary authentication, ownership, schema, and
+append rules; it is not rejected because of the date. Once the area is closed, the
+same write is rejected and the controls show saved values read-only; after
+reopening, it is accepted again. A late edit changes current derived state but
+never alters a closed result ([phases](../architecture/phases.md) §10).
+
+---
+
+## 1. The test that matters most
+
+**Shuffle invariance.** If you write one test, write this one.
+
+```ts
+test('solver output is invariant under input permutation', () => {
+  const log = loadEventLog('test/fixtures/event-logs/full-event.kdl')
+  const base = buildSolverInput(log, defaultConfig)
+  const expected = sha256(canonical(solve(base, defaultConfig)))
+
+  for (let seed = 0; seed < 50; seed++) {
+    const shuffled = shuffleEveryArray(base, seed)   // then re-sorted by solver-input.ts
+    const got = sha256(canonical(solve(shuffled, defaultConfig)))
+    expect(got).toBe(expected)
+  }
+})
+```
+
+Every array property of the solver input is permuted, the solver input builder re-sorts
+them, and the output hash must be identical. `labels` is one of the arrays the
+shuffler permutes — this proves the generic label input is order-independent.
+
+This single test catches almost every violation of the determinism contract in
+[solver contract](../architecture/solver-contract.md) §1:
+
+- an unsorted collection someone added and forgot to sort — **caught**
+- a tiebreak that falls through to input order — **caught**
+- `filter(...)[0]` where two candidates score equally — **caught**
+- a `Set` or `Map` iterated where insertion order was accidental — **caught**
+- floating-point comparison producing different winners — **caught**
+
+Repeated-solve tests use the same current solver input and must prove:
+
+- identical inputs produce identical plans and traces;
+- an unrelated change is handled by the documented current-input allocation;
+- invalidation or capacity loss follows the documented deterministic allocation
+  procedure without a hidden repair pass;
+- a new person does not displace an existing person when another feasible place
+  exists;
+- every move has one deterministic reason in the solver trace.
+
+Fifty seeds is arbitrary and enough; a real order dependence fails within a
+handful. It runs in well under a second.
+
+The one thing it does not catch is a dependence on something outside the
+solver input — the clock, randomness, the environment. That is what the lint rules
+in §5 are for.
+
+### Cross-runtime agreement
+
+Second in importance, and the one that holds the organiser application honest. The same
+derivation runs in two places — the Worker and the organiser chunk — so the test is
+that they cannot disagree.
+
+```ts
+test('the browser bundle derives what the Worker derives', async () => {
+  const log = loadEventLog('test/fixtures/event-logs/full-event.kdl')
+  const here  = sha256(canonical(derive(log, defaultConfig).plan))
+  const there = await deriveInBundle(log)      // the built organiser chunk, in a DOM env
+  expect(there).toBe(here)
+})
+```
+
+`deriveInBundle` runs the artefact that ships, not a re-import of the source, so it
+also catches a bundler transform that changes behaviour — the one way two copies of
+identical source can diverge.
+
+This test is what permits the organiser application to treat its locally derived plan as
+real. If it ever fails, the board is showing organisers something the server will not
+agree to, and that is worse than the board being slow.
+
+---
+
+## 2. Canonical KDL event fixtures
+
+Authored event-log inputs use KDL, the project’s restricted command-oriented
+profile described in [the event model](../architecture/events.md). There is one shared
+`loadEventLog(path)` loader. It parses KDL, validates the event payloads and
+replay invariants, and returns the same `Event[]` used by production derivation.
+
+Every event-driven test uses this loader, including fold and solver tests,
+API tests, D1 integration tests, and the
+browser/Worker agreement test. D1 tests seed their database from the parsed KDL
+events; they do not maintain a second JSON fixture for the same log.
+
+Fold tests assert explicit event mappings rather than deriving expected label keys
+from payload field names. They cover identity-only fields, semantic relationship
+keys, null transitions, full-restatement replacement, and alias normalization.
+
+The canonical fixture tree is:
+
+```text
+test/fixtures/event-logs/
+  minimal.kdl            6 families, 4 rooms — readable by hand
+  full-event.kdl         55 families, 40 rooms — realistic
+  tight.kdl              capacity == demand exactly
+  oversubscribed.kdl     demand > capacity; things must be unplaced
+  fragmented.kdl         many one-person families
+  conflicted.kdl         constraints that contradict after a change
+  constraint-heavy.kdl   many relations and organiser decisions
+  infeasible.kdl         trips room-assignment.requirement-arithmetic
+  workshop-spaces.kdl    workshop-space add/update/retire and capability facts
+  workshop-spaces-invalid.kdl  invalid capacity and overlapping windows
+  workshop-lifecycle.kdl workshops, current-cycle rankings, placements, and attendance
+  workshop-lifecycle-conflicted.kdl unscheduled workshops, fixed placements, and separation conflicts
+```
+
+The parser reports file and line locations, rejects duplicate properties, and
+uses deterministic envelope defaults unless a fixture supplies historical
+metadata explicitly. JSON remains valid for API messages, serialized rows,
+canonical regression-test hashes, and derived results, but authored event-log JSON must not be
+maintained alongside KDL. If a boundary requires JSON, generate it from the
+parsed KDL events in the test rather than adding a parallel fixture.
+
+## 3. Golden plans
+
+Fixture event logs with their expected output hashes, checked on every change.
+Each case is `derive(log, config)`, so a golden test exercises the fold, the
+solver input builder, and the solver together rather than the solver alone.
+
+Golden fixtures must record the compatibility revision they were recorded against,
+since an incompatible profile or contract change requires deliberate fixture review.
+Store `compatibility_revision` alongside `expected_hash` and fail with a clear message
+when the contract revision moved, rather than reporting an opaque mismatch:
+
+```ts
+test.each(goldenCases)('golden: $name', ({ log_path, expected_hash, compatibility_revision }) => {
+  if (currentCompatibilityRevision() !== compatibility_revision) {
+    throw new Error(`golden: $name was recorded against a different contract revision — review with pnpm run test:record`)
+  }
+  const world = derive(loadEventLog(log_path), defaultConfig)
+  expect(sha256(canonical(world.plan))).toBe(expected_hash)
+})
+```
+
+**A changed hash is not a failure. It is a question.** The test output must make
+the diff readable, not just report a mismatch:
+
+```
+golden: full-event — output changed
+  47 assignments identical
+   3 assignments differ:
+     fam_0007  rm_0014 → rm_0009
+     fam_0012  rm_0009 → rm_0014
+     fam_0022  rm_0031 → rm_0031  (place changed within room)
+  total_score 412 → 419
+  Re-record with: pnpm run test:record
+```
+
+Without that diff renderer, developers re-record goldens reflexively and the
+tests stop meaning anything. With it, the diff is the review.
+
+Re-recording is an explicit command, never automatic, and the recorded hashes are
+committed so the change shows up in the pull request.
+
+---
+
+## 4. Property tests
+
+Invariants that must hold for every plan from every solver input. These are the
+assertions that catch bugs the golden fixtures happen not to exercise.
+
+```ts
+const invariants = [
+  ['no person is assigned twice',
+    p => unique(roomAssignmentSection(p).assignments.map(a => a.person_id))],
+
+  ['no place holds two people',
+    p => unique(roomAssignmentSection(p).assignments
+      .map(a => a.place_id).filter(place_id => place_id !== null))],
+
+  ['every assigned place exists in the solver input',
+    (p, s) => roomAssignmentSection(p).assignments.every(a => s.places.some(pl => pl.id === a.place_id))],
+
+  ['no room exceeds its place count',
+    (p, s) => /* group by room, compare */],
+
+  ['every family is wholly placed or wholly unplaced',
+    p => /* never a partial family */],
+
+  ['every person appears exactly once across assignments + unplaced',
+    (p, s) => /* conservation of people */],
+
+  ['no-bed people have a room and no place',
+    (p, s) => /* no_bed_trait => room_id exists and place_id is null */],
+
+  ['bed demand equals non-null place assignments',
+    (p, s) => /* no null place consumes bed capacity */],
+
+  ['every required constraint is honoured or reported as a conflict',
+    (p, s) => s.constraints.filter(c => c.strength === 'required')
+      .every(c => honoured(p, c) || conflicted(p, c))],
+
+  ['preferred constraints affect configured soft terms and remain traceable',
+    (p, s) => /* no preferred decision becomes a forced placement */],
+
+  ['no person is in two workshops in one overlapping period',
+    p => /* group by (person, overlapping period) */],
+
+  ['no scheduled workshop exceeds capacity',
+    (p, s) => /* … */],
+
+  ['every selected workshop is placed or has a blocking unscheduled outcome',
+    (p, s) => /* … */],
+
+  ['every label key names a fixed resolver, profile trait, or selected module key, or is reported',
+    (p, s) => /* … */],
+
+  ['a capability with a derive has no assignments',
+    (p, s) => /* … */],
+
+  ['every family placement unit contains all of its non-withdrawn people',
+    (p, s) => /* no family is split in the active scope */],
+]
+```
+
+"Conservation of people" is the most valuable and the least obvious: every person
+in the solver input appears exactly once in `assignments` or once in a family listed
+under `unplaced`. A person who silently vanishes — dropped by a filter, lost in a
+rewrite — is the failure mode that is hardest to notice by eye and worst to
+discover at the hostel.
+
+Run every invariant against every golden fixture, and against generated
+solver inputs:
+
+```ts
+test('invariants hold on generated solver inputs', () => {
+  for (let seed = 0; seed < 200; seed++) {
+    const s = generateSolverInput(seed)  // varies sizes, ratios, constraints
+    const p = solve(s, defaultConfig)
+    for (const [name, check] of invariants) {
+      expect(check(p, s), `${name} (seed ${seed})`).toBe(true)
+    }
+  }
+})
+```
+
+The generator should produce hostile inputs as readily as reasonable ones: zero
+rooms, one enormous family, everyone requiring an ensuite,
+capacity exactly equal to demand, capacity one short.
+
+---
+
+## Profile tests
+
+Cheap, and they catch the failure mode where the Worker boots and solves
+wrongly:
+
+- every trait has a non-empty `title`;
+- every `satisfied_by` names a trait built with `capability`;
+- every `ref` names an entity kind of the kernel or a selected module;
+- no alias collides with another trait or alias, or with a module-owned key;
+- every `family_facing.control` has a renderer contributed by a selected module;
+- every `_trait` parameter names a trait of the shape its module role requires;
+- every feature composition check in [features](../architecture/features.md) §5
+  holds, and the Worker binding allowlist matches the declared feature set;
+- every selected module's `requires` is satisfied and stage order has no cycle;
+- `defineOccasionProfile` throws on each of the above when deliberately broken.
+
+The M1/M2 boundary also has contract coverage: a kernel test supplies a minimal
+validation view and verifies append/replay behavior without importing profile
+builders or module registration; a profile test verifies that M2 constructs the
+same view from typed traits and selected modules.
+
+Canonical identity tests cover email values with surrounding whitespace, mixed
+case, and composed/decomposed Unicode; all produce the same canonical identity.
+Tests also prove that provider-specific dot and plus-address transformations are
+not applied, duplicate family invites are rejected after canonicalization, an
+email change invalidates the old session identity, and actor, allowlist, session,
+magic-link, rate-limit, and delivery records use the same canonical value.
+
+Each module additionally ships contract tests and names the fixtures a profile
+selecting it must supply (module specification §12).
+
+The `workshop-space` contract tests cover add/update/retire replay, negative
+capacity, reversed and overlapping or touching availability windows, exclusion
+of retired spaces from `WorkshopSpaceInput`, resolver-backed capability output,
+and shuffle-invariant `sort_key`/id ordering. Workshop module contract tests cover
+eligibility-filtered current-cycle ranking before scheduling, deterministic demand
+summaries, proposer-selected deferred placement, fixed decisions, separation,
+unscheduled blocking outcomes, and attendance recomputation after a schedule
+change. Profile composition tests cover the official ranking/scheduling/attendance
+pipeline and the full
+Familienfreizeit profile with workshop spaces.
+
+---
+
+## Preflight tests
+
+One fixture per preflight check — the kernel's and each selected module's —
+asserting the finding fires with the right severity and names the right entities.
+The requirement arithmetic message should be asserted verbatim, since it is the one
+an organiser acts on.
+
+## Organiser decision cases
+
+### Local-first commit timing
+
+The organiser application must test the shared command pipeline, not separate
+immediate and drafting implementations:
+
+- A click stages ordinary event drafts, derives `committed ++ drafts` locally, and
+  increments/flashes the draft-control count by the number of event records created.
+- Immediate mode invokes the ordinary apply endpoint automatically; drafting mode
+  leaves the same events in the draft buffer until explicit Apply.
+- The draft workspace shows the event-record count and remains expanded while drafting
+  mode is active.
+- An apply acknowledgement removes only the submitted draft prefix, preserving
+  later clicks made while the request was in flight.
+- A stale-head response incorporates intervening committed events and preserves the
+  local draft buffer.
+- An automatic apply failure enters drafting mode, keeps the workspace expanded, and
+  retains the failed events for retry or discard.
+- Discard never sends a write request and leaves no event-log trace.
+- Toggling drafting mode off is blocked while drafts exist; route changes
+  preserve the policy and reload resets it to immediate mode.
+- Family responses never contain draft events, the organiser event log, or the full
+  organiser world.
+
+Use the ordinary KDL fixtures and module/integration tests for these cases:
+
+- `fam_42 needs=naehe_zum_eingang` and `rm_07 provides=naehe_zum_eingang`
+  work as free-form values under fixed resolver keys. Underscores are retained;
+  an empty matching token fails append validation.
+- `provides=my-ad-hoc-thing` and `needs=my-ad-hoc-thing` match without a profile
+  vocabulary entry, definition event, or deployment.
+- `key=needs-accessible value=accessible` resolves through the profile trait's
+  `satisfied_by` capability and never becomes a generic `needs` label.
+- A profile-derived capability is present in normalized resolver output without
+  creating a persisted `provides` label; assigning `provides=accessible` to a
+  derived capability is rejected.
+- Required and preferred needs have distinct hard/soft behavior. Multiple
+  providers leave a candidate set; the first provider is not silently pinned.
+- `fam_42 excludes=rm_14` prevents placement there in every solver phase, even
+  when another label requests that room. Contradictory required inputs produce
+  diagnostics. Place and workshop exclusions receive equivalent coverage.
+- Separation uses stable entities and resolver scope. Sleeping grouping is outside
+  the active fixture contract;
+  workshop groups never merge room placement units.
+- Workshop decisions preserve eligibility, capacity, and per-period uniqueness
+  through manual cancellation and unassigned outcomes. Cancelled required
+  targets are reported.
+- A ranking can be written before any schedule exists; demand contains no person
+  assignments, scheduling returns placements or blocking unscheduled outcomes, and
+  attendance consumes placements without rewriting ranking facts.
+- Clear removes the selected label's effect from the current plan; replay before
+  the clear reproduces its prior effect. Discard removes the complete local draft
+  batch, including both halves of a needs/provides pair.
+- Omitting a note equals `null`. Varying only note text with the event envelope
+  and other inputs held fixed changes organiser display but not solver input,
+  assignment, scores, or canonical solver-output hash. Appending any event still
+  advances `input_seq`.
+- Applied tokens, optional notes, authors, and timestamps are visible to a second
+  organiser in existing views/history; draft events are local. Family payloads
+  never expose internal tokens or organiser notes, and family attempts to write
+  unrestricted decision labels fail authorisation.
+- Kernel/module setup-only keys remain protected, and a decision requiring an
+  unselected module is rejected or diagnosed on replay.
+- The same cases pass shuffle invariance and browser/Worker agreement.
+
+These are ordinary feature regression cases, with no separate decision-analysis
+corpus, reporting module, or retrospective UI.
+
+---
+
+## 5. Lint rules as tests
+
+The [implemented lint rules and negative tests](../../docs/engineering/testing.md)
+provide naming and runtime/purity boundaries. Extend their coverage to all new
+pure domain code, active profiles, and module evaluators (`derive`, `check`,
+`valid_for`). Keep module app and Worker entry points outside the pure layer;
+[the module contract](../modules/contract.md) §6 defines that layout.
+
+The fold must remain browser-safe, and future profile builders must validate
+vocabulary names as required by D18.
+
+Plus one structural test, which catches the case a lint rule cannot:
+
+```ts
+test('every solver input array is sorted and frozen', () => {
+  const s = buildSolverInput(fixtureDb)
+  for (const [key, value] of Object.entries(s)) {
+    if (!Array.isArray(value)) continue
+    expect(Object.isFrozen(value), `${key} not frozen`).toBe(true)
+    expect(isSortedByDeclaredKey(key, value), `${key} not sorted`).toBe(true)
+  }
+})
+```
+
+This is the test that catches "someone added a collection and forgot", which is
+the most likely way the contract degrades as the code changes.
+
+---
+
+## 6. Integration tests
+
+Against a real D1 in `workerd`. Fewer, chunkier, covering the paths where a bug
+would be silent rather than loud.
+
+```ts
+test('the full loop: invite → constraints → solve → plan → close', async () => {
+  const db = await freshDb()
+
+  await inviteFamilies(db, familyFixture)        // 55 families
+  await setLabels(db, labelFixture)              // LabelSet events
+  const plan1 = await computePlan(db)
+
+  await addConstraint(db, ['per_a1','per_a2'], 'rm_0014')
+  const plan2 = await computePlan(db)
+
+  expect(roomOf(plan2, ['per_a1'])).toBe('rm_0014')
+  expect(movedCount(plan1, plan2)).toBeLessThan(6)   // constraints are surgical
+
+  const review = await previewClosing(db, 'accommodation')
+  await closeArea(db, 'accommodation', review.head_seq)   // Worker computes the payload
+  expect(await closingCount(db, 'accommodation')).toBe(1)
+  expect(await familyArrangements(db)).toEqual(review.familyArrangements)
+})
+```
+
+That `movedCount` assertion is worth more than it looks. It encodes the property
+that makes the whole design worthwhile: **a constraint moves the constrained family and very
+little else.** If a future change makes the solver chaotic — where a small input
+change produces a large output change — this test catches it, and nothing else
+would.
+
+Also covered:
+
+- **Auth**: magic link redeems exactly once; a second attempt fails; expiry
+  works; rate limits bite; changing an email kills sessions.
+- **Fold**: a pure test, no database. Fold a fixture log, compare against a
+  hand-written expectation, then fold twice and assert identical. Appending and replaying its source events is
+  a separate integration test; the fold itself is never persisted.
+- **Constraint enforcement**: attempt to give two people the same place and assert
+  solver-input validation fails.
+- **Phases**: implement every case in [phases](../architecture/phases.md) §10,
+  including stale-head and not-ready closing refusals, a server-computed payload equal
+  to the reviewed derivation, re-closing, reopening, keyboard-accessible expansion of
+  family comparisons, and field cases for names, withdrawal, live answers, materials,
+  cancellations, organiser notes and no-longer-available entities. Blocking findings
+  prevent closing and cannot be bypassed.
+- **Privacy boundary**: the organiser bundle may derive the full world locally, while
+  family responses, family diffs, reports and notification previews are derived and
+  projected by the Worker; event logs, draft events, full worlds and organiser-only
+  data never cross into the family bundle.
+- **Live coordination**: cover last-place races, over-capacity preservation, inactive
+  rankings, sign-up fairness exclusion, interest privacy and immediate material saves
+  under the module fixture contracts. These behaviours do not need a second Plan.
+- **Report contract**: check initial and before/after content and no writes from
+  preview or report requests. A reverted edit clears its difference from the closed
+  result; world-only changes create no difference.
+- **Shared phase read model**: organiser, family, report and notification consumers
+  receive the same phase status and comparisons after their audience projections;
+  no consumer computes phase status or differences independently.
+
+---
+
+## 7. What is not tested
+
+Recorded so the gaps are deliberate.
+
+- **Screens.** Smoke tests that every API route returns 200 for an authorised
+  principal and 401/404 otherwise, and that every screen renders from a fixture
+  world without throwing. No snapshot tests of markup — they break on every copy
+  change and catch nothing.
+- **Deferred placement interaction.** Richer manual placement overrides are not
+  active scope. The board's implemented narrow fixed-assignment flow is covered
+  through the shared organiser draft/apply/discard pipeline and the derived
+  solver tests; broader placement controls remain deferred.
+- **Email rendering.** Sent to a real address and looked at. Litmus-style
+  cross-client testing is not worth it for four plain emails.
+- **Load.** 150 people, three organisers. There is no load.
+
+---
+
+## 8. Fixtures as documentation
+
+`test/fixtures/event-logs/minimal.kdl` should be readable and hand-checkable: six
+families, four rooms, one keep-apart decision, and one preferred `sole-occupancy`.
+Small enough that a person can work out the right answer with a pencil and verify
+the solver agrees.
+
+Sleeping-party and child-room fixtures belong to their separate module contracts and
+are not part of the active fixture contract.
