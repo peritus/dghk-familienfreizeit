@@ -5,11 +5,11 @@ const meta = {
   title: 'Shared/Primitives/WorkflowStepper',
   component: WorkflowStepper,
   args: {
-    aria_label: 'Ablauf der Workshopwahl',
+    aria_label: 'Ablauf der Vorbereitung',
     steps: [
-      { id: 'create', label: 'Workshops anlegen', state: 'complete' },
-      { id: 'open', label: 'Wahl öffnen', state: 'current' },
-      { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
+      { id: 'create', label: 'Vorbereiten', state: 'complete' },
+      { id: 'open', label: 'Prüfen', state: 'current' },
+      { id: 'review', label: 'Bestätigen', state: 'upcoming' },
       { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
     ],
   },
@@ -26,7 +26,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const WorkshopChoice: Story = { name: 'Example: Workshops' }
+export const WorkshopChoice: Story = { name: 'Example: Workshops', args: { aria_label: 'Ablauf der Workshopwahl', steps: [{ id: 'create', label: 'Workshops anlegen', state: 'complete' }, { id: 'open', label: 'Wahl öffnen', state: 'current' }, { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' }, { id: 'fixed', label: 'Festgelegt', state: 'upcoming' }] } }
 
 export const Accommodation: Story = {
   name: 'Example: Unterbringung',
@@ -59,7 +59,7 @@ export const States: Story = {
           state: current === 2 ? 'complete' : index < current ? 'complete' : index === current ? 'current' : 'upcoming',
         }))}
         panel={{ text: current === 2 ? 'Der Vorgang ist abgeschlossen.' : 'Prüfe die Angaben im Hauptbereich.', note: 'Die Ansicht zeigt den aktuellen Stand.' }} />,
-    )))}
+    ))}
   </div>,
 }
 export const Print: Story = { ...States, parameters: { layout: 'fullscreen' } }

@@ -406,6 +406,12 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
     ],
     events: [
       {
+        type: 'WorkshopWarningsAcknowledged',
+        payload: z.object({ fingerprint: z.string().regex(/^[a-f0-9]{16}$/) }).strict(),
+        authorize: (principal) => principal.kind === 'organiser',
+        fold: () => {},
+      },
+      {
         type: 'WorkshopsClosed',
         payload: workshopsClosedPayload,
         authorize: (principal) => principal.kind === 'organiser',

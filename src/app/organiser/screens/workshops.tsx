@@ -1,9 +1,11 @@
+import { workshopNotes, workshopAgeLabel } from '../../../modules/official-workshops/checks.js'
+import { ChoiceField } from '../../components/shared/ui/field.js'
 import { ActionableNotice } from '../../components/shared/ui/notice.js'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { buttonVariants } from '../../components/shared/ui/button.js'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { randomIdPart } from '../ids.js'
-import { useLocation } from 'wouter'
+import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
 import type { World } from '../../../events/fold.js'
 import type { EventDraft } from '../../../events/types.js'
@@ -180,7 +182,7 @@ function solveWorkshopPlan(world: World): WorkshopPlan {
 }
 
 function audienceLabel(audience: string): string {
-  return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[audience] ?? audience
+  return { children: 'Kinder', adults: 'Erwachsene', all: 'Kinder und Erwachsene' }[audience] ?? audience
 }
 
 function participationLabel(mode: string): string {
@@ -201,12 +203,13 @@ function placementLabel(
   const slot = slots.find((item) => item.id === placement.slot_id)
   const space = spaces.find((item) => item.id === placement.space_id)
   if (!slot || !space) return 'Im Programm platziert'
-  const date = new globalThis.Date(slot.starts_at).toLocaleString('de-DE', {
+  const date = new Intl.DateTimeFormat(activeProfile.meta.locale, {
+    timeZone: activeProfile.meta.timezone,
     weekday: 'short',
     hour: '2-digit',
     minute: '2-digit',
-  })
-  return `${date} Uhr · ${space.name}`
+  }).format(new globalThis.Date(slot.starts_at)).replace(', ', ' ')
+  return `${date} · ${space.name}`
 }
 
 function slotLabel(startsAt: string, endsAt?: string): string {
@@ -241,7 +244,7 @@ export function WorkshopNavigation() {
             organiserPaths.workshop_leaders(),
             organiserPaths.workshop_external_leaders(),
           ],
-          label: 'Workshops',
+          label: 'Übersicht',
         },
         {
           href: organiserPaths.workshop_participation(),
@@ -423,7 +426,7 @@ function InternalLeaderCollection() {
       const leads = summary.workshops
         .filter((workshop) => workshop.leader_ids.includes(person.id))
         .map((workshop) => workshopById.get(workshop.id) ?? workshop.id)
-      return { id: person.id, name: name || person.id, leads }
+      return { id: person.id, name: name || 'Name nicht verfügbar', leads }
     })
     .filter((leader) => leader.leads.length)
     .sort((a, b) => a.name.localeCompare(b.name, 'de'))
@@ -462,8 +465,8 @@ function WorkshopResourceNavigation({ value }: { value: 'spaces' | 'slots' }) {
         )
       }
       items={[
-        { value: 'spaces', label: 'Räume' },
-        { value: 'slots', label: 'Slots' },
+        { value: 'spaces', label: 'Räume', link: <OrganiserLink href={organiserPaths.workshop_spaces()} /> },
+        { value: 'slots', label: 'Slots', link: <OrganiserLink href={organiserPaths.workshop_slots()} /> },
       ]}
     />
   )
@@ -471,7 +474,7 @@ function WorkshopResourceNavigation({ value }: { value: 'spaces' | 'slots' }) {
 export function Workshops({
   initial_view: initialView = 'workshops',
 }: { initial_view?: 'workshops' | 'leaders' | 'external' } = {}) {
-  const [, navigate] = useLocation()
+  const [pathname, navigate] = useLocation()
   useDocumentTitle('Workshops · Familienfreizeit')
   const { world, state, stage, phases } = useOrganiser()
   const summary = officialWorkshopsWorld(world!)
@@ -483,7 +486,16 @@ export function Workshops({
   const [editor, setEditor] = useState<'new' | string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [audienceFilter, setAudienceFilter] = useState<'all' | 'children' | 'adults'>('all')
-  const [view, setView] = useState<'workshops' | 'leaders' | 'external'>(initialView)
+  const view = pathname.endsWith('/external-leaders') ? 'external' : pathname.endsWith('/leaders') ? 'leaders' : initialView
+  const [onlyUnplaced, setOnlyUnplaced] = useState(false)
+  const search = useSearch()
+  const query = new URLSearchParams(search)
+  const [notesFilter, setOnlyNotes] = useState(false)
+  const onlyNotes = notesFilter || query.has('notes')
+  const focusWorkshop = query.get('workshop')
+  useEffect(() => {
+    if (focusWorkshop) { const row = document.getElementById(`workshop-${focusWorkshop}`); row?.scrollIntoView?.({ block: 'center' }); row?.focus() }
+  }, [focusWorkshop])
   const people = world!.persons
     .map((person) => {
       const labels = world!.labels_by_entity[person.id] ?? []
@@ -493,7 +505,7 @@ export function Workshops({
       ]
         .filter((value): value is string => typeof value === 'string' && value.length > 0)
         .join(' ')
-      return { id: person.id, name: name || person.id }
+      return { id: person.id, name: name || 'Name nicht verfügbar' }
     })
     .sort((a, b) => a.name.localeCompare(b.name))
   const leaderNames = new Map([
@@ -507,12 +519,15 @@ export function Workshops({
       (assignedByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
     )
   const placedWorkshopIds = new Set(plan.placements.map((placement) => placement.workshop_id))
+  const notes = workshopNotes(summary.workshops, new Set(leaderNames.keys()), plan.demand)
+  const notedIds = new Set(notes.filter(({ kind }) => kind === 'advisory').map(({ workshop_id }) => workshop_id))
+  const oversubscribed = summary.workshops.filter((workshop) => workshop.mode === 'assigned' && (plan.demand[workshop.id] ?? 0) > workshop.capacity).length
   const editingWorkshop =
     editor && editor !== 'new'
       ? summary.workshops.find((workshop) => workshop.id === editor)
       : undefined
   const activeWorkshops = summary.workshops.filter(
-    (workshop) => audienceFilter === 'all' || workshop.audience === audienceFilter,
+    (workshop) => (audienceFilter === 'all' || workshop.audience === 'all' || workshop.audience === audienceFilter) && (!onlyUnplaced || !placedWorkshopIds.has(workshop.id)) && (!onlyNotes || notedIds.has(workshop.id)),
   )
 
   const saveWorkshop = (event: FormEvent<HTMLFormElement>) => {
@@ -572,14 +587,14 @@ export function Workshops({
             : view === 'leaders'
               ? 'Leitungen'
               : 'Externe Leitungen'}
-          {view === 'workshops' ? ` · Zielgruppe: ${audienceLabel(audienceFilter)}` : ''}
+          {view === 'workshops' ? ` · Zielgruppe: ${audienceFilter === 'all' ? 'Alle' : audienceLabel(audienceFilter)}${onlyUnplaced ? ' · Nur nicht eingeplante' : ''}${onlyNotes ? ' · Nur mit Hinweisen' : ''} · ${activeWorkshops.length} von ${summary.workshops.length} Workshops` : ''}
         </p>
       }
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader
           eyebrow="Workshops"
-          title="Workshopübersicht"
+          title="Workshops"
           description="Workshops anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten."
         />
       }
@@ -587,6 +602,9 @@ export function Workshops({
         <>
           <WorkflowStepper
             aria_label="Ablauf der Workshopwahl"
+            storage_key="workshops.phase.expanded"
+            storage_user={state.principal_email}
+            panel={{ text: choice?.status === 'closed' ? 'Das Ergebnis ist festgelegt. Änderungen erscheinen als Abweichungen.' : choiceOpened ? 'Familien können ihre Wünsche, Anmeldungen und ihr Interesse bis zum Festlegen weiter ändern. Prüfe das Ergebnis in den Ansichten dieser Seite.' : summary.workshops.length ? 'Prüfe Zielgruppen und Leitungen. Öffne danach die Wahl für Familien.' : 'Lege den ersten Workshop an.' }}
             steps={workshopTrack({
               phases: phases ?? [],
               active_workshop_count: officialWorkshopsWorld(world!).workshops.length,
@@ -608,29 +626,7 @@ export function Workshops({
               ) : null
             }
           />
-          <StatusNotice
-            label={
-              choiceOpened
-                ? 'Wahl offen'
-                : summary.workshops.length
-                  ? 'Vorbereitung'
-                  : 'Noch kein Workshopplan'
-            }
-            tone={summary.workshops.length ? 'success' : 'attention'}
-            details={
-              choiceOpened
-                ? 'Familien sehen den Katalog und können Wünsche, Anmeldungen und Interesse angeben.'
-                : summary.workshops.length
-                  ? 'Familien sehen noch keine Workshops, bis die Wahl geöffnet ist.'
-                  : 'Lege den ersten Workshop an, um die nächste Phase vorzubereiten.'
-            }
-          >
-            {choiceOpened
-              ? 'Die Workshopwahl ist geöffnet.'
-              : summary.workshops.length
-                ? 'Workshopdaten sind vorhanden. Prüfe Zielgruppen und Leitungen, bevor du die Wahl öffnest.'
-                : 'Die Workshopdatenbank ist bereit für den ersten Entwurf.'}
-          </StatusNotice>
+
         </>
       }
       summary={
@@ -638,13 +634,15 @@ export function Workshops({
           items={[
             { value: summary.workshops.length, label: 'aktive Workshops' },
             {
-              value: summary.workshops.filter((workshop) => workshop.mode === 'assigned').length,
-              label: 'automatische Zuordnung',
+              value: oversubscribed,
+              label: 'mehr Wünsche als Plätze',
             },
             {
               value: summary.workshops.filter((workshop) => !placedWorkshopIds.has(workshop.id))
                 .length,
               label: 'noch nicht eingeplant',
+              tone: 'attention',
+              filter: { active: onlyUnplaced, onToggle: () => { navigate(organiserPaths.workshops()); setOnlyUnplaced((value) => !value) } },
             },
             { value: summary.external_leaders.length, label: 'externe Leitungen' },
           ]}
@@ -656,7 +654,6 @@ export function Workshops({
           value={view}
           onChange={(next) => {
             const value = next as 'workshops' | 'leaders' | 'external'
-            setView(value)
             navigate(
               value === 'leaders'
                 ? organiserPaths.workshop_leaders()
@@ -666,16 +663,17 @@ export function Workshops({
             )
           }}
           items={[
-            { value: 'workshops', label: 'Workshops' },
-            { value: 'leaders', label: 'Leitungen' },
-            { value: 'external', label: 'Externe Leitungen' },
+            { value: 'workshops', label: 'Workshops', count: summary.workshops.length, link: <OrganiserLink href={organiserPaths.workshops()} /> },
+            { value: 'leaders', label: 'Leitungen', count: people.filter((person) => summary.workshops.some((workshop) => workshop.leader_ids.includes(person.id))).length, link: <OrganiserLink href={organiserPaths.workshop_leaders()} /> },
+            { value: 'external', label: 'Externe Leitungen', count: summary.external_leaders.length, link: <OrganiserLink href={organiserPaths.workshop_external_leaders()} /> },
           ]}
         />
       }
     >
       {view === 'workshops' ? (
         <CollectionSection
-          title="Aktive Workshops"
+          title={null}
+          label="Aktive Workshops"
           action={
             <CollectionCreateAction
               label="Workshop hinzufügen"
@@ -728,16 +726,17 @@ export function Workshops({
             </CollectionCreateAction>
           }
           controls={
-            <SegmentedControl
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3"><SegmentedControl
+              presentation="filter"
               label="Gruppe"
               value={audienceFilter}
               onChange={setAudienceFilter}
               options={[
-                { value: 'all', label: 'Alle' },
-                { value: 'children', label: 'Kinder' },
-                { value: 'adults', label: 'Erwachsene' },
+                { value: 'all', label: `Alle (${summary.workshops.length})` },
+                { value: 'children', label: `Kinder (${summary.workshops.filter(({ audience }) => audience === 'children' || audience === 'all').length})` },
+                { value: 'adults', label: `Erwachsene (${summary.workshops.filter(({ audience }) => audience === 'adults' || audience === 'all').length})` },
               ]}
-            />
+            /><ChoiceField type="checkbox" label="Nur nicht eingeplante" checked={onlyUnplaced} onChange={(event) => setOnlyUnplaced(event.target.checked)} /><ChoiceField type="checkbox" label="Nur mit Hinweisen" checked={onlyNotes} onChange={(event) => { setOnlyNotes(event.target.checked); if (!event.target.checked && query.has('notes')) navigate(organiserPaths.workshops()) }} /><p role="status" aria-live="polite" className="text-sm text-muted">{activeWorkshops.length} von {summary.workshops.length} Workshops</p></div>
           }
         >
           {activeWorkshops.length ? (
@@ -750,28 +749,22 @@ export function Workshops({
                     title: workshop.title,
                     description: workshop.description,
                     audience: audienceLabel(workshop.audience),
-                    age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+                    age_range: workshopAgeLabel(workshop),
                     capacity: workshop.capacity,
                     participation_mode: participationLabel(workshop.mode),
                     leaders: workshop.leader_ids.map(
-                      (leaderId) => leaderNames.get(leaderId) ?? leaderId,
+                      (leaderId) => leaderNames.get(leaderId) ?? 'Leitung nicht verfügbar',
                     ),
                     requirement: workshop.needs.join(', ') || undefined,
-                    demand:
-                      workshop.mode === 'assigned'
-                        ? `${assignedByWorkshop.get(workshop.id) ?? 0}/${workshop.capacity} zugeordnet${
-                            plan.demand[workshop.id] ? ` · ${plan.demand[workshop.id]} Wünsche` : ''
-                          }`
-                        : workshop.mode === 'sign-up'
-                          ? `${plan.signups.filter((item) => item.workshop_id === workshop.id).length} Anmeldungen`
-                          : `${plan.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
+                    count: workshop.mode === 'assigned' ? assignedByWorkshop.get(workshop.id) ?? 0 : (workshop.mode === 'sign-up' ? plan.signups : plan.interests).filter((item) => item.workshop_id === workshop.id).length,
+                    wishes: workshop.mode === 'assigned' ? plan.demand[workshop.id] ?? 0 : undefined,
+                    notes: notes.filter((note) => note.workshop_id === workshop.id && note.kind === 'advisory').map(({ message }) => message),
                     placement: {
                       label:
                         placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
                         'Noch nicht eingeplant',
                       tone: placedWorkshopIds.has(workshop.id) ? 'success' : 'attention',
                     },
-                    attention: workshop.leader_ids.length ? undefined : 'Leitung fehlt',
                   }}
                   action={
                     <Button
@@ -1412,10 +1405,10 @@ export function WorkshopParticipationNavigation() {
         )
       }
       items={[
-        { value: 'persons', label: 'Personen' },
-        { value: 'programme', label: 'Programm' },
-        { value: 'unplaced', label: 'Nicht eingeplant' },
-        { value: 'overlaps', label: 'Überschneidungen' },
+        { value: 'persons', label: 'Personen', link: <OrganiserLink href={organiserPaths.workshop_participation()} /> },
+        { value: 'programme', label: 'Programm', link: <OrganiserLink href={organiserPaths.workshop_programme()} /> },
+        { value: 'unplaced', label: 'Nicht eingeplant', link: <OrganiserLink href={organiserPaths.workshop_programme_unplaced()} /> },
+        { value: 'overlaps', label: 'Überschneidungen', link: <OrganiserLink href={organiserPaths.workshop_programme_overlaps()} /> },
       ]}
     />
   )

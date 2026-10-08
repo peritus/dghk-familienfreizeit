@@ -222,9 +222,9 @@ export function WorkshopAllocation() {
           onChange={setView}
           controls={<WorkshopAllocationGroupFilter value={group} on_change={setGroup} />}
           items={[
-            { value: 'answers', label: 'Antworten' },
-            { value: 'demand', label: 'Nachfrage' },
-            { value: 'trace', label: 'Verlauf' },
+            { value: 'answers', label: 'Antworten', link: <OrganiserLink href={organiserPaths.workshop_allocation()} /> },
+            { value: 'demand', label: 'Nachfrage', link: <OrganiserLink href={organiserPaths.workshop_allocation_demand()} /> },
+            { value: 'trace', label: 'Verlauf', link: <OrganiserLink href={organiserPaths.workshop_allocation_trace()} /> },
           ]}
         />
       }

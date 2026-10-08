@@ -354,7 +354,7 @@ export function WorkshopLists() {
       secondary_navigation={<WorkshopNavigation />}
       header={<ScreenHeader eyebrow="Workshops" title="Listen" className="workshop-screen-only" />}
       tertiary_navigation={
-        <WorkshopListKinds
+        <WorkshopListKinds route_links
           value={kind}
           // Each list keeps its own selection in the query, so switching back returns to it.
           onChange={(value) => navigateWithQuery(listPath(value), {})}

@@ -437,7 +437,7 @@ export function FamilyPersonSidebar({
                     organiserPaths.family_person_topic(familyId, topic, person.entity.id),
                   )
                 }}
-                className={`grid min-h-16 w-full justify-items-start gap-1 rounded-base border-2 border-border px-3 py-2 text-left ${selected ? 'bg-foreground text-background shadow-shadow' : 'bg-secondary-background hover:bg-main'}`}
+                className={`grid min-h-16 w-full justify-items-start gap-1 rounded-base border-2 border-border px-3 py-2 text-left ${selected ? 'bg-foreground text-background shadow-shadow' : 'bg-secondary-background hover:bg-main-soft'}`}
               >
                 <span className="font-bold">{personName(person) || person.entity.id}</span>
                 <span className={`text-sm ${selected ? 'text-background' : 'text-muted'}`}>
@@ -1158,7 +1158,7 @@ function FamilyWorkshopView({
                     key={index}
                     className={`grid gap-3 rounded-base border-2 p-3 sm:grid-cols-[2.5rem_1fr] ${workshop ? 'border-border bg-secondary-background' : 'border-dashed border-muted'}`}
                   >
-                    <span className="grid size-9 place-items-center rounded-full border-2 border-border bg-main font-bold">
+                    <span className="grid size-9 place-items-center rounded-full border-2 border-border bg-main-soft font-bold">
                       {index + 1}
                     </span>
                     {workshop ? (
@@ -1380,7 +1380,7 @@ export function FamilyDetail({
           </StatusNotice>
         ) : null
       }
-      tertiary_navigation={<FamilyTopicNavigation value={topic} onChange={changeTopic} />}
+      tertiary_navigation={<FamilyTopicNavigation family_id={selectedFamilyId} value={topic} onChange={changeTopic} />}
     >
       <div role="tabpanel" aria-label={familyTopicLabel(topic)}>
         {topic === 'zimmer' ? (

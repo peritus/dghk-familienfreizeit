@@ -1,3 +1,5 @@
+import { officialWorkshopsWorld } from '../modules/official-workshops/index.js'
+import { workshopNotes, workshopAdvisoryFingerprint, type WorkshopNote } from '../modules/official-workshops/checks.js'
 import type { ProfileModule, OccasionProfile } from '../config/define.js'
 import { closedResults, declaredPhases, type FindingRef } from '../config/phases.js'
 import type { Event, EventDraft, JsonValue } from '../events/types.js'
@@ -12,6 +14,10 @@ export class AreaNotReadyError extends Error {
   ) {
     super(`area ${area} is not ready to close`)
   }
+}
+
+export class WorkshopReviewRequiredError extends Error {
+  constructor(public readonly findings: readonly WorkshopNote[]) { super('workshop advisory acknowledgement required') }
 }
 
 /** A closing whose client supplied a result; only the Worker produces it (D16). */
@@ -49,7 +55,9 @@ export function fillClosingPayloads(
   const areas = closingEventAreas(profile.modules)
   const results = closedResults(profile.modules)
   const filled: EventDraft[] = []
-  for (const draft of drafts) {
+  for (const [index, draft] of drafts.entries()) {
+    if (draft.type === 'WorkshopWarningsAcknowledged' && drafts[index + 1]?.type !== 'WorkshopsClosed')
+      throw new WorkshopReviewRequiredError([])
     const area = areas.get(draft.type)
     if (!area) {
       filled.push(draft)
@@ -71,6 +79,14 @@ export function fillClosingPayloads(
         return readiness.ready ? [] : readiness.findings
       })
     if (findings.length > 0) throw new AreaNotReadyError(area, findings)
+    if (area === 'workshops') {
+      const summary = officialWorkshopsWorld(world)
+      const advisories = workshopNotes(summary.workshops, new Set([...world.persons.map(({ id }) => id), ...summary.external_leaders.map(({ id }) => id)])).filter(({ kind }) => kind === 'advisory')
+      const previous = drafts[index - 1]
+      const fingerprint = previous?.payload && typeof previous.payload === 'object' && !Array.isArray(previous.payload) ? (previous.payload as Record<string, JsonValue>)['fingerprint'] : undefined
+      if (advisories.length && (previous?.type !== 'WorkshopWarningsAcknowledged' || fingerprint !== workshopAdvisoryFingerprint(advisories)))
+        throw new WorkshopReviewRequiredError(advisories)
+    }
     const result = results.get(area as Parameters<typeof results.get>[0])!
     filled.push({ ...draft, payload: { ...result.compute({ world, plan }), ...revisions } })
   }

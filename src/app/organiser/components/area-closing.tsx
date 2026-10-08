@@ -1,3 +1,9 @@
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '../../components/shared/ui/button.js'
+import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
+import { workshopNotes, workshopAdvisoryFingerprint } from '../../../modules/official-workshops/checks.js'
+import { OrganiserLink } from '../../components/application/organiser-link.js'
+import { organiserPaths, organiserPathWithQuery } from '../../../organiser/routes.js'
 import { ActionableNotice, StatusNotice } from '../../components/shared/ui/notice.js'
 import { activeProfile } from '../../../config/index.js'
 import type { AreaId } from '../../../config/phases.js'
@@ -61,7 +67,7 @@ export function AreaClosingReview({ state }: { state: ClosedAreaState }) {
       <p className="font-bold">
         {families} {families === 1 ? 'Familie betroffen' : 'Familien betroffen'}
       </p>
-      <ChangeList state={state} />
+
       {state.blocking.length > 0 ? (
         <div role="alert" className="space-y-1">
           <p className="font-bold">Prüfung erforderlich</p>
@@ -82,31 +88,54 @@ export function AreaClosingReview({ state }: { state: ClosedAreaState }) {
  * result when the staged closing is applied.
  */
 export function AreaClosingActions({ area }: { area: AreaId }) {
-  const { state: organiser, stage } = useOrganiser()
+  const { state: organiser, stage, world } = useOrganiser()
+  const [reviewing, setReviewing] = useState(false)
+  const [acknowledged, setAcknowledged] = useState(false)
+  const reviewHeading = useRef<HTMLHeadingElement>(null)
+  const reviewTrigger = useRef<HTMLButtonElement>(null)
+  const confirmation = useRef<HTMLDivElement>(null)
+  const wasReviewing = useRef(false)
+  useEffect(() => {
+    if (reviewing) reviewHeading.current?.focus()
+    else if (wasReviewing.current) (acknowledged ? confirmation.current?.querySelector('button') : reviewTrigger.current)?.focus()
+    wasReviewing.current = reviewing
+  }, [reviewing, acknowledged])
+  const summary = world && area === 'workshops' ? officialWorkshopsWorld(world) : null
+  const advisories = summary ? workshopNotes(summary.workshops, new Set([...world!.persons.map(({ id }) => id), ...summary.external_leaders.map(({ id }) => id)])).filter(({ kind }) => kind === 'advisory') : []
   const state = useClosedArea(area)
   if (!state || !organiser.principal_email) return null
   const actor = organiser.principal_email
   const labels = areaLabels[area]
   const stageEvent = (type: string) =>
-    stage([{ at: new Date().toISOString(), actor, subject: null, type, payload: {} }])
+    stage([
+      ...(type === 'WorkshopsClosed' && advisories.length ? [{ at: new Date().toISOString(), actor, subject: null, type: 'WorkshopWarningsAcknowledged', payload: { fingerprint: workshopAdvisoryFingerprint(advisories) } }] : []),
+      { at: new Date().toISOString(), actor, subject: null, type, payload: {} },
+    ])
   if (state.pending) return <p role="status">Das Ergebnis wird festgelegt …</p>
   const blocked = state.blocking.length > 0 || state.candidate === null
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <PhaseDecisionAction
+    <div ref={confirmation} className="flex flex-wrap items-center gap-3">
+      {reviewing ? <section data-slot="warning-review" aria-labelledby="workshop-review-title" className="w-full space-y-3 rounded-base border-2 border-dashed border-border bg-warning-bg p-4">
+        <h3 ref={reviewHeading} tabIndex={-1} id="workshop-review-title" className="font-heading text-lg">Hinweise vor dem Festlegen</h3>
+        <p>Diese Hinweise verhindern das Festlegen nicht. Eine Bestätigung durch ein Mitglied des Organisationsteams genügt für diese Festlegung.</p>
+        <ul className="list-disc space-y-2 pl-5">{advisories.slice(0, 5).map((note) => <li key={note.id}><OrganiserLink href={organiserPathWithQuery(organiserPaths.workshops(), { notes: '1', workshop: note.workshop_id })} className="underline">{note.title}</OrganiserLink>: {note.message}</li>)}</ul>
+        {advisories.length > 5 ? <OrganiserLink href={organiserPathWithQuery(organiserPaths.workshops(), { notes: '1' })} className="underline">Alle {advisories.length} Hinweise ansehen</OrganiserLink> : null}
+        <div className="flex flex-wrap gap-3"><Button variant="neutral" onClick={() => { setReviewing(false); reviewTrigger.current?.focus() }}>Abbrechen</Button><Button onClick={() => { setReviewing(false); setAcknowledged(true) }}>Hinweise zur Kenntnis genommen</Button></div>
+      </section> : advisories.length && !acknowledged ? <><Button ref={reviewTrigger} onClick={() => setReviewing(true)}>{advisories.length} {advisories.length === 1 ? 'Hinweis prüfen' : 'Hinweise prüfen'}</Button><Button variant="neutral" onClick={() => setReviewing(true)}>{state.closed ? 'Erneut festlegen' : 'Festlegen'}</Button></> : <PhaseDecisionAction
         label={state.closed ? 'Erneut festlegen' : 'Festlegen'}
         title={`${labels.name} festlegen?`}
         description={
           state.latest
             ? `Familien sehen danach ${labels.result} in der neuen Fassung. Verglichen mit der Festlegung vom ${formatTime(state.latest.at)}:`
-            : `Familien sehen danach ${labels.result}. Das ist die erste Festlegung.`
+            : `Familien sehen danach ${labels.result}. Das ist die erste Festlegung.${area === 'workshops' ? ' Die Wahl wird dabei geschlossen.' : ''}`
         }
         confirm_label="Festlegen"
         disabled={blocked}
         on_confirm={() => stageEvent(state.contribution.close_event)}
+        on_open_change={(open) => { if (!open) setAcknowledged(false) }}
       >
         <AreaClosingReview state={state} />
-      </PhaseDecisionAction>
+      </PhaseDecisionAction>}
       {state.closed ? (
         <PhaseDecisionAction
           label="Wieder öffnen"

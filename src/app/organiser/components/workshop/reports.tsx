@@ -1,3 +1,5 @@
+import { OrganiserLink } from '../../../components/application/organiser-link.js'
+import { organiserPaths } from '../../../../organiser/routes.js'
 import { TableFrame } from '../../../components/shared/ui/data-table.js'
 import { Fragment, type ReactNode, type Ref } from 'react'
 import { TertiaryNavigation } from '../../../components/shared/ui/tertiary-navigation.js'
@@ -9,13 +11,13 @@ import { PrintDocument } from '../../../components/shared/ui/print-layout.js'
 import { cn } from '../../../lib/utils.js'
 
 const tableBase =
-  'w-full border-collapse text-left text-[15px] [&_:is(th,td)]:text-left [&_:is(th,td)]:align-top [&_thead_th]:border-b-2 [&_thead_th]:border-border [&_thead_th]:font-bold [&_tbody_:is(th,td)]:border-t-[1.5px] [&_tbody_:is(th,td)]:border-rule [&_tbody_tr:first-child>*]:border-t-0'
+  'w-full border-collapse text-left text-sm [&_:is(th,td)]:text-left [&_:is(th,td)]:align-top [&_thead_th]:border-b-2 [&_thead_th]:border-border [&_thead_th]:font-bold [&_tbody_:is(th,td)]:border-t-[1.5px] [&_tbody_:is(th,td)]:border-rule [&_tbody_tr:first-child>*]:border-t-0'
 
 const tableVariants = {
   /** Prototype `table.roster`: the workshop roster. */
   roster: '[&_:is(th,td)]:px-3.5 [&_:is(th,td)]:py-2.5 [&_thead_th]:text-sm',
   /** Prototype `table.plain.roster`: person, family and room plans. */
-  plain: '[&_:is(th,td)]:px-3 [&_:is(th,td)]:py-2 [&_thead_th]:text-[13px]',
+  plain: '[&_:is(th,td)]:px-3 [&_:is(th,td)]:py-2 [&_thead_th]:text-sm',
 }
 
 function ListTable({
@@ -78,7 +80,7 @@ function Muted({ children }: { children: ReactNode }) {
 /** Prototype `.chip.attn`: an open case. */
 export function OpenChip() {
   return (
-    <span className="workshop-chip inline-flex min-h-7 items-center rounded-base border-2 border-border bg-main px-2 text-sm font-bold whitespace-nowrap text-main-foreground">
+    <span className="workshop-chip inline-flex min-h-7 items-center rounded-base border-2 border-border bg-warning-bg px-2 text-sm font-bold whitespace-nowrap text-main-foreground">
       Offen
     </span>
   )
@@ -87,7 +89,7 @@ export function OpenChip() {
 /** Prototype `.badge`: a quiet marker such as "leitet". */
 function QuietBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="workshop-quiet-badge ml-1.5 inline-flex min-h-[26px] items-center rounded-base border-[1.5px] border-muted bg-secondary-background px-2 text-[13px] font-medium whitespace-nowrap">
+    <span className="workshop-quiet-badge ml-1.5 inline-flex min-h-[26px] items-center rounded-base border-[1.5px] border-muted bg-secondary-background px-2 text-sm font-medium whitespace-nowrap">
       {children}
     </span>
   )
@@ -410,7 +412,9 @@ export function RoomPlanTable({
 export function WorkshopListKinds({
   value,
   onChange,
+  route_links: routeLinks = false,
 }: {
+  route_links?: boolean
   value: 'workshop' | 'person' | 'family' | 'room'
   onChange: (value: 'workshop' | 'person' | 'family' | 'room') => void
 }) {
@@ -420,10 +424,10 @@ export function WorkshopListKinds({
       value={value}
       onChange={(next) => onChange(next as 'workshop' | 'person' | 'family' | 'room')}
       items={[
-        { value: 'workshop', label: 'Workshop' },
-        { value: 'person', label: 'Person' },
-        { value: 'family', label: 'Familie' },
-        { value: 'room', label: 'Raum' },
+        { value: 'workshop', label: 'Workshop', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_workshop_list()} /> : undefined },
+        { value: 'person', label: 'Person', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_person_list()} /> : undefined },
+        { value: 'family', label: 'Familie', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_family_list()} /> : undefined },
+        { value: 'room', label: 'Raum', link: routeLinks ? <OrganiserLink href={organiserPaths.workshop_room_list()} /> : undefined },
       ]}
     />
   )

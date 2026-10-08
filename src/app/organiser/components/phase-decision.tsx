@@ -25,6 +25,7 @@ export function PhaseDecisionAction({
   disabled = false,
   on_confirm: onConfirm,
   children,
+  on_open_change: onOpenChange,
 }: {
   label: string
   title: string
@@ -33,10 +34,11 @@ export function PhaseDecisionAction({
   disabled?: boolean
   on_confirm: () => void
   children?: ReactNode
+  on_open_change?: (open: boolean) => void
 }) {
   const [open, setOpen] = useState(false)
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={(value) => { setOpen(value); onOpenChange?.(value) }}>
       <Button type="button" onClick={() => setOpen(true)}>
         {label}
       </Button>
@@ -53,6 +55,7 @@ export function PhaseDecisionAction({
             onClick={() => {
               onConfirm()
               setOpen(false)
+              onOpenChange?.(false)
             }}
           >
             {confirmLabel}

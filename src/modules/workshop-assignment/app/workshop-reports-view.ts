@@ -1,3 +1,4 @@
+import { workshopAgeLabel } from '../../official-workshops/checks.js'
 import type { World, Label } from '../../../events/fold.js'
 import type { Plan } from '../../../solver/types.js'
 import {
@@ -245,11 +246,6 @@ function audienceLabel(value: string): string {
   return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[value] ?? value
 }
 
-function ageRangeLabel(workshop: WorkshopRecord): string {
-  return workshop.age_max >= 99
-    ? `ab ${workshop.age_min} Jahren`
-    : `${workshop.age_min}–${workshop.age_max} Jahre`
-}
 
 function openReasonLabel(reason: string): string {
   switch (reason) {
@@ -477,7 +473,7 @@ export function buildWorkshopReportsProjection(
         id: workshop.id,
         title: workshop.title,
         audience: audienceLabel(workshop.audience),
-        age_label: ageRangeLabel(workshop),
+        age_label: workshopAgeLabel(workshop),
         capacity: workshop.capacity,
         mode: workshop.mode,
         slot_id: slot.id,

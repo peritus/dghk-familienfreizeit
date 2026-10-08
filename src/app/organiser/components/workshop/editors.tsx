@@ -1,3 +1,4 @@
+import { workshopAgeWarning } from '../../../../modules/official-workshops/checks.js'
 import { ChoiceField } from '../../../components/shared/ui/field.js'
 import { SelectField, TextareaField } from '../../../components/shared/ui/field.js'
 import { EntityEditorDialog } from '../../../components/shared/ui/entity-editor-dialog.js'
@@ -143,13 +144,18 @@ export function WorkshopEditorFields({
   default_values?: WorkshopEditorValues
   children?: ReactNode
 }) {
+  const [audience, setAudience] = useState(defaultValues.audience ?? 'all')
+  const [ageMin, setAgeMin] = useState(defaultValues.age_min ?? 0)
+  const [ageMax, setAgeMax] = useState(defaultValues.age_max ?? 120)
+  const warning = workshopAgeWarning({ audience, age_min: ageMin, age_max: ageMax })
   return (
     <>
       <TextField label="Titel" name="title" defaultValue={defaultValues.title} required />
       <SelectField
         label="Zielgruppe"
         name="audience"
-        defaultValue={defaultValues.audience ?? 'all'}
+        value={audience}
+        onChange={(event) => setAudience(event.target.value)}
       >
         <option value="all">Alle</option>
         <option value="children">Kinder</option>
@@ -168,7 +174,8 @@ export function WorkshopEditorFields({
         type="number"
         min="0"
         max="120"
-        defaultValue={defaultValues.age_min ?? 0}
+        value={ageMin}
+        onChange={(event) => setAgeMin(Number(event.target.value))}
       />
       <TextField
         label="Alter bis"
@@ -176,7 +183,8 @@ export function WorkshopEditorFields({
         type="number"
         min="0"
         max="120"
-        defaultValue={defaultValues.age_max ?? 120}
+        value={ageMax}
+        onChange={(event) => setAgeMax(Number(event.target.value))}
       />
       <TextField
         label="Plätze"
@@ -204,6 +212,7 @@ export function WorkshopEditorFields({
           hint="Mehrere Fähigkeiten mit Komma trennen; die Prüfung erfolgt über den Resolver."
         />
       </div>
+      {warning ? <p role="status" className="sm:col-span-2 rounded-base border-2 border-dashed border-border bg-warning-bg p-3 text-sm">{warning} Du kannst diese Angaben speichern.</p> : null}
       {children}
     </>
   )
@@ -314,7 +323,7 @@ export function ExternalLeaderEditorFields({
             ))}
           </div>
         ) : (
-          <p className="rounded-base border-2 border-border bg-main text-main-foreground p-3 text-sm">
+          <p className="rounded-base border-2 border-border bg-warning-bg text-foreground p-3 text-sm">
             Lege zuerst einen Workshop-Slot an.
           </p>
         )}

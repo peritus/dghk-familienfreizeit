@@ -1,3 +1,4 @@
+import { workshopAgeLabel } from '../../official-workshops/checks.js'
 import type { WorkshopRecord } from '../../official-workshops/index.js'
 import type { WorkshopRanking } from '../../workshop-rankings/index.js'
 import { compareFixedDecisions } from '../../../solver/fixed-decision.js'
@@ -188,7 +189,7 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
         state: 'placed' as const,
         title: workshop.title,
         audience: audienceLabel(workshop.audience),
-        age_range: `${workshop.age_min}–${workshop.age_max} Jahre`,
+        age_range: workshopAgeLabel(workshop),
         leaders: leaderNames,
         capacity_label: capacityLabel,
         demand_label: input.demand[workshop.id]
