@@ -1,3 +1,4 @@
+import { officialWorkshopAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
@@ -266,6 +267,7 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
     excluded_roles: z.array(nonEmpty).default(['infant']),
   }),
   contribute: (params) => ({
+    attention_checks: officialWorkshopAttention,
     entity_kinds: [
       { id: 'workshop', prefix: 'wks_' },
       { id: 'external-leader', prefix: 'ext_' },

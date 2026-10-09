@@ -1,3 +1,4 @@
+import { workshopAssignmentAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import {
@@ -498,6 +499,7 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
     workshops_per_person: z.number().int().min(1).default(2),
   }),
   contribute: (params) => ({
+    attention_checks: workshopAssignmentAttention(params.workshops_per_person),
     phases: [
       {
         id: 'workshop-assignment.review',

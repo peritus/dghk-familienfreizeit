@@ -1,3 +1,4 @@
+import { workshopSchedulingAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
@@ -482,6 +483,7 @@ export const workshopScheduling = defineModule<WorkshopSchedulingParams>({
       .default('automatic-with-fixed-decisions'),
   }),
   contribute: (_params) => ({
+    attention_checks: workshopSchedulingAttention,
     entity_kinds: [
       { id: 'workshop-slot', prefix: 'slot_' },
       { id: 'space-slot-block', prefix: 'blk_' },

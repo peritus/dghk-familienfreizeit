@@ -1,3 +1,4 @@
+import { attentionReason } from './reasons.js'
 import type { LocalizedText, ProfileModule } from '../config/define.js'
 import type { JsonValue } from '../events/types.js'
 import type { AttentionCheck, AttentionContext, AttentionFact, AttentionItem, AttentionResult } from './types.js'
@@ -80,7 +81,7 @@ function present(check: AttentionCheck, fact: AttentionFact, context: AttentionC
   return {
     id: attentionId(check.code, fact.key), code: check.code, owner: check.owner, kind: check.kind, severity: fact.severity ?? check.severity,
     subjects: fact.subjects, evidence: fact.evidence, source_refs: fact.sources ?? [], basis: basis(context),
-    wording: { title: localized(check.title, context.locale, context.profile.meta.fallback_locale), detail: localized(check.detail(fact), context.locale, context.profile.meta.fallback_locale), reasons: [] },
+    wording: { title: localized(check.title, context.locale, context.profile.meta.fallback_locale), detail: localized(check.detail(fact), context.locale, context.profile.meta.fallback_locale), reasons: Array.isArray(fact.evidence.reasons) ? fact.evidence.reasons.map(reason => attentionReason(typeof reason === 'string' ? reason : reason && typeof reason === 'object' && !Array.isArray(reason) ? String(reason.reason ?? '') : '', context.locale)) : typeof fact.evidence.reason === 'string' ? [attentionReason(fact.evidence.reason, context.locale)] : [] },
     areas: check.areas, display_scopes: check.scopes, blocks: fact.blocks ?? [],
     acknowledgement: fact.acknowledge ? { fingerprint } : null, actions: fact.actions ?? [],
   }

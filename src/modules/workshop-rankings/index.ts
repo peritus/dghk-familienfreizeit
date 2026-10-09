@@ -1,3 +1,4 @@
+import { workshopRankingAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import type { ValidationWorld, World } from '../../events/fold.js'
@@ -136,6 +137,7 @@ export const workshopRankings = defineModule<WorkshopRankingsParams>({
     allow_no_preference: z.boolean().default(true),
   }),
   contribute: (params) => ({
+    attention_checks: workshopRankingAttention(params.max_rank),
     label_keys: [
       {
         key: params.ranking_trait,
