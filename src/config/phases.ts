@@ -105,6 +105,11 @@ function kebab(value: string): boolean {
 
 /** One family-attributed change between two closed results, or a closed result and the plan. */
 export type ClosedResultChange = {
+  aspect?: 'room' | 'places' | 'unplaced' | 'attendance' | 'placement' | 'unassigned'
+  before_value?: JsonValue
+  after_value?: JsonValue
+  affected_family_ids?: readonly string[]
+  family_unknown?: boolean
   kind: 'added' | 'removed' | 'moved'
   /** The person or family whose arrangement changed. */
   subject_id: string

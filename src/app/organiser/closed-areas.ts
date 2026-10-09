@@ -19,7 +19,7 @@ export type ClosedAreaState = {
   /** A staged closing whose result the Worker has not filled in yet. */
   pending: boolean
   /** The latest recorded result and when it was recorded, or null before the first closing. */
-  latest: { at: string; payload: JsonValue } | null
+  latest: { seq: number; at: string; payload: JsonValue } | null
   /** The result the current derivation would record. */
   candidate: Readonly<Record<string, JsonValue>> | null
   /** The candidate compared with the latest recorded result (or with nothing). */
@@ -55,7 +55,7 @@ export function closedAreaState(input: {
     contribution,
     closed: facts?.latest?.kind === 'closed',
     pending: closings.length > 0 && !isRecorded(closings.at(-1)!.payload),
-    latest: last ? { at: last.at, payload: last.payload } : null,
+    latest: last ? { seq: last.seq, at: last.at, payload: last.payload } : null,
     candidate,
     difference: candidate
       ? contribution.compare(last?.payload ?? null, candidate, input.world)

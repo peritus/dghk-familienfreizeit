@@ -89,30 +89,19 @@ export const accommodationClosedResultContribution: ClosedResultContribution = {
     }
   },
   compare: (before, after) => {
-    const rooms = (payload: JsonValue | null) => {
-      const byFamily = new Map<string, string[]>()
-      for (const placement of accommodationClosedResult(payload)?.placements ?? [])
-        byFamily.set(placement.family_id, [
-          ...(byFamily.get(placement.family_id) ?? []),
-          placement.room_id,
-        ])
-      return new Map([...byFamily].map(([family, list]) => [family, list.sort().join(', ')]))
+    const previous=accommodationClosedResult(before), next=accommodationClosedResult(after)
+    const ids=[...new Set([...(previous?.placements??[]).map(p=>p.family_id),...(next?.placements??[]).map(p=>p.family_id),...(previous?.unplaced??[]).map(p=>p.family_id),...(next?.unplaced??[]).map(p=>p.family_id)])].sort()
+    const changes:ClosedResultChange[]=[]
+    for(const family of ids){
+      const was=(previous?.placements??[]).filter(p=>p.family_id===family), is=(next?.placements??[]).filter(p=>p.family_id===family)
+      const oldRooms=was.map(p=>p.room_id).sort(),newRooms=is.map(p=>p.room_id).sort()
+      const oldPlaces=was.flatMap(p=>p.place_ids).sort(),newPlaces=is.flatMap(p=>p.place_ids).sort()
+      const oldUnplaced=previous?.unplaced.some(p=>p.family_id===family)??false,newUnplaced=next?.unplaced.some(p=>p.family_id===family)??false
+      for(const [aspect,oldValue,newValue] of [['room',oldRooms,newRooms],['places',oldPlaces,newPlaces],['unplaced',oldUnplaced,newUnplaced]] as const){
+        if(JSON.stringify(oldValue)===JSON.stringify(newValue))continue
+        changes.push({kind:before===null?'added':'moved',subject_id:family,family_id:family,aspect,before:aspect==='room'?oldRooms.join(', ')||null:null,after:aspect==='room'?newRooms.join(', ')||null:null,before_value:oldValue,after_value:newValue,affected_family_ids:[family]})
+      }
     }
-    const previous = rooms(before)
-    const next = rooms(after)
-    const changes: ClosedResultChange[] = []
-    for (const familyId of [...new Set([...previous.keys(), ...next.keys()])].sort()) {
-      const was = previous.get(familyId) ?? null
-      const is = next.get(familyId) ?? null
-      if (was === is) continue
-      changes.push({
-        kind: was && is ? 'moved' : is ? 'added' : 'removed',
-        subject_id: familyId,
-        family_id: familyId,
-        before: was,
-        after: is,
-      })
-    }
-    return { changes, affected_family_ids: changes.map((change) => change.subject_id) }
+    return {changes,affected_family_ids:[...new Set(changes.map(c=>c.subject_id))].sort()}
   },
 }

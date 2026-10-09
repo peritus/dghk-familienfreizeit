@@ -1,3 +1,4 @@
+import { closedResults } from '../../config/phases.js'
 import { profileAttention } from '../../attention/profile.js'
 import { admitProfileProposal } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
@@ -233,7 +234,8 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     [derivation.world, phaseStatus, state.feature_overrides],
   )
 
-  const attention=useMemo(()=>evaluateAttention({domain:derivation.world?'available':state.status==='loading'?'loading':'invalid-proposal',world:derivation.world,plan:currentPlan,profile:activeProfile,build_revision:state.build_revision??buildRevision,locale:activeProfile.meta.locale,now,audience:'organiser',effective_features:effectiveFeatures,basis:{mode:state.drafts.length?'prospective':'committed',group_ids:[]}}),[derivation.world,currentPlan,state.build_revision,state.drafts.length,state.status,effectiveFeatures,now])
+  const closedChanges=useMemo(()=>derivation.world&&currentPlan?[...closedResults(activeProfile.modules).values()].flatMap(contribution=>{const facts=derivation.world!.phase_facts.areas[contribution.area];const closing=facts?.closings.at(-1);if(!closing)return [];const difference=contribution.compare(closing.payload,contribution.compute({world:derivation.world!,plan:currentPlan}),derivation.world!);return [{area:contribution.area,seq:closing.seq,closed:facts.latest?.kind==='closed',changes:difference.changes.map(c=>({...c})),family_ids:difference.affected_family_ids}]}):[],[derivation.world,currentPlan])
+  const attention=useMemo(()=>evaluateAttention({closed_changes:closedChanges,domain:derivation.world?'available':state.status==='loading'?'loading':'invalid-proposal',world:derivation.world,plan:currentPlan,profile:activeProfile,build_revision:state.build_revision??buildRevision,locale:activeProfile.meta.locale,now,audience:'organiser',effective_features:effectiveFeatures,basis:{mode:state.drafts.length?'prospective':'committed',group_ids:[]}}),[derivation.world,currentPlan,state.build_revision,state.drafts.length,state.status,effectiveFeatures,now,closedChanges])
   const phaseView=useMemo(()=>derivation.world?derivePhaseView({world:derivation.world,modules:activeProfile.modules,meta:activeProfile.meta,plan:currentPlan,now,attention}):[],[derivation.world,currentPlan,now,attention])
 
   const apply = useCallback(async () => {
