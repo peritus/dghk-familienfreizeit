@@ -152,7 +152,7 @@ function validateWorkshop(
   if (!params.available_modes.includes(value.participation_mode))
     return `participation mode is not configured: ${value.participation_mode}`
   if (value.age_min > value.age_max) return 'workshop age range is reversed'
-  if (updating) {
+  if (updating && value.capacity < Number(world.labels(value.workshop_id).find(label => label.key === 'capacity')?.value ?? 0)) {
     const attendance = liveAttendance(world, value.workshop_id)
     if (value.capacity < attendance)
       return `capacity reduction would strand ${attendance} current participant(s); rejected per D30`

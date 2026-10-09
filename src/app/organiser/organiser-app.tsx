@@ -1,3 +1,4 @@
+import { admitProfileProposal } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { ErrorState } from '../components/shared/ui/screen-state.js'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
@@ -18,7 +19,6 @@ import {
 import { derivePhaseView, phaseActivation } from '../../derive/phases.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
-  deriveWorld,
   draftCount,
   initialOrganiserState,
   materializeDraftEvents,
@@ -165,7 +165,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     )
       return { world: null, error: null }
     try {
-      return { world: deriveWorld(state, activeProfile.validation_view), error: null }
+      return { world: admitProfileProposal(state.committed, materializeDraftEvents(state), activeProfile, { build_revision: state.build_revision ?? buildRevision, compatibility_revision: state.compatibility_revision ?? compatibilityRevision }).world, error: null }
     } catch {
       return {
         world: null,

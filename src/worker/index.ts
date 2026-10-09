@@ -1,7 +1,8 @@
+import { admitProfileProposal, CapacityReductionError } from '../organiser/proposal.js'
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
-import { assertAppendableWorld, derive, type World } from '../events/fold.js'
+import { derive, type World } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendCanonicalEvents, readEvents, StaleHeadError } from '../events/store.js'
@@ -13,7 +14,6 @@ import {
   type EventDraft,
   type JsonValue,
 } from '../events/types.js'
-import { prepareEventBatch } from '../events/prepare.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
 import { authorizeEventBatch, type FamilyLabelOffered } from '../auth/authorization.js'
 import { deriveFeatureView, effectiveFeatureIds } from '../derive/features.js'
@@ -244,7 +244,7 @@ app.post('/api/organiser/apply', async (context) => {
     )
     const prepared = tracing.enterSpan('events.prepare_and_validate', (span) => {
       span.setAttribute('event.count', drafts.length)
-      return prepareEventBatch(existing, drafts, activeProfile.validation_view)
+      return admitProfileProposal(existing, drafts, activeProfile, { build_revision: buildRevision, compatibility_revision: compatibilityRevision })
     })
     const events = prepared.events
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
@@ -268,6 +268,7 @@ app.post('/api/organiser/apply', async (context) => {
       feature_overrides: featureBindings(context.env).overrides,
     })
   } catch (error) {
+    if (error instanceof CapacityReductionError) return context.json({ error: 'capacity_reduction_invalid', finding: { code: error.code, workshop_id: error.workshop_id, capacity: error.capacity, attendance: error.attendance, attendance_changed: error.attendance_changed } }, 409)
     if (error instanceof WorkshopReviewRequiredError)
       return context.json({ error: 'workshop_review_required', findings: error.findings }, 409)
     if (error instanceof AreaNotReadyError)
@@ -364,7 +365,7 @@ app.post('/api/events', async (context) => {
     })
     if (forbidden) throw new Error('forbidden')
     tracing.enterSpan('events.validate_world', () =>
-      assertAppendableWorld(deriveEventWorld([...existing, ...events])),
+      admitProfileProposal(existing, events, activeProfile, { build_revision: buildRevision, compatibility_revision: compatibilityRevision }),
     )
     await appendEventBatch(context, expectedHead, events)
     return context.json({ head: expectedHead + events.length }, 201)
