@@ -8,6 +8,7 @@ import {
 } from './closed-result.js'
 import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
 import { officialWorkshopsWorld } from '../official-workshops/index.js'
+import { workshopEligibilityFailure } from '../official-workshops/eligibility.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult, TraceEntry } from '../../solver/types.js'
 import type {
@@ -64,12 +65,6 @@ export type WorkshopAssignmentSection = {
   fixed_violations: readonly WorkshopFixedViolation[]
 }
 
-function eligibleRole(personRole: JsonValue | undefined, workshop: WorkshopRecord): boolean {
-  if (workshop.audience === 'children') return personRole === 'child'
-  if (workshop.audience === 'adults') return personRole === 'adult'
-  return true
-}
-
 function assignmentStage(
   params: WorkshopAssignmentParams,
   includeComparison = true,
@@ -104,9 +99,12 @@ function assignmentStage(
       // person's role every time; resolving that through `input.labels` meant
       // scanning every label in the occasion on each call.
       const roleByPerson = new Map<string, JsonValue>()
+      const ageByPerson = new Map<string, number | null>()
       for (const label of input.labels)
         if (label.key === 'role' && !roleByPerson.has(label.entity_id))
           roleByPerson.set(label.entity_id, label.value)
+        else if (label.key === 'age' && !ageByPerson.has(label.entity_id))
+          ageByPerson.set(label.entity_id, typeof label.value === 'number' ? label.value : null)
       // Ranked choices, filtered and ordered once per person for the round loop.
       const rankedChoicesByPerson = new Map<string, readonly WorkshopChoice[]>(
         rankingOutput.rankings.map((ranking) => [
@@ -189,7 +187,13 @@ function assignmentStage(
         if (!placement) return 'hard.unscheduled'
         if (workshop.mode !== 'assigned') return 'hard.mode-not-assigned'
         if (leaderSlots.get(personId)?.has(placement.slot_id)) return 'hard.leader-conflict'
-        if (!eligibleRole(roleByPerson.get(personId), workshop)) return 'hard.eligibility'
+        if (
+          workshopEligibilityFailure(
+            { age: ageByPerson.get(personId) ?? null, role: roleByPerson.get(personId) },
+            workshop,
+          )
+        )
+          return 'hard.eligibility'
         if ((counts.get(workshop.id) ?? 0) >= workshop.capacity) return 'hard.capacity'
         if (usedBySlot.get(placement.slot_id)?.has(personId)) return 'hard.overlap'
         return null

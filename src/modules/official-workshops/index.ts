@@ -3,6 +3,7 @@ import { defineModule } from '../define.js'
 import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
+export { workshopEligibilityFailure } from './eligibility.js'
 
 export const workshopModes = ['assigned', 'sign-up', 'interest'] as const
 

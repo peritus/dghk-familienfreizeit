@@ -171,7 +171,13 @@ function testProfile(assignmentParams: WorkshopAssignmentParams, maxRank = 3) {
   })
 }
 
-function family(personId: string, familyId: string, seq: number): Event[] {
+function family(
+  personId: string,
+  familyId: string,
+  seq: number,
+  age: number | null = 12,
+  role: 'child' | 'adult' | 'infant' = 'child',
+): Event[] {
   return [
     event(
       'FamilyInvited',
@@ -190,8 +196,8 @@ function family(personId: string, familyId: string, seq: number): Event[] {
         family_id: familyId,
         given_name: personId,
         family_name: familyId,
-        age: 12,
-        role: 'child',
+        age,
+        role,
       },
       seq + 1,
     ),
@@ -205,6 +211,8 @@ function workshop(
   seq: number,
   leaderIds: readonly string[] = [],
   needs: readonly string[] = [],
+  ageMin = 0,
+  ageMax = 18,
 ): Event {
   return event(
     'WorkshopAdded',
@@ -213,8 +221,8 @@ function workshop(
       title: workshopId,
       description: workshopId,
       audience: 'children',
-      age_min: 0,
-      age_max: 18,
+      age_min: ageMin,
+      age_max: ageMax,
       capacity,
       participation_mode: 'assigned',
       leader_ids: leaderIds,
@@ -709,6 +717,39 @@ test('automatic allocation never assigns a workshop outside the current ranking'
   expect(section.unassigned).toEqual([
     { person_id: 'per_a', workshop_id: null, reason: 'no current workshop choice' },
   ])
+})
+
+test('automatic choices enforce inclusive age bounds and reject unknown ages and infants', () => {
+  const cases: readonly {
+    age: number | null
+    role: 'child' | 'adult' | 'infant'
+    eligible: boolean
+  }[] = [
+    { age: 6, role: 'child', eligible: true },
+    { age: 14, role: 'child', eligible: true },
+    { age: 5, role: 'child', eligible: false },
+    { age: 15, role: 'child', eligible: false },
+    { age: null, role: 'child', eligible: false },
+    { age: 12, role: 'adult', eligible: false },
+    { age: 5, role: 'infant', eligible: false },
+  ]
+
+  for (const [index, person] of cases.entries()) {
+    const events = [
+      venue('wsp_a', 1),
+      slot(2),
+      workshop('wks_1', 10, 1, 3, [], [], 6, 14),
+      ...family('per_a', 'fam_a', 4, person.age, person.role),
+      ranking('per_a', 'wks_1', 1, 6),
+    ]
+    const section = assignmentSection(events, defaultParams)
+    expect(section.rounds[0]?.decisions, `case ${index}`).toEqual([
+      expect.objectContaining({
+        outcome: person.eligible ? 'assigned' : 'rejected',
+        reason: person.eligible ? 'ranked' : 'hard.eligibility',
+      }),
+    ])
+  }
 })
 
 test('a workshop leader cannot also attend a different workshop in their own leading slot', () => {

@@ -45,6 +45,7 @@ import { familyPreferencesConfig } from '../../../modules/family-preferences/ind
 import { sectionOffered } from '../../../derive/features.js'
 import {
   officialWorkshopsWorld,
+  workshopEligibilityFailure,
   type WorkshopMode,
   type WorkshopRecord,
 } from '../../../modules/official-workshops/index.js'
@@ -783,17 +784,18 @@ function workshopEligibility(
   person: ReturnType<typeof familyPeople>[number],
   workshop: WorkshopRecord,
 ): { ok: boolean; reason?: string } {
-  if (person.role === 'infant') return { ok: false, reason: 'Babys können hier nicht teilnehmen.' }
+  const failure = workshopEligibilityFailure(person, workshop)
+  if (!failure) return { ok: true }
   const age = person.age
-  if (age !== null && age < workshop.age_min)
-    return { ok: false, reason: `Ab ${workshop.age_min} Jahren. ${person.given_name} ist ${age}.` }
-  if (age !== null && age > workshop.age_max)
-    return { ok: false, reason: `Bis ${workshop.age_max} Jahre. ${person.given_name} ist ${age}.` }
-  if (workshop.audience === 'children' && person.role === 'adult')
-    return { ok: false, reason: 'Dieser Workshop ist für Kinder.' }
-  if (workshop.audience === 'adults' && person.role !== 'adult')
-    return { ok: false, reason: 'Dieser Workshop ist für Erwachsene.' }
-  return { ok: true }
+  const reasons = {
+    infant: 'Babys können hier nicht teilnehmen.',
+    'age-unknown': 'Das Alter muss eingetragen sein, damit die Altersgrenze geprüft werden kann.',
+    'age-too-young': `Ab ${workshop.age_min} Jahren. ${person.given_name} ist ${age}.`,
+    'age-too-old': `Bis ${workshop.age_max} Jahre. ${person.given_name} ist ${age}.`,
+    'audience-children': 'Dieser Workshop ist für Kinder.',
+    'audience-adults': 'Dieser Workshop ist für Erwachsene.',
+  }
+  return { ok: false, reason: reasons[failure] }
 }
 
 function workshopRankings(world: World, personId: string): readonly string[] {
