@@ -1,3 +1,4 @@
+import { AttentionNotices } from '../attention.js'
 import { PrintFooter } from '../../components/shared/ui/print-layout.js'
 import { LoadingState } from '../../components/shared/ui/screen-state.js'
 import { useMemo } from 'react'
@@ -36,7 +37,8 @@ export function WorkshopParticipationScreen() {
     return (
       <ScreenLayout
         secondary_navigation={<WorkshopNavigation />}
-        header={<ScreenHeader title="Teilnahme" />}
+        notices={<AttentionNotices scope="allocation" />}
+      header={<ScreenHeader title="Teilnahme" />}
       >
         <LoadingState />
       </ScreenLayout>

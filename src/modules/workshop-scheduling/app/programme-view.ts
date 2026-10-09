@@ -1,3 +1,4 @@
+import { attentionReason } from '../../../attention/reasons.js'
 import { workshopAgeLabel } from '../../official-workshops/checks.js'
 import type { WorkshopRecord } from '../../official-workshops/index.js'
 import type { WorkshopRanking } from '../../workshop-rankings/index.js'
@@ -113,27 +114,6 @@ function placementLabel(slot: WorkshopSlot | undefined, timeZone: string): strin
   return `${dateLabel(slot.starts_at, timeZone)}, ${timeLabel(slot.starts_at, slot.ends_at, timeZone)}`
 }
 
-function reasonLabel(reason: string): string {
-  switch (reason) {
-    case 'hard.space-occupied':
-      return 'Alle passenden Raum-Slots sind bereits belegt.'
-    case 'hard.space-capacity':
-      return 'Kein passender Raum bietet genügend Plätze.'
-    case 'hard.space-unavailable':
-      return 'Kein passender Raum ist in einem Slot verfügbar.'
-    case 'hard.space-slot-blocked':
-      return 'Passende Raum-Slots sind gesperrt.'
-    case 'hard.missing-capability':
-      return 'Kein Raum erfüllt die benötigten Eigenschaften.'
-    case 'hard.leader-conflict':
-      return 'Eine Leitung ist in den passenden Slots bereits eingeplant.'
-    case 'hard.no-slot-or-space':
-      return 'Es gibt keinen passenden Slot oder Raum.'
-    default:
-      return reason
-  }
-}
-
 export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeViewProjection {
   const workshops = new Map(input.workshops.map((workshop) => [workshop.id, workshop]))
   const placements = new Map(
@@ -213,7 +193,7 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
     .map((workshop) => ({
       id: workshop.id,
       title: workshop.title,
-      reason: reasonLabel(unscheduled.get(workshop.id) ?? 'hard.no-slot-or-space'),
+      reason: attentionReason(unscheduled.get(workshop.id) ?? 'hard.no-slot-or-space'),
       demand_label:
         workshop.mode === 'assigned'
           ? `${input.demand[workshop.id] ?? 0} Wünsche · Kapazität ${workshop.capacity}`

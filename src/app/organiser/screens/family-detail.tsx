@@ -1,3 +1,4 @@
+import { useAttention } from '../attention.js'
 import { TextareaField } from '../../components/shared/ui/field.js'
 import { ChoiceField } from '../../components/shared/ui/field.js'
 import { TextField } from '../../components/shared/ui/field.js'
@@ -1294,6 +1295,7 @@ export function FamilyDetail({
   topic?: FamilyTopic
   person_id?: string
 }) {
+  const attention=useAttention()
   const { state, world, stage, effective_features: effectiveFeatures, phases } = useOrganiser()
   const [, navigate] = useLocation()
   const family = familyId ? findFamily(world!, familyId) : null
@@ -1331,7 +1333,7 @@ export function FamilyDetail({
   const displayName = labelValue(labels, 'display-name') ?? selectedFamilyId
   const email = labelValue(labels, 'email') ?? ''
   const people = familyPeople(world!, selectedFamilyId)
-  const status = familyStatus(world!, family)
+  const status = familyStatus(world!, family, attention)
   const detailPersonId =
     personId && people.some((person) => person.entity.id === personId) ? personId : undefined
 

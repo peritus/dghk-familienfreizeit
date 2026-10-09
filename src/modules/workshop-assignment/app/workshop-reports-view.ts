@@ -1,3 +1,4 @@
+import { attentionReason } from '../../../attention/reasons.js'
 import { workshopAgeLabel } from '../../official-workshops/checks.js'
 import type { World, Label } from '../../../events/fold.js'
 import type { Plan } from '../../../solver/types.js'
@@ -246,17 +247,6 @@ function audienceLabel(value: string): string {
   return { children: 'Kinder', adults: 'Erwachsene', all: 'Alle' }[value] ?? value
 }
 
-function openReasonLabel(reason: string): string {
-  switch (reason) {
-    case 'no eligible capacity':
-      return 'Alle passenden Workshops sind voll.'
-    case 'no current workshop choice':
-      return 'Keine Workshopwahl abgegeben.'
-    default:
-      return reason
-  }
-}
-
 function leader(
   world: World,
   externalLeaders: readonly ExternalLeader[],
@@ -413,7 +403,7 @@ export function buildWorkshopReportsProjection(
   const externalLeaders = official.external_leaders
   const personIds = new Set(input.world.persons.map((person) => person.id))
   const openReasons = new Map(
-    assignment.unassigned.map((item) => [item.person_id, openReasonLabel(item.reason)]),
+    assignment.unassigned.map((item) => [item.person_id, attentionReason(item.reason)]),
   )
 
   const placedWorkshops = official.workshops.flatMap((workshop) => {

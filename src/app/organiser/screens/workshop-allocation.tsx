@@ -1,3 +1,4 @@
+import { AttentionNotices } from '../attention.js'
 import { LoadingState } from '../../components/shared/ui/screen-state.js'
 import { useMemo, useState } from 'react'
 import { useLocation, useSearch } from 'wouter'
@@ -37,7 +38,6 @@ import {
 } from '../../../modules/workshop-rankings/app/components/choices.js'
 import {
   WorkshopAllocationAnswers,
-  WorkshopAllocationConflictNotice,
   WorkshopAllocationDemand,
   WorkshopAllocationEmptyState,
   WorkshopAllocationGroupFilter,
@@ -225,7 +225,7 @@ export function WorkshopAllocation() {
       }
       notices={
         <>
-          <WorkshopAllocationConflictNotice projection={projection} />
+          <AttentionNotices scope="allocation" />
           <ClosedAreaDifferences area="workshops" />
           <FixedDecisionReview
             items={projection.fixed_reviews ?? []}

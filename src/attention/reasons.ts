@@ -1,4 +1,9 @@
 const reasons: Readonly<Record<string, readonly [string, string]>> = {
+ 'hard.room-unavailable': ['Zimmer nicht verfügbar', 'Room unavailable'],
+ 'hard.trait-requirements': ['Benötigte Zimmermerkmale fehlen', 'Required room capabilities missing'],
+ 'hard.resolver-decisions': ['Zimmerentscheidung oder Ausschluss', 'Room decision or exclusion'],
+ 'hard.keep-apart': ['Getrennte Unterbringung erforderlich', 'Separate accommodation required'],
+ 'hard.sole-occupancy': ['Zimmer allein erforderlich', 'Sole occupancy required'],
  'hard.eligibility': ['Alter oder Zielgruppe passt nicht', 'Age or audience does not match'],
  infant: ['Säuglinge nehmen nicht an der Wahl teil', 'Infants do not take part in choices'],
  'age-unknown': ['Alter nicht dokumentiert', 'Age not recorded'],

@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/app/*"] }
+  },
+  "include": [
+    "src/events/prepare.ts",
+    "src/attention/**/*.ts",
+    "src/app/**/*.ts",
+    "src/app/**/*.tsx",
+    "src/modules/**/*.tsx",
+    "src/config/**/*.ts",
+    "src/derive/**/*.ts",
+    "src/events/fold.ts",
+    "src/events/kdl.ts",
+    "src/events/resolver.ts",
+    "src/events/types.ts",
+    "src/events/world.ts",
+    "src/modules/**/*.ts",
+    "src/solver/**/*.ts",
+    "src/organiser/**/*.ts",
+    "test/app/**/*.tsx"
+  ]
+}

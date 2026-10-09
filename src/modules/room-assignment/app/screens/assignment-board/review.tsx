@@ -1,14 +1,13 @@
 import { activeProfile } from '../../../../../config/index.js'
-import { buildRevision, compatibilityRevision } from '../../../../../config/build.js'
 import type { World } from '../../../../../events/fold.js'
 import { inventoryWorld } from '../../../../../modules/room-inventory/index.js'
 import type {
   RoomAssignment,
   RoomAssignmentSection,
 } from '../../../../../modules/room-assignment/index.js'
-import { buildSolverInput, solve } from '../../../../../solver/index.js'
-import { composeSolverContributions } from '../../../../../solver/index.js'
-import type { SolverContributions } from '../../../../../solver/types.js'
+import type { Plan } from '../../../../../solver/types.js'
+import type { AttentionResult } from '../../../../../attention/types.js'
+import { selectAttention } from '../../../../../attention/selectors.js'
 import type {
   AssignmentPrintView,
   BoardView,
@@ -34,10 +33,6 @@ function localized(value: string | Readonly<Record<string, string>> | undefined)
   if (!value) return ''
   if (typeof value === 'string') return value
   return value[activeProfile.meta.locale] ?? value[activeProfile.meta.fallback_locale] ?? ''
-}
-
-function contributions(): SolverContributions {
-  return composeSolverContributions(activeProfile)
 }
 
 function labelValue(world: World, entityId: string, key: string): unknown {
@@ -104,7 +99,7 @@ function requirements(
   return requirements.flatMap((requirement) => {
     if (requirement.strength !== 'required' && requirement.strength !== 'preferred') return []
     const label = requirementLabel(requirement)
-    const key = `${label.key}:${requirement.strength}`
+    const key = `${label.key}:${requirement.value ?? ''}:${requirement.strength}`
     if (seen.has(key)) return []
     seen.add(key)
     const met = room
@@ -119,7 +114,7 @@ function requirements(
       : undefined
     return [
       {
-        key: label.key,
+        key,
         label: label.label,
         strength: requirement.strength,
         capability_key: requirement.capability_key,
@@ -240,52 +235,16 @@ function roomViews(
   })
 }
 
-function reasonLabel(reason: string): string {
-  if (reason.includes('hard.capacity')) return 'Nicht genügend freie Schlafplätze.'
-  if (reason.includes('hard.trait-requirements'))
-    return 'Kein verfügbares Zimmer erfüllt alle erforderlichen Merkmale.'
-  if (reason.includes('hard.resolver-decisions'))
-    return 'Die Raumkonfiguration schließt das Zimmer aus.'
-  if (reason.includes('hard.keep-apart'))
-    return 'Die Belegungsregeln verhindern die gemeinsame Unterbringung.'
-  return 'Kein passendes Zimmer gefunden.'
-}
-
-function subjectLabel(world: World, subject: string): string {
-  if (world.families.some(({ id }) => id === subject)) return familyName(world, subject)
-  if (inventoryWorld(world).rooms.some(({ id }) => id === subject)) return roomLabel(world, subject)
-  const trait = activeProfile.traits[subject as keyof typeof activeProfile.traits]
-  return localized(trait?.title) || 'Konfigurationsmerkmal'
-}
-
-function findingViews(world: World, plan: ReturnType<typeof solve>): readonly FindingView[] {
-  return plan.preflight.map((finding, index) => ({
-    id: `${finding.check}-${finding.subjects.join('-')}-${index}`,
-    severity: finding.severity === 'error' ? ('error' as const) : ('warning' as const),
-    title:
-      finding.check === 'room-assignment.unplaced-family'
-        ? 'Familie ohne Zimmer'
-        : finding.check === 'room-assignment.fixed-invalid'
-          ? 'Ungültige feste Zuordnung'
-          : 'Belegungsprüfung',
-    description: reasonLabel(finding.text),
-    subjects: finding.subjects.map((subject) => subjectLabel(world, subject)),
-  }))
+function findingViews(world: World, attention: AttentionResult): readonly FindingView[] {
+ return selectAttention(attention,{area:'accommodation'}).filter(item=>item.kind==='problem'||item.kind==='review').map(item=>({id:item.id,severity:item.severity==='error'?'error':'warning',title:item.wording.title,description:[item.wording.detail,...item.wording.reasons].join(' · '),subjects:item.subjects.map(subject=>familyName(world,subject.id))}))
 }
 
 export function deriveAssignmentReview(
   world: World,
+  plan: Plan,
+  attention: AttentionResult,
   generatedAt = 'Im Browser erzeugt',
 ): AssignmentReview {
-  const solverContributions = contributions()
-  const input = buildSolverInput(world, solverContributions)
-  const plan = solve(input, solverContributions, {
-    build_revision: buildRevision,
-    compatibility_revision: compatibilityRevision,
-    event_date: activeProfile.meta.starts_on,
-    profile: activeProfile,
-    seed: null,
-  })
   const section = plan.sections['room-assignment'] as RoomAssignmentSection | undefined
   if (!section) throw new Error('room-assignment solver output is unavailable')
 
@@ -320,8 +279,9 @@ export function deriveAssignmentReview(
   const unplaced = section.unplaced.map(({ family_id: familyId }) =>
     familyFor(familyId, 'unplaced'),
   )
+  const noMatchIds=new Set(selectAttention(attention,{area:'accommodation'}).filter(i=>i.code==='room-assignment.required-contradiction').flatMap(i=>i.subjects.map(s=>s.id)))
   const withoutMatch = section.unplaced
-    .filter(({ reason }) => /hard\.(trait-requirements|resolver-decisions|keep-apart)/.test(reason))
+    .filter(({ family_id }) => noMatchIds.has(family_id))
     .map(({ family_id: familyId }) => familyFor(familyId, 'unplaced'))
   for (const room of rooms) {
     room.fit_hints = unplaced
@@ -410,12 +370,12 @@ export function deriveAssignmentReview(
     placed_families: placedFamilies.size,
     unplaced_families: section.unplaced.length,
     rooms: reportRooms,
-    unplaced: section.unplaced.map(({ family_id: id, person_ids: people, reason }) => ({
+    unplaced: section.unplaced.map(({ family_id: id, person_ids: people }) => ({
       family: familyName(world, id),
       people: `${people.length} ${people.length === 1 ? 'Person' : 'Personen'}`,
-      reason: reasonLabel(reason),
+      reason: selectAttention(attention,{area:'accommodation',subject_id:id}).map(i=>[i.wording.detail,...i.wording.reasons].join(' · ')).join(' · '),
     })),
-    findings: findingViews(world, plan),
+    findings: findingViews(world, attention),
   }
   return {
     board: {
@@ -432,7 +392,7 @@ export function deriveAssignmentReview(
       free_rooms: freeRooms,
       partial_rooms: partialRooms,
       unplaced_reasons: Object.fromEntries(
-        section.unplaced.map(({ family_id: familyId, reason }) => [familyId, reasonLabel(reason)]),
+        section.unplaced.map(({ family_id: familyId }) => [familyId, selectAttention(attention,{area:'accommodation',subject_id:familyId}).map(i=>[i.wording.detail,...i.wording.reasons].join(' · ')).join(' · ')]),
       ),
     },
     print,

@@ -1,3 +1,8 @@
+import { useContext, useMemo } from 'react'
+import { OrganiserContext } from '../../../../../app/organiser/context.js'
+import { activeProfile } from '../../../../../config/index.js'
+import { buildRoomAssignmentInput, roomFeasibility, type RoomAssignmentParams, type RoomAssignmentSection } from '../../../index.js'
+import { attentionReason } from '../../../../../attention/reasons.js'
 import {
   Dialog,
   DialogClose,
@@ -11,21 +16,8 @@ import { AvailabilityBadge } from '../availability-badge.js'
 import { Button } from '../../../../../app/components/shared/ui/button.js'
 import { OrganiserLink } from '../../../../../app/components/application/organiser-link.js'
 import { organiserPathWithHash, organiserPaths } from '../../../../../organiser/routes.js'
-import type { FamilyView, RequirementView, RoomView } from '../../screens/assignment-board/types.js'
+import type { FamilyView, RoomView } from '../../screens/assignment-board/types.js'
 import { RequirementChip } from './chips.js'
-
-function evaluatedRequirements(family: FamilyView, room: RoomView): RequirementView[] {
-  const occupants = room.occupants.map(({ id }) => id)
-  return family.requirements.map((requirement) => ({
-    ...requirement,
-    met:
-      requirement.kind === 'structural' && requirement.structural === 'no-other-families'
-        ? occupants.every((id) => id === family.id)
-        : requirement.capability_key
-          ? room.amenity_keys.includes(requirement.capability_key)
-          : true,
-  }))
-}
 
 export function FixedAssignmentDialog({
   family,
@@ -40,28 +32,17 @@ export function FixedAssignmentDialog({
   onOpenChange: (open: boolean) => void
   onAssign: (family: FamilyView, room: RoomView) => void
 }) {
+  const context=useContext(OrganiserContext)
+  const feasibility=useMemo(()=>{
+    const module=activeProfile.modules.find(m=>m.id==='room-assignment')
+    if(!context?.world||!module||!family)return []
+    const params=module.parameters as RoomAssignmentParams
+    const input=buildRoomAssignmentInput(context.world,params)
+    const assignments=(context.current_plan?.sections['room-assignment'] as RoomAssignmentSection|undefined)?.assignments??[]
+    return roomFeasibility(input,params,assignments,family.id)
+  },[context?.world,context?.current_plan,family])
   if (!family) return null
-  const candidates = rooms
-    .filter((room) => room.id !== family.room_id && room.free >= family.bed_demand)
-    .map((room) => {
-      const requirements = evaluatedRequirements(family, room)
-      return {
-        room,
-        requirements,
-        unmet_required: requirements.filter(
-          ({ strength, met }) => strength === 'required' && met === false,
-        ).length,
-        unmet_wishes: requirements.filter(
-          ({ strength, met }) => strength === 'preferred' && met === false,
-        ).length,
-      }
-    })
-    .sort(
-      (left, right) =>
-        left.unmet_required - right.unmet_required ||
-        left.unmet_wishes - right.unmet_wishes ||
-        left.room.free - right.room.free,
-    )
+  const candidates=feasibility.flatMap(candidate=>{const room=rooms.find(r=>r.id===candidate.room_id);return room&&room.id!==family.room_id?[{room,requirements:family.requirements,reasons:candidate.reasons,unmet_required:candidate.reasons.length,unmet_wishes:0}]:[]})
   const hasRequirementMatch = candidates.some(
     ({ unmet_required: unmetRequired }) => unmetRequired === 0,
   )
@@ -87,7 +68,7 @@ export function FixedAssignmentDialog({
           ) : null}
         </DialogHeader>
         <div className="mt-5 divide-y-2 divide-border overflow-hidden rounded-base border-2 border-border">
-          {candidates.map(({ room, requirements, unmet_required: unmetRequired }) => (
+          {candidates.map(({ room, requirements, reasons, unmet_required: unmetRequired }) => (
             <div key={room.id} className="space-y-3 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -113,6 +94,7 @@ export function FixedAssignmentDialog({
                   <RequirementChip key={requirement.key} requirement={requirement} />
                 ))}
               </div>
+              <ul className="text-sm">{reasons.map(reason=><li key={reason}>{attentionReason(reason)}</li>)}</ul>
               <Button type="button" onClick={() => onAssign(family, room)}>
                 {unmetRequired > 0 ? 'Trotzdem zuordnen' : 'Zuordnen'}
               </Button>

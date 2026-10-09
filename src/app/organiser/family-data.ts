@@ -1,3 +1,4 @@
+import type { AttentionResult } from '../../attention/types.js'
 import type { Entity, World, Label } from '../../events/fold.js'
 
 export type FamilyRow = {
@@ -78,35 +79,13 @@ export function familyPeople(world: World, familyId: string): readonly FamilyPer
     .map((person) => personView(world, person))
 }
 
-function workshopWishCount(world: World, personId: string): number {
-  return (world.labels_by_entity[personId] ?? []).filter(
-    (label) => label.key === 'prefers-workshop',
-  ).length
-}
-
-/** The list status is a projection of the same labels edited by the detail views. */
-export function familyStatus(world: World, row: FamilyRow): FamilyStatus {
-  const open: string[] = []
-  const familyLabels = world.labels_by_entity[row.family.id] ?? []
-  for (const [key, label] of [
-    ['needs-private-sanitary', 'Eigenes Bad'],
-    ['needs-accessible', 'Barrierearmes Zimmer'],
-    ['sole-occupancy', 'Zimmer allein'],
-  ] as const) {
-    if (!familyLabels.some((label) => label.key === key)) open.push(label)
-  }
-
-  if (row.persons.length === 0) open.push('Personen')
-  for (const person of row.persons.map((entity) => personView(world, entity))) {
-    const name = personName(person) || person.entity.id
-    if (person.role === 'child' && person.age === null) open.push(`${name}: Alter`)
-    if (!world.labels_by_entity[person.entity.id]?.some((label) => label.key === 'diet')) {
-      open.push(`${name}: Essen`)
-    }
-    const target = person.role === 'infant' ? 0 : person.role === 'child' ? 2 : 1
-    if (workshopWishCount(world, person.entity.id) < target) open.push(`${name}: Workshops`)
-  }
-  return { complete: open.length === 0, open }
+/** Completeness selects core/response attention; placement warnings do not change it. */
+export function familyStatus(_world: World, row: FamilyRow, attention: AttentionResult): FamilyStatus {
+ const ids=new Set([row.family.id,...row.persons.map(p=>p.id)])
+ const codes=new Set(['kernel.family-without-persons','kernel.child-age-missing','family-preferences.response-missing','family-preferences.response-inconsistent','workshop-rankings.response-missing','workshop-rankings.invalid-response'])
+ const open=attention.items.filter(i=>codes.has(i.code)&&i.subjects.some(s=>ids.has(s.id))).map(i=>i.wording.title)
+ const unavailable=attention.coverage.some(c=>codes.has(c.code)&&c.state==='unavailable')
+ return {complete:!unavailable&&open.length===0,open:unavailable?[...open,'Die Prüfung ist noch nicht vollständig.']:open}
 }
 
 export function eventTypeLabel(type: string): string {

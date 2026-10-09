@@ -1,3 +1,4 @@
+import { useAttention } from '../attention.js'
 import { TableFrame } from '../../components/shared/ui/data-table.js'
 import { EmptyState } from '../../components/shared/ui/screen-state.js'
 import { TextField } from '../../components/shared/ui/field.js'
@@ -44,6 +45,7 @@ function familyStatusBadges(open: readonly string[], complete: boolean) {
 }
 
 export function Families() {
+  const attention=useAttention()
   const { world, state, stage: stageEvents } = useOrganiser()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<FamilyFilter>('all')
@@ -55,7 +57,7 @@ export function Families() {
   const all = useMemo(
     () =>
       familyRows(world!)
-        .map((row) => ({ row, status: familyStatus(world!, row) }))
+        .map((row) => ({ row, status: familyStatus(world!, row, attention) }))
         .sort((a, b) => a.row.display_name.localeCompare(b.row.display_name, 'de')),
     [world],
   )

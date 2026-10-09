@@ -1,6 +1,7 @@
+import { useAttention, AttentionNotices } from '../attention.js'
 import { pluralDe } from '../../lib/plural-de.js'
 import type { Plan } from '../../../solver/types.js'
-import { workshopNotes, workshopAgeLabel } from '../../../modules/official-workshops/checks.js'
+import { workshopAgeLabel } from '../../../modules/official-workshops/checks.js'
 import { ChoiceField } from '../../components/shared/ui/field.js'
 import { ActionableNotice } from '../../components/shared/ui/notice.js'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
@@ -18,7 +19,6 @@ import {
   type WorkshopSlot,
 } from '../../../modules/workshop-scheduling/index.js'
 import { workshopSpaceWorld, type WorkshopSpace } from '../../../modules/workshop-space/index.js'
-import { buildSolverInput, composeSolverContributions, solve } from '../../../solver/index.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
 import { Button } from '../../components/shared/ui/button.js'
 import { DestructiveActionDialog } from '../../components/shared/ui/destructive-action-dialog.js'
@@ -164,17 +164,8 @@ function WorkshopRetireAction({
   )
 }
 
-function solveWorkshopPlan(world: World, currentPlan?: Plan | null): WorkshopPlan {
-  const contributions = composeSolverContributions(activeProfile)
-  const plan =
-    currentPlan ??
-    solve(buildSolverInput(world, contributions), contributions, {
-      build_revision: 'organiser',
-      compatibility_revision: 1,
-      event_date: activeProfile.meta.starts_on,
-      profile: activeProfile,
-      seed: null,
-    })
+function solveWorkshopPlan(_world: World, currentPlan?: Plan | null): WorkshopPlan {
+  const plan: {sections:Readonly<Record<string,unknown>>}=currentPlan??{sections:{}}
   const scheduling = plan.sections['workshop-scheduling'] as
     | {
         placements?: readonly Placement[]
@@ -613,16 +604,14 @@ export function Workshops({
     interestsByWorkshop.set(attendee.workshop_id, people)
   }
   const placedWorkshopIds = new Set(plan.placements.map((placement) => placement.workshop_id))
-  const notes = workshopNotes(summary.workshops, new Set(leaderNames.keys()), plan.demand)
+  const attention=useAttention()
+  const notes=attention.items.filter(item=>item.display_scopes.includes('workshop'))
   const notedIds = new Set(
     notes
-      .filter(({ kind }) => kind === 'advisory')
-      .map(({ workshop_id: workshopId }) => workshopId),
+      .filter(item=>item.kind==='review'||item.kind==='problem')
+      .flatMap(item=>item.subjects.filter(s=>s.kind==='workshop').map(s=>s.id)),
   )
-  const oversubscribed = summary.workshops.filter(
-    (workshop) =>
-      workshop.mode === 'assigned' && (plan.demand[workshop.id] ?? 0) > workshop.capacity,
-  ).length
+  const oversubscribed=notes.filter(item=>item.code==='workshop-rankings.demand').length
   const editingWorkshop =
     editor && editor !== 'new'
       ? summary.workshops.find((workshop) => workshop.id === editor)
@@ -748,6 +737,7 @@ export function Workshops({
           />
         </>
       }
+      notices={<AttentionNotices scope="workshop" />}
       summary={
         <StatsStrip
           items={[
@@ -954,9 +944,9 @@ export function Workshops({
                       workshop.mode === 'assigned' ? (plan.demand[workshop.id] ?? 0) : undefined,
                     notes: notes
                       .filter(
-                        (note) => note.workshop_id === workshop.id && note.kind === 'advisory',
+                        (note) => note.subjects.some(s=>s.id===workshop.id) && (note.kind==='review'||note.kind==='problem'),
                       )
-                      .map(({ message }) => message),
+                      .map(item=>item.wording.detail),
                     placement: {
                       label:
                         placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
@@ -1019,72 +1009,15 @@ export function Workshops({
 }
 
 /** The workshop review phase's readiness, with its first findings (phases.md §3, §8). */
-function ReviewReadinessNotice({ phases }: { phases: readonly PhaseView[] }) {
-  const review = phases.find(({ phase }) => phase === 'workshop-assignment.review')
-  const closed = phases.some(
-    ({ phase, status }) => phase === 'workshop-rankings.choice' && status === 'closed',
-  )
-  const findings = review && !review.readiness.ready ? review.readiness.findings : []
-  if (closed)
-    return (
-      <StatusNotice label="Festgelegt" tone="success">
-        Das Ergebnis ist festgelegt. Änderungen erscheinen als Abweichung vom festgelegten Ergebnis.
-      </StatusNotice>
-    )
-  if (findings.length)
-    return (
-      <ActionableNotice
-        title={`${findings.length} ${findings.length === 1 ? 'Hinweis verhindert' : 'Hinweise verhindern'} das Festlegen.`}
-        action={
-          <OrganiserLink
-            href={organiserPaths.workshop_allocation_trace()}
-            className={buttonVariants({ variant: 'neutral' })}
-          >
-            Hinweise prüfen
-          </OrganiserLink>
-        }
-      >
-        <ul className="list-disc pl-5">
-          {findings.slice(0, 3).map((finding) => (
-            <li key={`${finding.id}-${finding.subject_id ?? ''}`}>{finding.message}</li>
-          ))}
-          {findings.length > 3 ? <li>… und {findings.length - 3} weitere</li> : null}
-        </ul>
-      </ActionableNotice>
-    )
-  return (
-    <StatusNotice
-      label={findings.length ? 'Prüfung erforderlich' : 'Zuordnung prüfen'}
-      tone={findings.length ? 'attention' : 'success'}
-      details={
-        findings.length ? (
-          <ul className="list-disc pl-5">
-            {findings.slice(0, 3).map((finding) => (
-              <li key={`${finding.id}-${finding.subject_id ?? ''}`}>{finding.message}</li>
-            ))}
-            {findings.length > 3 ? <li>… und {findings.length - 3} weitere</li> : null}
-          </ul>
-        ) : (
-          'Alle Workshops haben einen Platz. Prüfe Bedarf, Plätze und Überschneidungen.'
-        )
-      }
-    >
-      {findings.length
-        ? `${findings.length} ${findings.length === 1 ? 'Hinweis verhindert' : 'Hinweise verhindern'} das Festlegen.`
-        : 'Das Programm ist berechnet und kann auf Konflikte geprüft werden.'}
-    </StatusNotice>
-  )
-}
-
 export function WorkshopProgramme() {
   useDocumentTitle('Programm · Workshops · Familienfreizeit')
-  const { world, phases, state } = useOrganiser()
+  const { world, phases, state, current_plan:currentPlan } = useOrganiser()
   const [location, navigate] = useLocation()
   const schedule = workshopSchedulingWorld(world!)
   const spaces = workshopSpaceWorld(world!).live
   const official = officialWorkshopsWorld(world!)
   const rankings = workshopRankingsWorld(world!)
-  const plan = solveWorkshopPlan(world!)
+  const plan = solveWorkshopPlan(world!, currentPlan)
   const view = programmeReviewView(location)
   const personNames = new Map(
     world!.persons.map((person) => {
@@ -1148,7 +1081,7 @@ export function WorkshopProgramme() {
       }
       notices={
         <>
-          <ReviewReadinessNotice phases={phases ?? []} />
+          <AttentionNotices scope="programme" />
           <FixedDecisionReview
             items={programme.fixed_reviews}
             title="Feste Platzierungen prüfen"
@@ -1235,7 +1168,7 @@ export function WorkshopSlots() {
   useDocumentTitle('Slots · Workshops · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const summary = workshopSchedulingWorld(world!)
-  const plan = solveWorkshopPlan(world!)
+  const plan = solveWorkshopPlan(world!, currentPlan)
   const [addingSlot, setAddingSlot] = useState(false)
   const [editingSlot, setEditingSlot] = useState<WorkshopSlot | null>(null)
   const [slotError, setSlotError] = useState<string | null>(null)

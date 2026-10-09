@@ -1,3 +1,4 @@
+import { attentionReason } from '../../../attention/reasons.js'
 import type { World, Label } from '../../../events/fold.js'
 import type { Plan } from '../../../solver/types.js'
 import { compareFixedDecisions } from '../../../solver/fixed-decision.js'
@@ -289,21 +290,6 @@ function reasonOutcome(reason: string | undefined): WorkshopAllocationTraceOutco
     default:
       return 'unprocessed'
   }
-}
-
-function fixedViolationReasonText(reason: string): string {
-  const labels = new Map<string, string>([
-    ['hard.capacity', 'Kapazität überschritten'],
-    ['hard.overlap', 'Überschneidung'],
-    ['hard.leader-conflict', 'Person leitet gleichzeitig einen Workshop'],
-    ['hard.unscheduled', 'Workshop hat keinen Termin'],
-    ['hard.eligibility', 'Alter oder Zielgruppe passt nicht'],
-    ['hard.mode-not-assigned', 'andere Teilnahmeart'],
-    ['hard.cancellation', 'Workshop abgesagt oder entfernt'],
-    ['hard.fixed-pair-unresolved', 'needs/provides-Paar ist unvollständig'],
-    ['policy.target-reached', 'persönliches Zuordnungslimit überschritten'],
-  ])
-  return labels.get(reason) ?? reason
 }
 
 function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
@@ -619,7 +605,7 @@ export function buildWorkshopAllocationProjection(
       rank: null,
       phase: 'fixed',
       outcome: reasonOutcome(violation.reasons[0]),
-      detail: `Feste Zuordnung bleibt bestehen. Konflikte: ${violation.reasons.map(fixedViolationReasonText).join(', ')}.`,
+      detail: `Feste Zuordnung bleibt bestehen. Konflikte: ${violation.reasons.map(attentionReason).join(', ')}.`,
       slot_label: slotLabel(violation.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
@@ -769,10 +755,10 @@ export function buildWorkshopAllocationProjection(
         }))
       const cells: WorkshopParticipationCell[] = participationSlots.map((slot) => {
         const entries = slotEntriesByPerson.get(person.id)?.get(slot.id)
-        if (entries?.leaders.length) return { kind: 'leader', entries: entries.leaders }
-        if (entries?.assignments.length) return { kind: 'assignment', entries: entries.assignments }
-        if (entries?.signups.length) return { kind: 'sign-up', entries: entries.signups }
-        if (entries?.interests.length) return { kind: 'interest', entries: entries.interests }
+        if(entries){
+          const all=[...entries.leaders.map(e=>({...e,source:'Leitung'})),...entries.assignments.map(e=>({...e,source:'Teilnahme'})),...entries.signups.map(e=>({...e,source:'Anmeldung'})),...entries.interests.map(e=>({...e,source:'Interesse'}))].map(e=>({...e,title:`${e.title} (${e.source})`}))
+          if(all.length)return {kind:entries.leaders.length?'leader':entries.assignments.length?'assignment':entries.signups.length?'sign-up':'interest',entries:all}
+        }
         return { kind: 'free', entries: [] }
       })
       return {
