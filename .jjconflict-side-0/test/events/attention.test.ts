@@ -39,3 +39,12 @@ test('core records distinct unknown fields and localized applicability reasons',
  ] }
  expect(composeAttention(coreAttentionChecks)({ ...context, world }).items.filter(i => i.code === 'kernel.unknown-trait')).toHaveLength(2)
 })
+
+import { projectFamilyWorld } from '../../src/events/world.js'
+test('projection allowlist strips hidden labels, resolver tokens and derived attention',()=>{
+ const world={...context.world!,families:[{id:'fam_one',kind:'family',sort_key:1,created_seq:1}],labels:[{entity_id:'fam_one',key:'provides',value:'secret_per_other',value_type:'string' as const,strength:null,note:null,set_seq:1,sensitivity:'normal' as const}],diagnostics:[{id:'secret',subject_id:'per_other',severity:'warning' as const,message:'secret text'}],summaries:{hidden:'secret'}}
+ const projected=projectFamilyWorld(world,'fam_one')
+ expect(JSON.stringify(projected)).not.toContain('secret')
+ expect(projected.diagnostics).toEqual([]);expect(projected.summaries).toEqual({})
+ expect(world.diagnostics).toHaveLength(1)
+})
