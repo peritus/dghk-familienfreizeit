@@ -3,31 +3,31 @@
 // full-mode data-generation logic (seed 7), transformed into events for
 // this repository's actual event/module schemas. See spec/html-prototypes/AGENTS.md.
 
-WorkshopSpaceAdded workshop_space_id="wsp_r9" name="Atelier" location_description="Atelier" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=9
+WorkshopSpaceAdded workshop_space_id="wsp_r9" name="Atelier" location_description="Atelier" capacity=30 sort_key=9
 LabelSet entity_id="wsp_r9" key="provides" value="Tische" strength=#null note=#null
 LabelSet entity_id="wsp_r9" key="provides" value="Brennofen" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r10" name="Werkraum" location_description="Werkraum" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=10
+WorkshopSpaceAdded workshop_space_id="wsp_r10" name="Werkraum" location_description="Werkraum" capacity=30 sort_key=10
 LabelSet entity_id="wsp_r10" key="provides" value="Werkbänke" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r11" name="Küche" location_description="Küche" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=11
+WorkshopSpaceAdded workshop_space_id="wsp_r11" name="Küche" location_description="Küche" capacity=30 sort_key=11
 LabelSet entity_id="wsp_r11" key="provides" value="Herd" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r12" name="Halle" location_description="Halle" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=12
+WorkshopSpaceAdded workshop_space_id="wsp_r12" name="Halle" location_description="Halle" capacity=30 sort_key=12
 LabelSet entity_id="wsp_r12" key="provides" value="Matten" strength=#null note=#null
 LabelSet entity_id="wsp_r12" key="provides" value="Musikanlage" strength=#null note=#null
 LabelSet entity_id="wsp_r12" key="provides" value="viel Platz" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r13" name="Saal" location_description="Saal" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=13
+WorkshopSpaceAdded workshop_space_id="wsp_r13" name="Saal" location_description="Saal" capacity=30 sort_key=13
 LabelSet entity_id="wsp_r13" key="provides" value="Bühne" strength=#null note=#null
 LabelSet entity_id="wsp_r13" key="provides" value="Tische" strength=#null note=#null
 LabelSet entity_id="wsp_r13" key="provides" value="viel Platz" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r14" name="Seminarraum" location_description="Seminarraum" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=14
+WorkshopSpaceAdded workshop_space_id="wsp_r14" name="Seminarraum" location_description="Seminarraum" capacity=30 sort_key=14
 LabelSet entity_id="wsp_r14" key="provides" value="Tische" strength=#null note=#null
 LabelSet entity_id="wsp_r14" key="provides" value="Beamer" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r15" name="Kaminzimmer" location_description="Kaminzimmer" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=15
+WorkshopSpaceAdded workshop_space_id="wsp_r15" name="Kaminzimmer" location_description="Kaminzimmer" capacity=30 sort_key=15
 LabelSet entity_id="wsp_r15" key="provides" value="ruhig" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r16" name="Wiese" location_description="Wiese" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=16
+WorkshopSpaceAdded workshop_space_id="wsp_r16" name="Wiese" location_description="Wiese" capacity=30 sort_key=16
 LabelSet entity_id="wsp_r16" key="provides" value="draußen" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r17" name="Wald" location_description="Wald" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=17
+WorkshopSpaceAdded workshop_space_id="wsp_r17" name="Wald" location_description="Wald" capacity=30 sort_key=17
 LabelSet entity_id="wsp_r17" key="provides" value="draußen" strength=#null note=#null
-WorkshopSpaceAdded workshop_space_id="wsp_r18" name="Außenwand" location_description="Außenwand" capacity=30 availability_starts_at="2027-05-14T08:00:00+02:00" availability_ends_at="2027-05-16T21:00:00+02:00" sort_key=18
+WorkshopSpaceAdded workshop_space_id="wsp_r18" name="Außenwand" location_description="Außenwand" capacity=30 sort_key=18
 LabelSet entity_id="wsp_r18" key="provides" value="Kletterwand" strength=#null note=#null
 
 WorkshopSlotAdded slot_id="slot_s1" starts_at="2027-05-14T09:00:00+02:00" ends_at="2027-05-14T11:00:00+02:00" sort_key=1
@@ -190,5 +190,4 @@ LabelSet entity_id="wks_still" key="need" value="ruhig" strength=#null note=#nul
 WorkshopAdded workshop_id="wks_band" title="Bandprobe" description="Die Jugendgruppe probt offen. Wer mitspielen will, meldet sich an." audience="all" age_min=12 age_max=99 capacity=8 participation_mode="sign-up" sort_key=368
 LabelSet entity_id="wks_band" key="leader" value="per_p46" strength=#null note=#null
 LabelSet entity_id="wks_band" key="need" value="Bühne" strength=#null note=#null
-
 

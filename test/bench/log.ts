@@ -165,7 +165,6 @@ export function syntheticLog(scale: SyntheticScale): Event[] {
       name: `Raum ${index}`,
       location_description: `Haus ${index % scale.buildings}`,
       capacity: 12 + (index % 10),
-      availability_windows: [{ starts_at: windowStart(), ends_at: windowEnd() }],
       sort_key: index + 1,
     })
 
@@ -242,14 +241,6 @@ export function syntheticLog(scale: SyntheticScale): Event[] {
       })
 
   return events
-}
-
-function windowStart(): string {
-  return `${eventDays[0]}T08:00:00Z`
-}
-
-function windowEnd(): string {
-  return `${eventDays[eventDays.length - 1]}T20:00:00Z`
 }
 
 function pad(value: number): string {

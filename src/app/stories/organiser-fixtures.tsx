@@ -258,9 +258,6 @@ export const workshopCatalogueFixtureDrafts: readonly EventDraft[] = [
       name: 'Atelier',
       location_description: 'Haupthaus',
       capacity: 12,
-      availability_windows: [
-        { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-14T18:00:00Z' },
-      ],
       sort_key: 1,
     },
   },
@@ -274,9 +271,6 @@ export const workshopCatalogueFixtureDrafts: readonly EventDraft[] = [
       name: 'Wiese',
       location_description: 'Außengelände',
       capacity: 30,
-      availability_windows: [
-        { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-16T18:00:00Z' },
-      ],
       sort_key: 2,
     },
   },
@@ -290,9 +284,6 @@ export const workshopCatalogueFixtureDrafts: readonly EventDraft[] = [
       name: 'Halle',
       location_description: 'Haus 2',
       capacity: 24,
-      availability_windows: [
-        { starts_at: '2027-05-14T08:00:00Z', ends_at: '2027-05-16T18:00:00Z' },
-      ],
       sort_key: 3,
     },
   },

@@ -14,7 +14,7 @@ import { Workshops } from '../../src/app/organiser/screens/workshops.js'
 
 const events = loadKdl(
   `
-WorkshopSpaceAdded workshop_space_id="wsp_test" name="Raum" location_description="Unten" capacity=10 availability_starts_at="2027-04-30T08:00:00+02:00" availability_ends_at="2027-05-02T20:00:00+02:00" sort_key=1
+WorkshopSpaceAdded workshop_space_id="wsp_test" name="Raum" location_description="Unten" capacity=10 sort_key=1
 WorkshopSlotAdded slot_id="slot_test" starts_at="2027-05-01T09:00:00+02:00" ends_at="2027-05-01T11:00:00+02:00" sort_key=1
 WorkshopAdded workshop_id="wks_test" title="Gemeinsam" description="Für alle" audience="all" age_min=0 age_max=99 capacity=4 participation_mode="assigned" sort_key=1
 WorkshopChoiceOpened`,

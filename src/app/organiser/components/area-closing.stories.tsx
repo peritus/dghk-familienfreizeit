@@ -102,7 +102,7 @@ const advisoryState = organiserReducer(initialOrganiserState, {
   type: 'loaded',
   events: loadKdl(
     `
-WorkshopSpaceAdded workshop_space_id="wsp_review" name="Atelier" location_description="Unten" capacity=10 availability_starts_at="2027-04-30T08:00:00+02:00" availability_ends_at="2027-05-02T20:00:00+02:00" sort_key=1
+WorkshopSpaceAdded workshop_space_id="wsp_review" name="Atelier" location_description="Unten" capacity=10 sort_key=1
 WorkshopSlotAdded slot_id="slot_review" starts_at="2027-05-01T09:00:00+02:00" ends_at="2027-05-01T11:00:00+02:00" sort_key=1
 WorkshopAdded workshop_id="wks_review" title="Ein Workshop" description="" audience="adults" age_min=12 age_max=99 capacity=4 participation_mode="assigned" sort_key=1
 WorkshopChoiceOpened`,

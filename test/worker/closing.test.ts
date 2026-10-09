@@ -184,8 +184,6 @@ const readyWorkshops = [
       name: 'Raum',
       location_description: 'Erdgeschoss',
       capacity: 10,
-      availability_starts_at: '2027-04-30T08:00:00+02:00',
-      availability_ends_at: '2027-05-02T20:00:00+02:00',
       sort_key: 1,
     },
   },

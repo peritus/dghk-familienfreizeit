@@ -2,8 +2,8 @@
 // re-closed, then a withdrawn person and a cancelled workshop after the latest closing.
 // Closing results are recorded as `result_json`, the text-fixture form of their payload.
 
-WorkshopSpaceAdded workshop_space_id="wsp_atelier" name="Atelier" location_description="Erdgeschoss" capacity=10 availability_starts_at="2027-04-30T08:00:00+02:00" availability_ends_at="2027-05-02T20:00:00+02:00" sort_key=1
-WorkshopSpaceAdded workshop_space_id="wsp_wiese" name="Wiese" location_description="Draußen" capacity=10 availability_starts_at="2027-04-30T08:00:00+02:00" availability_ends_at="2027-05-02T20:00:00+02:00" sort_key=2
+WorkshopSpaceAdded workshop_space_id="wsp_atelier" name="Atelier" location_description="Erdgeschoss" capacity=10 sort_key=1
+WorkshopSpaceAdded workshop_space_id="wsp_wiese" name="Wiese" location_description="Draußen" capacity=10 sort_key=2
 WorkshopSlotAdded slot_id="slot_morgen" starts_at="2027-05-01T09:00:00+02:00" ends_at="2027-05-01T11:00:00+02:00" sort_key=1
 WorkshopAdded workshop_id="wks_ton" title="Ton" description="Schalen aus Ton." audience="all" age_min=0 age_max=120 capacity=4 participation_mode="assigned" sort_key=1
 WorkshopAdded workshop_id="wks_wald" title="Wald" description="Spuren lesen." audience="all" age_min=0 age_max=120 capacity=4 participation_mode="assigned" sort_key=2
