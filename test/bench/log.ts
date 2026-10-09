@@ -203,7 +203,7 @@ export function syntheticLog(scale: SyntheticScale): Event[] {
     append('FamilyInvited', {
       family_id: familyId,
       email: `f${index}@example.test`,
-      display_name: `Familie ${index}`,
+      display_name: String(index),
       locale: 'de',
     })
     for (let member = 0; member < personsPerFamily && personIndex < scale.persons; member += 1) {
@@ -211,7 +211,7 @@ export function syntheticLog(scale: SyntheticScale): Event[] {
         person_id: `per_${personIndex}`,
         family_id: familyId,
         given_name: `Vorname ${personIndex}`,
-        family_name: `Familie ${index}`,
+      family_name: String(index),
         age: member === 0 ? 41 : 10,
         role: member === 0 ? 'adult' : 'child',
       })

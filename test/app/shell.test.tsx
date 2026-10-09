@@ -106,7 +106,7 @@ function workshopFixtureEvents(): readonly Event[] {
       payload: {
         family_id: 'fam_stein',
         email: 'stein@example.test',
-        display_name: 'Familie Stein',
+      display_name: 'Stein',
         locale: 'de',
       },
     },
