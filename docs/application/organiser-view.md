@@ -121,7 +121,9 @@ views:
   explicit unanswered state, the sleeping-place count, infant bed toggles, and
   the deferred family room note with save/discard actions.
 - **Personen** uses a person selector, add/edit form, role and integer age fields,
-  and the shared destructive confirmation for `PersonWithdrawn`.
+  and the shared destructive confirmation for `PersonWithdrawn`. Adding a person
+  prefills the surname from the stored family display name; the field stays
+  editable and the submitted surname belongs to that person.
 - **Essen** uses the same person selector and the generic person-scoped
   `diet` choice plus `food-note` free-text controls. Both write the configured
   labels through the family-preferences control system; there is no screen-local
