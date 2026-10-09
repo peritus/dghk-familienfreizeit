@@ -63,7 +63,6 @@ type ScheduleSolverInput = WorkshopSchedulingSummary & {
   spaces: readonly {
     id: string
     capacity: number
-    availability_windows: readonly { starts_at: string; ends_at: string }[]
     capabilities: readonly string[]
   }[]
 }
@@ -226,10 +225,6 @@ function solverInput(world: World): ScheduleSolverInput {
   const spaces = (world.entities_by_kind['workshop-space'] ?? []).map((item) => ({
     id: item.id,
     capacity: Number(value(item.id, 'space-capacity') ?? 0),
-    availability_windows:
-      (value(item.id, 'space-availability') as
-        | { starts_at: string; ends_at: string }[]
-        | undefined) ?? [],
     capabilities: world.capabilities
       .filter((capability) => capability.entity_id === item.id)
       .map((capability) => capability.key),
@@ -257,12 +252,6 @@ function placementRejections(
   const rejected: PlacementRejection[] = []
   if (used.has(target)) rejected.push({ target, rule: 'hard.space-occupied' })
   if (space.capacity < workshop.capacity) rejected.push({ target, rule: 'hard.space-capacity' })
-  if (
-    !space.availability_windows.some(
-      (window) => window.starts_at <= slot.starts_at && window.ends_at >= slot.ends_at,
-    )
-  )
-    rejected.push({ target, rule: 'hard.space-unavailable' })
   if (
     schedule.space_slot_blocks.some(
       (block) => block.space_id === space.id && block.slot_id === slot.id,

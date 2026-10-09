@@ -63,7 +63,6 @@ const baseInput = {
       name: 'Atelier',
       location_description: 'Haupthaus',
       capacity: 12,
-      availability_windows: [],
       sort_key: 1,
     },
     {
@@ -71,7 +70,6 @@ const baseInput = {
       name: 'Halle',
       location_description: 'Haus 2',
       capacity: 24,
-      availability_windows: [],
       sort_key: 2,
     },
   ],

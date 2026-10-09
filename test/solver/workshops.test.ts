@@ -56,9 +56,6 @@ test('places one workshop and allocates a ranked person through the composed sta
         name: 'Halle',
         location_description: 'Erdgeschoss',
         capacity: 10,
-        availability_windows: [
-          { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-04-30T18:00:00Z' },
-        ],
         sort_key: 1,
       },
       3,
@@ -278,9 +275,6 @@ function venue(spaceId: string, seq: number, capacity = 10): Event {
       name: spaceId,
       location_description: spaceId,
       capacity,
-      availability_windows: [
-        { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-04-30T18:00:00Z' },
-      ],
       sort_key: 1,
     },
     seq,
@@ -344,9 +338,6 @@ test('a fixed workshop placement takes precedence over the automatic choice', ()
         name: 'Nebenraum',
         location_description: 'Obergeschoss',
         capacity: 10,
-        availability_windows: [
-          { starts_at: '2027-04-30T08:00:00Z', ends_at: '2027-04-30T18:00:00Z' },
-        ],
         sort_key: 2,
       },
       2,
