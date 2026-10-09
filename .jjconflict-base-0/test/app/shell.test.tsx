@@ -278,7 +278,7 @@ test('the login form requests a magic link and explains local delivery', async (
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
 
-  expect(await screen.findByText('Magic Link gesendet')).toBeTruthy()
+  expect(await screen.findByText('Anfrage bearbeitet')).toBeTruthy()
   expect(
     (screen.getByRole('button', { name: /Erneut anfordern in/ }) as HTMLButtonElement).disabled,
   ).toBe(true)
@@ -518,7 +518,7 @@ test('the external leaders view follows the prototype list and stages a complete
 
   expect(await screen.findByRole('heading', { name: 'Externe Leitungen' })).toBeTruthy()
   expect(screen.getByText('Pereira')).toBeTruthy()
-  expect(screen.getByText('Keramik')).toBeTruthy()
+  expect(screen.getAllByText('Keramik').length).toBeGreaterThan(0)
   expect(screen.getByText('alle Slots')).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Pereira' }))
 
@@ -624,7 +624,7 @@ test('the programme review keeps each view at its own URL and avoids false roste
   expect(screen.getByRole('link', { name: 'Teilnahme' }).getAttribute('aria-current')).toBe('page')
   expect(screen.getByRole('link', { name: 'Programm' }).getAttribute('aria-current')).toBe('page')
   expect(screen.getByText(/Freitag/)).toBeTruthy()
-  expect(screen.getByText('Keramik')).toBeTruthy()
+  expect(screen.getAllByText('Keramik').length).toBeGreaterThan(0)
   expect(screen.queryByRole('button', { name: 'Keramik' })).toBeNull()
 
   fireEvent.click(screen.getByRole('link', { name: 'Nicht eingeplant' }))
@@ -670,11 +670,9 @@ test('a failed organiser log load shows a load error, not a save error', async (
   window.history.replaceState({}, '', '/organiser')
   render(<App />)
 
+  expect(await screen.findByText('Daten konnten nicht geladen werden')).toBeTruthy()
   expect(
-    await screen.findByText('Die Organisationsdaten konnten nicht geladen werden'),
-  ).toBeTruthy()
-  expect(
-    screen.getByText('Die Familiendaten konnten nicht geladen werden.', { exact: false }),
+    screen.getByText('Die Organisationsdaten konnten nicht geladen werden.', { exact: false }),
   ).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Neu laden' })).toBeTruthy()
   // No organiser nav or save-status control renders for a whole-app load failure.

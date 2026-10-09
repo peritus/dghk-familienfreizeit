@@ -1,3 +1,4 @@
+import { EventInputError } from './types.js'
 import {
   canonicalEmail,
   canonicalJson,
@@ -295,6 +296,7 @@ export type ValidationWorld = {
 export type ModuleEventValidate = (payload: JsonValue, world: ValidationWorld) => string | null
 
 export type KernelConfig = {
+  capability_token_consumers?: readonly { prefix: string; consumer: string }[]
   entity_kinds?: readonly EntityKind[]
   /** Declared id prefix per entity kind, kernel and module alike; enforced at creation (D27). */
   entity_kind_prefixes?: Readonly<Record<string, string>>
@@ -374,16 +376,21 @@ export function validateEventStream(events: readonly Event[], config: KernelConf
 }
 
 /** Rejects only diagnostics that violate the append contract; other diagnostics remain visible. */
+export class AppendInvariantError extends Error {
+  constructor(
+    public readonly world: World,
+    public readonly diagnostics: readonly Diagnostic[],
+  ) {
+    super('append rejected: ' + diagnostics.map((d) => d.id).join(', '))
+  }
+}
+
 export function assertAppendableWorld(world: World): void {
-  const dangling = world.diagnostics.find(
-    (diagnostic) =>
-      ['kernel.dangling-reference', 'kernel.cardinality'].includes(diagnostic.id) &&
-      diagnostic.severity === 'error',
+  const failures = world.diagnostics.filter(
+    (d) =>
+      ['kernel.dangling-reference', 'kernel.cardinality'].includes(d.id) && d.severity === 'error',
   )
-  if (dangling)
-    throw new Error(
-      `append rejected: ${dangling.id} for ${dangling.subject_id}: ${dangling.message}`,
-    )
+  if (failures.length) throw new AppendInvariantError(world, failures)
 }
 
 function normalizeEvents(
@@ -399,7 +406,7 @@ function normalizeEvents(
     const validator = config.event_value_validators?.[event.type]
     if (validator) {
       const error = validator(event.payload)
-      if (error) throw new Error(error)
+      if (error) throw new EventInputError(error, [], event.seq)
     }
     expectedSeq += 1
   }
@@ -411,7 +418,7 @@ function normalizeEvents(
     const validator = config.event_validate_dispatch?.[event.type]
     if (validator) {
       const error = validator(event.payload, view)
-      if (error) throw new Error(error)
+      if (error) throw new EventInputError(error, [], event.seq)
     }
     applyEvent(state, event, config)
   }
@@ -672,7 +679,7 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
     case 'LabelCleared': {
       const { entity_id: entityId, key, value } = (event as unknown as LabelCleared).payload
       requireKnownEntity(state, entityId)
-      const clearKey = configuredLabelKey(config, key)
+      const clearKey = configuredLabelKey(config, key, true)
       assertConfiguredLabelMutation(
         config,
         entityId,
@@ -869,7 +876,7 @@ function setConfiguredLabel(
     schema?.cardinality ?? (fixedResolverKeys.has(canonicalKey) ? 'zero-or-more' : undefined)
   if (cardinality !== 'zero-or-more') replaceLabels(state, entityId, canonicalKey)
   const error = schema?.validate?.(value)
-  if (error) throw new Error(error)
+  if (error) throw new EventInputError(error, [], event.seq)
   setLabel(
     state,
     event,
@@ -899,7 +906,7 @@ function assertConfiguredLabelMutation(
   if (!target) throw new Error(`unknown entity: ${entityId}`)
 }
 
-function configuredLabelKey(config: KernelConfig, key: string): string {
+function configuredLabelKey(config: KernelConfig, key: string, allowUnknown = false): string {
   const canonicalKey = config.aliases?.[key] ?? key
   if (kernelSetupOwnedLabelKeys.has(canonicalKey))
     throw new Error(
@@ -911,6 +918,7 @@ function configuredLabelKey(config: KernelConfig, key: string): string {
     ...fixedResolverKeys,
   ])
   if (
+    !allowUnknown &&
     schemas.length > 0 &&
     !schemas.some((schema) => schema.key === canonicalKey) &&
     !resolverKeys.has(canonicalKey)

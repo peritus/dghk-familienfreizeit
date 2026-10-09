@@ -1,3 +1,4 @@
+import { fieldFeedback } from '../../../attention/fields.js'
 import { SelectField } from '../../components/shared/ui/field.js'
 import { ChoiceField } from '../../components/shared/ui/field.js'
 import { TableFrame } from '../../components/shared/ui/data-table.js'
@@ -115,7 +116,7 @@ export function Inventory() {
 
   function addBuilding(name: string) {
     const trimmed = name.trim()
-    if (!trimmed) return 'Gib dem Gebäude einen Namen.'
+    if (!trimmed) return fieldFeedback('building-name')
     stageInventoryEvents([
       draft(state.principal_email ?? '', 'BuildingAdded', {
         building_id: id('bld_'),
@@ -137,7 +138,7 @@ export function Inventory() {
     values: RoomTraitValues,
   ) {
     const number = payload.number.trim()
-    if (!number) return 'Gib eine Nummer oder einen Namen ein.'
+    if (!number) return fieldFeedback('room-number')
     const duplicate = summary.rooms.some(
       (room) => room.building_id === buildingId && room.number === number,
     )

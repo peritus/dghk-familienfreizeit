@@ -1,8 +1,15 @@
-import { admitProfileProposal, CapacityReductionError, capacityReductionFinding } from '../organiser/proposal.js'
+import { EventInputError } from '../events/types.js'
+import { eventInputFindings } from '../organiser/proposal.js'
+import {
+  admitProfileProposal,
+  CapacityReductionError,
+  capacityReductionFinding,
+  appendInvariantFindings,
+} from '../organiser/proposal.js'
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
-import { derive, type World } from '../events/fold.js'
+import { derive, AppendInvariantError, type World } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
 import { appendCanonicalEvents, readEvents, StaleHeadError } from '../events/store.js'
@@ -244,7 +251,10 @@ app.post('/api/organiser/apply', async (context) => {
     )
     const prepared = tracing.enterSpan('events.prepare_and_validate', (span) => {
       span.setAttribute('event.count', drafts.length)
-      return admitProfileProposal(existing, drafts, activeProfile, { build_revision: buildRevision, compatibility_revision: compatibilityRevision })
+      return admitProfileProposal(existing, drafts, activeProfile, {
+        build_revision: buildRevision,
+        compatibility_revision: compatibilityRevision,
+      })
     })
     const events = prepared.events
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
@@ -268,7 +278,42 @@ app.post('/api/organiser/apply', async (context) => {
       feature_overrides: featureBindings(context.env).overrides,
     })
   } catch (error) {
-    if (error instanceof CapacityReductionError) return context.json({ error: 'attention_required', findings:[capacityReductionFinding(error,activeProfile,buildRevision,new Date().toISOString())] }, 409)
+    if (error instanceof EventInputError)
+      return context.json(
+        {
+          error: 'attention_required',
+          findings: eventInputFindings(
+            error,
+            activeProfile,
+            buildRevision,
+            new Date().toISOString(),
+          ),
+        },
+        400,
+      )
+    if (error instanceof AppendInvariantError)
+      return context.json(
+        {
+          error: 'attention_required',
+          findings: appendInvariantFindings(
+            error,
+            activeProfile,
+            buildRevision,
+            new Date().toISOString(),
+          ),
+        },
+        400,
+      )
+    if (error instanceof CapacityReductionError)
+      return context.json(
+        {
+          error: 'attention_required',
+          findings: [
+            capacityReductionFinding(error, activeProfile, buildRevision, new Date().toISOString()),
+          ],
+        },
+        409,
+      )
     if (error instanceof WorkshopReviewRequiredError)
       return context.json({ error: 'workshop_review_required', findings: error.findings }, 409)
     if (error instanceof AreaNotReadyError)
@@ -334,7 +379,9 @@ app.post('/api/events', async (context) => {
         error: 'stale_head',
         expected_head: expectedHead,
         actual_head: existing.length,
-        events: existing.filter((event) => event.seq > expectedHead),
+        ...(principal.kind === 'organiser'
+          ? { events: existing.filter((event) => event.seq > expectedHead) }
+          : {}),
       },
       409,
     )
@@ -365,11 +412,38 @@ app.post('/api/events', async (context) => {
     })
     if (forbidden) throw new Error('forbidden')
     tracing.enterSpan('events.validate_world', () =>
-      admitProfileProposal(existing, events, activeProfile, { build_revision: buildRevision, compatibility_revision: compatibilityRevision }),
+      admitProfileProposal(existing, events, activeProfile, {
+        build_revision: buildRevision,
+        compatibility_revision: compatibilityRevision,
+      }),
     )
     await appendEventBatch(context, expectedHead, events)
     return context.json({ head: expectedHead + events.length }, 201)
   } catch (error) {
+    if (principal.kind === 'organiser' && error instanceof CapacityReductionError)
+      return context.json(
+        {
+          error: 'attention_required',
+          findings: [capacityReductionFinding(error, activeProfile, buildRevision, now)],
+        },
+        409,
+      )
+    if (principal.kind === 'organiser' && error instanceof EventInputError)
+      return context.json(
+        {
+          error: 'attention_required',
+          findings: eventInputFindings(error, activeProfile, buildRevision, now),
+        },
+        400,
+      )
+    if (principal.kind === 'organiser' && error instanceof AppendInvariantError)
+      return context.json(
+        {
+          error: 'attention_required',
+          findings: appendInvariantFindings(error, activeProfile, buildRevision, now),
+        },
+        400,
+      )
     if (error instanceof Error && error.message === 'forbidden')
       return context.json({ error: 'forbidden' }, 403)
     if (error instanceof StaleHeadError)

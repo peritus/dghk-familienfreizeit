@@ -218,7 +218,9 @@ function TraitControl({
     : null
 
   if (facing.control === 'tri-state') {
-    const marker = labels.some(label => label.key === `response-${traitKey}` && label.value === true)
+    const marker = labels.some(
+      (label) => label.key === `response-${traitKey}` && label.value === true,
+    )
     const selected = current?.strength ?? (marker ? 'indifferent' : 'none')
     const choices: readonly { value: TriStateValue; label: string }[] = [
       { value: 'none' as const, label: 'Keine Angabe' },
@@ -245,8 +247,12 @@ function TraitControl({
               checked={selected === choice.value}
               onChange={() => {
                 const markerKey = `response-${traitKey}`
-                const events: EventDraft[] = [labelClear(actor, familyId, target, traitKey), labelClear(actor, familyId, target, markerKey)]
-                if (choice.value === 'indifferent') events.push(labelSet(actor, familyId, target, markerKey, true, null))
+                const events: EventDraft[] = [
+                  labelClear(actor, familyId, target, traitKey),
+                  labelClear(actor, familyId, target, markerKey),
+                ]
+                if (choice.value === 'indifferent')
+                  events.push(labelSet(actor, familyId, target, markerKey, true, null))
                 else if (choice.value === 'required' || choice.value === 'preferred') {
                   const value = values[0]
                   if (value === undefined) return

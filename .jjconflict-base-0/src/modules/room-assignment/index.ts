@@ -1,3 +1,4 @@
+import { attentionReadiness } from '../../attention/readiness.js'
 import { roomAssignmentAttention } from './attention.js'
 import { z } from 'zod'
 import type { Entity, World } from '../../events/fold.js'
@@ -11,7 +12,7 @@ import {
   accommodationReopenedPayload,
   validateAccommodationReopened,
 } from './closed-result.js'
-import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
+import type { PhaseReadiness } from '../../config/phases.js'
 import { inventoryWorld, type InventoryRoom } from '../room-inventory/index.js'
 
 export type RoomAssignmentParams = {
@@ -128,7 +129,7 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
         opens: { kind: 'always' },
         target: false,
         closed_by_area: false,
-        readiness: roomReviewReadiness,
+        readiness: attentionReadiness('accommodation', roomAssignmentAttention(params)),
       },
     ],
     events: [
@@ -202,6 +203,7 @@ export function buildRoomAssignmentInput(
   }
   const requirementsByFamily = new Map<string, ResolvedRequirement[]>()
   for (const requirement of world.requirements) {
+    if (requirement.consumer && requirement.consumer !== 'room-assignment') continue
     const familyId = personFamily[requirement.holder_id] ?? requirement.holder_id
     if (!familyIds.has(familyId)) continue
     const current = requirementsByFamily.get(familyId) ?? []
@@ -534,7 +536,11 @@ export function roomAssignmentPreflight(
   const rules = roomInput.rules ?? roomAssignmentRules()
   const emptyPlacements = new Map<string, string>()
   for (const family of roomInput.families) {
-    const capacityFinding = (text: string, subjects: readonly string[], evidence: Readonly<Record<string, import('../../events/types.js').JsonValue>>) =>
+    const capacityFinding = (
+      text: string,
+      subjects: readonly string[],
+      evidence: Readonly<Record<string, import('../../events/types.js').JsonValue>>,
+    ) =>
       findings.push({
         check: 'room-assignment.requirement-arithmetic',
         evidence,
@@ -562,7 +568,12 @@ export function roomAssignmentPreflight(
               ' places of demand but satisfying rooms provide ' +
               satisfyingCapacity,
             [family.family_id, requirement.trait_key],
-            { demand: family.bed_demand, capacity: satisfyingCapacity, capability: requirement.capability_key, trait: requirement.trait_key },
+            {
+              demand: family.bed_demand,
+              capacity: satisfyingCapacity,
+              capability: requirement.capability_key,
+              trait: requirement.trait_key,
+            },
           )
       }
     }
@@ -589,7 +600,7 @@ export function roomAssignmentPreflight(
         severity: 'error',
         subjects: [family.family_id],
         text: family.family_id + ' has no room satisfying all required decisions',
-        evidence: { reasons: [...new Set(rejected.flatMap(r => r.map(v => v.rule)))].sort() },
+        evidence: { reasons: [...new Set(rejected.flatMap((r) => r.map((v) => v.rule)))].sort() },
       })
     if (unresolvedRoomDecision)
       findings.push({
@@ -1038,41 +1049,35 @@ function compareScore(left: RoomScore, right: RoomScore): number {
  * has no blocking room-assignment preflight finding, and every fixed room decision holds
  * (spec/architecture/phases.md §4).
  */
-export const roomReviewReadiness: PhaseReadiness = ({ world, plan }) => {
-  const findings: FindingRef[] = []
-  if (world.families.length === 0)
-    findings.push({
-      id: 'room-assignment.no-families',
-      subject_id: null,
-      message: 'Es ist noch keine Familie eingetragen.',
-    })
-  if (!plan) {
-    findings.push({
-      id: 'phase.plan-unavailable',
-      subject_id: null,
-      message: 'Die Zuordnung ist noch nicht berechnet.',
-    })
-    return { ready: false, findings }
-  }
-  const section = plan.sections['room-assignment'] as RoomAssignmentSection | undefined
-  for (const { check, severity, subjects, text } of plan.preflight)
-    if (severity === 'error' && check.startsWith('room-assignment.'))
-      findings.push({ id: check, subject_id: subjects[0] ?? null, message: text })
-  for (const violation of section?.fixed_violations ?? [])
-    findings.push({
-      id: 'room-assignment.fixed-invalid',
-      subject_id: violation.family_id,
-      message: `Feste Zimmerentscheidung für ${violation.family_id} ist nicht erfüllbar.`,
-    })
-  return findings.length === 0 ? { ready: true } : { ready: false, findings }
-}
+export const roomReviewReadiness: PhaseReadiness = attentionReadiness(
+  'accommodation',
+  roomAssignmentAttention(defaultRoomAssignmentParams),
+)
 
 /** One canonical indexed room sweep, shared by review and fixed-assignment authoring. */
-export function roomFeasibility(input: RoomAssignmentInput, params: RoomAssignmentParams, assignments: readonly RoomAssignment[], familyId: string) {
- const family = input.families.find(f => f.family_id === familyId)
- if (!family) return []
- const placements = new Map(assignments.filter(a => a.family_id !== familyId).map(a => [a.family_id,a.room_id]))
- const state = sweepState(family,placements,input,params)
- const rules = input.rules ?? roomAssignmentRules()
- return input.rooms.map(room => ({ room_id: room.id, remaining: roomRemaining(room,placements,input,state.index), reasons: feasible(family,room,placements,input,params,rules,state).map(r=>r.rule) }))
+export function roomFeasibility(
+  input: RoomAssignmentInput,
+  params: RoomAssignmentParams,
+  assignments: readonly RoomAssignment[],
+  familyId: string,
+) {
+  const family = input.families.find((f) => f.family_id === familyId)
+  if (!family) return []
+  const placements = new Map(
+    assignments.filter((a) => a.family_id !== familyId).map((a) => [a.family_id, a.room_id]),
+  )
+  const state = sweepState(family, placements, input, params)
+  const rules = input.rules ?? roomAssignmentRules()
+  return input.rooms.map((room) => ({
+    room_id: room.id,
+    remaining: roomRemaining(room, placements, input, state.index),
+    capability_matches: Object.fromEntries(
+      family.requirements.flatMap((requirement) =>
+        requirement.capability_key
+          ? [[requirement.capability_key, room.capabilities.has(requirement.capability_key)]]
+          : [],
+      ),
+    ),
+    reasons: feasible(family, room, placements, input, params, rules, state).map((r) => r.rule),
+  }))
 }

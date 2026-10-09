@@ -1,9 +1,7 @@
 import { derive } from '../../src/events/fold.js'
-import { officialWorkshopsWorld } from '../../src/modules/official-workshops/index.js'
-import {
-  workshopNotes,
-  workshopAdvisoryFingerprint,
-} from '../../src/modules/official-workshops/checks.js'
+import { composeAttention } from '../../src/attention/engine.js'
+import { acknowledgementFingerprint } from '../../src/attention/selectors.js'
+import { officialWorkshopAttention } from '../../src/modules/official-workshops/attention.js'
 import { expect, test } from 'vitest'
 import { env } from 'cloudflare:workers'
 import { app } from '../../src/worker/index.js'
@@ -65,14 +63,60 @@ const familyInvited = {
 
 test('the Worker fills a staged closing with the reviewed result and its revisions', async () => {
   const cookie = await organiserCookie()
+  const inventory = [
+    { type: 'BuildingAdded', payload: { building_id: 'bld_test', name: 'Haus', sort_key: 1 } },
+    {
+      type: 'RoomAdded',
+      payload: {
+        room_id: 'rm_test',
+        building_id: 'bld_test',
+        number: '1',
+        floor: 'ground',
+        room_type: 'standard',
+        sort_key: 1,
+      },
+    },
+    {
+      type: 'BedAdded',
+      payload: {
+        bed_id: 'bed_test',
+        room_id: 'rm_test',
+        label: '',
+        bed_type: 'single',
+        sleeps: 1,
+        sort_key: 1,
+      },
+    },
+    {
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'rm_test',
+        key: 'sanitary',
+        value: 'shared-floor',
+        strength: null,
+        note: null,
+      },
+    },
+    {
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'rm_test',
+        key: 'price-per-bed-eur',
+        value: 0,
+        strength: null,
+        note: null,
+      },
+    },
+  ]
   const closed = await apply(cookie, 0, [
+    ...inventory,
     familyInvited,
     { type: 'AccommodationClosed', payload: {} },
   ])
   expect(closed.status).toBe(200)
   const events = await stored()
-  expect(events.map(({ type }) => type)).toEqual(['FamilyInvited', 'AccommodationClosed'])
-  expect(events[1]!.payload).toEqual({
+  expect(events.slice(-2).map(({ type }) => type)).toEqual(['FamilyInvited', 'AccommodationClosed'])
+  expect(events.at(-1)!.payload).toEqual({
     placements: [],
     unplaced: [{ family_id: 'fam_close' }],
     build_revision: buildRevision,
@@ -80,11 +124,15 @@ test('the Worker fills a staged closing with the reviewed result and its revisio
   })
   expect(closed.body.events).toEqual(JSON.parse(JSON.stringify(events)))
 
-  const reclosed = await apply(cookie, 2, [{ type: 'AccommodationClosed', payload: {} }])
+  const reclosed = await apply(cookie, events.length, [
+    { type: 'AccommodationClosed', payload: {} },
+  ])
   expect(reclosed.status).toBe(200)
-  const reopened = await apply(cookie, 3, [{ type: 'AccommodationReopened', payload: {} }])
+  const reopened = await apply(cookie, events.length + 1, [
+    { type: 'AccommodationReopened', payload: {} },
+  ])
   expect(reopened.status).toBe(200)
-  expect((await stored()).map(({ type }) => type)).toEqual([
+  expect((await stored()).slice(-4).map(({ type }) => type)).toEqual([
     'FamilyInvited',
     'AccommodationClosed',
     'AccommodationClosed',
@@ -120,7 +168,7 @@ test('a closing whose review phase is not ready is refused with its findings', a
     error: 'area_not_ready',
     area: 'workshops',
     findings: expect.arrayContaining([
-      expect.objectContaining({ id: 'workshop-rankings.choice-not-opened' }),
+      expect.objectContaining({ code: 'workshop-rankings.choice-not-opened' }),
     ]),
   })
   expect(await stored()).toEqual([])
@@ -163,14 +211,16 @@ test('an area without content cannot be closed', async () => {
   expect(accommodation.body).toMatchObject({
     error: 'area_not_ready',
     area: 'accommodation',
-    findings: [expect.objectContaining({ id: 'room-assignment.no-families' })],
+    findings: expect.arrayContaining([
+      expect.objectContaining({ code: 'room-assignment.no-families' }),
+    ]),
   })
   const workshops = await apply(cookie, 0, [{ type: 'WorkshopsClosed', payload: {} }])
   expect(workshops.status).toBe(409)
   expect(workshops.body).toMatchObject({
     area: 'workshops',
     findings: expect.arrayContaining([
-      expect.objectContaining({ id: 'workshop-assignment.no-workshops' }),
+      expect.objectContaining({ code: 'workshop-assignment.no-workshops' }),
     ]),
   })
   expect(await stored()).toEqual([])
@@ -220,8 +270,17 @@ test('a team acknowledgement applies only to the immediately following new closi
   expect(await apply(cookie, 0, readyWorkshops)).toMatchObject({ status: 200 })
   const before = await stored()
   const world = derive(before, luebben2027Profile.validation_view)
-  const fingerprint = workshopAdvisoryFingerprint(
-    workshopNotes(officialWorkshopsWorld(world).workshops, new Set()),
+  const fingerprint = acknowledgementFingerprint(
+    composeAttention(officialWorkshopAttention)({
+      domain: 'available',
+      world,
+      plan: null,
+      profile: luebben2027Profile,
+      build_revision: buildRevision,
+      locale: 'de',
+      now: '2027-01-01T00:00:00Z',
+      audience: 'organiser',
+    }),
   )
   const ack = { type: 'WorkshopWarningsAcknowledged', payload: { fingerprint } }
   expect(

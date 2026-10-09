@@ -95,12 +95,33 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         error: null,
       }
     case 'stage':
-      return { ...state, next_group_id:(state.next_group_id??1)+1, drafts: [...state.drafts, { id:`group-${state.next_group_id??1}`, events: action.events }], error: null, attention_errors:[] }
+      return {
+        ...state,
+        next_group_id: (state.next_group_id ?? 1) + 1,
+        drafts: [
+          ...state.drafts,
+          { id: `group-${state.next_group_id ?? 1}`, events: action.events },
+        ],
+        error: null,
+        attention_errors: [],
+      }
     case 'discard-group':
     case 'replace-group': {
-      if(state.submitted_groups?.includes(action.group_id))return state
-      const drafts=state.drafts.flatMap(group=>group.id!==action.group_id?[group]:action.type==='replace-group'?[{...group,events:action.events}]:[])
-      return {...state,drafts,change_mode:drafts.length?'drafting':'immediate',error:null,attention_errors:[]}
+      if (state.submitted_groups?.includes(action.group_id)) return state
+      const drafts = state.drafts.flatMap((group) =>
+        group.id !== action.group_id
+          ? [group]
+          : action.type === 'replace-group'
+            ? [{ ...group, events: action.events }]
+            : [],
+      )
+      return {
+        ...state,
+        drafts,
+        change_mode: drafts.length ? 'drafting' : 'immediate',
+        error: null,
+        attention_errors: [],
+      }
     }
     case 'toggle_drafting':
       if (state.change_mode === 'drafting') {
@@ -108,9 +129,16 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
       }
       return { ...state, change_mode: 'drafting' }
     case 'discard':
-      return state.status==='applying' ? state : { ...state, drafts: [], change_mode: 'immediate', error: null, attention_errors:[] }
+      return state.status === 'applying'
+        ? state
+        : { ...state, drafts: [], change_mode: 'immediate', error: null, attention_errors: [] }
     case 'applying':
-      return { ...state, status: 'applying', error: null, submitted_groups:state.drafts.flatMap(g=>g.id?[g.id]:[]) }
+      return {
+        ...state,
+        status: 'applying',
+        error: null,
+        submitted_groups: state.drafts.flatMap((g) => (g.id ? [g.id] : [])),
+      }
     case 'applied': {
       const drafts = removeDraftEvents(state.drafts, action.count)
       return {
@@ -122,8 +150,8 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         head_seq: state.head_seq + action.events.length,
         status: 'ready',
         error: null,
-        submitted_groups:[],
-        attention_errors:[],
+        submitted_groups: [],
+        attention_errors: [],
       }
     }
     case 'rebased':
@@ -133,6 +161,7 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         head_seq: state.head_seq + action.events.length,
         change_mode: 'drafting',
         status: 'stale_head',
+        submitted_groups: [],
         error: 'Die gemeinsamen Daten haben sich geändert. Prüfe Deine Änderungsentwürfe.',
       }
     case 'failed':
@@ -140,8 +169,8 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         ...state,
         change_mode: 'drafting',
         status: action.status,
-        submitted_groups:[],
-        attention_errors:action.findings??[],
+        submitted_groups: [],
+        attention_errors: action.findings ?? [],
         error: action.error,
       }
   }
@@ -180,9 +209,10 @@ export type SaveStatusView =
  * "failed" only ever reflects a save problem, never a load problem.
  */
 export function saveStatusView(state: OrganiserState): SaveStatusView {
-  if (state.status === 'applying') return {kind:'saving'}
-  if (draftCount(state)>0 && state.change_mode==='immediate')return {kind:'draft-pending',count:draftCount(state)}
+  if (state.status === 'applying') return { kind: 'saving' }
   if (state.status === 'error' || state.status === 'stale_head') return { kind: 'failed' }
+  if (draftCount(state) > 0 && state.change_mode === 'immediate')
+    return { kind: 'draft-pending', count: draftCount(state) }
   if (state.change_mode === 'drafting') {
     const count = draftCount(state)
     return count > 0 ? { kind: 'draft-pending', count } : { kind: 'draft-empty' }

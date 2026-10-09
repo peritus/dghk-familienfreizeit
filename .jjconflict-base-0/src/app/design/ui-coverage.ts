@@ -220,6 +220,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Workshop overview at 390px',
     source: 'src/app/organiser/screens/workshops.tsx',
+    ready_selector: '[data-slot="screen-header"] h1',
     viewport: { width: 390, height: 900 },
   },
   {
@@ -227,6 +228,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Workshop overview at 640px',
     source: 'src/app/organiser/screens/workshops.tsx',
+    ready_selector: '[data-slot="screen-header"] h1',
     viewport: { width: 640, height: 900 },
   },
   {
@@ -234,6 +236,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Workshop overview at 768px',
     source: 'src/app/organiser/screens/workshops.tsx',
+    ready_selector: '[data-slot="screen-header"] h1',
     viewport: { width: 768, height: 900 },
   },
   {
@@ -241,6 +244,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Workshop overview at 1024px',
     source: 'src/app/organiser/screens/workshops.tsx',
+    ready_selector: '[data-slot="screen-header"] h1',
     viewport: { width: 1024, height: 900 },
   },
   {
@@ -248,6 +252,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Workshop overview at 1280px',
     source: 'src/app/organiser/screens/workshops.tsx',
+    ready_selector: '[data-slot="screen-header"] h1',
     viewport: { width: 1280, height: 900 },
   },
   {
@@ -255,6 +260,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Workshop overview printing',
     source: 'src/app/organiser/screens/workshops.tsx',
+    ready_selector: '[data-slot="screen-header"] h1',
     media: 'print',
   },
 

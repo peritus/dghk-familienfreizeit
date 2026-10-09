@@ -1,3 +1,5 @@
+import { profileAttention } from '../../attention/profile.js'
+import { closedAttentionContext } from '../../attention/closed.js'
 import { derivePhaseView } from '../../derive/phases.js'
 import { useCallback, useMemo, useState, type Dispatch, type ReactNode } from 'react'
 import { activeProfile } from '../../config/index.js'
@@ -845,7 +847,7 @@ export const fixtureNow = '2027-01-15T12:00:00.000Z'
 export function FixtureProvider({
   children,
   initialState = organiserFixtureState,
-  with_plan: withPlan = false,
+  with_plan: withPlan = true,
   effective_features: effectiveFeatures,
   now = fixtureNow,
 }: {
@@ -880,6 +882,23 @@ export function FixtureProvider({
       seed: null,
     })
   }, [withPlan, world])
+  const attention = useMemo(
+    () =>
+      profileAttention(activeProfile)({
+        domain: 'available',
+        world,
+        plan: currentPlan,
+        profile: activeProfile,
+        build_revision: 'storybook',
+        locale: activeProfile.meta.locale,
+        now,
+        audience: 'organiser',
+        closed_changes: currentPlan
+          ? closedAttentionContext(world, currentPlan, activeProfile)
+          : [],
+      }),
+    [world, currentPlan, now],
+  )
   const phases = useMemo(
     () =>
       world
@@ -889,9 +908,10 @@ export function FixtureProvider({
             world,
             now,
             plan: currentPlan,
+            attention,
           })
         : [],
-    [world, now, currentPlan],
+    [world, now, currentPlan, attention],
   )
   const value: OrganiserContextValue = {
     state,
@@ -899,6 +919,7 @@ export function FixtureProvider({
     dispatch: update,
     stage,
     apply,
+    attention,
     current_plan: currentPlan,
     effective_features: effectiveFeatures,
     phases,

@@ -1,3 +1,4 @@
+import { fieldFeedback } from '../../../attention/fields.js'
 import { useAttention } from '../attention.js'
 import { TextareaField } from '../../components/shared/ui/field.js'
 import { ChoiceField } from '../../components/shared/ui/field.js'
@@ -124,11 +125,11 @@ function FamilyEditDialog({
     const name = nextName.trim()
     const address = nextEmail.trim()
     if (!name) {
-      setError('Bitte gib einen Familiennamen ein.')
+      setError(fieldFeedback('family-name'))
       return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
-      setError('Bitte gib eine gültige E-Mail-Adresse ein.')
+      setError(fieldFeedback('email'))
       return
     }
     const events: EventDraft[] = []
@@ -499,7 +500,7 @@ function PersonForm({
     const given = givenName.trim()
     const family = familyName.trim()
     if (!given || !family) {
-      setError('Bitte gib Vor- und Nachnamen ein.')
+      setError(fieldFeedback('person-name'))
       return
     }
     const nextAge = role === 'child' && age.trim() ? Number(age) : null
@@ -507,7 +508,7 @@ function PersonForm({
       role === 'child' &&
       (nextAge === null || !Number.isSafeInteger(nextAge) || nextAge < 1 || nextAge > 17)
     ) {
-      setError('Bitte gib für Kinder ein Alter zwischen 1 und 17 Jahren ein.')
+      setError(fieldFeedback('child-age'))
       return
     }
     if (isNew) {
@@ -1295,7 +1296,7 @@ export function FamilyDetail({
   topic?: FamilyTopic
   person_id?: string
 }) {
-  const attention=useAttention()
+  const attention = useAttention()
   const { state, world, stage, effective_features: effectiveFeatures, phases } = useOrganiser()
   const [, navigate] = useLocation()
   const family = familyId ? findFamily(world!, familyId) : null

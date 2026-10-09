@@ -78,12 +78,24 @@ export function fillClosingPayloads(
       profile,
       seed: null,
     })
-    const attention=profileAttention(profile)({domain:'available',world,plan,profile,build_revision:revisions.build_revision,locale:profile.meta.locale,now:draft.at,audience:'organiser'})
-    const blockers=attentionBlockers(attention,area==='accommodation'?'close-accommodation':'close-workshops')
-    const findings=blockers
+    const attention = profileAttention(profile)({
+      domain: 'available',
+      world,
+      plan,
+      profile,
+      build_revision: revisions.build_revision,
+      locale: profile.meta.locale,
+      now: draft.at,
+      audience: 'organiser',
+    })
+    const blockers = attentionBlockers(
+      attention,
+      area === 'accommodation' ? 'close-accommodation' : 'close-workshops',
+    )
+    const findings = blockers
     if (findings.length > 0) throw new AreaNotReadyError(area, findings)
     if (area === 'workshops') {
-      const advisories=attention.items.filter(item=>item.acknowledgement!==null)
+      const advisories = attention.items.filter((item) => item.acknowledgement !== null)
       const previous = drafts[index - 1]
       const fingerprint =
         previous?.payload &&

@@ -38,7 +38,7 @@ export function WorkshopParticipationScreen() {
       <ScreenLayout
         secondary_navigation={<WorkshopNavigation />}
         notices={<AttentionNotices scope="allocation" />}
-      header={<ScreenHeader title="Teilnahme" />}
+        header={<ScreenHeader title="Teilnahme" />}
       >
         <LoadingState />
       </ScreenLayout>

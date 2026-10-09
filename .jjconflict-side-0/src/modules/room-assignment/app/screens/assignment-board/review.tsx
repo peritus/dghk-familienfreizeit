@@ -1,4 +1,9 @@
 import { activeProfile } from '../../../../../config/index.js'
+import {
+  buildRoomAssignmentInput,
+  roomFeasibility,
+  type RoomAssignmentParams,
+} from '../../../../../modules/room-assignment/index.js'
 import type { World } from '../../../../../events/fold.js'
 import { inventoryWorld } from '../../../../../modules/room-inventory/index.js'
 import type {
@@ -236,7 +241,15 @@ function roomViews(
 }
 
 function findingViews(world: World, attention: AttentionResult): readonly FindingView[] {
- return selectAttention(attention,{area:'accommodation'}).filter(item=>item.kind==='problem'||item.kind==='review').map(item=>({id:item.id,severity:item.severity==='error'?'error':'warning',title:item.wording.title,description:[item.wording.detail,...item.wording.reasons].join(' · '),subjects:item.subjects.map(subject=>familyName(world,subject.id))}))
+  return selectAttention(attention, { area: 'accommodation' })
+    .filter((item) => item.kind === 'problem' || item.kind === 'review')
+    .map((item) => ({
+      id: item.id,
+      severity: item.severity === 'error' ? 'error' : 'warning',
+      title: item.wording.title,
+      description: [item.wording.detail, ...item.wording.reasons].join(' · '),
+      subjects: item.subjects.map((subject) => familyName(world, subject.id)),
+    }))
 }
 
 export function deriveAssignmentReview(
@@ -279,31 +292,29 @@ export function deriveAssignmentReview(
   const unplaced = section.unplaced.map(({ family_id: familyId }) =>
     familyFor(familyId, 'unplaced'),
   )
-  const noMatchIds=new Set(selectAttention(attention,{area:'accommodation'}).filter(i=>i.code==='room-assignment.required-contradiction').flatMap(i=>i.subjects.map(s=>s.id)))
+  const noMatchIds = new Set(
+    selectAttention(attention, { area: 'accommodation' })
+      .filter((i) => i.code === 'room-assignment.required-contradiction')
+      .flatMap((i) => i.subjects.map((s) => s.id)),
+  )
   const withoutMatch = section.unplaced
-    .filter(({ family_id }) => noMatchIds.has(family_id))
+    .filter(({ family_id: familyId }) => noMatchIds.has(familyId))
     .map(({ family_id: familyId }) => familyFor(familyId, 'unplaced'))
-  for (const room of rooms) {
-    room.fit_hints = unplaced
-      .filter((family) => room.free >= family.bed_demand)
-      .map((family) => ({
-        ...family,
-        requirements: family.requirements.map((requirement) => ({
-          ...requirement,
-          met:
-            requirement.kind === 'structural' && requirement.structural === 'no-other-families'
-              ? room.occupants.length === 0
-              : requirement.kind === 'relation'
-                ? !requirement.value ||
-                  !room.occupants.some(
-                    ({ id }) => id === relationFamilyId(world, requirement.value!),
-                  )
-                : requirement.capability_key
-                  ? room.amenity_keys.includes(requirement.capability_key)
-                  : true,
-        })),
-      }))
-  }
+  const params = activeProfile.modules.find((m) => m.id === 'room-assignment')!
+    .parameters as RoomAssignmentParams
+  const feasibilityInput = buildRoomAssignmentInput(world, params)
+  const feasibleRooms = new Map(
+    unplaced.map((family) => [
+      family.id,
+      new Set(
+        roomFeasibility(feasibilityInput, params, section.assignments, family.id)
+          .filter((row) => row.reasons.length === 0)
+          .map((row) => row.room_id),
+      ),
+    ]),
+  )
+  for (const room of rooms)
+    room.fit_hints = unplaced.filter((family) => feasibleRooms.get(family.id)?.has(room.id))
   const buildings = [...new Map(rooms.map((room) => [room.building, room])).keys()].map((name) => {
     const buildingRooms = rooms.filter((room) => room.building === name)
     const occupants = buildingRooms.flatMap(({ occupants: families }) => families)
@@ -373,7 +384,9 @@ export function deriveAssignmentReview(
     unplaced: section.unplaced.map(({ family_id: id, person_ids: people }) => ({
       family: familyName(world, id),
       people: `${people.length} ${people.length === 1 ? 'Person' : 'Personen'}`,
-      reason: selectAttention(attention,{area:'accommodation',subject_id:id}).map(i=>[i.wording.detail,...i.wording.reasons].join(' · ')).join(' · '),
+      reason: selectAttention(attention, { area: 'accommodation', subject_id: id })
+        .map((i) => [i.wording.detail, ...i.wording.reasons].join(' · '))
+        .join(' · '),
     })),
     findings: findingViews(world, attention),
   }
@@ -392,7 +405,12 @@ export function deriveAssignmentReview(
       free_rooms: freeRooms,
       partial_rooms: partialRooms,
       unplaced_reasons: Object.fromEntries(
-        section.unplaced.map(({ family_id: familyId }) => [familyId, selectAttention(attention,{area:'accommodation',subject_id:familyId}).map(i=>[i.wording.detail,...i.wording.reasons].join(' · ')).join(' · ')]),
+        section.unplaced.map(({ family_id: familyId }) => [
+          familyId,
+          selectAttention(attention, { area: 'accommodation', subject_id: familyId })
+            .map((i) => [i.wording.detail, ...i.wording.reasons].join(' · '))
+            .join(' · '),
+        ]),
       ),
     },
     print,

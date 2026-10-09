@@ -181,6 +181,9 @@ describe('feature narrowing of family label writes', () => {
 describe('family governed label keys', () => {
   test('maps every control of a family-governed section to its family feature', () => {
     expect(Object.fromEntries(familyGovernedLabelKeys(luebben2027Profile))).toEqual({
+      'response-needs-private-sanitary': 'family-preferences.family-room-wishes',
+      'response-needs-accessible': 'family-preferences.family-room-wishes',
+      'response-sole-occupancy': 'family-preferences.family-room-wishes',
       'needs-private-sanitary': 'family-preferences.family-room-wishes',
       'needs-accessible': 'family-preferences.family-room-wishes',
       'sole-occupancy': 'family-preferences.family-room-wishes',

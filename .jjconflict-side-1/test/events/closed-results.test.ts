@@ -11,7 +11,10 @@ import { loadKdl } from '../../src/events/kdl.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
 import { defineModule } from '../../src/modules/define.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
-import { planWithWorkshopsClosedResult } from '../../src/modules/workshop-assignment/app/print-closed-result.js'
+import {
+  closingExplanationPlan,
+  planWithWorkshopsClosedResult,
+} from '../../src/modules/workshop-assignment/app/print-closed-result.js'
 
 const config = activeProfile.validation_view
 const contributions = composeSolverContributions(activeProfile)
@@ -53,6 +56,28 @@ const append = (events: readonly Event[], type: string, payload: JsonValue = {})
 const revisions = { build_revision: 'test', compatibility_revision: 1 }
 
 describe('closed results', () => {
+  test('historical explanations require matching policy revisions and canonical stored result', () => {
+    const payload = {
+      ...results.get('workshops')!.compute({ world: workshopWorld, plan: planOf(workshopWorld) }),
+      ...revisions,
+    }
+    const closed = append(workshopEvents, 'WorkshopsClosed', payload)
+    expect(
+      closingExplanationPlan(closed, closed.length, payload, activeProfile, revisions),
+    ).not.toBeNull()
+    expect(
+      closingExplanationPlan(closed, closed.length, payload, activeProfile, {
+        ...revisions,
+        build_revision: 'other',
+      }),
+    ).toBeNull()
+    expect(
+      closingExplanationPlan(closed, closed.length, payload, activeProfile, {
+        ...revisions,
+        compatibility_revision: 2,
+      }),
+    ).toBeNull()
+  })
   test('the active profile closes both areas through their owning modules', () => {
     expect(
       [...results.values()].map(({ area, close_event, reopen_event }) => [
@@ -196,7 +221,20 @@ describe('closed results', () => {
       unplaced: [],
       ...revisions,
     }
-    expect(contribution.compare(before, after, roomWorld)).toEqual({
+    expect({
+      ...contribution.compare(before, after, roomWorld),
+      changes: contribution
+        .compare(before, after, roomWorld)
+        .changes.map(
+          ({
+            aspect: _aspect,
+            before_value: _before,
+            after_value: _after,
+            affected_family_ids: _families,
+            ...change
+          }) => change,
+        ),
+    }).toEqual({
       changes: [
         {
           kind: 'moved',

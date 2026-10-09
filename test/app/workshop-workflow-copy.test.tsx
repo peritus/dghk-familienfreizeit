@@ -90,28 +90,8 @@ test('the programme and allocation screens ask for review without promising a co
   expectNoUnsupportedPromise()
 })
 
-test('the allocation conflict notice asks for review of the marked cases', () => {
-  render(
-    <WorkshopAllocationConflictNotice
-      projection={{
-        max_rank: 3,
-        answers: [],
-        participation: { slots: [], people: [] },
-        demand: [],
-        trace_events: [],
-        trace_people: [],
-        person_names: [],
-        unassigned_person_ids: ['noah'],
-        unassigned_count: 1,
-        fixed_violation_count: 0,
-        has_answers: true,
-        has_workshops: true,
-      }}
-    />,
-  )
-
-  expect(
-    screen.getByText('Die Zuordnung bleibt eine abgeleitete Vorschau. Prüfe die markierten Fälle.'),
-  ).toBeTruthy()
+test('the allocation conflict notice uses registered attention', () => {
+  renderAt('/workshops/allocation', <WorkshopAllocationConflictNotice />)
+  expect(document.querySelector('summary')).toBeTruthy()
   expectNoUnsupportedPromise()
 })

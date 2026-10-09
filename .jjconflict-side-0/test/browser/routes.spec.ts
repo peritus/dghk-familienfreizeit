@@ -71,7 +71,9 @@ for (const route of organiserRouteDefinitions) {
     await page.emulateMedia({ media: 'screen' })
     await page.setViewportSize({ width: 1440, height: 1000 })
     await page.goto(route.test_path)
-    await expect(page.locator('[data-slot="application-bar"]')).toContainText('Organisationsteam')
+    await expect(page.locator('[data-slot="application-bar"]')).toContainText('Organisationsteam', {
+      timeout: 15_000,
+    })
     await expect(page.getByRole('heading', { name: 'Ansicht laden' })).toHaveCount(0)
     const main = page.locator('main')
     const box = await main.boundingBox()

@@ -170,6 +170,17 @@ export function eventPayloadSchemas(config: EventSchemaConfig = {}): EventPayloa
 
 export const kernelEventTypes = Object.keys(kernelPayloadSchemas) as EventType[]
 
+/** Structured input failure. Its message stays internal; attention uses field paths. */
+export class EventInputError extends Error {
+  constructor(
+    message: string,
+    public readonly fields: readonly string[],
+    public seq: number | null = null,
+  ) {
+    super(message)
+  }
+}
+
 export function parsePayload(
   type: string,
   payload: unknown,
@@ -177,7 +188,13 @@ export function parsePayload(
 ): JsonValue {
   const schema = schemas[type]
   if (!schema) throw new Error(`unknown event type: ${type}`)
-  return schema.parse(payload)
+  const parsed = schema.safeParse(payload)
+  if (!parsed.success)
+    throw new EventInputError(
+      parsed.error.message,
+      parsed.error.issues.map((issue) => issue.path.map(String).join('.')).filter(Boolean),
+    )
+  return parsed.data
 }
 
 export function parseEvent(
@@ -196,13 +213,20 @@ export function parseEvent(
     throw new Error('event subject must be a string or null')
   if (typeof value.type !== 'string' || !(value.type in schemas))
     throw new Error(`unknown event type: ${String(value.type)}`)
+  let payload: JsonValue
+  try {
+    payload = parsePayload(value.type, value.payload, schemas)
+  } catch (error) {
+    if (error instanceof EventInputError) error.seq = seq
+    throw error
+  }
   return {
     seq,
     at: new Date(value.at).toISOString(),
     actor: value.actor,
     subject: value.subject ?? null,
     type: value.type,
-    payload: parsePayload(value.type, value.payload, schemas),
+    payload,
   } as Event
 }
 

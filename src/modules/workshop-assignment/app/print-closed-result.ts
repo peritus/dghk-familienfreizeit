@@ -13,7 +13,7 @@ import type { WorkshopAssignmentSection } from '../index.js'
 /**
  * The current plan with the workshop sections replaced by a closed result, so printed lists
  * match what families see (spec/architecture/phases.md §7). Descriptors, sign-ups, and interest
- * stay live; ranks and reasons are kept where the current plan still agrees.
+ * stay live; ranks and reasons come only from a verified closing-prefix replay.
  */
 export function planWithWorkshopsClosedResult<
   P extends { sections: Readonly<Record<string, unknown>> },
@@ -21,7 +21,9 @@ export function planWithWorkshopsClosedResult<
   const result = workshopsClosedResult(payload)
   if (!result) return plan
   const scheduling = plan.sections['workshop-scheduling'] as WorkshopSchedulingSection | undefined
-  const attendance = historical?.sections['workshop-assignment'] as WorkshopAssignmentSection | undefined
+  const attendance = historical?.sections['workshop-assignment'] as
+    | WorkshopAssignmentSection
+    | undefined
   const slots = new Map(
     result.placements.map((placement) => [placement.workshop_id, placement.slot_id]),
   )
@@ -37,7 +39,7 @@ export function planWithWorkshopsClosedResult<
       ...plan.sections,
       'workshop-scheduling': { ...scheduling, placements: result.placements },
       'workshop-assignment': {
-        ...attendance,
+        ...(plan.sections['workshop-assignment'] as WorkshopAssignmentSection | undefined),
         assignments: result.attendance.map((entry) => {
           const known = current.get(`${entry.person_id}\u0000${entry.workshop_id}`)
           return {
@@ -46,6 +48,7 @@ export function planWithWorkshopsClosedResult<
             slot_id: slots.get(entry.workshop_id) ?? known?.slot_id ?? '',
             rank: known?.rank ?? null,
             reason: known?.reason ?? 'ranked',
+            explanation_available: known !== undefined,
           }
         }),
         unassigned: result.unassigned.map((entry) => ({
@@ -53,7 +56,7 @@ export function planWithWorkshopsClosedResult<
           workshop_id: null,
           reason:
             attendance?.unassigned.find(({ person_id: personId }) => personId === entry.person_id)
-              ?.reason ?? 'Erklärung zum festgelegten Ergebnis nicht verfügbar.',
+              ?.reason ?? 'closed-explanation-unavailable',
         })),
       },
     },
@@ -61,11 +64,37 @@ export function planWithWorkshopsClosedResult<
 }
 
 /** Verify a closing-prefix replay before lending its explanations to historical print. */
-export function closingExplanationPlan(events:readonly Event[],seq:number,payload:JsonValue,profile:OccasionProfile,revisions:{build_revision:string;compatibility_revision:number}):Plan|null {
- try {
-  const prefix=events.filter(e=>e.seq<seq),world=derive(prefix,profile.validation_view),contributions=composeSolverContributions(profile)
-  const plan=solve(buildSolverInput(world,contributions),contributions,{...revisions,event_date:profile.meta.starts_on,profile,seed:null})
-  const stored=workshopsClosedResult(payload)
-  return stored&&canonical(workshopsClosedResultContribution.compute({world,plan}))===canonical(stored)?plan:null
- } catch {return null}
+export function closingExplanationPlan(
+  events: readonly Event[],
+  seq: number,
+  payload: JsonValue,
+  profile: OccasionProfile,
+  revisions: { build_revision: string; compatibility_revision: number },
+): Plan | null {
+  try {
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      Array.isArray(payload) ||
+      payload.build_revision !== revisions.build_revision ||
+      payload.compatibility_revision !== revisions.compatibility_revision
+    )
+      return null
+    const prefix = events.filter((e) => e.seq < seq),
+      world = derive(prefix, profile.validation_view),
+      contributions = composeSolverContributions(profile)
+    const plan = solve(buildSolverInput(world, contributions), contributions, {
+      ...revisions,
+      event_date: profile.meta.starts_on,
+      profile,
+      seed: null,
+    })
+    const stored = workshopsClosedResult(payload)
+    return stored &&
+      canonical(workshopsClosedResultContribution.compute({ world, plan })) === canonical(stored)
+      ? plan
+      : null
+  } catch {
+    return null
+  }
 }

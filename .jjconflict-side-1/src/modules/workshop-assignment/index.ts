@@ -1,3 +1,6 @@
+import { attentionReadiness } from '../../attention/readiness.js'
+import { workshopSchedulingAttention } from '../workshop-scheduling/attention.js'
+import { workshopRankingAttention } from '../workshop-rankings/attention.js'
 import { workshopAssignmentAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
@@ -7,10 +10,9 @@ import {
   workshopsClosedResultContribution,
   workshopsReopenedPayload,
 } from './closed-result.js'
-import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
+import type { PhaseReadiness } from '../../config/phases.js'
 import {
   fixedWorkshopIdFromToken,
-  officialWorkshopsWorld,
   workshopEligibilityFailure,
 } from '../official-workshops/index.js'
 import { isFixedWorkshopAttendanceToken } from '../official-workshops/fixed-attendance-token.js'
@@ -34,6 +36,8 @@ export type WorkshopAssignment = {
   slot_id: string
   rank: number | null
   reason: 'ranked' | 'fixed'
+  /** Present only in historical read models when explanations could not be verified. */
+  explanation_available?: boolean
 }
 
 export type WorkshopAssignmentRoundDecision = {
@@ -499,6 +503,7 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
     workshops_per_person: z.number().int().min(1).default(2),
   }),
   contribute: (params) => ({
+    capability_token_prefixes: ['fixed-workshop:'],
     attention_checks: workshopAssignmentAttention(params.workshops_per_person),
     phases: [
       {
@@ -600,57 +605,10 @@ export type { WorkshopMode }
  * been opened, every active workshop is placed, every fixed placement and attendance decision holds, and no workshop preflight finding
  * blocks the plan (spec/architecture/phases.md §4).
  */
-export const workshopReviewReadiness: PhaseReadiness = ({ world, plan }) => {
-  const findings: FindingRef[] = []
-  if (officialWorkshopsWorld(world).workshops.length === 0)
-    findings.push({
-      id: 'workshop-assignment.no-workshops',
-      subject_id: null,
-      message: 'Es ist noch kein aktiver Workshop angelegt.',
-    })
-  if (world.phase_facts.opened['workshop-rankings.choice'] === undefined)
-    findings.push({
-      id: 'workshop-rankings.choice-not-opened',
-      subject_id: null,
-      message: 'Die Workshopwahl ist noch nicht geöffnet.',
-    })
-  if (!plan) {
-    findings.push({
-      id: 'phase.plan-unavailable',
-      subject_id: null,
-      message: 'Die Zuordnung ist noch nicht berechnet.',
-    })
-    return { ready: false, findings }
-  }
-  const scheduling = plan.sections['workshop-scheduling'] as WorkshopSchedulingSection | undefined
-  const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection | undefined
-  // Unscheduled and invalid fixed placements are reported once below, with readable text.
-  const coveredChecks = new Set([
-    'workshop-scheduling.unscheduled',
-    'workshop-scheduling.fixed-invalid',
-  ])
-  for (const finding of plan.preflight)
-    if (
-      finding.severity === 'error' &&
-      finding.check.startsWith('workshop-') &&
-      !coveredChecks.has(finding.check)
-    )
-      findings.push({
-        id: finding.check,
-        subject_id: finding.subjects[0] ?? null,
-        message: finding.text,
-      })
-  for (const { workshop_id: workshopId, reason } of scheduling?.unscheduled ?? [])
-    findings.push({
-      id: 'workshop-scheduling.unplaced',
-      subject_id: workshopId,
-      message: `Workshop ${workshopId} hat keinen Platz im Programm (${reason}).`,
-    })
-  for (const violation of attendance?.fixed_violations ?? [])
-    findings.push({
-      id: 'workshop-assignment.fixed-invalid',
-      subject_id: violation.person_id,
-      message: `Feste Teilnahme von ${violation.person_id} an ${violation.workshop_id} ist nicht erfüllbar.`,
-    })
-  return findings.length === 0 ? { ready: true } : { ready: false, findings }
-}
+export const workshopReviewReadiness: PhaseReadiness = attentionReadiness('workshops', [
+  ...workshopAssignmentAttention(2),
+  ...workshopSchedulingAttention,
+  ...workshopRankingAttention(3).filter(
+    (check) => check.code === 'workshop-rankings.choice-not-opened',
+  ),
+])

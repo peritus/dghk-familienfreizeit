@@ -408,3 +408,46 @@ describe('occasion profile', () => {
     ).not.toThrow()
   })
 })
+
+test('tri-state controls require an explicit requested or optional response declaration', () => {
+  const traits = {
+    'needs-accessible': luebben2027Profile.traits['needs-accessible'],
+    accessible: luebben2027Profile.traits.accessible,
+  }
+  const params = {
+    sections: [
+      {
+        key: 'room',
+        title: 'Room',
+        intro: null,
+        traits: ['needs-accessible'],
+        features: [],
+        phase: null,
+        late_contact: null,
+      },
+    ],
+    module_controls: [],
+  }
+  expect(() =>
+    defineOccasionProfile({ meta, traits, modules: [familyPreferences(params)] }),
+  ).toThrow('tri-state response declaration missing')
+  expect(() =>
+    defineOccasionProfile({
+      meta,
+      traits,
+      modules: [
+        familyPreferences({
+          ...params,
+          response_fields: [
+            {
+              key: 'needs-accessible',
+              scope: 'family',
+              control: 'tri-state',
+              requirement: 'optional',
+            },
+          ],
+        }),
+      ],
+    }),
+  ).not.toThrow()
+})

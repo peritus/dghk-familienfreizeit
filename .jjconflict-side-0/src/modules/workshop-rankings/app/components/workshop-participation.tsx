@@ -53,19 +53,19 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
     <div className="workshop-participation__cell-entries">
       {cell.entries.map((entry) => (
         <div
-          className={`workshop-participation__cell-entry${cell.kind === 'leader' ? ' workshop-participation__cell-entry--leader' : ''}${cell.kind === 'sign-up' || cell.kind === 'interest' ? ' workshop-participation__cell-entry--participation' : ''}${cell.kind === 'assignment' && entry.reason === 'fixed' ? ' workshop-participation__cell-entry--fixed' : ''}`}
-          key={entry.workshop_id}
+          className={`workshop-participation__cell-entry${cell.kind === 'leader' ? ' workshop-participation__cell-entry--leader' : ''}${entry.reason === 'sign-up' || cell.kind === 'interest' ? ' workshop-participation__cell-entry--participation' : ''}${cell.kind === 'assignment' && entry.reason === 'fixed' ? ' workshop-participation__cell-entry--fixed' : ''}`}
+          key={`${entry.workshop_id}:${entry.reason}`}
         >
-          {cell.kind === 'leader' ? (
+          {entry.reason === 'leader' ? (
             <span className="workshop-participation__cell-title">Leitet {entry.title}</span>
           ) : (
             <>
               <span className="workshop-participation__cell-title">{entry.title}</span>
               <br />
               <span className="workshop-participation__cell-detail">
-                {cell.kind === 'sign-up'
+                {entry.reason === 'sign-up'
                   ? 'Anmeldung'
-                  : cell.kind === 'interest'
+                  : entry.reason === 'interest'
                     ? 'Interesse'
                     : entry.reason === 'fixed'
                       ? 'fest zugeordnet'

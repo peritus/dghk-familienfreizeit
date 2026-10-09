@@ -1,3 +1,7 @@
+import { loadKdl } from '../../../../../events/kdl.js'
+import { activeProfile } from '../../../../../config/index.js'
+import { FixtureProvider } from '../../../../../app/stories/organiser-fixtures.js'
+import { initialOrganiserState, organiserReducer } from '../../../../../app/organiser/state.js'
 import { CollectionList } from '../../../../../app/components/shared/ui/collection-list.js'
 import { SuccessState } from '../../../../../app/components/shared/ui/success-state.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
@@ -172,19 +176,55 @@ export const BuildingHeader: Story = {
   ),
 }
 
+const fixedDialogState = organiserReducer(initialOrganiserState, {
+  type: 'loaded',
+  build_revision: 'storybook',
+  compatibility_revision: 1,
+  feature_overrides: [],
+  principal_email: 'organiser@example.test',
+  events: loadKdl(
+    `
+FamilyInvited family_id="fam_baumann" email="baumann@example.test" display_name="Familie Baumann" locale="de"
+PersonAdded person_id="per_anna" family_id="fam_baumann" given_name="Anna" family_name="Baumann" role="adult" age=30
+PersonAdded person_id="per_luis" family_id="fam_baumann" given_name="Luis" family_name="Baumann" role="child" age=8
+BuildingAdded building_id="bld_haupthaus" name="Haupthaus" sort_key=1
+RoomAdded room_id="rm_23" building_id="bld_haupthaus" number="23" floor="first" room_type="standard" sort_key=1
+RoomAdded room_id="rm_24" building_id="bld_haupthaus" number="24" floor="first" room_type="standard" sort_key=2
+LabelSet entity_id="rm_23" key="is-accessible" value=#true strength=#null note=#null
+LabelSet entity_id="rm_24" key="is-accessible" value=#true strength=#null note=#null
+LabelSet entity_id="rm_23" key="sanitary" value="private" strength=#null note=#null
+LabelSet entity_id="rm_24" key="sanitary" value="private" strength=#null note=#null
+LabelSet entity_id="rm_23" key="price-per-bed-eur" value=0 strength=#null note=#null
+LabelSet entity_id="rm_24" key="price-per-bed-eur" value=0 strength=#null note=#null
+LabelSet entity_id="fam_baumann" key="needs-accessible" value="accessible" strength="required" note=#null
+LabelSet entity_id="fam_baumann" key="needs-private-sanitary" value="private-sanitary" strength="preferred" note=#null
+BedAdded bed_id="bed_23a" room_id="rm_23" label="1" bed_type="single" sleeps=1 sort_key=1
+BedAdded bed_id="bed_23b" room_id="rm_23" label="2" bed_type="single" sleeps=1 sort_key=2
+BedAdded bed_id="bed_23c" room_id="rm_23" label="3" bed_type="single" sleeps=1 sort_key=3
+BedAdded bed_id="bed_23d" room_id="rm_23" label="4" bed_type="single" sleeps=1 sort_key=4
+BedAdded bed_id="bed_24a" room_id="rm_24" label="1" bed_type="single" sleeps=1 sort_key=1
+BedAdded bed_id="bed_24b" room_id="rm_24" label="2" bed_type="single" sleeps=1 sort_key=2
+BedAdded bed_id="bed_24c" room_id="rm_24" label="3" bed_type="single" sleeps=1 sort_key=3
+BedAdded bed_id="bed_24d" room_id="rm_24" label="4" bed_type="single" sleeps=1 sort_key=4
+`,
+    activeProfile.validation_view,
+  ),
+})
 export const FixedDialog: Story = {
   args: { requirement: requirement({}) },
   render: () => (
-    <FixedAssignmentDialog
-      family={family}
-      rooms={[
-        room(),
-        room({ id: 'rm_24', name: 'Zimmer 24', occupied: 0, free: 4, occupants: [] }),
-      ]}
-      open
-      onOpenChange={() => undefined}
-      onAssign={() => undefined}
-    />
+    <FixtureProvider initialState={fixedDialogState}>
+      <FixedAssignmentDialog
+        family={family}
+        rooms={[
+          room(),
+          room({ id: 'rm_24', name: 'Zimmer 24', occupied: 0, free: 4, occupants: [] }),
+        ]}
+        open
+        onOpenChange={() => undefined}
+        onAssign={() => undefined}
+      />
+    </FixtureProvider>
   ),
 }
 

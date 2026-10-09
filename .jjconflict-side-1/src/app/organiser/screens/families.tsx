@@ -1,3 +1,4 @@
+import { fieldFeedback } from '../../../attention/fields.js'
 import { useAttention } from '../attention.js'
 import { TableFrame } from '../../components/shared/ui/data-table.js'
 import { EmptyState } from '../../components/shared/ui/screen-state.js'
@@ -45,7 +46,7 @@ function familyStatusBadges(open: readonly string[], complete: boolean) {
 }
 
 export function Families() {
-  const attention=useAttention()
+  const attention = useAttention()
   const { world, state, stage: stageEvents } = useOrganiser()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<FamilyFilter>('all')
@@ -59,7 +60,7 @@ export function Families() {
       familyRows(world!)
         .map((row) => ({ row, status: familyStatus(world!, row, attention) }))
         .sort((a, b) => a.row.display_name.localeCompare(b.row.display_name, 'de')),
-    [world],
+    [world, attention],
   )
   const counts = {
     all: all.length,
@@ -92,11 +93,11 @@ export function Families() {
     const trimmedEmail = email.trim()
     if (!state.principal_email) return
     if (!trimmedName) {
-      setInviteError('Bitte gib einen Familiennamen ein.')
+      setInviteError(fieldFeedback('family-name'))
       return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setInviteError('Bitte gib eine gültige E-Mail-Adresse ein.')
+      setInviteError(fieldFeedback('email'))
       return
     }
     if (
@@ -104,7 +105,7 @@ export function Families() {
         (row) => row.email.toLocaleLowerCase('de') === trimmedEmail.toLocaleLowerCase('de'),
       )
     ) {
-      setInviteError('Diese E-Mail ist schon bei einer anderen Familie eingetragen.')
+      setInviteError(fieldFeedback('email-used'))
       return
     }
     const familyId = id('fam_')

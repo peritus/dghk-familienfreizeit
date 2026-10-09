@@ -45,6 +45,8 @@ describe('workshop lifecycle fixture', () => {
       changes: [
         {
           kind: 'moved',
+          aspect: 'attendance',
+          family_unknown: false,
           subject_id: 'per_bo',
           family_id: 'fam_linde',
           before: 'wks_wald',

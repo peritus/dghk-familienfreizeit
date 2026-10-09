@@ -1,3 +1,7 @@
+import { loadKdl } from '../../../../events/kdl.js'
+import { activeProfile } from '../../../../config/index.js'
+import { FixtureProvider } from '../../../../app/stories/organiser-fixtures.js'
+import { initialOrganiserState, organiserReducer } from '../../../../app/organiser/state.js'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ChoiceTraceTable, TraceControls, TraceLegend } from './choices.js'
@@ -141,13 +145,45 @@ export const Empty: Story = {
   ),
 }
 
+const conflictState = organiserReducer(initialOrganiserState, {
+  type: 'loaded',
+  build_revision: 'storybook',
+  compatibility_revision: 1,
+  feature_overrides: [],
+  principal_email: 'organiser@example.test',
+  events: [
+    ...loadKdl(
+      `
+FamilyInvited family_id="fam_case" email="case@example.test" display_name="Familie Beispiel" locale="de"
+PersonAdded person_id="per_case" family_id="fam_case" given_name="Mara" family_name="Beispiel" role="adult" age=30
+WorkshopAdded workshop_id="wks_case" title="Keramik" description="" audience="all" age_min=0 age_max=99 capacity=4 participation_mode="assigned" sort_key=1
+WorkshopChoiceOpened
+`,
+      activeProfile.validation_view,
+    ),
+    {
+      seq: 5,
+      type: 'LabelSet',
+      at: '2027-01-01T00:00:00.000Z',
+      actor: 'organiser@example.test',
+      subject: 'per_case',
+      payload: {
+        entity_id: 'per_case',
+        key: 'prefers-workshop',
+        value: { workshop_id: 'wks_case', rank: 2 },
+        strength: null,
+        note: null,
+      },
+    },
+  ],
+})
 export const BlockedByConflicts: Story = {
   render: () => (
-    <div className="max-w-2xl space-y-5 bg-background p-6">
-      <WorkshopAllocationConflictNotice
-        projection={{ ...projection, fixed_violation_count: 2, unassigned_count: 3 }}
-      />
-    </div>
+    <FixtureProvider initialState={conflictState}>
+      <div className="max-w-2xl space-y-5 bg-background p-6">
+        <WorkshopAllocationConflictNotice />
+      </div>
+    </FixtureProvider>
   ),
 }
 

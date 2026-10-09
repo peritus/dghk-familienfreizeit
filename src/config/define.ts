@@ -1,3 +1,4 @@
+import { coreProfileAttentionChecks } from '../attention/catalogue.js'
 import type { AttentionCheck } from '../attention/types.js'
 import { composeAttention } from '../attention/engine.js'
 import type { ZodType } from 'zod'
@@ -101,7 +102,12 @@ export type FamilyPreferenceModuleControl = {
   help: LocalizedText | null
 }
 
-export type ResponseField = { key: string; scope: 'family' | 'person'; control: 'value' | 'tri-state'; requirement: 'requested' | 'optional' }
+export type ResponseField = {
+  key: string
+  scope: 'family' | 'person'
+  control: 'value' | 'tri-state'
+  requirement: 'requested' | 'optional'
+}
 
 export type FamilyPreferencesParams = {
   response_fields?: readonly ResponseField[]
@@ -201,6 +207,7 @@ export type ProfileModule = {
 }
 
 export type ModuleContributions = {
+  capability_token_prefixes?: readonly string[]
   attention_checks?: readonly AttentionCheck[]
   entity_kinds?: readonly {
     id: string
@@ -323,7 +330,7 @@ export function defineOccasionProfile<Traits extends Record<string, Trait>>(inpu
   const modules = input.modules ?? []
   validateTraits(input.traits, input.meta)
   validateModules(modules, input.traits, input.meta)
-  composeAttention([], modules)
+  composeAttention(coreProfileAttentionChecks, modules)
   return { ...input, modules, validation_view: validationView(input.traits, modules) }
 }
 
@@ -623,10 +630,19 @@ function validateFamilyPreferences(
   const responseKeys = new Set<string>()
   for (const response of params.response_fields ?? []) {
     const trait = traits[response.key]
-    if (responseKeys.has(response.key) || !trait?.family_facing || trait.family_facing.scope !== response.scope || (response.control === 'tri-state') !== (trait.family_facing.control === 'tri-state') || occurrences.get(response.key) !== 1)
+    if (
+      responseKeys.has(response.key) ||
+      !trait?.family_facing ||
+      trait.family_facing.scope !== response.scope ||
+      (response.control === 'tri-state') !== (trait.family_facing.control === 'tri-state') ||
+      occurrences.get(response.key) !== 1
+    )
       throw new Error(`invalid response field: ${response.key}`)
     responseKeys.add(response.key)
   }
+  for (const [key, trait] of Object.entries(traits))
+    if (trait.family_facing?.control === 'tri-state' && !responseKeys.has(key))
+      throw new Error(`tri-state response declaration missing: ${key}`)
   const moduleControlKeys = new Set<string>()
   for (const control of params.module_controls) {
     if (moduleControlKeys.has(control.key))
@@ -679,10 +695,20 @@ function validationView(
   }))
   for (const module of modules)
     for (const key of module.contributions.label_keys ?? []) schemas.push(key)
-  for (const [key, trait] of Object.entries(traits)) if (trait.family_facing?.control === 'tri-state') {
-    if (schemas.some(s => s.key === `response-${key}`)) throw new Error(`response marker collision: ${key}`)
-    schemas.push({ key: `response-${key}`, scopes: [trait.family_facing.scope], cardinality: 'zero-or-one', family_writable: trait.family_writable, sensitivity: trait.sensitivity, governed_control: key, validate: value => value === true ? null : 'response marker must be true' })
-  }
+  for (const [key, trait] of Object.entries(traits))
+    if (trait.family_facing?.control === 'tri-state') {
+      if (schemas.some((s) => s.key === `response-${key}`))
+        throw new Error(`response marker collision: ${key}`)
+      schemas.push({
+        key: `response-${key}`,
+        scopes: [trait.family_facing.scope],
+        cardinality: 'zero-or-one',
+        family_writable: trait.family_writable,
+        sensitivity: trait.sensitivity,
+        governed_control: key,
+        validate: (value) => (value === true ? null : 'response marker must be true'),
+      })
+    }
   const aliases = Object.fromEntries(
     schemas.flatMap((schema) => (schema.aliases ?? []).map((alias) => [alias, schema.key])),
   )
@@ -732,7 +758,24 @@ function validationView(
   for (const module of modules)
     for (const { id, prefix } of module.contributions.entity_kinds ?? [])
       entityKindPrefixes[id] = prefix
+  const tokenConsumers = modules.flatMap((module) =>
+    (module.contributions.capability_token_prefixes ?? []).map((prefix) => ({
+      prefix,
+      consumer: module.id,
+    })),
+  )
+  for (const token of tokenConsumers)
+    if (
+      !token.prefix ||
+      tokenConsumers.some(
+        (other) =>
+          other !== token &&
+          (other.prefix.startsWith(token.prefix) || token.prefix.startsWith(other.prefix)),
+      )
+    )
+      throw new Error(`ambiguous capability token prefix: ${token.prefix}`)
   return {
+    capability_token_consumers: tokenConsumers,
     label_schemas: schemas,
     aliases,
     resolver_descriptors: resolverDescriptors,

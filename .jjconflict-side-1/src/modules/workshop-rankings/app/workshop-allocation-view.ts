@@ -605,7 +605,7 @@ export function buildWorkshopAllocationProjection(
       rank: null,
       phase: 'fixed',
       outcome: reasonOutcome(violation.reasons[0]),
-      detail: `Feste Zuordnung bleibt bestehen. Konflikte: ${violation.reasons.map(attentionReason).join(', ')}.`,
+      detail: `Feste Zuordnung bleibt bestehen. Konflikte: ${violation.reasons.map((reason) => attentionReason(reason)).join(', ')}.`,
       slot_label: slotLabel(violation.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
@@ -755,9 +755,24 @@ export function buildWorkshopAllocationProjection(
         }))
       const cells: WorkshopParticipationCell[] = participationSlots.map((slot) => {
         const entries = slotEntriesByPerson.get(person.id)?.get(slot.id)
-        if(entries){
-          const all=[...entries.leaders.map(e=>({...e,source:'Leitung'})),...entries.assignments.map(e=>({...e,source:'Teilnahme'})),...entries.signups.map(e=>({...e,source:'Anmeldung'})),...entries.interests.map(e=>({...e,source:'Interesse'}))].map(e=>({...e,title:`${e.title} (${e.source})`}))
-          if(all.length)return {kind:entries.leaders.length?'leader':entries.assignments.length?'assignment':entries.signups.length?'sign-up':'interest',entries:all}
+        if (entries) {
+          const all = [
+            ...entries.leaders,
+            ...entries.assignments,
+            ...entries.signups,
+            ...entries.interests,
+          ]
+          if (all.length)
+            return {
+              kind: entries.leaders.length
+                ? 'leader'
+                : entries.assignments.length
+                  ? 'assignment'
+                  : entries.signups.length
+                    ? 'sign-up'
+                    : 'interest',
+              entries: all,
+            }
         }
         return { kind: 'free', entries: [] }
       })

@@ -1,3 +1,4 @@
+import { derivePublicAttention } from '../../attention/public.js'
 import { TextField } from '../components/shared/ui/field.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { useEffect, useState, type FormEvent } from 'react'
@@ -55,15 +56,17 @@ export function Login() {
         <div className="max-w-xl space-y-4">
           {expiredLink() ? (
             <Alert variant="destructive">
-              <AlertTitle>Der Link ist abgelaufen</AlertTitle>
-              <AlertDescription>Fordere einen neuen Magic Link an.</AlertDescription>
+              <AlertTitle>{derivePublicAttention('login-expired').wording.title}</AlertTitle>
+              <AlertDescription>
+                {derivePublicAttention('login-expired').wording.detail}
+              </AlertDescription>
             </Alert>
           ) : null}
           {status === 'sent' && magicLink ? (
             <Alert aria-live="polite" className="bg-main text-main-foreground">
-              <AlertTitle>Demo-Magic-Link bereit</AlertTitle>
+              <AlertTitle>{derivePublicAttention('login-demo').wording.title}</AlertTitle>
               <AlertDescription>
-                <p>Klicke auf den Link, um Dich als Organisator anzumelden.</p>
+                <p>{derivePublicAttention('login-demo').wording.detail}</p>
                 <a
                   href={magicLink}
                   className="inline-flex min-h-11 items-center rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-bold text-foreground shadow-shadow"
@@ -75,16 +78,18 @@ export function Login() {
           ) : null}
           {status === 'sent' && !magicLink ? (
             <Alert aria-live="polite">
-              <AlertTitle>Magic Link gesendet</AlertTitle>
+              <AlertTitle>{derivePublicAttention('login-response').wording.title}</AlertTitle>
               <AlertDescription>
-                <p>Bitte prüfe Dein Postfach und öffne den Link.</p>
+                <p>{derivePublicAttention('login-response').wording.detail}</p>
               </AlertDescription>
             </Alert>
           ) : null}
           {status === 'error' ? (
             <Alert variant="destructive">
-              <AlertTitle>Anfrage fehlgeschlagen</AlertTitle>
-              <AlertDescription>Bitte versuche es später erneut.</AlertDescription>
+              <AlertTitle>{derivePublicAttention('login-failed').wording.title}</AlertTitle>
+              <AlertDescription>
+                {derivePublicAttention('login-failed').wording.detail}
+              </AlertDescription>
             </Alert>
           ) : null}
         </div>

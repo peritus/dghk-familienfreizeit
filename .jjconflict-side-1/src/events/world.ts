@@ -39,7 +39,9 @@ export function projectFamilyWorld(world: World, familyId: string): World {
   const visibleIds = new Set([familyId, ...personIds])
   return project(
     world,
-    world.labels.filter((label) => visibleIds.has(label.entity_id) && label.sensitivity === 'normal'),
+    world.labels.filter(
+      (label) => visibleIds.has(label.entity_id) && label.sensitivity === 'normal',
+    ),
     world.families.filter((entity) => entity.id === familyId),
     world.persons.filter((entity) => personIds.has(entity.id)),
   )
@@ -80,14 +82,36 @@ function project(
   // resolved row: the shared projection is over the whole occasion, so the
   // paired loops cost entities times constraints.
   const visible = new Set(entities.map((entity) => entity.id))
-  const scalarKeys=new Set(['display-name','given-name','family-name','age','role','locale','diet','does-not-need-a-bed'])
-  const referenceKeys=new Set(['member-of'])
-  const safeLabels=labels.filter(label=>label.sensitivity==='normal' && (scalarKeys.has(label.key) || (label.key.startsWith('response-') && label.value===true) || (referenceKeys.has(label.key) && typeof label.value==='string' && visible.has(label.value))))
-  const rows=new Set(safeLabels.map(label=>`${label.entity_id}\0${label.key}\0${canonicalJson(label.value)}\0${label.set_seq}`))
+  const scalarKeys = new Set([
+    'display-name',
+    'given-name',
+    'family-name',
+    'age',
+    'role',
+    'locale',
+    'diet',
+    'does-not-need-a-bed',
+  ])
+  const referenceKeys = new Set(['member-of'])
+  const safeLabels = labels.filter(
+    (label) =>
+      label.sensitivity === 'normal' &&
+      (scalarKeys.has(label.key) ||
+        (label.key.startsWith('response-') && label.value === true) ||
+        (referenceKeys.has(label.key) &&
+          typeof label.value === 'string' &&
+          visible.has(label.value))),
+  )
+  const rows = new Set(
+    safeLabels.map(
+      (label) =>
+        `${label.entity_id}\0${label.key}\0${canonicalJson(label.value)}\0${label.set_seq}`,
+    ),
+  )
   return {
-    head_seq:world.head_seq,
-    diagnostics:[],
-    summaries:{},
+    head_seq: world.head_seq,
+    diagnostics: [],
+    summaries: {},
     families: [...families],
     persons: [...persons],
     labels: [...safeLabels],
@@ -95,7 +119,12 @@ function project(
     labels_by_key: index(safeLabels, (label) => label.key),
     entity_kind_by_id: entityKindsById(entities),
     family_id_by_email: familyIdsByEmail(safeLabels, entities),
-    constraints: world.constraints.filter(c=>visible.has(c.holder_id)&&visible.has(c.value)&&rows.has(`${c.holder_id}\0${c.key}\0${canonicalJson(c.value)}\0${c.set_seq}`)),
+    constraints: world.constraints.filter(
+      (c) =>
+        visible.has(c.holder_id) &&
+        visible.has(c.value) &&
+        rows.has(`${c.holder_id}\0${c.key}\0${canonicalJson(c.value)}\0${c.set_seq}`),
+    ),
     requirements: [],
     capabilities: [],
     entities_by_kind: index(entities, (entity) => entity.kind),

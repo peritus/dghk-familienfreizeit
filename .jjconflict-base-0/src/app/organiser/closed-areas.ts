@@ -1,3 +1,4 @@
+import type { InventorySummary } from '../../modules/room-inventory/index.js'
 import type { ProfileModule } from '../../config/define.js'
 import {
   closedResults,
@@ -66,14 +67,29 @@ export function closedAreaState(input: {
   }
 }
 
-/** A readable name for a person, family, workshop, or room id, falling back to the id. */
+/** A readable name for a person, family, workshop, or room id, with a truthful unavailable fallback. */
 export function subjectName(world: World, id: string | null): string {
   if (!id) return '—'
+  const inventory = world.summaries['room-inventory'] as InventorySummary | undefined
+  const place = inventory?.places.find((place) => place.id === id)
+  if (place) {
+    const beds = inventory!.beds.filter((bed) => bed.room_id === place.room_id)
+    const bed = beds.find((bed) => bed.id === place.bed_id)
+    const ordinal = beds.findIndex((bed) => bed.id === place.bed_id) + 1
+    return `Schlafplatz ${place.index} · Bett ${bed?.label || ordinal} · Zimmer ${subjectName(world, place.room_id)}`
+  }
   const labels = world.labels_by_entity[id] ?? []
   const value = (key: string) => {
     const found = labels.find((label) => label.key === key)?.value
     return typeof found === 'string' || typeof found === 'number' ? String(found) : null
   }
   const person = [value('given-name'), value('family-name')].filter(Boolean).join(' ')
-  return value('display-name') ?? value('title') ?? (person || null) ?? value('number') ?? id
+  return (
+    value('display-name') ??
+    value('title') ??
+    value('name') ??
+    (person || null) ??
+    value('number') ??
+    'Objekt nicht verfügbar'
+  )
 }

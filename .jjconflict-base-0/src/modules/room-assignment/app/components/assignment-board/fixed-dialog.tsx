@@ -1,7 +1,12 @@
-import { useContext, useMemo } from 'react'
-import { OrganiserContext } from '../../../../../app/organiser/context.js'
+import { useMemo } from 'react'
+import { useOrganiser } from '../../../../../app/organiser/context.js'
 import { activeProfile } from '../../../../../config/index.js'
-import { buildRoomAssignmentInput, roomFeasibility, type RoomAssignmentParams, type RoomAssignmentSection } from '../../../index.js'
+import {
+  buildRoomAssignmentInput,
+  roomFeasibility,
+  type RoomAssignmentParams,
+  type RoomAssignmentSection,
+} from '../../../index.js'
 import { attentionReason } from '../../../../../attention/reasons.js'
 import {
   Dialog,
@@ -32,17 +37,38 @@ export function FixedAssignmentDialog({
   onOpenChange: (open: boolean) => void
   onAssign: (family: FamilyView, room: RoomView) => void
 }) {
-  const context=useContext(OrganiserContext)
-  const feasibility=useMemo(()=>{
-    const module=activeProfile.modules.find(m=>m.id==='room-assignment')
-    if(!context?.world||!module||!family)return []
-    const params=module.parameters as RoomAssignmentParams
-    const input=buildRoomAssignmentInput(context.world,params)
-    const assignments=(context.current_plan?.sections['room-assignment'] as RoomAssignmentSection|undefined)?.assignments??[]
-    return roomFeasibility(input,params,assignments,family.id)
-  },[context?.world,context?.current_plan,family])
+  const context = useOrganiser()
+  const world = context?.world,
+    plan = context?.current_plan
+  const feasibility = useMemo(() => {
+    const module = activeProfile.modules.find((m) => m.id === 'room-assignment')
+    if (!world || !module || !family) return []
+    const params = module.parameters as RoomAssignmentParams
+    const input = buildRoomAssignmentInput(world, params)
+    const assignments =
+      (plan?.sections['room-assignment'] as RoomAssignmentSection | undefined)?.assignments ?? []
+    return roomFeasibility(input, params, assignments, family.id)
+  }, [world, plan, family])
   if (!family) return null
-  const candidates=feasibility.flatMap(candidate=>{const room=rooms.find(r=>r.id===candidate.room_id);return room&&room.id!==family.room_id?[{room,requirements:family.requirements,reasons:candidate.reasons,unmet_required:candidate.reasons.length,unmet_wishes:0}]:[]})
+  const candidates = feasibility.flatMap((candidate) => {
+    const room = rooms.find((r) => r.id === candidate.room_id)
+    return room && room.id !== family.room_id
+      ? [
+          {
+            room,
+            requirements: family.requirements.map((requirement) => ({
+              ...requirement,
+              met: requirement.capability_key
+                ? candidate.capability_matches[requirement.capability_key]
+                : undefined,
+            })),
+            reasons: candidate.reasons,
+            unmet_required: candidate.reasons.length,
+            unmet_wishes: 0,
+          },
+        ]
+      : []
+  })
   const hasRequirementMatch = candidates.some(
     ({ unmet_required: unmetRequired }) => unmetRequired === 0,
   )
@@ -94,7 +120,11 @@ export function FixedAssignmentDialog({
                   <RequirementChip key={requirement.key} requirement={requirement} />
                 ))}
               </div>
-              <ul className="text-sm">{reasons.map(reason=><li key={reason}>{attentionReason(reason)}</li>)}</ul>
+              <ul className="text-sm">
+                {reasons.map((reason) => (
+                  <li key={reason}>{attentionReason(reason)}</li>
+                ))}
+              </ul>
               <Button type="button" onClick={() => onAssign(family, room)}>
                 {unmetRequired > 0 ? 'Trotzdem zuordnen' : 'Zuordnen'}
               </Button>

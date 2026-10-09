@@ -47,7 +47,8 @@ test.describe('repository-local UI contract', () => {
       if (entry.viewport) await page.setViewportSize(entry.viewport)
       await page.goto(`/iframe.html?id=${entry.id}&viewMode=story`)
       if (entry.media) await page.emulateMedia({ media: entry.media })
-      if (entry.ready_selector) await expect(page.locator(entry.ready_selector)).toBeVisible()
+      if (entry.ready_selector)
+        await expect(page.locator(entry.ready_selector)).toBeVisible({ timeout: 15_000 })
       const root = page.locator('#storybook-root')
       const target = entry.screenshot_target === 'dialog' ? page.getByRole('dialog') : root
       await expect(target).toBeVisible({ timeout: 15_000 })

@@ -9,6 +9,7 @@ import type { PhaseView } from '../../derive/phases.js'
 export type OrganiserContextValue = {
   state: OrganiserState
   world: World | null
+  baseline_world?: World | null
   dispatch: Dispatch<OrganiserAction>
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>

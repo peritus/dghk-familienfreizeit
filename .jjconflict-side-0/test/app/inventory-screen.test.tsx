@@ -129,7 +129,24 @@ test('apartment rooms group added beds by Schlafraum, with a "+ Neuer Schlafraum
       sort_key: 1,
     },
   }
-  open([buildingEvent, roomEvent])
+  open([
+    buildingEvent,
+    roomEvent,
+    ...['sanitary', 'price-per-bed-eur'].map((key, index) => ({
+      seq: index + 3,
+      at: buildingEvent.at,
+      actor: buildingEvent.actor,
+      subject: 'rm_1',
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'rm_1',
+        key,
+        value: key === 'sanitary' ? 'shared-floor' : 0,
+        strength: null,
+        note: null,
+      },
+    })),
+  ])
 
   fireEvent.click(await screen.findByRole('button', { name: /35/ }))
   // First bed: no Schlafraum exists yet, defaults to "Schlafraum 1".
@@ -243,7 +260,24 @@ test('room rows carry mobile field labels (visible only under the max-md breakpo
       sort_key: 1,
     },
   }
-  open([buildingEvent, roomEvent])
+  open([
+    buildingEvent,
+    roomEvent,
+    ...['sanitary', 'price-per-bed-eur'].map((key, index) => ({
+      seq: index + 3,
+      at: buildingEvent.at,
+      actor: buildingEvent.actor,
+      subject: 'rm_1',
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'rm_1',
+        key,
+        value: key === 'sanitary' ? 'shared-floor' : 0,
+        strength: null,
+        note: null,
+      },
+    })),
+  ])
 
   await screen.findByRole('button', { name: /101/ })
   for (const label of ['Etage:', 'Typ:', 'Bad:', 'Betten:', 'Plätze:', 'Preis/Platz:'])
@@ -274,7 +308,24 @@ test('a building with rooms explains inline why it cannot be removed, instead of
       sort_key: 1,
     },
   }
-  open([buildingEvent, roomEvent])
+  open([
+    buildingEvent,
+    roomEvent,
+    ...['sanitary', 'price-per-bed-eur'].map((key, index) => ({
+      seq: index + 3,
+      at: buildingEvent.at,
+      actor: buildingEvent.actor,
+      subject: 'rm_1',
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'rm_1',
+        key,
+        value: key === 'sanitary' ? 'shared-floor' : 0,
+        strength: null,
+        note: null,
+      },
+    })),
+  ])
 
   fireEvent.click(await screen.findByText('Gebäude bearbeiten'))
   const removeButton = screen.getByRole('button', { name: 'Gebäude entfernen' })

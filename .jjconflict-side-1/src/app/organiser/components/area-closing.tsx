@@ -1,3 +1,5 @@
+import type { JsonValue } from '../../../events/types.js'
+import { AttentionDetails, useAttention } from '../attention.js'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/shared/ui/button.js'
 import { acknowledgementFingerprint } from '../../../attention/selectors.js'
@@ -41,14 +43,35 @@ export function useClosedArea(area: AreaId): ClosedAreaState | null {
 function ChangeList({ state }: { state: ClosedAreaState }) {
   const { world } = useOrganiser()
   const changes = state.difference?.changes ?? []
+  const describe = (value: JsonValue | undefined, legacy: string | null): string =>
+    value === undefined
+      ? subjectName(world!, legacy)
+      : value === null
+        ? '—'
+        : Array.isArray(value)
+          ? value.map((v) => describe(v, null)).join(', ') || '—'
+          : typeof value === 'object'
+            ? Object.entries(value)
+                .map(
+                  ([key, v]) =>
+                    `${({ slot_id: 'Slot', space_id: 'Raum', place_ids: 'Schlafplätze', room_id: 'Zimmer' } as Record<string, string>)[key] ?? key}: ${describe(v, null)}`,
+                )
+                .join('; ')
+            : typeof value === 'string'
+              ? subjectName(world!, value)
+              : String(value)
   if (changes.length === 0) return <p>Keine Abweichung.</p>
   return (
     <ul className="max-h-64 space-y-1 overflow-y-auto text-sm">
       {changes.map((change) => (
-        <li key={`${change.kind}-${change.subject_id}-${change.before}-${change.after}`}>
+        <li
+          key={`${change.kind}-${change.subject_id}-${change.aspect}-${change.before}-${change.after}`}
+        >
           <strong>{subjectName(world!, change.subject_id)}</strong>{' '}
           <span className="text-muted">({changeLabels[change.kind]})</span>:{' '}
-          {subjectName(world!, change.before)} → {subjectName(world!, change.after)}
+          {describe(change.before_value, change.before)} →{' '}
+          {describe(change.after_value, change.after)}
+          {change.family_unknown ? ' · Familie nicht verfügbar' : null}
         </li>
       ))}
     </ul>
@@ -87,12 +110,13 @@ export function AreaClosingReview({ state }: { state: ClosedAreaState }) {
  * result when the staged closing is applied.
  */
 export function AreaClosingActions({ area }: { area: AreaId }) {
-  const { state: organiser, stage, attention } = useOrganiser()
+  const { state: organiser, stage } = useOrganiser()
+  const attention = useAttention()
   const [reviewing, setReviewing] = useState(false)
   const [reviewedFingerprint, setReviewedFingerprint] = useState<string | null>(null)
-  const fingerprint=attention ? acknowledgementFingerprint(attention) : ''
-  const acknowledged=reviewedFingerprint===fingerprint
-  const setAcknowledged=(value:boolean)=>setReviewedFingerprint(value?fingerprint:null)
+  const fingerprint = attention ? acknowledgementFingerprint(attention) : ''
+  const acknowledged = reviewedFingerprint === fingerprint
+  const setAcknowledged = (value: boolean) => setReviewedFingerprint(value ? fingerprint : null)
   const reviewHeading = useRef<HTMLHeadingElement>(null)
   const reviewTrigger = useRef<HTMLButtonElement>(null)
   const confirmation = useRef<HTMLDivElement>(null)
@@ -109,7 +133,10 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
     wasReviewing.current = reviewing
     wasAcknowledged.current = acknowledged
   }, [reviewing, acknowledged])
-  const advisories = area === 'workshops' ? attention?.items.filter(item=>item.acknowledgement!==null) ?? [] : []
+  const advisories =
+    area === 'workshops'
+      ? (attention?.items.filter((item) => item.acknowledgement !== null) ?? [])
+      : []
   const state = useClosedArea(area)
   if (!state || !organiser.principal_email) return null
   const actor = organiser.principal_email
@@ -154,16 +181,8 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
           <ul className="list-disc space-y-2 pl-5">
             {advisories.slice(0, 5).map((note) => (
               <li key={note.id}>
-                <OrganiserLink
-                  href={organiserPathWithQuery(organiserPaths.workshops(), {
-                    notes: '1',
-                    workshop: note.subjects[0]?.id ?? '',
-                  })}
-                  className="underline"
-                >
-                  {note.wording.title}
-                </OrganiserLink>
-                : {note.wording.detail}
+                <p className="font-bold">{note.wording.title}</p>
+                <AttentionDetails item={note} />
               </li>
             ))}
           </ul>

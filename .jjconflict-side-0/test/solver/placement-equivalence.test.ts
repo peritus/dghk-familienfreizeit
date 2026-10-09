@@ -43,7 +43,12 @@ test('the placement plan is unchanged for a full occasion', () => {
   const world = derive(events, profile.validation_view)
   const plan = solve(buildSolverInput(world, contributions), contributions, solverConfig)
   const digest = createHash('sha256')
-    .update(canonicalJson(plan as unknown as JsonValue))
+    .update(
+      canonicalJson({
+        ...plan,
+        preflight: plan.preflight.map(({ evidence: _evidence, ...finding }) => finding),
+      } as unknown as JsonValue),
+    )
     .digest('hex')
   expect(digest).toBe(baselineDigest)
 })

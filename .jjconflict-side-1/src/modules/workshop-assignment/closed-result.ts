@@ -155,19 +155,56 @@ export const workshopsClosedResultContribution: ClosedResultContribution = {
         subject_id: workshopId,
         family_id: null,
         aspect: 'placement',
-        before_value: previous?.placements.find(p=>p.workshop_id===workshopId) ? { ...previous.placements.find(p=>p.workshop_id===workshopId)! } : null,
-        after_value: next?.placements.find(p=>p.workshop_id===workshopId) ? { ...next.placements.find(p=>p.workshop_id===workshopId)! } : null,
-        affected_family_ids: [...new Set([...(previous?.attendance??[]),...(next?.attendance??[]),...(world.labels_by_key['signed-up-for']??[]).filter(l=>l.value===workshopId).map(l=>({person_id:l.entity_id,workshop_id:workshopId}))].filter(a=>a.workshop_id===workshopId).flatMap(a=>{const family=familyOf(world,a.person_id);return family?[family]:[]}))].sort(),
+        before_value: previous?.placements.find((p) => p.workshop_id === workshopId)
+          ? { ...previous.placements.find((p) => p.workshop_id === workshopId)! }
+          : null,
+        after_value: next?.placements.find((p) => p.workshop_id === workshopId)
+          ? { ...next.placements.find((p) => p.workshop_id === workshopId)! }
+          : null,
+        affected_family_ids: [
+          ...new Set(
+            [
+              ...(previous?.attendance ?? []),
+              ...(next?.attendance ?? []),
+              ...(world.labels_by_key['signed-up-for'] ?? [])
+                .filter((l) => l.value === workshopId)
+                .map((l) => ({ person_id: l.entity_id, workshop_id: workshopId })),
+            ]
+              .filter((a) => a.workshop_id === workshopId)
+              .flatMap((a) => {
+                const family = familyOf(world, a.person_id)
+                return family ? [family] : []
+              }),
+          ),
+        ].sort(),
         before: was,
         after: is,
       })
     }
-    const oldUnassigned=new Set(previous?.unassigned.map(a=>a.person_id)??[]),newUnassigned=new Set(next?.unassigned.map(a=>a.person_id)??[])
-    for(const person of [...new Set([...oldUnassigned,...newUnassigned])].sort())if(oldUnassigned.has(person)!==newUnassigned.has(person))changes.push({kind:newUnassigned.has(person)?'added':'removed',subject_id:person,family_id:familyOf(world,person),family_unknown:familyOf(world,person)===null,aspect:'unassigned',before:null,after:null,before_value:oldUnassigned.has(person),after_value:newUnassigned.has(person)})
+    const oldUnassigned = new Set(previous?.unassigned.map((a) => a.person_id) ?? []),
+      newUnassigned = new Set(next?.unassigned.map((a) => a.person_id) ?? [])
+    for (const person of [...new Set([...oldUnassigned, ...newUnassigned])].sort())
+      if (oldUnassigned.has(person) !== newUnassigned.has(person))
+        changes.push({
+          kind: newUnassigned.has(person) ? 'added' : 'removed',
+          subject_id: person,
+          family_id: familyOf(world, person),
+          family_unknown: familyOf(world, person) === null,
+          aspect: 'unassigned',
+          before: null,
+          after: null,
+          before_value: oldUnassigned.has(person),
+          after_value: newUnassigned.has(person),
+        })
     return {
       changes,
       affected_family_ids: [
-        ...new Set(changes.flatMap((change) => [...(change.family_id ? [change.family_id] : []),...(change.affected_family_ids??[])])),
+        ...new Set(
+          changes.flatMap((change) => [
+            ...(change.family_id ? [change.family_id] : []),
+            ...(change.affected_family_ids ?? []),
+          ]),
+        ),
       ].sort(),
     }
   },

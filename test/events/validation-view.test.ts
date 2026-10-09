@@ -173,7 +173,7 @@ describe('narrowed validation view', () => {
       { entity_id: 'wks_1', key: 'provides', value: token, strength: null, note: null },
     ] as const
 
-    // D30: capacity may not drop below live attendance.
+    // Replay validation stays structural; D30 is enforced by proposal admission.
     expect(
       foldError(
         log(
@@ -185,7 +185,7 @@ describe('narrowed validation view', () => {
           workshop(0, 'WorkshopUpdated'),
         ),
       ),
-    ).toBe('capacity reduction would strand 1 current participant(s); rejected per D30')
+    ).toBeNull()
 
     // Withdrawing the participant removes that attendance label, so the same
     // reduction becomes legal. A stale label-key index would still count them.

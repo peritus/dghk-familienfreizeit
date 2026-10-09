@@ -1,7 +1,7 @@
 import { attentionReason } from '../../../attention/reasons.js'
 import { workshopAgeLabel } from '../../official-workshops/checks.js'
 import type { WorkshopRecord } from '../../official-workshops/index.js'
-import type { WorkshopRanking } from '../../workshop-rankings/index.js'
+import type { AttentionItem } from '../../../attention/types.js'
 import { compareFixedDecisions } from '../../../solver/fixed-decision.js'
 import type {
   FixedWorkshopPlacement,
@@ -75,10 +75,9 @@ export type ProgrammeProjectionInput = {
   assignments: readonly { person_id: string; workshop_id: string }[]
   signups: readonly { person_id: string; workshop_id: string }[]
   interests: readonly { person_id: string; workshop_id: string }[]
-  rankings: readonly WorkshopRanking[]
+  overlap_findings: readonly AttentionItem[]
   person_names: ReadonlyMap<string, string>
   leader_names: ReadonlyMap<string, string>
-  overlap_rank: number
   time_zone: string
 }
 
@@ -202,40 +201,20 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
             : `${input.interests.filter((item) => item.workshop_id === workshop.id).length} Interessen`,
     }))
 
-  const overlapPeople = new Map<string, Set<string>>()
-  for (const ranking of input.rankings) {
-    const choices = ranking.choices
-      .filter(
-        (choice): choice is { workshop_id: string; rank: number } =>
-          choice.workshop_id !== null && choice.rank !== null && choice.rank <= input.overlap_rank,
-      )
-      .filter((choice) => placements.has(choice.workshop_id))
-    for (let first = 0; first < choices.length; first += 1) {
-      for (let second = first + 1; second < choices.length; second += 1) {
-        const firstId = choices[first]?.workshop_id
-        const secondId = choices[second]?.workshop_id
-        if (!firstId || !secondId) continue
-        if (placements.get(firstId)?.slot_id !== placements.get(secondId)?.slot_id) continue
-        const key = [firstId, secondId].sort().join(':')
-        const people = overlapPeople.get(key) ?? new Set<string>()
-        people.add(ranking.person_id)
-        overlapPeople.set(key, people)
-      }
-    }
-  }
-  const overlaps = [...overlapPeople.entries()]
-    .map(([id, people]) => {
-      const [firstId, secondId] = id.split(':')
-      const first = firstId ? workshops.get(firstId) : undefined
-      const second = secondId ? workshops.get(secondId) : undefined
-      const placement = firstId ? placements.get(firstId) : undefined
+  const overlaps = input.overlap_findings
+    .map((item) => {
+      const ids = item.evidence.workshop_ids as string[],
+        people = item.evidence.person_ids as string[],
+        slotId = item.evidence.slot_id as string
       return {
-        id,
-        workshops: `${first?.title ?? firstId} + ${second?.title ?? secondId}`,
-        slot: placementLabel(placement ? slots.get(placement.slot_id) : undefined, input.time_zone),
-        people_count: people.size,
-        people: [...people]
-          .map((personId) => input.person_names.get(personId) ?? personId)
+        id: item.id,
+        workshops: ids
+          .map((id) => workshops.get(id)?.title ?? 'Workshop nicht verfügbar')
+          .join(' + '),
+        slot: placementLabel(slots.get(slotId), input.time_zone),
+        people_count: people.length,
+        people: people
+          .map((id) => input.person_names.get(id) ?? 'Person nicht verfügbar')
           .sort((a, b) => a.localeCompare(b, 'de')),
       }
     })

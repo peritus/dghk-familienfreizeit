@@ -121,7 +121,7 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
           header={<ScreenHeader title="Wer schläft wo?" />}
           notices={
             <ActionableNotices>
-          <AttentionNotices area="accommodation" scope="accommodation" />
+              <AttentionNotices area="accommodation" scope="accommodation" />
               {view.stats.without_room > 0 ? (
                 <ActionableNotice
                   title={`${view.stats.without_room} Familien ohne Zimmer`}
@@ -242,9 +242,9 @@ export function AssignmentBoard({ view, print }: { view: BoardView; print: Assig
 }
 
 export function AssignmentBoardScreen() {
-  const { world,current_plan:plan } = useOrganiser()
-  const attention=useAttention()
-  if (!world||!plan) return null
-  const review = deriveAssignmentReview(world,plan,attention)
+  const { world, current_plan: plan } = useOrganiser()
+  const attention = useAttention()
+  if (!world || !plan) return null
+  const review = deriveAssignmentReview(world, plan, attention)
   return <AssignmentBoard view={review.board} print={review.print} />
 }

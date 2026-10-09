@@ -1,3 +1,4 @@
+import { attentionLabel } from './attention-label.js'
 import type { AttentionResult } from '../../attention/types.js'
 import type { Entity, World, Label } from '../../events/fold.js'
 
@@ -80,12 +81,28 @@ export function familyPeople(world: World, familyId: string): readonly FamilyPer
 }
 
 /** Completeness selects core/response attention; placement warnings do not change it. */
-export function familyStatus(_world: World, row: FamilyRow, attention: AttentionResult): FamilyStatus {
- const ids=new Set([row.family.id,...row.persons.map(p=>p.id)])
- const codes=new Set(['kernel.family-without-persons','kernel.child-age-missing','family-preferences.response-missing','family-preferences.response-inconsistent','workshop-rankings.response-missing','workshop-rankings.invalid-response'])
- const open=attention.items.filter(i=>codes.has(i.code)&&i.subjects.some(s=>ids.has(s.id))).map(i=>i.wording.title)
- const unavailable=attention.coverage.some(c=>codes.has(c.code)&&c.state==='unavailable')
- return {complete:!unavailable&&open.length===0,open:unavailable?[...open,'Die Prüfung ist noch nicht vollständig.']:open}
+export function familyStatus(
+  world: World,
+  row: FamilyRow,
+  attention: AttentionResult,
+): FamilyStatus {
+  const ids = new Set([row.family.id, ...row.persons.map((p) => p.id)])
+  const codes = new Set([
+    'kernel.family-without-persons',
+    'kernel.child-age-missing',
+    'family-preferences.response-missing',
+    'family-preferences.response-inconsistent',
+    'workshop-rankings.response-missing',
+    'workshop-rankings.invalid-response',
+  ])
+  const open = attention.items
+    .filter((i) => codes.has(i.code) && i.subjects.some((s) => ids.has(s.id)))
+    .map((i) => attentionLabel(i, world, row.family.id))
+  const unavailable = attention.coverage.some((c) => codes.has(c.code) && c.state === 'unavailable')
+  return {
+    complete: !unavailable && open.length === 0,
+    open: unavailable ? [...open, 'Die Prüfung ist noch nicht vollständig.'] : open,
+  }
 }
 
 export function eventTypeLabel(type: string): string {

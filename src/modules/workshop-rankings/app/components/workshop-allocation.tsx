@@ -1,7 +1,4 @@
-import { ActionableNotice } from '../../../../app/components/shared/ui/notice.js'
-import { OrganiserLink } from '../../../../app/components/application/organiser-link.js'
-import { organiserPaths } from '../../../../organiser/routes.js'
-import { buttonVariants } from '../../../../app/components/shared/ui/button.js'
+import { AttentionNotices } from '../../../../app/organiser/attention.js'
 import type { ReactNode } from 'react'
 import { SegmentedControl } from '../../../../app/components/shared/ui/segmented-control.js'
 import { EmptyState } from '../../../../app/components/shared/ui/screen-state.js'
@@ -98,32 +95,8 @@ export function WorkshopAllocationDemand({
   return <ResponsiveCollection wide={table} narrow={cards} />
 }
 
-export function WorkshopAllocationConflictNotice({
-  projection,
-}: {
-  projection: WorkshopAllocationProjection
-}) {
-  if (!projection.fixed_violation_count && !projection.unassigned_count) return null
-  return (
-    <ActionableNotice
-      title="Prüfung nötig"
-      action={
-        <OrganiserLink
-          href={organiserPaths.workshop_allocation_trace()}
-          className={buttonVariants({ variant: 'neutral' })}
-        >
-          Fälle prüfen
-        </OrganiserLink>
-      }
-    >
-      {projection.fixed_violation_count
-        ? `${projection.fixed_violation_count} feste Entscheidung${projection.fixed_violation_count === 1 ? '' : 'en'} konnte${projection.fixed_violation_count === 1 ? '' : 'n'} nicht erfüllt werden.`
-        : `${projection.unassigned_count} Person${projection.unassigned_count === 1 ? '' : 'en'} bleiben ohne Zuordnung.`}
-      <p className="mt-2">
-        Die Zuordnung bleibt eine abgeleitete Vorschau. Prüfe die markierten Fälle.
-      </p>
-    </ActionableNotice>
-  )
+export function WorkshopAllocationConflictNotice() {
+  return <AttentionNotices scope="allocation" area="workshops" actionable />
 }
 
 export function WorkshopAllocationEmptyState({

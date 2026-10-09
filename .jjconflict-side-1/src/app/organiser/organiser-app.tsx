@@ -1,9 +1,23 @@
-import { closedResults } from '../../config/phases.js'
+import { useAttentionClock } from './attention-clock.js'
+import { associateFindingGroups } from '../../organiser/proposal.js'
+import { decodeAttentionItems } from '../../attention/wire.js'
+import { profileAttentionChecks } from '../../attention/profile.js'
+import { operationFeedback } from '../../attention/operations.js'
+import { EventInputError } from '../../events/types.js'
+import { eventInputFindings } from '../../organiser/proposal.js'
+import { AttentionRecovery } from './recovery.js'
+import { closedAttentionContext } from '../../attention/closed.js'
+import { derive, AppendInvariantError } from '../../events/fold.js'
 import { profileAttention } from '../../attention/profile.js'
-import { admitProfileProposal, CapacityReductionError, capacityReductionFinding } from '../../organiser/proposal.js'
+import {
+  admitProfileProposal,
+  CapacityReductionError,
+  capacityReductionFinding,
+  appendInvariantFindings,
+} from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { ErrorState } from '../components/shared/ui/screen-state.js'
-import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
@@ -94,13 +108,7 @@ const FamilyDetail = lazy(() =>
 const evaluateAttention = profileAttention(activeProfile)
 
 export default function OrganiserApp({ profile }: { profile?: ProfilePresentation }) {
-  const [now,setNow]=useState(()=>new Date().toISOString())
-  useEffect(()=>{
-    const refresh=()=>setNow(new Date().toISOString())
-    const interval=window.setInterval(refresh,1000)
-    window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh)
-    return ()=>{window.clearInterval(interval);window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh)}
-  },[])
+  const now = useAttentionClock(activeProfile.meta.phase_dates ?? [])
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
 
   const stage = useCallback((events: readonly EventDraft[]) => {
@@ -168,43 +176,93 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     }
   }, [])
 
+  const domainUnavailable =
+    state.status === 'loading' || state.status === 'unauthorized' || state.status === 'load_error'
+  const committed = state.committed,
+    drafts = state.drafts,
+    revision = state.build_revision,
+    compatibility = state.compatibility_revision
   const derivation = useMemo(() => {
-    if (
-      state.status === 'loading' ||
-      state.status === 'unauthorized' ||
-      state.status === 'load_error'
-    )
-      return { world: null, error: null }
+    if (domainUnavailable) return { world: null, error: null }
     try {
-      return { world: admitProfileProposal(state.committed, materializeDraftEvents(state), activeProfile, { build_revision: state.build_revision ?? buildRevision, compatibility_revision: state.compatibility_revision ?? compatibilityRevision }).world, error: null }
+      return {
+        world:
+          drafts.length === 0
+            ? derive(committed, activeProfile.validation_view)
+            : admitProfileProposal(
+                committed,
+                drafts.flatMap((group) => group.events),
+                activeProfile,
+                {
+                  build_revision: revision ?? buildRevision,
+                  compatibility_revision: compatibility ?? compatibilityRevision,
+                },
+              ).world,
+        error: null,
+      }
     } catch (error) {
       return {
-        failure: error instanceof CapacityReductionError ? capacityReductionFinding(error,activeProfile,state.build_revision??buildRevision,new Date().toISOString()) : null,
+        failures:
+          error instanceof AppendInvariantError
+            ? appendInvariantFindings(
+                error,
+                activeProfile,
+                revision ?? buildRevision,
+                new Date().toISOString(),
+              )
+            : error instanceof EventInputError
+              ? eventInputFindings(
+                  error,
+                  activeProfile,
+                  revision ?? buildRevision,
+                  new Date().toISOString(),
+                  drafts.find((_, index) => {
+                    const before =
+                      committed.length +
+                      drafts.slice(0, index).reduce((sum, g) => sum + g.events.length, 0)
+                    return (
+                      error.seq !== null &&
+                      error.seq > before &&
+                      error.seq <= before + drafts[index]!.events.length
+                    )
+                  })?.id,
+                )
+              : [],
+        failure:
+          error instanceof CapacityReductionError
+            ? capacityReductionFinding(
+                error,
+                activeProfile,
+                revision ?? buildRevision,
+                new Date().toISOString(),
+              )
+            : null,
         world: null,
         error: 'Die geplanten Änderungen können so nicht geprüft werden.',
       }
     }
-  }, [state.committed,state.drafts,state.build_revision,state.compatibility_revision,state.status === 'loading',state.status === 'unauthorized',state.status === 'load_error'])
+  }, [committed, drafts, revision, compatibility, domainUnavailable])
+
+  const baselineWorld = useMemo(() => {
+    if (derivation.world || !drafts.length) return null
+    try {
+      return derive(committed, activeProfile.validation_view)
+    } catch {
+      return null
+    }
+  }, [derivation.world, committed, drafts.length])
 
   const currentPlan = useMemo(() => {
-    if (
-      state.status === 'loading' ||
-      state.status === 'unauthorized' ||
-      state.status === 'load_error' ||
-      !derivation.world ||
-      !state.build_revision ||
-      state.compatibility_revision === null
-    )
-      return null
+    if (domainUnavailable || !derivation.world || !revision || compatibility === null) return null
     const contributions = composeSolverContributions(activeProfile)
     return solve(buildSolverInput(derivation.world, contributions), contributions, {
-      build_revision: state.build_revision,
-      compatibility_revision: state.compatibility_revision,
+      build_revision: revision,
+      compatibility_revision: compatibility,
       event_date: activeProfile.meta.starts_on,
       profile: activeProfile,
       seed: null,
     })
-  }, [derivation.world, state.build_revision,state.compatibility_revision])
+  }, [derivation.world, revision, compatibility, domainUnavailable])
 
   const phaseStatus = useMemo(
     () =>
@@ -235,9 +293,96 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     [derivation.world, phaseStatus, state.feature_overrides],
   )
 
-  const closedChanges=useMemo(()=>derivation.world&&currentPlan?[...closedResults(activeProfile.modules).values()].flatMap(contribution=>{const facts=derivation.world!.phase_facts.areas[contribution.area];const closing=facts?.closings.at(-1);if(!closing)return [];const difference=contribution.compare(closing.payload,contribution.compute({world:derivation.world!,plan:currentPlan}),derivation.world!);return [{area:contribution.area,seq:closing.seq,closed:facts?.latest?.kind==='closed',changes:difference.changes.map(c=>({kind:c.kind,aspect:c.aspect??null,subject_id:c.subject_id,family_id:c.family_id,before:c.before_value??c.before,after:c.after_value??c.after,family_unknown:c.family_unknown??false})),family_ids:difference.affected_family_ids}]}):[],[derivation.world,currentPlan])
-  const attention=useMemo(()=>evaluateAttention({operations:[{id:'organiser-session',code:state.status==='applying'?'saving':state.status==='stale_head'?'stale-head':state.status==='stale_build'?'stale-build':state.status==='error'?'apply-failed':state.drafts.length?'drafts':'saved'}],rejected_findings:[...(state.attention_errors??[]),...(derivation.failure?[derivation.failure]:[])],closed_changes:closedChanges,domain:derivation.world?'available':state.status==='loading'?'loading':'invalid-proposal',world:derivation.world,plan:currentPlan,profile:activeProfile,build_revision:state.build_revision??buildRevision,locale:activeProfile.meta.locale,now,audience:'organiser',effective_features:effectiveFeatures,basis:{mode:state.drafts.length?'prospective':'committed',group_ids:state.drafts.flatMap(g=>g.id?[g.id]:[])}}),[derivation.world,currentPlan,state.build_revision,state.drafts.length,state.status,state.attention_errors,state.drafts,effectiveFeatures,now,closedChanges])
-  const phaseView=useMemo(()=>derivation.world?derivePhaseView({world:derivation.world,modules:activeProfile.modules,meta:activeProfile.meta,plan:currentPlan,now,attention}):[],[derivation.world,currentPlan,now,attention])
+  const closedChanges = useMemo(
+    () =>
+      derivation.world && currentPlan
+        ? closedAttentionContext(derivation.world, currentPlan, activeProfile)
+        : [],
+    [derivation.world, currentPlan],
+  )
+  const attention = useMemo(
+    () =>
+      evaluateAttention({
+        operations: [
+          {
+            id: 'organiser-session',
+            code:
+              state.status === 'loading'
+                ? 'loading'
+                : state.status === 'load_error'
+                  ? 'load-failed'
+                  : state.status === 'unauthorized'
+                    ? 'unauthorized'
+                    : state.status === 'applying'
+                      ? 'saving'
+                      : state.status === 'stale_head'
+                        ? 'stale-head'
+                        : state.status === 'stale_build'
+                          ? 'stale-build'
+                          : state.status === 'error'
+                            ? 'apply-failed'
+                            : state.drafts.length
+                              ? 'drafts'
+                              : 'saved',
+          },
+        ],
+        rejected_findings: associateFindingGroups(
+          [
+            ...(state.attention_errors ?? []),
+            ...(derivation.failure ? [derivation.failure] : []),
+            ...(derivation.failures ?? []),
+          ],
+          state.drafts,
+          state.head_seq,
+        ),
+        closed_changes: closedChanges,
+        domain: derivation.world
+          ? 'available'
+          : state.status === 'loading'
+            ? 'loading'
+            : 'invalid-proposal',
+        world: derivation.world,
+        plan: currentPlan,
+        profile: activeProfile,
+        build_revision: state.build_revision ?? buildRevision,
+        locale: activeProfile.meta.locale,
+        now,
+        audience: 'organiser',
+        effective_features: effectiveFeatures,
+        basis: {
+          mode: state.drafts.length ? 'prospective' : 'committed',
+          group_ids: state.drafts.flatMap((g) => (g.id ? [g.id] : [])),
+        },
+      }),
+    [
+      derivation.world,
+      currentPlan,
+      state.build_revision,
+      state.status,
+      state.attention_errors,
+      state.drafts,
+      state.head_seq,
+      effectiveFeatures,
+      now,
+      closedChanges,
+      derivation.failure,
+      derivation.failures,
+    ],
+  )
+  const phaseView = useMemo(
+    () =>
+      derivation.world
+        ? derivePhaseView({
+            world: derivation.world,
+            modules: activeProfile.modules,
+            meta: activeProfile.meta,
+            plan: currentPlan,
+            now,
+            attention,
+          })
+        : [],
+    [derivation.world, currentPlan, now, attention],
+  )
 
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
@@ -287,7 +432,10 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       }
       dispatch({
         type: 'failed',
-        findings: error instanceof OrganiserApiError && Array.isArray(error.body.findings) ? error.body.findings as import('../../attention/types.js').AttentionItem[] : [],
+        findings:
+          error instanceof OrganiserApiError && Array.isArray(error.body.findings)
+            ? decodeAttentionItems(error.body.findings, profileAttentionChecks(activeProfile))
+            : [],
         status: 'error',
         error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
       })
@@ -296,13 +444,14 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
 
   useEffect(() => {
     if (
+      derivation.world !== null &&
       state.change_mode === 'immediate' &&
       state.status !== 'applying' &&
       state.drafts.length > 0
     ) {
       void apply()
     }
-  }, [apply, state.change_mode, state.drafts.length, state.status])
+  }, [apply, state.change_mode, state.drafts.length, state.status, derivation.world])
 
   if (state.status === 'loading')
     return (
@@ -315,11 +464,17 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       <OrganiserMinimalFrame profile={profile}>
         <ScreenLayout header={<ScreenHeader title="Ansicht nicht verfügbar" />}>
           <ErrorState
-            title="Zugang oder Versionsstand prüfen"
+            title={
+              operationFeedback(state.status === 'unauthorized' ? 'unauthorized' : 'stale-build')
+                .wording.title
+            }
             onRetry={() => window.location.reload()}
             retry_label="Neu laden"
           >
-            {state.error}
+            {
+              operationFeedback(state.status === 'unauthorized' ? 'unauthorized' : 'stale-build')
+                .wording.detail
+            }
           </ErrorState>
         </ScreenLayout>
       </OrganiserMinimalFrame>
@@ -329,31 +484,55 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       <OrganiserMinimalFrame profile={profile}>
         <ScreenLayout header={<ScreenHeader title="Organisationsdaten nicht verfügbar" />}>
           <ErrorState
-            title="Die Organisationsdaten konnten nicht geladen werden"
+            title={operationFeedback('load-failed').wording.title}
             onRetry={() => window.location.reload()}
             retry_label="Neu laden"
           >
-            <p>{state.error} Solange die Daten fehlen, zeigt diese Ansicht keine Zahlen an.</p>
+            <p>
+              {operationFeedback('load-failed').wording.detail} Solange die Daten fehlen, zeigt
+              diese Ansicht keine Zahlen an.
+            </p>
           </ErrorState>
         </ScreenLayout>
       </OrganiserMinimalFrame>
     )
   if (!derivation.world)
     return (
-      <OrganiserMinimalFrame profile={profile}>
-        <ScreenLayout header={<ScreenHeader title="Planung prüfen" />}>
-          <OrganiserDerivationError
-            has_drafts={draftCount(state) > 0}
-            message={
-              draftCount(state) > 0
-                ? (derivation.error ?? state.error ?? 'Die Planung konnte nicht berechnet werden.')
-                : 'Der gespeicherte Ereignisstand kann mit dieser Konfiguration nicht abgeleitet werden.'
-            }
-            onDiscard={() => dispatch({ type: 'discard' })}
-            onReload={() => window.location.reload()}
-          />
-        </ScreenLayout>
-      </OrganiserMinimalFrame>
+      <OrganiserContext.Provider
+        value={{
+          state,
+          world: null,
+          baseline_world: baselineWorld,
+          dispatch,
+          stage,
+          apply,
+          attention,
+          current_plan: null,
+        }}
+      >
+        <OrganiserMinimalFrame profile={profile}>
+          <ScreenLayout header={<ScreenHeader title="Planung prüfen" />}>
+            <AttentionRecovery
+              findings={attention.items.filter(
+                (item) =>
+                  item.code !== 'attention-unavailable' && item.code !== 'operation.apply-failed',
+              )}
+            />
+            <OrganiserDerivationError
+              has_drafts={draftCount(state) > 0}
+              message={
+                draftCount(state) > 0
+                  ? (derivation.error ??
+                    state.error ??
+                    'Die Planung konnte nicht berechnet werden.')
+                  : 'Der gespeicherte Ereignisstand kann mit dieser Konfiguration nicht abgeleitet werden.'
+              }
+              onDiscard={() => dispatch({ type: 'discard' })}
+              onReload={() => window.location.reload()}
+            />
+          </ScreenLayout>
+        </OrganiserMinimalFrame>
+      </OrganiserContext.Provider>
     )
 
   return (

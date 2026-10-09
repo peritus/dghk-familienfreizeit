@@ -1,3 +1,4 @@
+import { admitProfileProposal, CapacityReductionError } from '../../src/organiser/proposal.js'
 import { describe, expect, test } from 'vitest'
 import { defineOccasionProfile } from '../../src/config/define.js'
 import { derive } from '../../src/events/fold.js'
@@ -321,8 +322,8 @@ describe('workshop domain events', () => {
     })
     expect(attendance.unassigned.map(({ person_id }) => person_id)).toContain('per_a')
     expect(
-      workshopReviewReadiness({ world: after, plan }).findings.some(
-        ({ id }) => id === 'workshop-assignment.fixed-invalid',
+      workshopReviewReadiness({ world: after, plan }).findings.some(({ id }) =>
+        id.startsWith('workshop-assignment.fixed-invalid:'),
       ),
     ).toBe(true)
     const prefix = [...committed, ...appended].slice(0, committed.length)
@@ -434,7 +435,13 @@ describe('workshop domain events', () => {
         8,
       ),
     ]
-    expect(() => derive(events, profile.validation_view)).toThrow(/D30/)
+    expect(() => derive(events, profile.validation_view)).not.toThrow()
+    expect(() =>
+      admitProfileProposal(events.slice(0, -1), events.slice(-1), profile, {
+        build_revision: 'test',
+        compatibility_revision: 1,
+      }),
+    ).toThrow(CapacityReductionError)
   })
 
   const personEvents: Event[] = [

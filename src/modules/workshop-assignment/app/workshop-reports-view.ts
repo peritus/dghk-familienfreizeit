@@ -111,6 +111,7 @@ export type WorkshopReportFamilyMember = {
 }
 
 export type WorkshopReportFamilyCell = {
+  entries?: readonly WorkshopReportPersonPlanEntry[]
   member_id: string
   workshop: string | null
   space: string | null
@@ -299,65 +300,63 @@ function buildPersonEntries(
   personId: string,
   context: PlanContext,
 ): WorkshopReportPersonPlanEntry[] {
-  const assignmentBySlot = new Map(
-    context.assignment.assignments
-      .filter((item) => item.person_id === personId)
-      .map((item) => [item.slot_id, item]),
-  )
-  const signupIds = context.assignment.signups
-    .filter((item) => item.person_id === personId)
-    .map((item) => item.workshop_id)
-  const interestIds = context.assignment.interests
-    .filter((item) => item.person_id === personId)
-    .map((item) => item.workshop_id)
+  const attendance = context.assignment.assignments.filter((item) => item.person_id === personId)
+  const signups = context.assignment.signups.filter((item) => item.person_id === personId)
+  const interests = context.assignment.interests.filter((item) => item.person_id === personId)
   const openReason = context.open_reasons.get(personId)
-  const inSlot = (ids: readonly string[], slotId: string) =>
-    ids.find((id) => context.placements.get(id)?.slot_id === slotId)
-  return context.slots.map((slot) => {
-    const ledWorkshopId = context.leader_workshops.get(`${personId}:${slot.id}`)?.[0]
-    const assignment = assignmentBySlot.get(slot.id)
-    const workshopId = ledWorkshopId ?? assignment?.workshop_id ?? null
-    const signup = workshopId ? undefined : inSlot(signupIds, slot.id)
-    const interest = workshopId || signup ? undefined : inSlot(interestIds, slot.id)
-    const selectedWorkshopId = workshopId ?? signup ?? interest ?? null
-    const selectedWorkshop = selectedWorkshopId
-      ? context.workshops.get(selectedWorkshopId)
-      : undefined
-    const status: WorkshopReportPersonPlanStatus = ledWorkshopId
-      ? 'lead'
-      : assignment?.reason === 'fixed'
-        ? 'fixed'
-        : assignment
-          ? 'assigned'
-          : signup
-            ? 'signup'
-            : interest
-              ? 'interest'
-              : openReason
-                ? 'open'
-                : 'free'
-    const roleLabel = {
-      lead: 'leitet',
-      fixed: 'nimmt teil (fest zugeordnet)',
-      assigned: assignment?.rank ? `nimmt teil (${assignment.rank}. Wahl)` : 'nimmt teil',
-      signup: 'Anmeldung',
-      interest: 'Interesse',
-      open: openReason ?? '',
-      free: '',
-      available: 'verfügbar',
-      unavailable: '',
-    }[status]
-    return {
-      id: `${personId}:${slot.id}`,
-      slot_id: slot.id,
-      slot_label: slot.label,
-      workshop_id: selectedWorkshopId,
-      workshop: selectedWorkshop?.title ?? null,
-      space: selectedWorkshop?.space_name ?? null,
-      status,
-      role_label: roleLabel,
-      participant_count: null,
-    }
+  return context.slots.flatMap<WorkshopReportPersonPlanEntry>((slot) => {
+    const entries: { id: string; status: WorkshopReportPersonPlanStatus; label: string }[] = []
+    for (const id of context.leader_workshops.get(`${personId}:${slot.id}`) ?? [])
+      entries.push({ id, status: 'lead', label: 'leitet' })
+    for (const item of attendance.filter((item) => item.slot_id === slot.id))
+      entries.push({
+        id: item.workshop_id,
+        status: item.reason === 'fixed' ? 'fixed' : 'assigned',
+        label:
+          item.explanation_available === false
+            ? attentionReason('closed-explanation-unavailable')
+            : item.reason === 'fixed'
+              ? 'nimmt teil (fest zugeordnet)'
+              : item.rank
+                ? `nimmt teil (${item.rank}. Wahl)`
+                : 'nimmt teil',
+      })
+    for (const item of signups.filter(
+      (item) => context.placements.get(item.workshop_id)?.slot_id === slot.id,
+    ))
+      entries.push({ id: item.workshop_id, status: 'signup', label: 'Anmeldung' })
+    for (const item of interests.filter(
+      (item) => context.placements.get(item.workshop_id)?.slot_id === slot.id,
+    ))
+      entries.push({ id: item.workshop_id, status: 'interest', label: 'Interesse' })
+    if (!entries.length)
+      return [
+        {
+          id: `${personId}:${slot.id}`,
+          slot_id: slot.id,
+          slot_label: slot.label,
+          workshop_id: null,
+          workshop: null,
+          space: null,
+          status: openReason ? ('open' as const) : ('free' as const),
+          role_label: openReason ?? '',
+          participant_count: null,
+        },
+      ]
+    return entries.map((entry) => {
+      const workshop = context.workshops.get(entry.id)
+      return {
+        id: `${personId}:${slot.id}:${entry.id}:${entry.status}`,
+        slot_id: slot.id,
+        slot_label: slot.label,
+        workshop_id: entry.id,
+        workshop: workshop?.title ?? null,
+        space: workshop?.space_name ?? null,
+        status: entry.status,
+        role_label: entry.label,
+        participant_count: null,
+      }
+    })
   })
 }
 
@@ -502,7 +501,9 @@ export function buildWorkshopReportsProjection(
       age_label: ageLabel(input.world, person.id),
       family_id: familyId,
       family_name: familyId ? stringLabel(familyLabels, 'display-name') : null,
-      workshop_count: entries.filter((entry) => counted.has(entry.status)).length,
+      workshop_count: new Set(
+        entries.filter((entry) => counted.has(entry.status)).map((entry) => entry.workshop_id),
+      ).size,
       led_workshops: ledTitles(entries),
       open_reason: openReasons.get(person.id) ?? null,
       entries,
@@ -552,9 +553,12 @@ export function buildWorkshopReportsProjection(
           id: `${family.id}:${slot.id}`,
           label: slot.label,
           cells: memberIds.map((id) => {
-            const entry = personById.get(id)?.entries.find((item) => item.slot_id === slot.id)
+            const entries =
+              personById.get(id)?.entries.filter((item) => item.slot_id === slot.id) ?? []
+            const entry = entries[0]
             return {
               member_id: id,
+              ...(entries.length > 1 ? { entries } : {}),
               workshop: entry?.workshop ?? null,
               space: entry?.space ?? null,
               lead: entry?.status === 'lead',

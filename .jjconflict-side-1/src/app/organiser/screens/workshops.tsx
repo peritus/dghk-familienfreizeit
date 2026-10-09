@@ -1,11 +1,10 @@
+import { fieldFeedback } from '../../../attention/fields.js'
 import { useAttention, AttentionNotices } from '../attention.js'
 import { pluralDe } from '../../lib/plural-de.js'
 import type { Plan } from '../../../solver/types.js'
 import { workshopAgeLabel } from '../../../modules/official-workshops/checks.js'
 import { ChoiceField } from '../../components/shared/ui/field.js'
-import { ActionableNotice } from '../../components/shared/ui/notice.js'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
-import { buttonVariants } from '../../components/shared/ui/button.js'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { randomIdPart } from '../ids.js'
 import { useLocation, useSearch } from 'wouter'
@@ -13,7 +12,6 @@ import { activeProfile } from '../../../config/index.js'
 import type { World } from '../../../events/fold.js'
 import type { EventDraft } from '../../../events/types.js'
 import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
-import { workshopRankingsWorld } from '../../../modules/workshop-rankings/index.js'
 import {
   workshopSchedulingWorld,
   type WorkshopSlot,
@@ -28,7 +26,6 @@ import { WorkflowStepper } from '../../components/shared/ui/workflow-stepper.js'
 import { PhaseDecisionAction } from '../components/phase-decision.js'
 import { AreaClosingActions } from '../components/area-closing.js'
 import { workshopTrack } from '../../../modules/workshop-assignment/app/workshop-track.js'
-import type { PhaseView } from '../../../derive/phases.js'
 import {
   SpaceEditorForm,
   SlotEditorForm,
@@ -38,7 +35,6 @@ import {
 } from '../components/workshop/editors.js'
 import { EmptyState } from '../../components/shared/ui/screen-state.js'
 import { FixedDecisionReview } from '../../components/shared/ui/fixed-decision-review.js'
-import { StatusNotice } from '../../components/shared/ui/notice.js'
 import { CollectionList, CollectionRow } from '../../components/shared/ui/collection-list.js'
 import {
   ScreenHeader,
@@ -165,7 +161,7 @@ function WorkshopRetireAction({
 }
 
 function solveWorkshopPlan(_world: World, currentPlan?: Plan | null): WorkshopPlan {
-  const plan: {sections:Readonly<Record<string,unknown>>}=currentPlan??{sections:{}}
+  const plan: { sections: Readonly<Record<string, unknown>> } = currentPlan ?? { sections: {} }
   const scheduling = plan.sections['workshop-scheduling'] as
     | {
         placements?: readonly Placement[]
@@ -350,11 +346,11 @@ function ExternalLeaderCollection() {
     const name = String(data.get('name') ?? '').trim()
     const availability = data.getAll('availability').map(String)
     if (!name) {
-      setError('Gib einen Namen an.')
+      setError(fieldFeedback('name'))
       return
     }
     if (!availability.length) {
-      setError('Wähle mindestens einen verfügbaren Slot.')
+      setError(fieldFeedback('leader-slots'))
       return
     }
     stage([
@@ -604,14 +600,14 @@ export function Workshops({
     interestsByWorkshop.set(attendee.workshop_id, people)
   }
   const placedWorkshopIds = new Set(plan.placements.map((placement) => placement.workshop_id))
-  const attention=useAttention()
-  const notes=attention.items.filter(item=>item.display_scopes.includes('workshop'))
+  const attention = useAttention()
+  const notes = attention.items.filter((item) => item.display_scopes.includes('workshop'))
   const notedIds = new Set(
     notes
-      .filter(item=>item.kind==='review'||item.kind==='problem')
-      .flatMap(item=>item.subjects.filter(s=>s.kind==='workshop').map(s=>s.id)),
+      .filter((item) => item.kind === 'review' || item.kind === 'problem')
+      .flatMap((item) => item.subjects.filter((s) => s.kind === 'workshop').map((s) => s.id)),
   )
-  const oversubscribed=notes.filter(item=>item.code==='workshop-rankings.demand').length
+  const oversubscribed = notes.filter((item) => item.code === 'workshop-rankings.demand').length
   const editingWorkshop =
     editor && editor !== 'new'
       ? summary.workshops.find((workshop) => workshop.id === editor)
@@ -633,7 +629,7 @@ export function Workshops({
     const ageMax = Number(data.get('age_max') ?? 120)
     const capacity = Number(data.get('capacity') ?? 0)
     if (!title) {
-      setError('Gib dem Workshop einen Titel.')
+      setError(fieldFeedback('workshop-title'))
       return
     }
     if (
@@ -643,11 +639,11 @@ export function Workshops({
       ageMax > 120 ||
       ageMin > ageMax
     ) {
-      setError('Der Altersbereich muss zwischen 0 und 120 Jahren liegen und aufsteigend sein.')
+      setError(fieldFeedback('age-range'))
       return
     }
     if (!Number.isInteger(capacity) || capacity < 0) {
-      setError('Die Platzanzahl muss eine ganze Zahl ab 0 sein.')
+      setError(fieldFeedback('capacity'))
       return
     }
     stage([
@@ -944,9 +940,11 @@ export function Workshops({
                       workshop.mode === 'assigned' ? (plan.demand[workshop.id] ?? 0) : undefined,
                     notes: notes
                       .filter(
-                        (note) => note.subjects.some(s=>s.id===workshop.id) && (note.kind==='review'||note.kind==='problem'),
+                        (note) =>
+                          note.subjects.some((s) => s.id === workshop.id) &&
+                          (note.kind === 'review' || note.kind === 'problem'),
                       )
-                      .map(item=>item.wording.detail),
+                      .map((item) => item.wording.detail),
                     placement: {
                       label:
                         placementLabel(workshop.id, plan.placements, schedule.slots, spaces) ??
@@ -1011,12 +1009,12 @@ export function Workshops({
 /** The workshop review phase's readiness, with its first findings (phases.md §3, §8). */
 export function WorkshopProgramme() {
   useDocumentTitle('Programm · Workshops · Familienfreizeit')
-  const { world, phases, state, current_plan:currentPlan } = useOrganiser()
+  const { world, phases, state, current_plan: currentPlan } = useOrganiser()
   const [location, navigate] = useLocation()
   const schedule = workshopSchedulingWorld(world!)
   const spaces = workshopSpaceWorld(world!).live
   const official = officialWorkshopsWorld(world!)
-  const rankings = workshopRankingsWorld(world!)
+  const attention = useAttention()
   const plan = solveWorkshopPlan(world!, currentPlan)
   const view = programmeReviewView(location)
   const personNames = new Map(
@@ -1035,9 +1033,6 @@ export function WorkshopProgramme() {
     ...personNames,
     ...official.external_leaders.map((leader) => [leader.id, `${leader.name} (extern)`] as const),
   ])
-  const rankingModule = activeProfile.modules.find((module) => module.id === 'workshop-rankings')
-  const overlapRank =
-    typeof rankingModule?.parameters?.max_rank === 'number' ? rankingModule.parameters.max_rank : 3
   const programme = buildProgrammeView({
     workshops: official.workshops,
     slots: schedule.slots,
@@ -1052,10 +1047,9 @@ export function WorkshopProgramme() {
     assignments: plan.assignments,
     signups: plan.signups,
     interests: plan.interests,
-    rankings: rankings.rankings,
+    overlap_findings: attention.items.filter((item) => item.code === 'workshop-rankings.overlap'),
     person_names: personNames,
     leader_names: leaderNames,
-    overlap_rank: overlapRank,
     time_zone: activeProfile.meta.timezone,
   })
   return (
@@ -1166,7 +1160,7 @@ export function WorkshopProgramme() {
 
 export function WorkshopSlots() {
   useDocumentTitle('Slots · Workshops · Familienfreizeit')
-  const { world, state, stage } = useOrganiser()
+  const { world, state, stage, current_plan: currentPlan } = useOrganiser()
   const summary = workshopSchedulingWorld(world!)
   const plan = solveWorkshopPlan(world!, currentPlan)
   const [addingSlot, setAddingSlot] = useState(false)
@@ -1219,7 +1213,7 @@ export function WorkshopSlots() {
       !Number.isSafeInteger(durationMinutes) ||
       durationMinutes <= 0
     ) {
-      setSlotError('Beginn und Dauer müssen gültig sein.')
+      setSlotError(fieldFeedback('slot-time'))
       return
     }
     const endsDate = new globalThis.Date(startsDate.getTime() + durationMinutes * 60_000)
@@ -1231,7 +1225,7 @@ export function WorkshopSlots() {
           new globalThis.Date(slot.starts_at).getTime() <= endsDate.getTime(),
       )
     ) {
-      setSlotError('Dieser Zeitraum überschneidet sich mit einem bestehenden Slot.')
+      setSlotError(fieldFeedback('slot-overlap'))
       return
     }
     stage([

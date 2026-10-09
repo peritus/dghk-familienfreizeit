@@ -79,6 +79,9 @@ test('save status reflects a save failure, never a load failure', () => {
     error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
   })
   expect(saveStatusView(saveFailed)).toEqual({ kind: 'failed' })
+  const pending = organiserReducer(loadedState(), { type: 'stage', events: [family] })
+  expect(saveStatusView({ ...pending, status: 'error' })).toEqual({ kind: 'failed' })
+  expect(saveStatusView({ ...pending, status: 'stale_head' })).toEqual({ kind: 'failed' })
 
   const loadFailed = organiserReducer(initialOrganiserState, {
     type: 'failed',
@@ -145,4 +148,45 @@ test('last saved time is successful browser-session metadata, never inferred fro
   const failed = organiserReducer(saved, { type: 'failed', status: 'error', error: 'Save failed' })
   expect(failed.last_saved_at).toBe(saved.last_saved_at)
   expect(organiserReducer(failed, { type: 'discard' }).last_saved_at).toBe(saved.last_saved_at)
+})
+
+test('group recovery preserves other groups and rejects edits to the in-flight prefix', () => {
+  const one = organiserReducer(loadedState(), { type: 'stage', events: [family] })
+  const two = organiserReducer(one, {
+    type: 'stage',
+    events: [
+      {
+        ...family,
+        type: 'FamilyDisplayNameChanged',
+        payload: { family_id: 'fam_state', old_display_name: 'State', new_display_name: 'Other' },
+      },
+    ],
+  })
+  const first = two.drafts[0]!.id!,
+    second = two.drafts[1]!.id!
+  const applying = organiserReducer(two, { type: 'applying' })
+  expect(saveStatusView(applying)).toEqual({ kind: 'saving' })
+  expect(organiserReducer(applying, { type: 'discard-group', group_id: first })).toBe(applying)
+  expect(organiserReducer(applying, { type: 'replace-group', group_id: first, events: [] })).toBe(
+    applying,
+  )
+  const three = organiserReducer(applying, { type: 'stage', events: [family] })
+  const corrected = organiserReducer(three, {
+    type: 'replace-group',
+    group_id: three.drafts[2]!.id!,
+    events: [],
+  })
+  expect(corrected.drafts[0]).toBe(applying.drafts[0])
+  expect(corrected.drafts[1]).toBe(applying.drafts[1])
+  const failed = organiserReducer(applying, { type: 'failed', status: 'error', error: 'sanitized' })
+  const discarded = organiserReducer(failed, { type: 'discard-group', group_id: first })
+  expect(discarded.drafts.map((group) => group.id)).toEqual([second])
+  const replaced = organiserReducer(failed, {
+    type: 'replace-group',
+    group_id: second,
+    events: [family],
+  })
+  expect(replaced.drafts[1]!.id).toBe(second)
+  expect(replaced.drafts[0]).toBe(two.drafts[0])
+  expect(two.drafts).toHaveLength(2)
 })

@@ -1,3 +1,4 @@
+import { AttentionRecovery } from './recovery.js'
 import { useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
 import { Switch } from '@base-ui/react/switch'
@@ -203,7 +204,11 @@ export function SaveStatus() {
                 <Popover.Title className="text-xl font-heading">
                   Speichern fehlgeschlagen
                 </Popover.Title>
-                <p className="mt-1 text-sm text-muted">{state.error}</p>
+                {state.attention_errors?.length ? (
+                  <AttentionRecovery findings={state.attention_errors} />
+                ) : (
+                  <p className="mt-1 text-sm text-muted">{state.error}</p>
+                )}
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3">

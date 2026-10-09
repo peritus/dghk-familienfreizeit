@@ -69,7 +69,16 @@ export function canAppendEvent(
   if (event.type === 'LabelSet' || event.type === 'LabelCleared') {
     const key = (event as unknown as LabelSet | LabelCleared).payload.key
     if (!isFamilyWritable(config, key)) return false
-    if (familyLabelOffered && !familyLabelOffered(config.label_schemas?.find(schema => schema.key === (config.aliases?.[key] ?? key))?.governed_control ?? config.aliases?.[key] ?? key)) return false
+    if (
+      familyLabelOffered &&
+      !familyLabelOffered(
+        config.label_schemas?.find((schema) => schema.key === (config.aliases?.[key] ?? key))
+          ?.governed_control ??
+          config.aliases?.[key] ??
+          key,
+      )
+    )
+      return false
   }
   if (!kernelEntityEventTypes.has(event.type)) {
     const authorize = config.event_authorize_dispatch?.[event.type]

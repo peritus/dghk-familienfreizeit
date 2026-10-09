@@ -117,7 +117,7 @@ for (const width of [390, 640]) {
     await expect(dialog.getByRole('heading', { name: 'Menü', level: 2 })).toBeVisible()
     for (let i = 0; i < 9; i++) {
       await page.keyboard.press('Tab')
-      expect(await dialog.evaluate((e) => e.contains(document.activeElement))).toBe(true)
+      await expect.poll(() => dialog.evaluate((e) => e.contains(document.activeElement))).toBe(true)
     }
     if (width === 390)
       expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).toBe('hidden')

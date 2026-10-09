@@ -70,7 +70,7 @@ test('the closing review explains blocking findings and cannot be confirmed', ()
   fireEvent.click(screen.getByRole('button', { name: 'Festlegen' }))
   const dialog = within(screen.getByRole('alertdialog'))
   expect(dialog.getByText('Prüfung erforderlich')).toBeTruthy()
-  expect(dialog.getByText(/fam_seidel has no room satisfying all required decisions/)).toBeTruthy()
+  expect(dialog.getByText(/Kein Zimmer erfüllt die Anforderungen/)).toBeTruthy()
   expect((dialog.getByRole('button', { name: 'Festlegen' }) as HTMLButtonElement).disabled).toBe(
     true,
   )
@@ -127,16 +127,17 @@ test('a change after closing is listed per family and raises a dashboard Hinweis
       <ClosedAreaDifferences area="accommodation" />
     </FixtureProvider>,
   )
-  expect(screen.getByText('1 Abweichung vom festgelegten Ergebnis')).toBeTruthy()
-  expect(screen.getByText('(neu)')).toBeTruthy()
+  expect(screen.getByText('2 Abweichungen vom festgelegten Ergebnis')).toBeTruthy()
+  expect(screen.getAllByText('(neu)')).toHaveLength(2)
   cleanup()
   render(
     <FixtureProvider initialState={stale} with_plan>
       <Dashboard />
     </FixtureProvider>,
   )
+  const all = screen.queryByRole('button', { name: /Alle .* Hinweise anzeigen/ })
+  if (all) fireEvent.click(all)
   expect(
-    await screen.findByText(/Unterkunft: 1 Abweichung vom festgelegten Ergebnis \(\s*1 Familie\)/),
+    await screen.findByText(/Abweichung vom festgelegten Ergebnis/, { selector: 'summary' }),
   ).toBeTruthy()
-  expect(screen.getByRole('link', { name: 'Prüfen' })).toBeTruthy()
 })

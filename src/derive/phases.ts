@@ -33,7 +33,9 @@ export type PhaseViewInput = {
  * Derives every declared phase's status from the folded phase facts, the profile dates, and an
  * explicit `now`. It runs after `derive`, which stays clock-free (D15, D26).
  */
-export function derivePhaseStatus(input: Omit<PhaseViewInput, 'plan' | 'attention'>): readonly PhaseView[] {
+export function derivePhaseStatus(
+  input: Omit<PhaseViewInput, 'plan' | 'attention'>,
+): readonly PhaseView[] {
   const now = utcInstant(input.now)
   return [...declaredPhases(input.modules).values()].map((phase) => {
     const area = input.world.phase_facts.areas[phase.area]
@@ -64,13 +66,29 @@ export function derivePhaseStatus(input: Omit<PhaseViewInput, 'plan' | 'attentio
 
 /** Status precedes attention; readiness selects its explicit operation policy. */
 export function derivePhaseView(input: PhaseViewInput): readonly PhaseView[] {
- return derivePhaseStatus(input).map(view => {
-  const definition = declaredPhases(input.modules).get(view.phase)!
-  if (!definition.readiness) return view
-  if (!input.attention) return { ...view, readiness: definition.readiness({world: input.world,plan: input.plan}) }
-  const blockers = attentionBlockers(input.attention,view.area === 'accommodation' ? 'close-accommodation' : 'close-workshops')
-  return { ...view, readiness: blockers.length ? { ready: false as const, findings: blockers.map(item=>({id:item.id,subject_id:item.subjects[0]?.id??null,message:item.wording.detail})) } : { ready: true as const } }
- })
+  return derivePhaseStatus(input).map((view) => {
+    const definition = declaredPhases(input.modules).get(view.phase)!
+    if (!definition.readiness) return view
+    if (!input.attention)
+      return { ...view, readiness: definition.readiness({ world: input.world, plan: input.plan }) }
+    const blockers = attentionBlockers(
+      input.attention,
+      view.area === 'accommodation' ? 'close-accommodation' : 'close-workshops',
+    )
+    return {
+      ...view,
+      readiness: blockers.length
+        ? {
+            ready: false as const,
+            findings: blockers.map((item) => ({
+              id: item.id,
+              subject_id: item.subjects[0]?.id ?? null,
+              message: item.wording.detail,
+            })),
+          }
+        : { ready: true as const },
+    }
+  })
 }
 
 /**

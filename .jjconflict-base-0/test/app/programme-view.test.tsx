@@ -1,3 +1,5 @@
+import { operationFeedback } from '../../src/attention/operations.js'
+import { attentionId } from '../../src/attention/engine.js'
 import { describe, expect, test } from 'vitest'
 import { buildProgrammeView } from '../../src/modules/workshop-scheduling/app/programme-view.js'
 
@@ -80,10 +82,9 @@ const baseInput = {
   assignments: [{ person_id: 'per_a', workshop_id: 'wks_ceramics' }],
   signups: [],
   interests: [],
-  rankings: [],
+  overlap_findings: [],
   person_names: new Map(),
   leader_names: new Map([['per_lead', 'Sam Morgan']]),
-  overlap_rank: 3,
   time_zone: 'Europe/Berlin',
 }
 
@@ -138,13 +139,20 @@ describe('buildProgrammeView', () => {
         { workshop_id: 'wks_circus', slot_id: 'slot_morning', space_id: 'wsp_halle' },
       ],
       blocks: [],
-      rankings: [
+      overlap_findings: [
         {
-          person_id: 'per_a',
-          choices: [
-            { workshop_id: 'wks_ceramics', rank: 1 },
-            { workshop_id: 'wks_circus', rank: 2 },
-          ],
+          ...operationFeedback('drafts'),
+          code: 'workshop-rankings.overlap',
+          id: attentionId('workshop-rankings.overlap', [
+            'wks_ceramics',
+            'wks_circus',
+            'slot_morning',
+          ]),
+          evidence: {
+            workshop_ids: ['wks_ceramics', 'wks_circus'],
+            person_ids: ['per_a'],
+            slot_id: 'slot_morning',
+          },
         },
       ],
       person_names: new Map([['per_a', 'Alex Morgan']]),
@@ -153,12 +161,16 @@ describe('buildProgrammeView', () => {
     expect(view.unplaced).toEqual([
       expect.objectContaining({
         title: 'Schmieden',
-        reason: 'Kein Raum erfüllt die benötigten Eigenschaften.',
+        reason: 'Benötigte Ausstattung fehlt',
       }),
     ])
     expect(view.overlaps).toEqual([
       {
-        id: 'wks_ceramics:wks_circus',
+        id: attentionId('workshop-rankings.overlap', [
+          'wks_ceramics',
+          'wks_circus',
+          'slot_morning',
+        ]),
         workshops: 'Keramik + Zirkus',
         slot: 'Freitag, 14.05., 09:00–11:00',
         people_count: 1,

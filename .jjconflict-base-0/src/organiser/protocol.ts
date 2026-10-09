@@ -61,4 +61,7 @@ export type OrganiserProtocolConfig = {
 }
 
 /** Sanitized domain failures; no exception text, stacks, or event payloads. */
-export type OrganiserAttentionFailure = { error: 'attention_required'; findings: readonly AttentionItem[] }
+export type OrganiserAttentionFailure = {
+  error: 'attention_required'
+  findings: readonly AttentionItem[]
+}

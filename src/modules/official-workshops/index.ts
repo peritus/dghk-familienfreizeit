@@ -1,21 +1,17 @@
+export {
+  fixedWorkshopIdFromToken,
+  isFixedWorkshopAttendanceToken,
+} from './fixed-attendance-token.js'
 import { officialWorkshopAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
-import {
-  fixedWorkshopIdFromToken,
-  isFixedWorkshopAttendanceToken,
-} from './fixed-attendance-token.js'
 
 export { workshopEligibilityFailure } from './eligibility.js'
 
-export {
-  fixedWorkshopAttendanceToken,
-  fixedWorkshopIdFromToken,
-  isFixedWorkshopAttendanceToken,
-} from './fixed-attendance-token.js'
+export { fixedWorkshopAttendanceToken } from './fixed-attendance-token.js'
 
 export const workshopModes = ['assigned', 'sign-up', 'interest'] as const
 
@@ -100,43 +96,6 @@ function labelValue(world: World, idValue: string, key: string): JsonValue | und
  * scanning every entity's labels made a capacity check cost the whole label
  * store, on an event type organisers fire repeatedly.
  */
-function liveAttendance(world: ValidationWorld, workshopId: string): number {
-  const participants = new Set(
-    world
-      .labelsByKey('signed-up-for')
-      .filter(
-        (label) =>
-          label.value === workshopId && world.findEntity('person', label.entity_id) !== undefined,
-      )
-      .map((label) => label.entity_id),
-  )
-  const provided = new Set(
-    world
-      .labelsByKey('provides')
-      .filter(
-        (label) =>
-          label.entity_id === workshopId &&
-          typeof label.value === 'string' &&
-          isFixedWorkshopAttendanceToken(label.value),
-      )
-      .map((label) => label.value as string),
-  )
-  const fixedPeople = new Set(
-    world
-      .labelsByKey('needs')
-      .filter(
-        (label) =>
-          world.findEntity('person', label.entity_id) &&
-          typeof label.value === 'string' &&
-          fixedWorkshopIdFromToken(label.entity_id, label.value) === workshopId &&
-          provided.has(label.value),
-      )
-      .map((label) => label.entity_id),
-  )
-  for (const personId of fixedPeople) participants.add(personId)
-  return participants.size
-}
-
 function validateWorkshop(
   params: OfficialWorkshopsParams,
   world: ValidationWorld,
@@ -152,11 +111,6 @@ function validateWorkshop(
   if (!params.available_modes.includes(value.participation_mode))
     return `participation mode is not configured: ${value.participation_mode}`
   if (value.age_min > value.age_max) return 'workshop age range is reversed'
-  if (updating && value.capacity < Number(world.labels(value.workshop_id).find(label => label.key === 'capacity')?.value ?? 0)) {
-    const attendance = liveAttendance(world, value.workshop_id)
-    if (value.capacity < attendance)
-      return `capacity reduction would strand ${attendance} current participant(s); rejected per D30`
-  }
   for (const leaderId of value.leader_ids)
     if (!entity(world, 'person', leaderId) && !entity(world, 'external-leader', leaderId))
       return `unknown workshop leader: ${leaderId}`

@@ -62,7 +62,7 @@ export const accommodationClosedResultContribution: ClosedResultContribution = {
   area: 'accommodation',
   close_event: 'AccommodationClosed',
   reopen_event: 'AccommodationReopened',
-  compute: ({ plan }) => {
+  compute: ({ world, plan }) => {
     const section = plan.sections['room-assignment'] as RoomAssignmentSection | undefined
     const places = new Map<string, { family_id: string; room_id: string; place_ids: string[] }>()
     for (const assignment of section?.assignments ?? []) {
@@ -83,25 +83,65 @@ export const accommodationClosedResultContribution: ClosedResultContribution = {
             left.family_id.localeCompare(right.family_id) ||
             left.room_id.localeCompare(right.room_id),
         ),
-      unplaced: [...new Set((section?.unplaced ?? []).map((entry) => entry.family_id))]
+      unplaced: [
+        ...new Set([
+          ...(section?.unplaced ?? []).map((entry) => entry.family_id),
+          ...world.families
+            .filter((f) => !(section?.assignments ?? []).some((a) => a.family_id === f.id))
+            .map((f) => f.id),
+        ]),
+      ]
         .sort()
         .map((familyId) => ({ family_id: familyId })),
     }
   },
   compare: (before, after) => {
-    const previous=accommodationClosedResult(before), next=accommodationClosedResult(after)
-    const ids=[...new Set([...(previous?.placements??[]).map(p=>p.family_id),...(next?.placements??[]).map(p=>p.family_id),...(previous?.unplaced??[]).map(p=>p.family_id),...(next?.unplaced??[]).map(p=>p.family_id)])].sort()
-    const changes:ClosedResultChange[]=[]
-    for(const family of ids){
-      const was=(previous?.placements??[]).filter(p=>p.family_id===family), is=(next?.placements??[]).filter(p=>p.family_id===family)
-      const oldRooms=was.map(p=>p.room_id).sort(),newRooms=is.map(p=>p.room_id).sort()
-      const oldPlaces=was.flatMap(p=>p.place_ids).sort(),newPlaces=is.flatMap(p=>p.place_ids).sort()
-      const oldUnplaced=previous?.unplaced.some(p=>p.family_id===family)??false,newUnplaced=next?.unplaced.some(p=>p.family_id===family)??false
-      for(const [aspect,oldValue,newValue] of [['room',oldRooms,newRooms],['places',oldPlaces,newPlaces],['unplaced',oldUnplaced,newUnplaced]] as const){
-        if(JSON.stringify(oldValue)===JSON.stringify(newValue))continue
-        changes.push({kind:before===null?'added':'moved',subject_id:family,family_id:family,aspect,before:aspect==='room'?oldRooms.join(', ')||null:null,after:aspect==='room'?newRooms.join(', ')||null:null,before_value:oldValue,after_value:newValue,affected_family_ids:[family]})
+    const previous = accommodationClosedResult(before),
+      next = accommodationClosedResult(after)
+    const ids = [
+      ...new Set([
+        ...(previous?.placements ?? []).map((p) => p.family_id),
+        ...(next?.placements ?? []).map((p) => p.family_id),
+        ...(previous?.unplaced ?? []).map((p) => p.family_id),
+        ...(next?.unplaced ?? []).map((p) => p.family_id),
+      ]),
+    ].sort()
+    const changes: ClosedResultChange[] = []
+    for (const family of ids) {
+      const was = (previous?.placements ?? []).filter((p) => p.family_id === family),
+        is = (next?.placements ?? []).filter((p) => p.family_id === family)
+      const oldRooms = was.map((p) => p.room_id).sort(),
+        newRooms = is.map((p) => p.room_id).sort()
+      const oldPlaces = was.flatMap((p) => p.place_ids).sort(),
+        newPlaces = is.flatMap((p) => p.place_ids).sort()
+      const oldUnplaced = previous?.unplaced.some((p) => p.family_id === family) ?? false,
+        newUnplaced = next?.unplaced.some((p) => p.family_id === family) ?? false
+      for (const [aspect, oldValue, newValue] of [
+        ['room', oldRooms, newRooms],
+        ['places', oldPlaces, newPlaces],
+        ['unplaced', oldUnplaced, newUnplaced],
+      ] as const) {
+        if (JSON.stringify(oldValue) === JSON.stringify(newValue)) continue
+        changes.push({
+          kind:
+            Array.isArray(oldValue) && oldValue.length === 0
+              ? 'added'
+              : Array.isArray(newValue) && newValue.length === 0
+                ? 'removed'
+                : before === null
+                  ? 'added'
+                  : 'moved',
+          subject_id: family,
+          family_id: family,
+          aspect,
+          before: aspect === 'room' ? oldRooms.join(', ') || null : null,
+          after: aspect === 'room' ? newRooms.join(', ') || null : null,
+          before_value: oldValue,
+          after_value: newValue,
+          affected_family_ids: [family],
+        })
       }
     }
-    return {changes,affected_family_ids:[...new Set(changes.map(c=>c.subject_id))].sort()}
+    return { changes, affected_family_ids: [...new Set(changes.map((c) => c.subject_id))].sort() }
   },
 }

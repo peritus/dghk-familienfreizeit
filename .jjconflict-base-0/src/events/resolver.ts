@@ -25,6 +25,7 @@ export type ResolvedConstraint = {
 }
 
 export type ResolvedRequirement = {
+  consumer?: string
   trait_key: string
   holder_id: string
   capability_key: string | null
@@ -146,17 +147,23 @@ export function resolve(
           { key: label.key, value: label.value, seq: label.set_seq, kind: entity.kind },
         ),
       )
-    if (schema?.valid_for && entity && schema.valid_for(viewFor(entity.id)) !== true)
+    const validity = schema?.valid_for && entity ? schema.valid_for(viewFor(entity.id)) : true
+    if (validity !== true)
       diagnostics.push(
         diagnostic(
           'kernel.valid-for',
           'warning',
           label.entity_id,
           `label ${label.key} is not valid for this entity`,
-          { key: label.key, value: label.value, seq: label.set_seq, reason: schema!.valid_for!(viewFor(entity!.id)) as JsonValue },
+          {
+            key: label.key,
+            value: label.value,
+            seq: label.set_seq,
+            reason: validity as JsonValue,
+          },
         ),
       )
-    if (fixed || descriptor) {
+    if (fixed || (descriptor && descriptor.kind !== 'ordered-choice')) {
       if (typeof label.value !== 'string' || label.value.length === 0)
         diagnostics.push(
           diagnostic(
@@ -164,7 +171,7 @@ export function resolve(
             'error',
             label.entity_id,
             'resolver value must be a non-empty string',
-          { key: label.key, value: label.value, seq: label.set_seq },
+            { key: label.key, value: label.value, seq: label.set_seq },
           ),
         )
       else {
@@ -204,6 +211,15 @@ export function resolve(
               holder_id: label.entity_id,
               capability_key: label.value,
               kind: 'generic-needs',
+              ...(config.capability_token_consumers?.find((scope) =>
+                String(label.value).startsWith(scope.prefix),
+              )
+                ? {
+                    consumer: config.capability_token_consumers.find((scope) =>
+                      String(label.value).startsWith(scope.prefix),
+                    )!.consumer,
+                  }
+                : {}),
               structural: null,
               value: label.value,
               strength: label.strength,
@@ -232,7 +248,7 @@ export function resolve(
               'error',
               label.entity_id,
               `unknown entity: ${label.value}`,
-          { key: label.key, target: label.value, value: label.value, seq: label.set_seq },
+              { key: label.key, target: label.value, value: label.value, seq: label.set_seq },
             ),
           )
       }
@@ -251,7 +267,7 @@ export function resolve(
             'error',
             entity.id,
             `label ${schema.key} requires ${schema.cardinality}, found ${count}`,
-          { key: schema.key, cardinality: schema.cardinality!, count },
+            { key: schema.key, cardinality: schema.cardinality!, count },
           ),
         )
     }
@@ -267,20 +283,25 @@ export function resolve(
     }
   // Required relations indexed by holder and target, so detecting a
   // contradiction is a lookup rather than a scan of every constraint.
+  const relationOperator = (key: string) => descriptors.get(key)?.operator ?? key
   const requiredRelations = new Set<string>()
   for (const constraint of constraints)
     if (
-      (constraint.key === 'groups-with' || constraint.key === 'separates-from') &&
+      (relationOperator(constraint.key) === 'groups-with' ||
+        relationOperator(constraint.key) === 'separates-from') &&
       constraint.strength === 'required'
     )
-      requiredRelations.add(relationKey(constraint.holder_id, constraint.key, constraint.value))
+      requiredRelations.add(
+        relationKey(constraint.holder_id, relationOperator(constraint.key), constraint.value),
+      )
+  const emittedContradictions = new Set<string>()
   for (const constraint of constraints) {
-    if (
-      constraint.key !== 'groups-with' ||
-      constraint.strength !== 'required'
-    )
+    if (relationOperator(constraint.key) !== 'groups-with' || constraint.strength !== 'required')
       continue
-    const opposite = constraint.key === 'groups-with' ? 'separates-from' : 'groups-with'
+    const opposite = 'separates-from'
+    const contradictionKey = relationKey(constraint.holder_id, opposite, constraint.value)
+    if (emittedContradictions.has(contradictionKey)) continue
+    emittedContradictions.add(contradictionKey)
     if (requiredRelations.has(relationKey(constraint.holder_id, opposite, constraint.value)))
       diagnostics.push(
         diagnostic(

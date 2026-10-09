@@ -1,3 +1,4 @@
+import { derivePublicAttention } from '../../../attention/public.js'
 import { ScreenLayout, ScreenHeader } from '../shared/ui/screen-layout.js'
 import { LoadingState, ErrorState } from '../shared/ui/screen-state.js'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
@@ -60,7 +61,7 @@ export class RouteBoundary extends Component<
     const content = (
       <ScreenLayout header={<ScreenHeader title="Ansicht nicht verfügbar" />}>
         <ErrorState onRetry={() => window.location.reload()} retry_label="Neu laden">
-          Bitte lade die Seite neu. Deine gespeicherten Angaben bleiben erhalten.
+          {derivePublicAttention('route-failed').wording.detail}
         </ErrorState>
       </ScreenLayout>
     )

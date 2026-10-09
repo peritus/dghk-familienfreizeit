@@ -165,7 +165,9 @@ test('an open case shows Offen in every empty slot with the reason', () => {
   expect(empty.length).toBeGreaterThan(0)
   for (const row of empty)
     expect(
-      within(row).getByText(/Alle passenden Workshops sind voll|Keine Workshopwahl abgegeben/),
+      within(row).getByText(
+        /Gewählte Workshops konnten nicht zugeordnet werden|Keine aktuelle Workshopwahl dokumentiert/,
+      ),
     ).toBeTruthy()
 })
 

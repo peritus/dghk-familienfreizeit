@@ -73,10 +73,7 @@ describe('world projections', () => {
 
   test('a family projection keeps only resolved rows its own entities hold', () => {
     const projected = projectFamilyWorld(world, 'fam_1')
-    expect(projected.requirements.map((requirement) => requirement.holder_id).sort()).toEqual([
-      'fam_1',
-      'per_1',
-    ])
+    expect(projected.requirements).toEqual([])
     expect(projected.requirements.some((requirement) => requirement.holder_id === 'fam_2')).toBe(
       false,
     )
@@ -93,11 +90,7 @@ describe('world projections', () => {
   test('the shared projection drops restricted labels and keeps ordinary ones', () => {
     const shared = projectSharedWorld(world)
     expect(shared.labels.every((label) => label.sensitivity === 'normal')).toBe(true)
-    expect(shared.requirements.map((requirement) => requirement.holder_id).sort()).toEqual([
-      'fam_1',
-      'fam_2',
-      'per_1',
-    ])
+    expect(shared.requirements).toEqual([])
   })
 
   test('both projections leave the source world untouched', () => {

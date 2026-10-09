@@ -1,11 +1,13 @@
-import { buildRevision, compatibilityRevision } from '../../../config/build.js'
 import { AttentionNotices } from '../attention.js'
 import { PrintFooter } from '../../components/shared/ui/print-layout.js'
 import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { deriveAreaView } from '../../../derive/phases.js'
 import { workshopsClosedResult } from '../../../modules/workshop-assignment/closed-result.js'
-import { planWithWorkshopsClosedResult, closingExplanationPlan } from '../../../modules/workshop-assignment/app/print-closed-result.js'
+import {
+  planWithWorkshopsClosedResult,
+  closingExplanationPlan,
+} from '../../../modules/workshop-assignment/app/print-closed-result.js'
 import { activeProfile } from '../../../config/index.js'
 import { organiserPaths } from '../../../organiser/routes.js'
 import { useDocumentTitle } from '../../lib/use-document-title.js'
@@ -138,7 +140,21 @@ function familyPlanSlots(family: WorkshopReportFamily): FamilyPlanSlot[] {
         id: member.id,
         name: member.first_name,
         detail: member.age_label,
-        value: (
+        value: cell.entries?.length ? (
+          <div className="space-y-2">
+            {cell.entries.map((entry) => (
+              <div key={entry.id}>
+                <FamilyPlanCell
+                  workshop={entry.workshop}
+                  room={entry.space}
+                  lead={entry.status === 'lead'}
+                  open={entry.status === 'open'}
+                />
+                <p className="text-sm">{entry.role_label}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
           <FamilyPlanCell
             workshop={cell.workshop}
             room={cell.space}
@@ -205,12 +221,25 @@ export function WorkshopLists() {
         ? buildWorkshopReportsProjection({
             world,
             plan: closedResult
-              ? planWithWorkshopsClosedResult(currentPlan, closedResult.payload, closingExplanationPlan(state.committed,closedResult.seq,closedResult.payload,activeProfile,{build_revision:buildRevision,compatibility_revision:compatibilityRevision}))
+              ? planWithWorkshopsClosedResult(
+                  currentPlan,
+                  closedResult.payload,
+                  closingExplanationPlan(
+                    state.committed,
+                    closedResult.seq,
+                    closedResult.payload,
+                    activeProfile,
+                    {
+                      build_revision: currentPlan.meta.build_revision,
+                      compatibility_revision: currentPlan.meta.compatibility_revision,
+                    },
+                  ),
+                )
               : currentPlan,
             time_zone: activeProfile.meta.timezone,
           })
         : null,
-    [closedResult, currentPlan, world,state.committed],
+    [closedResult, currentPlan, world, state.committed],
   )
 
   const query = new URLSearchParams(search)
@@ -248,7 +277,7 @@ export function WorkshopLists() {
       <ScreenLayout
         secondary_navigation={<WorkshopNavigation />}
         notices={<AttentionNotices scope="print" />}
-      header={<ScreenHeader title="Listen" />}
+        header={<ScreenHeader title="Listen" />}
       >
         <ErrorState title="Die Listen konnten nicht berechnet werden.">{state.error}</ErrorState>
       </ScreenLayout>

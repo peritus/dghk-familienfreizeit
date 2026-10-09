@@ -404,10 +404,7 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
     ),
     config,
   )
-  expect(world.diagnostics.map((item) => item.id)).toEqual([
-    'kernel.contradiction',
-    'kernel.contradiction',
-  ])
+  expect(world.diagnostics.map((item) => item.id)).toEqual(['kernel.contradiction'])
   expect(world.constraints).toContainEqual({
     key: 'needs',
     holder_id: 'fam_1',
@@ -421,7 +418,7 @@ test('compiles resolver diagnostics and preserves restricted facts only for thei
   ).toBe(false)
   expect(
     projectFamilyWorld(world, 'fam_1').labels.some((label) => label.key === 'private-note'),
-  ).toBe(true)
+  ).toBe(false)
 })
 
 test('derives draft events and stable world changes without persistence', () => {
