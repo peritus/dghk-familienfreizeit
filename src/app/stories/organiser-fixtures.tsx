@@ -23,7 +23,7 @@ export const organiserFixtureDrafts: readonly EventDraft[] = [
     payload: {
       family_id: 'fam_sonnenberg',
       email: 'sonnenberg@example.test',
-      display_name: 'Familie Sonnenberg',
+      display_name: 'Sonnenberg',
       locale: 'de',
     },
   },
@@ -412,7 +412,7 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
   {
     family_id: 'fam_seidel',
     email: 'seidel@example.test',
-    display_name: 'Familie Seidel',
+    display_name: 'Seidel',
     people: [
       {
         person_id: 'per_seidel_mara',
@@ -455,7 +455,7 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
   {
     family_id: 'fam_morgan',
     email: 'morgan@example.test',
-    display_name: 'Familie Morgan',
+    display_name: 'Morgan',
     people: [
       {
         person_id: 'per_morgan_alex',
@@ -481,7 +481,7 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
   {
     family_id: 'fam_rivera',
     email: 'rivera@example.test',
-    display_name: 'Familie Rivera',
+    display_name: 'Rivera',
     people: [
       {
         person_id: 'per_rivera_sam',
@@ -509,7 +509,7 @@ const assignmentFixtureFeaturedFamilies: readonly AssignmentFixtureFamily[] = [
   {
     family_id: 'fam_lang',
     email: 'lang@example.test',
-    display_name: 'Familie Lang',
+    display_name: 'Lang',
     people: [
       {
         person_id: 'per_lang_robin',
@@ -582,7 +582,7 @@ const assignmentFixtureGeneratedFamilies: readonly AssignmentFixtureFamily[] =
     return {
       family_id: `fam_${familySlug}`,
       email: `${familySlug}@example.test`,
-      display_name: `Familie ${surname}`,
+      display_name: surname,
       people: Array.from({ length: peopleCount }, (_, personIndex) => ({
         person_id: `per_${familySlug}_${personIndex + 1}`,
         given_name:

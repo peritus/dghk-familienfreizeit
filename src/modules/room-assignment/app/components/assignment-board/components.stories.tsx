@@ -28,7 +28,7 @@ const requirement = (overrides: Partial<RequirementView>): RequirementView => ({
 
 const family: FamilyView = {
   id: 'fam_baumann',
-  name: 'Familie Baumann',
+  name: 'Baumann',
   people: [
     { id: 'per_anna', name: 'Anna Baumann', role: 'adult' },
     { id: 'per_luis', name: 'Luis Baumann', role: 'child' },
@@ -110,7 +110,7 @@ export const RoomCardVariants: Story = {
       <RoomCard room={room({ occupied: 4, free: 0, occupants: [family] })} />
       <RoomCard
         room={room({
-          occupants: [family, { ...family, id: 'fam_keller', name: 'Familie Keller' }],
+          occupants: [family, { ...family, id: 'fam_keller', name: 'Keller' }],
         })}
       />
       <RoomCard room={room()} />
