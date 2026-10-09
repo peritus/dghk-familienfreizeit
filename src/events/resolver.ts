@@ -49,6 +49,7 @@ export type Diagnostic = {
   severity: 'error' | 'warning'
   subject_id: string
   message: string
+  evidence?: Readonly<Record<string, JsonValue>>
 }
 
 /** Normalizes fixed resolver inputs; modules consume this result instead of event payloads. */
@@ -130,6 +131,7 @@ export function resolve(
           'warning',
           label.entity_id,
           `unknown trait: ${label.key}`,
+          { key: label.key, value: label.value, seq: label.set_seq },
         ),
       )
       continue
@@ -141,15 +143,17 @@ export function resolve(
           'error',
           label.entity_id,
           `label ${label.key} is not valid for ${entity.kind}`,
+          { key: label.key, value: label.value, seq: label.set_seq, kind: entity.kind },
         ),
       )
-    if (schema?.valid_for && entity && !schema.valid_for(viewFor(entity.id)))
+    if (schema?.valid_for && entity && schema.valid_for(viewFor(entity.id)) !== true)
       diagnostics.push(
         diagnostic(
           'kernel.valid-for',
           'warning',
           label.entity_id,
           `label ${label.key} is not valid for this entity`,
+          { key: label.key, value: label.value, seq: label.set_seq, reason: schema!.valid_for!(viewFor(entity!.id)) as JsonValue },
         ),
       )
     if (fixed || descriptor) {
@@ -160,6 +164,7 @@ export function resolve(
             'error',
             label.entity_id,
             'resolver value must be a non-empty string',
+          { key: label.key, value: label.value, seq: label.set_seq },
           ),
         )
       else {
@@ -227,6 +232,7 @@ export function resolve(
               'error',
               label.entity_id,
               `unknown entity: ${label.value}`,
+          { key: label.key, target: label.value, value: label.value, seq: label.set_seq },
             ),
           )
       }
@@ -245,6 +251,7 @@ export function resolve(
             'error',
             entity.id,
             `label ${schema.key} requires ${schema.cardinality}, found ${count}`,
+          { key: schema.key, cardinality: schema.cardinality!, count },
           ),
         )
     }
@@ -269,7 +276,7 @@ export function resolve(
       requiredRelations.add(relationKey(constraint.holder_id, constraint.key, constraint.value))
   for (const constraint of constraints) {
     if (
-      (constraint.key !== 'groups-with' && constraint.key !== 'separates-from') ||
+      constraint.key !== 'groups-with' ||
       constraint.strength !== 'required'
     )
       continue
@@ -281,6 +288,7 @@ export function resolve(
           'error',
           constraint.holder_id,
           `contradictory required relations to ${constraint.value}`,
+          { target: constraint.value, operators: ['groups-with', 'separates-from'] },
         ),
       )
   }
@@ -339,6 +347,7 @@ function diagnostic(
   severity: Diagnostic['severity'],
   subjectId: string,
   message: string,
+  evidence?: Readonly<Record<string, JsonValue>>,
 ): Diagnostic {
-  return { id, severity, subject_id: subjectId, message }
+  return { id, severity, subject_id: subjectId, message, ...(evidence ? { evidence } : {}) }
 }

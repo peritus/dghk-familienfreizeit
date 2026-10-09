@@ -30,3 +30,12 @@ test('duplicate registration and conflicting facts fail; equal facts merge', () 
 test('other audiences never receive organiser findings', () => {
  expect(composeAttention([check])({ ...context, audience: 'family' }).items).toEqual([])
 })
+
+import { coreAttentionChecks } from '../../src/attention/core.js'
+test('core records distinct unknown fields and localized applicability reasons', () => {
+ const world = { ...context.world!, diagnostics: [
+ { id: 'kernel.unknown-trait', subject_id: 'fam_1', severity: 'warning' as const, message: 'irrelevant', evidence: { key: 'first', value: true, seq: 1 } },
+ { id: 'kernel.unknown-trait', subject_id: 'fam_1', severity: 'warning' as const, message: 'irrelevant', evidence: { key: 'second', value: true, seq: 2 } },
+ ] }
+ expect(composeAttention(coreAttentionChecks)({ ...context, world }).items.filter(i => i.code === 'kernel.unknown-trait')).toHaveLength(2)
+})
