@@ -4,6 +4,7 @@ import { App } from '../../src/app/app'
 import { activeProfilePresentation } from '../../src/app/active-profile.js'
 import { RouteBoundary, RouteLoading } from '../../src/app/components/application/route-states'
 import { buildRevision, compatibilityRevision } from '../../src/config/build.js'
+import { activeProfile } from '../../src/config/index.js'
 import type { Event } from '../../src/events/types.js'
 
 beforeAll(async () => {
@@ -450,7 +451,8 @@ test('slot editing uses a duration and does not offer slot capacity', async () =
 
   fireEvent.click(screen.getByRole('button', { name: 'Slot hinzufügen' }))
   expect(screen.getByRole('heading', { name: 'Slot hinzufügen' })).toBeTruthy()
-  expect(screen.getByLabelText('Beginn')).toBeTruthy()
+  const slotStart = screen.getByLabelText('Beginn') as HTMLInputElement
+  expect(slotStart.value).toBe(`${activeProfile.meta.starts_on}T09:00`)
   expect(screen.getByLabelText('Dauer (Minuten)')).toBeTruthy()
   expect(screen.queryByLabelText(/^Plätze/)).toBeNull()
 

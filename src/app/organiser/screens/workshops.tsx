@@ -1358,7 +1358,7 @@ export function WorkshopSlots() {
                         editingSlot.ends_at,
                       ),
                     }
-                  : undefined
+                  : { starts_at: `${activeProfile.meta.starts_on}T09:00` }
               }
             />
           </CollectionCreateAction>
