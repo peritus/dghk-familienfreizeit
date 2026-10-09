@@ -20,11 +20,12 @@ Specification coverage: [workshops](modules/workshops.md),
 [workshop attendance](modules/workshop-assignment.md), and [UI-12](ui/screens/workshops.md).
 
 The event-backed organiser foundation and deterministic automatic planner are
-implemented. Event-backed fixed attendance decisions and their resolver
-mechanics are delivered (see [workshop attendance](modules/workshop-assignment.md)),
-and so are the organiser sides of the [feature](../docs/architecture/features.md) and
-[phase](../docs/architecture/phases.md) contracts; remaining active work is limited
-to the unresolved planning contract:
+implemented. Fixed attendance now uses paired generic `needs`/`provides` labels
+and has organiser authoring controls (see
+[workshop attendance](modules/workshop-assignment.md)). The organiser sides of
+the [feature](../docs/architecture/features.md) and
+[phase](../docs/architecture/phases.md) contracts are delivered; remaining active
+work is limited to the unresolved planning contract:
 
 - complete finding and open-case review surfaces for current and prospective
   programme and allocation contexts, building on the delivered
@@ -36,7 +37,7 @@ to the unresolved planning contract:
   [D30](../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces),
   and [D31](../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops);
 - reconcile the workshop contract terms for reservations, individual attendance
-  cancellation, separation, and age eligibility. Record whether current behavior
+  cancellation, and separation. Record whether current behavior
   covers each term, it remains active M8 work, or it requires an explicit scope
   decision before M8 can close.
 
@@ -45,8 +46,12 @@ and attendance, including finding and open-case outcomes; eligible rankings can
 be recorded before placement is known, with no-preference represented explicitly;
 every blocking outcome and allocation decision is traceable; capacity changes
 follow D30; each workshop has at most one placement
-and each person has at most one assignment per overlapping period; and every
-reconciled contract term has a recorded disposition.
+and automatic assignments do not overlap for a person. An explicit fixed
+attendance decision remains assigned when it conflicts with eligibility,
+capacity, overlap, leadership, participation mode, or the automatic per-person
+limit, and each conflict is traceable. Cancelled, removed, and unscheduled
+workshops do not produce attendance. Every reconciled contract term has a
+recorded disposition.
 
 <a id="m10--family-access-and-release-control"></a>
 ## M10 — Family access
