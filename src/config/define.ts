@@ -1,3 +1,5 @@
+import type { AttentionCheck } from '../attention/types.js'
+import { composeAttention } from '../attention/engine.js'
 import type { ZodType } from 'zod'
 import {
   guardModuleFold,
@@ -196,6 +198,7 @@ export type ProfileModule = {
 }
 
 export type ModuleContributions = {
+  attention_checks?: readonly AttentionCheck[]
   entity_kinds?: readonly {
     id: string
     prefix: string
@@ -317,6 +320,7 @@ export function defineOccasionProfile<Traits extends Record<string, Trait>>(inpu
   const modules = input.modules ?? []
   validateTraits(input.traits, input.meta)
   validateModules(modules, input.traits, input.meta)
+  composeAttention([], modules)
   return { ...input, modules, validation_view: validationView(input.traits, modules) }
 }
 

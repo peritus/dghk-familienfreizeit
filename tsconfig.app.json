@@ -8,6 +8,7 @@
     "paths": { "@/*": ["./src/app/*"] }
   },
   "include": [
+    "src/attention/**/*.ts",
     "src/app/**/*.ts",
     "src/app/**/*.tsx",
     "src/modules/**/*.tsx",

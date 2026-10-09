@@ -7,6 +7,7 @@ import tseslint from 'typescript-eslint'
 const browserFiles = ['src/app/**/*.{ts,tsx}', 'src/modules/*/app/**/*.{ts,tsx}']
 const workerFiles = ['src/worker/**/*.ts', 'src/modules/*/worker/**/*.ts']
 const pureFiles = [
+  'src/attention/**/*.ts',
   'src/derive/**/*.ts',
   'src/events/fold.ts',
   'src/events/resolver.ts',

@@ -5,6 +5,7 @@
     "types": ["@cloudflare/vitest-plugin/types"]
   },
   "include": [
+    "src/attention/**/*.ts",
     "src/worker/**/*.ts",
     "src/events/**/*.ts",
     "src/auth/**/*.ts",
