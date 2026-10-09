@@ -64,6 +64,7 @@ export type TraceEntry = {
 }
 
 export type PreflightFinding = {
+  evidence?: Readonly<Record<string, JsonValue>>
   check: string
   severity: 'error' | 'warning' | 'info'
   subjects: readonly string[]

@@ -1,3 +1,4 @@
+import { inventoryAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
@@ -419,6 +420,7 @@ export const roomInventory = defineModule({
   id: 'room-inventory',
   params: paramsSchema,
   contribute: (params) => ({
+    attention_checks: inventoryAttention,
     entity_kinds: [
       { id: 'building', prefix: 'bld_' },
       { id: 'room', prefix: 'rm_' },

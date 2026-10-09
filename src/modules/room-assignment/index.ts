@@ -1,3 +1,4 @@
+import { roomAssignmentAttention } from './attention.js'
 import { z } from 'zod'
 import type { Entity, World } from '../../events/fold.js'
 import type { ResolvedRequirement } from '../../events/resolver.js'
@@ -119,6 +120,7 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
   requires: ['room-inventory'],
   params: paramsSchema,
   contribute: (params) => ({
+    attention_checks: roomAssignmentAttention(params),
     phases: [
       {
         id: 'room-assignment.review',
@@ -515,6 +517,7 @@ export function roomAssignmentPreflight(
   const findings: {
     check: string
     severity: 'error'
+    evidence?: Readonly<Record<string, import('../../events/types.js').JsonValue>>
     subjects: readonly string[]
     text: string
   }[] = []
@@ -531,9 +534,10 @@ export function roomAssignmentPreflight(
   const rules = roomInput.rules ?? roomAssignmentRules()
   const emptyPlacements = new Map<string, string>()
   for (const family of roomInput.families) {
-    const capacityFinding = (text: string, subjects: readonly string[]) =>
+    const capacityFinding = (text: string, subjects: readonly string[], evidence: Readonly<Record<string, import('../../events/types.js').JsonValue>>) =>
       findings.push({
         check: 'room-assignment.requirement-arithmetic',
+        evidence,
         severity: 'error',
         subjects,
         text,
@@ -545,6 +549,7 @@ export function roomAssignmentPreflight(
           family.bed_demand +
           ' places but the inventory has insufficient capacity',
         [family.family_id],
+        { demand: family.bed_demand, capacity: totalCapacity, capability: null },
       )
     for (const requirement of family.requirements) {
       if (requirement.strength === 'required' && requirement.capability_key) {
@@ -557,6 +562,7 @@ export function roomAssignmentPreflight(
               ' places of demand but satisfying rooms provide ' +
               satisfyingCapacity,
             [family.family_id, requirement.trait_key],
+            { demand: family.bed_demand, capacity: satisfyingCapacity, capability: requirement.capability_key, trait: requirement.trait_key },
           )
       }
     }
@@ -583,6 +589,7 @@ export function roomAssignmentPreflight(
         severity: 'error',
         subjects: [family.family_id],
         text: family.family_id + ' has no room satisfying all required decisions',
+        evidence: { reasons: [...new Set(rejected.flatMap(r => r.map(v => v.rule)))].sort() },
       })
     if (unresolvedRoomDecision)
       findings.push({
@@ -590,6 +597,7 @@ export function roomAssignmentPreflight(
         severity: 'error',
         subjects: [family.family_id],
         text: family.family_id + ' has a room decision with no provider',
+        evidence: { reasons: ['hard.room-unavailable'] },
       })
   }
   return findings
@@ -1057,4 +1065,14 @@ export const roomReviewReadiness: PhaseReadiness = ({ world, plan }) => {
       message: `Feste Zimmerentscheidung für ${violation.family_id} ist nicht erfüllbar.`,
     })
   return findings.length === 0 ? { ready: true } : { ready: false, findings }
+}
+
+/** One canonical indexed room sweep, shared by review and fixed-assignment authoring. */
+export function roomFeasibility(input: RoomAssignmentInput, params: RoomAssignmentParams, assignments: readonly RoomAssignment[], familyId: string) {
+ const family = input.families.find(f => f.family_id === familyId)
+ if (!family) return []
+ const placements = new Map(assignments.filter(a => a.family_id !== familyId).map(a => [a.family_id,a.room_id]))
+ const state = sweepState(family,placements,input,params)
+ const rules = input.rules ?? roomAssignmentRules()
+ return input.rooms.map(room => ({ room_id: room.id, remaining: roomRemaining(room,placements,input,state.index), reasons: feasible(family,room,placements,input,params,rules,state).map(r=>r.rule) }))
 }
