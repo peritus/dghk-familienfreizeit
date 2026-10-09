@@ -2,7 +2,13 @@ import { LoadingState } from '../../components/shared/ui/screen-state.js'
 import { useMemo, useState } from 'react'
 import { useLocation, useSearch } from 'wouter'
 import { activeProfile } from '../../../config/index.js'
-import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
+import {
+  fixedWorkshopAttendanceToken,
+  officialWorkshopsWorld,
+} from '../../../modules/official-workshops/index.js'
+import { Button } from '../../components/shared/ui/button.js'
+import { SelectField } from '../../components/shared/ui/field.js'
+import { CollectionList, CollectionRow } from '../../components/shared/ui/collection-list.js'
 import { AreaClosingActions, ClosedAreaDifferences } from '../components/area-closing.js'
 import { workshopTrack } from '../../../modules/workshop-assignment/app/workshop-track.js'
 import type { PhaseView } from '../../../derive/phases.js'
@@ -20,6 +26,8 @@ import { FixedDecisionReview } from '../../components/shared/ui/fixed-decision-r
 import { personPickerOptions } from '../person-picker-options.js'
 import { WorkshopNavigation } from './workshops.js'
 import { useOrganiser } from '../context.js'
+import type { EventDraft } from '../../../events/types.js'
+import { workshopAssignmentSection } from '../../../modules/workshop-assignment/index.js'
 import {
   ChoiceTraceTable,
   TraceControls,
@@ -88,15 +96,43 @@ function allocationStatusLabel(phases: readonly PhaseView[]): string {
   return review && !review.readiness.ready ? 'Prüfung erforderlich' : 'Zuordnung prüfen'
 }
 
+function setLabelDraft(
+  actor: string,
+  entityId: string,
+  key: string,
+  value: string,
+  strength: 'required' | null,
+): EventDraft {
+  return {
+    at: new Date().toISOString(),
+    actor,
+    subject: entityId,
+    type: 'LabelSet',
+    payload: { entity_id: entityId, key, value, strength, note: null },
+  }
+}
+
+function clearLabelDraft(actor: string, entityId: string, key: string, value: string): EventDraft {
+  return {
+    at: new Date().toISOString(),
+    actor,
+    subject: entityId,
+    type: 'LabelCleared',
+    payload: { entity_id: entityId, key, value },
+  }
+}
+
 export function WorkshopAllocation() {
   useDocumentTitle('Wünsche · Workshops · Familienfreizeit')
   // wouter's location is the pathname only; a traced person arrives in the query.
   const [location, navigate] = useLocation()
   const queryPersonId = new URLSearchParams(useSearch()).get('person')
-  const { world, current_plan: currentPlan, phases, state } = useOrganiser()
+  const { world, current_plan: currentPlan, phases, state, stage } = useOrganiser()
   const [group, setGroup] = useState<WorkshopAllocationGroup>('all')
   const [traceMode, setTraceMode] = useState<TraceMode>(queryPersonId ? 'highlight' : 'all')
   const [selectedPersonId, setSelectedPersonId] = useState(queryPersonId ?? '')
+  const [fixedPersonId, setFixedPersonId] = useState('')
+  const [fixedWorkshopId, setFixedWorkshopId] = useState('')
   const projection = useMemo(
     () =>
       world && currentPlan
@@ -122,6 +158,16 @@ export function WorkshopAllocation() {
     )
 
   const view = allocationView(location)
+  const workshopSummary = officialWorkshopsWorld(world)
+  const activeWorkshops = workshopSummary.workshops
+  const allWorkshops = [...workshopSummary.workshops, ...workshopSummary.cancelled]
+  const assignment = currentPlan ? workshopAssignmentSection(currentPlan) : null
+  const fixedPairs = assignment?.fixed ?? []
+  const personNamesById = new Map(projection.person_names.map((person) => [person.id, person.name]))
+  const workshopsById = new Map(allWorkshops.map((workshop) => [workshop.id, workshop]))
+  const fixedKeys = new Set(
+    fixedPairs.map(({ person_id, workshop_id }) => `${person_id}|${workshop_id}`),
+  )
   const answers = workshopAllocationPeople(projection, group)
   const selectedPerson =
     projection.person_names.find((person) => person.id === queryPersonId) ??
@@ -243,6 +289,120 @@ export function WorkshopAllocation() {
         />
       }
     >
+      <section className="space-y-4" aria-label="Feste Teilnahmen">
+        <SectionHeader
+          title="Feste Teilnahmen"
+          description="Lege bei Bedarf eine Teilnahme fest. Sie bleibt trotz Alters-, Zielgruppen-, Kapazitäts-, Überschneidungs-, Leitungs- oder Teilnahmeartkonflikten bestehen; abgesagte und nicht terminierte Workshops werden mit einem Hinweis nicht zugeteilt."
+        />
+        <form
+          className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (!fixedPersonId || !fixedWorkshopId) return
+            const token = fixedWorkshopAttendanceToken(fixedPersonId, fixedWorkshopId)
+            stage([
+              setLabelDraft(
+                state.principal_email ?? 'organiser@example.test',
+                fixedPersonId,
+                'needs',
+                token,
+                'required',
+              ),
+              setLabelDraft(
+                state.principal_email ?? 'organiser@example.test',
+                fixedWorkshopId,
+                'provides',
+                token,
+                null,
+              ),
+            ])
+            setFixedPersonId('')
+            setFixedWorkshopId('')
+          }}
+        >
+          <SelectField
+            label="Person"
+            value={fixedPersonId}
+            onChange={(event) => setFixedPersonId(event.currentTarget.value)}
+            required
+          >
+            <option value="" disabled>
+              Person auswählen
+            </option>
+            {projection.person_names.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField
+            label="Workshop"
+            value={fixedWorkshopId}
+            onChange={(event) => setFixedWorkshopId(event.currentTarget.value)}
+            required
+          >
+            <option value="" disabled>
+              Workshop auswählen
+            </option>
+            {activeWorkshops.map((workshop) => (
+              <option key={workshop.id} value={workshop.id}>
+                {workshop.title}
+              </option>
+            ))}
+          </SelectField>
+          <Button
+            type="submit"
+            disabled={
+              !fixedPersonId ||
+              !fixedWorkshopId ||
+              fixedKeys.has(`${fixedPersonId}|${fixedWorkshopId}`)
+            }
+          >
+            Fest zuordnen
+          </Button>
+        </form>
+        {fixedPairs.length ? (
+          <CollectionList>
+            {fixedPairs.map(({ person_id: personId, workshop_id: workshopId }) => {
+              const token = fixedWorkshopAttendanceToken(personId, workshopId)
+              const actor = state.principal_email ?? 'organiser@example.test'
+              const workshopExists = world.entities_by_kind.workshop?.some(
+                (workshop) => workshop.id === workshopId,
+              )
+              return (
+                <CollectionRow
+                  key={`${personId}|${workshopId}`}
+                  action={
+                    <Button
+                      type="button"
+                      variant="neutral"
+                      size="sm"
+                      aria-label={`Feste Teilnahme von ${personNamesById.get(personId) ?? personId} an ${workshopsById.get(workshopId)?.title ?? workshopId} entfernen`}
+                      onClick={() =>
+                        stage([
+                          clearLabelDraft(actor, personId, 'needs', token),
+                          ...(workshopExists
+                            ? [clearLabelDraft(actor, workshopId, 'provides', token)]
+                            : []),
+                        ])
+                      }
+                    >
+                      Entfernen
+                    </Button>
+                  }
+                >
+                  <strong>{personNamesById.get(personId) ?? personId}</strong>
+                  <p className="mt-1 text-sm">
+                    Fest: <strong>{workshopsById.get(workshopId)?.title ?? workshopId}</strong>
+                  </p>
+                </CollectionRow>
+              )
+            })}
+          </CollectionList>
+        ) : (
+          <p className="text-sm text-muted">Noch keine festen Teilnahmen.</p>
+        )}
+      </section>
       {view === 'answers' ? (
         <section className="space-y-5" aria-labelledby="allocation-answers-heading">
           <SectionHeader

@@ -280,6 +280,7 @@ function reasonOutcome(reason: string | undefined): WorkshopAllocationTraceOutco
     case 'hard.unscheduled':
       return 'unscheduled'
     case 'hard.eligibility':
+    case 'hard.mode-not-assigned':
       return 'eligibility'
     case 'hard.cancellation':
       return 'cancellation'
@@ -288,6 +289,21 @@ function reasonOutcome(reason: string | undefined): WorkshopAllocationTraceOutco
     default:
       return 'unprocessed'
   }
+}
+
+function fixedViolationReasonText(reason: string): string {
+  const labels: Record<string, string> = {
+    'hard.capacity': 'Kapazität überschritten',
+    'hard.overlap': 'Überschneidung',
+    'hard.leader-conflict': 'Person leitet gleichzeitig einen Workshop',
+    'hard.unscheduled': 'Workshop hat keinen Termin',
+    'hard.eligibility': 'Alter oder Zielgruppe passt nicht',
+    'hard.mode-not-assigned': 'andere Teilnahmeart',
+    'hard.cancellation': 'Workshop abgesagt oder entfernt',
+    'hard.fixed-pair-unresolved': 'needs/provides-Paar ist unvollständig',
+    'policy.target-reached': 'persönliches Zuordnungslimit überschritten',
+  }
+  return labels[reason] ?? reason
 }
 
 function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
@@ -463,7 +479,9 @@ export function buildWorkshopAllocationProjection(
     }))
     .sort((left, right) => left.name.localeCompare(right.name, 'de'))
   const rankingsByPerson = answerRankings(rankings, input.max_rank)
-  const workshops = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
+  const workshops = new Map(
+    [...official.workshops, ...official.cancelled].map((workshop) => [workshop.id, workshop]),
+  )
   const scheduling = input.plan.sections['workshop-scheduling'] as
     | WorkshopSchedulingSection
     | undefined
@@ -601,7 +619,7 @@ export function buildWorkshopAllocationProjection(
       rank: null,
       phase: 'fixed',
       outcome: reasonOutcome(violation.reasons[0]),
-      detail: `Feste Zuordnung nicht möglich: ${reasonText(reasonOutcome(violation.reasons[0]))}.`,
+      detail: `Feste Zuordnung bleibt bestehen. Konflikte: ${violation.reasons.map(fixedViolationReasonText).join(', ')}.`,
       slot_label: slotLabel(violation.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
