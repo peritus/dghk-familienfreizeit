@@ -85,8 +85,6 @@ export const Forms: Story = {
             name: 'Werkraum',
             location: 'Haus 2',
             capacity: 14,
-            availability_start: '2026-07-17T08:00',
-            availability_end: '2026-07-19T18:00',
             default_capabilities: ['indoor', 'water'],
           }}
         />

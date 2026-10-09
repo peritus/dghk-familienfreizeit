@@ -421,8 +421,6 @@ export type SpaceEditorValues = {
   name?: string
   location?: string
   capacity?: number
-  availability_start?: string
-  availability_end?: string
   default_capabilities?: readonly string[]
 }
 
@@ -451,18 +449,6 @@ export function SpaceEditorForm({
               type="number"
               min="0"
               defaultValue={defaultValues.capacity ?? 8}
-            />
-            <TextField
-              label="Verfügbar ab"
-              name="availability_start"
-              type="datetime-local"
-              defaultValue={defaultValues.availability_start}
-            />
-            <TextField
-              label="Verfügbar bis"
-              name="availability_end"
-              type="datetime-local"
-              defaultValue={defaultValues.availability_end}
             />
           </div>
           <p className="text-sm text-muted">

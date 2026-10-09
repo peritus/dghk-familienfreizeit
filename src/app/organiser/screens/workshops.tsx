@@ -1441,17 +1441,6 @@ export function WorkshopSpaces() {
   const add = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const availabilityStart = String(data.get('availability_start') ?? '')
-    const availabilityEnd = String(data.get('availability_end') ?? '')
-    const availabilityWindows =
-      availabilityStart && availabilityEnd
-        ? [
-            {
-              starts_at: new globalThis.Date(availabilityStart).toISOString(),
-              ends_at: new globalThis.Date(availabilityEnd).toISOString(),
-            },
-          ]
-        : []
     stage([
       draft(
         state.principal_email ?? '',
@@ -1461,7 +1450,6 @@ export function WorkshopSpaces() {
           name: String(data.get('name') ?? ''),
           location_description: String(data.get('location') ?? ''),
           capacity: Number(data.get('capacity') ?? 0),
-          availability_windows: availabilityWindows,
           sort_key: editingSpace?.sort_key ?? summary.live.length + 1,
         },
       ),
@@ -1477,7 +1465,7 @@ export function WorkshopSpaces() {
         <ScreenHeader
           eyebrow="Workshops"
           title="Räume und Slots"
-          description="Workshopräume, Kapazitäten und Zeitfenster verwalten."
+          description="Workshopräume, Kapazitäten und ihre Verfügbarkeit pro Slot verwalten."
         />
       }
       tertiary_navigation={<WorkshopResourceNavigation value="spaces" />}
@@ -1488,7 +1476,7 @@ export function WorkshopSpaces() {
           <CollectionCreateAction
             label="Raum hinzufügen"
             title={editingSpace ? 'Workshopraum bearbeiten' : 'Workshopraum hinzufügen'}
-            description="Lege Ort, Kapazität und verfügbare Zeiten fest."
+            description="Lege Ort und Kapazität des Workshopraums fest. Die Verfügbarkeit markierst du pro Slot."
             open={addingSpace || editingSpace !== null}
             on_open_change={(open) => {
               setAddingSpace(open)
@@ -1505,12 +1493,6 @@ export function WorkshopSpaces() {
                       name: editingSpace.name,
                       location: editingSpace.location_description,
                       capacity: editingSpace.capacity,
-                      availability_start: editingSpace.availability_windows[0]
-                        ? dateTimeLocal(editingSpace.availability_windows[0].starts_at)
-                        : undefined,
-                      availability_end: editingSpace.availability_windows[0]
-                        ? dateTimeLocal(editingSpace.availability_windows[0].ends_at)
-                        : undefined,
                     }
                   : undefined
               }
