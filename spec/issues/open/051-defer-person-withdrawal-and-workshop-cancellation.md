@@ -25,8 +25,8 @@ principal to emit the event for its own person, though no family-screen action
 was found. D24 names withdrawal as an active person-management action, and D27
 uses `PersonWithdrawn` as an example of hard removal. M10 also asks for a
 withdrawn-person fixture. See [the event contract](../../architecture/events.md#personwithdrawn),
-[D24](../../decisions.md#d24--every-family-self-service-action-has-an-organiser-equivalent),
-[D27](../../decisions.md#d27--entities-and-labels-are-hard-removed-on-retirementclear-history-is-re-derived-not-tombstoned),
+[D24](../../../decisions.md#d24--every-family-self-service-action-has-an-organiser-equivalent),
+[D27](../../../decisions.md#d27--entities-and-labels-are-hard-removed-on-retirementclear-history-is-re-derived-not-tombstoned),
 and [M10](../../roadmap.md#m10--family-access-and-release-control).
 
 `WorkshopCancelled` has no organiser authoring control. Its event and derived
@@ -75,7 +75,7 @@ must be reviewed before changing them.
 
 ## Related files
 
-- [decisions.md](../../decisions.md)
+- [decisions.md](../../../decisions.md)
 - [architecture/events.md](../../architecture/events.md)
 - [roadmap.md](../../roadmap.md)
 - [modules/workshop-assignment.md](../../modules/workshop-assignment.md)
