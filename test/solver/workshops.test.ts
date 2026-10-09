@@ -5,7 +5,10 @@ import { derive } from '../../src/events/fold.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
 import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { defineOccasionProfile } from '../../src/config/define.js'
-import { officialWorkshops } from '../../src/modules/official-workshops/index.js'
+import {
+  fixedWorkshopAttendanceToken,
+  officialWorkshops,
+} from '../../src/modules/official-workshops/index.js'
 import { workshopScheduling } from '../../src/modules/workshop-scheduling/index.js'
 import { workshopSpace } from '../../src/modules/workshop-space/index.js'
 import { workshopRankings } from '../../src/modules/workshop-rankings/index.js'
@@ -213,6 +216,7 @@ function workshop(
   needs: readonly string[] = [],
   ageMin = 0,
   ageMax = 18,
+  mode: 'assigned' | 'sign-up' | 'interest' = 'assigned',
 ): Event {
   return event(
     'WorkshopAdded',
@@ -224,7 +228,7 @@ function workshop(
       age_min: ageMin,
       age_max: ageMax,
       capacity,
-      participation_mode: 'assigned',
+      participation_mode: mode,
       leader_ids: leaderIds,
       needs,
       sort_key: sortKey,
@@ -247,8 +251,23 @@ function ranking(personId: string, workshopId: string, rank: number, seq: number
   )
 }
 
-function fixedAttendance(personId: string, workshopIds: readonly string[], seq: number): Event {
-  return event('WorkshopAttendanceFixed', { person_id: personId, workshop_ids: workshopIds }, seq)
+function fixedAttendance(personId: string, workshopIds: readonly string[], seq: number): Event[] {
+  return workshopIds.flatMap((workshopId, index) => {
+    const token = fixedWorkshopAttendanceToken(personId, workshopId)
+    const pairSeq = seq + index * 2
+    return [
+      event(
+        'LabelSet',
+        { entity_id: personId, key: 'needs', value: token, strength: 'required', note: null },
+        pairSeq,
+      ),
+      event(
+        'LabelSet',
+        { entity_id: workshopId, key: 'provides', value: token, strength: null, note: null },
+        pairSeq + 1,
+      ),
+    ]
+  })
 }
 
 function venue(spaceId: string, seq: number, capacity = 10): Event {
@@ -488,7 +507,7 @@ test('a fixed attendance decision takes precedence over a ranked choice for the 
     ...family('per_a', 'fam_a', 4),
     ...family('per_b', 'fam_b', 6),
     ranking('per_b', 'wks_1', 1, 8),
-    fixedAttendance('per_a', ['wks_1'], 9),
+    ...fixedAttendance('per_a', ['wks_1'], 9),
   ]
   const section = assignmentSection(events, defaultParams)
   expect(section.assignments).toEqual([
@@ -547,10 +566,10 @@ test('every configured choice round is processed and automatic assignments stop 
     workshop('wks_3', 1, 3, 9),
     ...family('per_taken', 'fam_taken', 10),
     ...family('per_a', 'fam_a', 12),
-    fixedAttendance('per_taken', ['wks_1'], 14),
-    ranking('per_a', 'wks_1', 1, 15),
-    ranking('per_a', 'wks_2', 2, 16),
-    ranking('per_a', 'wks_3', 3, 17),
+    ...fixedAttendance('per_taken', ['wks_1'], 14),
+    ranking('per_a', 'wks_1', 1, 16),
+    ranking('per_a', 'wks_2', 2, 17),
+    ranking('per_a', 'wks_3', 3, 18),
   ]
   const section = assignmentSection(events, { ...defaultParams, workshops_per_person: 1 })
 
@@ -612,13 +631,20 @@ test('conflicting fixed decisions surface as fixed_violations instead of throwin
     workshop('wks_1', 1, 1, 3),
     ...family('per_a', 'fam_a', 4),
     ...family('per_b', 'fam_b', 6),
-    fixedAttendance('per_a', ['wks_1'], 8),
-    fixedAttendance('per_b', ['wks_1'], 9),
+    ...fixedAttendance('per_a', ['wks_1'], 8),
+    ...fixedAttendance('per_b', ['wks_1'], 10),
   ]
   const section = assignmentSection(events, defaultParams)
   expect(section.assignments).toEqual([
     {
       person_id: 'per_a',
+      workshop_id: 'wks_1',
+      slot_id: 'slot_morning',
+      rank: null,
+      reason: 'fixed',
+    },
+    {
+      person_id: 'per_b',
       workshop_id: 'wks_1',
       slot_id: 'slot_morning',
       rank: null,
@@ -631,6 +657,51 @@ test('conflicting fixed decisions surface as fixed_violations instead of throwin
   ])
   expect(section.fixed_violations).toEqual([
     { person_id: 'per_b', workshop_id: 'wks_1', reasons: ['hard.capacity'] },
+  ])
+})
+
+test('fixed choices remain assigned across eligibility, mode, leader, capacity, overlap, and limit conflicts', () => {
+  const events = [
+    venue('wsp_a', 1),
+    venue('wsp_b', 2),
+    slot(3),
+    ...family('per_a', 'fam_a', 4, 5, 'child'),
+    workshop('wks_signup', 1, 1, 6, ['per_a'], [], 6, 14, 'sign-up'),
+    workshop('wks_second', 1, 2, 7),
+    ...family('per_b', 'fam_b', 8, 15, 'adult'),
+    ...fixedAttendance('per_a', ['wks_signup'], 10),
+    ...fixedAttendance('per_a', ['wks_second'], 12),
+    ...fixedAttendance('per_b', ['wks_signup'], 14),
+  ]
+  const section = assignmentSection(events, defaultParams)
+
+  expect(section.assignments).toEqual([
+    expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_second', reason: 'fixed' }),
+    expect.objectContaining({ person_id: 'per_a', workshop_id: 'wks_signup', reason: 'fixed' }),
+    expect.objectContaining({ person_id: 'per_b', workshop_id: 'wks_signup', reason: 'fixed' }),
+  ])
+  expect(section.fixed_violations).toEqual([
+    {
+      person_id: 'per_a',
+      workshop_id: 'wks_second',
+      reasons: ['hard.leader-conflict'],
+    },
+    {
+      person_id: 'per_a',
+      workshop_id: 'wks_signup',
+      reasons: [
+        'hard.mode-not-assigned',
+        'hard.leader-conflict',
+        'hard.eligibility',
+        'hard.overlap',
+        'policy.target-reached',
+      ],
+    },
+    {
+      person_id: 'per_b',
+      workshop_id: 'wks_signup',
+      reasons: ['hard.mode-not-assigned', 'hard.eligibility', 'hard.capacity'],
+    },
   ])
 })
 
@@ -798,9 +869,9 @@ test('a rejected ranked choice is traced with its reason, not just the winning c
     workshop('wks_2', 1, 2, 5),
     ...family('per_taken', 'fam_taken', 6),
     ...family('per_a', 'fam_a', 8),
-    fixedAttendance('per_taken', ['wks_1'], 10),
-    ranking('per_a', 'wks_1', 1, 11),
-    ranking('per_a', 'wks_2', 2, 12),
+    ...fixedAttendance('per_taken', ['wks_1'], 10),
+    ranking('per_a', 'wks_1', 1, 12),
+    ranking('per_a', 'wks_2', 2, 13),
   ]
   const { section, trace } = assignmentPlan(events, defaultParams)
   expect(section.assignments).toEqual(

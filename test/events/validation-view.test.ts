@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import { derive } from '../../src/events/fold.js'
 import type { Event, JsonValue } from '../../src/events/types.js'
+import { fixedWorkshopAttendanceToken } from '../../src/modules/official-workshops/index.js'
 
 /**
  * Event validators no longer receive a full derived world; they read a narrow
@@ -162,9 +163,14 @@ describe('narrowed validation view', () => {
         role: 'adult',
       },
     ] as const
-    const fixAttendance = [
-      'WorkshopAttendanceFixed',
-      { person_id: 'per_1', workshop_ids: ['wks_1'] },
+    const token = fixedWorkshopAttendanceToken('per_1', 'wks_1')
+    const fixedNeed = [
+      'LabelSet',
+      { entity_id: 'per_1', key: 'needs', value: token, strength: 'required', note: null },
+    ] as const
+    const fixedCapability = [
+      'LabelSet',
+      { entity_id: 'wks_1', key: 'provides', value: token, strength: null, note: null },
     ] as const
 
     // D30: capacity may not drop below live attendance.
@@ -174,7 +180,8 @@ describe('narrowed validation view', () => {
           family,
           person,
           workshop(4, 'WorkshopAdded'),
-          fixAttendance,
+          fixedNeed,
+          fixedCapability,
           workshop(0, 'WorkshopUpdated'),
         ),
       ),
@@ -188,7 +195,8 @@ describe('narrowed validation view', () => {
           family,
           person,
           workshop(4, 'WorkshopAdded'),
-          fixAttendance,
+          fixedNeed,
+          fixedCapability,
           ['PersonWithdrawn', { person_id: 'per_1', reason: null }],
           workshop(0, 'WorkshopUpdated'),
         ),

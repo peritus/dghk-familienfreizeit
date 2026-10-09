@@ -3,7 +3,16 @@ import { defineModule } from '../define.js'
 import type { Entity, World, ModuleFoldCapability, ValidationWorld } from '../../events/fold.js'
 import type { Diagnostic } from '../../events/resolver.js'
 import type { JsonValue } from '../../events/types.js'
+import {
+  fixedWorkshopIdFromToken,
+  isFixedWorkshopAttendanceToken,
+} from './fixed-attendance-token.js'
 export { workshopEligibilityFailure } from './eligibility.js'
+export {
+  fixedWorkshopAttendanceToken,
+  fixedWorkshopIdFromToken,
+  isFixedWorkshopAttendanceToken,
+} from './fixed-attendance-token.js'
 
 export const workshopModes = ['assigned', 'sign-up', 'interest'] as const
 
@@ -75,11 +84,6 @@ const externalLeaderReason = z.object({
   external_leader_id: externalLeaderId,
   reason: z.string().nullable(),
 })
-const attendanceFixedPayload = z.object({
-  person_id: nonEmpty,
-  workshop_ids: z.array(workshopId).max(32),
-})
-
 function entity(world: ValidationWorld, kind: string, idValue: string): Entity | undefined {
   return world.findEntity(kind, idValue)
 }
@@ -94,9 +98,40 @@ function labelValue(world: World, idValue: string, key: string): JsonValue | und
  * store, on an event type organisers fire repeatedly.
  */
 function liveAttendance(world: ValidationWorld, workshopId: string): number {
-  return ['signed-up-for', 'workshop-attendance']
-    .flatMap((key) => world.labelsByKey(key))
-    .filter((label) => label.value === workshopId).length
+  const participants = new Set(
+    world
+      .labelsByKey('signed-up-for')
+      .filter(
+        (label) =>
+          label.value === workshopId && world.findEntity('person', label.entity_id) !== undefined,
+      )
+      .map((label) => label.entity_id),
+  )
+  const provided = new Set(
+    world
+      .labelsByKey('provides')
+      .filter(
+        (label) =>
+          label.entity_id === workshopId &&
+          typeof label.value === 'string' &&
+          isFixedWorkshopAttendanceToken(label.value),
+      )
+      .map((label) => label.value as string),
+  )
+  const fixedPeople = new Set(
+    world
+      .labelsByKey('needs')
+      .filter(
+        (label) =>
+          world.findEntity('person', label.entity_id) &&
+          typeof label.value === 'string' &&
+          fixedWorkshopIdFromToken(label.entity_id, label.value) === workshopId &&
+          provided.has(label.value),
+      )
+      .map((label) => label.entity_id),
+  )
+  for (const personId of fixedPeople) participants.add(personId)
+  return participants.size
 }
 
 function validateWorkshop(
@@ -151,16 +186,6 @@ function validateReason(world: ValidationWorld, payload: JsonValue, kind: string
   return entity(world, kind === 'workshop' ? 'workshop' : 'external-leader', entityId)
     ? null
     : `unknown ${kind}: ${entityId}`
-}
-
-function validateAttendanceFixed(world: ValidationWorld, payload: JsonValue): string | null {
-  const value = attendanceFixedPayload.parse(payload)
-  if (!entity(world, 'person', value.person_id)) return `unknown person: ${value.person_id}`
-  for (const workshop of value.workshop_ids)
-    if (!entity(world, 'workshop', workshop)) return `unknown workshop: ${workshop}`
-  if (value.workshop_ids.length !== new Set(value.workshop_ids).size)
-    return `duplicate workshop in fixed attendance: ${value.person_id}`
-  return null
 }
 
 function setLabels(
@@ -257,7 +282,6 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
       { key: 'cancellation-reason', scopes: ['workshop'], cardinality: 'zero-or-one' },
       { key: 'signed-up-for', scopes: ['person'], cardinality: 'zero-or-more' },
       { key: 'interested-in', scopes: ['person'], cardinality: 'zero-or-more' },
-      { key: 'workshop-attendance', scopes: ['person'], cardinality: 'zero-or-more' },
       {
         key: 'external-leader-name',
         scopes: ['external-leader'],
@@ -443,24 +467,6 @@ export const officialWorkshops = defineModule<OfficialWorkshopsParams>({
         fold: (capability, event) => {
           const value = externalLeaderReason.parse(event.payload)
           capability.retireEntity('external-leader', value.external_leader_id)
-        },
-      },
-      {
-        type: 'WorkshopAttendanceFixed',
-        payload: attendanceFixedPayload,
-        validate: (payload, world) => validateAttendanceFixed(world, payload),
-        authorize: (principal) => principal.kind === 'organiser',
-        fold: (capability, event) => {
-          const value = attendanceFixedPayload.parse(event.payload)
-          setLabels(
-            capability,
-            value.person_id,
-            ['workshop-attendance'],
-            value.workshop_ids.map((workshopId) => ({
-              key: 'workshop-attendance',
-              value: workshopId,
-            })),
-          )
         },
       },
     ],

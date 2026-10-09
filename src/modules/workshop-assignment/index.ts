@@ -7,8 +7,12 @@ import {
   workshopsReopenedPayload,
 } from './closed-result.js'
 import type { FindingRef, PhaseReadiness } from '../../config/phases.js'
-import { officialWorkshopsWorld } from '../official-workshops/index.js'
-import { workshopEligibilityFailure } from '../official-workshops/eligibility.js'
+import {
+  fixedWorkshopIdFromToken,
+  officialWorkshopsWorld,
+  workshopEligibilityFailure,
+} from '../official-workshops/index.js'
+import { isFixedWorkshopAttendanceToken } from '../official-workshops/fixed-attendance-token.js'
 import type { JsonValue } from '../../events/types.js'
 import type { SolverInput, SolverStage, StageResult, TraceEntry } from '../../solver/types.js'
 import type {
@@ -81,7 +85,10 @@ function assignmentStage(
         max_rank: number
       }
       const official = input.module_inputs['official-workshops'] as OfficialWorkshopsSummary
-      const workshops = new Map(official.workshops.map((workshop) => [workshop.id, workshop]))
+      const workshops = new Map(
+        [...official.workshops, ...official.cancelled].map((workshop) => [workshop.id, workshop]),
+      )
+      const activeWorkshops = new Set(official.workshops.map((workshop) => workshop.id))
       const placements = new Map(
         schedule.placements.map((placement) => [placement.workshop_id, placement]),
       )
@@ -92,6 +99,7 @@ function assignmentStage(
       const unassigned: WorkshopUnassigned[] = []
       const trace: TraceEntry[] = []
       const assignedPeople = input.persons.slice().sort((a, b) => a.id.localeCompare(b.id))
+      const assignedPersonIds = new Set(assignedPeople.map((person) => person.id))
       const rankingByPerson = new Map(
         rankingOutput.rankings.map((ranking) => [ranking.person_id, ranking]),
       )
@@ -139,16 +147,26 @@ function assignmentStage(
         const rejection = rejectionReason(personId, workshop)
         if (rejection) return false
         const placement = placements.get(workshop.id)!
+        recordAssignment(personId, workshop, placement.slot_id, rank, reason)
+        return true
+      }
+      const recordAssignment = (
+        personId: string,
+        workshop: WorkshopRecord,
+        slotId: string,
+        rank: number | null,
+        reason: WorkshopAssignment['reason'],
+      ): void => {
         const count = counts.get(workshop.id) ?? 0
         counts.set(workshop.id, count + 1)
-        const peopleAtSlot = usedBySlot.get(placement.slot_id) ?? new Set<string>()
+        const peopleAtSlot = usedBySlot.get(slotId) ?? new Set<string>()
         peopleAtSlot.add(personId)
-        usedBySlot.set(placement.slot_id, peopleAtSlot)
+        usedBySlot.set(slotId, peopleAtSlot)
         assignedCount.set(personId, (assignedCount.get(personId) ?? 0) + 1)
         assignments.push({
           person_id: personId,
           workshop_id: workshop.id,
-          slot_id: placement.slot_id,
+          slot_id: slotId,
           rank,
           reason,
         })
@@ -165,7 +183,6 @@ function assignmentStage(
             },
           },
         })
-        return true
       }
       const traceRejection = (
         personId: string,
@@ -213,24 +230,87 @@ function assignmentStage(
       // Step 1: apply feasible fixed attendance decisions first — they always
       // take precedence over automatic ranked choices, so they
       // claim capacity before anything else runs.
-      const fixed = input.labels
-        .filter((label) => label.key === 'workshop-attendance' && typeof label.value === 'string')
-        .map((label) => ({ person_id: label.entity_id, workshop_id: String(label.value) }))
+      const fixed = input.requirements
+        .filter(
+          (requirement) =>
+            requirement.kind === 'generic-needs' &&
+            typeof requirement.value === 'string' &&
+            isFixedWorkshopAttendanceToken(requirement.value) &&
+            assignedPersonIds.has(requirement.holder_id),
+        )
+        .flatMap((requirement) => {
+          const token = requirement.value!
+          const workshopId = fixedWorkshopIdFromToken(requirement.holder_id, token)
+          return workshopId
+            ? [{ person_id: requirement.holder_id, workshop_id: workshopId, token }]
+            : []
+        })
         .sort(
           (a, b) =>
             a.person_id.localeCompare(b.person_id) || a.workshop_id.localeCompare(b.workshop_id),
         )
+      const fixedDecisions = fixed.map(({ person_id, workshop_id }) => ({ person_id, workshop_id }))
       const fixedViolations: WorkshopFixedViolation[] = []
       for (const decision of fixed) {
         const workshop = workshops.get(decision.workshop_id)
         if (!workshop) {
-          fixedViolations.push({ ...decision, reasons: ['hard.cancellation'] })
+          fixedViolations.push({
+            person_id: decision.person_id,
+            workshop_id: decision.workshop_id,
+            reasons: ['hard.cancellation'],
+          })
           continue
         }
-        if (!place(decision.person_id, workshop, null, 'fixed')) {
-          const reason = rejectionReason(decision.person_id, workshop) ?? 'hard.capacity'
-          fixedViolations.push({ ...decision, reasons: [reason] })
+        if (!activeWorkshops.has(workshop.id)) {
+          fixedViolations.push({
+            person_id: decision.person_id,
+            workshop_id: decision.workshop_id,
+            reasons: ['hard.cancellation'],
+          })
+          continue
         }
+        if (!input.capabilities.get(workshop.id)?.has(decision.token)) {
+          fixedViolations.push({
+            person_id: decision.person_id,
+            workshop_id: decision.workshop_id,
+            reasons: ['hard.fixed-pair-unresolved'],
+          })
+          continue
+        }
+        const placement = placements.get(workshop.id)
+        if (!placement) {
+          fixedViolations.push({
+            person_id: decision.person_id,
+            workshop_id: decision.workshop_id,
+            reasons: ['hard.unscheduled'],
+          })
+          continue
+        }
+        const reasons: string[] = []
+        if (workshop.mode !== 'assigned') reasons.push('hard.mode-not-assigned')
+        if (leaderSlots.get(decision.person_id)?.has(placement.slot_id))
+          reasons.push('hard.leader-conflict')
+        if (
+          workshopEligibilityFailure(
+            {
+              age: ageByPerson.get(decision.person_id) ?? null,
+              role: roleByPerson.get(decision.person_id),
+            },
+            workshop,
+          )
+        )
+          reasons.push('hard.eligibility')
+        if ((counts.get(workshop.id) ?? 0) >= workshop.capacity) reasons.push('hard.capacity')
+        if (usedBySlot.get(placement.slot_id)?.has(decision.person_id)) reasons.push('hard.overlap')
+        if ((assignedCount.get(decision.person_id) ?? 0) >= params.workshops_per_person)
+          reasons.push('policy.target-reached')
+        recordAssignment(decision.person_id, workshop, placement.slot_id, null, 'fixed')
+        if (reasons.length)
+          fixedViolations.push({
+            person_id: decision.person_id,
+            workshop_id: decision.workshop_id,
+            reasons,
+          })
       }
 
       const fixedChoiceKeys = new Set<string>()
@@ -348,7 +428,24 @@ function assignmentStage(
         ? assignmentStage(params, false).run(
             {
               ...input,
-              labels: input.labels.filter((label) => label.key !== 'workshop-attendance'),
+              labels: input.labels.filter(
+                (label) =>
+                  !['needs', 'provides'].includes(label.key) ||
+                  typeof label.value !== 'string' ||
+                  !isFixedWorkshopAttendanceToken(label.value),
+              ),
+              requirements: input.requirements.filter(
+                (requirement) =>
+                  requirement.kind !== 'generic-needs' ||
+                  typeof requirement.value !== 'string' ||
+                  !isFixedWorkshopAttendanceToken(requirement.value),
+              ),
+              capabilities: new Map(
+                [...input.capabilities].map(([entityId, values]) => [
+                  entityId,
+                  new Set([...values].filter((value) => !isFixedWorkshopAttendanceToken(value))),
+                ]),
+              ),
             },
             Object.assign({}, upstream, {
               ['workshop-scheduling.placement']: {
@@ -374,7 +471,7 @@ function assignmentStage(
           automatic_unassigned: automaticOnly?.unassigned ?? unassigned,
           signups,
           interests,
-          fixed: Object.freeze(fixed),
+          fixed: Object.freeze(fixedDecisions),
           fixed_violations: Object.freeze(fixedViolations),
         },
         trace,

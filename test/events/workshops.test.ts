@@ -5,6 +5,7 @@ import type { Event, JsonValue } from '../../src/events/types.js'
 import { prepareEventBatch } from '../../src/events/prepare.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
 import {
+  fixedWorkshopAttendanceToken,
   officialWorkshops,
   officialWorkshopsWorld,
 } from '../../src/modules/official-workshops/index.js'
@@ -241,7 +242,28 @@ describe('workshop domain events', () => {
         },
         7,
       ),
-      event('WorkshopAttendanceFixed', { person_id: 'per_a', workshop_ids: ['wks_ceramics'] }, 8),
+      event(
+        'LabelSet',
+        {
+          entity_id: 'per_a',
+          key: 'needs',
+          value: fixedWorkshopAttendanceToken('per_a', 'wks_ceramics'),
+          strength: 'required',
+          note: null,
+        },
+        8,
+      ),
+      event(
+        'LabelSet',
+        {
+          entity_id: 'wks_ceramics',
+          key: 'provides',
+          value: fixedWorkshopAttendanceToken('per_a', 'wks_ceramics'),
+          strength: null,
+          note: null,
+        },
+        9,
+      ),
       event(
         'LabelSet',
         {
@@ -251,7 +273,7 @@ describe('workshop domain events', () => {
           strength: null,
           note: null,
         },
-        9,
+        10,
       ),
       event(
         'LabelSet',
@@ -262,14 +284,14 @@ describe('workshop domain events', () => {
           strength: null,
           note: null,
         },
-        10,
+        11,
       ),
     ]
     const before = derive(committed, profile.validation_view)
     const retirement = event(
       'WorkshopRetired',
       { workshop_id: 'wks_ceramics', reason: 'Entfernt' },
-      11,
+      12,
     )
     const { world: after, events: appended } = prepareEventBatch(
       committed,
@@ -456,111 +478,78 @@ describe('workshop domain events', () => {
     personEvents.length + 1,
   )
 
-  test('records a fixed attendance decision as a workshop-attendance label', () => {
+  test('records fixed attendance as paired generic need and capability labels', () => {
+    const token = fixedWorkshopAttendanceToken('per_a', 'wks_ceramics')
     const world = derive(
       [
         ...personEvents,
         event(
-          'WorkshopAttendanceFixed',
-          { person_id: 'per_a', workshop_ids: ['wks_ceramics'] },
+          'LabelSet',
+          { entity_id: 'per_a', key: 'needs', value: token, strength: 'required', note: null },
           personEvents.length + 1,
+        ),
+        event(
+          'LabelSet',
+          { entity_id: 'wks_ceramics', key: 'provides', value: token, strength: null, note: null },
+          personEvents.length + 2,
         ),
       ],
       profile.validation_view,
     )
     expect(world.labels_by_entity['per_a']).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ key: 'workshop-attendance', value: 'wks_ceramics' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ key: 'needs', value: token })]),
+    )
+    expect(world.labels_by_entity['wks_ceramics']).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'provides', value: token })]),
     )
   })
 
-  test('full-restatement replaces the previous fixed set and an empty array clears it', () => {
+  test('fixed workshop decisions are independent and clear through their paired labels', () => {
+    const ceramics = fixedWorkshopAttendanceToken('per_a', 'wks_ceramics')
+    const painting = fixedWorkshopAttendanceToken('per_a', 'wks_painting')
     const withTwoFixed = [
       ...personEvents,
       secondWorkshop,
       event(
-        'WorkshopAttendanceFixed',
-        { person_id: 'per_a', workshop_ids: ['wks_ceramics', 'wks_painting'] },
+        'LabelSet',
+        { entity_id: 'per_a', key: 'needs', value: ceramics, strength: 'required', note: null },
         secondWorkshop.seq + 1,
       ),
+      event(
+        'LabelSet',
+        { entity_id: 'wks_ceramics', key: 'provides', value: ceramics, strength: null, note: null },
+        secondWorkshop.seq + 2,
+      ),
+      event(
+        'LabelSet',
+        { entity_id: 'per_a', key: 'needs', value: painting, strength: 'required', note: null },
+        secondWorkshop.seq + 3,
+      ),
+      event(
+        'LabelSet',
+        { entity_id: 'wks_painting', key: 'provides', value: painting, strength: null, note: null },
+        secondWorkshop.seq + 4,
+      ),
     ]
-    const worldWithBoth = derive(withTwoFixed, profile.validation_view)
-    expect(
-      worldWithBoth.labels_by_entity['per_a']?.filter(({ key }) => key === 'workshop-attendance'),
-    ).toHaveLength(2)
-
-    const nextSeq = withTwoFixed.length + 1
-    const worldRestated = derive(
+    const nextSeq = secondWorkshop.seq + 5
+    const worldCleared = derive(
       [
         ...withTwoFixed,
+        event('LabelCleared', { entity_id: 'per_a', key: 'needs', value: ceramics }, nextSeq),
         event(
-          'WorkshopAttendanceFixed',
-          { person_id: 'per_a', workshop_ids: ['wks_painting'] },
-          nextSeq,
+          'LabelCleared',
+          { entity_id: 'wks_ceramics', key: 'provides', value: ceramics },
+          nextSeq + 1,
         ),
       ],
       profile.validation_view,
     )
+    expect(worldCleared.labels_by_entity['per_a']?.filter(({ key }) => key === 'needs')).toEqual([
+      expect.objectContaining({ value: painting }),
+    ])
     expect(
-      worldRestated.labels_by_entity['per_a']?.filter(({ key }) => key === 'workshop-attendance'),
-    ).toEqual([expect.objectContaining({ value: 'wks_painting' })])
-
-    const worldCleared = derive(
-      [
-        ...withTwoFixed,
-        event('WorkshopAttendanceFixed', { person_id: 'per_a', workshop_ids: [] }, nextSeq),
-      ],
-      profile.validation_view,
-    )
-    expect(
-      worldCleared.labels_by_entity['per_a']?.filter(({ key }) => key === 'workshop-attendance'),
+      worldCleared.labels_by_entity['wks_ceramics']?.filter(({ key }) => key === 'provides'),
     ).toHaveLength(0)
-  })
-
-  test('rejects a fixed decision for an unknown person or workshop', () => {
-    expect(() =>
-      derive(
-        [
-          ...personEvents,
-          event(
-            'WorkshopAttendanceFixed',
-            { person_id: 'per_unknown', workshop_ids: ['wks_ceramics'] },
-            personEvents.length + 1,
-          ),
-        ],
-        profile.validation_view,
-      ),
-    ).toThrow(/unknown person/)
-    expect(() =>
-      derive(
-        [
-          ...personEvents,
-          event(
-            'WorkshopAttendanceFixed',
-            { person_id: 'per_a', workshop_ids: ['wks_missing'] },
-            personEvents.length + 1,
-          ),
-        ],
-        profile.validation_view,
-      ),
-    ).toThrow(/unknown workshop/)
-  })
-
-  test('rejects duplicate workshop ids in one fixed decision', () => {
-    expect(() =>
-      derive(
-        [
-          ...personEvents,
-          event(
-            'WorkshopAttendanceFixed',
-            { person_id: 'per_a', workshop_ids: ['wks_ceramics', 'wks_ceramics'] },
-            personEvents.length + 1,
-          ),
-        ],
-        profile.validation_view,
-      ),
-    ).toThrow(/duplicate workshop/)
   })
 
   test('WorkshopAdded defaults leader_ids and needs to empty when omitted', () => {
