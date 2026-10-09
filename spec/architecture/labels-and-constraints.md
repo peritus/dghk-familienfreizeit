@@ -245,6 +245,14 @@ rules at runtime (D11–D12). Notes are available in the derived organiser views
 history, but are excluded from solver input. Trace entries identify the source
 labels so those views can display the optional note and event attribution.
 
+Fixed-choice behavior is owned by the module that consumes the decision. The
+application has no core `FixedDecision` entity or resolver operator. A module may
+represent one fixed choice with a namespaced required `needs` value on the holder
+and the matching `provides` value on its target. The resolver only returns the
+ordinary match; the module decides which feasibility checks that choice overrides
+and reports every resulting conflict. A fixed choice does not recreate an entity
+that its owning module has retired or otherwise removed.
+
 ### Free-form matching values
 
 An organiser may supply a new matching value without adding vocabulary or deploying

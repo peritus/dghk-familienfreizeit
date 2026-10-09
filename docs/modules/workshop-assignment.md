@@ -4,9 +4,9 @@ Attendance assignment consumes the derived current-cycle demand, one-placement
 schedule, workshop modes, person roles, capacities, and profile configuration.
 Under [D31](../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops),
 automatic assigned-mode attendance is limited to a person's current ranked
-choices; fixed and ranked assignments are the valid origins. Sign-up and
-interest lists remain separate outputs and are not
-converted into automatic assignments.
+choices and shared age/audience eligibility; fixed assignments are the explicit
+organizer-authored exception. Sign-up and interest lists remain separate outputs
+and are not converted into automatic assignments.
 
 The active profile accepts three ranked choices and targets up to two automatic
 workshops per person.
@@ -16,29 +16,33 @@ round snapshots, and explainable traces.
 
 ## Verified business logic
 
-- An organiser's `WorkshopAttendanceFixed` decision (written on
-  [official workshops](official-workshops.md)'s `workshop-attendance` label)
-  is applied first, ahead of every automatic outcome, so it always claims its
-  capacity and slot occupancy before ranking rounds run.
-- An infeasible fixed decision (cancelled or unknown workshop, wrong
-  audience/role, leader conflict, full capacity, or a same-slot conflict with
-  another fixed decision) never throws and is never silently dropped — it is
-  recorded in `fixed_violations` with its reason and reported as a
-  `workshop-assignment.fixed-invalid` diagnostic.
+- Normal family choices and ranked assignment use the same eligibility helper:
+  age bounds are inclusive, age must be known, infants are excluded, and role
+  restrictions for child and adult audiences apply. An ineligible choice is
+  unavailable in the family chooser and rejected by automatic assignment.
+- A fixed person-to-workshop decision is represented by a required generic
+  `needs` label on the person paired with a matching `provides` label on the
+  workshop. The workshop-assignment module interprets its namespaced tokens and
+  applies those decisions before ranked choices.
+- A valid fixed decision remains assigned despite age or audience/role mismatch,
+  participation mode, leader conflict, capacity, same-slot overlap, or the
+  automatic per-person limit. It claims capacity and slot occupancy before
+  ranking rounds run, and every conflict is retained in `fixed_violations` and
+  reported as a `workshop-assignment.fixed-invalid` diagnostic.
+- A missing, retired, or cancelled workshop, an unresolved label pair, or a
+  workshop without a scheduled placement cannot produce attendance. The decision
+  remains reviewable where its labels survive and receives a corresponding
+  finding; fixed attendance does not restore removed entities.
 - Each Wahlrunde processes the corresponding rank for every person in stable
   order. A successful earlier-round assignment is never displaced by a later
   round; a person without a feasible ranked choice remains unassigned.
 
-The allocation review shows each fixed attendance decision beside the automatic
-counterfactual produced from the same current derived input. It labels decisions
-that are unchanged, replace an automatic choice, have no automatic counterpart,
-or are invalid. The projection is read-only and is recalculated for prospective
+The allocation screen lets organisers add and clear a fixed attendance pair.
+Its review shows each fixed decision beside the automatic counterfactual
+produced from the same current derived input. It labels decisions that are
+unchanged, replace an automatic choice, have no automatic counterpart, or have
+conflicts. The projection and conflict review recalculate for prospective
 local-first organiser drafts.
-
-The event model accepts `WorkshopAttendanceFixed`, but no organiser screen control
-currently authors or clears that event. The review shows decisions already
-present in the world. Whether a UI authoring control is required remains under
-[investigation](../../spec/issues/open/050-workshop-fixed-decision-authoring.md).
 
 ## Closing the workshop area
 

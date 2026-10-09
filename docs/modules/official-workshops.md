@@ -35,21 +35,22 @@ labelled cancellation-history view; that organiser surface is
 Retiring a workshop removes it from the live world; historical views replay the
 earlier event prefix when needed.
 
-Capacity reductions that would put live sign-ups or recorded attendance above the
-new capacity are rejected outright, per D30. No participant is silently
-evicted by a workshop edit. External leader contact labels are restricted to
-organiser projections.
+Capacity reductions that would put live sign-ups or matched fixed-attendance
+`needs`/`provides` pairs above the new capacity are rejected outright, per D30.
+Attendance is counted by person, so a sign-up and fixed decision for the same
+person do not count twice. No participant is silently evicted by a workshop edit.
+External leader contact labels are restricted to organiser projections.
 
-The event model supports fixed person-to-workshop attendance through
-`WorkshopAttendanceFixed`, a full restatement of the person's fixed workshop
-set (an empty set clears it) that writes the person-scoped `workshop-attendance`
-label. The current organiser UI reviews fixed attendance but provides no control
-to author or clear it; whether that control is in scope is under
-[investigation](../../spec/issues/open/050-workshop-fixed-decision-authoring.md).
-Append validation only checks that the person and every workshop exist;
-[workshop attendance](workshop-assignment.md) evaluates whether the decision is
-actually feasible and reports an infeasible one as a solver diagnostic rather
-than a rejected event.
+Organisers author fixed person-to-workshop attendance on the allocation screen.
+Each decision writes a required `needs` label on the person and a matching
+`provides` label on the workshop, using a stable token scoped to that pair. The
+resolver continues to treat these as generic labels; workshop assignment
+interprets its tokens as fixed attendance. The same screen can clear both labels.
+Age and audience rules still govern family choices and ranked assignment;
+fixed attendance can override those and other assignment checks. The solver
+keeps the decision and reports its conflicts. A retired or cancelled workshop
+or an active workshop without a scheduled placement cannot produce an attendance
+assignment.
 
 The module exposes typed summaries to scheduling, rankings, attendance, reports,
 and the organiser UI. It does not persist a folded summary or an independent

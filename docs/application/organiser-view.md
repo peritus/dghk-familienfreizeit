@@ -23,7 +23,7 @@ path before persistence.
 | `/organiser/workshops/participation` | Read-only responsive person-by-slot matrix with linked wish traces |
 | `/organiser/workshops/slots` | Event-backed slot creation, editing, and retirement with overlap validation |
 | `/organiser/workshops/spaces` | Physical workshop-space inventory and schedule-aware availability context |
-| `/organiser/workshops/allocation` | Workshop allocation answers (**Wünsche · Antworten**) |
+| `/organiser/workshops/allocation` | Workshop allocation answers and fixed-attendance controls (**Wünsche · Antworten**) |
 | `/organiser/workshops/allocation/demand` | Workshop allocation demand (**Wünsche · Nachfrage**) |
 | `/organiser/workshops/allocation/trace` | Workshop allocation trace (**Wünsche · Verlauf**) |
 | `/organiser/workshops/lists/workshops` | Selected workshop roster with placement, leaders, capacity, and confidential operational fields |
@@ -130,7 +130,9 @@ views:
   to three ranked wishes with reorder/remove actions, and separates assigned,
   sign-up, and interest sections. The finder provides search, unsuitable-item
   visibility, eligibility reasons, age/audience badges, capacity, and the
-  corresponding ordinary label events.
+  corresponding ordinary label events. Normal choices require a known age
+  inside the inclusive workshop band, exclude infants, and enforce audience
+  roles.
 
 All four views preserve the shared shell, URL-backed topic selection, accessible
 tabs, empty states, and responsive narrow layout. Prototype-only save-failure
@@ -160,10 +162,15 @@ placement per workshop. The programme review derives one slot and one physical
 space per workshop and keeps unscheduled workshops visible with a reason; its cells
 show the actual day, mark fixed placements, and compare them with the automatic-only
 counterfactual. Invalid fixed placements remain visible as blocking findings and do
-not fall back silently. The allocation review applies the same shared comparison
-to fixed attendance decisions, so organisers can see whether a fixed choice is
-unchanged, overrides an automatic choice, has no automatic counterpart, or is
-invalid. Both comparisons are derived from the current prospective world.
+not fall back silently. The allocation view lets organisers fix a person to any
+active workshop and clear that decision. It writes a required `needs` label on
+the person and matching `provides` label on the workshop. These fixed decisions
+stay assigned across age, audience/role, participation-mode, capacity, overlap,
+leader, and automatic per-person-limit conflicts; the review reports each
+conflict. Cancelled, removed, and unscheduled workshops do not produce
+attendance. The comparison shows whether each fixed choice is unchanged,
+overrides an automatic choice, has no automatic counterpart, or has conflicts.
+The editor and comparison use the current prospective world.
 Slots derive occupancy counts, reject client-visible reversed/overlapping edits before
 staging, and use the shared confirmation dialog for retirement. Space cards preserve
 profile-derived capabilities and readable blocked-slot labels; capability editing is
@@ -241,13 +248,13 @@ There is no in-app print, download, or export action.
 
 The active profile contains the kernel `role` trait, accommodation modules, the
 profile-driven organiser family controls, and the workshop planning modules.
-Assignment review, the narrow event-backed fixed-assignment workflow, opening
-workshop choice, and closing and reopening both areas are implemented. Family
+Assignment review, fixed workshop attendance controls, opening workshop choice,
+and closing and reopening both areas are implemented. Family
 magic-link authentication and the minimal family principal endpoint are also
 implemented; the family-facing application and full family view of closed results
-remain later scope. Workshop fixed attendance and placement decisions are
-supported by the event model and read-only review, but the organiser UI has no
-controls to author or clear them; the scope question is tracked in
+remain later scope. Fixed attendance is authored as an ordinary `needs`/`provides`
+label pair and can be reviewed and cleared in allocation. Fixed workshop
+placement still has no authoring controls; that follow-up is tracked in
 [issue 050](../../spec/issues/open/050-workshop-fixed-decision-authoring.md).
 Non-workshop generic reports, plan comparison, and change notifications remain
 later scope.

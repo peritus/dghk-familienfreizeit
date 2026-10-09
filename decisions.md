@@ -120,6 +120,13 @@ resolver mechanisms include `needs`, `provides`, `excludes`, separation, and wor
 eligibility. Grouping for sleeping placement belongs to
 the separate sleeping-parties module.
 
+The module that owns an assignment target defines how its fixed decisions are
+represented and which feasibility checks they override. There is no core
+`FixedDecision` entity or module. A module may interpret a namespaced
+`needs`/`provides` pair as an authoritative choice and still report the conflicts
+it overrides. A fixed decision does not create or restore an entity excluded by
+that module's lifecycle.
+
 *Rejected alternative:* the board writes assignments directly. Then every re-run
 either destroys organiser work or requires merge logic, and the solver stops being
 the single writer of assignments.
@@ -744,7 +751,8 @@ the removed surname; new examples follow the same neutral-identity rule.
 ## D30 — Workshop capacity reduction blocks, never displaces
 
 *Chosen.* Reducing a workshop's capacity below its current attendance (solver
-assignments, live sign-ups, or fixed attendance decisions) is rejected outright.
+assignments, live sign-ups, or matched fixed-attendance `needs`/`provides` pairs)
+is rejected outright.
 Existing attendance names are preserved unchanged; the workshop simply stays
 over its nominal capacity until the organiser either raises capacity back up or
 removes attendees through the ordinary attendance/sign-up path. No recomputation,
@@ -774,8 +782,11 @@ correct-looking number. This closes [issue 036](spec/issues/archived/036-worksho
 person's current-cycle `prefers-workshop` ranking. A missing response, an
 explicit lack of preference, a blocked or exhausted ranking, and a
 `minimum_workshops` target never authorize assigning an unchosen workshop.
-Explicit organiser-authored `workshop-attendance` decisions remain the fixed
-exception defined by D6; they are decisions, not automatic filling.
+Explicit organiser-authored fixed attendance decisions remain the exception
+defined by D6, represented as matched `needs`/`provides` labels; they are
+decisions, not automatic filling. Normal ranked assignment still requires a
+chosen, age- and audience-eligible workshop. A fixed organizer decision may
+override assignment feasibility checks while its conflicts remain visible.
 
 *Why:* attendance communicates a person's programme, so an unchosen workshop
 must not be presented as if the person had selected it. A minimum target can
@@ -793,5 +804,5 @@ different role-based filling would preserve the underlying agency violation.
 *Consequence:* the solver, prototypes, projections, and review surfaces have
 no implicit fill outcomes. If ranked choices cannot produce an assignment, the
 person remains unassigned and the rejected choices remain explainable in the
-trace. Explicit organiser-authored `workshop-attendance` decisions remain the
-only non-ranking exception.
+trace. An organizer's explicit fixed workshop decision remains the only
+non-ranking attendance exception.
