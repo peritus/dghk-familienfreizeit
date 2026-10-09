@@ -1,9 +1,11 @@
+import type { AttentionItem } from '../../attention/types.js'
 import { deriveDraftWorld } from '../../events/world.js'
 import type { KernelConfig } from '../../events/fold.js'
 import type { Event, EventDraft } from '../../events/types.js'
 import type { FeatureOverride } from '../../derive/features.js'
 
 export type DraftBatch = {
+  id?: string
   events: readonly EventDraft[]
 }
 
@@ -20,6 +22,9 @@ export type OrganiserStatus =
   | 'error'
 
 export type OrganiserState = {
+  next_group_id?: number
+  submitted_groups?: readonly string[]
+  attention_errors?: readonly AttentionItem[]
   /** Browser-session UI metadata; absent until this session successfully saves. */
   last_saved_at?: string
   committed: readonly Event[]
@@ -58,6 +63,8 @@ export type OrganiserAction =
       principal_email: string
     }
   | { type: 'stage'; events: readonly EventDraft[] }
+  | { type: 'discard-group'; group_id: string }
+  | { type: 'replace-group'; group_id: string; events: readonly EventDraft[] }
   | { type: 'toggle_drafting' }
   | { type: 'discard' }
   | { type: 'applying' }
@@ -67,6 +74,7 @@ export type OrganiserAction =
       type: 'failed'
       status: Exclude<OrganiserStatus, 'loading' | 'ready' | 'applying'>
       error: string
+      findings?: readonly AttentionItem[]
     }
 
 export function organiserReducer(state: OrganiserState, action: OrganiserAction): OrganiserState {
@@ -87,16 +95,22 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         error: null,
       }
     case 'stage':
-      return { ...state, drafts: [...state.drafts, { events: action.events }], error: null }
+      return { ...state, next_group_id:(state.next_group_id??1)+1, drafts: [...state.drafts, { id:`group-${state.next_group_id??1}`, events: action.events }], error: null, attention_errors:[] }
+    case 'discard-group':
+    case 'replace-group': {
+      if(state.submitted_groups?.includes(action.group_id))return state
+      const drafts=state.drafts.flatMap(group=>group.id!==action.group_id?[group]:action.type==='replace-group'?[{...group,events:action.events}]:[])
+      return {...state,drafts,change_mode:drafts.length?'drafting':'immediate',error:null,attention_errors:[]}
+    }
     case 'toggle_drafting':
       if (state.change_mode === 'drafting') {
         return draftCount(state) === 0 ? { ...state, change_mode: 'immediate' } : state
       }
       return { ...state, change_mode: 'drafting' }
     case 'discard':
-      return { ...state, drafts: [], change_mode: 'immediate', error: null }
+      return state.status==='applying' ? state : { ...state, drafts: [], change_mode: 'immediate', error: null, attention_errors:[] }
     case 'applying':
-      return { ...state, status: 'applying', error: null }
+      return { ...state, status: 'applying', error: null, submitted_groups:state.drafts.flatMap(g=>g.id?[g.id]:[]) }
     case 'applied': {
       const drafts = removeDraftEvents(state.drafts, action.count)
       return {
@@ -108,6 +122,8 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         head_seq: state.head_seq + action.events.length,
         status: 'ready',
         error: null,
+        submitted_groups:[],
+        attention_errors:[],
       }
     }
     case 'rebased':
@@ -124,6 +140,8 @@ export function organiserReducer(state: OrganiserState, action: OrganiserAction)
         ...state,
         change_mode: 'drafting',
         status: action.status,
+        submitted_groups:[],
+        attention_errors:action.findings??[],
         error: action.error,
       }
   }
@@ -148,6 +166,7 @@ export function draftCount(state: OrganiserState): number {
 
 export type SaveStatusView =
   | { kind: 'saved' }
+  | { kind: 'saving' }
   | { kind: 'draft-empty' }
   | { kind: 'draft-pending'; count: number }
   | { kind: 'failed' }
@@ -161,6 +180,8 @@ export type SaveStatusView =
  * "failed" only ever reflects a save problem, never a load problem.
  */
 export function saveStatusView(state: OrganiserState): SaveStatusView {
+  if (state.status === 'applying') return {kind:'saving'}
+  if (draftCount(state)>0 && state.change_mode==='immediate')return {kind:'draft-pending',count:draftCount(state)}
   if (state.status === 'error' || state.status === 'stale_head') return { kind: 'failed' }
   if (state.change_mode === 'drafting') {
     const count = draftCount(state)
@@ -181,7 +202,7 @@ function removeDraftEvents(drafts: readonly DraftBatch[], count: number): readon
       remaining -= action.events.length
       continue
     }
-    result.push({ events: action.events.slice(remaining) })
+    result.push({ ...action, events: action.events.slice(remaining) })
     remaining = 0
   }
   return result

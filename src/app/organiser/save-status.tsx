@@ -47,6 +47,8 @@ export function SaveStatus() {
 
   const ariaLabel = (() => {
     switch (view.kind) {
+      case 'saving':
+        return 'Änderungen werden gespeichert. Details anzeigen'
       case 'saved':
         return 'Alles gespeichert. Speicheroptionen anzeigen'
       case 'draft-empty':
@@ -139,6 +141,8 @@ export function SaveStatus() {
     }
 
     switch (view.kind) {
+      case 'saving':
+        return <Popover.Title>Änderungen werden gespeichert …</Popover.Title>
       case 'saved':
         return (
           <div className="space-y-5">
@@ -233,6 +237,7 @@ export function SaveStatus() {
           <Icon aria-hidden="true" className="size-5" />
           <span className="pointer-events-none">
             {view.kind === 'saved' && 'Gespeichert'}
+            {view.kind === 'saving' && 'Wird gespeichert …'}
             {view.kind === 'draft-empty' && 'Entwurfsmodus'}
             {view.kind === 'draft-pending' && (
               <span className="hidden sm:inline">Nicht gespeichert</span>

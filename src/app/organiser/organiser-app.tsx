@@ -1,6 +1,6 @@
 import { closedResults } from '../../config/phases.js'
 import { profileAttention } from '../../attention/profile.js'
-import { admitProfileProposal } from '../../organiser/proposal.js'
+import { admitProfileProposal, CapacityReductionError, capacityReductionFinding } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { ErrorState } from '../components/shared/ui/screen-state.js'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from 'react'
@@ -177,13 +177,14 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       return { world: null, error: null }
     try {
       return { world: admitProfileProposal(state.committed, materializeDraftEvents(state), activeProfile, { build_revision: state.build_revision ?? buildRevision, compatibility_revision: state.compatibility_revision ?? compatibilityRevision }).world, error: null }
-    } catch {
+    } catch (error) {
       return {
+        failure: error instanceof CapacityReductionError ? capacityReductionFinding(error,activeProfile,state.build_revision??buildRevision,new Date().toISOString()) : null,
         world: null,
         error: 'Die geplanten Änderungen können so nicht geprüft werden.',
       }
     }
-  }, [state])
+  }, [state.committed,state.drafts,state.build_revision,state.compatibility_revision,state.status === 'loading',state.status === 'unauthorized',state.status === 'load_error'])
 
   const currentPlan = useMemo(() => {
     if (
@@ -203,7 +204,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       profile: activeProfile,
       seed: null,
     })
-  }, [derivation.world, state])
+  }, [derivation.world, state.build_revision,state.compatibility_revision])
 
   const phaseStatus = useMemo(
     () =>
@@ -235,7 +236,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
   )
 
   const closedChanges=useMemo(()=>derivation.world&&currentPlan?[...closedResults(activeProfile.modules).values()].flatMap(contribution=>{const facts=derivation.world!.phase_facts.areas[contribution.area];const closing=facts?.closings.at(-1);if(!closing)return [];const difference=contribution.compare(closing.payload,contribution.compute({world:derivation.world!,plan:currentPlan}),derivation.world!);return [{area:contribution.area,seq:closing.seq,closed:facts.latest?.kind==='closed',changes:difference.changes.map(c=>({...c})),family_ids:difference.affected_family_ids}]}):[],[derivation.world,currentPlan])
-  const attention=useMemo(()=>evaluateAttention({closed_changes:closedChanges,domain:derivation.world?'available':state.status==='loading'?'loading':'invalid-proposal',world:derivation.world,plan:currentPlan,profile:activeProfile,build_revision:state.build_revision??buildRevision,locale:activeProfile.meta.locale,now,audience:'organiser',effective_features:effectiveFeatures,basis:{mode:state.drafts.length?'prospective':'committed',group_ids:[]}}),[derivation.world,currentPlan,state.build_revision,state.drafts.length,state.status,effectiveFeatures,now,closedChanges])
+  const attention=useMemo(()=>evaluateAttention({operations:[{id:'organiser-session',code:state.status==='applying'?'saving':state.status==='stale_head'?'stale-head':state.status==='stale_build'?'stale-build':state.status==='error'?'apply-failed':state.drafts.length?'drafts':'saved'}],rejected_findings:[...(state.attention_errors??[]),...(derivation.failure?[derivation.failure]:[])],closed_changes:closedChanges,domain:derivation.world?'available':state.status==='loading'?'loading':'invalid-proposal',world:derivation.world,plan:currentPlan,profile:activeProfile,build_revision:state.build_revision??buildRevision,locale:activeProfile.meta.locale,now,audience:'organiser',effective_features:effectiveFeatures,basis:{mode:state.drafts.length?'prospective':'committed',group_ids:state.drafts.flatMap(g=>g.id?[g.id]:[])}}),[derivation.world,currentPlan,state.build_revision,state.drafts.length,state.status,state.attention_errors,state.drafts,effectiveFeatures,now,closedChanges])
   const phaseView=useMemo(()=>derivation.world?derivePhaseView({world:derivation.world,modules:activeProfile.modules,meta:activeProfile.meta,plan:currentPlan,now,attention}):[],[derivation.world,currentPlan,now,attention])
 
   const apply = useCallback(async () => {
@@ -286,6 +287,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       }
       dispatch({
         type: 'failed',
+        findings: error instanceof OrganiserApiError && Array.isArray(error.body.findings) ? error.body.findings as import('../../attention/types.js').AttentionItem[] : [],
         status: 'error',
         error: 'Die Änderungsentwürfe konnten nicht angewendet werden.',
       })

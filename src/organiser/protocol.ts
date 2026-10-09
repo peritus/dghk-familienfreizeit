@@ -1,3 +1,4 @@
+import type { AttentionItem } from '../attention/types.js'
 import type { FeatureOverride } from '../derive/features.js'
 import type { World } from '../events/fold.js'
 import type { Event, EventPayloadSchemas, JsonValue } from '../events/types.js'
@@ -58,3 +59,6 @@ export type OrganiserRevisionResponse = {
 export type OrganiserProtocolConfig = {
   event_payload_schemas?: EventPayloadSchemas
 }
+
+/** Sanitized domain failures; no exception text, stacks, or event payloads. */
+export type OrganiserAttentionFailure = { error: 'attention_required'; findings: readonly AttentionItem[] }

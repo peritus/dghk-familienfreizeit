@@ -1,3 +1,5 @@
+import { capacityReductionCheck } from '../modules/official-workshops/attention.js'
+import { composeAttention } from '../attention/engine.js'
 import type { OccasionProfile } from '../config/define.js'
 import { derive, type World } from '../events/fold.js'
 import { prepareEventBatch } from '../events/prepare.js'
@@ -45,4 +47,8 @@ function currentAttendance(world:World,plan:Plan,id:string){
  const provided=new Set((world.labels_by_entity[id]??[]).filter(l=>l.key==='provides').map(l=>l.value))
  for(const l of world.labels_by_key.needs??[])if(world.entity_kind_by_id[l.entity_id]==='person'&&typeof l.value==='string'&&fixedWorkshopIdFromToken(l.entity_id,l.value)===id&&provided.has(l.value))people.add(l.entity_id)
  return people.size
+}
+
+export function capacityReductionFinding(error:CapacityReductionError,profile:OccasionProfile,build:string,now:string) {
+ return composeAttention([capacityReductionCheck])({domain:'invalid-proposal',world:null,plan:null,profile,build_revision:build,locale:profile.meta.locale,now,audience:'organiser',capacity_rejections:[{workshop_id:error.workshop_id,capacity:error.capacity,attendance:error.attendance,attendance_changed:error.attendance_changed}]}).items[0]!
 }

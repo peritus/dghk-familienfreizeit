@@ -1,4 +1,4 @@
-import { admitProfileProposal, CapacityReductionError } from '../organiser/proposal.js'
+import { admitProfileProposal, CapacityReductionError, capacityReductionFinding } from '../organiser/proposal.js'
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
@@ -268,7 +268,7 @@ app.post('/api/organiser/apply', async (context) => {
       feature_overrides: featureBindings(context.env).overrides,
     })
   } catch (error) {
-    if (error instanceof CapacityReductionError) return context.json({ error: 'capacity_reduction_invalid', finding: { code: error.code, workshop_id: error.workshop_id, capacity: error.capacity, attendance: error.attendance, attendance_changed: error.attendance_changed } }, 409)
+    if (error instanceof CapacityReductionError) return context.json({ error: 'attention_required', findings:[capacityReductionFinding(error,activeProfile,buildRevision,new Date().toISOString())] }, 409)
     if (error instanceof WorkshopReviewRequiredError)
       return context.json({ error: 'workshop_review_required', findings: error.findings }, 409)
     if (error instanceof AreaNotReadyError)

@@ -35,7 +35,7 @@ export function composeAttention(core: readonly AttentionCheck[], modules: reado
   checks.sort((a, b) => compare(a.code, b.code))
   return (context: AttentionContext): AttentionResult => {
     if (context.audience !== 'organiser') return { items: [], coverage: checks.map(check => ({ code: check.code, owner: check.owner, state: 'not-applicable' })) }
-    const items = new Map<string, AttentionItem>()
+    const items = new Map<string, AttentionItem>((context.rejected_findings??[]).map(item=>[item.id,item]))
     const coverage: AttentionResult['coverage'][number][] = []
     for (const check of checks) {
       const available = check.requires.every(input => input === 'world'

@@ -11,7 +11,7 @@ import { buildSolverInput, composeSolverContributions, solve } from '../solver/i
 export class AreaNotReadyError extends Error {
   constructor(
     public readonly area: string,
-    public readonly findings: readonly FindingRef[],
+    public readonly findings: readonly AttentionItem[],
   ) {
     super(`area ${area} is not ready to close`)
   }
@@ -80,7 +80,7 @@ export function fillClosingPayloads(
     })
     const attention=profileAttention(profile)({domain:'available',world,plan,profile,build_revision:revisions.build_revision,locale:profile.meta.locale,now:draft.at,audience:'organiser'})
     const blockers=attentionBlockers(attention,area==='accommodation'?'close-accommodation':'close-workshops')
-    const findings=blockers.map(item=>({id:item.id,subject_id:item.subjects[0]?.id??null,message:item.wording.detail}))
+    const findings=blockers
     if (findings.length > 0) throw new AreaNotReadyError(area, findings)
     if (area === 'workshops') {
       const advisories=attention.items.filter(item=>item.acknowledgement!==null)
