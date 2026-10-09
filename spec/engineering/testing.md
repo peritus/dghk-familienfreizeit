@@ -128,7 +128,7 @@ test/fixtures/event-logs/
   constraint-heavy.kdl   many relations and organiser decisions
   infeasible.kdl         trips room-assignment.requirement-arithmetic
   workshop-spaces.kdl    workshop-space add/update/retire and capability facts
-  workshop-spaces-invalid.kdl  invalid capacity and overlapping windows
+  workshop-spaces-invalid.kdl  invalid workshop-space names and capacity
   workshop-lifecycle.kdl workshops, current-cycle rankings, placements, and attendance
   workshop-lifecycle-conflicted.kdl unscheduled workshops, fixed placements, and separation conflicts
 ```
@@ -301,14 +301,13 @@ Each module additionally ships contract tests and names the fixtures a profile
 selecting it must supply (module specification §12).
 
 The `workshop-space` contract tests cover add/update/retire replay, negative
-capacity, reversed and overlapping or touching availability windows, exclusion
-of retired spaces from `WorkshopSpaceInput`, resolver-backed capability output,
-and shuffle-invariant `sort_key`/id ordering. Workshop module contract tests cover
-eligibility-filtered current-cycle ranking before scheduling, deterministic demand
-summaries, proposer-selected deferred placement, fixed decisions, separation,
-unscheduled blocking outcomes, and attendance recomputation after a schedule
-change. Profile composition tests cover the official ranking/scheduling/attendance
-pipeline and the full
+capacity, exclusion of retired spaces from `WorkshopSpaceInput`, resolver-backed
+capability output, and shuffle-invariant `sort_key`/id ordering. Workshop module
+contract tests cover eligibility-filtered current-cycle ranking before scheduling,
+deterministic demand summaries, proposer-selected deferred placement, fixed
+decisions, per-slot space-block rejection, separation, unscheduled blocking
+outcomes, and attendance recomputation after a schedule change. Profile composition
+tests cover the official ranking/scheduling/attendance pipeline and the full
 Familienfreizeit profile with workshop spaces.
 
 ---

@@ -10,11 +10,13 @@ duration in minutes, then derives `ends_at` before staging the slot event.
 Workshop capacity belongs to workshops and physical capacity belongs to spaces.
 
 The automatic stage is deterministic. It checks slot ordering and overlap, space
-availability and capacity, explicit space-slot blocks, resolver capabilities, and
-leader conflicts, then chooses the first feasible slot/space candidate in stable
-order. Ranking demand summaries and co-selection do not affect placement. A
-workshop without a feasible placement remains visible in the programme review
-with an explainable unscheduled result.
+capacity, explicit space-slot blocks, resolver capabilities, and leader conflicts,
+then chooses the first feasible slot/space candidate in stable order. Per-slot
+blocks are the only way to mark a space unavailable. When an organiser creates a
+slot, its start defaults to the profile event's start date at 09:00. Ranking demand
+summaries and co-selection do not affect placement. A workshop without a feasible
+placement remains visible in the programme review with an explainable unscheduled
+result.
 
 Organisers maintain slots at `/organiser/workshops/slots` and review the programme
 at `/organiser/workshops/programme`. Its companion views are

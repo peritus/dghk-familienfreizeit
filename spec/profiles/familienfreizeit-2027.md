@@ -27,7 +27,7 @@ The active occasion selects these modules ([modules](../modules/contract.md) §5
 |---|---|
 | [`room-inventory`](../modules/room-inventory.md) | buildings, rooms, beds, places, and capacity |
 | [`room-assignment`](../modules/room-assignment.md) | deterministic placement, keep-apart relations, organiser board, and browser-printable assignment output |
-| [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, availability, ordering, and resolver capabilities |
+| [`workshop-space`](../modules/workshop-space.md) | physical workshop spaces, capacity, ordering, and resolver capabilities |
 | [`official-workshops`](../../docs/modules/official-workshops.md) | organiser-authored workshops, audience, participation modes, leaders, and cancellation |
 | [`workshop-scheduling`](../../docs/modules/workshop-scheduling.md) | event-backed slots and one placement per workshop |
 | [`workshop-rankings`](../modules/workshop-rankings.md) | current-cycle ordered per-person workshop rankings |
@@ -54,9 +54,10 @@ accommodation inventory. A workshop space is not a room, bed, place, or
 building, and no workshop event names an accommodation room.
 
 The organiser records each space's display name, location description, physical
-capacity, event-backed availability windows, and deterministic order. Generic
-resolver labels may describe capabilities such as `accessible` or `outdoor`
-without adding a profile-specific capability vocabulary. The active profile
+capacity, and deterministic order. Per-slot unavailability is represented by
+workshop-scheduling blocks. Generic resolver labels may describe capabilities
+such as `accessible` or `outdoor` without adding a profile-specific vocabulary.
+The active profile
 does not yet expose these physical facts to families; they reach families through
 the closed workshop result ([phases](../architecture/phases.md) §5).
 

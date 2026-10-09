@@ -11,8 +11,9 @@ host. Derive it from the selected module's current world; do not persist report
 state or add a second relationship lookup.
 
 The report includes live and retired spaces, their names and location descriptions,
-physical capacity, availability windows, ordering, and resolver-backed capabilities.
-Retired spaces remain distinguishable from spaces available to current scheduling.
+physical capacity, ordering, and resolver-backed capabilities. Per-slot blocks
+belong to workshop scheduling. Retired spaces remain distinguishable from spaces
+available to current scheduling.
 
 Acceptance: organisers can open and print the report through the M11 report host;
 it identifies the current data cut and does not present a retired space as an

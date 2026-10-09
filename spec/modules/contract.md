@@ -212,8 +212,8 @@ migration ([deployment](../engineering/deployment.md) §2).
 | [`official-workshops`](../../docs/modules/official-workshops.md) | Direct workshop identity, authoring facts, participation modes, leaders, and cancellation | — | — |
 | [`room-inventory`](room-inventory.md) | Buildings, rooms, beds, places; capacity | — | — |
 | [`room-assignment`](room-assignment.md) | Placing whole families into rooms and places; the board | `room-inventory` | — |
-| [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity, availability, and resolved capabilities | — | — |
-| [`workshop-scheduling`](../../docs/modules/workshop-scheduling.md) | Event-backed slots, one placement per workshop, and conflicts | `workshop-space`, `official-workshops` | — |
+| [`workshop-space`](workshop-space.md) | Typed workshop spaces; capacity and resolved capabilities | — | — |
+| [`workshop-scheduling`](../../docs/modules/workshop-scheduling.md) | Event-backed slots, one placement per workshop, per-slot space blocks, and conflicts | `workshop-space`, `official-workshops` | — |
 | [`workshop-rankings`](workshop-rankings.md) | Ordered current-cycle per-person workshop choices | `official-workshops` | — |
 | [`workshop-assignment`](workshop-assignment.md) | Fair workshop attendance assignment | `workshop-rankings`, `workshop-scheduling` | — |
 | [`family-preferences`](family-preferences.md) | The profile-driven preferences page | — | — |

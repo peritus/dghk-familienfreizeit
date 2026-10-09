@@ -2,12 +2,13 @@
 
 ## Audience, purpose, and route
 
-Organisers maintain physical workshop spaces and the schedule context that
-affects their availability. Route: `/organiser/workshops/spaces`.
+Organisers maintain physical workshop spaces and their per-slot availability.
+Route: `/organiser/workshops/spaces`.
 
 The view is not accommodation inventory. A workshop space is a typed physical
-entity with a name, location description, capacity, availability windows,
-resolver-backed capabilities, and deterministic order.
+entity with a name, location description, capacity, resolver-backed capabilities,
+and deterministic order. The entity has no availability date range; organisers
+block a space for each slot when it is unavailable.
 
 ## Controls
 
@@ -29,8 +30,8 @@ export action exists.
 
 ## Acceptance criteria
 
-- Invalid capacity, names, timestamps, reversed or overlapping windows fail at
-  append and replay.
+- Invalid capacity, empty names, and empty location descriptions fail at append
+  and replay.
 - A retired space is absent from current scheduler input and remains available
   in labelled history.
 - Space-slot blocks affect only the selected pair and produce an explainable
