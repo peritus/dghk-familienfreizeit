@@ -1,15 +1,38 @@
+import { buildSolverInput, composeSolverContributions, solve } from '../../src/solver/index.js'
+import { profileAttention } from '../../src/attention/profile.js'
 import { describe, expect, test } from 'vitest'
 import { activeProfile } from '../../src/config/index.js'
 import { derive } from '../../src/events/fold.js'
 import { deriveDraftWorld } from '../../src/events/world.js'
 import { materializeDraftEvents } from '../../src/app/organiser/state.js'
-import { deriveAssignmentReview } from '../../src/modules/room-assignment/app/screens/assignment-board/review.js'
+import { deriveAssignmentReview as projectReview } from '../../src/modules/room-assignment/app/screens/assignment-board/review.js'
 import {
   organiserAssignmentFixedFixtureState,
   organiserAssignmentFixtureEvents,
   organiserFixtureEvents,
 } from '../../src/app/stories/organiser-fixtures.js'
 
+function deriveAssignmentReview(world: ReturnType<typeof derive>) {
+  const contributions = composeSolverContributions(activeProfile)
+  const plan = solve(buildSolverInput(world, contributions), contributions, {
+    build_revision: 'test',
+    compatibility_revision: 1,
+    event_date: activeProfile.meta.starts_on,
+    profile: activeProfile,
+    seed: null,
+  })
+  const attention = profileAttention(activeProfile)({
+    domain: 'available',
+    world,
+    plan,
+    profile: activeProfile,
+    build_revision: 'test',
+    locale: 'de',
+    now: '2027-01-01T00:00:00Z',
+    audience: 'organiser',
+  })
+  return projectReview(world, plan, attention)
+}
 describe('assignment review projection', () => {
   test('derives user-facing board and print views without event-log metadata', () => {
     const world = derive(organiserFixtureEvents, activeProfile.validation_view)
@@ -67,8 +90,8 @@ describe('assignment review projection', () => {
     expect(rooms.some(({ occupied, capacity }) => occupied < capacity)).toBe(true)
     expect(rooms.some(({ occupied }) => occupied === 0)).toBe(true)
     expect(review.board.unplaced.map(({ name }) => name)).toContain('Seidel')
-    expect(review.board.unplaced_reasons['fam_seidel']).toBe('Nicht genügend freie Schlafplätze.')
-    expect(review.print.unplaced[0]?.reason).toBe('Nicht genügend freie Schlafplätze.')
+    expect(review.board.unplaced_reasons['fam_seidel']).toContain('Familie ohne Zimmer')
+    expect(review.print.unplaced[0]?.reason).toContain('Familie ohne Zimmer')
     expect(review.board).not.toHaveProperty('sequence')
     expect(review.board).not.toHaveProperty('traces')
     expect(review.print).not.toHaveProperty('sequence')
@@ -95,7 +118,9 @@ describe('assignment review projection', () => {
     expect(fixedFamily?.fixed_room_name).toBe('Zimmer 12')
     expect(invalidFamily?.fixed_invalid).toBe(true)
     expect(review.print.findings).toEqual(
-      expect.arrayContaining([expect.objectContaining({ title: 'Ungültige feste Zuordnung' })]),
+      expect.arrayContaining([
+        expect.objectContaining({ title: 'Feste Zimmerentscheidung prüfen' }),
+      ]),
     )
   })
 })
