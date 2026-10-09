@@ -50,6 +50,7 @@ export type AttentionContext = {
   locale: string
   now: string
   audience: 'organiser' | 'family' | 'shared'
+  effective_features?: ReadonlySet<string>
   basis?: { mode: 'committed' | 'prospective'; group_ids: readonly string[] }
   operations?: readonly { id: string; code: 'loading' | 'saving' | 'drafts' | 'saved' | 'load-failed' | 'unauthorized' | 'stale-head' | 'stale-build' | 'apply-failed' | 'invalid-field' | 'confidential' | 'prospective' | 'route-failed'; field?: string; group_id?: string }[]
   closed_changes?: readonly { area: 'accommodation' | 'workshops'; seq: number; changes: readonly JsonValue[]; family_ids: readonly string[]; closed: boolean }[]

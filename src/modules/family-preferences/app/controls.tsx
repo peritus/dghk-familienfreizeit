@@ -183,7 +183,6 @@ function TraitControl({
   stage,
   meta,
   defer_text: deferText,
-  tri_state_no_answer: triStateNoAnswer,
 }: {
   trait_key: string
   trait: Trait
@@ -217,14 +216,12 @@ function TraitControl({
       ? validity
       : 'Diese Angabe ist für diese Person derzeit nicht verfügbar.'
     : null
-  const [unpersistedTriState, setUnpersistedTriState] = useState<TriStateValue>(
-    current?.strength ?? (triStateNoAnswer ? 'none' : 'indifferent'),
-  )
 
   if (facing.control === 'tri-state') {
-    const selected = current?.strength ?? unpersistedTriState
+    const marker = labels.some(label => label.key === `response-${traitKey}` && label.value === true)
+    const selected = current?.strength ?? (marker ? 'indifferent' : 'none')
     const choices: readonly { value: TriStateValue; label: string }[] = [
-      ...(triStateNoAnswer ? [{ value: 'none' as const, label: 'Keine Angabe' }] : []),
+      { value: 'none' as const, label: 'Keine Angabe' },
       ...(facing.strengths?.includes('required')
         ? [{ value: 'required' as const, label: facing.invert ? 'Auf keinen Fall' : 'Unbedingt' }]
         : []),
@@ -247,24 +244,15 @@ function TraitControl({
               name={`${target.id}-${traitKey}`}
               checked={selected === choice.value}
               onChange={() => {
-                setUnpersistedTriState(choice.value)
-                if (choice.value === 'indifferent' || choice.value === 'none') {
-                  if (current) stage([labelClear(actor, familyId, target, traitKey)])
-                  return
+                const markerKey = `response-${traitKey}`
+                const events: EventDraft[] = [labelClear(actor, familyId, target, traitKey), labelClear(actor, familyId, target, markerKey)]
+                if (choice.value === 'indifferent') events.push(labelSet(actor, familyId, target, markerKey, true, null))
+                else if (choice.value === 'required' || choice.value === 'preferred') {
+                  const value = values[0]
+                  if (value === undefined) return
+                  events.push(labelSet(actor, familyId, target, traitKey, value, choice.value))
                 }
-                const value = values[0]
-                if (!value || (current?.value === value && current.strength === choice.value))
-                  return
-                stage([
-                  labelSet(
-                    actor,
-                    familyId,
-                    target,
-                    traitKey,
-                    value,
-                    choice.value as 'required' | 'preferred',
-                  ),
-                ])
+                stage(events)
               }}
               label={<>{choice.label}</>}
             />

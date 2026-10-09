@@ -101,7 +101,10 @@ export type FamilyPreferenceModuleControl = {
   help: LocalizedText | null
 }
 
+export type ResponseField = { key: string; scope: 'family' | 'person'; control: 'value' | 'tri-state'; requirement: 'requested' | 'optional' }
+
 export type FamilyPreferencesParams = {
+  response_fields?: readonly ResponseField[]
   sections: readonly FamilyPreferenceSection[]
   module_controls: readonly FamilyPreferenceModuleControl[]
 }
@@ -617,6 +620,13 @@ function validateFamilyPreferences(
     if (trait.family_facing && occurrences.get(traitKey) !== 1)
       throw new Error(`family-facing trait must appear in exactly one section: ${traitKey}`)
   }
+  const responseKeys = new Set<string>()
+  for (const response of params.response_fields ?? []) {
+    const trait = traits[response.key]
+    if (responseKeys.has(response.key) || !trait?.family_facing || trait.family_facing.scope !== response.scope || (response.control === 'tri-state') !== (trait.family_facing.control === 'tri-state') || occurrences.get(response.key) !== 1)
+      throw new Error(`invalid response field: ${response.key}`)
+    responseKeys.add(response.key)
+  }
   const moduleControlKeys = new Set<string>()
   for (const control of params.module_controls) {
     if (moduleControlKeys.has(control.key))
@@ -669,6 +679,10 @@ function validationView(
   }))
   for (const module of modules)
     for (const key of module.contributions.label_keys ?? []) schemas.push(key)
+  for (const [key, trait] of Object.entries(traits)) if (trait.family_facing?.control === 'tri-state') {
+    if (schemas.some(s => s.key === `response-${key}`)) throw new Error(`response marker collision: ${key}`)
+    schemas.push({ key: `response-${key}`, scopes: [trait.family_facing.scope], cardinality: 'zero-or-one', family_writable: trait.family_writable, sensitivity: trait.sensitivity, governed_control: key, validate: value => value === true ? null : 'response marker must be true' })
+  }
   const aliases = Object.fromEntries(
     schemas.flatMap((schema) => (schema.aliases ?? []).map((alias) => [alias, schema.key])),
   )

@@ -1,3 +1,4 @@
+import { responseAttention } from './attention.js'
 import { z } from 'zod'
 import { defineModule } from '../define.js'
 import { declaredFeatures } from '../../config/features.js'
@@ -11,6 +12,7 @@ import type {
 const localizedText = z.union([z.string().min(1), z.record(z.string().min(1), z.string().min(1))])
 
 const familyPreferencesParams = z.object({
+  response_fields: z.array(z.object({ key: z.string().min(1), scope: z.enum(['family','person']), control: z.enum(['value','tri-state']), requirement: z.enum(['requested','optional']) })).default([]),
   sections: z
     .array(
       z.object({
@@ -40,7 +42,8 @@ export type { FamilyPreferencesParams, LocalizedText }
 export const familyPreferences = defineModule<FamilyPreferencesParams>({
   id: 'family-preferences',
   params: familyPreferencesParams,
-  contribute: () => ({
+  contribute: (params) => ({
+    attention_checks: responseAttention(params),
     phases: [
       {
         id: 'family-preferences.accommodation-preferences',
@@ -111,7 +114,7 @@ export function familyGovernedLabelKeys(
   for (const section of params.sections) {
     const feature = section.features.find((id) => features.get(id)?.audience === 'family')
     if (!feature) continue
-    for (const trait of section.traits) governed.set(trait, feature)
+    for (const trait of section.traits) { governed.set(trait, feature); governed.set(`response-${trait}`, feature) }
     for (const control of params.module_controls.filter(
       ({ section: key }) => key === section.key,
     )) {

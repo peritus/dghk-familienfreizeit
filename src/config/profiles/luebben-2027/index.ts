@@ -309,6 +309,12 @@ export const luebben2027Profile = defineOccasionProfile({
       workshops_per_person: workshopsPerPerson,
     }),
     familyPreferences({
+      response_fields: [
+        { key: 'needs-private-sanitary', scope: 'family', control: 'tri-state', requirement: 'requested' },
+        { key: 'needs-accessible', scope: 'family', control: 'tri-state', requirement: 'requested' },
+        { key: 'sole-occupancy', scope: 'family', control: 'tri-state', requirement: 'requested' },
+        { key: 'diet', scope: 'person', control: 'value', requirement: 'requested' },
+      ],
       sections: [
         {
           key: 'people',

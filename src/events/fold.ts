@@ -62,6 +62,7 @@ export type Label = {
   strength: 'required' | 'preferred' | null
   note: string | null
   set_seq: number
+  set_at?: string
   sensitivity: 'normal' | 'restricted'
 }
 
@@ -212,6 +213,7 @@ export function guardModuleFold(
 }
 
 export type LabelSchema = {
+  governed_control?: string
   key: string
   aliases?: readonly string[]
   validate?: (value: JsonValue) => string | null
@@ -829,6 +831,7 @@ function setLabel(
     strength,
     note,
     set_seq: event.seq,
+    set_at: event.at,
     sensitivity,
   })
 }
