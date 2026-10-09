@@ -480,8 +480,13 @@ function PersonForm({
   on_cancel?: () => void
   is_new?: boolean
 }) {
+  const { world } = useOrganiser()
+  const familyNameSuggestion =
+    labelValue(world?.labels_by_entity[familyId] ?? [], 'display-name') ?? ''
   const [givenName, setGivenName] = useState(person?.given_name ?? '')
-  const [familyName, setFamilyName] = useState(person?.family_name ?? '')
+  const [familyName, setFamilyName] = useState(
+    person?.family_name ?? (isNew ? familyNameSuggestion : ''),
+  )
   const [role, setRole] = useState(person?.role ?? 'adult')
   const [age, setAge] = useState(
     person?.age === null || person?.age === undefined ? '' : String(person.age),
@@ -560,6 +565,7 @@ function PersonForm({
         />
         <TextField
           label="Nachname"
+          hint={isNew ? 'Vorschlag aus dem Familiennamen. Du kannst ihn ändern.' : undefined}
           required
           value={familyName}
           onChange={(event) => setFamilyName(event.target.value)}
