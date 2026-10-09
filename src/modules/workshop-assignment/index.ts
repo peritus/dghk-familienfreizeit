@@ -249,7 +249,10 @@ function assignmentStage(
           (a, b) =>
             a.person_id.localeCompare(b.person_id) || a.workshop_id.localeCompare(b.workshop_id),
         )
-      const fixedDecisions = fixed.map(({ person_id, workshop_id }) => ({ person_id, workshop_id }))
+      const fixedDecisions = fixed.map((decision) => ({
+        person_id: decision.person_id,
+        workshop_id: decision.workshop_id,
+      }))
       const fixedViolations: WorkshopFixedViolation[] = []
       for (const decision of fixed) {
         const workshop = workshops.get(decision.workshop_id)

@@ -165,9 +165,7 @@ export function WorkshopAllocation() {
   const fixedPairs = assignment?.fixed ?? []
   const personNamesById = new Map(projection.person_names.map((person) => [person.id, person.name]))
   const workshopsById = new Map(allWorkshops.map((workshop) => [workshop.id, workshop]))
-  const fixedKeys = new Set(
-    fixedPairs.map(({ person_id, workshop_id }) => `${person_id}|${workshop_id}`),
-  )
+  const fixedKeys = new Set(fixedPairs.map((pair) => `${pair.person_id}|${pair.workshop_id}`))
   const answers = workshopAllocationPeople(projection, group)
   const selectedPerson =
     projection.person_names.find((person) => person.id === queryPersonId) ??

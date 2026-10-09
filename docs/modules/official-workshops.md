@@ -39,6 +39,9 @@ Capacity reductions that would put live sign-ups or matched fixed-attendance
 `needs`/`provides` pairs above the new capacity are rejected outright, per D30.
 Attendance is counted by person, so a sign-up and fixed decision for the same
 person do not count twice. No participant is silently evicted by a workshop edit.
+Workshop capacity summaries use the unique union of assignments and sign-ups;
+interest totals remain separate, while a fixed attendee consumes capacity in any
+participation mode.
 External leader contact labels are restricted to organiser projections.
 
 Organisers author fixed person-to-workshop attendance on the allocation screen.

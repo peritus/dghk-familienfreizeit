@@ -196,6 +196,49 @@ test('the resolver produces a constraint-valid, deterministic plan over the full
   expect(assignmentKey(attendanceAgain)).toEqual(assignmentKey(attendance))
 })
 
+test('allocation counts a fixed attendee once when that person also signed up', () => {
+  const { plan, world } = solveFixture()
+  const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection
+  const assigned = attendance.assignments[0]
+  expect(assigned).toBeTruthy()
+
+  const original = buildWorkshopAllocationProjection({
+    world,
+    plan,
+    event_date: '2027-05-14',
+    time_zone: 'Europe/Berlin',
+    max_rank: 3,
+  })
+  const duplicate = {
+    ...plan,
+    sections: {
+      ...plan.sections,
+      'workshop-assignment': {
+        ...attendance,
+        signups: [
+          ...attendance.signups,
+          { person_id: assigned!.person_id, workshop_id: assigned!.workshop_id },
+        ],
+      },
+    },
+  }
+  const withSignup = buildWorkshopAllocationProjection({
+    world,
+    plan: duplicate,
+    event_date: '2027-05-14',
+    time_zone: 'Europe/Berlin',
+    max_rank: 3,
+  })
+
+  expect(
+    withSignup.participation.people.find((person) => person.id === assigned!.person_id)
+      ?.workshop_count,
+  ).toBe(
+    original.participation.people.find((person) => person.id === assigned!.person_id)
+      ?.workshop_count,
+  )
+})
+
 test('projects the complete workshop list set from the organiser plan', () => {
   const { plan, world } = solveFixture()
   const attendance = plan.sections['workshop-assignment'] as WorkshopAssignmentSection

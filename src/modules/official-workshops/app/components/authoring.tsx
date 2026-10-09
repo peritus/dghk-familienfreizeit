@@ -21,6 +21,9 @@ export type WorkshopAuthoringView = {
   requirement?: string
   demand?: string
   count?: number
+  fixed_attendance_count?: number
+  signup_count?: number
+  interest_count?: number
   wishes?: number
   notes?: readonly string[]
   placement?: {
@@ -161,20 +164,33 @@ export function WorkshopSummaryRow({
               : 'text-muted'
           }
         >
-          {count === 0 && workshop.wishes === undefined ? 'Noch keine ' : ''}
-          {pluralDe(
-            count === 0 && workshop.wishes === undefined ? 2 : count,
-            workshop.participation_mode === 'Anmeldung'
-              ? 'Anmeldung'
-              : workshop.participation_mode === 'Interesse'
-                ? 'Interessensbekundung'
-                : 'zugeordnet',
-            workshop.participation_mode === 'Anmeldung'
-              ? 'Anmeldungen'
-              : workshop.participation_mode === 'Interesse'
-                ? 'Interessensbekundungen'
-                : 'zugeordnet',
-          )}
+          {count === 0 && workshop.wishes === undefined && !workshop.fixed_attendance_count
+            ? 'Noch keine '
+            : ''}
+          {workshop.fixed_attendance_count
+            ? `${count} Teilnehmende`
+            : pluralDe(
+                count === 0 && workshop.wishes === undefined ? 2 : count,
+                workshop.participation_mode === 'Anmeldung'
+                  ? 'Anmeldung'
+                  : workshop.participation_mode === 'Interesse'
+                    ? 'Interessensbekundung'
+                    : 'zugeordnet',
+                workshop.participation_mode === 'Anmeldung'
+                  ? 'Anmeldungen'
+                  : workshop.participation_mode === 'Interesse'
+                    ? 'Interessensbekundungen'
+                    : 'zugeordnet',
+              )}
+          {workshop.fixed_attendance_count && workshop.signup_count !== undefined
+            ? ` · ${workshop.signup_count} Anmeldungen`
+            : ''}
+          {workshop.fixed_attendance_count && workshop.interest_count !== undefined
+            ? ` · ${workshop.interest_count} Interessen`
+            : ''}
+          {workshop.fixed_attendance_count
+            ? ` · ${workshop.fixed_attendance_count} fest zugeordnet`
+            : ''}
           {workshop.wishes !== undefined
             ? workshop.wishes === 0
               ? ' · Noch keine Wünsche'

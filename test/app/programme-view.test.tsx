@@ -113,6 +113,25 @@ describe('buildProgrammeView', () => {
     ])
   })
 
+  test('counts fixed attendance once beside sign-ups and shows it for interest workshops', () => {
+    const view = buildProgrammeView({
+      ...baseInput,
+      workshops: baseInput.workshops.map((workshop) =>
+        workshop.id === 'wks_ceramics' ? { ...workshop, mode: 'interest' as const } : workshop,
+      ),
+      assignments: [{ person_id: 'per_a', workshop_id: 'wks_ceramics' }],
+      signups: [
+        { person_id: 'per_a', workshop_id: 'wks_ceramics' },
+        { person_id: 'per_b', workshop_id: 'wks_ceramics' },
+      ],
+      interests: [{ person_id: 'per_c', workshop_id: 'wks_ceramics' }],
+    })
+
+    expect(view.rows[0]?.cells[0]).toEqual(
+      expect.objectContaining({ capacity_label: '2 / 10 · 8 frei · 1 Interesse' }),
+    )
+  })
+
   test('projects unscheduled reasons and ranked same-slot overlaps', () => {
     const view = buildProgrammeView({
       ...baseInput,

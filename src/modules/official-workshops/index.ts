@@ -7,7 +7,9 @@ import {
   fixedWorkshopIdFromToken,
   isFixedWorkshopAttendanceToken,
 } from './fixed-attendance-token.js'
+
 export { workshopEligibilityFailure } from './eligibility.js'
+
 export {
   fixedWorkshopAttendanceToken,
   fixedWorkshopIdFromToken,

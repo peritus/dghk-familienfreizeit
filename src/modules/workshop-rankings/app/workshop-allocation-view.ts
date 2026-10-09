@@ -292,18 +292,18 @@ function reasonOutcome(reason: string | undefined): WorkshopAllocationTraceOutco
 }
 
 function fixedViolationReasonText(reason: string): string {
-  const labels: Record<string, string> = {
-    'hard.capacity': 'Kapazität überschritten',
-    'hard.overlap': 'Überschneidung',
-    'hard.leader-conflict': 'Person leitet gleichzeitig einen Workshop',
-    'hard.unscheduled': 'Workshop hat keinen Termin',
-    'hard.eligibility': 'Alter oder Zielgruppe passt nicht',
-    'hard.mode-not-assigned': 'andere Teilnahmeart',
-    'hard.cancellation': 'Workshop abgesagt oder entfernt',
-    'hard.fixed-pair-unresolved': 'needs/provides-Paar ist unvollständig',
-    'policy.target-reached': 'persönliches Zuordnungslimit überschritten',
-  }
-  return labels[reason] ?? reason
+  const labels = new Map<string, string>([
+    ['hard.capacity', 'Kapazität überschritten'],
+    ['hard.overlap', 'Überschneidung'],
+    ['hard.leader-conflict', 'Person leitet gleichzeitig einen Workshop'],
+    ['hard.unscheduled', 'Workshop hat keinen Termin'],
+    ['hard.eligibility', 'Alter oder Zielgruppe passt nicht'],
+    ['hard.mode-not-assigned', 'andere Teilnahmeart'],
+    ['hard.cancellation', 'Workshop abgesagt oder entfernt'],
+    ['hard.fixed-pair-unresolved', 'needs/provides-Paar ist unvollständig'],
+    ['policy.target-reached', 'persönliches Zuordnungslimit überschritten'],
+  ])
+  return labels.get(reason) ?? reason
 }
 
 function assignmentOutcome(reason: string): WorkshopAllocationTraceOutcome {
@@ -781,9 +781,11 @@ export function buildWorkshopAllocationProjection(
         age_label: person.age_label,
         group: person.group,
         ranks,
-        workshop_count:
-          assignment.assignments.filter((item) => item.person_id === person.id).length +
-          assignment.signups.filter((item) => item.person_id === person.id).length,
+        workshop_count: new Set(
+          [...assignment.assignments, ...assignment.signups]
+            .filter((item) => item.person_id === person.id)
+            .map((item) => item.workshop_id),
+        ).size,
         cells,
       }
     })

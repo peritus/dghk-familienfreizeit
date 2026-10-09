@@ -151,9 +151,12 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
   )
   const slots = new Map(input.slots.map((slot) => [slot.id, slot]))
   const unscheduled = new Map(input.unscheduled.map((item) => [item.workshop_id, item.reason]))
-  const attendance = new Map<string, number>()
-  for (const item of [...input.assignments, ...input.signups])
-    attendance.set(item.workshop_id, (attendance.get(item.workshop_id) ?? 0) + 1)
+  const attendance = new Map<string, Set<string>>()
+  for (const item of [...input.assignments, ...input.signups]) {
+    const people = attendance.get(item.workshop_id) ?? new Set<string>()
+    people.add(item.person_id)
+    attendance.set(item.workshop_id, people)
+  }
   const interests = new Map<string, number>()
   for (const item of input.interests)
     interests.set(item.workshop_id, (interests.get(item.workshop_id) ?? 0) + 1)
@@ -176,11 +179,15 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
       const leaderNames = workshop.leader_ids
         .map((leaderId) => input.leader_names.get(leaderId) ?? leaderId)
         .join(', ')
-      const count = attendance.get(workshop.id) ?? 0
+      const count = attendance.get(workshop.id)?.size ?? 0
       const remaining = workshop.capacity - count
       const capacityLabel =
         workshop.mode === 'interest'
-          ? `${interests.get(workshop.id) ?? 0} Interessen`
+          ? `${count} / ${workshop.capacity} · ${
+              remaining > 0 ? `${remaining} frei` : remaining === 0 ? 'voll' : 'über Kapazität'
+            } · ${interests.get(workshop.id) ?? 0} ${
+              (interests.get(workshop.id) ?? 0) === 1 ? 'Interesse' : 'Interessen'
+            }`
           : `${count} / ${workshop.capacity} · ${
               remaining > 0 ? `${remaining} frei` : remaining === 0 ? 'voll' : 'über Kapazität'
             }`

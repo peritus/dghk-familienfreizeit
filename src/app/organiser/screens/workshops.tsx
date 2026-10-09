@@ -98,7 +98,11 @@ type WorkshopPlan = {
     reasons: readonly string[]
   }[]
   demand: Readonly<Record<string, number>>
-  assignments: readonly { person_id: string; workshop_id: string }[]
+  assignments: readonly {
+    person_id: string
+    workshop_id: string
+    reason: 'ranked' | 'fixed'
+  }[]
   signups: readonly { person_id: string; workshop_id: string }[]
   interests: readonly { person_id: string; workshop_id: string }[]
 }
@@ -185,7 +189,11 @@ function solveWorkshopPlan(world: World, currentPlan?: Plan | null): WorkshopPla
     | undefined
   const attendance = plan.sections['workshop-assignment'] as
     | {
-        assignments?: readonly { person_id: string; workshop_id: string }[]
+        assignments?: readonly {
+          person_id: string
+          workshop_id: string
+          reason: 'ranked' | 'fixed'
+        }[]
         signups?: readonly { person_id: string; workshop_id: string }[]
         interests?: readonly { person_id: string; workshop_id: string }[]
       }
@@ -580,12 +588,30 @@ export function Workshops({
     ...people.map((person) => [person.id, person.name] as const),
     ...summary.external_leaders.map((leader) => [leader.id, `${leader.name} (extern)`] as const),
   ])
-  const assignedByWorkshop = new Map<string, number>()
-  for (const assignment of plan.assignments)
-    assignedByWorkshop.set(
-      assignment.workshop_id,
-      (assignedByWorkshop.get(assignment.workshop_id) ?? 0) + 1,
-    )
+  const attendanceByWorkshop = new Map<string, Set<string>>()
+  for (const attendee of [...plan.assignments, ...plan.signups]) {
+    const people = attendanceByWorkshop.get(attendee.workshop_id) ?? new Set<string>()
+    people.add(attendee.person_id)
+    attendanceByWorkshop.set(attendee.workshop_id, people)
+  }
+  const fixedByWorkshop = new Map<string, Set<string>>()
+  for (const attendee of plan.assignments.filter((assignment) => assignment.reason === 'fixed')) {
+    const people = fixedByWorkshop.get(attendee.workshop_id) ?? new Set<string>()
+    people.add(attendee.person_id)
+    fixedByWorkshop.set(attendee.workshop_id, people)
+  }
+  const signupsByWorkshop = new Map<string, Set<string>>()
+  for (const attendee of plan.signups) {
+    const people = signupsByWorkshop.get(attendee.workshop_id) ?? new Set<string>()
+    people.add(attendee.person_id)
+    signupsByWorkshop.set(attendee.workshop_id, people)
+  }
+  const interestsByWorkshop = new Map<string, Set<string>>()
+  for (const attendee of plan.interests) {
+    const people = interestsByWorkshop.get(attendee.workshop_id) ?? new Set<string>()
+    people.add(attendee.person_id)
+    interestsByWorkshop.set(attendee.workshop_id, people)
+  }
   const placedWorkshopIds = new Set(plan.placements.map((placement) => placement.workshop_id))
   const notes = workshopNotes(summary.workshops, new Set(leaderNames.keys()), plan.demand)
   const notedIds = new Set(
@@ -914,12 +940,16 @@ export function Workshops({
                       (leaderId) => !leaderNames.has(leaderId),
                     ).length,
                     requirement: workshop.needs.join(', ') || undefined,
-                    count:
-                      workshop.mode === 'assigned'
-                        ? (assignedByWorkshop.get(workshop.id) ?? 0)
-                        : (workshop.mode === 'sign-up' ? plan.signups : plan.interests).filter(
-                            (item) => item.workshop_id === workshop.id,
-                          ).length,
+                    count: attendanceByWorkshop.get(workshop.id)?.size ?? 0,
+                    fixed_attendance_count: fixedByWorkshop.get(workshop.id)?.size ?? 0,
+                    signup_count:
+                      workshop.mode === 'sign-up'
+                        ? (signupsByWorkshop.get(workshop.id)?.size ?? 0)
+                        : undefined,
+                    interest_count:
+                      workshop.mode === 'interest'
+                        ? (interestsByWorkshop.get(workshop.id)?.size ?? 0)
+                        : undefined,
                     wishes:
                       workshop.mode === 'assigned' ? (plan.demand[workshop.id] ?? 0) : undefined,
                     notes: notes
