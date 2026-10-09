@@ -750,13 +750,12 @@ the removed surname; new examples follow the same neutral-identity rule.
 
 ## D30 — Workshop capacity reduction blocks, never displaces
 
-*Chosen.* Reducing a workshop's capacity below its current attendance (solver
-assignments, live sign-ups, or matched fixed-attendance `needs`/`provides` pairs)
-is rejected outright.
-Existing attendance names are preserved unchanged; the workshop simply stays
-over its nominal capacity until the organiser either raises capacity back up or
-removes attendees through the ordinary attendance/sign-up path. No recomputation,
-displacement, or reassignment is triggered by a capacity edit.
+*Chosen.* Capacity edits are previewed through the ordinary pure derivation and
+solver. A reduction is accepted only when it does not fall below current distinct
+attendance and the complete person-to-workshop attendance set is unchanged by
+that transition. Otherwise the reduction is rejected. No accepted reduction
+displaces, adds, or reassigns attendance. No assignment snapshot or implicit fixed
+decision is created to preserve an earlier result.
 
 *Rejected alternative:* recompute and displace or reassign affected people using
 fairness rules. This would silently move people who were never touched by the

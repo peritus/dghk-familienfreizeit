@@ -37,6 +37,9 @@ review of affected binding decisions, and reinsertion into the roadmap. A
 deferred contract is distinct from a module that is merely not selected by a
 particular profile.
 
+The [attention contract](architecture/attention.md) governs composed findings,
+response completeness, readiness and evidence review.
+
 ## Reading order
 
 | # | Document | What it settles |
