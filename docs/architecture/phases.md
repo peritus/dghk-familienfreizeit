@@ -39,12 +39,12 @@ time in the Worker, browser time in the organiser application:
 - `late` — open after its target date; nothing is disabled;
 - `closed` — the area's latest closing or reopening event is a closing.
 
-Readiness stays separate from status. The room review is ready when at least one
-family is registered, the current plan has no blocking room-assignment preflight
-finding, and every fixed room decision holds. The workshop review is ready once at
-least one active workshop exists, workshop choice is open, every active workshop is
-placed, every fixed placement and attendance decision holds,
-and no other workshop preflight finding blocks the plan. The family wish
+Readiness stays separate from status. Review phases select explicit blockers and
+required-check coverage from [composed attention](attention.md). No-family and
+no-usable-capacity states block accommodation closing; required feasibility and
+fixed-decision failures also block it. Workshop closing requires active workshops,
+opened choice, placements and valid fixed decisions. Advisory severity alone does
+not decide readiness. The family wish
 features require their phase, so they are effective only while it is open or
 late; the organiser wish features require none.
 

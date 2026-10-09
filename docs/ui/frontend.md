@@ -219,3 +219,13 @@ A collapsed workflow row expands on pointer click; the native Alle Schritte togg
 remains the sole keyboard control. Expanded content and module-owned actions keep
 their existing interaction boundaries. Responsive typography uses the shared
 [role tokens](design-system.md#responsive-typography-roles) across current consumers.
+
+## Attention integration
+
+Organiser routes select [composed attention](../architecture/attention.md) from the
+state owner. Counts, rows and details share item IDs. Required operation coverage
+controls closing; warning severity does not. Shared details and recovery preserve
+client-side navigation and the existing state owner. A reviewed clear action
+checks current value and sequence. Draft recovery edits/discards one group and
+locks the submitted prefix. The current view is not claimed valid after proposal
+failure. Neutral answers come from event-derived markers, including after reload.

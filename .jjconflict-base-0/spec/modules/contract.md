@@ -82,6 +82,8 @@ export interface ModuleContributions {
   rules: readonly Rule[]
   preflight_checks: readonly PreflightCheck[]
   world_summaries: readonly WorldSummaryDefinition[]
+  attention_checks: readonly AttentionCheck[] // implemented contract linked below
+  capability_token_prefixes: readonly string[]
   world_checks: readonly WorldCheck[]
   phases: readonly PhaseDefinition[]       // spec/architecture/phases.md
   closed_results: readonly ClosedResultContribution[]
@@ -104,6 +106,9 @@ modules' tables.
 Empty contributions are empty arrays. `contribute` is a pure function of the
 parameters and a read-only view of the rest of the profile; it performs no I/O and
 is evaluated once, at profile build.
+
+Module attention contributions follow the implemented [composed attention contract](../../docs/architecture/attention.md).
+Capability token namespaces are described in [profile composition](../../docs/architecture/profile-composition.md#attention-and-capability-namespaces).
 
 ### 3.1 Contribution kinds
 

@@ -46,3 +46,17 @@ and review screens. The Worker resolves family principals and currently returns
 only the family ID from `/api/family/view`; the family application and its full
 privacy-projected response remain in the outstanding milestone specifications. Organiser-side
 family controls are implemented from the same profile definitions.
+
+## Attention and capability namespaces
+
+Selected modules contribute pure `attention_checks`. Profile compilation validates
+this registry together with the core checks, including unique ownership, codes,
+localization, scopes and areas. The composed evaluator and its coverage contract
+are described in [composed attention](attention.md).
+
+A module can declare `capability_token_prefixes` for its typed capability tokens.
+Composition rejects empty or overlapping prefixes and builds the kernel's
+`capability_token_consumers` lookup. Resolved requirements retain their consumer;
+room assignment does not interpret workshop attendance tokens as room requirements.
+Workshop assignment owns `fixed-workshop:`. Relationships remain generic labels
+resolved by the configured resolver.

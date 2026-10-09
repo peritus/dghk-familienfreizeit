@@ -187,3 +187,11 @@ Worker imports exclude browser code. Pure-domain patterns reject clocks, random
 values, I/O and imports of runtime-specific modules. The configured domain globs
 are guards for matching files, not proof that the domain implementation exists.
 [Negative tests](../../test/build/lint-boundaries.test.mjs) exercise these rules.
+
+## Verification servers in concurrent workspaces
+
+Playwright defaults to ports 5173 for the app and 6006 for Storybook. Set
+`PLAYWRIGHT_APP_PORT` and `PLAYWRIGHT_STORYBOOK_PORT` to unused ports when another
+workspace is running its own servers. `CI=1` disables existing-server reuse, so
+verification starts servers from the checked-out workspace. Run browser and
+Storybook suites sequentially: both manage the same `test-results` directory.

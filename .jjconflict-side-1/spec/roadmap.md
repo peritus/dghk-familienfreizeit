@@ -13,14 +13,6 @@ reports are separate audience and presentation slices; an organiser milestone
 does not claim family behavior, and a domain milestone does not require reports
 before the report host exists.
 
-## Composed attention system
-
-Implement the approved [attention contract](architecture/attention.md) across
-core and selected modules, all organiser consumers, closing, append admission,
-operational recovery and audience projections. Verify the acceptance catalogue,
-full CI and work budgets, then document behavior and remove this delivered entry.
-This scope does not close unrelated workshop lifecycle requirements.
-
 <a id="m8--organiser-authored-workshop-programme"></a>
 ## M8 — Workshop planning completion
 

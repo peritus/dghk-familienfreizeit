@@ -35,10 +35,11 @@ labelled cancellation-history view; that organiser surface is
 Retiring a workshop removes it from the live world; historical views replay the
 earlier event prefix when needed.
 
-Capacity reductions that would put live sign-ups or matched fixed-attendance
-`needs`/`provides` pairs above the new capacity are rejected outright, per D30.
-Attendance is counted by person, so a sign-up and fixed decision for the same
-person do not count twice. No participant is silently evicted by a workshop edit.
+Capacity reductions use [composed proposal admission](../architecture/attention.md#admission-and-closing)
+under D30. The new capacity must hold distinct current assignments, sign-ups and
+matched fixed pairs, and exact prefix solving must preserve every attendance pair.
+Replay remains structural. Unchanged-capacity metadata edits and increases remain
+legal even when an existing world already exceeds capacity.
 Workshop capacity summaries use the unique union of assignments and sign-ups;
 interest totals remain separate, while a fixed attendee consumes capacity in any
 participation mode.

@@ -11,6 +11,8 @@ are separate claims and require separate evidence.
 - [Derived world](architecture/derived-world.md): in-memory labels, resolver, diagnostics, projections and diffs.
 - [Profile composition](architecture/profile-composition.md): typed profile construction and selected modules.
 - [Features](architecture/features.md): per-audience capabilities, availability and operational bindings.
+- [Composed attention](architecture/attention.md): pure profile/module checks, coverage, policies and shared presentation.
+- [Family preferences](modules/family-preferences.md): response declarations and shared organiser controls.
 - [Phases](architecture/phases.md): phase status, opening, closing and reopening, and closed results.
 - [Room inventory](modules/room-inventory.md): implemented accommodation entities, fixture, summaries, and organiser surface.
 - [Room assignment](modules/room-assignment.md): deterministic assignment solver and organiser review/report surfaces.

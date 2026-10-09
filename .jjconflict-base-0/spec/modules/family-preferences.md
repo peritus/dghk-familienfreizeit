@@ -76,7 +76,8 @@ routes, authorised per [labels and constraints](../architecture/labels-and-const
 For a profile trait, the control uses that trait's canonical label key and value
 schema; it does not emit a generic `needs` or `provides` label. A tri-state
 requirement therefore emits the trait key with `strength=required` or
-`strength=preferred`, and clears that same key for the indifferent state.
+`strength=preferred`, and writes an explicit neutral response marker for the indifferent state, as
+documented in [response declarations](../../docs/modules/family-preferences.md#response-declarations).
 
 ## 6. Labels and trait roles
 
@@ -104,7 +105,7 @@ renderer in `src/modules/<module-id>/app/controls/`.
 
 | `control` | Contributed by | Renders | Writes |
 |---|---|---|---|
-| `tri-state` | this module | three radios — unbedingt / gerne / egal | strength `required`, `preferred`, or `LabelCleared` |
+| `tri-state` | this module | answer radios plus unanswered reset | strength `required`, `preferred`, explicit neutral marker, or reset of both labels |
 | `toggle` | this module | one checkbox | `LabelSet` with no strength, or `LabelCleared` |
 | `choice` | this module | one select over the trait's enum or referenced entities | `LabelSet` replacing the current value, or `LabelCleared` when optional |
 | `free-text` | this module | a text area | `LabelSet` with the text, or `LabelCleared` when emptied |
