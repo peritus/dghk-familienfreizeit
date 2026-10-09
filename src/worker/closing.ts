@@ -1,11 +1,8 @@
-import { officialWorkshopsWorld } from '../modules/official-workshops/index.js'
-import {
-  workshopNotes,
-  workshopAdvisoryFingerprint,
-  type WorkshopNote,
-} from '../modules/official-workshops/checks.js'
+import { profileAttention } from '../attention/profile.js'
+import { attentionBlockers, acknowledgementFingerprint } from '../attention/selectors.js'
+import type { AttentionItem } from '../attention/types.js'
 import type { ProfileModule, OccasionProfile } from '../config/define.js'
-import { closedResults, declaredPhases, type FindingRef } from '../config/phases.js'
+import { closedResults, type FindingRef } from '../config/phases.js'
 import type { Event, EventDraft, JsonValue } from '../events/types.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../solver/index.js'
@@ -21,7 +18,7 @@ export class AreaNotReadyError extends Error {
 }
 
 export class WorkshopReviewRequiredError extends Error {
-  constructor(public readonly findings: readonly WorkshopNote[]) {
+  constructor(public readonly findings: readonly AttentionItem[]) {
     super('workshop advisory acknowledgement required')
   }
 }
@@ -81,22 +78,12 @@ export function fillClosingPayloads(
       profile,
       seed: null,
     })
-    const findings = [...declaredPhases(profile.modules).values()]
-      .filter((phase) => phase.area === area && phase.readiness)
-      .flatMap((phase) => {
-        const readiness = phase.readiness!({ world, plan })
-        return readiness.ready ? [] : readiness.findings
-      })
+    const attention=profileAttention(profile)({domain:'available',world,plan,profile,build_revision:revisions.build_revision,locale:profile.meta.locale,now:draft.at,audience:'organiser'})
+    const blockers=attentionBlockers(attention,area==='accommodation'?'close-accommodation':'close-workshops')
+    const findings=blockers.map(item=>({id:item.id,subject_id:item.subjects[0]?.id??null,message:item.wording.detail}))
     if (findings.length > 0) throw new AreaNotReadyError(area, findings)
     if (area === 'workshops') {
-      const summary = officialWorkshopsWorld(world)
-      const advisories = workshopNotes(
-        summary.workshops,
-        new Set([
-          ...world.persons.map(({ id }) => id),
-          ...summary.external_leaders.map(({ id }) => id),
-        ]),
-      ).filter(({ kind }) => kind === 'advisory')
+      const advisories=attention.items.filter(item=>item.acknowledgement!==null)
       const previous = drafts[index - 1]
       const fingerprint =
         previous?.payload &&
@@ -107,7 +94,7 @@ export function fillClosingPayloads(
       if (
         advisories.length &&
         (previous?.type !== 'WorkshopWarningsAcknowledged' ||
-          fingerprint !== workshopAdvisoryFingerprint(advisories))
+          fingerprint !== acknowledgementFingerprint(attention))
       )
         throw new WorkshopReviewRequiredError(advisories)
     }

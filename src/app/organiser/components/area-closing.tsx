@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/shared/ui/button.js'
-import { officialWorkshopsWorld } from '../../../modules/official-workshops/index.js'
-import {
-  workshopNotes,
-  workshopAdvisoryFingerprint,
-} from '../../../modules/official-workshops/checks.js'
+import { acknowledgementFingerprint } from '../../../attention/selectors.js'
 import { OrganiserLink } from '../../components/application/organiser-link.js'
 import { organiserPaths, organiserPathWithQuery } from '../../../organiser/routes.js'
 import { ActionableNotice, StatusNotice } from '../../components/shared/ui/notice.js'
@@ -91,9 +87,12 @@ export function AreaClosingReview({ state }: { state: ClosedAreaState }) {
  * result when the staged closing is applied.
  */
 export function AreaClosingActions({ area }: { area: AreaId }) {
-  const { state: organiser, stage, world } = useOrganiser()
+  const { state: organiser, stage, attention } = useOrganiser()
   const [reviewing, setReviewing] = useState(false)
-  const [acknowledged, setAcknowledged] = useState(false)
+  const [reviewedFingerprint, setReviewedFingerprint] = useState<string | null>(null)
+  const fingerprint=attention ? acknowledgementFingerprint(attention) : ''
+  const acknowledged=reviewedFingerprint===fingerprint
+  const setAcknowledged=(value:boolean)=>setReviewedFingerprint(value?fingerprint:null)
   const reviewHeading = useRef<HTMLHeadingElement>(null)
   const reviewTrigger = useRef<HTMLButtonElement>(null)
   const confirmation = useRef<HTMLDivElement>(null)
@@ -110,16 +109,7 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
     wasReviewing.current = reviewing
     wasAcknowledged.current = acknowledged
   }, [reviewing, acknowledged])
-  const summary = world && area === 'workshops' ? officialWorkshopsWorld(world) : null
-  const advisories = summary
-    ? workshopNotes(
-        summary.workshops,
-        new Set([
-          ...world!.persons.map(({ id }) => id),
-          ...summary.external_leaders.map(({ id }) => id),
-        ]),
-      ).filter(({ kind }) => kind === 'advisory')
-    : []
+  const advisories = area === 'workshops' ? attention?.items.filter(item=>item.acknowledgement!==null) ?? [] : []
   const state = useClosedArea(area)
   if (!state || !organiser.principal_email) return null
   const actor = organiser.principal_email
@@ -133,7 +123,7 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
               actor,
               subject: null,
               type: 'WorkshopWarningsAcknowledged',
-              payload: { fingerprint: workshopAdvisoryFingerprint(advisories) },
+              payload: { fingerprint: reviewedFingerprint! },
             },
           ]
         : []),
@@ -167,13 +157,13 @@ export function AreaClosingActions({ area }: { area: AreaId }) {
                 <OrganiserLink
                   href={organiserPathWithQuery(organiserPaths.workshops(), {
                     notes: '1',
-                    workshop: note.workshop_id,
+                    workshop: note.subjects[0]?.id ?? '',
                   })}
                   className="underline"
                 >
-                  {note.title}
+                  {note.wording.title}
                 </OrganiserLink>
-                : {note.message}
+                : {note.wording.detail}
               </li>
             ))}
           </ul>

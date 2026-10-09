@@ -1,3 +1,5 @@
+import { attentionBlockers } from '../attention/selectors.js'
+import type { AttentionResult } from '../attention/types.js'
 import type { ProfileMeta, ProfileModule } from '../config/define.js'
 import { declaredPhases, type AreaId, type PhaseReadinessResult } from '../config/phases.js'
 import type { AreaClosing, World } from '../events/fold.js'
@@ -24,13 +26,14 @@ export type PhaseViewInput = {
   now: string
   /** The current plan; readiness that depends on it is not ready while it is absent. */
   plan: Plan | null
+  attention?: AttentionResult
 }
 
 /**
  * Derives every declared phase's status from the folded phase facts, the profile dates, and an
  * explicit `now`. It runs after `derive`, which stays clock-free (D15, D26).
  */
-export function derivePhaseView(input: PhaseViewInput): readonly PhaseView[] {
+export function derivePhaseStatus(input: Omit<PhaseViewInput, 'plan' | 'attention'>): readonly PhaseView[] {
   const now = utcInstant(input.now)
   return [...declaredPhases(input.modules).values()].map((phase) => {
     const area = input.world.phase_facts.areas[phase.area]
@@ -53,17 +56,28 @@ export function derivePhaseView(input: PhaseViewInput): readonly PhaseView[] {
       area: phase.area,
       status,
       target_at: targetAt,
-      readiness: phase.readiness?.({ world: input.world, plan: input.plan }) ?? { ready: true },
+      readiness: { ready: true },
       closed: latestClosing ? { seq: latestClosing.seq, at: latestClosing.at } : null,
     }
   })
+}
+
+/** Status precedes attention; readiness selects its explicit operation policy. */
+export function derivePhaseView(input: PhaseViewInput): readonly PhaseView[] {
+ return derivePhaseStatus(input).map(view => {
+  const definition = declaredPhases(input.modules).get(view.phase)!
+  if (!definition.readiness) return view
+  if (!input.attention) return { ...view, readiness: definition.readiness({world: input.world,plan: input.plan}) }
+  const blockers = attentionBlockers(input.attention,view.area === 'accommodation' ? 'close-accommodation' : 'close-workshops')
+  return { ...view, readiness: blockers.length ? { ready: false as const, findings: blockers.map(item=>({id:item.id,subject_id:item.subjects[0]?.id??null,message:item.wording.detail})) } : { ready: true as const } }
+ })
 }
 
 /**
  * Normalises a UTC instant (`…Z`, with or without milliseconds) to one fixed-width form, so
  * instants compare as strings without a clock read in this pure module.
  */
-function utcInstant(value: string): string {
+export function utcInstant(value: string): string {
   const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d{1,3})?Z$/.exec(value)
   if (!match) throw new Error(`not a UTC instant: ${value}`)
   return `${match[1]}${(match[2] ?? '.').padEnd(4, '0')}Z`

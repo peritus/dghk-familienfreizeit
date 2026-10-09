@@ -1,3 +1,4 @@
+import type { AttentionResult } from '../../attention/types.js'
 import { createContext, useContext, type Dispatch } from 'react'
 import type { World } from '../../events/fold.js'
 import type { EventDraft } from '../../events/types.js'
@@ -11,6 +12,7 @@ export type OrganiserContextValue = {
   dispatch: Dispatch<OrganiserAction>
   stage: (events: readonly EventDraft[]) => void
   apply: () => Promise<void>
+  attention?: AttentionResult
   current_plan?: Plan | null
   /** Effective organiser features (spec/architecture/features.md §4); absent means all built. */
   effective_features?: ReadonlySet<string>

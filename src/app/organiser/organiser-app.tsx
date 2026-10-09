@@ -1,7 +1,8 @@
+import { profileAttention } from '../../attention/profile.js'
 import { admitProfileProposal } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { ErrorState } from '../components/shared/ui/screen-state.js'
-import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { activeProfile } from '../../config/index.js'
 import { buildRevision, compatibilityRevision } from '../../config/build.js'
@@ -16,7 +17,7 @@ import {
   effectiveFeatureIds,
   sameFeatureOverrides,
 } from '../../derive/features.js'
-import { derivePhaseView, phaseActivation } from '../../derive/phases.js'
+import { derivePhaseView, derivePhaseStatus, phaseActivation } from '../../derive/phases.js'
 import { OrganiserFrame, OrganiserMinimalFrame } from './organiser-frame.js'
 import {
   draftCount,
@@ -89,7 +90,16 @@ const FamilyDetail = lazy(() =>
   import('./screens/family-detail.js').then((module) => ({ default: module.FamilyDetail })),
 )
 
+const evaluateAttention = profileAttention(activeProfile)
+
 export default function OrganiserApp({ profile }: { profile?: ProfilePresentation }) {
+  const [now,setNow]=useState(()=>new Date().toISOString())
+  useEffect(()=>{
+    const refresh=()=>setNow(new Date().toISOString())
+    const interval=window.setInterval(refresh,1000)
+    window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh)
+    return ()=>{window.clearInterval(interval);window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh)}
+  },[])
   const [state, dispatch] = useReducer(organiserReducer, initialOrganiserState)
 
   const stage = useCallback((events: readonly EventDraft[]) => {
@@ -194,18 +204,17 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     })
   }, [derivation.world, state])
 
-  const phaseView = useMemo(
+  const phaseStatus = useMemo(
     () =>
       derivation.world
-        ? derivePhaseView({
+        ? derivePhaseStatus({
             modules: activeProfile.modules,
             meta: activeProfile.meta,
             world: derivation.world,
-            now: new Date().toISOString(),
-            plan: currentPlan,
+            now,
           })
         : [],
-    [derivation.world, currentPlan],
+    [derivation.world, now],
   )
 
   const effectiveFeatures = useMemo(
@@ -216,13 +225,16 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
               modules: activeProfile.modules,
               world: derivation.world,
               overrides: state.feature_overrides,
-              phase_active: phaseActivation(phaseView),
+              phase_active: phaseActivation(phaseStatus),
               principal: 'organiser',
             }),
           )
         : new Set<string>(),
-    [derivation.world, phaseView, state.feature_overrides],
+    [derivation.world, phaseStatus, state.feature_overrides],
   )
+
+  const attention=useMemo(()=>evaluateAttention({domain:derivation.world?'available':state.status==='loading'?'loading':'invalid-proposal',world:derivation.world,plan:currentPlan,profile:activeProfile,build_revision:state.build_revision??buildRevision,locale:activeProfile.meta.locale,now,audience:'organiser',effective_features:effectiveFeatures,basis:{mode:state.drafts.length?'prospective':'committed',group_ids:[]}}),[derivation.world,currentPlan,state.build_revision,state.drafts.length,state.status,effectiveFeatures,now])
+  const phaseView=useMemo(()=>derivation.world?derivePhaseView({world:derivation.world,modules:activeProfile.modules,meta:activeProfile.meta,plan:currentPlan,now,attention}):[],[derivation.world,currentPlan,now,attention])
 
   const apply = useCallback(async () => {
     if (!state.build_revision || state.compatibility_revision === null) return
@@ -348,6 +360,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         dispatch,
         stage,
         apply,
+        attention,
         current_plan: currentPlan,
         effective_features: effectiveFeatures,
         phases: phaseView,

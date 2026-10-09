@@ -8,4 +8,9 @@ export function attentionComplete(result: AttentionResult, area?: AttentionArea)
 }
 export function attentionAllClear(result: AttentionResult): boolean { return attentionComplete(result) && selectAttention(result, { actionable: true }).length === 0 }
 export function attentionBlockers(result: AttentionResult, operation: AttentionOperation) { return result.items.filter(item => item.blocks.includes(operation)) }
-export function acknowledgementFingerprint(result: AttentionResult): string { return canonical(result.items.filter(item => item.acknowledgement !== null).map(item => item.acknowledgement!.fingerprint).sort()) }
+export function acknowledgementFingerprint(result: AttentionResult): string {
+ const content=canonical(result.items.filter(item=>item.acknowledgement!==null).map(item=>item.acknowledgement!.fingerprint).sort())
+ let hash=14695981039346656037n
+ for(const char of content)hash=BigInt.asUintN(64,(hash^BigInt(char.codePointAt(0)!))*1099511628211n)
+ return hash.toString(16).padStart(16,'0')
+}
