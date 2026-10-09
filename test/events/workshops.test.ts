@@ -387,7 +387,7 @@ describe('workshop domain events', () => {
         {
           family_id: 'fam_a',
           email: 'family@example.test',
-          display_name: 'Familie A',
+          display_name: 'A',
           locale: 'de',
         },
         1,
@@ -440,7 +440,7 @@ describe('workshop domain events', () => {
   const personEvents: Event[] = [
     event(
       'FamilyInvited',
-      { family_id: 'fam_a', email: 'family@example.test', display_name: 'Familie A', locale: 'de' },
+      { family_id: 'fam_a', email: 'family@example.test', display_name: 'A', locale: 'de' },
       1,
     ),
     event(
@@ -598,7 +598,7 @@ describe('workshop domain events', () => {
           {
             family_id: 'fam_a',
             email: 'family@example.test',
-            display_name: 'Familie A',
+            display_name: 'A',
             locale: 'de',
           },
           2,

@@ -7,7 +7,7 @@ WorkshopSpaceAdded workshop_space_id="wsp_wiese" name="Wiese" location_descripti
 WorkshopSlotAdded slot_id="slot_morgen" starts_at="2027-05-01T09:00:00+02:00" ends_at="2027-05-01T11:00:00+02:00" sort_key=1
 WorkshopAdded workshop_id="wks_ton" title="Ton" description="Schalen aus Ton." audience="all" age_min=0 age_max=120 capacity=4 participation_mode="assigned" sort_key=1
 WorkshopAdded workshop_id="wks_wald" title="Wald" description="Spuren lesen." audience="all" age_min=0 age_max=120 capacity=4 participation_mode="assigned" sort_key=2
-FamilyInvited family_id="fam_linde" email="linde@example.test" display_name="Familie Linde" locale="de"
+FamilyInvited family_id="fam_linde" email="linde@example.test" display_name="Linde" locale="de"
 PersonAdded person_id="per_ada" family_id="fam_linde" given_name="Ada" family_name="Linde" age=40 role="adult"
 PersonAdded person_id="per_bo" family_id="fam_linde" given_name="Bo" family_name="Linde" age=42 role="adult"
 LabelSet entity_id="per_ada" key="prefers-workshop" value="wks_ton:1" strength=#null note=#null

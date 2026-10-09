@@ -58,7 +58,7 @@ const familyInvited = {
   payload: {
     family_id: 'fam_close',
     email: 'close@example.test',
-    display_name: 'Familie Schluss',
+    display_name: 'Schluss',
     locale: 'de',
   },
 }
