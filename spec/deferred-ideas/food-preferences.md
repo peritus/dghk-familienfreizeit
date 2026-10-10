@@ -63,7 +63,9 @@ Module-owned label keys: none.
 | Allergies | `allergies_trait` | `property`, scope `person`, value `text()`, cardinality zero or one, sensitivity `restricted` |
 
 "Exactly one" is enforced as: setting a diet replaces the current value in the same
-append, and a person without a diet appears on the chase list. Allergy text is
+append. A person without a diet contributes to aggregate optional-response
+progress under the [shared statistics contract](attention-progress-statistics.md);
+the food report does not create an organiser chase list. Allergy text is
 retained exactly as entered, including quantities and wording such as `1 x Eier`;
 the module never parses it.
 
@@ -77,7 +79,9 @@ None.
 
 ## 9. Preflight checks
 
-None. A missing diet is a chase-list item, not a plan diagnostic.
+None. A missing diet is optional response progress, not a plan diagnostic or an
+organiser chase-list item. Aggregate counts belong to the
+[shared statistics contract](attention-progress-statistics.md).
 
 ## 10. Output and diff
 
@@ -88,7 +92,6 @@ type FoodSummary = {
   by_diet: readonly { diet: string, persons: number }[]            // profile vocabulary order
   by_day: readonly { date: string, by_diet: readonly { diet: string, persons: number }[] }[]
   with_allergies: number
-  missing_diet: readonly string[]                                   // person ids, sorted
 }
 ```
 
@@ -99,9 +102,9 @@ Counts use people who are not withdrawn.
 | Kind | Contribution |
 |---|---|
 | Controls | The diet trait uses `choice`; the allergies trait uses `free-text` ([family preferences](../modules/family-preferences.md)) |
-| Screen | Diet and allergy columns on family detail; missing diets on the chase list |
+| Screen | Diet and allergy columns on family detail; aggregate response progress follows the [shared statistics contract](attention-progress-statistics.md) |
 | Reports | Food service overview (aggregates, may be shared); allergy and safety sheet (organiser-only, restricted); food part of the family information sheet ([reports](../application/reports.md) §3) |
-| Emails | Reminder copy may name people without a diet |
+| Emails | Future family-facing prompts may describe the family's own optional unanswered diet control |
 
 Own food values are current after every save, independent of any closing.
 Aggregate diet counts may be shared. Individual allergy text never leaves organiser
@@ -116,6 +119,6 @@ and own-family views.
 
 ## 13. When not selected
 
-The deferred food reports, columns, and chase-list entries are absent. Profiles
+The deferred food reports and columns are absent. Profiles
 may still use the generic family-preferences `choice` and `free-text` controls
 for person-scoped food properties when those traits are configured.

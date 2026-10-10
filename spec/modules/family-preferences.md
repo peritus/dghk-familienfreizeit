@@ -144,9 +144,9 @@ None.
 | Kind | Contribution |
 |---|---|
 | Family view | The preferences page ([family view](../application/family-view.md) §1, [UI-03](../ui/screens/family-preferences.md)) |
-| Screen | Preference completion columns and chase-list entries for the organiser ([organiser view](../application/organiser-view.md) §2, §3) |
+| Screen | Aggregate response progress for organisers, deferred to the [shared statistics contract](../deferred-ideas/attention-progress-statistics.md) |
 | Screen | Family detail renders the same control union, editable, organiser-authorised, for phone/email requests ([organiser view](../application/organiser-view.md) §3, D24) |
-| Emails | Reminder copy names what is missing, per person and section |
+| Emails | Future family-facing prompts may describe optional unanswered controls for that family; they do not create an organiser chase list or a completion requirement |
 | Reports | none |
 
 Module-owned controls are placed by `module_controls`, after the section's traits in
