@@ -213,7 +213,7 @@ test('organiser log carries the operational feature overrides', async () => {
   })
 })
 
-test('capacity admission agrees across organiser and generic append and never partially saves', async () => {
+test('capacity edits are accepted through organiser and generic append without changing sign-ups', async () => {
   const cookie = await organiserCookie(),
     headers = { cookie, origin: 'http://localhost', 'content-type': 'application/json' }
   const workshop = {
@@ -282,53 +282,43 @@ test('capacity admission agrees across organiser and generic append and never pa
     type: 'LabelSet',
     payload: { entity_id: 'wks_capacity', key: 'capacity', value: 0, strength: null, note: null },
   }
-  for (const response of [
-    await apply(4, [
-      {
-        type: 'FamilyDisplayNameChanged',
-        payload: {
-          family_id: 'fam_capacity',
-          old_display_name: 'Kapazität',
-          new_display_name: 'Entwurf',
-        },
-      },
-      lowering,
-    ]),
-    await app.request(
-      '/api/events',
-      { method: 'POST', headers, body: JSON.stringify({ expected_head: 4, events: [lowering] }) },
-      organiserEnv,
-    ),
-  ]) {
-    expect(response.status).toBeGreaterThanOrEqual(400)
-    expect(await response.json()).toMatchObject({
-      error: 'attention_required',
-      findings: [
-        expect.objectContaining({
-          code: 'official-workshops.capacity-reduction-invalid',
-          evidence: expect.objectContaining({ capacity: 0, attendance: 1 }),
-          blocks: ['capacity-reduction'],
-        }),
-      ],
-    })
-    expect((await readEvents(env.DB, luebben2027Profile.validation_view)).length).toBe(4)
-  }
-  // Capacity-preserving restatements remain legal despite pre-existing overflow.
   expect(
     (
       await apply(4, [
-        { type: 'WorkshopUpdated', payload: { ...workshop, title: 'Metadaten', capacity: 2 } },
+        {
+          type: 'FamilyDisplayNameChanged',
+          payload: {
+            family_id: 'fam_capacity',
+            old_display_name: 'Kapazität',
+            new_display_name: 'Entwurf',
+          },
+        },
+        lowering,
       ])
     ).status,
   ).toBe(200)
+  const generic = await app.request(
+    '/api/events',
+    { method: 'POST', headers, body: JSON.stringify({ expected_head: 6, events: [lowering] }) },
+    organiserEnv,
+  )
+  expect(generic.status).toBe(201)
+  const saved = await readEvents(env.DB, luebben2027Profile.validation_view)
+  expect(saved).toHaveLength(7)
+  expect(
+    saved.some(
+      (event) =>
+        event.type === 'LabelSet' &&
+        event.payload !== null &&
+        typeof event.payload === 'object' &&
+        !Array.isArray(event.payload) &&
+        event.payload.key === 'signed-up-for',
+    ),
+  ).toBe(true)
+  // A stale head is still rejected after both accepted capacity edits.
   const race = await apply(4, [lowering])
   expect(race.status).toBe(409)
   expect(await race.json()).toMatchObject({ error: 'stale_head' })
-  const clear = {
-    type: 'LabelCleared',
-    payload: { entity_id: 'per_capacity', key: 'signed-up-for', value: null },
-  }
-  expect((await apply(5, [clear, lowering])).status).toBe(200)
 })
 test('field failures return structured sanitized findings and preserve the event head', async () => {
   const response = await app.request(

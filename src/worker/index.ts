@@ -1,11 +1,6 @@
 import { EventInputError } from '../events/types.js'
 import { eventInputFindings } from '../organiser/proposal.js'
-import {
-  admitProfileProposal,
-  CapacityReductionError,
-  capacityReductionFinding,
-  appendInvariantFindings,
-} from '../organiser/proposal.js'
+import { admitProfileProposal, appendInvariantFindings } from '../organiser/proposal.js'
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
@@ -304,16 +299,6 @@ app.post('/api/organiser/apply', async (context) => {
         },
         400,
       )
-    if (error instanceof CapacityReductionError)
-      return context.json(
-        {
-          error: 'attention_required',
-          findings: [
-            capacityReductionFinding(error, activeProfile, buildRevision, new Date().toISOString()),
-          ],
-        },
-        409,
-      )
     if (error instanceof WorkshopReviewRequiredError)
       return context.json({ error: 'workshop_review_required', findings: error.findings }, 409)
     if (error instanceof AreaNotReadyError)
@@ -420,14 +405,6 @@ app.post('/api/events', async (context) => {
     await appendEventBatch(context, expectedHead, events)
     return context.json({ head: expectedHead + events.length }, 201)
   } catch (error) {
-    if (principal.kind === 'organiser' && error instanceof CapacityReductionError)
-      return context.json(
-        {
-          error: 'attention_required',
-          findings: [capacityReductionFinding(error, activeProfile, buildRevision, now)],
-        },
-        409,
-      )
     if (principal.kind === 'organiser' && error instanceof EventInputError)
       return context.json(
         {

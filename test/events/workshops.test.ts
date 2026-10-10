@@ -1,4 +1,4 @@
-import { admitProfileProposal, CapacityReductionError } from '../../src/organiser/proposal.js'
+import { admitProfileProposal } from '../../src/organiser/proposal.js'
 import { describe, expect, test } from 'vitest'
 import { defineOccasionProfile } from '../../src/config/define.js'
 import { derive } from '../../src/events/fold.js'
@@ -381,7 +381,7 @@ describe('workshop domain events', () => {
     ).toThrow(/overlaps or touches/)
   })
 
-  test('blocks a capacity reduction below live sign-ups', () => {
+  test('accepts a capacity reduction below live sign-ups', () => {
     const events = [
       event(
         'FamilyInvited',
@@ -441,7 +441,7 @@ describe('workshop domain events', () => {
         build_revision: 'test',
         compatibility_revision: 1,
       }),
-    ).toThrow(CapacityReductionError)
+    ).not.toThrow()
   })
 
   const personEvents: Event[] = [

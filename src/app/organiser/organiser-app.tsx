@@ -11,8 +11,6 @@ import { derive, AppendInvariantError } from '../../events/fold.js'
 import { profileAttention } from '../../attention/profile.js'
 import {
   admitProfileProposal,
-  CapacityReductionError,
-  capacityReductionFinding,
   appendInvariantFindings,
 } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
@@ -228,15 +226,6 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
                   })?.id,
                 )
               : [],
-        failure:
-          error instanceof CapacityReductionError
-            ? capacityReductionFinding(
-                error,
-                activeProfile,
-                revision ?? buildRevision,
-                new Date().toISOString(),
-              )
-            : null,
         world: null,
         error: 'Die geplanten Änderungen können so nicht geprüft werden.',
       }
@@ -329,7 +318,6 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         rejected_findings: associateFindingGroups(
           [
             ...(state.attention_errors ?? []),
-            ...(derivation.failure ? [derivation.failure] : []),
             ...(derivation.failures ?? []),
           ],
           state.drafts,
@@ -365,7 +353,6 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       effectiveFeatures,
       now,
       closedChanges,
-      derivation.failure,
       derivation.failures,
     ],
   )

@@ -193,12 +193,6 @@ const cases: Record<string, () => AttentionContext> = {
       },
     ],
   }),
-  'official-workshops.capacity-reduction-invalid': () => ({
-    ...clean,
-    capacity_rejections: [
-      { workshop_id: 'wks_a', capacity: 0, attendance: 1, attendance_changed: true },
-    ],
-  }),
   'official-workshops.zero-capacity': () => context([...entries, label('wks_a', 'capacity', 0)]),
   'official-workshops.age-advisory': () =>
     context([...entries, label('wks_a', 'audience', 'adults'), label('wks_a', 'age-min', 0)]),

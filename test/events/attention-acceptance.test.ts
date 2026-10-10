@@ -10,7 +10,7 @@ import {
   attentionBlockers,
   acknowledgementFingerprint,
 } from '../../src/attention/selectors.js'
-import { admitProfileProposal, CapacityReductionError } from '../../src/organiser/proposal.js'
+import { admitProfileProposal } from '../../src/organiser/proposal.js'
 import {
   roomFeasibility,
   buildRoomAssignmentInput,
@@ -258,7 +258,7 @@ test('semantic acknowledgement ignores locale and unrelated sequence; relevant e
   ])
   expect(acknowledgementFingerprint(evaluator(fixed))).not.toBe(token)
 })
-test('D30 checks automatic attendance, generic capacity writes and exact batch prefixes', () => {
+test('D30 accepts capacity changes and recomputes automatic attendance from the new input', () => {
   const entries = [
     family,
     person('per_a'),
@@ -270,16 +270,28 @@ test('D30 checks automatic attendance, generic capacity writes and exact batch p
   ]
   const committed = log(entries),
     decrease = label('wks_a', 'capacity', 1)
-  expect(() => admitProfileProposal(committed, [decrease], profile, revisions)).toThrow(
-    CapacityReductionError,
-  )
+  const beforeWorld = derive(committed, profile.validation_view)
+  const after = admitProfileProposal(committed, [decrease], profile, revisions)
+  const contributions = composeSolverContributions(profile)
+  const plan = (world: ReturnType<typeof derive>) =>
+    solve(buildSolverInput(world, contributions), contributions, {
+      ...revisions,
+      event_date: profile.meta.starts_on,
+      profile,
+      seed: null,
+    })
+  const beforeAssignments = (
+    plan(beforeWorld).sections['workshop-assignment'] as { assignments: unknown[] }
+  ).assignments
+  const afterAssignments = (
+    plan(after.world).sections['workshop-assignment'] as { assignments: unknown[] }
+  ).assignments
+  expect(afterAssignments.length).toBeLessThan(beforeAssignments.length)
   const remove = event('LabelCleared', { entity_id: 'per_b', key: 'prefers-workshop', value: null })
   expect(() =>
     admitProfileProposal(committed, [remove, decrease], profile, revisions),
   ).not.toThrow()
-  expect(() => admitProfileProposal(committed, [decrease, remove], profile, revisions)).toThrow(
-    CapacityReductionError,
-  )
+  expect(() => admitProfileProposal(committed, [decrease, remove], profile, revisions)).not.toThrow()
   expect(() =>
     admitProfileProposal(committed, [label('wks_a', 'capacity', 3)], profile, revisions),
   ).not.toThrow()

@@ -83,12 +83,6 @@ export type AttentionContext = {
   audience: 'organiser' | 'family' | 'shared'
   effective_features?: ReadonlySet<string>
   basis?: { mode: 'committed' | 'prospective'; group_ids: readonly string[] }
-  capacity_rejections?: readonly {
-    workshop_id: string
-    capacity: number
-    attendance: number
-    attendance_changed: boolean
-  }[]
   rejected_findings?: readonly AttentionItem[]
   operations?: readonly {
     id: string

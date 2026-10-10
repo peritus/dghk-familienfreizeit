@@ -6,20 +6,6 @@ function summary(c: AttentionContext) {
   if (!value) throw new Error('missing workshop facts')
   return value as OfficialWorkshopsSummary
 }
-export const capacityReductionCheck = check(
-  'official-workshops.capacity-reduction-invalid',
-  'official-workshops',
-  [
-    'Kapazitätsverringerung würde die Teilnahme ändern',
-    'Capacity reduction would change attendance',
-  ],
-  (c) =>
-    (c.capacity_rejections ?? []).map((r) =>
-      fact(c, [r.workshop_id], [r.workshop_id], { ...r }, { blocks: ['capacity-reduction'] }),
-    ),
-  { requires: [], severity: 'error', scopes: ['operation', 'workshop'] },
-)
-
 export function workshopAgeAdvisory(
   w: Pick<OfficialWorkshopsSummary['workshops'][number], 'audience' | 'age_min' | 'age_max'>,
 ): boolean {
@@ -29,7 +15,6 @@ export function workshopAgeAdvisory(
 }
 
 export const officialWorkshopAttention = [
-  capacityReductionCheck,
   check(
     'official-workshops.zero-capacity',
     'official-workshops',
