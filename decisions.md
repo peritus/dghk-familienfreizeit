@@ -748,32 +748,41 @@ behavior being demonstrated.
 *Consequence:* Repository-wide fixture and example searches must not reintroduce
 the removed surname; new examples follow the same neutral-identity rule.
 
-## D30 — Workshop capacity reduction blocks, never displaces
+## D30 — Workshop capacity is solver input; Festlegen snapshots the result
 
-*Chosen.* Capacity edits are previewed through the ordinary pure derivation and
-solver. A reduction is accepted only when it does not fall below current distinct
-attendance and the complete person-to-workshop attendance set is unchanged by
-that transition. Otherwise the reduction is rejected. No accepted reduction
-displaces, adds, or reassigns attendance. No assignment snapshot or implicit fixed
-decision is created to preserve an earlier result.
+*Chosen.* Workshop capacity is input to the ordinary derivation and solver. A
+capacity edit is accepted even when it makes explicit sign-ups or fixed
+attendance exceed capacity, or changes the solver's automatic assignments. On
+each derivation, the solver recomputes automatic attendance from the current
+inputs and capacity. It may move a solver-assigned person to another ranked
+workshop or leave them unassigned. This recomputation does not rewrite
+sign-ups or organiser-authored fixed attendance; those remain explicit inputs
+and their conflicts with capacity remain visible.
 
-*Rejected alternative:* recompute and displace or reassign affected people using
-fairness rules. This would silently move people who were never touched by the
-capacity edit, and it conflicts with fixed attendance decisions being meant to
-take precedence over automatic ones ([D4](#d4--stable-sorted-greedy-not-integer-programming)):
-an automatic reassignment pass has no principled way to leave fixed decisions
-alone while still resolving the overflow.
+The solver's current result and a plan that has been *festgelegt* are separate
+mechanisms. *Festlegen* stores a snapshot of the solver result at that event-log
+prefix. Later input or capacity edits recompute the current result but do not
+rewrite the stored snapshot; the difference between the current result and the
+snapshot remains available for review.
 
-*Rejected alternative:* select the reduction behavior through occasion-profile
-policy. Only one profile is active today, so the flexibility has no consumer,
-and branching solver behavior on a profile-selected policy value risks becoming
-the kind of runtime-supplied executable rule occasion configuration must not
-contain ([modules/contract.md](spec/modules/contract.md) §1 kernel/profile
-boundary).
+*Rejected alternative:* reject capacity edits that exceed current attendance or
+change automatic assignments. Capacity is an input to recomputation, so rejecting
+an input change to preserve a derived result would prevent the solver from
+responding to the current data.
 
-*Consequence:* the capacity editor must surface the over-capacity state clearly
-(so organisers can see and resolve it) rather than hiding it behind a silently
-correct-looking number. This closes [issue 036](spec/issues/archived/036-workshop-capacity-reduction-policy.md).
+*Rejected alternative:* rewrite sign-ups or fixed attendance to make the new
+capacity appear satisfied. These are explicit inputs authored outside the
+solver; only solver-assigned attendance is fluid during recomputation.
+
+*Rejected alternative:* select capacity-reduction behavior through
+occasion-profile policy. There is no current consumer for that flexibility, and
+the decision about which attendance is an explicit input versus a solver output
+belongs to the shared domain contract, not an occasion-specific executable rule
+([modules/contract.md](spec/modules/contract.md) §1 kernel/profile boundary).
+
+*Consequence:* over-capacity remains visible when explicit attendance exceeds
+capacity. The current solver result may differ from the *festgelegt* snapshot
+after later edits. This closes [issue 036](spec/issues/archived/036-workshop-capacity-reduction-policy.md).
 
 ## D31 — Automatic workshop attendance is limited to chosen workshops
 

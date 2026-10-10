@@ -278,15 +278,13 @@ Each is submitted here for review, per `AGENTS.md`.
 | [`D14`](../../../decisions.md#d14--family_facing-in-the-occasion-profile-drives-the-family-view) | "every trait that declares `family_facing` produces a control, in profile order" stops holding once availability gates controls | Amend to: every such trait produces a control where its governing feature is effective, in profile order |
 | [`D24`](../../../decisions.md#d24--every-family-self-service-action-has-an-organiser-equivalent) | A per-audience feature could satisfy a family action with no organiser equivalent | Encode the pairing in the feature contract so composition fails rather than drifting |
 
-[`D30`](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces)
-is not amended but must be answered. It rejected a profile-selected policy value,
-reasoning that branching behavior on profile policy "risks becoming the kind of
-runtime-supplied executable rule occasion configuration must not contain", and
-that with one active profile the flexibility had no consumer. A feature contract
-with selection and fixed policy enums must explain why it differs — the honest
-distinction being that feature selection changes whether a capability is offered,
-not how the solver computes a result — or D30 reads as precedent against this
-issue.
+[`D30`](../../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result)
+sets a shared domain rule for workshop capacity: capacity is solver input,
+automatic attendance is recomputed, and explicit attendance remains unchanged.
+It rejects profile-selected capacity-reduction behavior because that shared
+solver contract should not vary by occasion profile. This does not conflict with
+feature selection: feature availability determines whether a capability is
+offered, not how the solver computes attendance.
 
 [`D11`](../../../decisions.md#d11--resolver-mechanisms-and-vocabulary-live-in-code-organiser-values-live-in-the-event-log)
 and [`D12`](../../../decisions.md#d12--weights-live-in-code) are cited as
@@ -400,11 +398,11 @@ Decision amendments: [D14](../../../decisions.md#d14--family_facing-in-the-occas
 [D24](../../../decisions.md#d24--every-family-self-service-action-has-an-organiser-equivalent)
 are amended as proposed, together with the narrowed statements in
 [`profiles/contract.md`](../../profiles/contract.md) and
-[`architecture/overview.md`](../../architecture/overview.md). D30 is not
-amended here; whether the feature model reopens its rejection of
-profile-selected policy is reviewed separately in
-[046](../open/046-d30-review-against-feature-model.md). The feature contract
-carries no solver policy values, so it does not depend on that review.
+[`architecture/overview.md`](../../architecture/overview.md). D30's shared
+capacity and solver contract is described above; the separate review in
+[046](../open/046-d30-review-against-feature-model.md) concerns only whether
+that rule needs an occasion-profile option. The feature contract carries no
+solver policy values, so it does not depend on that review.
 
 ## Related files
 

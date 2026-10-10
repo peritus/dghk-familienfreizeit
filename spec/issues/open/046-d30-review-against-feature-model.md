@@ -14,23 +14,23 @@ opened: 2026-10-06
 
 ## Problem
 
-[D30](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces)
-chose that a capacity reduction below current attendance is rejected outright.
-Its second rejected alternative, selecting the reduction behavior through
-occasion-profile policy, gives two reasons:
+[D30](../../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result)
+accepts capacity edits and treats capacity as shared solver input. Automatic
+attendance is recomputed from current inputs, while explicit sign-ups and fixed
+attendance remain unchanged. Its rejected alternative of selecting this behavior
+through occasion-profile policy gives two reasons:
 
 > Only one profile is active today, so the flexibility has no consumer, and
 > branching solver behavior on a profile-selected policy value risks becoming the
 > kind of runtime-supplied executable rule occasion configuration must not contain.
 
-The [feature contract](../../architecture/features.md) now lets the profile
-select among fixed, code-owned features and lets a deployment switch their
-availability. Read literally, D30's second reason argues against that: profile
-data now chooses among code-owned options and changes what the application does.
-The feature contract states the distinction it relies on — selection changes
-whether a capability is offered, never how a result is computed — but D30 itself
-does not draw that line, so it can be read as precedent against the feature
-model, or the feature model as precedent for reopening D30.
+The [feature contract](../../architecture/features.md) lets the profile select
+among fixed, code-owned features and lets a deployment switch their
+availability. Feature availability determines whether a capability is offered;
+D30 concerns how workshop attendance is computed. The remaining question is
+whether this capacity rule should remain shared across profiles or become an
+explicit code-owned profile option, not whether feature selection itself changes
+solver behavior.
 
 ## Evidence
 
@@ -41,24 +41,22 @@ model, or the feature model as precedent for reopening D30.
   and [D12](../../../decisions.md#d12--weights-live-in-code) already allow profile
   data to select among fixed, code-owned options while forbidding executable
   predicates.
-- The chosen D30 behavior is enforced by `validateWorkshop` in
-  `official-workshops` and is not affected by the feature contract.
+- D30's capacity behavior is enforced in proposal admission and ordinary solver
+  derivation; it does not depend on feature availability.
 
 ## Recommendation
 
-Keep D30's chosen behavior unchanged and restate its second rejected alternative
-so that it rests on what actually distinguishes it: capacity-reduction policy
-would change how attendance is computed, which the solver contract keeps in code;
-selecting a code-owned enum is not itself an executable rule, as D11 and D12
-already allow. The "no consumer" reason stays as stated.
+Keep the shared D30 behavior and its distinction from feature availability. If
+an occasion-profile option is ever proposed, define it as a code-owned enum with
+a concrete consumer and amend the solver contract explicitly; profile data must
+not supply executable rules. Today there is no consumer for the added variation.
 
 ## Open questions
 
-1. Restate D30's rationale as recommended, leaving the decision unchanged.
-2. Leave D30 verbatim and rely on the feature contract's own §2 statement.
-3. Reopen the decision itself and make capacity-reduction behavior a
-   profile-selected, code-owned policy enum, which needs a consumer and a solver
-   contract change.
+1. Keep D30 shared across profiles and clarify its boundary from feature
+   availability.
+2. Add an explicit code-owned profile option for capacity-reduction behavior,
+   which needs a concrete consumer and a solver contract change.
 
 ## Dependencies
 

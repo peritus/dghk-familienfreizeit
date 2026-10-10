@@ -15,8 +15,8 @@ opened: 2026-09-29
 ## Problem
 
 The workshop editor allows capacity changes, but reducing capacity below live
-attendance requires a product decision. The event log and derived allocation
-must not silently displace people or silently leave an impossible allocation.
+attendance requires a product decision. The event log keeps explicit attendance
+as input while automatic attendance is recomputed by the solver.
 
 ## Evidence
 
@@ -29,9 +29,9 @@ The workshop contracts need one consistent rule for reductions affecting:
 
 ## Recommendation
 
-Until this issue is resolved, reject a capacity reduction that would make the
-current attendance exceed the new capacity. Keep the editor's alternatives
-visible as an unresolved issue rather than choosing a policy in the solver.
+The resolution must distinguish explicit sign-ups and fixed attendance from
+solver-assigned attendance, and distinguish recomputing the current result from
+the snapshot stored when a plan is *festgelegt*.
 
 ## Open questions
 
@@ -41,17 +41,18 @@ visible as an unresolved issue rather than choosing a policy in the solver.
 
 ## Resolution
 
-Resolved as [D30](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces):
-option 1. A capacity reduction that would put current attendance (solver
-assignments, live sign-ups, or fixed attendance decisions) over the new
-capacity is rejected outright; existing attendance names are preserved
-unchanged and no recomputation, displacement, or profile-configurable policy
-is applied. `official-workshops`' `validateWorkshop` already enforced this as
-an interim rule; it now cites D30 instead of this issue.
+Resolved as [D30](../../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result):
+capacity edits are accepted. Each derivation recomputes solver-assigned
+attendance from current inputs and capacity; automatic assignments may move to
+another ranked workshop or become unassigned. Explicit sign-ups and
+organiser-authored fixed attendance are not rewritten, and any resulting
+over-capacity state remains visible. *Festlegen* stores a snapshot at its event
+prefix; later edits recompute the current result without changing that snapshot.
 
 ## Related files
 
 - [official workshops](../../../docs/modules/official-workshops.md)
 - [workshop attendance](../../modules/workshop-assignment.md)
+- [phase and snapshot behavior](../../../docs/architecture/phases.md)
 - `release control`
 - [workshops UI](../../ui/screens/workshops.md)
