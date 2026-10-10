@@ -1,91 +1,70 @@
 ---
 id: "023"
-title: ModuleContributions is missing most of the contract's contribution kinds
+title: Module contribution API still has contract gaps
 status: open
 severity: gap
 category: kernel
 source: M4 readiness assessment
 related_decisions: []
-related_milestones: [M2, M5, M6, M7, M8, M9, M10, M11, M12, M14]
+related_milestones: [M12, M13, M14]
 opened: 2026-09-21
 ---
 
-# ModuleContributions is missing most of the contract's contribution kinds
+# Module contribution API still has contract gaps
 
 ## Problem
 
-[`modules/contract.md`](../../modules/contract.md) defines the contribution
-surface a selected module may provide. The first consumers now exist, but the
-contract and runtime still need to stay aligned as each new contribution kind is
-introduced.
+[`modules/contract.md`](../../modules/contract.md) describes a broader module
+contribution API than the runtime currently exposes in
+[`ModuleContributions`](../../../src/config/define.ts#L209-L243). The runtime
+already supports `family_controls`, `phases`, and `closed_results`; they are not
+remaining gaps. It still has no fields for `event_mappings`,
+`typed_contributions`, `change_kinds`, `emails`, or `fixtures`.
 
-The remaining direct fields absent from the runtime type are `phases`,
-`closed_results`, `change_kinds`, `family_controls`, `emails`, and `fixtures`. A module cannot
-contribute those through `defineOccasionProfile` until their real consumers exist.
-
-The contract's contribution-kind table also describes `event_mappings` and
-`typed_contributions`, but they are not fields on the interface at all. The
-repository therefore needs to decide whether those are deliberately internal
-composition boundaries or additional typed API fields. This is a separate
-contract-shape mismatch from the ten absent direct fields.
+Some existing fields also expose narrower shapes than the contract describes:
+`routes` carries only a route string, `screens` currently allows organiser
+screens, and `reports` carries only an id. The contract describes worker route
+handlers, organiser or family screens, and report definitions with audience and
+sensitivity. The runtime and contract therefore need to be reconciled at those
+boundaries as well.
 
 ## Evidence
 
-The inventory slice requires "buildings,
-rooms, beds, places, capacity, retirement, room labels, **and
-inventory world summaries", and the organiser inventory screen. Its report
-contribution is consumed by the report host in M11 rather than being an M5
-acceptance requirement. The end-to-end rule in [issue 019](../archived/019-module-delivery-needs-surface-staging.md)
-still requires each intended audience's surface to be usable in its owning
-milestone. Other fields remain deferred until their first real caller exists.
-
-This is the direct sibling of [issue 021](../archived/021-module-owned-entity-fold-boundary.md):
-that issue closed the gap for `entity_kinds`/`events` specifically because
-M4's inventory events were the immediate blocker; [issues 022](../archived/022-module-event-authorization-contribution-gap.md)
-and [024](../archived/024-module-fold-lifecycle-gap.md) later closed the
-authorization and lifecycle gaps within those same two kinds. The remaining
-ten direct kinds have the same problem this issue originally described —
-declared in the module contract, unimplemented in `defineOccasionProfile` —
-but they are not all equally urgent. No selected module can use them until the
-corresponding consumer and composition checks exist.
+- `family_controls` is validated during profile composition and consumed by the
+  family-preferences module. `phases` and `closed_results` are validated and
+  consumed by the phase configuration. These are implemented in
+  [`define.ts`](../../../src/config/define.ts#L542-L552) and
+  [`phases.ts`](../../../src/config/phases.ts#L58-L72).
+- M12 names profile contribution registration and fixtures as active-profile
+  integration requirements. M13 owns the remaining report catalogue, including
+  differences from a fixed result. M14 owns hosted authentication email
+  delivery; module notification contributions remain deferred.
+- [Issue 024](../archived/024-module-fold-lifecycle-gap.md) records that
+  `event_mappings` is unnecessary until a real module needs declarative identity
+  field mapping. No current consumer has established the runtime shape for
+  `typed_contributions` either.
 
 ## Recommendation
 
-Extend `ModuleContributions` and `defineOccasionProfile` incrementally at the
-first real consumer. Add solver fields with the solver/room-assignment slice,
-screen and family-control fields with the application slices, phase and
-closed-result fields with the [phase contract](../../architecture/phases.md) in M8,
-change fields with their first comparison consumer, reports with the report host, and email
-fields only for active authentication email behavior. Do not add unused fields
-speculatively. Resolve `event_mappings` and `typed_contributions` during the
-same contract review as either internal composition structures or explicit API
-fields.
+Add each missing contribution at its first active consumer rather than adding
+unused fields speculatively: fixture contracts with M12 integration, any needed
+change-kind API with the M13 comparison/report consumer, and email contributions
+only if the active M14 behavior requires module-owned email kinds. Add
+`event_mappings` and `typed_contributions` when a real module needs them, and
+resolve whether routes, screens, and reports carry full definitions or registry
+references in the same contract review. Keep this issue open until those runtime
+and contract shapes agree.
 
 ## Open questions
 
-None.
-
-## M5 progress
-
-The first real screen consumer is now implemented: `ModuleContributions.screens`
-registers the selected module's organiser route, the composition layer checks
-screen-route collisions, and the worker screen registry exposes the selected
-screen. State-aware event invariant validation is also available to module event
-contributions because the inventory fold needs parent and uniqueness checks.
-
-The issue remains open for the unused contribution kinds: phases, closed results, change
-kinds, family controls, emails, fixtures as a typed composition contract, and the unresolved
-`event_mappings`/`typed_contributions` API decision. They should be added only with
-their first real consumers.
-
-## M6 progress
-
-Room assignment now consumes the existing solver contribution fields and registers
-two organiser screens plus the first real module report identifier. The report is a
-module-owned current-state projection; the generic audience-aware report host and
-closed-result contribution fields remain later consumers.
+1. Should `event_mappings` and `typed_contributions` be explicit profile-facing
+   contribution fields, or internal composition boundaries?
+2. Should route, screen, and report contributions carry executable/typed
+   definitions in `ModuleContributions`, or reference definitions registered
+   elsewhere?
 
 ## Related files
 
 - [modules/contract.md](../../modules/contract.md)
 - [roadmap.md](../../roadmap.md)
+- [engineering/testing.md](../../engineering/testing.md)
