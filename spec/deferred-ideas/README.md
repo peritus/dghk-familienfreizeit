@@ -31,6 +31,7 @@ active module path.
 - [Plan inspection and comparison](plan-inspection-and-comparison.md)
 - [Feature availability UI](feature-availability-ui.md)
 - [Demand-aware workshop scheduling](demand-aware-workshop-scheduling.md)
+- [Preference and assignment progress statistics](attention-progress-statistics.md)
 - [Workshop cancellation authoring and history](workshop-cancellation.md)
 
 The `ui/` subdirectory contains non-executable TypeScript examples moved out of
