@@ -44,30 +44,6 @@ export function workshopRankingAttention(maxRank: number) {
       },
     ),
     check(
-      'workshop-rankings.response-missing',
-      'workshop-rankings',
-      ['Workshopantwort nicht dokumentiert', 'Workshop response not recorded'],
-      (c) => {
-        if (!c.world!.phase_facts.opened['workshop-rankings.choice']) return 'not-applicable'
-        const selected = c.profile.modules.find((m) => m.id === 'workshop-rankings')
-        if (
-          c.effective_features
-            ? !c.effective_features.has('workshop-rankings.organiser-workshop-wishes')
-            : selected?.deselected_features.includes('workshop-rankings.organiser-workshop-wishes')
-        )
-          return 'not-applicable'
-        const responded = new Set(rankings(c).map((r) => r.person_id))
-        return c
-          .world!.persons.filter(
-            (p) =>
-              !responded.has(p.id) &&
-              official(c).workshops.some((w) => w.mode === 'assigned' && !eligible(c, p.id, w)),
-          )
-          .map((p) => fact(c, [p.id], [p.id], { field: 'prefers-workshop' }))
-      },
-      { scopes: ['dashboard', 'family', 'allocation'] },
-    ),
-    check(
       'workshop-rankings.invalid-response',
       'workshop-rankings',
       ['Workshopantwort widersprüchlich', 'Inconsistent workshop response'],

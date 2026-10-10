@@ -80,7 +80,7 @@ export function familyPeople(world: World, familyId: string): readonly FamilyPer
     .map((person) => personView(world, person))
 }
 
-/** Completeness selects core/response attention; placement warnings do not change it. */
+/** Family completeness includes required identity and input consistency, not optional responses. */
 export function familyStatus(
   world: World,
   row: FamilyRow,
@@ -90,9 +90,7 @@ export function familyStatus(
   const codes = new Set([
     'kernel.family-without-persons',
     'kernel.child-age-missing',
-    'family-preferences.response-missing',
     'family-preferences.response-inconsistent',
-    'workshop-rankings.response-missing',
     'workshop-rankings.invalid-response',
   ])
   const open = attention.items

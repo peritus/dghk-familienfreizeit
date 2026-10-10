@@ -155,7 +155,7 @@ test('missing plan/head/build and invalid proposals make required coverage unava
     expect(attentionBlockers(evaluator(unavailable), 'close-workshops').length).toBeGreaterThan(0)
   }
 })
-test('none, infancy, unopened choice and one eligible wish do not invent allocation tasks', () => {
+test('unanswered preferences do not create organiser attention', () => {
   const none = context([
     family,
     person('per_a'),
@@ -168,7 +168,6 @@ test('none, infancy, unopened choice and one eligible wish do not invent allocat
   expect(items(none, 'workshop-assignment.shortfall')).toEqual([])
   expect(items(none, 'workshop-rankings.response-missing')).toEqual([])
   const unopened = context([family, person('per_a'), ...resources, workshop('wks_a')])
-  expect(items(unopened, 'workshop-rankings.response-missing')).toEqual([])
   const one = context([
     family,
     person('per_a'),
@@ -177,7 +176,6 @@ test('none, infancy, unopened choice and one eligible wish do not invent allocat
     label('per_a', 'prefers-workshop', { workshop_id: 'wks_a', rank: 1 }),
     event('WorkshopChoiceOpened', {}),
   ])
-  expect(items(one, 'workshop-assignment.shortfall')).toEqual([])
   expect(one.world!.diagnostics.some((d) => d.id === 'kernel.invalid-resolver-value')).toBe(false)
 })
 test('rank inconsistency and partial fulfilment retain exact causes and truthful warning policy', () => {
@@ -210,13 +208,10 @@ test('rank inconsistency and partial fulfilment retain exact causes and truthful
   ])
   expect(items(stale, 'workshop-rankings.stale-selection')[0]?.actions[0]?.kind).toBe('clear-label')
 })
-test('neutral markers replay, reset, timestamps and contradictory held values are explicit', () => {
+test('neutral markers replay and contradictory held values are explicit', () => {
   const key = 'needs-accessible',
     base = [family, person('per_a')]
   const c = context([...base, label('fam_a', `response-${key}`, true)])
-  expect(
-    items(c, 'family-preferences.response-missing').some((i) => i.evidence.field === key),
-  ).toBe(false)
   expect(c.world!.labels.find((l) => l.key === `response-${key}`)?.set_at).toBe(
     '2027-01-01T00:00:00.000Z',
   )
@@ -226,14 +221,6 @@ test('neutral markers replay, reset, timestamps and contradictory held values ar
     label('fam_a', key, 'accessible', 'required'),
   ])
   expect(items(contradictory, 'family-preferences.response-inconsistent')).toHaveLength(1)
-  const reset = context([
-    ...base,
-    label('fam_a', `response-${key}`, true),
-    event('LabelCleared', { entity_id: 'fam_a', key: `response-${key}`, value: null }),
-  ])
-  expect(
-    items(reset, 'family-preferences.response-missing').some((i) => i.evidence.field === key),
-  ).toBe(true)
 })
 test('semantic acknowledgement ignores locale and unrelated sequence; relevant evidence invalidates it', () => {
   const c = context([family, person('per_a'), workshop('wks_a')])

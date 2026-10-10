@@ -46,31 +46,6 @@ export function responseAttention(params: FamilyPreferencesParams) {
     })
   return [
     check(
-      'family-preferences.response-missing',
-      'family-preferences',
-      ['Antwort nicht dokumentiert', 'Response not recorded'],
-      (c) =>
-        rows(c)
-          .filter((r) => r.field.requirement === 'requested' && !r.value && !r.marker)
-          .map((r) =>
-            fact(
-              c,
-              [r.entity.id, r.field.key],
-              [r.entity.id],
-              { field: r.field.key },
-              {
-                title: responseTitle(
-                  c,
-                  r.field.key,
-                  'Antwort nicht dokumentiert',
-                  'Response not recorded',
-                ),
-              },
-            ),
-          ),
-      { areas: ['core'], scopes: ['dashboard', 'family'] },
-    ),
-    check(
       'family-preferences.response-inconsistent',
       'family-preferences',
       ['Neutral und Wunsch zugleich dokumentiert', 'Neutral response and wish both recorded'],

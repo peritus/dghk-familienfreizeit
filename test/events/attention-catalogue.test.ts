@@ -229,7 +229,6 @@ const cases: Record<string, () => AttentionContext> = {
     ]),
   'workshop-rankings.choice-not-opened': () =>
     world(clean, { phase_facts: { ...clean.world!.phase_facts, opened: {} } }),
-  'workshop-rankings.response-missing': () => context(entries.filter((e) => e !== choices[0])),
   'workshop-rankings.invalid-response': () =>
     context([...entries, label('per_a', 'prefers-workshop', { workshop_id: null, rank: null })]),
   'workshop-rankings.stale-selection': () =>
@@ -316,16 +315,6 @@ const cases: Record<string, () => AttentionContext> = {
     context([...entries, label('fam_a', 'needs-accessible', 'accessible', 'required')]),
   'room-assignment.unmet-preference': () =>
     context([...entries, label('fam_a', 'needs-accessible', 'accessible', 'preferred')]),
-  'family-preferences.response-missing': () =>
-    context(
-      entries.filter(
-        (e) =>
-          !(
-            e.type === 'LabelSet' &&
-            (e.payload as Record<string, JsonValue>).key === 'response-needs-accessible'
-          ),
-      ),
-    ),
   'family-preferences.response-inconsistent': () =>
     context([...entries, label('fam_a', 'needs-accessible', 'accessible', 'preferred')]),
   'family-preferences.late-save': () =>
@@ -471,17 +460,4 @@ test('closing advisories explain their cause in both locales', () => {
   expect(english.wording.detail).toContain('minimum age is below 16')
   expect(german.wording.detail).not.toBe(german.wording.title)
   expect(german.id).toBe(english.id)
-})
-
-test('requested response wording names its configured field without changing identity', () => {
-  const context = cases['family-preferences.response-missing']!()
-  const finding = evaluator(context).items.find(
-    (item) => item.code === 'family-preferences.response-missing',
-  )!
-  expect(finding.wording.title).not.toBe('Antwort nicht dokumentiert')
-  expect(finding.wording.title).toContain(': Antwort nicht dokumentiert')
-  expect(
-    evaluator({ ...context, locale: 'en' }).items.find((item) => item.id === finding.id)?.wording
-      .title,
-  ).toContain(': Response not recorded')
 })
