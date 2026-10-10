@@ -102,20 +102,23 @@ agree to, and that is worse than the board being slow.
 ## 2. Canonical KDL event fixtures
 
 Authored event-log inputs use KDL, the project’s restricted command-oriented
-profile described in [the event model](../architecture/events.md). There is one shared
-`loadEventLog(path)` loader. It parses KDL, validates the event payloads and
-replay invariants, and returns the same `Event[]` used by production derivation.
+profile described in [the event model](../architecture/events.md). The shared
+`loadKdl(source, validationView)` loader parses KDL, validates event payloads and
+replay invariants, and returns the `Event[]` used by production derivation.
 
-Every event-driven test uses this loader, including fold and solver tests,
-API tests, D1 integration tests, and the
-browser/Worker agreement test. D1 tests seed their database from the parsed KDL
-events; they do not maintain a second JSON fixture for the same log.
+Event-driven tests should use this loader for fixture-backed cases, including
+fold and solver tests, API tests, D1 integration tests, and the browser/Worker
+agreement test. D1 tests seed their database from the parsed KDL events; they do
+not maintain a second JSON fixture for the same log.
 
 Fold tests assert explicit event mappings rather than deriving expected label keys
 from payload field names. They cover identity-only fields, semantic relationship
 keys, null transitions, full-restatement replacement, and alias normalization.
 
-The canonical fixture tree is:
+The current fixture inventory and verified M8 workshop coverage are documented
+in the [testing guide](../../docs/engineering/testing.md#canonical-kdl-event-fixtures).
+The following reusable event-log scenarios remain planned requirements; these
+names describe targets, not files that currently exist:
 
 ```text
 test/fixtures/event-logs/
@@ -129,7 +132,6 @@ test/fixtures/event-logs/
   infeasible.kdl         trips room-assignment.requirement-arithmetic
   workshop-spaces.kdl    workshop-space add/update/retire and capability facts
   workshop-spaces-invalid.kdl  invalid workshop-space names and capacity
-  workshop-lifecycle.kdl workshops, current-cycle rankings, placements, and attendance
   workshop-lifecycle-conflicted.kdl unscheduled workshops, fixed placements, and separation conflicts
 ```
 

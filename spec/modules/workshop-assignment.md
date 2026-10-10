@@ -20,11 +20,6 @@ See the [implemented attendance contract](../../docs/modules/workshop-assignment
 - Reconcile reservations, individual attendance cancellation, and separation.
   Record for each term whether current behavior covers it,
   it remains active M8 work, or it needs an explicit scope decision.
-- Add the remaining fixtures for capacity races, ranked-round allocation,
-  slot changes, and privacy under [D4](../../decisions.md#d4--stable-sorted-greedy-not-integer-programming),
-  [D30](../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result),
-  and [D31](../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops).
-
 Acceptance: organisers can inspect automatic and explicitly fixed placements
 and attendance, including findings and open-case outcomes; every blocking outcome
 and allocation decision is traceable; each workshop has at most one placement

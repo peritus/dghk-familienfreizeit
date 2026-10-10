@@ -38,8 +38,11 @@ solver behavior.
   and [D12](../../../decisions.md#d12--weights-live-in-code) already allow profile
   data to select among fixed, code-owned options while forbidding executable
   predicates.
-- D30's capacity behavior is enforced in proposal admission and ordinary solver
-  derivation; it does not depend on feature availability.
+- [`admitProfileProposal`](../../../src/organiser/proposal.ts) validates and
+  derives the proposed event batch without imposing a solver-output admission
+  gate. Solver derivation reads the current capacity and recomputes automatic
+  attendance, while explicit sign-ups and fixed attendance remain unchanged.
+  This behavior does not depend on feature availability.
 
 ## Recommendation
 

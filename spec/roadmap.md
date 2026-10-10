@@ -31,11 +31,6 @@ work is limited to the unresolved planning contract:
   programme and allocation contexts, building on the delivered
   [participation matrix](../docs/ui/frontend.md#workshop-participation-overview)
   and traces without creating another workshop state store;
-- complete fixtures for capacity races, deterministic ranked-round allocation,
-  fixed attendance, slot changes, and privacy, exercising the
-  allocation and capacity policies in [D4](../decisions.md#d4--stable-sorted-greedy-not-integer-programming),
-  [D30](../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result),
-  and [D31](../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops);
 - reconcile the workshop contract terms for reservations, individual attendance
   cancellation, and separation. Record whether current behavior
   covers each term, it remains active M8 work, or it requires an explicit scope

@@ -177,6 +177,30 @@ draft events after failure, and promotion of an automatic failure into drafting
 mode. These tests verify commit timing only; event schemas, authorization, replay, and
 atomic append remain Worker responsibilities.
 
+## Canonical KDL event fixtures
+
+Authored event-log fixtures live under `test/fixtures/`, organized by domain.
+The current workshop fixtures are:
+
+- `workshop-assignment/prototype-catalogue.kdl` and
+  `workshop-assignment/prototype-dataset.kdl` provide the catalogue and full
+  prototype dataset. The prototype dataset intentionally has no fixed attendance.
+- `workshop-assignment/ranked-fixed-contention.kdl` exercises a fixed decision
+  claiming capacity before ranked rounds, deterministic competition and trace,
+  explicit sign-ups, capacity reductions, and private facts. Its solver test
+  verifies fixed attendance and sign-ups remain explicit while ranked outcomes
+  recompute, and that family/shared projections omit private facts and opaque
+  fixed-attendance identifiers.
+- `workshop-assignment/slot-retirement.kdl` verifies that replaying a slot
+  retirement moves a workshop placement to the next available slot.
+- `phases/workshop-lifecycle.kdl` exercises workshop choice, closing, reopening,
+  and later person/workshop lifecycle events.
+
+The M8 fixture cases are consumed by
+[`workshop-review-fixtures.test.ts`](../../test/solver/workshop-review-fixtures.test.ts).
+The closed-result tests separately verify that later input edits change the
+current plan without rewriting a stored workshop snapshot.
+
 
 ## Lint coverage
 
