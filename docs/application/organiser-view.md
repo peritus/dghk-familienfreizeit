@@ -189,8 +189,9 @@ Nachfrage compares first choices and ranked demand with configured capacity and
 placement; Verlauf shows deterministic stages and explanations for capacity, overlap,
 leader, eligibility, cancellation, unscheduled, and dropped cases. Group
 filters, person tracing, responsive tables/cards, keyboard tertiary navigation, and
-browser print use shared workshop components. Fixed violations and unassigned people
-remain visible as review notices; the views do not create attendance or roster events.
+browser print use shared workshop components. Fixed violations remain review notices;
+unassigned people remain visible as local allocation outcomes. The views do not
+create attendance or roster events.
 
 The **Teilnahme** route presents a person-by-slot overview derived from the same
 prospective world and solver plan. Its accessible table has one person column and

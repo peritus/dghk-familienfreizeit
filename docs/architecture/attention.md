@@ -28,21 +28,28 @@ The resolver and solver own domain facts. Checks adapt structured causes; they d
 not parse exception text, persist findings, or run screen-specific solvers.
 Severity describes urgency. Explicit blockers decide admission and closing;
 `unavailable_blocks` identifies required checks whose missing coverage blocks an
-operation. Informational demand, choice shortfall, and ordinary unplaced-family
-warnings do not acquire blockers from their tone.
+operation. Informational demand and ordinary unplaced-family warnings do not
+acquire blockers from their tone.
 
 The registry owns domain attention, operation feedback, authoring field wording,
 and public login/route recovery wording. Organiser routes select the state owner's
 result. Small public controls compose only their audience-safe checks.
 
 The catalogue covers kernel label/reference/cardinality/contradiction causes,
-missing people and child ages, requested responses and inconsistent neutrality,
-workshop authoring advisories, stale/ineligible/inconsistent choices, demand,
-ranked overlaps, scheduling failures, external leader availability, fixed
-attendance conflicts, actual overlaps, attendance capacity, choice fulfilment,
-room inventory, required room feasibility, capacity lower bounds, missing places,
-unmet preferences, phase targets and changed closed results. Operational checks
-cover loading, saving, drafts, failures, stale views, confidentiality and recovery.
+missing people and child ages, inconsistent neutrality, workshop authoring
+advisories, stale/ineligible/inconsistent choices, demand, ranked overlaps,
+scheduling failures, external leader availability, fixed attendance conflicts,
+actual overlaps, attendance capacity, room inventory, required room feasibility,
+capacity lower bounds, missing places, phase targets and changed closed results.
+Operational checks cover loading, saving, drafts, failures, stale views,
+confidentiality and recovery.
+
+An unanswered requested family preference or workshop choice, a ranked choice
+that could not be assigned, and an unmet preferred room feature are normal
+progress or solver outcomes. They do not create per-family or per-person
+attention findings. Existing answer and allocation views continue to show their
+current response and assignment states. A consistent aggregate overview across
+the relevant organiser screens is [deferred](../../spec/deferred-ideas/attention-progress-statistics.md).
 
 ## Responses and time
 

@@ -10,8 +10,10 @@ page and reminder mail remain [outstanding](../../spec/modules/family-preference
 `value` or `tri-state` control and `requested` or `optional` requirement. Composition
 rejects duplicates, unknown traits, scope/control mismatches and fields outside
 configured sections. Every tri-state control must declare a requested or optional
-response policy. Only requested, applicable, offered controls create missing
-response attention. Optional notes and relationship controls do not become gates.
+response policy. Requested, applicable, offered controls can have an unanswered
+state, but it does not create a per-person organiser attention item. Aggregate
+response progress is [deferred](../../spec/deferred-ideas/attention-progress-statistics.md).
+Optional notes and relationship controls do not become gates.
 The active profile requests three room answers and each person's diet.
 
 Every family-facing tri-state has a generated `response-<key>` boolean-true marker.
@@ -35,9 +37,10 @@ visible with its applicability reason; feature and phase status govern whether
 an audience may edit. Organiser parity follows D24. Family-owned generic writes
 use the same scope, ownership and feature checks at append.
 
-Live label timestamps come from normalized event envelopes. Response attention
-can explain a save after a configured target using the live `set_at`, without
-scanning history or keeping tombstones. Targets remain advisory.
+Live label timestamps come from normalized event envelopes. A late-save
+information item can identify an answer saved after a configured target using the
+live `set_at`, without scanning history or keeping tombstones. Targets remain
+advisory.
 
 See [composed attention](../architecture/attention.md) for coverage, wording and
 privacy, and [features](../architecture/features.md) for availability.
