@@ -139,6 +139,40 @@ describe('closed results', () => {
     expect(() => derive(append(roomEvents, 'AccommodationReopened'), config)).toThrow(/not closed/)
   })
 
+  test('later capacity edits recompute attendance without changing the Festlegen snapshot', () => {
+    const contribution = results.get('workshops')!
+    const snapshot = {
+      ...contribution.compute({ world: workshopWorld, plan: planOf(workshopWorld) }),
+      ...revisions,
+    } as {
+      placements: { workshop_id: string; slot_id: string; space_id: string }[]
+      attendance: { person_id: string; workshop_id: string }[]
+      unassigned: { person_id: string }[]
+      build_revision: string
+      compatibility_revision: number
+    }
+    const closed = append(workshopEvents, 'WorkshopsClosed', snapshot)
+    const changed = append(closed, 'LabelSet', {
+      entity_id: snapshot.attendance[0]!.workshop_id,
+      key: 'capacity',
+      value: 0,
+      strength: null,
+      note: null,
+    })
+    const currentWorld = derive(changed, config)
+    const current = {
+      ...contribution.compute({ world: currentWorld, plan: planOf(currentWorld) }),
+      ...revisions,
+    }
+
+    expect(currentWorld.phase_facts.areas.workshops).toMatchObject({
+      closings: [{ payload: snapshot }],
+      latest: { kind: 'closed', seq: closed.length },
+    })
+    expect(current.attendance).not.toEqual(snapshot.attendance)
+    expect(contribution.compare(snapshot, current, currentWorld).changes.length).toBeGreaterThan(0)
+  })
+
   test('a malformed stored payload is rejected; a pending empty one folds', () => {
     expect(() =>
       derive(append(workshopEvents, 'WorkshopsClosed', { placements: [] }), config),
