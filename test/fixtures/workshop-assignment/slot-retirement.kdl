@@ -1,0 +1,11 @@
+// Retiring the first slot moves the derived placement to the next available
+// slot on replay.
+
+WorkshopSpaceAdded workshop_space_id="wsp_slot" name="Atelier" location_description="Erdgeschoss" capacity=10 sort_key=1
+WorkshopSlotAdded slot_id="slot_first" starts_at="2027-05-14T09:00:00+02:00" ends_at="2027-05-14T11:00:00+02:00" sort_key=1
+WorkshopSlotAdded slot_id="slot_second" starts_at="2027-05-14T13:00:00+02:00" ends_at="2027-05-14T15:00:00+02:00" sort_key=2
+WorkshopAdded workshop_id="wks_slot" title="Werkstatt" description="Arbeiten mit Material." audience="children" age_min=6 age_max=14 capacity=4 participation_mode="assigned" sort_key=1
+FamilyInvited family_id="fam_slot" email="slot@example.test" display_name="Slot" locale="de"
+PersonAdded person_id="per_slot" family_id="fam_slot" given_name="Slot" family_name="Slot" age=12 role="child"
+LabelSet entity_id="per_slot" key="prefers-workshop" value="wks_slot:1" strength=#null note=#null
+WorkshopSlotRetired slot_id="slot_first" reason=#null
