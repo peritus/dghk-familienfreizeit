@@ -52,6 +52,14 @@ attendance, and unassigned people as the Worker computes them, and
 `WorkshopsReopened` opens the area again. See
 [phases](../architecture/phases.md#organiser-decisions).
 
+Under [D30](../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result),
+capacity and other current inputs drive a fresh solver result on each derivation.
+Solver-assigned attendance can move or become unassigned; sign-ups and
+organiser-authored fixed attendance remain explicit inputs. `WorkshopsClosed`
+stores the current result at its event prefix. Later input edits recompute the
+current plan and its difference from the closed result without changing the
+snapshot.
+
 ## Workshop list reports
 
 The organiser workshop-list projection derives four read-only document views from

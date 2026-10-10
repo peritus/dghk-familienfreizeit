@@ -57,14 +57,14 @@ world and solver plan. Targets are advisory and do not disable late editing.
 
 ## Admission and closing
 
-[D30](../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces)
-is enforced in proposal admission for organiser apply and generic event append.
-Actual capacity reductions compare exact before/after event-prefix plans. The new
-capacity must hold distinct current attendance (assignments, sign-ups and matched
-fixed pairs), and the full attendance pair set must remain equal. Unrelated edits,
-increases and unchanged capacities do not run this policy. Replay and the narrow
-validation view stay structural. Stale-head/build checks and atomic persistence
-remain authoritative at the Worker boundary.
+[D30](../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result)
+keeps proposal admission structural: capacity edits are not rejected because
+they exceed explicit attendance or change the solver result. The current solver
+plan is recomputed from the prospective event prefix and new capacity. Sign-ups
+and fixed attendance remain explicit inputs, and over-capacity remains visible
+as a derived finding. Replay and the narrow validation view stay structural.
+Stale-head/build checks and atomic persistence remain authoritative at the Worker
+boundary.
 
 Closing selects registered blockers and required-check coverage at its exact
 prefix. Workshop age/audience and missing/unavailable-leader advisories require
@@ -73,8 +73,10 @@ translated wording and unrelated head changes do not invalidate it. The browser
 pins the reviewed fingerprint; the Worker recomputes it and requires the
 acknowledgement immediately before the closing in the same batch.
 
-Closed comparisons retain room, place, unplaced, attendance, placement and
-unassigned changes with affected families and explicit unknown-family attribution.
+Closing stores the solver result at its exact event prefix. Later input edits
+recompute the current plan without rewriting that snapshot; closed comparisons
+retain room, place, unplaced, attendance, placement and unassigned changes with
+affected families and explicit unknown-family attribution.
 Historical workshop lists replay the closing prefix and borrow explanations only
 when the build and compatibility revisions match and its canonical IDs match the recorded result. Current descriptors stay live.
 A missing verified explanation is stated explicitly.

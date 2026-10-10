@@ -35,14 +35,19 @@ labelled cancellation-history view; that organiser surface is
 Retiring a workshop removes it from the live world; historical views replay the
 earlier event prefix when needed.
 
-Capacity reductions use [composed proposal admission](../architecture/attention.md#admission-and-closing)
-under D30. The new capacity must hold distinct current assignments, sign-ups and
-matched fixed pairs, and exact prefix solving must preserve every attendance pair.
-Replay remains structural. Unchanged-capacity metadata edits and increases remain
-legal even when an existing world already exceeds capacity.
+Capacity is solver input under
+[D30](../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result).
+Capacity edits are accepted even when explicit sign-ups or fixed attendance
+exceed the new limit. Each derivation recomputes solver-assigned attendance from
+current inputs, so an automatic assignment may move to another ranked workshop
+or become unassigned. A capacity edit does not rewrite sign-ups or
+organiser-authored fixed attendance. Their over-capacity state remains visible.
 Workshop capacity summaries use the unique union of assignments and sign-ups;
 interest totals remain separate, while a fixed attendee consumes capacity in any
-participation mode.
+participation mode. When the workshop area is *festgelegt*, its stored solver
+result is a snapshot; later edits change the current derived result and its
+comparison with that snapshot, not the stored result. See
+[phase behavior](../architecture/phases.md#organiser-decisions).
 External leader contact labels are restricted to organiser projections.
 
 Organisers author fixed person-to-workshop attendance on the allocation screen.
