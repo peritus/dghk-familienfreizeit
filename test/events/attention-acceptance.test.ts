@@ -45,7 +45,11 @@ const person = (id: string, role = 'adult', age: number | null = 30) =>
     age,
     role,
   })
-const workshop = (id: string, capacity = 2) =>
+const workshop = (
+  id: string,
+  capacity = 2,
+  participationMode: 'assigned' | 'sign-up' | 'interest' = 'assigned',
+) =>
   event('WorkshopAdded', {
     workshop_id: id,
     title: id,
@@ -54,7 +58,7 @@ const workshop = (id: string, capacity = 2) =>
     age_min: 0,
     age_max: 99,
     capacity,
-    participation_mode: 'assigned',
+    participation_mode: participationMode,
     leader_ids: [],
     needs: [],
     sort_key: 1,
@@ -274,6 +278,41 @@ test('D30 accepts capacity changes and recomputes automatic attendance from the 
   expect(() =>
     derive([...committed, { ...decrease, seq: committed.length + 1 }], profile.validation_view),
   ).not.toThrow()
+})
+test('an unsaved capacity draft produces a prospective over-capacity finding for its preserved sign-up', () => {
+  const entries = [
+    family,
+    person('per_a'),
+    ...resources,
+    workshop('wks_a', 1, 'sign-up'),
+    label('per_a', 'signed-up-for', 'wks_a'),
+  ]
+  const committed = log(entries)
+  const decrease = label('wks_a', 'capacity', 0)
+  const proposal = admitProfileProposal(committed, [decrease], profile, revisions)
+  const contributions = composeSolverContributions(profile)
+  const plan = solve(buildSolverInput(proposal.world, contributions), contributions, {
+    ...revisions,
+    event_date: profile.meta.starts_on,
+    profile,
+    seed: null,
+  })
+  const prospective: AttentionContext = {
+    ...context(entries),
+    world: proposal.world,
+    plan,
+    basis: { mode: 'prospective', group_ids: ['capacity-draft'] },
+  }
+  const attendance = plan.sections['workshop-assignment'] as { signups: unknown[] }
+  const overCapacity = items(prospective, 'workshop-assignment.over-capacity')
+
+  expect(attendance.signups).toEqual([{ person_id: 'per_a', workshop_id: 'wks_a' }])
+  expect(overCapacity).toHaveLength(1)
+  expect(overCapacity[0]!.evidence).toMatchObject({ attendance: 1, capacity: 0 })
+  expect(overCapacity[0]!.basis).toMatchObject({
+    mode: 'prospective',
+    group_ids: ['capacity-draft'],
+  })
 })
 test('audience projections omit findings, sensitive facts and opaque relationship identifiers', () => {
   const c = context([
