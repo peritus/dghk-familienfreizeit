@@ -9,10 +9,7 @@ import { AttentionRecovery } from './recovery.js'
 import { closedAttentionContext } from '../../attention/closed.js'
 import { derive, AppendInvariantError } from '../../events/fold.js'
 import { profileAttention } from '../../attention/profile.js'
-import {
-  admitProfileProposal,
-  appendInvariantFindings,
-} from '../../organiser/proposal.js'
+import { admitProfileProposal, appendInvariantFindings } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { ErrorState } from '../components/shared/ui/screen-state.js'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
@@ -316,10 +313,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
           },
         ],
         rejected_findings: associateFindingGroups(
-          [
-            ...(state.attention_errors ?? []),
-            ...(derivation.failures ?? []),
-          ],
+          [...(state.attention_errors ?? []), ...(derivation.failures ?? [])],
           state.drafts,
           state.head_seq,
         ),

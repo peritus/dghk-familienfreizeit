@@ -4,7 +4,7 @@ import { operationalAttentionChecks } from '../attention/operations.js'
 import { coreAttentionChecks } from '../attention/core.js'
 import { composeAttention } from '../attention/engine.js'
 import type { OccasionProfile } from '../config/define.js'
-import { AppendInvariantError, type World } from '../events/fold.js'
+import { AppendInvariantError } from '../events/fold.js'
 import { prepareEventBatch } from '../events/prepare.js'
 import type { Event, EventDraft } from '../events/types.js'
 

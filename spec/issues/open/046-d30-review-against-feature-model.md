@@ -17,12 +17,9 @@ opened: 2026-10-06
 [D30](../../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result)
 accepts capacity edits and treats capacity as shared solver input. Automatic
 attendance is recomputed from current inputs, while explicit sign-ups and fixed
-attendance remain unchanged. Its rejected alternative of selecting this behavior
-through occasion-profile policy gives two reasons:
-
-> Only one profile is active today, so the flexibility has no consumer, and
-> branching solver behavior on a profile-selected policy value risks becoming the
-> kind of runtime-supplied executable rule occasion configuration must not contain.
+attendance remain unchanged. It rejects profile-selected capacity behavior
+because the shared solver contract should not vary by occasion profile and no
+current profile needs that flexibility.
 
 The [feature contract](../../architecture/features.md) lets the profile select
 among fixed, code-owned features and lets a deployment switch their

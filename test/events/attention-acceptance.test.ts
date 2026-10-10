@@ -291,7 +291,9 @@ test('D30 accepts capacity changes and recomputes automatic attendance from the 
   expect(() =>
     admitProfileProposal(committed, [remove, decrease], profile, revisions),
   ).not.toThrow()
-  expect(() => admitProfileProposal(committed, [decrease, remove], profile, revisions)).not.toThrow()
+  expect(() =>
+    admitProfileProposal(committed, [decrease, remove], profile, revisions),
+  ).not.toThrow()
   expect(() =>
     admitProfileProposal(committed, [label('wks_a', 'capacity', 3)], profile, revisions),
   ).not.toThrow()

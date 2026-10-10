@@ -39,5 +39,5 @@ unscheduled workshops; and record a disposition for each reconciled contract ter
 Existing capacity,
 placement, and attendance invariants remain governed by
 [D4](../../../decisions.md#d4--stable-sorted-greedy-not-integer-programming),
-[D30](../../../decisions.md#d30--workshop-capacity-reduction-blocks-never-displaces),
+[D30](../../../decisions.md#d30--workshop-capacity-is-solver-input-festlegen-snapshots-the-result),
 and [D31](../../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops).
