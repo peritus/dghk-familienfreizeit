@@ -3,7 +3,6 @@ import type { AttentionContext } from '../../attention/types.js'
 import type { OfficialWorkshopsSummary } from '../official-workshops/index.js'
 import type { WorkshopAssignmentSection } from './index.js'
 import type { WorkshopSchedulingSection } from '../workshop-scheduling/index.js'
-import type { WorkshopRankingsSummary } from '../workshop-rankings/index.js'
 import { eligible } from '../workshop-rankings/attention.js'
 function section(c: AttentionContext) {
   const s = c.plan!.sections['workshop-assignment']
@@ -14,7 +13,7 @@ function section(c: AttentionContext) {
 function official(c: AttentionContext) {
   return c.world!.summaries['official-workshops'] as OfficialWorkshopsSummary
 }
-export function workshopAssignmentAttention(target: number) {
+export function workshopAssignmentAttention() {
   return [
     check(
       'workshop-assignment.no-workshops',
@@ -73,42 +72,6 @@ export function workshopAssignmentAttention(target: number) {
         })
       },
       { requires: ['world', 'plan'], scopes: ['dashboard', 'workshop', 'allocation', 'print'] },
-    ),
-    check(
-      'workshop-assignment.shortfall',
-      'workshop-assignment',
-      ['Gewählte Teilnahme nicht vollständig zugeordnet', 'Chosen attendance not fully assigned'],
-      (c) => {
-        const s = section(c),
-          r = c.world!.summaries['workshop-rankings'] as WorkshopRankingsSummary
-        return r.rankings.flatMap((r) => {
-          const asked = [
-            ...new Set(r.choices.flatMap((v) => (v.workshop_id ? [v.workshop_id] : []))),
-          ].filter((id) => {
-            const w = official(c).workshops.find((w) => w.id === id)
-            return w?.mode === 'assigned' && !eligible(c, r.person_id, w)
-          })
-          const fulfilled = asked.filter((id) =>
-            s.assignments.some((a) => a.person_id === r.person_id && a.workshop_id === id),
-          )
-          const expected = Math.min(target, asked.length)
-          return fulfilled.length < expected
-            ? [
-                fact(c, [r.person_id], [r.person_id], {
-                  asked: asked.sort(),
-                  fulfilled: fulfilled.sort(),
-                  expected,
-                  reasons: s.rounds.flatMap((round) =>
-                    round.decisions
-                      .filter((d) => d.person_id === r.person_id && d.outcome === 'rejected')
-                      .map((d) => ({ workshop_id: d.workshop_id, reason: d.reason })),
-                  ),
-                }),
-              ]
-            : []
-        })
-      },
-      { requires: ['world', 'plan'], scopes: ['dashboard', 'allocation', 'family', 'print'] },
     ),
     check(
       'workshop-assignment.actual-overlap',

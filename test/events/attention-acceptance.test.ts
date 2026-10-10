@@ -165,9 +165,7 @@ test('unanswered preferences do not create organiser attention', () => {
     label('per_a', 'prefers-workshop', { workshop_id: null, rank: null }),
     event('WorkshopChoiceOpened', {}),
   ])
-  expect(items(none, 'workshop-assignment.shortfall')).toEqual([])
   expect(items(none, 'workshop-rankings.response-missing')).toEqual([])
-  const unopened = context([family, person('per_a'), ...resources, workshop('wks_a')])
   const one = context([
     family,
     person('per_a'),
@@ -178,19 +176,7 @@ test('unanswered preferences do not create organiser attention', () => {
   ])
   expect(one.world!.diagnostics.some((d) => d.id === 'kernel.invalid-resolver-value')).toBe(false)
 })
-test('rank inconsistency and partial fulfilment retain exact causes and truthful warning policy', () => {
-  const c = context([
-    family,
-    person('per_a'),
-    ...resources,
-    workshop('wks_a', 0),
-    label('per_a', 'prefers-workshop', { workshop_id: 'wks_a', rank: 1 }),
-    event('WorkshopChoiceOpened', {}),
-  ])
-  const item = items(c, 'workshop-assignment.shortfall')[0]!
-  expect(item.evidence.expected).toBe(1)
-  expect(item.blocks).toEqual([])
-  expect(item.evidence.reasons).toEqual([{ workshop_id: 'wks_a', reason: 'hard.capacity' }])
+test('rank inconsistency and stale choices remain reviewable findings', () => {
   const mixed = context([
     family,
     person('per_a'),

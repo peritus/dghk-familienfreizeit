@@ -192,40 +192,5 @@ export function roomAssignmentAttention(params: RoomAssignmentParams) {
       },
       { scopes: ['dashboard', 'accommodation'] },
     ),
-    check(
-      'room-assignment.unmet-preference',
-      'room-assignment',
-      ['Zimmerwunsch nicht erfüllt', 'Room preference not fulfilled'],
-      (c) => {
-        const i = input(c),
-          s = section(c)
-        return i.families.flatMap((f) =>
-          f.requirements
-            .filter((r) => r.strength === 'preferred' && r.capability_key)
-            .flatMap((r) => {
-              const roomIds = new Set(
-                s.assignments.filter((a) => a.family_id === f.family_id).map((a) => a.room_id),
-              )
-              return roomIds.size &&
-                !i.rooms.some(
-                  (room) => roomIds.has(room.id) && room.capabilities.has(r.capability_key!),
-                )
-                ? [
-                    fact(c, [f.family_id, r.trait_key, r.value], [f.family_id], {
-                      trait: r.trait_key,
-                      capability: r.capability_key,
-                    }),
-                  ]
-                : []
-            }),
-        )
-      },
-      {
-        requires: ['world', 'plan'],
-        kind: 'information',
-        severity: 'info',
-        scopes: ['accommodation'],
-      },
-    ),
   ]
 }

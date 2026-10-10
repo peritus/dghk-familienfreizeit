@@ -269,7 +269,6 @@ const cases: Record<string, () => AttentionContext> = {
     }),
   'workshop-assignment.over-capacity': () =>
     attendance({ signups: [{ person_id: 'per_b', workshop_id: 'wks_a' }] }),
-  'workshop-assignment.shortfall': () => context([...entries, label('wks_a', 'capacity', 0)]),
   'workshop-assignment.actual-overlap': () => {
     const c = cases['workshop-rankings.overlap']!()
     return {
@@ -313,8 +312,6 @@ const cases: Record<string, () => AttentionContext> = {
   'room-assignment.total-shortfall': () => context([...entries, person('per_b')]),
   'room-assignment.capability-shortfall': () =>
     context([...entries, label('fam_a', 'needs-accessible', 'accessible', 'required')]),
-  'room-assignment.unmet-preference': () =>
-    context([...entries, label('fam_a', 'needs-accessible', 'accessible', 'preferred')]),
   'family-preferences.response-inconsistent': () =>
     context([...entries, label('fam_a', 'needs-accessible', 'accessible', 'preferred')]),
   'family-preferences.late-save': () =>

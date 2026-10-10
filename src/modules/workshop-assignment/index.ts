@@ -504,7 +504,7 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
   }),
   contribute: (params) => ({
     capability_token_prefixes: ['fixed-workshop:'],
-    attention_checks: workshopAssignmentAttention(params.workshops_per_person),
+    attention_checks: workshopAssignmentAttention(),
     phases: [
       {
         id: 'workshop-assignment.review',
@@ -606,7 +606,7 @@ export type { WorkshopMode }
  * blocks the plan (spec/architecture/phases.md §4).
  */
 export const workshopReviewReadiness: PhaseReadiness = attentionReadiness('workshops', [
-  ...workshopAssignmentAttention(2),
+  ...workshopAssignmentAttention(),
   ...workshopSchedulingAttention,
   ...workshopRankingAttention(3).filter(
     (check) => check.code === 'workshop-rankings.choice-not-opened',
