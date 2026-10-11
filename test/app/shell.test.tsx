@@ -827,7 +827,9 @@ test('family history includes staged events before they are applied', async () =
   fireEvent.change(within(personDialog).getByLabelText('Nachname'), { target: { value: 'Person' } })
   fireEvent.click(within(personDialog).getByRole('button', { name: 'Person hinzufügen' }))
 
-  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
+  await waitFor(() =>
+    expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung'),
+  )
   expect(await screen.findByText('Lokale Person')).toBeTruthy()
 })
 

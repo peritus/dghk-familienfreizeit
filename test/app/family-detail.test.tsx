@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import { afterEach, expect, test } from 'vitest'
 import { FamilyDetail } from '../../src/app/organiser/screens/family-detail.js'
 import {
@@ -8,7 +8,7 @@ import {
 
 afterEach(() => cleanup())
 
-test('organiser can rename a family and edit profile-driven controls', () => {
+test('organiser can rename a family and edit profile-driven controls', async () => {
   render(
     <FixtureProvider>
       <FamilyDetail family_id="fam_sonnenberg" />
@@ -23,7 +23,7 @@ test('organiser can rename a family and edit profile-driven controls', () => {
   fireEvent.change(displayName, { target: { value: 'Abendrot' } })
   fireEvent.click(within(dialog).getByRole('button', { name: 'Änderungen speichern' }))
 
-  expect(screen.getByRole('heading', { name: 'Abendrot' })).toBeTruthy()
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Abendrot' })).toBeTruthy())
   expect(screen.getByRole('link', { name: 'Zimmer' }).getAttribute('aria-current')).toBe('page')
 })
 
