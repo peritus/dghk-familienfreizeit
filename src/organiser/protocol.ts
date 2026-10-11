@@ -12,6 +12,7 @@ export type ScreenDescriptor = {
 }
 
 export type OrganiserLogResponse = {
+  performance_enabled?: boolean
   events: readonly Event[]
   head_seq: number
   build_revision: string

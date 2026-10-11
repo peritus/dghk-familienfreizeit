@@ -1,9 +1,18 @@
 import { EventInputError } from '../events/types.js'
 import { eventInputFindings } from '../organiser/proposal.js'
-import { admitProfileProposal, appendInvariantFindings } from '../organiser/proposal.js'
+import { appendInvariantFindings } from '../organiser/proposal.js'
 import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
+import { profiledDerive, profiledPrepare } from '../performance/domain.js'
+import { performanceOperations, requestOperations } from '../performance/operations.js'
+import {
+  computationMeasurements,
+  parseMetricBatch,
+  performanceLogMarker,
+  performanceSampleInterval,
+  writeMetrics,
+} from '../performance/metrics.js'
 import { derive, AppendInvariantError, type World } from '../events/fold.js'
 import { activeProfile } from '../config/index.js'
 import { buildRevision, compatibilityRevision } from '../config/build.js'
@@ -42,7 +51,13 @@ import {
 } from '../auth/service.js'
 import { organiserScreenRegistry } from '../organiser/registry.js'
 
-const app = new Hono<{ Bindings: Env }>()
+type AppEnvironment = {
+  Bindings: Env
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- Hono environment contract.
+  Variables: { performance: ReturnType<typeof computationMeasurements> }
+}
+const app = new Hono<AppEnvironment>()
+const operations = performanceOperations(activeProfile)
 const maxJsonBodyBytes = 256 * 1024
 const maxJsonDepth = 10
 const maxJsonStringLength = 4096
@@ -55,6 +70,19 @@ let warnedDemoLogin = false
 let announcedFeatureBindings = ''
 
 app.use('*', async (context, next) => {
+  const root =
+    requestOperations[new URL(context.req.url).pathname as keyof typeof requestOperations]
+  const measurements = computationMeasurements({
+    source: 'worker',
+    enabled: context.env.DGHK_PERFORMANCE === 'on' && Boolean(root),
+    operations,
+    span: (operation, run) =>
+      tracing.enterSpan('performance.step', (span) => {
+        span.setAttribute('performance.operation', operation)
+        return run()
+      }),
+  })
+  context.set('performance', measurements)
   warnDangerousDevelopmentBindings(context.env)
   const features = featureBindings(context.env)
   if (features.invalid.length > 0 && new URL(context.req.url).pathname !== '/api/health') {
@@ -65,7 +93,24 @@ app.use('*', async (context, next) => {
     applySecurityHeaders(context)
     return
   }
-  await next()
+  try {
+    await next()
+  } finally {
+    if (measurements.sampled && root) {
+      measurements.markOutcome(root, context.res.status >= 400 ? 'error' : 'ok')
+      console.log(
+        performanceLogMarker,
+        JSON.stringify({
+          schema_version: 1,
+          source: 'worker',
+          build_revision: buildRevision,
+          sample_interval: performanceSampleInterval,
+          root_operation: root,
+          metrics: measurements.metrics(),
+        }),
+      )
+    }
+  }
   applySecurityHeaders(context)
 })
 
@@ -84,7 +129,7 @@ app.post('/api/login', async (context) => {
   if (!(await consumeLoginRateLimits(context.env.DB, email, ip, now)))
     return context.json({ accepted: true })
   const events = await readEventLog(context)
-  const world = deriveEventWorld(events)
+  const world = deriveEventWorld(context, events)
   const familyExists = familyForEmail(world, email) !== null
   const isOrganiser = organiserPredicate(context.env)
   const result = await issueMagicLink(context.env.DB, email, ip, familyExists, {
@@ -182,7 +227,36 @@ app.get('/api/organiser/log', async (context) => {
     compatibility_revision: compatibilityRevision,
     screen_registry: organiserScreenRegistry,
     feature_overrides: featureBindings(context.env).overrides,
+    performance_enabled: context.env.DGHK_PERFORMANCE === 'on' && Boolean(context.env.PERFORMANCE),
   })
+})
+
+app.post('/api/performance', async (context) => {
+  if (context.env.DGHK_PERFORMANCE !== 'on' || !context.env.PERFORMANCE)
+    return context.body(null, 204)
+  const principal = await principalFromContext(context)
+  if (!principal || principal.kind !== 'organiser')
+    return context.json({ error: 'unauthorized' }, 401)
+  if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
+  const batch = parseMetricBatch(
+    await readJsonBody(context, 48 * 1024),
+    operations,
+    'browser',
+    buildRevision,
+  )
+  if (!batch) return context.json({ error: 'invalid_request' }, 400)
+  if (
+    !(await consumeRateLimit(
+      context.env.DB,
+      `performance:${principal.email}`,
+      120,
+      eventRateLimitDuration,
+      new Date().toISOString(),
+    ))
+  )
+    return context.json({ error: 'rate_limited' }, 429)
+  writeMetrics(context.env.PERFORMANCE, batch)
+  return context.body(null, 204)
 })
 
 app.post('/api/organiser/apply', async (context) => {
@@ -242,24 +316,31 @@ app.post('/api/organiser/apply', async (context) => {
         (body.events as unknown[]).map((candidate) => eventDraft(candidate, principal.email, now)),
         activeProfile,
         { build_revision: buildRevision, compatibility_revision: compatibilityRevision },
+        context.get('performance').measure,
       ),
     )
     const prepared = tracing.enterSpan('events.prepare_and_validate', (span) => {
       span.setAttribute('event.count', drafts.length)
-      return admitProfileProposal(existing, drafts, activeProfile, {
-        build_revision: buildRevision,
-        compatibility_revision: compatibilityRevision,
-      })
+      return profiledPrepare(
+        existing,
+        drafts,
+        activeProfile.validation_view,
+        context.get('performance').measure,
+      )
     })
     const events = prepared.events
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
       span.setAttribute('event.count', events.length)
-      return !authorizeEventBatch(
-        principal,
-        events,
-        deriveEventWorld(existing),
-        activeProfile.validation_view,
-      )
+      return !context
+        .get('performance')
+        .measure('events.authorize', () =>
+          authorizeEventBatch(
+            principal,
+            events,
+            deriveEventWorld(context, existing),
+            activeProfile.validation_view,
+          ),
+        )
     })
     if (forbidden) return context.json({ error: 'forbidden' }, 403)
     const appended = await appendEventBatch(context, inputSeq, events)
@@ -370,7 +451,7 @@ app.post('/api/events', async (context) => {
       },
       409,
     )
-  const world = deriveEventWorld(existing)
+  const world = deriveEventWorld(context, existing)
   try {
     const drafts = body.events.map((draft) => eventDraft(draft, principal.email, now))
     // Closings are filled only on the organiser apply path (phases.md §5).
@@ -379,28 +460,38 @@ app.post('/api/events', async (context) => {
       throw new Error('forbidden')
     const schemas = eventPayloadSchemas(activeProfile.validation_view)
     const events = tracing.enterSpan('events.parse_and_validate', (span) => {
-      const parsed = drafts.map((draft, index) =>
-        parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
-      )
+      const parsed = context
+        .get('performance')
+        .measure('events.parse', () =>
+          drafts.map((draft, index) =>
+            parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
+          ),
+        )
       span.setAttribute('event.count', parsed.length)
       return parsed
     })
     const forbidden = tracing.enterSpan('events.authorize_batch', (span) => {
       span.setAttribute('event.count', events.length)
-      return !authorizeEventBatch(
-        principal,
-        events,
-        world,
-        activeProfile.validation_view,
-        principal.kind === 'family' ? familyLabelGate(world, context.env) : undefined,
-      )
+      return !context
+        .get('performance')
+        .measure('events.authorize', () =>
+          authorizeEventBatch(
+            principal,
+            events,
+            world,
+            activeProfile.validation_view,
+            principal.kind === 'family' ? familyLabelGate(world, context.env) : undefined,
+          ),
+        )
     })
     if (forbidden) throw new Error('forbidden')
     tracing.enterSpan('events.validate_world', () =>
-      admitProfileProposal(existing, events, activeProfile, {
-        build_revision: buildRevision,
-        compatibility_revision: compatibilityRevision,
-      }),
+      profiledPrepare(
+        existing,
+        events,
+        activeProfile.validation_view,
+        context.get('performance').measure,
+      ),
     )
     await appendEventBatch(context, expectedHead, events)
     return context.json({ head: expectedHead + events.length }, 201)
@@ -455,19 +546,22 @@ export default {
   },
 }
 
-async function principalFromContext(
-  context: Context<{ Bindings: Env }>,
-): Promise<Principal | null> {
-  return tracing.enterSpan('auth.resolve_principal', async (span) => {
-    const principal = await currentPrincipal(
-      context.env.DB,
-      getCookie(context, 'sid'),
-      { isOrganiser: organiserPredicate(context.env) },
-      activeProfile.validation_view,
-    )
-    if (principal) span.setAttribute('auth.kind', principal.kind)
-    return principal
-  })
+async function principalFromContext(context: Context<AppEnvironment>): Promise<Principal | null> {
+  return context.get('performance').io('auth.principal', () =>
+    tracing.enterSpan('auth.resolve_principal', async (span) => {
+      const principal = await currentPrincipal(
+        context.env.DB,
+        getCookie(context, 'sid'),
+        {
+          isOrganiser: organiserPredicate(context.env),
+          readWorld: async () => deriveEventWorld(context, await readEventLog(context)),
+        },
+        activeProfile.validation_view,
+      )
+      if (principal) span.setAttribute('auth.kind', principal.kind)
+      return principal
+    }),
+  )
 }
 
 function organiserPredicate(env: Env): (email: string) => boolean {
@@ -475,34 +569,39 @@ function organiserPredicate(env: Env): (email: string) => boolean {
   return (email) => allowlist.has(email)
 }
 
-async function readEventLog(context: Context<{ Bindings: Env }>) {
-  return tracing.enterSpan('events.read_log', async (span) => {
-    const events = await readEvents(context.env.DB, activeProfile.validation_view)
-    span.setAttribute('event.count', events.length)
-    return events
-  })
+async function readEventLog(context: Context<AppEnvironment>) {
+  return context.get('performance').io('events.read', () =>
+    tracing.enterSpan('events.read_log', async (span) => {
+      const events = await readEvents(context.env.DB, activeProfile.validation_view)
+      span.setAttribute('event.count', events.length)
+      context.get('performance').setEventCount(events.length)
+      return events
+    }),
+  )
 }
 
-function deriveEventWorld(events: Parameters<typeof derive>[0]) {
+function deriveEventWorld(context: Context<AppEnvironment>, events: Parameters<typeof derive>[0]) {
   return tracing.enterSpan('events.derive_world', (span) => {
     span.setAttribute('event.count', events.length)
-    return derive(events, activeProfile.validation_view)
+    return profiledDerive(events, activeProfile.validation_view, context.get('performance').measure)
   })
 }
 
 async function appendEventBatch(
-  context: Context<{ Bindings: Env }>,
+  context: Context<AppEnvironment>,
   expectedHead: number,
   events: readonly Event[],
 ) {
-  return tracing.enterSpan('events.append_batch', async (span) => {
-    span.setAttribute('event.count', events.length)
-    span.setAttribute('event.expected_head', expectedHead)
-    return appendCanonicalEvents(context.env.DB, expectedHead, events)
-  })
+  return context.get('performance').io('events.append', () =>
+    tracing.enterSpan('events.append_batch', async (span) => {
+      span.setAttribute('event.count', events.length)
+      span.setAttribute('event.expected_head', expectedHead)
+      return appendCanonicalEvents(context.env.DB, expectedHead, events)
+    }),
+  )
 }
 
-function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): boolean {
+function shouldShowMagicLinkOnConsole(context: Context<AppEnvironment>): boolean {
   const url = new URL(context.req.url)
   return (
     isLoopback(url.hostname) ||
@@ -511,14 +610,14 @@ function shouldShowMagicLinkOnConsole(context: Context<{ Bindings: Env }>): bool
   )
 }
 
-function shouldAllowInsecureSessionCookies(context: Context<{ Bindings: Env }>): boolean {
+function shouldAllowInsecureSessionCookies(context: Context<AppEnvironment>): boolean {
   return (
     context.env.DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES === 'true' &&
     isLocalPreviewRequest(context)
   )
 }
 
-function isLocalPreviewRequest(context: Context<{ Bindings: Env }>): boolean {
+function isLocalPreviewRequest(context: Context<AppEnvironment>): boolean {
   const hostname = new URL(context.req.url).hostname
   return isLoopback(hostname) || context.env.DGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST === hostname
 }
@@ -532,7 +631,7 @@ function isLoopback(hostname: string): boolean {
   )
 }
 
-function hasTrustedOrigin(context: Context<{ Bindings: Env }>): boolean {
+function hasTrustedOrigin(context: Context<AppEnvironment>): boolean {
   const origin = context.req.header('Origin')
   if (!origin) return false
   try {
@@ -543,7 +642,7 @@ function hasTrustedOrigin(context: Context<{ Bindings: Env }>): boolean {
 }
 
 async function readJsonBody<T>(
-  context: Context<{ Bindings: Env }>,
+  context: Context<AppEnvironment>,
   maxBytes = maxJsonBodyBytes,
 ): Promise<T | null> {
   const contentLength = Number(context.req.header('Content-Length'))
@@ -600,7 +699,7 @@ function isBoundedJsonValue(value: unknown, depth = 0): boolean {
   )
 }
 
-function applySecurityHeaders(context: Context<{ Bindings: Env }>): void {
+function applySecurityHeaders(context: Context<AppEnvironment>): void {
   const url = new URL(context.req.url)
   context.header(
     'Content-Security-Policy',

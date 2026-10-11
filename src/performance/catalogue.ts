@@ -1,4 +1,5 @@
 /** Stable names shared by the bench, operational metrics, and trace exports. */
+/* eslint-disable @typescript-eslint/naming-convention -- Stable telemetry operation keys. */
 export const performanceCatalogue = {
   'events.derive': 'derive',
   'events.fold': 'foldEventLog / normalizeEvents',
@@ -14,6 +15,8 @@ export const performanceCatalogue = {
   'solver.solve': 'solve',
   'solver.preflight': 'all registered preflight checks',
   'attention.evaluate': 'profileAttention / composeAttention',
+  'attention.closed': 'closedAttentionContext',
+  'phase.status': 'derivePhaseStatus',
   'closing.fill': 'fillClosingPayloads',
   'projection.shared': 'projectSharedWorld',
   'projection.family': 'projectFamilyWorld',

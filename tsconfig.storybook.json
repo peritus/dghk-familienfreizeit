@@ -8,6 +8,7 @@
     "paths": { "@/*": ["./src/app/*"] }
   },
   "include": [
+    "src/performance/**/*.ts",
     "src/events/prepare.ts",
     "src/attention/**/*.ts",
     ".storybook/**/*.ts",

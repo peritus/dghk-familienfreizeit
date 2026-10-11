@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 
-const timeout = Number(process.env.DGHK_BENCH_TIMEOUT_MS ?? '600000')
+const timeout = Number(process.env.DGHK_BENCH_TIMEOUT_MS ?? '900000')
 if (!Number.isSafeInteger(timeout) || timeout <= 0) throw new Error('invalid benchmark timeout')
 const sizes = (process.env.DGHK_BENCH_EVENTS ?? '20000,50000').split(',')
 const scenarios = (process.env.DGHK_BENCH_SCENARIOS ?? 'history,population').split(',')

@@ -38,20 +38,24 @@ export function readHistory(path = historyPath()): PerformanceRun[] {
 }
 
 export function startRun(workload: string, shape: PerformanceRun['shape']) {
-  const revision = JSON.parse(
-    execFileSync(
-      'jj',
-      [
-        'log',
-        '-r',
-        '@',
-        '--no-graph',
-        '-T',
-        '"{\\"change_id\\":\\"" ++ change_id ++ "\\",\\"commit_id\\":\\"" ++ commit_id ++ "\\",\\"parent_commit_id\\":\\"" ++ parents.map(|p| p.commit_id()).join("") ++ "\\"}"',
-      ],
-      { encoding: 'utf8' },
-    ),
-  ) as PerformanceRun['revision']
+  const ciCommit = process.env.CI && process.env.GITHUB_SHA
+  if (ciCommit && !/^[a-f0-9]{40}$/.test(ciCommit)) throw new Error('invalid CI revision')
+  const revision = ciCommit
+    ? { change_id: 'ci', commit_id: ciCommit, parent_commit_id: '' }
+    : (JSON.parse(
+        execFileSync(
+          'jj',
+          [
+            'log',
+            '-r',
+            '@',
+            '--no-graph',
+            '-T',
+            '"{\\"change_id\\":\\"" ++ change_id ++ "\\",\\"commit_id\\":\\"" ++ commit_id ++ "\\",\\"parent_commit_id\\":\\"" ++ parents.map(|p| p.commit_id()).join("") ++ "\\"}"',
+          ],
+          { encoding: 'utf8' },
+        ),
+      ) as PerformanceRun['revision'])
   const run: PerformanceRun = {
     schema_version: 1,
     run_id: randomUUID(),

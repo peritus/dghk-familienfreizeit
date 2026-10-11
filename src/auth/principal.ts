@@ -7,7 +7,11 @@ export type Principal =
   | { kind: 'organiser'; email: string }
   | { kind: 'family'; email: string; family_id: string }
 
-export type PrincipalOptions = { isOrganiser: (email: string) => boolean; now?: () => string }
+export type PrincipalOptions = {
+  isOrganiser: (email: string) => boolean
+  now?: () => string
+  readWorld?: () => Promise<World>
+}
 
 export async function currentPrincipal(
   db: D1Database,
@@ -41,7 +45,9 @@ export async function currentPrincipal(
     )
     return { kind: 'organiser', email }
   }
-  const world = derive(await readEvents(db, config), config)
+  const world = options.readWorld
+    ? await options.readWorld()
+    : derive(await readEvents(db, config), config)
   const familyId = familyForEmail(world, email)
   if (!familyId) return null
   if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.family_absolute_ms)) {

@@ -44,14 +44,16 @@ export function compareRuns(
   history: readonly PerformanceRun[],
   threshold = 0.2,
 ): readonly { operation: string; baseline_ms: number; change: number; regression: boolean }[] {
+  const signature = (value: Readonly<Record<string, string | number>>) =>
+    JSON.stringify(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
   const comparable = history
     .filter(
       (run) =>
         run.schema_version === current.schema_version &&
         run.run_id !== current.run_id &&
         run.workload === current.workload &&
-        JSON.stringify(run.shape) === JSON.stringify(current.shape) &&
-        JSON.stringify(run.environment) === JSON.stringify(current.environment),
+        signature(run.shape) === signature(current.shape) &&
+        signature(run.environment) === signature(current.environment),
     )
     .slice(-10)
   return current.timings.flatMap((timing) => {

@@ -11,6 +11,7 @@
     "vitest.bench.config.ts",
     "scripts/**/*.ts",
     "src/performance/results.ts",
-    "src/performance/trace.ts"
+    "src/performance/trace.ts",
+    "src/performance/import-trace.ts"
   ]
 }

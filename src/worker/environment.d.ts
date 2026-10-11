@@ -1,4 +1,7 @@
 interface Env {
+  /** Production operational telemetry; local/preview configuration leaves these unset. */
+  DGHK_PERFORMANCE?: 'on'
+  PERFORMANCE?: import('../performance/metrics.js').MetricWriter
   /** Local-only development adapter; production must leave this unset. */
   DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE?: 'true'
   /** Local-only development adapter; production must leave this unset. */

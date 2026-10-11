@@ -43,7 +43,8 @@ cat > "$FAKE_BIN/pnpm" <<'EOF'
 set -euo pipefail
 
 [[ "${1:-}" == run && "${2:-}" == build ]]
-mkdir -p dist/dghk_familienfreizeit dist/client/assets
+mkdir -p dist/dghk_familienfreizeit dist/dghk_performance dist/client/assets
+printf '%s\n' 'export default { tail() {} }' > dist/dghk_performance/index.js
 printf '%s\n' 'export default { fetch() { return new Response("ok") } }' \
   > dist/dghk_familienfreizeit/index.js
 printf '%s\n' '<!doctype html><html><body>test</body></html>' \
@@ -110,7 +111,9 @@ done
 [[ -n "$config" ]]
 [[ -f "$config" ]]
 
-if [[ ! -f "${WRANGLER_CAPTURE:?}" ]]; then
+if [[ "$(jq -r '.main' "$config")" == 'performance/index.js' ]]; then
+  cp "$config" "${WRANGLER_CAPTURE:?}.performance"
+elif [[ ! -f "${WRANGLER_CAPTURE:?}" ]]; then
   cp "$config" "$WRANGLER_CAPTURE"
 else
   cmp "$config" "$WRANGLER_CAPTURE"
@@ -151,8 +154,13 @@ jq -e '
   .d1_databases[0].database_name == "dghk-familienfreizeit" and
   .d1_databases[0].database_id == "01234567-89ab-cdef-0123-456789abcdef" and
   .main == "worker/index.js" and
+  .vars.DGHK_PERFORMANCE == "on" and
+  .tail_consumers[0].service == "dghk-familienfreizeit-performance" and
+  .analytics_engine_datasets[0].binding == "PERFORMANCE" and
+  .observability.traces.head_sampling_rate == 0.05 and
   .assets.directory == "site"
 ' "$WRANGLER_CAPTURE" >/dev/null
+jq -e '.name == "dghk-familienfreizeit-performance" and .account_id == "0123456789abcdef0123456789abcdef" and .main == "performance/index.js" and .analytics_engine_datasets[0].dataset == "dghk_performance"' "$WRANGLER_CAPTURE.performance" >/dev/null
 cmp "$before_template" "$REPO_COPY/deploy/cloudflare/wrangler.json.template"
 [[ -f "$WRANGLER_PATH_RECORD" ]]
 [[ ! -e "$(cat "$WRANGLER_PATH_RECORD")" ]]

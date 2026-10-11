@@ -1,3 +1,10 @@
+import { browserComputation, configureBrowserPerformance } from './performance.js'
+import {
+  profiledDerive,
+  profiledPrepare,
+  profiledContributions,
+  profiledAttention,
+} from '../../performance/domain.js'
 import { useAttentionClock } from './attention-clock.js'
 import { associateFindingGroups } from '../../organiser/proposal.js'
 import { decodeAttentionItems } from '../../attention/wire.js'
@@ -7,9 +14,8 @@ import { EventInputError } from '../../events/types.js'
 import { eventInputFindings } from '../../organiser/proposal.js'
 import { AttentionRecovery } from './recovery.js'
 import { closedAttentionContext } from '../../attention/closed.js'
-import { derive, AppendInvariantError } from '../../events/fold.js'
-import { profileAttention } from '../../attention/profile.js'
-import { admitProfileProposal, appendInvariantFindings } from '../../organiser/proposal.js'
+import { AppendInvariantError } from '../../events/fold.js'
+import { appendInvariantFindings } from '../../organiser/proposal.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { ErrorState } from '../components/shared/ui/screen-state.js'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from 'react'
@@ -100,7 +106,10 @@ const FamilyDetail = lazy(() =>
   import('./screens/family-detail.js').then((module) => ({ default: module.FamilyDetail })),
 )
 
-const evaluateAttention = profileAttention(activeProfile)
+const evaluateAttention = (context: Parameters<ReturnType<typeof profiledAttention>>[0]) =>
+  browserComputation('attention.evaluate', context.world?.head_seq ?? 0, (measure) =>
+    profiledAttention(activeProfile, measure)(context),
+  )
 
 export default function OrganiserApp({ profile }: { profile?: ProfilePresentation }) {
   const now = useAttentionClock(activeProfile.meta.phase_dates ?? [])
@@ -139,6 +148,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
           })
           return
         }
+        configureBrowserPerformance(log.performance_enabled === true)
         dispatch({
           type: 'loaded',
           events: log.events,
@@ -168,6 +178,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       })
     return () => {
       cancelled = true
+      configureBrowserPerformance(false)
     }
   }, [])
 
@@ -183,15 +194,19 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
       return {
         world:
           drafts.length === 0
-            ? derive(committed, activeProfile.validation_view)
-            : admitProfileProposal(
-                committed,
-                drafts.flatMap((group) => group.events),
-                activeProfile,
-                {
-                  build_revision: revision ?? buildRevision,
-                  compatibility_revision: compatibility ?? compatibilityRevision,
-                },
+            ? browserComputation('events.derive', committed.length, (measure) =>
+                profiledDerive(committed, activeProfile.validation_view, measure),
+              )
+            : browserComputation(
+                'events.prepare',
+                committed.length + drafts.reduce((count, group) => count + group.events.length, 0),
+                (measure) =>
+                  profiledPrepare(
+                    committed,
+                    drafts.flatMap((group) => group.events),
+                    activeProfile.validation_view,
+                    measure,
+                  ),
               ).world,
         error: null,
       }
@@ -227,12 +242,14 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
         error: 'Die geplanten Änderungen können so nicht geprüft werden.',
       }
     }
-  }, [committed, drafts, revision, compatibility, domainUnavailable])
+  }, [committed, drafts, revision, domainUnavailable])
 
   const baselineWorld = useMemo(() => {
     if (derivation.world || !drafts.length) return null
     try {
-      return derive(committed, activeProfile.validation_view)
+      return browserComputation('events.derive', committed.length, (measure) =>
+        profiledDerive(committed, activeProfile.validation_view, measure),
+      )
     } catch {
       return null
     }
@@ -240,25 +257,37 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
 
   const currentPlan = useMemo(() => {
     if (domainUnavailable || !derivation.world || !revision || compatibility === null) return null
-    const contributions = composeSolverContributions(activeProfile)
-    return solve(buildSolverInput(derivation.world, contributions), contributions, {
-      build_revision: revision,
-      compatibility_revision: compatibility,
-      event_date: activeProfile.meta.starts_on,
-      profile: activeProfile,
-      seed: null,
+    const world = derivation.world
+    return browserComputation('solver.solve', world.head_seq, (measure) => {
+      const contributions = profiledContributions(
+        composeSolverContributions(activeProfile),
+        measure,
+      )
+      return solve(
+        measure('solver.input', () => buildSolverInput(world, contributions)),
+        contributions,
+        {
+          build_revision: revision,
+          compatibility_revision: compatibility,
+          event_date: activeProfile.meta.starts_on,
+          profile: activeProfile,
+          seed: null,
+        },
+      )
     })
   }, [derivation.world, revision, compatibility, domainUnavailable])
 
   const phaseStatus = useMemo(
     () =>
       derivation.world
-        ? derivePhaseStatus({
-            modules: activeProfile.modules,
-            meta: activeProfile.meta,
-            world: derivation.world,
-            now,
-          })
+        ? browserComputation('phase.status', derivation.world.head_seq, () =>
+            derivePhaseStatus({
+              modules: activeProfile.modules,
+              meta: activeProfile.meta,
+              world: derivation.world,
+              now,
+            }),
+          )
         : [],
     [derivation.world, now],
   )
@@ -282,7 +311,9 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
   const closedChanges = useMemo(
     () =>
       derivation.world && currentPlan
-        ? closedAttentionContext(derivation.world, currentPlan, activeProfile)
+        ? browserComputation('attention.closed', derivation.world.head_seq, () =>
+            closedAttentionContext(derivation.world!, currentPlan, activeProfile),
+          )
         : [],
     [derivation.world, currentPlan],
   )

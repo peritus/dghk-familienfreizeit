@@ -21,6 +21,7 @@ TARGET_DIR="$HOME/.config/$APP_SLUG/cloudflare/$APP_SLUG"
 TARGET_CONFIG="$TARGET_DIR/target.json"
 TOKEN_FILE="$TARGET_DIR/api-token"
 TEMPLATE="$ROOT_DIR/deploy/cloudflare/wrangler.json.template"
+PERFORMANCE_TEMPLATE="$ROOT_DIR/deploy/cloudflare/performance.json.template"
 API_BASE="https://api.cloudflare.com/client/v4"
 
 file_mode() {
@@ -61,6 +62,7 @@ require_command() {
 require_file "target config" "$TARGET_CONFIG"
 require_file "API token" "$TOKEN_FILE"
 require_file "Wrangler template" "$TEMPLATE"
+require_file "performance collector template" "$PERFORMANCE_TEMPLATE"
 require_mode_600 "target config" "$TARGET_CONFIG"
 require_mode_600 "API token" "$TOKEN_FILE"
 
@@ -98,6 +100,7 @@ fi
 ACCOUNT_ID="$(jq -er '.account_id' "$TARGET_CONFIG")"
 ACCOUNT_NAME="$(jq -er '.account_name' "$TARGET_CONFIG")"
 WORKER_NAME="$(jq -er '.worker_name' "$TARGET_CONFIG")"
+PERFORMANCE_WORKER_NAME="${WORKER_NAME:0:48}-performance"
 DATABASE_NAME="$(jq -er '.database_name' "$TARGET_CONFIG")"
 DATABASE_ID="$(jq -er '.database_id' "$TARGET_CONFIG")"
 
@@ -114,6 +117,7 @@ SITE_DIR="$DEPLOY_DIR/site"
 WORKER_DIR="$DEPLOY_DIR/worker"
 MIGRATIONS_DIR="$DEPLOY_DIR/migrations"
 RENDERED_CONFIG="$DEPLOY_DIR/wrangler.json"
+PERFORMANCE_CONFIG="$DEPLOY_DIR/performance.json"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/cloudflare-deploy.XXXXXX")"
 
 cleanup() {
@@ -127,6 +131,8 @@ cd "$ROOT_DIR"
 pnpm run build >/dev/null
 
 mkdir -p "$SITE_DIR" "$WORKER_DIR" "$MIGRATIONS_DIR"
+mkdir -p "$DEPLOY_DIR/performance"
+install -m 0644 "$ROOT_DIR/dist/dghk_performance/index.js" "$DEPLOY_DIR/performance/index.js" || die "could not stage performance collector"
 cp -R "$ROOT_DIR/dist/client/." "$SITE_DIR/" ||
   die "could not stage built client assets"
 install -m 0644 "$ROOT_DIR/dist/dghk_familienfreizeit/index.js" \
@@ -139,14 +145,19 @@ jq \
   --arg worker_name "$WORKER_NAME" \
   --arg database_name "$DATABASE_NAME" \
   --arg database_id "$DATABASE_ID" \
+  --arg performance_worker_name "$PERFORMANCE_WORKER_NAME" \
   '
     .account_id = $account_id
     | .name = $worker_name
     | .d1_databases[0].database_name = $database_name
     | .d1_databases[0].database_id = $database_id
+    | .tail_consumers[0].service = $performance_worker_name
   ' "$TEMPLATE" > "$RENDERED_CONFIG"
 
+jq --arg account_id "$ACCOUNT_ID" --arg worker_name "$PERFORMANCE_WORKER_NAME" '.account_id = $account_id | .name = $worker_name' "$PERFORMANCE_TEMPLATE" > "$PERFORMANCE_CONFIG"
+
 chmod 600 "$RENDERED_CONFIG"
+chmod 600 "$PERFORMANCE_CONFIG"
 
 api_get() {
   local url="$1"
@@ -234,6 +245,10 @@ if ! wrangler d1 migrations apply \
   --remote \
   --config "$RENDERED_CONFIG"; then
   die "D1 migration failed"
+fi
+
+if ! wrangler deploy --config "$PERFORMANCE_CONFIG"; then
+  die "performance collector deployment failed"
 fi
 
 if ! wrangler deploy --config "$RENDERED_CONFIG"; then

@@ -32,7 +32,9 @@
     "check:docs": "node scripts/check-doc-links.mjs",
     "test:docs": "node --test test/docs/*.test.mjs && pnpm run check:docs",
     "perf:report": "node --experimental-strip-types scripts/performance-history.ts",
-    "bench:scale": "node --experimental-strip-types scripts/performance-bench.ts"
+    "bench:scale": "node --experimental-strip-types scripts/performance-bench.ts",
+    "perf:export": "node --experimental-strip-types scripts/performance-export.ts",
+    "perf:catalogue": "DGHK_PERF_WRITE_CATALOGUE=1 vitest run --project kernel test/events/performance-catalogue.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1",

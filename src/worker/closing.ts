@@ -1,10 +1,14 @@
-import { profileAttention } from '../attention/profile.js'
+import {
+  profiledAttention,
+  profiledContributions,
+  profiledPrepare,
+  type ComputationProfiler,
+} from '../performance/domain.js'
 import { attentionBlockers, acknowledgementFingerprint } from '../attention/selectors.js'
 import type { AttentionItem } from '../attention/types.js'
 import type { ProfileModule, OccasionProfile } from '../config/define.js'
 import { closedResults } from '../config/phases.js'
 import type { Event, EventDraft, JsonValue } from '../events/types.js'
-import { prepareEventBatch } from '../events/prepare.js'
 import { buildSolverInput, composeSolverContributions, solve } from '../solver/index.js'
 
 /** A closing the Worker refuses because the area's review phase is not ready. */
@@ -54,64 +58,76 @@ export function fillClosingPayloads(
   drafts: readonly EventDraft[],
   profile: OccasionProfile,
   revisions: { build_revision: string; compatibility_revision: number },
+  measure: ComputationProfiler = (_operation, run) => run(),
 ): EventDraft[] {
-  const areas = closingEventAreas(profile.modules)
-  const results = closedResults(profile.modules)
-  const filled: EventDraft[] = []
-  for (const [index, draft] of drafts.entries()) {
-    if (
-      draft.type === 'WorkshopWarningsAcknowledged' &&
-      drafts[index + 1]?.type !== 'WorkshopsClosed'
-    )
-      throw new WorkshopReviewRequiredError([])
-    const area = areas.get(draft.type)
-    if (!area) {
-      filled.push(draft)
-      continue
-    }
-    if (!isEmptyPayload(draft.payload)) throw new ClosingPayloadSuppliedError(draft.type)
-    const { world } = prepareEventBatch(committed, filled, profile.validation_view)
-    const contributions = composeSolverContributions(profile)
-    const plan = solve(buildSolverInput(world, contributions), contributions, {
-      ...revisions,
-      event_date: profile.meta.starts_on,
-      profile,
-      seed: null,
-    })
-    const attention = profileAttention(profile)({
-      domain: 'available',
-      world,
-      plan,
-      profile,
-      build_revision: revisions.build_revision,
-      locale: profile.meta.locale,
-      now: draft.at,
-      audience: 'organiser',
-    })
-    const blockers = attentionBlockers(
-      attention,
-      area === 'accommodation' ? 'close-accommodation' : 'close-workshops',
-    )
-    const findings = blockers
-    if (findings.length > 0) throw new AreaNotReadyError(area, findings)
-    if (area === 'workshops') {
-      const advisories = attention.items.filter((item) => item.acknowledgement !== null)
-      const previous = drafts[index - 1]
-      const fingerprint =
-        previous?.payload &&
-        typeof previous.payload === 'object' &&
-        !Array.isArray(previous.payload)
-          ? (previous.payload as Record<string, JsonValue>)['fingerprint']
-          : undefined
+  return measure('closing.fill', () => {
+    const areas = closingEventAreas(profile.modules)
+    const results = closedResults(profile.modules)
+    const filled: EventDraft[] = []
+    for (const [index, draft] of drafts.entries()) {
       if (
-        advisories.length &&
-        (previous?.type !== 'WorkshopWarningsAcknowledged' ||
-          fingerprint !== acknowledgementFingerprint(attention))
+        draft.type === 'WorkshopWarningsAcknowledged' &&
+        drafts[index + 1]?.type !== 'WorkshopsClosed'
       )
-        throw new WorkshopReviewRequiredError(advisories)
+        throw new WorkshopReviewRequiredError([])
+      const area = areas.get(draft.type)
+      if (!area) {
+        filled.push(draft)
+        continue
+      }
+      if (!isEmptyPayload(draft.payload)) throw new ClosingPayloadSuppliedError(draft.type)
+      const { world } = profiledPrepare(committed, filled, profile.validation_view, measure)
+      const contributions = profiledContributions(composeSolverContributions(profile), measure)
+      const plan = measure('solver.solve', () =>
+        solve(
+          measure('solver.input', () => buildSolverInput(world, contributions)),
+          contributions,
+          {
+            ...revisions,
+            event_date: profile.meta.starts_on,
+            profile,
+            seed: null,
+          },
+        ),
+      )
+      const attention = profiledAttention(
+        profile,
+        measure,
+      )({
+        domain: 'available',
+        world,
+        plan,
+        profile,
+        build_revision: revisions.build_revision,
+        locale: profile.meta.locale,
+        now: draft.at,
+        audience: 'organiser',
+      })
+      const blockers = attentionBlockers(
+        attention,
+        area === 'accommodation' ? 'close-accommodation' : 'close-workshops',
+      )
+      const findings = blockers
+      if (findings.length > 0) throw new AreaNotReadyError(area, findings)
+      if (area === 'workshops') {
+        const advisories = attention.items.filter((item) => item.acknowledgement !== null)
+        const previous = drafts[index - 1]
+        const fingerprint =
+          previous?.payload &&
+          typeof previous.payload === 'object' &&
+          !Array.isArray(previous.payload)
+            ? (previous.payload as Record<string, JsonValue>)['fingerprint']
+            : undefined
+        if (
+          advisories.length &&
+          (previous?.type !== 'WorkshopWarningsAcknowledged' ||
+            fingerprint !== acknowledgementFingerprint(attention))
+        )
+          throw new WorkshopReviewRequiredError(advisories)
+      }
+      const result = results.get(area as Parameters<typeof results.get>[0])!
+      filled.push({ ...draft, payload: { ...result.compute({ world, plan }), ...revisions } })
     }
-    const result = results.get(area as Parameters<typeof results.get>[0])!
-    filled.push({ ...draft, payload: { ...result.compute({ world, plan }), ...revisions } })
-  }
-  return filled
+    return filled
+  })
 }

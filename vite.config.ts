@@ -11,7 +11,14 @@ const buildRevision =
 const compatibilityRevision = Number(process.env.COMPATIBILITY_REVISION ?? 1)
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), bundleGraph(), ...(process.env.VITEST ? [] : [cloudflare()])],
+  plugins: [
+    react(),
+    tailwindcss(),
+    bundleGraph(),
+    ...(process.env.VITEST
+      ? []
+      : [cloudflare({ auxiliaryWorkers: [{ configPath: 'wrangler.performance.jsonc' }] })]),
+  ],
   resolve: { alias: { '@': fileURLToPath(new URL('./src/app', import.meta.url)) } },
   build: { manifest: true },
   define: {
