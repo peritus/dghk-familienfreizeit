@@ -5,7 +5,9 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
     "baseUrl": ".",
-    "paths": { "@/*": ["./src/app/*"] }
+    "paths": {
+      "@/*": ["./src/app/*"]
+    }
   },
   "include": [
     "src/events/prepare.ts",
@@ -23,6 +25,7 @@
     "src/modules/**/*.ts",
     "src/solver/**/*.ts",
     "src/organiser/**/*.ts",
-    "test/app/**/*.tsx"
+    "test/app/**/*.tsx",
+    "src/performance/**/*.ts"
   ]
 }
