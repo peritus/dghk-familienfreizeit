@@ -7,7 +7,7 @@ export const calculationBudgets: CapacityBudgets = { 'organiser.edit': 500 }
 
 export const appendBudgets: CapacityBudgets = {
   'request.organiser-apply': 1000,
-  'request.events:family': 1000,
+  'request.family-write': 1000,
 }
 
 /* eslint-enable @typescript-eslint/naming-convention */

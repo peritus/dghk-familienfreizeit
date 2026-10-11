@@ -25,7 +25,10 @@ export const performanceCatalogue = {
   'request.me:organiser': 'GET principal (organiser authentication)',
   'request.me:family': 'GET principal (family authentication and replay)',
   'request.organiser-apply': 'POST organiser batch (prepare, authorize, append, response)',
-  'request.events:family': 'POST family batch (authentication, replay, authorize, prepare, append)',
+  'request.family-read': 'GET family resource (authentication, one replay, allowlisted response)',
+  'request.family-write':
+    'Family REST mutation (authentication, prepare, authorize, append, response)',
+  'request.events:family': 'Historical family event append measurement',
 } as const
 
 export type PerformanceOperation = keyof typeof performanceCatalogue

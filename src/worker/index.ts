@@ -5,7 +5,7 @@ import { Hono, type Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { tracing } from 'cloudflare:workers'
 import { profiledDerive, profiledPrepare } from '../performance/domain.js'
-import { performanceOperations, requestOperations } from '../performance/operations.js'
+import { performanceOperations, requestOperation } from '../performance/operations.js'
 import {
   computationMeasurements,
   parseMetricBatch,
@@ -75,8 +75,7 @@ let warnedDemoLogin = false
 let announcedFeatureBindings = ''
 
 app.use('*', async (context, next) => {
-  const root =
-    requestOperations[new URL(context.req.url).pathname as keyof typeof requestOperations]
+  const root = requestOperation(new URL(context.req.url).pathname, context.req.method)
   const measurements = computationMeasurements({
     source: 'worker',
     enabled: context.env.DGHK_PERFORMANCE === 'on' && Boolean(root),

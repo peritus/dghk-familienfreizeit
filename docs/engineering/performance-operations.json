@@ -89,6 +89,8 @@
   "projection.shared",
   "request.events",
   "request.events:family",
+  "request.family-read",
+  "request.family-write",
   "request.login",
   "request.me",
   "request.me:family",

@@ -72,8 +72,8 @@ for (const original of cases) {
   const scenario = fixture.scenario
   const history = startRun(
     original.lifecycle
-      ? `luebben2027-lifecycle-requests-v1:${scenario}`
-      : `luebben2027-requests-v1:${scenario}`,
+      ? `luebben2027-lifecycle-requests-v2:${scenario}`
+      : `luebben2027-requests-v2:${scenario}`,
     { events: size, ...fixture.scale, samples },
     `/wrangler:${workerRuntime}`,
     measuredRevision,
@@ -205,23 +205,46 @@ for (const original of cases) {
     const timings: TimingSummary[] = []
     const slices: TraceSlice[] = []
     const traceOrigin = clock()
-    const request = async (path: string, token: string, body?: unknown) => {
+    const request = async (
+      path: string,
+      token: string,
+      body?: unknown,
+      method = body === undefined ? 'GET' : 'POST',
+      etag?: string,
+    ) => {
       const response = await fetch(`${origin}${path}`, {
-        method: body === undefined ? 'GET' : 'POST',
-        headers: { cookie: `sid=${token}`, origin, 'content-type': 'application/json' },
+        method,
+        headers: {
+          cookie: `sid=${token}`,
+          origin,
+          'content-type': 'application/json',
+          ...(etag ? { 'If-Match': etag } : {}),
+        },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         signal: AbortSignal.any([interrupted.signal, AbortSignal.timeout(120000)]),
       })
       const result = (await response.json()) as {
         head?: number
         head_seq?: number
-        principal?: { kind?: string }
+        principal?: { roles?: string[] }
+        data?: { family: { id: string } }
+        given_name?: string
+        etag?: string
       }
       if (!response.ok)
         throw new Error(`benchmark request ${path} failed with status ${response.status}`)
-      return result
+      return { ...result, etag: response.headers.get('etag') ?? undefined }
     }
+    const personPath = `/api/family/people/${encodeURIComponent(String((person.payload as Record<string, unknown>).person_id))}`
+    let personETag = (await request(personPath, familyToken)).etag
     const operations = [
+      [
+        'request.family-read',
+        async () => {
+          if ((await request('/api/family', familyToken)).data?.family.id !== family.family_id)
+            throw new Error('unexpected family representation')
+        },
+      ],
       [
         'request.organiser-log',
         async () => {
@@ -232,14 +255,17 @@ for (const original of cases) {
       [
         'request.me:organiser',
         async () => {
-          if ((await request('/api/me', organiserToken)).principal?.kind !== 'organiser')
+          if (
+            (await request('/api/me', organiserToken)).principal?.roles?.includes('organiser') !==
+            true
+          )
             throw new Error('unexpected organiser principal')
         },
       ],
       [
         'request.me:family',
         async () => {
-          if ((await request('/api/me', familyToken)).principal?.kind !== 'family')
+          if ((await request('/api/me', familyToken)).principal?.roles?.includes('family') !== true)
             throw new Error('unexpected family principal')
         },
       ],
@@ -269,22 +295,20 @@ for (const original of cases) {
         },
       ],
       [
-        'request.events:family',
+        'request.family-write',
         async () => {
-          const result = await request('/api/events', familyToken, {
-            expected_head: head,
-            events: [
-              {
-                type: 'PersonUpdated',
-                payload: {
-                  ...(person.payload as Record<string, unknown>),
-                  given_name: `Performance ${edit++}`,
-                },
-              },
-            ],
-          })
+          const name = `Performance ${edit++}`
+          const result = await request(
+            personPath,
+            familyToken,
+            { given_name: name },
+            'PATCH',
+            personETag,
+          )
+          personETag = result.etag
           head++
-          if (result.head !== head) throw new Error('unexpected family append head')
+          if (result.given_name !== name || !personETag)
+            throw new Error('unexpected family resource update')
         },
       ],
     ] as const
@@ -313,6 +337,8 @@ for (const original of cases) {
         `${scenario} ${size} ${operation}: median ${timing.median_ms.toFixed(2)} ms, p95 ${timing.p95_ms.toFixed(2)} ms, n=${samples}\n`,
       )
     }
+    if ((await request('/api/organiser/log', organiserToken)).head_seq !== head)
+      throw new Error('unexpected final event head')
     history.finish(
       timings,
       createHash('sha256')

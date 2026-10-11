@@ -13,12 +13,22 @@ export const requestOperations = {
 } as const
 /* eslint-enable @typescript-eslint/naming-convention */
 
+const familyRequestOperations = ['request.family-read', 'request.family-write'] as const
+
+/** Resource IDs never enter telemetry operation names. */
+export function requestOperation(path: string, method: string): string | undefined {
+  if (path === '/api/family' || path.startsWith('/api/family/'))
+    return method === 'GET' ? familyRequestOperations[0] : familyRequestOperations[1]
+  return requestOperations[path as keyof typeof requestOperations]
+}
+
 /** Names come only from registered code/configuration, never entity IDs or input. */
 export function performanceOperations(profile: OccasionProfile): ReadonlySet<string> {
   const contributions = composeSolverContributions(profile)
   return new Set([
     ...Object.keys(performanceCatalogue),
     ...Object.values(requestOperations),
+    ...familyRequestOperations,
     'telemetry.dropped',
     ...(profile.validation_view.world_summaries ?? []).map((item) => `world.summary:${item.id}`),
     ...(profile.validation_view.world_checks ?? []).map((_, index) => `world.check:${index}`),

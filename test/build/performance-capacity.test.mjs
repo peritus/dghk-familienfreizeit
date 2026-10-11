@@ -34,7 +34,7 @@ test('capacity CLI reports both scopes, explicit limits and incomplete coverage'
       ...base,
       run_id: 'http',
       workload: 'luebben2027-lifecycle-requests-v1:normal',
-      timings: ['request.organiser-apply', 'request.events:family'].map((operation) => ({
+      timings: ['request.organiser-apply', 'request.family-write'].map((operation) => ({
         operation,
         median_ms: 500,
         p95_ms: 900,
