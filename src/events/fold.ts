@@ -350,8 +350,16 @@ export function derive(events: readonly Event[], config: KernelConfig = {}): Wor
   // `normalizeEvents` already folds the log to run each event's validator
   // against the state before it. Folding a second time here doubled the cost of
   // every derive for an identical result.
-  const { state } = normalizeEvents(events, config)
-  const world = worldFromState(state, config)
+  return completeDerivedWorld(resolveFoldedWorld(foldEventLog(events, config), config), config)
+}
+
+/** Pure derivation phase; its transient state is never persisted. */
+export function foldEventLog(events: readonly Event[], config: KernelConfig = {}): MutableWorld {
+  return normalizeEvents(events, config).state
+}
+
+/** Pure finalization phase, also used by profiling adapters. */
+export function completeDerivedWorld(world: World, config: KernelConfig = {}): World {
   const summaries = Object.fromEntries(
     (config.world_summaries ?? []).map((definition) => [
       definition.id,
@@ -493,7 +501,7 @@ function entityLabels(state: MutableWorld, entityId: string): readonly Label[] {
   return [...(state.labels_by_entity.get(entityId)?.values() ?? [])]
 }
 
-function worldFromState(state: MutableWorld, config: KernelConfig): World {
+export function resolveFoldedWorld(state: MutableWorld, config: KernelConfig = {}): World {
   const labels = [...state.labels.values()].sort(
     (a, b) =>
       a.set_seq - b.set_seq || a.entity_id.localeCompare(b.entity_id) || a.key.localeCompare(b.key),

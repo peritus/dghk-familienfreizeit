@@ -22,6 +22,9 @@ export type PerformanceRun = {
   shape: Readonly<Record<string, number>>
   timings: readonly TimingSummary[]
   output_hash: string
+  status?: 'complete' | 'partial'
+  pending_operation?: string
+  pending_started_at?: string
 }
 
 export function summarize(operation: string, samples: readonly number[]): TimingSummary {

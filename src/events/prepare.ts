@@ -16,12 +16,20 @@ export function prepareEventBatch(
   drafts: readonly EventDraft[],
   config: KernelConfig = {},
 ): { events: Event[]; world: World } {
-  const schemas = eventPayloadSchemas(config)
-  const expectedHead = committed.length
-  const events = drafts.map((draft, index) =>
-    parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
-  )
+  const events = parseDraftBatch(committed.length, drafts, config)
   const world = derive([...committed, ...events], config)
   assertAppendableWorld(world)
   return { events, world }
+}
+
+/** Pure parsing phase shared with the performance adapter. */
+export function parseDraftBatch(
+  expectedHead: number,
+  drafts: readonly EventDraft[],
+  config: KernelConfig = {},
+): Event[] {
+  const schemas = eventPayloadSchemas(config)
+  return drafts.map((draft, index) =>
+    parseEvent({ ...draft, seq: expectedHead + index + 1 }, schemas),
+  )
 }

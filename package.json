@@ -31,7 +31,8 @@
     "ci": "pnpm run format:check && pnpm run test:docs && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build && pnpm run storybook:build && pnpm run test:storybook && pnpm run test:build && pnpm run test:browser",
     "check:docs": "node scripts/check-doc-links.mjs",
     "test:docs": "node --test test/docs/*.test.mjs && pnpm run check:docs",
-    "perf:report": "node --experimental-strip-types scripts/performance-history.ts"
+    "perf:report": "node --experimental-strip-types scripts/performance-history.ts",
+    "bench:scale": "node --experimental-strip-types scripts/performance-bench.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1",

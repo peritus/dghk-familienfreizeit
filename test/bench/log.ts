@@ -50,6 +50,46 @@ export function syntheticScale(factor: number): SyntheticScale {
   }
 }
 
+/** Exact log lengths, with either a fixed population or growing live entity counts. */
+export function syntheticLogSize(events: number, scenario: 'history' | 'population') {
+  if (!Number.isSafeInteger(events) || events < 611)
+    throw new Error('bench size must be an integer of at least 611')
+  let factor = scenario === 'history' ? 1 : Math.max(1, Math.floor(events / 590))
+  let scale = syntheticScale(factor)
+  let log = syntheticLog(scale)
+  while (log.length > events && factor > 1) {
+    scale = syntheticScale(--factor)
+    log = syntheticLog(scale)
+  }
+  if (scenario === 'population') {
+    for (;;) {
+      const nextScale = syntheticScale(factor + 1)
+      const next = syntheticLog(nextScale)
+      if (next.length > events) break
+      factor += 1
+      scale = nextScale
+      log = next
+    }
+  }
+  while (log.length < events) {
+    log.push({
+      seq: log.length + 1,
+      at: '2027-01-01T00:00:00Z',
+      actor: 'bench@example.test',
+      subject: null,
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'fam_0',
+        key: 'family-note',
+        value: `history ${log.length}`,
+        strength: null,
+        note: null,
+      },
+    })
+  }
+  return { events: log, scale, factor, scenario }
+}
+
 /**
  * Per-family accommodation needs, at the density a real occasion shows them.
  * These are what reach the resolver as constraints, requirements and
@@ -211,7 +251,7 @@ export function syntheticLog(scale: SyntheticScale): Event[] {
         person_id: `per_${personIndex}`,
         family_id: familyId,
         given_name: `Vorname ${personIndex}`,
-      family_name: String(index),
+        family_name: String(index),
         age: member === 0 ? 41 : 10,
         role: member === 0 ? 'adult' : 'child',
       })
