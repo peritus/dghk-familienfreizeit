@@ -87,8 +87,8 @@ Worker types when the bindings change.
 ## 3. Application shape
 
 The [implemented frontend](../../docs/ui/frontend.md#peer-family-detail-adapters)
-loads `/family` and `/organiser` as peer lazy apps. Shared login and `/apps`
-selection are outside both adapters. One neutral family-detail component accepts
+loads `/family` and `/organiser` as peer lazy apps. Shared login and its role
+choices are outside both adapters. One neutral family-detail component accepts
 serializable data and semantic actions through the same interface from both
 adapters. Shared components must not import either app, its state owner, World,
 events, solver or HTTP transport. Keep authority and persistence in adapters;

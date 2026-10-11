@@ -6,7 +6,8 @@ The route table is:
 | Route | Implemented behavior |
 |---|---|
 | `/` | Profile-configured public occasion landing and actions |
-| `/login` | Public organiser magic-link login |
+| `/login` | Shared magic-link login; direct entry for one role, equal choices for both |
+| `/family` and `/family/:topic/:person` | Own-family committed REST view |
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with header-dialog invitation staging |
 | `/organiser/families/:id` | Family detail shell with the Zimmer, Personen, Essen, and Workshops views |
@@ -233,7 +234,7 @@ failure. Neutral answers come from event-derived markers, including after reload
 ## Peer family-detail adapters
 
 `/family` and `/organiser` are equal lazy application roots. Shared `/login`,
-magic links and `/apps` selection sit outside both. Their family-detail screens
+magic links and login role choices sit outside both. Their family-detail screens
 use one neutral component and the same `FamilyDetailData`/`FamilyDetailActions`
 interface. Shared widget code imports neither adapter, event/World state,
 solver nor transport. The organiser adapter preserves its prospective World and
@@ -246,3 +247,21 @@ has four topic routes and local input/dialog state. `/family/:topic/:person`
 person IDs are opaque. Topic changes use client navigation; print and narrow
 layouts share the existing frame/primitives. See the [family app](../application/family-view.md)
 for the implemented controls, REST contract and remaining scope.
+
+## User-facing access terminology
+
+Describe access using family and organiser roles in visible copy and accessible
+names. Architecture terms such as App/Apps stay internal, including in component
+names and bundle documentation. Apply this to headings, controls, notices,
+tooltips, titles, accessible labels and authored print text. User-supplied domain
+names remain unchanged. German login actions are **Als Familie anmelden** and
+**Als Organisator anmelden**; English actions are **Sign in as a family** and
+**Sign in as an organiser**. Both roles use the shared occasion header, with
+role or family identity in its subtitle. The current login has no persistent
+role-switch control and preserves ordinary browser history.
+
+[Login tests](../../test/app/login.test.tsx) verify bilingual wording; the
+[browser login flow](../../test/browser/family-login.spec.ts) checks rendered
+copy and accessible labels, both sole-role redirects and returning to choices
+with Back. The [family layout check](../../test/browser/family.spec.ts) verifies
+shared branding, rename updates, narrow widths and print behavior.

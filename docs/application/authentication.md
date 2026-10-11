@@ -35,7 +35,7 @@ and `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` are both
 configured. Shared and deployed environments must leave these bindings unset.
 
 `GET /auth/:token/` (also accepted without the trailing slash) atomically deletes an unexpired token with `DELETE … RETURNING`,
-creates a hashed session, and redirects to `/apps`. Reusing or expiring a
+creates a hashed session, and redirects to `/login`. Reusing or expiring a
 token redirects to the invalid-link screen.
 
 Family sessions idle-expire after 30 days and organiser sessions idle-expire
@@ -56,8 +56,22 @@ array containing `family`, `organiser`, or both. Matching an organiser's email
 to the current family email grants both memberships through one session; an
 organiser's allowlist membership never grants access to another family's REST
 resources. A dual membership uses the stricter organiser expiry policy.
-`/apps` enters a sole app or shows equal links to both. An organiser app switch
-with pending drafts asks before discarding that in-memory workspace.
+
+The shared `/login` route probes `GET /api/me` before presenting the form. A 401
+shows the email-link form; a failed identity read shows a sanitized error and an
+explicit retry. A sole membership automatically enters `/family` or `/organiser`
+without rendering choices. Both memberships show equal **Als Familie anmelden**
+and **Als Organisator anmelden** links (English: **Sign in as a family** and
+**Sign in as an organiser**). The heading is **Wie möchtest du dich anmelden?**
+(**How would you like to sign in?**), and the navigation label is **Anmeldung auswählen** (**Choose how to sign in**).
+
+Choosing uses ordinary client navigation. The browser Back button returns to
+those choices. Neither authenticated header offers a role switch. Users can
+sign out and sign in again to choose, or directly visit the other authorized
+URL; no selected role is persisted and both memberships remain authorized.
+Leaving the organiser root follows its existing in-memory state lifecycle.
+The separate `/apps` route is not served by the frontend.
+
 
 The [family REST resources](family-view.md#rest-resources) require the current
 family membership, including for an organiser who attends. Organiser subroutes
@@ -84,3 +98,14 @@ separate deployment work. A family's mailbox is its authentication boundary:
 anyone who can use the shared mailbox can sign in, and a forwarded link can be
 redeemed once before its 15-minute expiry. The application does not provide
 per-person family accounts or prevent a recipient from forwarding a live link.
+
+## Verification
+
+[Login component tests](../../test/app/login.test.tsx) cover sole and dual roles,
+German and English copy, identity retry and request cancellation.
+[Worker authentication tests](../../test/worker/auth.test.ts) cover redemption
+and its `/login` destination. The [built browser flow](../../test/browser/family-login.spec.ts)
+uses real isolated Worker/D1 sessions for both sole roles and dual membership,
+Back navigation, authorized direct URLs, persisted REST edits and logout/relogin.
+Run `pnpm run build` before that flow. This is local verification, not hosted
+mail delivery or deployment evidence.

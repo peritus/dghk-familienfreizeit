@@ -1,9 +1,11 @@
 # Family application
 
 The authenticated family app lives at `/family`; `/organiser` is its peer app.
-Both use [the same login and session](authentication.md). `/apps` reads
-`GET /api/me`, enters the sole available app, or offers both apps equally when the
-email is both invited and on the organiser allowlist.
+Both use [the same login and session](authentication.md). `/login` reads
+`GET /api/me`, enters the sole available view, or offers equal role choices when
+the email is both invited and on the organiser allowlist. Authenticated headers
+have no role-switch control; Back can return to login choices and direct URLs
+remain authorized by current membership.
 
 ## Shared presentation and adapters
 
@@ -33,6 +35,18 @@ Normal form buffers are local input state. The family app has no event log,
 local resolver, Drafts, SaveStatus, offline mutation queue or speculative World.
 Preference controls save on change; text saves on blur. Failed writes show plain
 errors. A stale edit refreshes data and requires an explicit new action.
+
+## Header identity
+
+Both adapters supply their navigation link to the shared
+[occasion branding component](../../src/app/components/application/occasion-brand.tsx).
+The same compact occasion title, boxed logo and truncation apply at phone and
+wide widths. The organiser subtitle is **DGHK Berlin-Brandenburg ·
+Organisationsteam** (English: **Organising team**); the family subtitle uses its
+committed display name, such as **DGHK Berlin-Brandenburg · Familie Schmitz**
+(English: **Schmitz family**). A saved family rename updates the subtitle.
+While data is loading, the family label is **Familie** / **Family**. Existing
+German Familie prefixes and English family prefixes or suffixes are not duplicated. Logout remains available.
 
 ## REST resources
 
