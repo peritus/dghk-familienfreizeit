@@ -916,7 +916,7 @@ test('families validate invitations', async () => {
   expect(screen.getByRole('alert').textContent).toBe('Bitte gib eine gültige E-Mail-Adresse ein.')
 })
 
-test.each(['/family', '/unknown', '/organiser/unknown'])(
+test.each(['/unknown', '/organiser/unknown'])(
   '%s has a recoverable not-found state',
   async (path) => {
     open(path)
@@ -984,4 +984,27 @@ test('an apply response with changed feature overrides asks for a reload', async
   fireEvent.click(inviteDialog.getByRole('button', { name: 'Familie hinzufügen' }))
 
   expect(await screen.findByText('Diese Ansicht ist veraltet. Bitte lade sie neu.')).toBeTruthy()
+})
+
+test('app switching asks before losing organiser drafts and declining preserves them', async () => {
+  open('/organiser/families')
+  await screen.findByRole('heading', { name: /Familien/, level: 1 })
+  await enableDraftMode()
+  const dialog = await openFamilyInviteDialog()
+  fireEvent.change(dialog.getByLabelText('Familienname'), { target: { value: 'Wechsel Familie' } })
+  fireEvent.change(dialog.getByLabelText('E-Mail'), { target: { value: 'wechsel@example.test' } })
+  fireEvent.click(dialog.getByRole('button', { name: 'Familie hinzufügen' }))
+  await screen.findByRole('link', { name: 'Wechsel Familie' })
+  fireEvent.click(screen.getByRole('button', { name: 'Apps' }))
+  expect(screen.getByText('Beim Wechsel gehen die offenen Entwürfe verloren.')).toBeTruthy()
+  expect(window.location.pathname).toBe('/organiser/families')
+  fireEvent.click(screen.getByRole('button', { name: 'Hier bleiben' }))
+  expect(screen.queryByText('Beim Wechsel gehen die offenen Entwürfe verloren.')).toBeNull()
+  expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
+  fireEvent.click(screen.getByRole('button', { name: 'Apps' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Trotzdem wechseln' }))
+  await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' })
+  expect(saveStatusTrigger().getAttribute('aria-label')).toBe(
+    'Alles gespeichert. Speicheroptionen anzeigen',
+  )
 })

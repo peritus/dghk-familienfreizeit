@@ -9,6 +9,7 @@ import { SaveStatus } from './save-status.js'
 import { HeaderMenu } from './header-menu.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
+import { useLocation } from 'wouter'
 import { logout } from '../auth/session.js'
 import { Button } from '../components/shared/ui/button'
 import type { ProfilePresentation } from '../../config/presentation.js'
@@ -92,6 +93,8 @@ export function OrganiserFrame({
   profile?: ProfilePresentation
 }) {
   const { state } = useOrganiser()
+  const [, navigate] = useLocation()
+  const [switchConfirmation, setSwitchConfirmation] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState(false)
 
@@ -145,6 +148,16 @@ export function OrganiserFrame({
       primary_navigation={<PrimaryNavigation items={primaryNavItems} />}
       controls={
         <>
+          <Button
+            type="button"
+            variant="neutral"
+            onClick={() => {
+              if (draftCount(state) > 0) setSwitchConfirmation(true)
+              else void navigate('~/apps')
+            }}
+          >
+            Apps
+          </Button>
           <div className="md:hidden">
             <HeaderMenu on_logout={signOut} logging_out={loggingOut} />
           </div>
@@ -158,6 +171,23 @@ export function OrganiserFrame({
       }
       notices={
         <>
+          {switchConfirmation ? (
+            <div role="alert" className="grid gap-2">
+              <p>Beim Wechsel gehen die offenen Entwürfe verloren.</p>
+              <div className="flex gap-2">
+                <Button type="button" onClick={() => void navigate('~/apps')}>
+                  Trotzdem wechseln
+                </Button>
+                <Button
+                  type="button"
+                  variant="neutral"
+                  onClick={() => setSwitchConfirmation(false)}
+                >
+                  Hier bleiben
+                </Button>
+              </div>
+            </div>
+          ) : null}
           {logoutError ? (
             <p role="alert" className="text-sm text-danger-foreground">
               Die Abmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut.

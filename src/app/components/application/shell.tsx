@@ -15,8 +15,12 @@ export function Shell({
   force_frame?: boolean
 }) {
   const [location] = useLocation()
-  const organiserSection = location === '/organiser' || location.startsWith('/organiser/')
-  if (organiserSection && !forceFrame) return <>{children}</>
+  const applicationSection =
+    location === '/organiser' ||
+    location.startsWith('/organiser/') ||
+    location === '/family' ||
+    location.startsWith('/family/')
+  if (applicationSection && !forceFrame) return <>{children}</>
   return (
     <ApplicationFrame
       print_title={profileEventTitle(profile)}

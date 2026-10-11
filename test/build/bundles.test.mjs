@@ -22,7 +22,12 @@ function closure(file, visited = new Set()) {
 
 const entry = graph.find((item) => item.entry)
 assert.ok(entry, 'Browser entry must exist')
-const family = closure(entry.file)
+const publicChunks = closure(entry.file)
+const familyApp = graph.find((item) =>
+  item.modules.some((id) => id.endsWith('src/app/family/family-app.tsx')),
+)
+assert.ok(familyApp, 'Family must have a separate lazy chunk')
+const family = new Set([...publicChunks, ...closure(familyApp.file)])
 const organiser = graph.find((item) =>
   item.modules.some((id) => id.endsWith('src/app/organiser/organiser-app.tsx')),
 )
@@ -33,10 +38,25 @@ test('family static import closure excludes organiser, solver and Worker code', 
   for (const id of modules)
     assert.doesNotMatch(
       id,
-      /src\/(app\/organiser|solver|derive|worker)\/|src\/modules\/[^/]+\/worker\//,
+      /src\/(app\/organiser|solver|derive|worker|events)\/|src\/family-detail\/(read-model|changes)\.ts|src\/modules\/[^/]+\/(worker|app)\//,
     )
   assert.ok(organiser, 'Organiser must have a separate lazy chunk')
   assert.ok(!family.has(organiser.file))
+  assert.ok(!publicChunks.has(familyApp.file))
+  assert.ok(modules.some((id) => id.endsWith('src/app/components/family-detail/family-detail.tsx')))
+  assert.ok(modules.some((id) => id.endsWith('src/app/family/api.ts')))
+  const organiserDetail = graph.find((item) =>
+    item.modules.some((id) => id.endsWith('src/app/organiser/screens/family-detail.tsx')),
+  )
+  assert.ok(organiserDetail)
+  const organiserModules = graph
+    .filter((item) => closure(organiserDetail.file).has(item.file))
+    .flatMap((item) => item.modules)
+  assert.ok(
+    organiserModules.some((id) =>
+      id.endsWith('src/app/components/family-detail/family-detail.tsx'),
+    ),
+  )
   assert.ok(
     graph.some((item) => family.has(item.file) && item.dynamic_imports.includes(organiser.file)),
   )
