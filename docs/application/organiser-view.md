@@ -253,7 +253,7 @@ The active profile contains the kernel `role` trait, accommodation modules, the
 profile-driven organiser family controls, and the workshop planning modules.
 Assignment review, fixed workshop attendance controls, opening workshop choice,
 and closing and reopening both areas are implemented. Family
-magic-link authentication and the minimal family principal endpoint are also
+shared multi-membership authentication and the peer family REST app are also
 implemented; the family-facing application and full family view of closed results
 remain later scope. Fixed attendance is authored as an ordinary `needs`/`provides`
 label pair and can be reviewed and cleared in allocation. Fixed workshop

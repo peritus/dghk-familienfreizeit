@@ -21,7 +21,8 @@ are separate claims and require separate evidence.
 - [Workshop scheduling](modules/workshop-scheduling.md): slots and one-placement scheduling.
 - [Workshop rankings](modules/workshop-rankings.md): current-cycle structured choices.
 - [Workshop assignment](modules/workshop-assignment.md): deterministic attendance allocation.
-- [Authentication](application/authentication.md): magic links, sessions and request principals.
+- [Authentication](application/authentication.md): shared magic links, sessions and app memberships.
+- [Family app](application/family-view.md): shared widgets, scoped REST resources and privacy.
 - [Organiser view](application/organiser-view.md): authenticated organiser host, family surfaces and draft changes.
 - [Frontend](ui/frontend.md): application routes and recovery behavior.
 - [Design system](ui/design-system.md): copied primitives and shell styling.

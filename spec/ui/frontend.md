@@ -86,19 +86,13 @@ Worker types when the bindings change.
 
 ## 3. Application shape
 
-```
-src/app/
-  main.tsx              router, session probe, lazy-loads the organiser application
-  family-view/               login, preferences page, assignment page
-  organiser/
-    OrganiserApp.tsx        loads the log, owns the draft reducer, derives the world
-    screens/            dashboard, families, inventory, assignment board, workshops
-  components/shared/ui/        neobrutalism components, copied in by the shadcn CLI
-```
-
-**Routing** is `wouter`: path patterns with parameters for the dozen routes in the
-[organiser view](../application/organiser-view.md) and the family view. `/organiser/**` is a lazy
-chunk, so a family's phone never downloads the organiser screens or the solver.
+The [implemented frontend](../../docs/ui/frontend.md#peer-family-detail-adapters)
+loads `/family` and `/organiser` as peer lazy apps. Shared login and `/apps`
+selection are outside both adapters. One neutral family-detail component accepts
+serializable data and semantic actions through the same interface from both
+adapters. Shared components must not import either app, its state owner, World,
+events, solver or HTTP transport. Keep authority and persistence in adapters;
+verify both adapter behavior and their emitted module closures.
 
 **Organiser state** is one reducer and one local-first command pipeline:
 
@@ -135,12 +129,13 @@ family bundle never downloads the event log, draft events, full organiser `World
 solver traces, organiser labels or notes. It receives only the Worker response after
 server-side derivation and family privacy projection.
 
-**Family view state** is the family's privacy-projected response from
-`GET /api/family/view`, which the Worker derives and composes according to
-[phases](../architecture/phases.md) §6 and filters to that family ([family view](../application/family-view.md)).
-The response includes the family's closed results, phase status and own
-before/after comparisons; it never transfers the source log or the organiser
-`World`. A control change posts the label event and re-renders from the response.
+**Family state** is the allowlisted REST response described in
+[the current family app](../../docs/application/family-view.md). It has no local
+World, event drafts, SaveStatus or offline queue. Arrangement data, phase-composed
+results and own before/after comparisons remain requirements of
+[the family view](../application/family-view.md) and
+[phases](../architecture/phases.md) §6. Their source log and organiser World must
+remain server-side.
 
 **Escaping.** React escapes interpolated values by default.
 `dangerouslySetInnerHTML` appears nowhere in this codebase. Family free text, organiser
@@ -148,7 +143,7 @@ notes, and workshop titles are all user-supplied and all rendered as `{value}`.
 
 The family preferences page is a renderer over `family_facing` occasion-profile entries
 rather than hand-written JSX ([family view](../application/family-view.md) §1): each
-`control` value maps one-to-one onto a component in `src/app/family-view/controls/`.
+`control` value maps one-to-one onto a component in the neutral shared control renderer.
 
 ### Workshop navigation and responsive behavior
 
@@ -335,7 +330,7 @@ auditable by someone who does not know this stack. React never reaches into it.
 | htmx or other partial-update libraries | React owns updates; requests return JSON |
 | A meta-framework (Next.js, Remix, TanStack Start) | No server rendering to organise; the Worker is an API |
 | A state manager | The state is a list of events and a pure function over it |
-| A data-fetching library | Three organiser requests and two family view requests |
+| A data-fetching library | Small explicit organiser and family REST clients |
 | A table library | 55 rows from the derived world |
 | tRPC | Shared zod schemas type both ends |
 | An ORM | Only the event log and operational tables are stored; see [data model](../architecture/data-model.md) |

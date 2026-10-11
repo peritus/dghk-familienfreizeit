@@ -24,7 +24,7 @@ A normal unit test checks that the documented list matches the registry.
 | `projection.shared`, `projection.family` | `projectSharedWorld`, `projectFamilyWorld` | Elapsed | Currently no production caller |
 | `closing.fill` | `fillClosingPayloads`, prospective replay, input construction, solve, attention and closing result | Includes the expected rejection of an unready synthetic occasion | Worker calls/spans |
 | `organiser.edit` | Prospective world, solver input, solve and attention | Complete composed calculation | Individual browser calculations; no combined React-render latency claim |
-| `request.*` | Organiser log, organiser/family principal, organiser apply and family append handlers | Real HTTP, local Worker/D1, response decoding | Selected request invocation CPU/wall |
+| `request.*` | Organiser log, organiser/family memberships, organiser apply and family REST read/write handlers | Real HTTP, local Worker/D1, response decoding | Selected request invocation CPU/wall |
 
 Inner names are `world.summary:<id>`, `world.check:<index>`,
 `solver.input:<id>`, `solver.check:<id>`, `solver.stage:<id>` and

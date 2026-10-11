@@ -16,9 +16,9 @@ configured. The response is uniform and does not reveal whether an address is
 invited.
 
 When `DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN=true` is also configured, an
-allowlisted organiser receives the single-use link as `magic_link` in the same
+eligible family or organiser receives the single-use link as `magic_link` in the same
 JSON response. The login form replaces the input and submit button with a
-highlighted orange demo panel offering an “Als Organisator anmelden” link. This
+highlighted orange demo panel offering an “Anmelden” link. This
 is a dangerous development adapter, not an
 email-delivery replacement; it must be unset for real user authentication.
 
@@ -34,8 +34,8 @@ Session cookies are always `Secure`, except when the exact local-preview host
 and `DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true` are both
 configured. Shared and deployed environments must leave these bindings unset.
 
-`GET /auth/:token` atomically deletes an unexpired token with `DELETE … RETURNING`,
-creates a hashed session, and redirects to the application. Reusing or expiring a
+`GET /auth/:token/` (also accepted without the trailing slash) atomically deletes an unexpired token with `DELETE … RETURNING`,
+creates a hashed session, and redirects to `/apps`. Reusing or expiring a
 token redirects to the invalid-link screen.
 
 Family sessions idle-expire after 30 days and organiser sessions idle-expire
@@ -51,17 +51,20 @@ the runtime allowlist on every request. Family status is resolved from the
 current folded event world, so a family email change invalidates the old address
 without session cleanup.
 
-`/api/family/view` requires a family principal and currently returns only
-`{ family_id }`; the family projection and family-facing application are not
-implemented. Organiser API subroutes return JSON 401 to unauthenticated or
-non-organiser requests; the base `/api/organiser` route intentionally returns
-JSON 404 to conceal the organiser surface. `/api/me` exposes only the current
-principal kind and identity needed by the shell.
-`POST /api/events` sets the verified actor server-side, requires a same-origin
-`Origin`, rejects stale heads, accepts at most 100 events per request, bounds
-request size and batch shape, rate-limits family writes, and permits family
-principals only to append events about their own family or people; organiser
-principals may append setup events.
+`GET /api/me` returns `{principal: {email, roles, family_id}}`. Roles is an
+array containing `family`, `organiser`, or both. Matching an organiser's email
+to the current family email grants both memberships through one session; an
+organiser's allowlist membership never grants access to another family's REST
+resources. A dual membership uses the stricter organiser expiry policy.
+`/apps` enters a sole app or shows equal links to both. An organiser app switch
+with pending drafts asks before discarding that in-memory workspace.
+
+The [family REST resources](family-view.md#rest-resources) require the current
+family membership, including for an organiser who attends. Organiser subroutes
+return JSON 401 to unauthenticated or non-organiser requests; the base
+`/api/organiser` returns JSON 404. `POST /api/events` is organiser-only; it sets the
+actor server-side, requires same-origin Origin, bounds the body and batch, and
+rejects stale heads. Families do not submit events or receive an event log.
 
 Cookie-authenticated mutations require a same-origin `Origin` header. Worker
 responses set browser security headers, and authentication/API responses are
@@ -76,7 +79,7 @@ where a demo organiser is needed, and `DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN`
 must remain unset outside that demo. The local `dev-preview` task creates a
 temporary ignored `.dev.vars` file with the synthetic identity
 `demo-organiser@example.invalid`; it does not put these values in committed
-Wrangler configuration. Email delivery, family forms, and hosted secrets remain
+Wrangler configuration. Email delivery and hosted secrets remain
 separate deployment work. A family's mailbox is its authentication boundary:
 anyone who can use the shared mailbox can sign in, and a forwarded link can be
 redeemed once before its 15-minute expiry. The application does not provide

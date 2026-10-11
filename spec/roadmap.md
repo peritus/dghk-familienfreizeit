@@ -62,9 +62,11 @@ Specification coverage: [authentication delivery intent](application/authenticat
   in the [current authentication foundation](../docs/application/authentication.md).
   M10 may expose the link in development, but does not render hosted messages,
   call provider transport, or record delivery outcomes.
-- Render the shared profile-driven controls for families through the same
-  definitions and ordinary event path, including Zieltermin and closed-input
-  notices and assignment cards.
+- Extend the [implemented family current-input app](../docs/application/family-view.md)
+  with the final family presentation, inline success feedback, explicit workshop
+  no-preference and arrangement cards. Shared login, multiple memberships, peer
+  UI adapters, REST CRUD, target/closed notices and own display-name correction
+  are implemented.
 - Implement the family side of [phases](architecture/phases.md) §6: the live
   family composition with each area's closed result, live descriptors,
   unavailable referenced entities, and the own-family before/after comparison.
@@ -76,16 +78,14 @@ Specification coverage: [authentication delivery intent](application/authenticat
   family, and a family-authored event whose governing feature is not effective is
   rejected on append, including writes to a closed area. Keep availability
   distinct from authorization and phase status.
-- Let an authenticated family correct its own `display-name` from the family
-  view through `FamilyDisplayNameChanged`; the family may address only its own
-  entity, while organisers retain the cross-family correction path from M7.
 - Add closing, reopening, re-closing, withdrawn-person, cancelled-workshop,
   privacy, and family-projection fixtures.
 
 ### Family projection privacy gate
 
-Before `/api/family/view` returns any derived family data, diffs, badges,
-reports, or notification previews:
+The [current-input allowlist](../docs/application/family-view.md#privacy-and-verification)
+is implemented and adversarially tested. Before adding arrangement data, diffs,
+badges, reports or notification previews to `/api/family`:
 
 - Build the projection from an explicit family-visible allowlist; do not
   shallow-copy the organiser world. Recompute or filter every derived

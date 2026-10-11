@@ -201,7 +201,7 @@ must verify that pairing.
 
 *Chosen.* Roughly 120 lines using Web Crypto. Sessions and magic links store the
 verified email address, and every request resolves it — against the organiser
-allowlist, or to a family in the derived world — so there is no user table beside
+allowlist and to a family in the derived world, allowing both memberships — so there is no user table beside
 the event log (D2).
 
 *Rejected alternative:* Better Auth. It is a good library, but this application
@@ -267,7 +267,7 @@ draft events and the full organiser `World`.
 The family browser must never receive the event log, draft events, the full `World`,
 solver traces, organiser labels, organiser notes or other organiser-only metadata. The
 Worker derives and privacy-projects the family `World` server-side before returning
-`GET /api/family/view`. Family diffs, badges, reports and notification previews use
+resource-based `/api/family` REST responses. Family diffs, badges, reports and notification previews use
 that server-side family projection. They share diff semantics with organiser views,
 not the organiser's unfiltered data or execution environment.
 

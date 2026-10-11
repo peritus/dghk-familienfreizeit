@@ -229,3 +229,20 @@ client-side navigation and the existing state owner. A reviewed clear action
 checks current value and sequence. Draft recovery edits/discards one group and
 locks the submitted prefix. The current view is not claimed valid after proposal
 failure. Neutral answers come from event-derived markers, including after reload.
+
+## Peer family-detail adapters
+
+`/family` and `/organiser` are equal lazy application roots. Shared `/login`,
+magic links and `/apps` selection sit outside both. Their family-detail screens
+use one neutral component and the same `FamilyDetailData`/`FamilyDetailActions`
+interface. Shared widget code imports neither adapter, event/World state,
+solver nor transport. The organiser adapter preserves its prospective World and
+staging policy; the family adapter uses committed REST resources. No organiser
+bundle or state owner is required to mount the family app.
+
+Adapter tests cover both persistence policies; emitted module-closure checks
+include the actual lazy family app and its shared dependencies. The shared screen
+has four topic routes and local input/dialog state. `/family/:topic/:person`
+person IDs are opaque. Topic changes use client navigation; print and narrow
+layouts share the existing frame/primitives. See the [family app](../application/family-view.md)
+for the implemented controls, REST contract and remaining scope.

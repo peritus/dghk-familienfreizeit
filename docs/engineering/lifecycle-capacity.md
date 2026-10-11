@@ -40,7 +40,7 @@ Worker and uses the same materialized lifecycle fixtures in isolated local D1.
 Fixture import uses bounded batches of parameterized D1 inserts in a private
 setup isolate, including the larger closing payloads. That isolate is disposed
 before the measured Worker starts. It measures organiser log, organiser
-principal, family principal, organiser append and family append. Setup, migrations, fixture construction and closing
+and family memberships, organiser append, family REST reads and person PATCH. Setup, migrations, fixture construction and closing
 history construction are excluded from timing loops. HTTP timing includes
 response transfer and JSON decoding.
 
@@ -249,3 +249,24 @@ For an operational limit, follow the [hosted runbook](performance-analysis.md)
 and measure provider CPU limits, cold requests, representative client hardware,
 initial usable UI latency and concurrent requests. The local Worker/D1 path and
 Node calculation timings cover only their stated scopes.
+
+## Family REST request evidence
+
+The [family REST evidence](family-rest-evidence.json) contains two completed
+100-family HTTP runs, seed 2027, with one warmup and seven samples. These use
+real person PATCH with its displayed ETag; family reads include the complete
+allowlisted widget envelope and tags. Membership requests now resolve both roles.
+The source snapshots, environment fingerprints and all route timings are retained
+in the evidence. Setup and fixture construction are excluded; the host clock
+includes transfer and JSON decoding. Shared-host scheduling can affect samples.
+
+| Scenario | Family read p95 | Family REST write p95 | Organiser append p95 |
+|---|---:|---:|---:|
+| Normal | 380 ms | 321 ms | 484 ms |
+| Contention | 206 ms | 266 ms | 370 ms |
+
+Both current append routes meet the 1,000 ms request budget for this local shape.
+The historical append observations above retain their original operation names.
+The current capacity gate requires `request.family-write`; a historical event
+append observation cannot prove the REST path's current capacity. These HTTP runs
+make no new calculation, concurrent-user, browser-speed or hosted capacity claim.

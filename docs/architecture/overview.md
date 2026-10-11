@@ -6,10 +6,9 @@ operators and `derive(events, config)`, the organiser host with kernel family
 surfaces, profile-driven organiser family controls, room inventory, workshop
 planning, and deterministic assignment business logic. The room-assignment board
 and workshop review surfaces are implemented organiser projections. The Worker
-also implements family magic-link authentication; `/api/family/view` currently
-returns only the authenticated family ID. The full family view and family-facing result projections,
-generic reports, and release communication remain future work; workshop family
-projections are separate from the organiser planning slice.
+also implements shared multi-membership magic-link authentication and a peer
+[family app with REST resources](../application/family-view.md). Published family
+arrangements, generic reports and release communication remain future work.
 
 ## Runtime and build
 
@@ -36,7 +35,7 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 
 | Path | Responsibility |
 |---|---|
-| `src/worker/` | Hono health endpoint and JSON fallback |
+| `src/worker/` | Authenticated organiser APIs, family REST resources, health and JSON fallback |
 | `src/events/` | Kernel event schemas, fold, KDL adapter and D1 source |
 | `src/auth/` | Magic links, sessions, rate limits and principals |
 | `src/config/` | Active profile, trait builders and build identity |
@@ -44,6 +43,9 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 | `migrations/` | Append-only event and operational D1 schema |
 | `src/app/` | React entry, router, shared shell and route states |
 | `src/app/public-view/` | Public organiser landing |
+| `src/family-detail/` | Neutral widget contracts, server/organiser mapping and canonical intent semantics |
+| `src/app/family/` | Lazy family host and REST adapter |
+| `src/app/components/family-detail/` | Neutral shared family widgets |
 | `src/app/organiser/` | Lazy authenticated organiser host, shared draft reducer, kernel family screens, and assignment review routes |
 | `src/app/components/shared/` | App-wide visual primitives, icons, and reusable patterns |
 | `src/app/components/application/` | Public shell, route states, and application-boundary components |
@@ -56,8 +58,8 @@ SPA HTML. D1 uses a local-only placeholder ID with `remote: false` and migration
 
 ## Boundaries
 
-The browser entry's complete static import closure excludes organiser, derive,
-solver and Worker code; the organiser application is loaded lazily. Worker output
+The public entry plus the lazy family app's complete static import closure excludes
+organiser, events, derive, solver and Worker code. Both apps are loaded lazily. Worker output
 excludes browser code. [Tests](../engineering/testing.md) verify the emitted graph
 and bundle size budgets. Kernel, authentication, profile-composition,
 derived-world, inventory, and room-assignment tests cover the verified domain

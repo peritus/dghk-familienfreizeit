@@ -10,7 +10,7 @@ state preferences and never see machinery: no scores, solver language, organiser
 notes or other families' preferences.
 
 The Worker returns the signed-in family's server-derived, privacy-projected response
-from `GET /api/family/view`. Its composition is defined in [phases](../architecture/phases.md)
+from `GET /api/family`. Its composition is defined in [phases](../architecture/phases.md)
 §6; the event log, full `World`, solver and organiser-only data never reach a family's
 browser. Current inputs remain visible whether or not any area has been closed.
 
@@ -20,77 +20,16 @@ browser. Current inputs remain visible whether or not any area has been closed.
 
 ### Current information and controls
 
-One scrolling page, not a wizard. A wizard implies a one-time completion; this is
-a form people return to as they change their minds. Everything saves on change.
+The shared profile-driven inputs, people forms, family display-name correction,
+REST resources, target/closed notices and privacy boundary are implemented in
+[the family application](../../docs/application/family-view.md). Both apps use
+one neutral component with peer adapters; custom family components are not
+required for current inputs.
 
-Section 2 ("Zimmerwünsche") and the later sections are **generated from the
-active occasion profile**: every trait declaring
-`family_facing` produces a control where its governing
-[feature](../architecture/features.md) is effective, in the sections the profile
-configures. The family view never shows a control, section, or notice for a
-feature that is not effective.
-Selected module-owned participation controls are placed through `module_controls`
-as defined by [family preferences](../modules/family-preferences.md). The
-mock-up below is explanatory only; no occasion-specific form is hard-coded here.
-
-The page, its sections, the closed `control` union, and the save-on-change contract
-are specified by the [family preferences](../modules/family-preferences.md) module. A trait
-that reuses an existing control needs no family view code.
-
-```
-Willkommen, Familie Müller
-
-  Dein Zimmer wird vom Organisationsteam eingeteilt.
-  Deine Angaben kannst Du bis zum 31. März ändern.
-
-  ─────────────────────────────────────────────────
-  1  WER KOMMT MIT
-  ─────────────────────────────────────────────────
-  Anna Müller          Erwachsene      38
-  Kai Müller           Erwachsener     41
-  Jonas Müller         Kind             9
-  Emma Müller          Kind             6
-  Mia Müller           Baby             0   schläft bei den Eltern
-
-  [ Person hinzufügen ]     Stimmt etwas nicht? [ Melden ]
-
-  ─────────────────────────────────────────────────
-  2  ZIMMERWÜNSCHE
-  ─────────────────────────────────────────────────
-  Eigenes Bad         ( ) unbedingt  (•) gerne  ( ) egal
-  Barrierefreies Zimmer ( ) unbedingt ( ) gerne (•) egal
-  Zimmer teilen       ( ) gerne mit einer anderen Familie
-                      ( ) lieber nicht
-                      ( ) auf keinen Fall
-
-  Sonst noch etwas?   [                                    ]
-                      Freitext — das Organisationsteam liest mit.
-
-  ─────────────────────────────────────────────────
-  3  WORKSHOPS
-  ─────────────────────────────────────────────────
-  Samstag Vormittag
-    Anna    1. Töpfern   2. Kochen    3. —
-    Kai     1. Klettern  2. Töpfern   3. —
-    Jonas   1. Klettern  2. Bogen     3. Töpfern
-    Emma    noch nichts gewählt  ⚠
-  …
-```
-
-"Person hinzufügen" emits `PersonAdded`; an organiser can add, edit, or
-withdraw a person on the family's behalf through the organiser family-detail
-screen, writing the identical events (D24;
-[events](../architecture/events.md) §"Setup and identity").
-
-The family can also correct its own family display name in the identity area at
-the top of the page. Saving the changed value emits one
-`FamilyDisplayNameChanged` event through the ordinary family request path. The
-server authorizes the event only when its `family_id` belongs to the signed-in
-family; an attempted cross-family write is rejected. The response is the truth:
-the corrected name is shown after the append succeeds, and a failed save
-restores the stored value with a plain-language error. Changing the display name
-does not change the family's identity, people, memberships, email routing, or
-relationship labels.
+The final family presentation remains one scrolling page rather than a wizard.
+It must combine returning editable inputs with the fixed arrangements below.
+The shared [family preferences contract](../modules/family-preferences.md)
+continues to govern outstanding controls and audience-specific behavior.
 
 ### Fixed arrangements
 
@@ -189,17 +128,10 @@ privacy failure available to this application.
 
 ## 3. Interaction details
 
-**Everything saves on change.** No save button, no draft state. A radio click
-emits a `LabelSet` (or `LabelCleared`) and shows an inline confirmation:
-*"Gespeichert um 14:22."* Families in their forties on a phone in a kitchen will
-not find a save button at the bottom of a long page, and losing their input
-once means they will not come back.
-
-**One request per change, and the response is the truth.** Each control posts its
-label event as it changes and renders the confirmation from the response. A failed
-save returns the control to its stored state and says so in plain words; nothing is
-queued in the browser, so what a family sees is what was saved. Keep the family view
-bundle small and test it on an old, slow phone — that is the device it will meet.
+The implemented REST mutation and recovery behavior is described in
+[the family application](../../docs/application/family-view.md#rest-resources).
+The final family presentation must also give a plain inline success confirmation,
+such as “Gespeichert um 14:22.”, and be exercised on representative slow phones.
 
 **Age is computed and shown.** "Jonas (9)" uses the age at the occasion date, not
 today. If a child turns 9 the week before, they are shown as 9 throughout, which
@@ -218,11 +150,9 @@ The same underlying data. Do not build a mobile drag interaction; numbered
 The ranking list contains only workshops eligible for that person in the current
 choice cycle; it does not require a slot or room.
 
-**Target dates are stated everywhere and remain advisory.** Accommodation and
-workshop sections can show their **Zieltermin** and, once it has passed, a late
-notice with the relevant contact copy. A passed target does not disable its
-controls: families may continue to update preferences until the organisers close
-the area.
+Target dates, late copy and closed-input notices are implemented in
+[the shared current-input interface](../../docs/application/family-view.md#shared-presentation-and-adapters).
+The final arrangement presentation must preserve these notices.
 
 ---
 
