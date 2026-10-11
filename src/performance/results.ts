@@ -25,6 +25,8 @@ export type PerformanceRun = {
   status?: 'complete' | 'partial'
   pending_operation?: string
   pending_started_at?: string
+  /** Allocation completeness and measured payload sizes; never domain output. */
+  observations?: Readonly<Record<string, number>>
 }
 
 export function summarize(operation: string, samples: readonly number[]): TimingSummary {
