@@ -181,9 +181,27 @@ export function buildRoomAssignmentInput(
   params: RoomAssignmentParams,
 ): RoomAssignmentInput {
   const inventory = inventoryWorld(world)
+  const placesByRoom = new Map<string, string[]>()
+  for (const place of inventory.places) {
+    const bucket = placesByRoom.get(place.room_id) ?? []
+    bucket.push(place.id)
+    placesByRoom.set(place.room_id, bucket)
+  }
+  const capabilitiesByEntity = new Map<string, string[]>()
+  for (const capability of world.capabilities) {
+    const bucket = capabilitiesByEntity.get(capability.entity_id) ?? []
+    bucket.push(capability.key)
+    capabilitiesByEntity.set(capability.entity_id, bucket)
+  }
   const rooms = inventory.rooms
     .filter(({ traits }) => traits['room-status'] !== 'blocked')
-    .map((room) => toRoomCandidate(room, inventory.places, world))
+    .map((room) =>
+      toRoomCandidate(
+        room,
+        placesByRoom.get(room.id) ?? [],
+        capabilitiesByEntity.get(room.id) ?? [],
+      ),
+    )
   const personFamily: Record<string, string> = {}
   for (const person of world.persons) {
     const familyId = labelValue(world, person.id, 'member-of')
@@ -304,10 +322,10 @@ export function runRoomAssignment(
     room: RoomCandidate,
     step: string,
     score?: RoomScore,
+    evaluated = evaluateRooms(family, placements, input, params, rules),
   ): void => {
     // One sweep provides both halves of the trace detail: scored candidates and
     // per-room rejections.
-    const evaluated = evaluateRooms(family, placements, input, params, rules)
     const candidates = evaluated.candidates.slice().sort(compareScore)
     const selected = score ?? candidates.find(({ room: candidate }) => candidate.id === room.id)
     const rejected = evaluated.rejections
@@ -373,18 +391,20 @@ export function runRoomAssignment(
     changed = false
     iterations += 1
     for (const family of unplaced()) {
-      const candidates = scoredRooms(family, placements, input, params, rules)
+      const evaluated = evaluateRooms(family, placements, input, params, rules)
+      const candidates = evaluated.candidates
       if (candidates.length === 1) {
-        place(family, candidates[0]!.room, 'forced', candidates[0])
+        place(family, candidates[0]!.room, 'forced', candidates[0], evaluated)
         changed = true
       }
     }
   }
 
   for (const family of unplaced()) {
-    const candidates = scoredRooms(family, placements, input, params, rules)
+    const evaluated = evaluateRooms(family, placements, input, params, rules)
+    const candidates = evaluated.candidates
     const sorted = candidates.slice().sort(compareScore)
-    if (sorted[0]) place(family, sorted[0].room, 'greedy', sorted[0])
+    if (sorted[0]) place(family, sorted[0].room, 'greedy', sorted[0], evaluated)
   }
 
   const unplacedFamilies = unplaced().map((family) => ({
@@ -616,27 +636,15 @@ export function roomAssignmentPreflight(
 
 function toRoomCandidate(
   room: InventoryRoom,
-  places: readonly { id: string; room_id: string }[],
-  world: World,
+  placeIds: readonly string[],
+  capabilities: readonly string[],
 ): RoomCandidate {
   return {
     id: room.id,
     sort_key: room.sort_key,
-    place_ids: Object.freeze(
-      places
-        .filter(({ room_id: roomId }) => roomId === room.id)
-        .map(({ id }) => id)
-        .sort(),
-    ),
+    place_ids: Object.freeze(placeIds.slice().sort()),
     capacity: room.place_count,
-    capabilities: Object.freeze(
-      new Set([
-        ...room.capabilities,
-        ...world.capabilities
-          .filter(({ entity_id: entityId }) => entityId === room.id)
-          .map(({ key }) => key),
-      ]),
-    ),
+    capabilities: Object.freeze(new Set([...room.capabilities, ...capabilities])),
     room_type: room.room_type,
   }
 }
@@ -901,6 +909,7 @@ export function assignRoomPlaces(
 ): readonly RoomAssignment[] {
   const used = new Set<string>()
   const assignments: RoomAssignment[] = []
+  const roomsById = new Map(input.rooms.map((room) => [room.id, room]))
   const fixedIds = new Set((input.fixed_assignments ?? []).map(({ family_id: id }) => id))
   for (const family of families
     .slice()
@@ -911,7 +920,7 @@ export function assignRoomPlaces(
     )) {
     const roomId = placements.get(family.family_id)
     if (!roomId) continue
-    const room = roomById(input.rooms, roomId)
+    const room = roomsById.get(roomId)
     if (!room) continue
     const available = room.place_ids.filter((placeId) => !used.has(placeId))
     let index = 0
@@ -938,9 +947,10 @@ function explainUnplaced(
   rules: readonly Rule[],
 ): string {
   const counts = new Map<string, number>()
+  const state = sweepState(family, placements, input, params)
   const candidates = input.rooms.map((room) => ({
     room,
-    rejections: feasible(family, room, placements, input, params, rules),
+    rejections: feasible(family, room, placements, input, params, rules, state),
   }))
   for (const { rejections } of candidates)
     for (const rejection of rejections)
@@ -981,10 +991,6 @@ function roomFamilies(
 ): readonly string[] {
   if (index) return index.families_by_room.get(roomId) ?? []
   return [...placements.entries()].filter(([, id]) => id === roomId).map(([familyId]) => familyId)
-}
-
-function roomById(rooms: readonly RoomCandidate[], id: string): RoomCandidate | undefined {
-  return rooms.find((room) => room.id === id)
 }
 
 function labelValue(world: World, entityId: string, key: string): unknown {

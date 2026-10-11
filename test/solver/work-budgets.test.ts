@@ -58,6 +58,7 @@ type Counts = {
   label_reads: number
   constraint_reads: number
   family_reads: number
+  placement_sweeps: number
 }
 
 function measureWork(factor: number): Counts {
@@ -66,7 +67,9 @@ function measureWork(factor: number): Counts {
     label_reads: 0,
     constraint_reads: 0,
     family_reads: 0,
+    placement_sweeps: 0,
   }
+  const contexts = new WeakSet<object>()
   const world = derive(syntheticLog(syntheticScale(factor)), profile.validation_view)
   const base = buildSolverInput(world, contributions)
   const roomInput = base.module_inputs['room-assignment'] as RoomAssignmentInput
@@ -77,6 +80,10 @@ function measureWork(factor: number): Counts {
         id: rule.id,
         evaluate: (candidate, target, context) => {
           counts.rule_evaluations += 1
+          if (!contexts.has(context as object)) {
+            contexts.add(context as object)
+            counts.placement_sweeps += 1
+          }
           return rule.evaluate(
             candidate as Parameters<typeof rule.evaluate>[0],
             target as Parameters<typeof rule.evaluate>[1],
@@ -123,9 +130,21 @@ function measureWork(factor: number): Counts {
  */
 const budgets: Readonly<Record<number, Counts>> = {
   // measured: 7500 / 6260 / 64 / 180
-  1: { rule_evaluations: 11_000, label_reads: 8_800, constraint_reads: 192, family_reads: 512 },
+  1: {
+    rule_evaluations: 7_000,
+    label_reads: 8_800,
+    constraint_reads: 192,
+    family_reads: 512,
+    placement_sweeps: 150,
+  },
   // measured: 30000 / 12240 / 124 / 360
-  2: { rule_evaluations: 44_000, label_reads: 17_200, constraint_reads: 384, family_reads: 1_024 },
+  2: {
+    rule_evaluations: 28_000,
+    label_reads: 17_200,
+    constraint_reads: 384,
+    family_reads: 1_024,
+    placement_sweeps: 300,
+  },
 }
 
 for (const factor of [1, 2]) {
@@ -137,5 +156,6 @@ for (const factor of [1, 2]) {
     expect(counts.label_reads).toBeLessThanOrEqual(budget.label_reads)
     expect(counts.constraint_reads).toBeLessThanOrEqual(budget.constraint_reads)
     expect(counts.family_reads).toBeLessThanOrEqual(budget.family_reads)
+    expect(counts.placement_sweeps).toBeLessThanOrEqual(budget.placement_sweeps)
   })
 }
