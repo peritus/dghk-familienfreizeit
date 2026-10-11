@@ -158,7 +158,7 @@ describe('authentication boundary', () => {
     })
   })
 
-  test('event append sets the actor and enforces family ownership', async () => {
+  test('the generic event endpoint is unavailable to family sessions', async () => {
     const now = new Date().toISOString()
     await env.DB.prepare(
       'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (1, ?1, ?2, ?3, NULL, ?4)',
@@ -175,10 +175,7 @@ describe('authentication boundary', () => {
         }),
       )
       .run()
-    const options = {
-      now: () => now,
-      isOrganiser: (email: string) => email === 'organiser@example.test',
-    }
+    const options = { isOrganiser: () => false }
     const link = await issueMagicLink(env.DB, 'family-owner@example.test', null, true, options)
     const session = await redeemMagicLink(env.DB, link.token!, options)
     const response = await app.request(
@@ -186,138 +183,16 @@ describe('authentication boundary', () => {
       {
         method: 'POST',
         headers: {
-          cookie: `sid=${session?.session}`,
+          cookie: `sid=${session!.session}`,
           origin: 'http://localhost',
           'content-type': 'application/json',
         },
-        body: JSON.stringify({
-          expected_head: 1,
-          events: [
-            {
-              type: 'PersonAdded',
-              payload: {
-                person_id: 'per_owner',
-                family_id: 'fam_owner',
-                given_name: 'Own',
-                family_name: 'Er',
-                age: null,
-                role: 'adult',
-              },
-            },
-          ],
-        }),
+        body: JSON.stringify({ expected_head: 1, events: [] }),
       },
       organiserEnv,
     )
-    expect(response.status).toBe(201)
-    expect(
-      (await env.DB.prepare('SELECT actor FROM event WHERE seq = 2').first<{ actor: string }>())
-        ?.actor,
-    ).toBe('family-owner@example.test')
-    const forbidden = await app.request(
-      '/api/events',
-      {
-        method: 'POST',
-        headers: {
-          cookie: `sid=${session?.session}`,
-          origin: 'http://localhost',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          expected_head: 2,
-          events: [
-            {
-              type: 'PersonAdded',
-              payload: {
-                person_id: 'per_other',
-                family_id: 'fam_other',
-                given_name: 'Other',
-                family_name: 'Family',
-                age: null,
-                role: 'adult',
-              },
-            },
-          ],
-        }),
-      },
-      organiserEnv,
-    )
-    expect(forbidden.status).toBe(403)
-  })
-
-  test('a family cannot update a person from another family by forging family_id', async () => {
-    const now = new Date().toISOString()
-    const invite = (seq: number, family_id: string, email: string) =>
-      env.DB.prepare(
-        'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (?1, ?2, ?3, ?4, NULL, ?5)',
-      ).bind(
-        seq,
-        now,
-        'organiser@example.test',
-        'FamilyInvited',
-        JSON.stringify({ family_id, email, display_name: family_id, locale: 'de' }),
-      )
-    await env.DB.batch([
-      invite(1, 'fam_a', 'family-a@example.test'),
-      invite(2, 'fam_b', 'family-b@example.test'),
-      env.DB.prepare(
-        'INSERT INTO event(seq, at, actor, type, subject, payload) VALUES (3, ?1, ?2, ?3, NULL, ?4)',
-      ).bind(
-        now,
-        'organiser@example.test',
-        'PersonAdded',
-        JSON.stringify({
-          person_id: 'per_a',
-          family_id: 'fam_a',
-          given_name: 'A',
-          family_name: 'Person',
-          age: null,
-          role: 'adult',
-        }),
-      ),
-    ])
-    const options = {
-      now: () => now,
-      isOrganiser: (email: string) => email === 'organiser@example.test',
-    }
-    const link = await issueMagicLink(env.DB, 'family-b@example.test', null, true, options)
-    const session = await redeemMagicLink(env.DB, link.token!, options)
-    const response = await app.request(
-      '/api/events',
-      {
-        method: 'POST',
-        headers: {
-          cookie: `sid=${session?.session}`,
-          origin: 'http://localhost',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          expected_head: 3,
-          events: [
-            {
-              type: 'PersonUpdated',
-              payload: {
-                person_id: 'per_a',
-                family_id: 'fam_b',
-                given_name: 'Hijacked',
-                family_name: 'Person',
-                age: null,
-                role: 'adult',
-              },
-            },
-          ],
-        }),
-      },
-      organiserEnv,
-    )
-    expect(response.status).toBe(403)
-    expect(
-      await env.DB.prepare('SELECT COUNT(*) AS count FROM event').first<{ count: number }>(),
-    ).toEqual({ count: 3 })
-    expect(
-      (await env.DB.prepare('SELECT payload FROM event WHERE seq = 3').first<{ payload: string }>())
-        ?.payload,
-    ).toContain('"fam_a"')
+    expect(response.status).toBe(401)
+    expect(await env.DB.prepare('SELECT COUNT(*) FROM event').first('COUNT(*)')).toBe(1)
   })
 
   test('generic event append reports stale lower and forward heads before parsing', async () => {
@@ -424,7 +299,7 @@ describe('authentication boundary', () => {
       },
       organiserEnv,
     )
-    expect(response.status).toBe(403)
+    expect(response.status).toBe(401)
   })
 
   test('logout revokes the session and mutating requests require a same-origin header', async () => {

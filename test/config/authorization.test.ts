@@ -101,10 +101,13 @@ describe('event append authorization', () => {
     expect(canAppendEvent(family, otherFamilysLabel, world, config)).toBe(false)
   })
 
-  test('display-name correction is organiser-only until family access is delivered', () => {
+  test('display-name correction permits only the family that owns the identity', () => {
     const world = derive(events)
     expect(canAppendEvent(organiser, displayNameChanged, world, {})).toBe(true)
-    expect(canAppendEvent(family, displayNameChanged, world, {})).toBe(false)
+    expect(canAppendEvent(family, displayNameChanged, world, {})).toBe(true)
+    expect(
+      canAppendEvent({ ...family, family_id: 'fam_other' }, displayNameChanged, world, {}),
+    ).toBe(false)
   })
 
   test('a family update is authorized by the existing person ownership, not the payload family', () => {

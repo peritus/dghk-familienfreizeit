@@ -26,10 +26,7 @@ import {
   type JsonValue,
 } from '../events/types.js'
 import { organiserAllowlist } from '../auth/allowlist.js'
-import { authorizeEventBatch, type FamilyLabelOffered } from '../auth/authorization.js'
-import { deriveFeatureView, effectiveFeatureIds } from '../derive/features.js'
-import { derivePhaseView, phaseActivation } from '../derive/phases.js'
-import { familyGovernedLabelKeys } from '../modules/family-preferences/index.js'
+import { authorizeEventBatch } from '../auth/authorization.js'
 import {
   currentIdentity,
   currentPrincipal,
@@ -54,9 +51,10 @@ import {
   redeemMagicLink,
   revokeSession,
 } from '../auth/service.js'
+import { registerFamilyResources } from './family/resources.js'
 import { organiserScreenRegistry } from '../organiser/registry.js'
 
-type AppEnvironment = {
+export type AppEnvironment = {
   Bindings: Env
   // eslint-disable-next-line @typescript-eslint/naming-convention -- Hono environment contract.
   Variables: {
@@ -68,9 +66,8 @@ const app = new Hono<AppEnvironment>()
 const operations = performanceOperations(activeProfile)
 const maxJsonBodyBytes = 256 * 1024
 const maxJsonDepth = 10
-const maxJsonStringLength = 4096
-const familyEventLimit = 120
 const eventRateLimitDuration = 60 * 60 * 1000
+const maxJsonStringLength = 4096
 
 let warnedMagicLinkConsole = false
 let warnedInsecureSessionCookies = false
@@ -419,7 +416,8 @@ app.post('/api/organiser/apply', async (context) => {
 
 app.post('/api/events', async (context) => {
   const principal = await principalFromContext(context)
-  if (!principal) return context.json({ error: 'unauthorized' }, 401)
+  if (!principal || principal.kind !== 'organiser')
+    return context.json({ error: 'unauthorized' }, 401)
   if (!hasTrustedOrigin(context)) return context.json({ error: 'origin_required' }, 403)
   const body = await readJsonBody<{
     expected_head?: number
@@ -436,19 +434,6 @@ app.post('/api/events', async (context) => {
   )
     return context.json({ error: 'invalid_request' }, 400)
   const now = new Date().toISOString()
-  if (
-    principal.kind === 'family' &&
-    !(await consumeRateLimit(
-      context.env.DB,
-      `events:${principal.email}`,
-      familyEventLimit,
-      eventRateLimitDuration,
-      now,
-    ))
-  ) {
-    context.header('Retry-After', '3600')
-    return context.json({ error: 'rate_limited' }, 429)
-  }
   const expectedHead: number = body.expected_head
   const existing = await readEventLog(context)
   if (expectedHead !== existing.length)
@@ -487,13 +472,7 @@ app.post('/api/events', async (context) => {
       return !context
         .get('performance')
         .measure('events.authorize', () =>
-          authorizeEventBatch(
-            principal,
-            events,
-            world,
-            activeProfile.validation_view,
-            principal.kind === 'family' ? familyLabelGate(world, context.env) : undefined,
-          ),
+          authorizeEventBatch(principal, events, world, activeProfile.validation_view, undefined),
         )
     })
     if (forbidden) throw new Error('forbidden')
@@ -535,10 +514,21 @@ app.post('/api/events', async (context) => {
   }
 })
 
-app.get('/api/family/view', async (context) => {
-  const principal = await principalFromContext(context)
-  if (!principal || principal.kind !== 'family') return context.json({ error: 'unauthorized' }, 401)
-  return context.json({ family_id: principal.family_id })
+registerFamilyResources(app, {
+  principal: (context) => principalFromContext(context, 'family'),
+  domain: requestDomain,
+  invalidate: (context) => context.set('domain', undefined),
+  prepare: (context, events, drafts) =>
+    profiledPrepare(
+      events,
+      drafts,
+      activeProfile.validation_view,
+      context.get('performance').measure,
+    ),
+  append: appendEventBatch,
+  origin: hasTrustedOrigin,
+  body: (context) => readJsonBody(context),
+  overrides: (context) => featureBindings(context.env).overrides,
 })
 
 app.get('/api/organiser', async (context) => {
@@ -734,30 +724,6 @@ function applySecurityHeaders(context: Context<AppEnvironment>): void {
  * Narrows family label writes to the sections whose family feature is effective for the world
  * before the batch (spec/architecture/features.md §4).
  */
-function familyLabelGate(world: World, env: Env): FamilyLabelOffered {
-  const effective = effectiveFeatureIds(
-    deriveFeatureView({
-      modules: activeProfile.modules,
-      world,
-      overrides: featureBindings(env).overrides,
-      phase_active: phaseActivation(
-        derivePhaseView({
-          modules: activeProfile.modules,
-          meta: activeProfile.meta,
-          world,
-          now: new Date().toISOString(),
-          plan: null,
-        }),
-      ),
-      principal: 'family',
-    }),
-  )
-  const governed = familyGovernedLabelKeys(activeProfile)
-  return (key) => {
-    const feature = governed.get(key)
-    return feature === undefined || effective.has(feature)
-  }
-}
 
 /**
  * Validates the operational feature bindings fail-closed and logs every set or invalid

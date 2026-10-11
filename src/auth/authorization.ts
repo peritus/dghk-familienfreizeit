@@ -60,12 +60,7 @@ export function canAppendEvent(
   familyLabelOffered?: FamilyLabelOffered,
 ): boolean {
   if (principal.kind === 'organiser') return true
-  if (
-    event.type === 'FamilyInvited' ||
-    event.type === 'FamilyEmailChanged' ||
-    event.type === 'FamilyDisplayNameChanged'
-  )
-    return false
+  if (event.type === 'FamilyInvited' || event.type === 'FamilyEmailChanged') return false
   if (event.type === 'LabelSet' || event.type === 'LabelCleared') {
     const key = (event as unknown as LabelSet | LabelCleared).payload.key
     if (!isFamilyWritable(config, key)) return false

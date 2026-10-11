@@ -688,13 +688,24 @@ function validationView(
     aliases: trait.aliases,
     scopes: trait.scopes,
     cardinality: trait.cardinality,
-    family_writable: trait.family_writable,
+    family_writable: trait.family_facing !== undefined || trait.family_writable === true,
     sensitivity: trait.sensitivity,
     valid_for: trait.valid_for,
     validate: (value) => validateValueValue(trait.value, value),
   }))
   for (const module of modules)
-    for (const key of module.contributions.label_keys ?? []) schemas.push(key)
+    for (const key of module.contributions.label_keys ?? [])
+      schemas.push({
+        ...key,
+        family_writable: (module.contributions.family_controls ?? []).some(
+          (control) =>
+            (control.control === 'workshop-sign-up'
+              ? 'signed-up-for'
+              : control.control === 'workshop-interest'
+                ? 'interested-in'
+                : control.key) === key.key,
+        ),
+      })
   for (const [key, trait] of Object.entries(traits))
     if (trait.family_facing?.control === 'tri-state') {
       if (schemas.some((s) => s.key === `response-${key}`))
@@ -703,7 +714,7 @@ function validationView(
         key: `response-${key}`,
         scopes: [trait.family_facing.scope],
         cardinality: 'zero-or-one',
-        family_writable: trait.family_writable,
+        family_writable: trait.family_facing !== undefined || trait.family_writable === true,
         sensitivity: trait.sensitivity,
         governed_control: key,
         validate: (value) => (value === true ? null : 'response marker must be true'),
