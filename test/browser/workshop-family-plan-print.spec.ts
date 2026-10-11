@@ -38,7 +38,9 @@ test('an eight-member family plan uses stacked cards on A4 portrait print', asyn
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+      body: JSON.stringify({
+        principal: { roles: ['organiser'], email: 'organiser@example.test' },
+      }),
     }),
   )
   await page.route('**/api/organiser/log', (route) =>

@@ -48,7 +48,7 @@ describe('authentication boundary', () => {
       const link = new URL(output.slice(output.indexOf('http://')))
       const redeemed = await app.request(link.pathname, {}, localEnv)
       expect(redeemed.status).toBe(302)
-      expect(redeemed.headers.get('location')).toBe('/organiser')
+      expect(redeemed.headers.get('location')).toBe('/apps')
       expect(redeemed.headers.get('set-cookie')).toContain('Secure')
     } finally {
       log.mockRestore()

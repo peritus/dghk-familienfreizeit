@@ -20,7 +20,7 @@ function open(events: readonly Event[] = []) {
     if (url.endsWith('/api/me'))
       return Promise.resolve(
         new Response(
-          JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+          JSON.stringify({ principal: { roles: ['organiser'], email: 'organiser@example.test' } }),
           { status: 200, headers: { 'content-type': 'application/json' } },
         ),
       )

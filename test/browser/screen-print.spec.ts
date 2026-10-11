@@ -18,7 +18,7 @@ test('populated family and accommodation screens retain data and one footer on p
   await page.route('**/api/me', (route) =>
     route.fulfill({
       json: {
-        principal: { kind: 'organiser', email: 'organiser@example.test' },
+        principal: { roles: ['organiser'], email: 'organiser@example.test' },
       },
     }),
   )

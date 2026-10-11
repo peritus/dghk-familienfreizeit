@@ -48,7 +48,9 @@ function open(
       if (url.endsWith('/api/me'))
         return Promise.resolve(
           new Response(
-            JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+            JSON.stringify({
+              principal: { roles: ['organiser'], email: 'organiser@example.test' },
+            }),
             {
               status: 200,
               headers: { 'content-type': 'application/json' },
@@ -185,14 +187,12 @@ function workshopFixtureEvents(): readonly Event[] {
   return drafts.map((event, index) => ({ ...event, seq: index + 1 }))
 }
 
-test('the root renders an organiser-focused public shell', () => {
+test('the root renders the shared public shell', () => {
   open('/')
   expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Lübben 2027')
   expect(screen.getByText('Planungswerkzeug für die Familienfreizeit.')).toBeTruthy()
-  expect(screen.getByRole('link', { name: 'Als Organisator anmelden' }).getAttribute('href')).toBe(
-    '/login',
-  )
-  expect(screen.queryByRole('link', { name: 'Anmelden' })).toBeNull()
+  expect(screen.getByRole('link', { name: 'Anmelden' }).getAttribute('href')).toBe('/login')
+  expect(screen.queryByRole('link', { name: 'Als Organisator anmelden' })).toBeNull()
   expect(screen.getByRole('main').id).toBe('content')
   expect(screen.getByRole('link', { name: 'Zum Inhalt' }).getAttribute('href')).toBe('#content')
   expect(screen.queryByRole('link', { name: /Organisationsteam/ })).toBeNull()
@@ -312,10 +312,10 @@ test('the login form renders a dangerous demo link when the Worker returns one',
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
 
-  const link = await screen.findByRole('link', { name: 'Als Organisator anmelden' })
+  const link = await screen.findByRole('link', { name: 'Anmelden' })
   expect(link.getAttribute('href')).toBe('http://127.0.0.1/auth/demo-token')
   expect(screen.getByText('Demo-Magic-Link bereit')).toBeTruthy()
-  expect(screen.getByText('Klicke auf den Link, um Dich als Organisator anzumelden.')).toBeTruthy()
+  expect(screen.getByText('Klicke auf den Link, um Dich anzumelden.')).toBeTruthy()
   expect(screen.getByRole('alert').className).toContain('bg-main')
   expect(screen.queryByLabelText('E-Mail-Adresse')).toBeNull()
   expect(screen.queryByRole('button', { name: 'Magic Link anfordern' })).toBeNull()
@@ -344,7 +344,7 @@ test('an unauthenticated organiser URL returns to the login screen', async () =>
   window.history.replaceState({}, '', '/organiser')
   render(<App />)
 
-  expect(await screen.findByRole('heading', { name: 'Als Organisator anmelden' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Anmelden' })).toBeTruthy()
 })
 
 test('ordinary route navigation preserves the user-controlled focus', async () => {
@@ -660,7 +660,7 @@ test('a failed organiser log load shows a load error, not a save error', async (
     if (url.endsWith('/api/me'))
       return Promise.resolve(
         new Response(
-          JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+          JSON.stringify({ principal: { roles: ['organiser'], email: 'organiser@example.test' } }),
           { status: 200, headers: { 'content-type': 'application/json' } },
         ),
       )

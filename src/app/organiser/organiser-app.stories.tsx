@@ -32,7 +32,7 @@ function mockOrganiserApi() {
     const url = String(input)
     if (url.endsWith('/api/me')) {
       return new Response(
-        JSON.stringify({ principal: { kind: 'organiser', email: 'organiser@example.test' } }),
+        JSON.stringify({ principal: { roles: ['organiser'], email: 'organiser@example.test' } }),
         { headers: { 'content-type': 'application/json' } },
       )
     }

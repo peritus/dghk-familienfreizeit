@@ -124,7 +124,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     void Promise.all([
       fetch('/api/me').then(async (response) => {
         const body = (await response.json().catch(() => ({}))) as {
-          principal?: { kind?: string; email?: string }
+          principal?: { roles?: string[]; email?: string }
         }
         if (!response.ok) throw new OrganiserApiError(response.status, body)
         return body
@@ -133,7 +133,7 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
     ])
       .then(([me, log]) => {
         if (cancelled) return
-        if (me.principal?.kind !== 'organiser' || !me.principal.email) {
+        if (!me.principal?.roles?.includes('organiser') || !me.principal.email) {
           redirectToLogin()
           return
         }

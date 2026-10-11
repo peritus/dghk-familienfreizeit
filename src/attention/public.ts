@@ -26,7 +26,7 @@ const declarations = [
     'login-demo',
     'Demo-Magic-Link bereit',
     'Demo magic link ready',
-    'Klicke auf den Link, um Dich als Organisator anzumelden.',
+    'Klicke auf den Link, um Dich anzumelden.',
     'Follow the link to sign in as an organiser.',
   ],
   [

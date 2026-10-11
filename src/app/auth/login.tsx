@@ -51,7 +51,7 @@ export function Login() {
 
   return (
     <ScreenLayout
-      header={<ScreenHeader eyebrow="Zugang" title="Als Organisator anmelden" />}
+      header={<ScreenHeader eyebrow="Zugang" title="Anmelden" />}
       notices={
         <div className="max-w-xl space-y-4">
           {expiredLink() ? (
@@ -71,7 +71,7 @@ export function Login() {
                   href={magicLink}
                   className="inline-flex min-h-11 items-center rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-bold text-foreground shadow-shadow"
                 >
-                  Als Organisator anmelden
+                  Anmelden
                 </a>
               </AlertDescription>
             </Alert>

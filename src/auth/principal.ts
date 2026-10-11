@@ -11,6 +11,7 @@ export type PrincipalOptions = {
   isOrganiser: (email: string) => boolean
   now?: () => string
   readWorld?: () => Promise<World>
+  audience?: 'family' | 'organiser'
 }
 
 export async function currentPrincipal(
@@ -29,7 +30,9 @@ export async function currentPrincipal(
     .first<{ email: string; created_at: string; expires_at: string }>()
   if (!row) return null
   const email = canonicalEmail(row.email)
-  if (options.isOrganiser(email)) {
+  const organiser = options.isOrganiser(email)
+  if (options.audience === 'organiser' && !organiser) return null
+  if (organiser && options.audience !== 'family') {
     if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.organiser_absolute_ms)) {
       await revokeSession(db, raw)
       return null
@@ -50,7 +53,13 @@ export async function currentPrincipal(
     : derive(await readEvents(db, config), config)
   const familyId = familyForEmail(world, email)
   if (!familyId) return null
-  if (isPastAbsoluteExpiry(row.created_at, now, sessionPolicy.family_absolute_ms)) {
+  if (
+    isPastAbsoluteExpiry(
+      row.created_at,
+      now,
+      organiser ? sessionPolicy.organiser_absolute_ms : sessionPolicy.family_absolute_ms,
+    )
+  ) {
     await revokeSession(db, raw)
     return null
   }
@@ -59,9 +68,9 @@ export async function currentPrincipal(
     raw,
     email,
     now,
-    sessionPolicy.family_idle_ms,
+    organiser ? sessionPolicy.organiser_idle_ms : sessionPolicy.family_idle_ms,
     row.created_at,
-    sessionPolicy.family_absolute_ms,
+    organiser ? sessionPolicy.organiser_absolute_ms : sessionPolicy.family_absolute_ms,
   )
   return { kind: 'family', email, family_id: familyId }
 }
@@ -92,4 +101,36 @@ async function refreshSession(
 
 function isPastAbsoluteExpiry(createdAt: string, now: string, duration: number): boolean {
   return Date.parse(createdAt) + duration <= Date.parse(now)
+}
+
+export type SessionIdentity = {
+  email: string
+  roles: readonly ('family' | 'organiser')[]
+  family_id: string | null
+}
+
+export async function currentIdentity(
+  db: D1Database,
+  raw: string | undefined,
+  options: PrincipalOptions,
+  config: KernelConfig,
+): Promise<SessionIdentity | null> {
+  let cached: Promise<World> | undefined
+  const readWorld =
+    options.readWorld ??
+    (() => (cached ??= readEvents(db, config).then((events) => derive(events, config))))
+  const identityOptions: PrincipalOptions = { ...options }
+  identityOptions.readWorld = readWorld
+  const principal = await currentPrincipal(db, raw, identityOptions, config)
+  if (!principal) return null
+  const world = await readWorld()
+  const familyId = familyForEmail(world, principal.email)
+  return {
+    email: principal.email,
+    roles: [
+      ...(familyId ? ['family' as const] : []),
+      ...(options.isOrganiser(principal.email) ? ['organiser' as const] : []),
+    ],
+    family_id: familyId,
+  }
 }

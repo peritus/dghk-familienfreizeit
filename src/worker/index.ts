@@ -30,7 +30,12 @@ import { authorizeEventBatch, type FamilyLabelOffered } from '../auth/authorizat
 import { deriveFeatureView, effectiveFeatureIds } from '../derive/features.js'
 import { derivePhaseView, phaseActivation } from '../derive/phases.js'
 import { familyGovernedLabelKeys } from '../modules/family-preferences/index.js'
-import { currentPrincipal, familyForEmail, type Principal } from '../auth/principal.js'
+import {
+  currentIdentity,
+  currentPrincipal,
+  familyForEmail,
+  type Principal,
+} from '../auth/principal.js'
 import { expiredSessionCookie } from '../auth/cookies.js'
 import { maxEventsPerBatch } from './request-limits.js'
 import { readFeatureBindings, type FeatureBindingState } from './feature-bindings.js'
@@ -54,7 +59,10 @@ import { organiserScreenRegistry } from '../organiser/registry.js'
 type AppEnvironment = {
   Bindings: Env
   // eslint-disable-next-line @typescript-eslint/naming-convention -- Hono environment contract.
-  Variables: { performance: ReturnType<typeof computationMeasurements> }
+  Variables: {
+    performance: ReturnType<typeof computationMeasurements>
+    domain?: Promise<{ events: Event[]; world: World }>
+  }
 }
 const app = new Hono<AppEnvironment>()
 const operations = performanceOperations(activeProfile)
@@ -138,21 +146,17 @@ app.post('/api/login', async (context) => {
     rate_limits_consumed: true,
   })
   if (result.token && shouldShowMagicLinkOnConsole(context)) {
-    const magicLink = new URL(`/auth/${result.token}`, context.req.url)
+    const magicLink = new URL(`/auth/${result.token}/`, context.req.url)
     console.log(`[DANGEROUS DEBUG] magic link for ${email}: ${magicLink}`)
   }
   const response: { accepted: true; magic_link?: string } = { accepted: true }
-  if (
-    result.token &&
-    isOrganiser(email) &&
-    context.env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true'
-  ) {
-    response.magic_link = new URL(`/auth/${result.token}`, context.req.url).toString()
+  if (result.token && context.env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true') {
+    response.magic_link = new URL(`/auth/${result.token}/`, context.req.url).toString()
   }
   return context.json(response)
 })
 
-app.get('/auth/:token', async (context) => {
+app.on('GET', ['/auth/:token', '/auth/:token/'], async (context) => {
   const isOrganiser = organiserPredicate(context.env)
   let result
   try {
@@ -168,7 +172,7 @@ app.get('/auth/:token', async (context) => {
     path: '/',
     maxAge: isOrganiser(result.email) ? 7 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
   })
-  return context.redirect(isOrganiser(result.email) ? '/organiser' : '/', 302)
+  return context.redirect('/apps', 302)
 })
 
 app.get('/api/health', async (context) => {
@@ -199,7 +203,15 @@ app.get('/api/health', async (context) => {
 })
 
 app.get('/api/me', async (context) => {
-  const principal = await principalFromContext(context)
+  const principal = await currentIdentity(
+    context.env.DB,
+    getCookie(context, 'sid'),
+    {
+      isOrganiser: organiserPredicate(context.env),
+      readWorld: async () => (await requestDomain(context)).world,
+    },
+    activeProfile.validation_view,
+  )
   if (!principal) {
     context.header('Set-Cookie', expiredSessionCookie(!shouldAllowInsecureSessionCookies(context)))
     return context.json({ error: 'unauthorized' }, 401)
@@ -546,7 +558,10 @@ export default {
   },
 }
 
-async function principalFromContext(context: Context<AppEnvironment>): Promise<Principal | null> {
+async function principalFromContext(
+  context: Context<AppEnvironment>,
+  audience?: 'family' | 'organiser',
+): Promise<Principal | null> {
   return context.get('performance').io('auth.principal', () =>
     tracing.enterSpan('auth.resolve_principal', async (span) => {
       const principal = await currentPrincipal(
@@ -554,7 +569,8 @@ async function principalFromContext(context: Context<AppEnvironment>): Promise<P
         getCookie(context, 'sid'),
         {
           isOrganiser: organiserPredicate(context.env),
-          readWorld: async () => deriveEventWorld(context, await readEventLog(context)),
+          audience,
+          readWorld: async () => (await requestDomain(context)).world,
         },
         activeProfile.validation_view,
       )
@@ -765,7 +781,7 @@ function featureBindings(env: Env): FeatureBindingState {
 function warnDangerousDevelopmentBindings(env: Env): void {
   if (env.DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN === 'true' && !warnedDemoLogin) {
     console.warn(
-      '[WARN] DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN is enabled: organiser magic links will be returned to the browser. Never enable it for real user authentication.',
+      '[WARN] DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN is enabled: eligible magic links will be returned to the browser. Never enable it for real user authentication.',
     )
     warnedDemoLogin = true
   }
@@ -802,4 +818,16 @@ function eventDraft(candidate: unknown, actor: string, at: string): EventDraft {
     type: item.type,
     payload: item.payload as JsonValue,
   }
+}
+
+async function requestDomain(context: Context<AppEnvironment>) {
+  let domain = context.get('domain')
+  if (!domain) {
+    domain = readEventLog(context).then((events) => ({
+      events,
+      world: deriveEventWorld(context, events),
+    }))
+    context.set('domain', domain)
+  }
+  return domain
 }

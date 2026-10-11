@@ -24,7 +24,7 @@ async function mockOrganiserApi(page: Page): Promise<void> {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        principal: { kind: 'organiser', email: 'organiser@example.test' },
+        principal: { roles: ['organiser'], email: 'organiser@example.test' },
       }),
     }),
   )
