@@ -94,6 +94,11 @@ function open(
     })
     vi.stubGlobal('fetch', fetchMock)
   }
+  if (path.startsWith('/login'))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('{}', { status: 401 })),
+    )
   window.history.replaceState({}, '', path)
   return { fetchMock, view: render(<App profile={profile} />) }
 }
@@ -266,14 +271,18 @@ test('the active profile logo is inverted for dark mode', () => {
 })
 
 test('the login form requests a magic link and explains local delivery', async () => {
-  const fetchMock = vi.fn(() =>
-    Promise.resolve(new Response(JSON.stringify({ accepted: true }), { status: 200 })),
+  const fetchMock = vi.fn((input: RequestInfo | URL) =>
+    Promise.resolve(
+      new Response(JSON.stringify({ accepted: true }), {
+        status: String(input) === '/api/me' ? 401 : 200,
+      }),
+    ),
   )
   vi.stubGlobal('fetch', fetchMock)
   window.history.replaceState({}, '', '/login')
   render(<App />)
 
-  fireEvent.change(screen.getByLabelText('E-Mail-Adresse'), {
+  fireEvent.change(await screen.findByLabelText('E-Mail-Adresse'), {
     target: { value: 'organiser@example.test' },
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))
@@ -292,14 +301,14 @@ test('the login form requests a magic link and explains local delivery', async (
 })
 
 test('the login form renders a dangerous demo link when the Worker returns one', async () => {
-  const fetchMock = vi.fn(() =>
+  const fetchMock = vi.fn((input: RequestInfo | URL) =>
     Promise.resolve(
       new Response(
         JSON.stringify({
           accepted: true,
           magic_link: 'http://127.0.0.1/auth/demo-token',
         }),
-        { status: 200 },
+        { status: String(input) === '/api/me' ? 401 : 200 },
       ),
     ),
   )
@@ -307,7 +316,7 @@ test('the login form renders a dangerous demo link when the Worker returns one',
   window.history.replaceState({}, '', '/login')
   render(<App />)
 
-  fireEvent.change(screen.getByLabelText('E-Mail-Adresse'), {
+  fireEvent.change(await screen.findByLabelText('E-Mail-Adresse'), {
     target: { value: 'demo-organiser@example.invalid' },
   })
   fireEvent.click(screen.getByRole('button', { name: 'Magic Link anfordern' }))

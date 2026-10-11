@@ -2,7 +2,9 @@ import { derivePublicAttention } from '../../attention/public.js'
 import { TextField } from '../components/shared/ui/field.js'
 import { ScreenLayout, ScreenHeader } from '../components/shared/ui/screen-layout.js'
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
+import type { ProfilePresentation } from '../../config/presentation.js'
+import { loginCopy } from './wording.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { Button } from '../components/shared/ui/button'
 import { Card, CardContent } from '../components/shared/ui/card'
@@ -14,7 +16,7 @@ function expiredLink(): boolean {
   return new URLSearchParams(window.location.search).get('error') === 'expired'
 }
 
-export function Login() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<LoginStatus>('idle')
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
@@ -121,6 +123,88 @@ export function Login() {
           </Link>
         </CardContent>
       </Card>
+    </ScreenLayout>
+  )
+}
+
+export function Login({ profile }: { profile?: ProfilePresentation }) {
+  const [, navigate] = useLocation()
+  const [identity, setIdentity] = useState<'loading' | 'anonymous' | 'failed' | readonly string[]>(
+    'loading',
+  )
+  const [attempt, setAttempt] = useState(0)
+  const copy = loginCopy(profile?.meta.locale ?? 'de')
+  useEffect(() => {
+    const controller = new AbortController()
+    void fetch('/api/me', { signal: controller.signal })
+      .then(async (response) => {
+        if (response.status === 401) {
+          if (!controller.signal.aborted) setIdentity('anonymous')
+          return
+        }
+        if (!response.ok) throw new Error('identity unavailable')
+        const body = (await response.json()) as { principal?: { roles?: unknown } }
+        if (!Array.isArray(body.principal?.roles)) throw new Error('invalid identity')
+        const roles = [
+          ...new Set(
+            body.principal.roles.filter(
+              (role: unknown) => role === 'family' || role === 'organiser',
+            ),
+          ),
+        ] as string[]
+        if (controller.signal.aborted) return
+        setIdentity(roles.length ? roles : 'anonymous')
+        if (roles.length === 1) void navigate(roles[0] === 'family' ? '/family' : '/organiser')
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setIdentity('failed')
+      })
+    return () => controller.abort()
+  }, [navigate, attempt])
+  if (identity === 'anonymous') return <LoginForm />
+  if (identity === 'failed')
+    return (
+      <ScreenLayout header={<ScreenHeader title={copy.sign_in} />}>
+        <p role="alert">{copy.failed}</p>
+        <Button
+          type="button"
+          onClick={() => {
+            setIdentity('loading')
+            setAttempt((value) => value + 1)
+          }}
+        >
+          {copy.retry}
+        </Button>
+      </ScreenLayout>
+    )
+  if (identity === 'loading' || identity.length === 1)
+    return (
+      <ScreenLayout header={<ScreenHeader title={copy.sign_in} />}>
+        <p role="status" aria-busy="true">
+          {copy.loading}
+        </p>
+      </ScreenLayout>
+    )
+  return (
+    <ScreenLayout header={<ScreenHeader title={copy.choose} description={copy.explanation} />}>
+      <nav aria-label={copy.choices_label} className="grid gap-4 sm:grid-cols-2">
+        {identity.includes('family') ? (
+          <Link
+            href="/family"
+            className="grid min-h-20 content-center rounded-base border-2 border-border bg-secondary-background p-5 font-bold shadow-shadow"
+          >
+            {copy.family}
+          </Link>
+        ) : null}
+        {identity.includes('organiser') ? (
+          <Link
+            href="/organiser"
+            className="grid min-h-20 content-center rounded-base border-2 border-border bg-secondary-background p-5 font-bold shadow-shadow"
+          >
+            {copy.organiser}
+          </Link>
+        ) : null}
+      </nav>
     </ScreenLayout>
   )
 }

@@ -65,18 +65,22 @@ function open(path: string, fetchMock: ReturnType<typeof vi.fn>) {
 }
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
-test('both memberships are offered as peer apps by the common identity route', async () => {
+test('both memberships are offered during shared login', async () => {
   open(
-    '/apps',
+    '/login',
     vi.fn(async () =>
       json({
         principal: { email: 'a@example.test', roles: ['family', 'organiser'], family_id: 'fam_a' },
       }),
     ),
   )
-  expect(await screen.findByRole('heading', { name: 'App auswählen' })).toBeTruthy()
-  expect(screen.getByRole('link', { name: 'Familienansicht' }).getAttribute('href')).toBe('/family')
-  expect(screen.getByRole('link', { name: 'Organisationsteam' }).getAttribute('href')).toBe(
+  expect(
+    await screen.findByRole('heading', { name: 'Wie möchtest du dich anmelden?' }),
+  ).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Als Familie anmelden' }).getAttribute('href')).toBe(
+    '/family',
+  )
+  expect(screen.getByRole('link', { name: 'Als Organisator anmelden' }).getAttribute('href')).toBe(
     '/organiser',
   )
 })
@@ -84,7 +88,7 @@ test('one membership enters the family app and shares all four topic links', asy
   const fetchMock = vi.fn(async (input: RequestInfo | URL) =>
     String(input) === '/api/me' ? json({ principal: { roles: ['family'] } }) : json(fixture),
   )
-  open('/apps', fetchMock)
+  open('/login', fetchMock)
   expect(await screen.findByRole('heading', { name: 'Linde' })).toBeTruthy()
   for (const title of ['Zimmer', 'Personen', 'Essen', 'Workshops'])
     expect(screen.getByRole('link', { name: title })).toBeTruthy()

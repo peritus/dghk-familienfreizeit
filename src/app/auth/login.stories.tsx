@@ -4,6 +4,13 @@ import { Login } from './login.js'
 const meta = {
   title: 'Screens/Public/Login',
   component: Login,
+  beforeEach: () => {
+    const original = globalThis.fetch
+    globalThis.fetch = async () => new Response('{}', { status: 401 })
+    return () => {
+      globalThis.fetch = original
+    }
+  },
   parameters: {
     docs: {
       description: {

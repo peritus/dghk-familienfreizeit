@@ -168,7 +168,7 @@ app.on('GET', ['/auth/:token', '/auth/:token/'], async (context) => {
     path: '/',
     maxAge: isOrganiser(result.email) ? 7 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
   })
-  return context.redirect('/apps', 302)
+  return context.redirect('/login', 302)
 })
 
 app.get('/api/health', async (context) => {

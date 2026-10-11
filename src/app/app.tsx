@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { Shell } from './components/application/shell'
 import { NotFound, RouteBoundary, RouteLoading } from './components/application/route-states'
-import { AppSelection } from './auth/apps'
 import { Login } from './auth/login'
 import { OccasionLanding } from './public-view/occasion-landing'
 import type { ProfilePresentation } from '../config/presentation.js'
@@ -33,10 +32,7 @@ export function App({ profile }: { profile?: ProfilePresentation } = {}) {
         <Switch>
           <Route path="/">{profile ? <OccasionLanding profile={profile} /> : null}</Route>
           <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/apps">
-            <AppSelection />
+            <Login profile={profile} />
           </Route>
           <Route path="/family" nest>
             <Suspense
