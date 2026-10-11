@@ -108,8 +108,14 @@ export function startRun(
   checkpoint([])
   return {
     checkpoint,
-    finish(timings: readonly TimingSummary[], outputHash: string, trace: string) {
+    finish(
+      timings: readonly TimingSummary[],
+      outputHash: string,
+      trace: string,
+      observations?: PerformanceRun['observations'],
+    ) {
       run.status = 'complete'
+      run.observations = observations
       run.output_hash = outputHash
       const tracePath = join(dirname(path), `${run.run_id}.trace.json`)
       writeFileSync(tracePath, trace, { mode: 0o600 })
@@ -144,7 +150,7 @@ function report(run: PerformanceRun, history: readonly PerformanceRun[]): boolea
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const history = readHistory(
-    process.argv.slice(2).find((value) => value !== '--fail-on-regression'),
+    process.argv.slice(2).find((value) => value !== '--fail-on-regression' && value !== '--'),
   )
   const latestByWorkload = new Map(
     history.map((run) => [`${run.workload}:${JSON.stringify(run.shape)}`, run]),

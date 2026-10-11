@@ -14,6 +14,9 @@
     "src/performance/trace.ts",
     "src/performance/import-trace.ts",
     "test/bench/log.ts",
-    "src/events/types.ts"
+    "src/events/types.ts",
+    "src/performance/capacity.ts",
+    "test/bench/cases.ts",
+    "test/bench/lifecycle.ts"
   ]
 }

@@ -1,9 +1,20 @@
 {
   "files": [],
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.worker.json" },
-    { "path": "./tsconfig.tools.json" },
-    { "path": "./tsconfig.storybook.json" }
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.worker.json"
+    },
+    {
+      "path": "./tsconfig.tools.json"
+    },
+    {
+      "path": "./tsconfig.storybook.json"
+    },
+    {
+      "path": "./tsconfig.bench.json"
+    }
   ]
 }

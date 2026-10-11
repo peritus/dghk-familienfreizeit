@@ -1,6 +1,7 @@
 import process from 'node:process'
 import { performance } from 'node:perf_hooks'
 import { createHash } from 'node:crypto'
+import { writeFileSync } from 'node:fs'
 import { expect, test } from 'vitest'
 import { luebben2027Profile } from '../../src/config/profiles/luebben-2027/index.js'
 import {
@@ -34,9 +35,11 @@ import {
   profiledAttention,
   profiledContributions,
   profiledDerive,
+  profiledPrepare,
 } from '../../src/performance/domain.js'
 import { startRun } from '../../scripts/performance-history.ts'
-import { syntheticLog, syntheticScale, syntheticLogSize } from './log.js'
+import { benchmarkCases } from './cases.js'
+import { completeLifecycle } from './lifecycle-world.js'
 
 const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
@@ -53,25 +56,9 @@ const selected = new Set(
     'derive,buildSolverInput,solve,attention,prepareEventBatch,authorizeEventBatch,projectSharedWorld,projectFamilyWorld,edit,closing'
   ).split(','),
 )
-const numberList = (value: string) =>
-  value
-    .split(',')
-    .map(Number)
-    .filter((entry) => Number.isSafeInteger(entry) && entry > 0)
-const scenarios = (process.env.DGHK_BENCH_SCENARIOS ?? 'history,population').split(',')
-if (scenarios.some((value) => value !== 'history' && value !== 'population'))
-  throw new Error('invalid bench scenario')
-const cases = process.env.DGHK_BENCH_EVENTS
-  ? numberList(process.env.DGHK_BENCH_EVENTS).flatMap((size) =>
-      scenarios.map((scenario) => syntheticLogSize(size, scenario as 'history' | 'population')),
-    )
-  : numberList(process.env.DGHK_BENCH_FACTORS ?? '1,2,4').map((factor) => ({
-      events: syntheticLog(syntheticScale(factor)),
-      scale: syntheticScale(factor),
-      factor,
-      scenario: 'population',
-    }))
-if (!cases.length) throw new Error('no valid benchmark sizes')
+const cases = benchmarkCases()
+const benchNow =
+  process.env.DGHK_CAPACITY_FAMILIES !== undefined ? '2027-04-02T00:00:00Z' : '2027-01-01T00:00:00Z'
 
 function attentionContext(world: World, plan: Plan | null): AttentionContext {
   return {
@@ -81,7 +68,7 @@ function attentionContext(world: World, plan: Plan | null): AttentionContext {
     profile,
     build_revision: 'bench',
     locale: profile.meta.locale,
-    now: '2027-01-01T00:00:00Z',
+    now: benchNow,
     audience: 'organiser',
   }
 }
@@ -145,9 +132,16 @@ function stageTimings(
 }
 
 test('heavy computations across reproducible event-log workloads', () => {
-  for (const fixture of cases) {
+  for (const original of cases) {
+    const fixture = original.lifecycle ? { ...original, ...completeLifecycle(original) } : original
+    if (process.env.DGHK_CAPACITY_EXPORT_TO) {
+      if (cases.length !== 1 || !original.lifecycle)
+        throw new Error('fixture export requires one lifecycle case')
+      writeFileSync(process.env.DGHK_CAPACITY_EXPORT_TO, JSON.stringify(fixture), { mode: 0o600 })
+      continue
+    }
     const { events, scale, scenario } = fixture
-    const history = startRun(`luebben2027-synthetic-v1:${scenario}`, {
+    const history = startRun(fixture.workload, {
       events: events.length,
       ...scale,
     })
@@ -205,13 +199,13 @@ test('heavy computations across reproducible event-log workloads', () => {
           world,
           modules: profile.modules,
           meta: profile.meta,
-          now: '2027-01-01T00:00:00Z',
+          now: benchNow,
         }),
       )
     }
     const family = world.families[0]!
     const draft: EventDraft = {
-      at: '2027-01-01T00:00:00Z',
+      at: benchNow,
       actor: 'bench@example.test',
       subject: null,
       type: 'LabelSet',
@@ -256,7 +250,10 @@ test('heavy computations across reproducible event-log workloads', () => {
             events,
             [{ ...draft, type: closeType, payload: {} }],
             profile,
-            solverConfig,
+            {
+              build_revision: solverConfig.build_revision,
+              compatibility_revision: solverConfig.compatibility_revision,
+            },
           )
         } catch (error) {
           // The growing fixture includes unplaced families; closing correctly rejects it.
@@ -276,7 +273,9 @@ test('heavy computations across reproducible event-log workloads', () => {
     // A single representative trace. Trace contains only timing/count/outcome, never domain output.
     if (selected.has('solve') || selected.has('edit'))
       timed('organiser.edit', () => {
-        const tracedWorld = profiledDerive(events, profile.validation_view, timed)
+        const tracedWorld = selected.has('edit')
+          ? profiledPrepare(events, [draft], profile.validation_view, timed).world
+          : profiledDerive(events, profile.validation_view, timed)
         const scoped = profiledContributions(contributions, timed)
         const tracedPlan = timed('solver.solve', () =>
           solve(
@@ -285,7 +284,7 @@ test('heavy computations across reproducible event-log workloads', () => {
             solverConfig,
           ),
         )
-        if (selected.has('attention'))
+        if (selected.has('attention') || selected.has('edit'))
           profiledAttention(profile, timed)(attentionContext(tracedWorld, tracedPlan))
       })
     else profiledDerive(events, profile.validation_view, timed)
@@ -293,6 +292,7 @@ test('heavy computations across reproducible event-log workloads', () => {
       timings,
       outputHash,
       chromeTrace(recorder.slices, `${scenario} ${events.length}`),
+      'observations' in fixture ? fixture.observations : undefined,
     )
   }
 })
