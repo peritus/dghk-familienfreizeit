@@ -52,8 +52,8 @@ phases for the profiling adapter without adding clocks to domain computations.
 The remaining large-population cost is full deterministic room search, whose
 work tracks candidate pairs rather than log length. See
 [room assignment](../modules/room-assignment.md#placement-cost) and
-[issue 041](../../spec/issues/open/041-incremental-derivation.md) for the measured
-limit and the outstanding acceptance decision.
+[issue 041](../../spec/issues/archived/041-incremental-derivation.md) for the accepted
+100-family local envelope and the larger measured stress costs.
 
 KDL fixtures in `test/fixtures/derived-world/` exercise replay, resolver, cardinality, privacy,
 and shuffle-stable derivation. Run `pnpm test` for the domain suite, and

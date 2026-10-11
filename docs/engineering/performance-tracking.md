@@ -40,6 +40,12 @@ engine and solver continue to receive ordinary deterministic inputs. The
 profiler preserves return values and exceptions. Repeated nested wrappers of
 the same operation produce one operational measurement.
 
+## Lifecycle capacity lab
+
+Use the [lifecycle capacity guide](lifecycle-capacity.md) to measure family
+counts with natural action histories, allocation completeness, payload bytes
+and explicit latency budgets. The exact-size cases below remain stress controls.
+
 ## Local computation lab
 
 ```sh

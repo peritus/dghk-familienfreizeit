@@ -109,8 +109,6 @@ information, correct its own display name, save permitted controls while an area
 is open, and see each area's result only once it is closed. The family projection
 privacy gate is implemented and its adversarial tests pass. Hosted invitation
 and reminder delivery begins in M14.
-Issue 041 is closed or explicitly accepted before this family-access
-acceptance is declared complete.
 
 ## M11 — Reports and browser-printing host
 
@@ -191,6 +189,11 @@ and cross-cutting frontend requirements.
   preview environments, health checks, and the pre-occasion runbook.
 - Run dependency, security, privacy, performance, accessibility, deliverability,
   identity, and exported-log rehearsal checks.
+- Verify the accepted occasion lifecycle envelope on representative browser
+  hardware and hosted Worker/D1, including cold requests, provider CPU limits
+  and concurrency. Use the [capacity lab](../docs/engineering/lifecycle-capacity.md)
+  and [hosted runbook](../docs/engineering/performance-analysis.md) as the local
+  foundation and operational procedure.
 - Record the final cut-line decisions before deployment.
 
 Acceptance: deployment is reproducible from one revision, recovery and identity

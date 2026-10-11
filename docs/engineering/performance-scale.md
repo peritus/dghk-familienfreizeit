@@ -109,7 +109,9 @@ that a hosted workflow run has completed.
 
 [Issue 040](../../spec/issues/archived/040-historical-code-path-metrics.md) is
 resolved by the tracking mechanism and verified local procedures.
-[Issue 041](../../spec/issues/open/041-incremental-derivation.md) retains the
-required decision about the worst-case live-population solver: roughly 32 seconds
-for a complete solve and 37 seconds for an organiser edit are not an established
-interactive latency envelope. Its M10 acceptance gate remains in force.
+[Issue 041](../../spec/issues/archived/041-incremental-derivation.md) is resolved
+by the accepted measured 100-family lifecycle envelope. The
+[lifecycle capacity lab](lifecycle-capacity.md#measured-results) records realistic
+population/event mixtures, selected latency budgets and allocation completeness.
+The large population controls above remain stress evidence. Hosted and browser
+verification belongs to M15 launch hardening.

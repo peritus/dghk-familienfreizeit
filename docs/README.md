@@ -30,6 +30,7 @@ are separate claims and require separate evidence.
 - [Hosted performance analysis](engineering/performance-analysis.md): repeatable
   API, Chromium, Cloudflare trace, and guarded mutation benchmarking.
 - [Performance tracking](engineering/performance-tracking.md): heavy-function catalogue,
+- [Lifecycle capacity lab](engineering/lifecycle-capacity.md)
   durable lab results, operational metrics and portable traces.
 - [Scale evidence](engineering/performance-scale.md): measured workloads and remaining limits.
 - [Testing](engineering/testing.md): checks and verification limits.

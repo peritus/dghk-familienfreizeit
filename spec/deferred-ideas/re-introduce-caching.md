@@ -4,20 +4,15 @@
 
 ## Context
 
-`kkrzzvqs` ("plan Workers Paid") made D1 require Workers Paid. The reason: every
-server request that shows domain state runs `derive`, the family view and the
-organiser apply run the solver, and fold + solve + trace won't reliably fit in 10 ms
-of CPU. The only alternative it considered was an in-isolate memo, and it turned
-that down because a cold isolate still has to solve from scratch.
+D1 requires Workers Paid. Read models are derived from the event log; closing
+computes a complete solver result. CPU cost must be measured at the intended
+occasion shape, including cold requests.
+An in-isolate memo only helps requests handled by an already warm isolate.
 
-`xsppsvly` removed persisted projections (`entity`, `label`, and project
-projections). That was the right call. Those tables
-were a second copy of domain state with a rebuild step that could fail or race.
-The same commit also dropped the old "KV keyed by `max(seq)`" note.
-
-You asked for caching that is **only** caching. Per AGENTS.md, touching D1/D2 is a
-decision revision, so this plan is the review: what changed, the alternatives, and
-a recommendation. The spec gets edited only after you approve.
+D1/D2 make the event log the only persisted domain state. A cache proposal must
+preserve that authority and avoid a second stored domain model with a rebuild
+or synchronization lifecycle. Adopting the proposal requires review of D1/D2,
+the alternatives below, and explicit scope approval.
 
 ## Derivation boundaries the proposal must preserve
 
@@ -32,30 +27,21 @@ participation checks, closing reviews and ordinary apply. Do not assume saves ar
 fold-only. This proposal is outside the active architecture; phases introduce no
 persisted cache.
 
-## What the measurements changed about this plan
+## Measurement foundation
 
-This document was written before anything was measured, and two of its premises
-were wrong.
+The [performance tracking guide](../../docs/engineering/performance-tracking.md)
+and [scale evidence](../../docs/engineering/performance-scale.md) describe the
+implemented benchmark, indexes, solver costs and deterministic regression gates.
+The [lifecycle capacity lab](../../docs/engineering/lifecycle-capacity.md) measures
+family counts, natural event counts, payload bytes and allocation quality.
+[Issue 041](../issues/archived/041-incremental-derivation.md) records the accepted
+100-family local envelope. Hosted/browser verification belongs to launch hardening.
 
-"Always refold (it's cheap)" was an assumption. `derive` was quadratic in the
-length of the log: 3.2 s at 2 367 events and 3 min 45 s at 9 393. Refolding was
-never cheap, and no cache keyed on the plan identity would have helped, because
-every append changes `input_seq` and so misses by construction. The fold is now
-close to linear — 73 ms and 731 ms at those two sizes — which is what makes
-"always refold" a true statement rather than a hopeful one.
-
-The benchmark this plan made the D1 revision conditional on now exists as
-`pnpm run bench`; see [testing](../../docs/engineering/testing.md#derivation-benchmarks).
-It also shows where the cost actually sits, and it is not the fold: at 2 367
-events `solve` is 23 442 ms against the fold's 72 ms. A plan cache would hide
-that from a repeat reader at an unchanged head, and from nobody else — not a
-cold isolate, not a new `build_revision`, and not `deriveTransition`, which
-solves two worlds per organiser keystroke batch and whose draft world has never
-existed before and can never be in any cache.
-
-So the store choice below is still open, but it is no longer the first question.
-[Issue 041](../issues/open/041-incremental-derivation.md) carries the costs that
-remain and the options for them.
+A plan cache helps an unchanged-head reader. Cold isolates, a new build revision
+and an appended event still require fresh computation. Organiser drafts create
+a prospective head absent from the committed log; an unchanged-head cache does
+not remove that draft calculation. The store choice below remains a proposal
+requiring D1/D2 review and scope approval.
 
 ## Why a cache here needs no invalidation
 
