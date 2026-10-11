@@ -17,6 +17,7 @@
     "test/worker/**/*.ts",
     "src/performance/**/*.ts",
     "test/bench/**/*.ts",
-    "scripts/performance-history.ts"
+    "scripts/performance-history.ts",
+    "src/family-detail/**/*.ts"
   ]
 }

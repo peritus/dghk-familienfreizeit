@@ -26,6 +26,7 @@
     "src/solver/**/*.ts",
     "src/organiser/**/*.ts",
     "test/app/**/*.tsx",
-    "src/performance/**/*.ts"
+    "src/performance/**/*.ts",
+    "src/family-detail/**/*.ts"
   ]
 }

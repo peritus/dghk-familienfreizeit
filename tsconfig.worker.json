@@ -16,6 +16,7 @@
     "src/organiser/**/*.ts",
     "worker-configuration.d.ts",
     "test/worker/**/*.ts",
-    "src/performance/**/*.ts"
+    "src/performance/**/*.ts",
+    "src/family-detail/**/*.ts"
   ]
 }
