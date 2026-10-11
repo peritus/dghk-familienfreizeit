@@ -25,6 +25,9 @@ jobs:
       - run: nix develop -c pnpm run bench:check
       - run: nix develop -c pnpm exec vitest run --project kernel test/events/validation-budgets.test.ts
       - run: nix develop -c pnpm run bench:scale
+      - run: nix develop -c pnpm run bench:capacity
+      - run: nix develop -c pnpm run bench:capacity:requests
+      - run: nix develop -c sh -c 'pnpm run perf:capacity > .performance-state/dghk-familienfreizeit/performance/capacity-report.txt'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
