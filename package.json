@@ -37,7 +37,8 @@
     "perf:catalogue": "DGHK_PERF_WRITE_CATALOGUE=1 vitest run --project kernel test/events/performance-catalogue.test.ts",
     "bench:requests": "node --experimental-strip-types scripts/performance-requests.ts",
     "bench:capacity": "node --experimental-strip-types scripts/performance-capacity.ts --run",
-    "perf:capacity": "node --experimental-strip-types scripts/performance-capacity.ts"
+    "perf:capacity": "node --experimental-strip-types scripts/performance-capacity.ts",
+    "bench:capacity:requests": "node --experimental-strip-types scripts/performance-requests.ts --lifecycle"
   },
   "dependencies": {
     "@base-ui/react": "^1",
