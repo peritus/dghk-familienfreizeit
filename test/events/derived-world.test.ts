@@ -313,6 +313,7 @@ test('guardModuleFold rejects capability calls outside a module’s own declared
   const capability: ModuleFoldCapability = {
     findEntity: () => undefined,
     entities: () => [],
+    entitiesWithLabels: () => [],
     labels: () => [],
     setSortKey: (kind, id, sortKey) => {
       calls.push(`setSortKey:${kind}:${id}:${sortKey}`)

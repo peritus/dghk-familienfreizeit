@@ -130,6 +130,8 @@ export type ModuleFoldCapability = {
   findEntity(kind: string, id: string): Entity | undefined
   /** Read-only live entities of one module-owned kind. */
   entities(kind: string): readonly Entity[]
+  /** Exact first-label lookup, indexed lazily and maintained within this replay. */
+  entitiesWithLabels(kind: string, labels: LabelCriteria): readonly Entity[]
   /** Read-only live labels for one entity. */
   labels(entityId: string): readonly Label[]
   /** Restates the deterministic source ordering key without adding a domain label. */
@@ -180,6 +182,11 @@ export function guardModuleFold(
       entities(kind) {
         requireKind(kind)
         return capability.entities(kind)
+      },
+      entitiesWithLabels(kind, labels) {
+        requireKind(kind)
+        for (const key of Object.keys(labels)) requireKey(key)
+        return capability.entitiesWithLabels(kind, labels)
       },
       labels(entityId) {
         return capability.labels(entityId)
@@ -285,12 +292,21 @@ export type ModuleEventAuthorize = (
 export type ValidationWorld = {
   findEntity(kind: string, id: string): Entity | undefined
   entities(kind: string): readonly Entity[]
+  hasEntityWithLabels(kind: string, labels: LabelCriteria, exceptId?: string): boolean
   labels(entityId: string): readonly Label[]
   labelsByKey(key: string): readonly Label[]
   /** Whether an event-opened phase has been opened. */
   phaseOpened(phase: string): boolean
   /** Whether the area's latest closing or reopening event is a closing. */
   areaClosed(area: string): boolean
+}
+
+export type LabelCriteria = Readonly<Record<string, string | number | boolean | null>>
+type LabelTupleIndex = {
+  kind: string
+  keys: readonly string[]
+  members: Map<string, string>
+  buckets: Map<string, Map<string, Entity>>
 }
 
 export type ModuleEventValidate = (payload: JsonValue, world: ValidationWorld) => string | null
@@ -341,6 +357,7 @@ type MutableWorld = {
   entities_by_kind: Map<string, Map<string, Entity>>
   labels_by_entity: Map<string, Map<string, Label>>
   labels_by_key: Map<string, Map<string, Label>>
+  label_tuple_indexes: Map<string, LabelTupleIndex>
   phase_opened: Map<string, { seq: number; at: string }>
   area_closings: Map<string, AreaClosing[]>
   area_latest: Map<string, { kind: 'closed' | 'reopened'; seq: number; at: string }>
@@ -440,6 +457,10 @@ function validationWorld(state: MutableWorld): ValidationWorld {
       return target?.kind === kind ? target : undefined
     },
     entities: (kind) => [...(state.entities_by_kind.get(kind)?.values() ?? [])],
+    hasEntityWithLabels: (kind, labels, exceptId) => {
+      const bucket = matchingEntities(state, kind, labels)
+      return bucket.size > (exceptId && bucket.has(exceptId) ? 1 : 0)
+    },
     labels: (entityId) => entityLabels(state, entityId),
     labelsByKey: (key) => [...(state.labels_by_key.get(key)?.values() ?? [])],
     phaseOpened: (phase) => state.phase_opened.has(phase),
@@ -459,6 +480,7 @@ function createMutableWorld(): MutableWorld {
     entities_by_kind: new Map(),
     labels_by_entity: new Map(),
     labels_by_key: new Map(),
+    label_tuple_indexes: new Map(),
     phase_opened: new Map(),
     area_closings: new Map(),
     area_latest: new Map(),
@@ -485,6 +507,7 @@ function putLabel(state: MutableWorld, mapKey: string, label: Label): void {
   state.labels.set(mapKey, label)
   indexBucket(state.labels_by_entity, label.entity_id).set(mapKey, label)
   indexBucket(state.labels_by_key, label.key).set(mapKey, label)
+  refreshTupleIndexes(state, label.entity_id, label.key)
 }
 
 /** The only delete path out of `labels`; keeps both label indexes in step. */
@@ -494,6 +517,49 @@ function dropLabel(state: MutableWorld, mapKey: string): void {
   state.labels.delete(mapKey)
   dropFromBucket(state.labels_by_entity, label.entity_id, mapKey)
   dropFromBucket(state.labels_by_key, label.key, mapKey)
+  refreshTupleIndexes(state, label.entity_id, label.key)
+}
+
+/** No module names or relationship rules enter the kernel; callers select the tuple. */
+function matchingEntities(
+  state: MutableWorld,
+  kind: string,
+  criteria: LabelCriteria,
+): Map<string, Entity> {
+  const keys = Object.keys(criteria).sort()
+  if (!keys.length) throw new Error('label criteria must not be empty')
+  const signature = canonicalJson([kind, ...keys])
+  let index = state.label_tuple_indexes.get(signature)
+  if (!index) {
+    index = { kind, keys, members: new Map(), buckets: new Map() }
+    state.label_tuple_indexes.set(signature, index)
+    for (const entity of state.entities_by_kind.get(kind)?.values() ?? [])
+      refreshTuple(state, index, entity.id)
+  }
+  return index.buckets.get(canonicalJson(keys.map((key) => criteria[key]!))) ?? new Map()
+}
+
+function refreshTuple(state: MutableWorld, index: LabelTupleIndex, entityId: string): void {
+  const previous = index.members.get(entityId)
+  if (previous !== undefined) {
+    dropFromBucket(index.buckets, previous, entityId)
+    index.members.delete(entityId)
+  }
+  const entity = state.entities_by_id.get(entityId)
+  if (entity?.kind !== index.kind) return
+  const labels = entityLabels(state, entityId)
+  const values = index.keys.map((key) => labels.find((label) => label.key === key)?.value)
+  if (values.some((value) => value === undefined)) return
+  const tuple = canonicalJson(values as JsonValue[])
+  index.members.set(entityId, tuple)
+  indexBucket(index.buckets, tuple).set(entityId, entity)
+}
+
+function refreshTupleIndexes(state: MutableWorld, entityId: string, key?: string): void {
+  const kind = state.entities_by_id.get(entityId)?.kind
+  for (const index of state.label_tuple_indexes.values())
+    if (index.kind === kind && (key === undefined || index.keys.includes(key)))
+      refreshTuple(state, index, entityId)
 }
 
 /** Live labels of one entity, in insertion order (which is `set_seq` order). */
@@ -709,6 +775,8 @@ function applyEvent(state: MutableWorld, event: Event, config: KernelConfig): vo
         },
         entities: (kind) =>
           [...(state.entities_by_kind.get(kind)?.values() ?? [])].sort(sortEntities),
+        entitiesWithLabels: (kind, labels) =>
+          [...matchingEntities(state, kind, labels).values()].sort(sortEntities),
         labels: (entityId) => entityLabels(state, entityId),
         setSortKey: (kind, id, sortKey) => {
           const target = state.entities_by_id.get(id)
@@ -782,6 +850,8 @@ function unregisterEntity(state: MutableWorld, id: string): void {
   if (!target) return
   state.entities_by_id.delete(id)
   dropFromBucket(state.entities_by_kind, target.kind, id)
+  for (const index of state.label_tuple_indexes.values())
+    if (index.kind === target.kind) refreshTuple(state, index, id)
 }
 
 function addPerson(

@@ -181,13 +181,11 @@ function validateRoom(
   if (value.floor !== null && !params.floors.includes(value.floor))
     return `invalid floor: ${value.floor}`
   if (!params.room_types.includes(value.room_type)) return `invalid room type: ${value.room_type}`
-  const duplicate = world.entities('room').some((room) => {
-    if (room.id === value.room_id) return false
-    return (
-      liveLabel(world, room.id, locationKey) === value.building_id &&
-      liveLabel(world, room.id, 'number') === value.number
-    )
-  })
+  const duplicate = world.hasEntityWithLabels(
+    'room',
+    { [locationKey]: value.building_id, number: value.number },
+    value.room_id,
+  )
   return duplicate ? `room number already exists in building: ${value.number}` : null
 }
 
@@ -208,13 +206,11 @@ function validateBed(
     return `sleeping_room only applies to apartment rooms: ${value.room_id}`
   const duplicate =
     value.label !== '' &&
-    world.entities('bed').some((bed) => {
-      if (bed.id === value.bed_id) return false
-      return (
-        liveLabel(world, bed.id, locationKey) === value.room_id &&
-        liveLabel(world, bed.id, 'label') === value.label
-      )
-    })
+    world.hasEntityWithLabels(
+      'bed',
+      { [locationKey]: value.room_id, label: value.label },
+      value.bed_id,
+    )
   return duplicate ? `bed label already exists in room: ${value.label}` : null
 }
 
@@ -226,18 +222,14 @@ function validateRemovedBed(payload: JsonValue, world: ValidationWorld): string 
 function validateRemovedBuilding(payload: JsonValue, world: ValidationWorld): string | null {
   const value = buildingRemovedPayload.parse(payload)
   if (!entity(world, 'building', value.building_id)) return `unknown building: ${value.building_id}`
-  const hasRooms = world
-    .entities('room')
-    .some((room) => liveLabel(world, room.id, locationKey) === value.building_id)
+  const hasRooms = world.hasEntityWithLabels('room', { [locationKey]: value.building_id })
   return hasRooms ? `building has rooms: ${value.building_id}` : null
 }
 
 function validateRemovedRoom(payload: JsonValue, world: ValidationWorld): string | null {
   const value = roomRemovedPayload.parse(payload)
   if (!entity(world, 'room', value.room_id)) return `unknown room: ${value.room_id}`
-  const hasBeds = world
-    .entities('bed')
-    .some((bed) => liveLabel(world, bed.id, locationKey) === value.room_id)
+  const hasBeds = world.hasEntityWithLabels('bed', { [locationKey]: value.room_id })
   return hasBeds ? `room has beds: ${value.room_id}` : null
 }
 
@@ -251,13 +243,7 @@ function syncPlaces(
   bedIdValue: string,
   sleeps: 0 | 1 | 2,
 ): void {
-  const current = capability
-    .entities('place')
-    .filter((place) =>
-      capability
-        .labels(place.id)
-        .some((label) => label.key === locationKey && label.value === bedIdValue),
-    )
+  const current = capability.entitiesWithLabels('place', { [locationKey]: bedIdValue })
   const desired = new Set(
     Array.from({ length: sleeps }, (_, index) => placeId(bedIdValue, index + 1)),
   )
@@ -293,16 +279,25 @@ function inventorySummary(world: World, priceTrait: string | null = null): Inven
   }))
   const buildingById = new Map(buildings.map((building) => [building.id, building]))
   const buildingOrder = new Map(buildings.map((building, index) => [building.id, index]))
+  const capacityByRoom = new Map<string, number>()
+  for (const bed of world.entities_by_kind.bed ?? []) {
+    const room = labelValue(world, bed.id, locationKey)
+    if (typeof room === 'string')
+      capacityByRoom.set(
+        room,
+        (capacityByRoom.get(room) ?? 0) + Number(labelValue(world, bed.id, 'sleeps') ?? 0),
+      )
+  }
+  const capabilitiesByEntity = new Map<string, string[]>()
+  for (const capability of world.capabilities) {
+    const bucket = capabilitiesByEntity.get(capability.entity_id) ?? []
+    bucket.push(capability.key)
+    capabilitiesByEntity.set(capability.entity_id, bucket)
+  }
   const rooms = (world.entities_by_kind.room ?? [])
     .map((item) => {
       const buildingId = String(labelValue(world, item.id, locationKey) ?? '')
-      const beds = (world.entities_by_kind.bed ?? []).filter(
-        (bed) => labelValue(world, bed.id, locationKey) === item.id,
-      )
-      const placeCount = beds.reduce(
-        (total, bed) => total + Number(labelValue(world, bed.id, 'sleeps') ?? 0),
-        0,
-      )
+      const placeCount = capacityByRoom.get(item.id) ?? 0
       const traits: Record<string, JsonValue> = {}
       for (const label of world.labels_by_entity[item.id] ?? [])
         if (!['number', 'floor', 'room-type', locationKey].includes(label.key))
@@ -316,9 +311,7 @@ function inventorySummary(world: World, priceTrait: string | null = null): Inven
         place_count: placeCount,
         sort_key: item.sort_key,
         traits,
-        capabilities: world.capabilities
-          .filter((capability) => capability.entity_id === item.id)
-          .map(({ key }) => key),
+        capabilities: capabilitiesByEntity.get(item.id) ?? [],
       }
     })
     .sort(
@@ -348,10 +341,11 @@ function inventorySummary(world: World, priceTrait: string | null = null): Inven
         a.id.localeCompare(b.id),
     )
   const bedOrder = new Map(beds.map((bed, index) => [bed.id, index]))
+  const bedById = new Map(beds.map((bed) => [bed.id, bed]))
   const places = (world.entities_by_kind.place ?? [])
     .map((item) => {
       const bedIdValue = String(labelValue(world, item.id, locationKey) ?? '')
-      const bed = beds.find((candidate) => candidate.id === bedIdValue)
+      const bed = bedById.get(bedIdValue)
       const suffix = Number(item.id.slice(item.id.lastIndexOf('_') + 1))
       return { id: item.id, bed_id: bedIdValue, room_id: bed?.room_id ?? '', index: suffix }
     })
