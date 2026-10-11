@@ -43,7 +43,14 @@ export function compareRuns(
   current: PerformanceRun,
   history: readonly PerformanceRun[],
   threshold = 0.2,
-): readonly { operation: string; baseline_ms: number; change: number; regression: boolean }[] {
+): readonly {
+  operation: string
+  baseline_ms: number
+  baseline_p95_ms: number
+  change: number
+  p95_change: number
+  regression: boolean
+}[] {
   const signature = (value: Readonly<Record<string, string | number>>) =>
     JSON.stringify(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
   const comparable = history
@@ -64,15 +71,67 @@ export function compareRuns(
     )
     if (!values.length) return []
     const baseline = summarize(timing.operation, values).median_ms
+    const tails = comparable.flatMap((run) =>
+      run.timings
+        .filter((entry) => entry.operation === timing.operation)
+        .map((entry) => entry.p95_ms),
+    )
+    const baselineP95 = summarize(timing.operation, tails).median_ms
     const change =
       baseline === 0 ? (timing.median_ms === 0 ? 0 : Infinity) : timing.median_ms / baseline - 1
+    const p95Change =
+      baselineP95 === 0 ? (timing.p95_ms === 0 ? 0 : Infinity) : timing.p95_ms / baselineP95 - 1
     return [
       {
         operation: timing.operation,
         baseline_ms: baseline,
+        baseline_p95_ms: baselineP95,
         change,
-        regression: change > threshold,
+        p95_change: p95Change,
+        regression: change > threshold || p95Change > threshold,
       },
     ]
   })
+}
+
+/** Compare log scaling only within one source revision and runtime/machine. */
+export function scaleGrowth(runs: readonly PerformanceRun[]): readonly {
+  workload: string
+  operation: string
+  from_events: number
+  to_events: number
+  exponent: number
+}[] {
+  const result: {
+    workload: string
+    operation: string
+    from_events: number
+    to_events: number
+    exponent: number
+  }[] = []
+  for (const larger of runs)
+    for (const smaller of runs) {
+      const from = smaller.shape.events ?? 0
+      const to = larger.shape.events ?? 0
+      if (
+        from <= 0 ||
+        to <= from ||
+        smaller.workload !== larger.workload ||
+        smaller.revision.commit_id !== larger.revision.commit_id ||
+        JSON.stringify(smaller.environment) !== JSON.stringify(larger.environment)
+      )
+        continue
+      for (const timing of larger.timings) {
+        const baseline = smaller.timings.find((entry) => entry.operation === timing.operation)
+        if (baseline && baseline.median_ms > 0 && timing.median_ms > 0)
+          result.push({
+            workload: larger.workload,
+            operation: timing.operation,
+            from_events: from,
+            to_events: to,
+            exponent: Math.log(timing.median_ms / baseline.median_ms) / Math.log(to / from),
+          })
+      }
+    }
+  return result
 }

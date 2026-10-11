@@ -21,6 +21,11 @@ export const performanceCatalogue = {
   'projection.shared': 'projectSharedWorld',
   'projection.family': 'projectFamilyWorld',
   'organiser.edit': 'prospective derive, solver input, solve, and attention',
+  'request.organiser-log': 'GET organiser log (authentication, read, response)',
+  'request.me:organiser': 'GET principal (organiser authentication)',
+  'request.me:family': 'GET principal (family authentication and replay)',
+  'request.organiser-apply': 'POST organiser batch (prepare, authorize, append, response)',
+  'request.events:family': 'POST family batch (authentication, replay, authorize, prepare, append)',
 } as const
 
 export type PerformanceOperation = keyof typeof performanceCatalogue

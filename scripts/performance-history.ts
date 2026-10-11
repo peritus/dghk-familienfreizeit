@@ -4,7 +4,12 @@ import { join, dirname } from 'node:path'
 import { createHash, randomUUID } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
-import { compareRuns, type PerformanceRun, type TimingSummary } from '../src/performance/results.ts'
+import {
+  compareRuns,
+  scaleGrowth,
+  type PerformanceRun,
+  type TimingSummary,
+} from '../src/performance/results.ts'
 
 export function historyPath(): string {
   return join(
@@ -37,10 +42,17 @@ export function readHistory(path = historyPath()): PerformanceRun[] {
   }
 }
 
-export function startRun(workload: string, shape: PerformanceRun['shape']) {
+export function benchmarkRevision(): PerformanceRun['revision'] {
   const ciCommit = process.env.CI && process.env.GITHUB_SHA
   if (ciCommit && !/^[a-f0-9]{40}$/.test(ciCommit)) throw new Error('invalid CI revision')
-  const revision = ciCommit
+  const sourceRevision = ciCommit
+    ? '@'
+    : execFileSync('jj', ['log', '-r', '@', '--no-graph', '-T', 'empty'], {
+          encoding: 'utf8',
+        }).trim() === 'true'
+      ? '@-'
+      : '@'
+  return ciCommit
     ? { change_id: 'ci', commit_id: ciCommit, parent_commit_id: '' }
     : (JSON.parse(
         execFileSync(
@@ -48,7 +60,7 @@ export function startRun(workload: string, shape: PerformanceRun['shape']) {
           [
             'log',
             '-r',
-            '@',
+            sourceRevision,
             '--no-graph',
             '-T',
             '"{\\"change_id\\":\\"" ++ change_id ++ "\\",\\"commit_id\\":\\"" ++ commit_id ++ "\\",\\"parent_commit_id\\":\\"" ++ parents.map(|p| p.commit_id()).join("") ++ "\\"}"',
@@ -56,6 +68,14 @@ export function startRun(workload: string, shape: PerformanceRun['shape']) {
           { encoding: 'utf8' },
         ),
       ) as PerformanceRun['revision'])
+}
+
+export function startRun(
+  workload: string,
+  shape: PerformanceRun['shape'],
+  runtimeSuffix = '',
+  revision = benchmarkRevision(),
+) {
   const run: PerformanceRun = {
     schema_version: 1,
     run_id: randomUUID(),
@@ -68,7 +88,7 @@ export function startRun(workload: string, shape: PerformanceRun['shape']) {
         .slice(0, 16),
       platform: platform(),
       arch: arch(),
-      runtime: process.version,
+      runtime: process.version + runtimeSuffix,
     },
     workload,
     shape,
@@ -117,7 +137,7 @@ function report(run: PerformanceRun, history: readonly PerformanceRun[]): boolea
   const comparisons = compareRuns(run, history, threshold)
   for (const entry of comparisons)
     process.stdout.write(
-      `${entry.regression ? 'REGRESSION' : 'comparison'} ${entry.operation}: ${(entry.change * 100).toFixed(1)}% vs ${entry.baseline_ms.toFixed(2)} ms\n`,
+      `${entry.regression ? 'REGRESSION' : 'comparison'} ${entry.operation}: ${(entry.change * 100).toFixed(1)}% vs ${entry.baseline_ms.toFixed(2)} ms; p95 ${(entry.p95_change * 100).toFixed(1)}% vs ${entry.baseline_p95_ms.toFixed(2)} ms\n`,
     )
   return comparisons.some((entry) => entry.regression)
 }
@@ -137,5 +157,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const index = history.indexOf(run)
     regressed = report(run, history.slice(0, index)) || regressed
   }
+  for (const growth of scaleGrowth([...latestByWorkload.values()]))
+    process.stdout.write(
+      `growth ${growth.workload} ${growth.operation}: ${growth.from_events} -> ${growth.to_events}, exponent ${growth.exponent.toFixed(2)}\n`,
+    )
   if (regressed && process.argv.includes('--fail-on-regression')) process.exitCode = 1
 }

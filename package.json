@@ -34,7 +34,8 @@
     "perf:report": "node --experimental-strip-types scripts/performance-history.ts",
     "bench:scale": "node --experimental-strip-types scripts/performance-bench.ts",
     "perf:export": "node --experimental-strip-types scripts/performance-export.ts",
-    "perf:catalogue": "DGHK_PERF_WRITE_CATALOGUE=1 vitest run --project kernel test/events/performance-catalogue.test.ts"
+    "perf:catalogue": "DGHK_PERF_WRITE_CATALOGUE=1 vitest run --project kernel test/events/performance-catalogue.test.ts",
+    "bench:requests": "node --experimental-strip-types scripts/performance-requests.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1",

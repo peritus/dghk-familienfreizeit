@@ -21,7 +21,8 @@ const fixture = readFileSync(
   resolve(process.cwd(), 'test/fixtures/workshop-assignment/prototype-dataset.kdl'),
   'utf-8',
 )
-const world = derive(loadKdl(fixture, activeProfile.validation_view), activeProfile.validation_view)
+const fixtureEvents = loadKdl(fixture, activeProfile.validation_view)
+const world = derive(fixtureEvents, activeProfile.validation_view)
 const contributions = composeSolverContributions(activeProfile)
 const plan = solve(buildSolverInput(world, contributions), contributions, {
   build_revision: 'test',
@@ -42,17 +43,27 @@ const unsupportedPromises = [
   'bevor der Plan festgelegt wird',
 ]
 
-function renderAt(path: string, children: ReactNode) {
+function renderAt(path: string, children: ReactNode, currentWorld = world) {
+  const currentPlan =
+    currentWorld === world
+      ? plan
+      : solve(buildSolverInput(currentWorld, contributions), contributions, {
+          build_revision: 'test',
+          compatibility_revision: 1,
+          event_date: activeProfile.meta.starts_on,
+          profile: activeProfile,
+          seed: null,
+        })
   const location = memoryLocation({ path, record: true })
   render(
     <OrganiserContext.Provider
       value={{
         state: organiserFixtureState,
-        world,
+        world: currentWorld,
         dispatch: () => undefined,
         stage: () => undefined,
         apply: async () => undefined,
-        current_plan: plan,
+        current_plan: currentPlan,
       }}
     >
       <Router hook={location.hook} searchHook={location.searchHook}>
@@ -91,7 +102,21 @@ test('the programme and allocation screens ask for review without promising a co
 })
 
 test('the allocation conflict notice uses registered attention', () => {
-  renderAt('/workshops/allocation', <WorkshopAllocationConflictNotice />)
+  const updates = fixtureEvents
+    .filter((event) => event.type === 'WorkshopAdded')
+    .map((event, index) => ({
+      ...event,
+      seq: fixtureEvents.length + index + 1,
+      type: 'WorkshopUpdated',
+      payload: {
+        ...(event.payload as Record<string, import('../../src/events/types.js').JsonValue>),
+        audience: 'adults',
+        age_min: 18,
+        age_max: 99,
+      },
+    }))
+  const constrained = derive([...fixtureEvents, ...updates], activeProfile.validation_view)
+  renderAt('/workshops/allocation', <WorkshopAllocationConflictNotice />, constrained)
   expect(document.querySelector('summary')).toBeTruthy()
   expectNoUnsupportedPromise()
 })

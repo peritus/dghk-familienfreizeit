@@ -12,6 +12,8 @@
     "scripts/**/*.ts",
     "src/performance/results.ts",
     "src/performance/trace.ts",
-    "src/performance/import-trace.ts"
+    "src/performance/import-trace.ts",
+    "test/bench/log.ts",
+    "src/events/types.ts"
   ]
 }

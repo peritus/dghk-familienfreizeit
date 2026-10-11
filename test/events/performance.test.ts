@@ -1,5 +1,10 @@
 import { expect, test } from 'vitest'
-import { summarize, compareRuns, type PerformanceRun } from '../../src/performance/results.js'
+import {
+  summarize,
+  compareRuns,
+  scaleGrowth,
+  type PerformanceRun,
+} from '../../src/performance/results.js'
 import { chromeTrace, traceRecorder } from '../../src/performance/trace.js'
 
 test('nested and failed computations retain timing and propagate their result or error', () => {
@@ -39,8 +44,37 @@ test('comparison excludes different machines, runtimes and workloads', () => {
       { ...previous, environment: { ...run.environment, machine: 'two' } },
     ]),
   ).toEqual([
-    { operation: 'derive', baseline_ms: 10, change: 0.3999999999999999, regression: true },
+    {
+      operation: 'derive',
+      baseline_ms: 10,
+      baseline_p95_ms: 10,
+      change: 0.3999999999999999,
+      p95_change: 0.5,
+      regression: true,
+    },
   ])
   expect(() => summarize('derive', [])).toThrow()
   expect(() => summarize('derive', [NaN])).toThrow()
+  const tailOnly = { ...run, timings: [{ ...previous.timings[0]!, p95_ms: 15 }] }
+  expect(compareRuns(tailOnly, [previous])[0]).toMatchObject({
+    change: 0,
+    p95_change: 0.5,
+    regression: true,
+  })
+  const larger = { ...previous, shape: { events: 100000 }, timings: [summarize('derive', [40])] }
+  expect(scaleGrowth([previous, larger])).toEqual([
+    {
+      workload: previous.workload,
+      operation: 'derive',
+      from_events: 50000,
+      to_events: 100000,
+      exponent: 2,
+    },
+  ])
+  expect(
+    scaleGrowth([
+      previous,
+      { ...larger, revision: { ...larger.revision, commit_id: 'different' } },
+    ]),
+  ).toEqual([])
 })
