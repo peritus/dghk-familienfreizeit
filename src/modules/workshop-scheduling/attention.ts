@@ -15,6 +15,14 @@ export const workshopSchedulingAttention = [
     (c) => {
       const s = section(c)
       const fixed = new Set(s.fixed_violations.map((v) => v.workshop_id))
+      const reasonsByWorkshop = new Map<string, Set<string>>()
+      for (const entry of c.plan!.trace) {
+        if (entry.stage !== 'workshop-scheduling.placement' || entry.step !== 'unscheduled')
+          continue
+        const reasons = reasonsByWorkshop.get(entry.subject) ?? new Set<string>()
+        for (const rejection of entry.detail?.rejected ?? []) reasons.add(rejection.rule)
+        reasonsByWorkshop.set(entry.subject, reasons)
+      }
       return s.unscheduled
         .filter((v) => !fixed.has(v.workshop_id))
         .map((v) =>
@@ -23,18 +31,7 @@ export const workshopSchedulingAttention = [
             [v.workshop_id],
             [v.workshop_id],
             {
-              reasons: [
-                ...new Set(
-                  c
-                    .plan!.trace.filter(
-                      (t) =>
-                        t.stage === 'workshop-scheduling.placement' &&
-                        t.subject === v.workshop_id &&
-                        t.step === 'unscheduled',
-                    )
-                    .flatMap((t) => t.detail?.rejected?.map((r) => r.rule) ?? []),
-                ),
-              ].sort(),
+              reasons: [...(reasonsByWorkshop.get(v.workshop_id) ?? [])].sort(),
               reason: v.reason,
             },
             {

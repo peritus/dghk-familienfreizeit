@@ -124,10 +124,11 @@ export function workshopRankingAttention(maxRank: number) {
       'workshop-rankings.ineligible-selection',
       'workshop-rankings',
       ['Auswahl passt nicht zur Teilnahme', 'Selection does not match attendance eligibility'],
-      (c) =>
-        rankings(c).flatMap((r) =>
+      (c) => {
+        const workshops = new Map(official(c).workshops.map((workshop) => [workshop.id, workshop]))
+        return rankings(c).flatMap((r) =>
           r.choices.flatMap((v) => {
-            const w = official(c).workshops.find((w) => w.id === v.workshop_id)
+            const w = v.workshop_id === null ? undefined : workshops.get(v.workshop_id)
             const reason = w
               ? (eligible(c, r.person_id, w) ??
                 (w.mode !== 'assigned' ? 'hard.mode-not-assigned' : null))
@@ -136,26 +137,32 @@ export function workshopRankingAttention(maxRank: number) {
               ? [fact(c, [r.person_id, w.id], [r.person_id, w.id], { reason })]
               : []
           }),
-        ),
+        )
+      },
       { scopes: ['dashboard', 'family', 'allocation'] },
     ),
     check(
       'workshop-rankings.demand',
       'workshop-rankings',
       ['Mehr Wünsche als Plätze', 'More wishes than places'],
-      (c) =>
-        official(c)
+      (c) => {
+        const demand = new Map<string, Set<string>>()
+        for (const ranking of rankings(c))
+          for (const choice of ranking.choices) {
+            if (choice.workshop_id === null) continue
+            const people = demand.get(choice.workshop_id) ?? new Set<string>()
+            people.add(ranking.person_id)
+            demand.set(choice.workshop_id, people)
+          }
+        return official(c)
           .workshops.filter((w) => w.mode === 'assigned')
           .flatMap((w) => {
-            const count = new Set(
-              rankings(c)
-                .filter((r) => r.choices.some((v) => v.workshop_id === w.id))
-                .map((r) => r.person_id),
-            ).size
+            const count = demand.get(w.id)?.size ?? 0
             return count > w.capacity
               ? [fact(c, [w.id], [w.id], { demand: count, capacity: w.capacity })]
               : []
-          }),
+          })
+      },
       { kind: 'information', severity: 'info', scopes: ['workshop', 'allocation'] },
     ),
     check(

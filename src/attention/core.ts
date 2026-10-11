@@ -74,11 +74,12 @@ export const coreAttentionChecks: readonly AttentionCheck[] = [
     'kernel.family-without-persons',
     'core',
     ['Familie ohne Personen', 'Family without people'],
-    (context) =>
-      context
-        .world!.families.filter(
-          (f) => !(context.world!.labels_by_key['member-of'] ?? []).some((l) => l.value === f.id),
-        )
+    (context) => {
+      const familiesWithPeople = new Set(
+        (context.world!.labels_by_key['member-of'] ?? []).map((label) => label.value),
+      )
+      return context
+        .world!.families.filter((family) => !familiesWithPeople.has(family.id))
         .map((f) =>
           fact(
             context,
@@ -87,7 +88,8 @@ export const coreAttentionChecks: readonly AttentionCheck[] = [
             {},
             { actions: [{ kind: 'navigate', destination: 'family', entity_id: f.id }] },
           ),
-        ),
+        )
+    },
     { scopes: ['dashboard', 'family'] },
   ),
   check(

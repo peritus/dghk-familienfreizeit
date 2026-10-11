@@ -10,9 +10,24 @@ test('attention output preserves its reference digest', () => {
   const profile = luebben2027Profile
   const world = derive(syntheticLog(syntheticScale(2)), profile.validation_view)
   const contributions = composeSolverContributions(profile)
-  const plan = solve(buildSolverInput(world, contributions), contributions, { build_revision: 'equivalence', compatibility_revision: 1, event_date: profile.meta.starts_on, profile, seed: null })
-  const attention = profileAttention(profile)({ domain: 'available', world, plan, profile, build_revision: 'equivalence', locale: profile.meta.locale, now: '2027-01-01T00:00:00Z', audience: 'organiser' })
+  const plan = solve(buildSolverInput(world, contributions), contributions, {
+    build_revision: 'equivalence',
+    compatibility_revision: 1,
+    event_date: profile.meta.starts_on,
+    profile,
+    seed: null,
+  })
+  const attention = profileAttention(profile)({
+    domain: 'available',
+    world,
+    plan,
+    profile,
+    build_revision: 'equivalence',
+    locale: profile.meta.locale,
+    now: '2027-01-01T00:00:00Z',
+    audience: 'organiser',
+  })
   const digest = createHash('sha256').update(JSON.stringify(attention)).digest('hex')
   process.stderr.write(`ATTENTION reference ${digest}\n`)
-  expect(digest).toMatch(/^[a-f0-9]{64}$/)
+  expect(digest).toBe('5d4e29523bebd6bceabd3df4e71a69398196bb285457d68dbf87e92bdbab3139')
 })

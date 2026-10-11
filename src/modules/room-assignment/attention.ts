@@ -126,10 +126,15 @@ export function roomAssignmentAttention(params: RoomAssignmentParams) {
       (c) => {
         const i = input(c),
           s = section(c)
+        const assignedByFamily = new Map<string, number>()
+        for (const assignment of s.assignments)
+          if (assignment.place_id !== null)
+            assignedByFamily.set(
+              assignment.family_id,
+              (assignedByFamily.get(assignment.family_id) ?? 0) + 1,
+            )
         return i.families.flatMap((f) => {
-          const actual = s.assignments.filter(
-            (a) => a.family_id === f.family_id && a.place_id !== null,
-          ).length
+          const actual = assignedByFamily.get(f.family_id) ?? 0
           return actual < f.bed_demand
             ? [
                 fact(c, [f.family_id], [f.family_id], {
