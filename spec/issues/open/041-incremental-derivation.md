@@ -12,144 +12,52 @@ opened: 2026-10-03
 
 # Derivation cost above a few thousand events
 
-## Problem
+## Remaining problem
 
-`derive` was quadratic in the length of the event log. Every module event
-declares a `validate(payload, world)`, and `normalizeEvents` built a complete
-derived world — a full label sort plus a full `resolve()` — before each one. A
-log of *n* events therefore performed roughly *n* full resolves over a label
-store that grows with *n*.
+The event-log fold, scoped uniqueness checks, place synchronization and
+inventory construction are indexed. Room placement shares evaluated sweeps
+and placement-index construction. Attention checks group trace rejections,
+assignments, membership and demand. Their implemented behavior and measurements
+are in [performance tracking](../../../docs/engineering/performance-tracking.md)
+and [scale evidence](../../../docs/engineering/performance-scale.md).
 
-That is fixed: validators now receive a narrow `ValidationWorld` backed by
-incrementally maintained indexes, and the log is folded once per `derive`. The
-fold is close to linear and the measured improvement at 9 393 events is 307×.
-See [derived world](../../../docs/architecture/derived-world.md#derivation-cost).
+The remaining expensive operation is the complete deterministic room search
+for a large simultaneously live population. At 50,000 events with 2,550
+families and 2,125 rooms, the measured full solve is about 32 seconds and a
+composed organiser edit about 37 seconds on the lab machine. Replay at the
+same size is about 1.35 seconds. A 50,000-event history with 30 live families
+has a composed edit around 0.35 seconds. Event count alone is not a useful
+interactive solver budget.
 
-Two superlinear costs remain, and neither is addressed by caching, because a
-cache cannot help the paths that matter here: a cold isolate and a new
-`build_revision`. The organiser currently derives the prospective world and
-solves that current input once per keystroke batch. Explicit before/after
-comparison remains a separate future feature rather than an implicit solver
-input.
+The [M10 acceptance gate](../../roadmap.md#m10--family-access) still
+requires this issue to be closed or explicitly accepted. Passing the lab cases
+does not resolve that acceptance decision.
 
-**1. Uniqueness validators are quadratic in their entity kind.**
-`validateRoom` scans every live room to reject a duplicate number within a
-building, and `validateBed` scans every live bed to reject a duplicate label
-within a room, each candidate costing a label lookup. Cost tracks rooms² and
-beds², not events². Measured growth exponent returns to 1.98 between 9 393 and
-18 762 events, where beds reach 2 400.
+## Decision needed
 
-**2. `solve` grows faster than the fold.** Addressed for the stage that
-dominated it. `room-assignment.place` was rescanning families, rooms and
-constraints inside its innermost loops; removing that took `solve` from
-23 442 ms to 1 607 ms at 2 367 events, with the plan output unchanged. See
-[room assignment](../../../docs/modules/room-assignment.md#placement-cost).
+Keep D1/D2's event-only persistence and D3's deterministic solver contract while
+choosing the next step:
 
-`workshop-assignment.attendance` was addressed the same way — a role lookup,
-a prior-assignment lookup and a ranked-choice list were resolved inside the
-per-person pass and are now resolved once per run. It went from 383 ms to 3 ms
-at 2 367 events and is linear in the log. See
-[workshop assignment](../../../docs/modules/workshop-assignment.md#attendance-cost).
+1. Accept an explicit live-population/latency envelope for the complete solver.
+   Measure the intended occasion shape on representative client hardware and
+   the hosted runtime, including cold requests and its CPU limits.
+2. Approve further answer-preserving search/index work or incremental computation.
+   An incremental result must be verified against a complete fresh solve across
+   edits, global constraints, forced placements and ordering dependencies.
+3. Review a changed candidate search or placement strategy under D3. Specify its
+   expected behavior and equivalence/quality criteria before changing the solver.
 
-Room placement has no post-greedy repair pass. It performs deterministic
-forced and greedy placement from the current derived input and reports families
-that remain unplaced instead of mutating earlier placements.
-
-What remains is the search itself: families times rooms in
-`room-assignment.place`. The ordering key, preflight, forced pass, greedy pass,
-and trace each inspect the current room candidates. Beyond reducing those
-sweeps, reducing cost means changing what the solver searches rather than how
-often it rescans, which is a design question.
-
-Cost is now guarded rather than only measured:
-[solver cost gates](../../../docs/engineering/testing.md#solver-cost-gates) run
-in `pnpm test` and fail on a work-count regression or a change in plan output.
-
-## Evidence
-
-`pnpm run bench`, one machine, median of repeated runs, `familienfreizeit-2027`
-profile. `derive` before and after the fold fixes:
-
-| events | before | after | factor |
-|---|---|---|---|
-| 611 | 145.7 ms | 14.8 ms | 9.8× |
-| 1 196 | 611.0 ms | 27.8 ms | 22× |
-| 2 367 | 3 175.3 ms | 71.8 ms | 44× |
-| 4 709 | 21 689.9 ms | 239.5 ms | 91× |
-| 9 393 | 224 605.3 ms | 730.8 ms | 307× |
-| 18 762 | not measurable | 2 875.6 ms | — |
-
-Growth exponent, consecutive factors: before 2.13 → 2.41 → 3.39; after 0.94 →
-1.39 → 1.62 → 1.98.
-
-`solve`, before and after the placement work:
-
-| events | before | after | factor |
-|---|---|---|---|
-| 611 | 195.9 ms | 52.8 ms | 3.7× |
-| 1 196 | 1 926.3 ms | 276.3 ms | 7.0× |
-| 2 367 | 23 442.3 ms | 209.5 ms | 112× |
-
-Per stage at 2 367 events after the change: `room-assignment.place` 201 ms,
-`preflight` 10 ms, `workshop-assignment.attendance` 3 ms,
-`workshop-scheduling.placement` 0.7 ms, `workshop-rankings.demand` 0.1 ms.
-
-## Recommendation
-
-Three independent pieces, in this order.
-
-**Index the uniqueness validators.** Maintain the two uniqueness keys the fold
-already enforces — room number within building, bed label within room — as
-indexes beside the existing ones, so a duplicate check is a lookup. Contained
-within `room-inventory` and the fold's state, no decision review needed.
-
-**The organiser keystroke is now measured, and it is the remaining cost.**
-The current path folds and solves the prospective world once per batch.
-Everything else on the request path is now cheap: an append folds once regardless of batch size
-([append cost](../../../docs/architecture/events.md#append-cost)), and
-authorization resolves families through the derived indexes.
-
-Reducing the keystroke means one of two things, and this is the decision the
-issue is now waiting on:
-
-- Keep shaving `solve`. Sharing room sweeps between the ordering, forced and
-  greedy passes is answer-preserving and worth perhaps 40% of the placement
-  stage.
-- Stop re-solving the whole occasion to answer what one edit changed. A draft
-  usually touches a handful of families, and the plan for the rest is already
-  known. This is the larger change and the one with the bigger ceiling.
-
-**Then decide whether the search itself needs to change.** Sharing sweeps
-between the ordering, forced and greedy passes is answer-preserving and worth
-perhaps another 40%. Past that — candidate pruning, a different placement
-strategy — changes what the solver examines and wants a decision rather than a
-measurement.
-
-**Snapshot and tail replay, if the fold still needs to be faster.** `derive` is
-a prefix fold over an append-only log: persist a serialised world at seq *N*,
-load it, and fold only the events after *N*. Cost becomes proportional to the
-tail rather than the log, and a stale snapshot degrades to a longer tail rather
-than a wrong answer.
-
-This last one is why the issue is `needs-decision`. A snapshot stores folded
-domain state, which [AGENTS.md](../../../AGENTS.md) forbids and which commit
-`xsppsvly` deliberately removed when it dropped the `entity` and `label`
-projection tables. The distinction worth reviewing is that those tables were
-authoritative and needed a rebuild step that could fail or race, whereas a
-snapshot keyed on `(seq, build_revision, compatibility_revision)` is derivable,
-verifiable against a fresh fold, and discardable — deleting it makes the
-application slow, never wrong. That is a D1/D2 revision and belongs in decision
-review before any specification text changes.
+A background calculation can improve responsiveness but does not remove CPU
+cost and needs an explicit UI lifecycle contract. Persisted world snapshots
+would require D1/D2 review and would not eliminate draft solver search cost.
+These are decisions for review, not requirements silently adopted by tooling.
 
 ## Open questions
 
-1. Is a discardable, content-keyed world snapshot acceptable under the "no
-   tables that store folded domain state" rule, or does that rule stand as
-   written and the fold has to stay fully recomputed?
-2. The organiser keystroke is 547 ms at 2 367 events and nothing else on the
-   request path is now significant. Is that acceptable, or should the draft
-   path stop re-solving the whole occasion? A snapshot does not help here: the
-   draft world has never existed before.
+- What is the required maximum live population and acceptable organiser-edit latency?
+- Which of the alternatives above should be pursued or explicitly accepted?
+- Does the event-only persistence rule stand as written? Any snapshot proposal
+  requires review of D1/D2 rather than a workaround.
 
 ## Related files
 
@@ -157,4 +65,4 @@ review before any specification text changes.
 - [architecture/events.md](../../architecture/events.md)
 - [architecture/solver-contract.md](../../architecture/solver-contract.md)
 - [deferred-ideas/re-introduce-caching.md](../../deferred-ideas/re-introduce-caching.md)
-- [issues/open/040-historical-code-path-metrics.md](040-historical-code-path-metrics.md)
+- [Historical metrics](../archived/040-historical-code-path-metrics.md)

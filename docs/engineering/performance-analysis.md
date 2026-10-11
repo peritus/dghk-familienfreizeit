@@ -11,6 +11,20 @@ The result should distinguish four different costs:
 - event-log loading and parsing;
 - world replay, validation, resolver work, response construction, and commit.
 
+## Telemetry conventions
+
+Use stable, registered operation names, explicit measurement kinds and numeric
+counts. Telemetry is operational data outside the event log. Do not record
+emails, entity IDs, domain payloads, solver trace text, URLs or request headers
+in performance measurements. Clocks and sinks belong in adapters outside the
+pure domain core. The [tracking guide](performance-tracking.md) defines the
+catalogue, sampled dataset, bounds, local history and export formats.
+
+Worker JavaScript clocks advance after I/O, so a synchronous custom span's zero
+is not a CPU measurement. Use provider invocation CPU/wall totals, local host
+measurements and sampled CPU profiles for that distinction. Production CPU
+profiles use [pprof](https://developers.cloudflare.com/workers/observability/profiling-in-production/).
+
 ## Safety and evidence boundary
 
 Use a deployment explicitly placed in scope by the user. Treat session cookies,

@@ -53,10 +53,9 @@ in jsdom, not pixel appearance or real-browser keyboard layout.
 
 ## Solver cost gates
 
-`pnpm run bench:check` runs the two gates that protect derivation cost. Both are
-ordinary tests under `test/solver/`, so `pnpm test` — and therefore
-`pnpm run ci` — already runs them; the script exists to run just those two when
-that is all you want.
+`pnpm run bench:check` runs the focused solver/request work gates and plan
+equivalence test. These are ordinary tests under `test/solver/`, so
+`pnpm test` — and therefore `pnpm run ci` — already runs them.
 
 They assert different things, and neither measures time:
 
@@ -66,7 +65,8 @@ They assert different things, and neither measures time:
   search examines — and element reads on the three collections that inner loops
   have historically rescanned. The counts are produced by wrapping the rules in
   counting decorators and the collections in `Proxy` objects, so nothing in
-  `src/` is instrumented.
+  `src/` is instrumented by the gates. It also counts distinct placement-sweep
+  contexts to catch rebuilding placement indexes per rejected room.
 - [`request-budgets.test.ts`](../../test/solver/request-budgets.test.ts) counts
   the same way for the request path: how many elements an authorized append and
   an email lookup read from the bucket arrays that previously hid linear scans.
@@ -78,6 +78,21 @@ They assert different things, and neither measures time:
 - [`placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
   digests a whole plan, both solve passes, and compares it with a recorded
   value. Cost work must not change an answer, and this is what says so.
+
+Additional ordinary tests protect the measured replay and attention hotspots:
+
+- [Validation budgets](../../test/events/validation-budgets.test.ts) compare
+  indexed answers with scans and reject whole-room/bed/place scans in replay.
+- [Worker request replay budget](../../test/worker/performance.test.ts) ensures
+  an organiser batch reads its log once and replays only the committed and
+  prospective worlds, independently of batch size.
+- [Attention budgets](../../test/solver/attention-budgets.test.ts) require one
+  pass over trace, assignments, membership and rankings for the selected checks.
+- [Attention equivalence](../../test/solver/attention-equivalence.test.ts) pins
+  the complete attention output digest.
+- [Performance adapter tests](../../test/events/performance-domain.test.ts)
+  compare instrumented and ordinary computations; metrics, ingestion, exports
+  and durable history have separate tests.
 
 **A wall-clock budget is deliberately not part of CI.** Timings from a shared
 runner are either loose enough to miss a real regression or tight enough to fail
@@ -96,35 +111,10 @@ budget of 11000.
 
 ## Derivation benchmarks
 
-`pnpm run bench` runs `test/bench/` under its own
-[Vitest configuration](../../vitest.bench.config.ts). It is deliberately outside
-`pnpm run ci`: it measures cost rather than asserting behavior, and wall-clock
-timings from a shared runner are not a gate anyone should block a merge on.
-
-`test/bench/log.ts` generates a deterministic event log valid for the
-`familienfreizeit-2027` profile. It scales what grows between occasions —
-rooms, beds, workshops, families, persons, rankings and stated needs — and holds
-the programme grid fixed, because slots and spaces are bounded by the length of
-the occasion rather than by attendance. Rooms carry both their `exactly-one`
-traits so measurements are not distorted by thousands of cardinality
-diagnostics.
-
-Two environment variables select the run:
-
-- `DGHK_BENCH_FACTORS=1,2,4` — the scale factors to sweep (default `1,2,4`).
-- `DGHK_BENCH_STAGES=derive` — which stages to time. `solve` costs orders of
-  magnitude more than the others and grows faster, so measuring the fold at a
-  large log size means leaving it out.
-
-When `solve` is timed, each solver stage and the preflight pass are timed
-separately as well, in the order `solve` itself runs them. The total on its own
-does not say which stage spends the time, and the stages differ by more than two
-orders of magnitude.
-
-Each sweep reports a growth exponent between consecutive factors: a linear stage
-tracks the event growth and reports roughly `1.0`, a quadratic one reports
-roughly `2.0`. That number, not a single absolute timing, is what makes a
-complexity regression visible on a machine whose absolute speed is unknown.
+The [performance tracking guide](performance-tracking.md) documents the
+computation lab, authenticated local HTTP lab, persistent results, 20k/50k
+workloads, regression comparisons and Perfetto exports. Timed benchmarks are
+separate from ordinary CI's deterministic cost and equivalence gates.
 
 ## Browser route and link gate
 

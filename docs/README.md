@@ -29,6 +29,9 @@ are separate claims and require separate evidence.
 - [Development](engineering/development.md): installation, CI and local preview.
 - [Hosted performance analysis](engineering/performance-analysis.md): repeatable
   API, Chromium, Cloudflare trace, and guarded mutation benchmarking.
+- [Performance tracking](engineering/performance-tracking.md): heavy-function catalogue,
+  durable lab results, operational metrics and portable traces.
+- [Scale evidence](engineering/performance-scale.md): measured workloads and remaining limits.
 - [Testing](engineering/testing.md): checks and verification limits.
 - [Documentation workflow](engineering/documentation.md): maintaining this split.
 

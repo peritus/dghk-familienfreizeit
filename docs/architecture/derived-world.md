@@ -30,40 +30,30 @@ the full world and draft events remain organiser-only.
 
 ## Derivation cost
 
-`derive` folds the whole log on every call; nothing is cached or persisted.
-Its measured cost is close to linear in the log's length, which is a property of
-two deliberate choices rather than an accident.
+`derive` folds the whole log on every call. No derived domain state is persisted.
+Measured replay is close to linear for the fixed-population history fixture;
+growing the live population also adds resolver and summary work. See
+[scale evidence](../engineering/performance-scale.md) for the two workload shapes.
 
-An event validator receives a `ValidationWorld`, not a `World`. It is a narrow
-accessor surface — live entity lookup, one entity's labels, one label key's
-labels — because a validator checks invariants against live identity and labels
-and never reads resolver output or a module summary. The fold maintains those
-three indexes incrementally, so a validator's question costs one lookup rather
-than a scan of the whole store, and `normalizeEvents` builds one view for the
-entire log instead of one derived world per event. Widening that type would
-restore a per-event resolver pass, so a validator that needs a constraint,
-requirement, capability, diagnostic or summary is a change to review, not a
-change to make quietly.
+An event validator receives a `ValidationWorld`, not a `World`. Its accessor
+surface exposes live entity lookup, labels and scalar label-tuple existence.
+It never reads resolver output or a module summary. The fold maintains
+identity/label indexes and lazy scalar-tuple indexes as labels change and
+entities retire. Scoped room/bed uniqueness uses those transient indexes;
+place synchronization reads only the owning bed's indexed bucket.
+A validator that needs resolver output is a change to review.
 
-`normalizeEvents` returns the state it folded while running those validators,
-and `derive` projects that state instead of folding a second time.
+`normalizeEvents` returns the state it folded while running validators, and
+`derive` resolves and completes that state. Inventory summaries group places,
+capacity and capabilities once instead of scanning them for every bed.
+`foldEventLog`, `resolveFoldedWorld` and `completeDerivedWorld` expose pure
+phases for the profiling adapter without adding clocks to domain computations.
 
-Known residual costs, all measured by `pnpm run bench` rather than reasoned
-about:
-
-- Uniqueness validators in `room-inventory` scan a whole entity kind per event:
-  a room's number within its building, and a bed's label within its room. These
-  are quadratic in rooms and in beds, not in events, and they dominate the fold
-  once an inventory passes a few hundred rooms.
-- `solve` still costs more than `derive` and grows faster, because its stages
-  are greedy searches whose cost tracks the product of two populations rather
-  than the length of the log. What was removed from it was rescanning, not
-  searching — see [room assignment](../modules/room-assignment.md#placement-cost).
-  `workshop-assignment.attendance` is now its largest remaining term.
-
-Both are recorded in
-[issue 041](../../spec/issues/open/041-incremental-derivation.md) together with
-the incremental-derivation options that would address the remaining growth.
+The remaining large-population cost is full deterministic room search, whose
+work tracks candidate pairs rather than log length. See
+[room assignment](../modules/room-assignment.md#placement-cost) and
+[issue 041](../../spec/issues/open/041-incremental-derivation.md) for the measured
+limit and the outstanding acceptance decision.
 
 KDL fixtures in `test/fixtures/derived-world/` exercise replay, resolver, cardinality, privacy,
 and shuffle-stable derivation. Run `pnpm test` for the domain suite, and

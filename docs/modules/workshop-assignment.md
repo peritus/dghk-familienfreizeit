@@ -89,3 +89,6 @@ The measured effect was two orders of magnitude, and the stage is now linear in
 the log: at 2 367 events it costs about 3 ms, against 383 ms before. See the
 [solver cost gates](../engineering/testing.md#solver-cost-gates) for what keeps
 it there.
+
+The current complete solver and attention measurements are recorded in
+[scale evidence](../engineering/performance-scale.md).

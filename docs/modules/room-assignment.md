@@ -32,8 +32,7 @@ Placement is a greedy search: each family is scored against each candidate room,
 so cost tracks families times rooms and grows faster than the event log does.
 That product is the algorithm; what used to sit on top of it was rescanning.
 
-Four things are now resolved once per sweep instead of once per candidate room,
-and the measured effect was an order of magnitude:
+The implementation groups or reuses the following work:
 
 - Each family's feasible-room count, which orders the families, is computed once
   per family. It was previously computed twice per comparison inside the sort's
@@ -58,6 +57,12 @@ across the stage. Per-sweep derivation is linear in the placements and cannot
 drift from the placement map. `roomRemaining` and `roomFamilies` take it as an
 optional argument and fall back to scanning, so a rule defined outside this
 module keeps working.
+
+Room candidates group places and capabilities once. Forced and greedy placement
+reuse evaluated candidate/rejection sweeps; unplaced explanations build one
+placement context per family. Place assignment uses a room-keyed lookup.
+See [scale evidence](../engineering/performance-scale.md) for the completed
+20k/50k cases and the remaining large-population search cost.
 
 Preflight resolves inventory totals and capacity-per-capability once for the
 whole run instead of per family, and reuses one feasibility sweep per family.
