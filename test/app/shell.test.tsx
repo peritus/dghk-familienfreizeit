@@ -324,7 +324,7 @@ test('the login form renders a dangerous demo link when the Worker returns one',
   const link = await screen.findByRole('link', { name: 'Anmelden' })
   expect(link.getAttribute('href')).toBe('http://127.0.0.1/auth/demo-token')
   expect(screen.getByText('Demo-Magic-Link bereit')).toBeTruthy()
-  expect(screen.getByText('Klicke auf den Link, um Dich anzumelden.')).toBeTruthy()
+  expect(screen.getByText('Klicke auf den Link, um dich anzumelden.')).toBeTruthy()
   expect(screen.getByRole('alert').className).toContain('bg-main')
   expect(screen.queryByLabelText('E-Mail-Adresse')).toBeNull()
   expect(screen.queryByRole('button', { name: 'Magic Link anfordern' })).toBeNull()

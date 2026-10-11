@@ -22,7 +22,7 @@ const meta = {
     actions: [
       {
         id: 'organiser-login',
-        label: { de: 'Anmelden', en: 'Login' },
+        label: { de: 'Anmelden', en: 'Sign in' },
         emphasis: 'primary' as const,
         destination: { kind: 'route' as const, to: '/login' },
       },
@@ -47,7 +47,7 @@ describe('occasion profile', () => {
       actions: [
         {
           id: 'organiser-login',
-          label: { de: 'Anmelden', en: 'Login' },
+          label: { de: 'Anmelden', en: 'Sign in' },
           emphasis: 'primary',
           destination: { kind: 'route', to: '/login' },
         },

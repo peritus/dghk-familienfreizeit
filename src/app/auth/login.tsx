@@ -16,7 +16,8 @@ function expiredLink(): boolean {
   return new URLSearchParams(window.location.search).get('error') === 'expired'
 }
 
-function LoginForm() {
+function LoginForm({ locale }: { locale: string }) {
+  const copy = loginCopy(locale)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<LoginStatus>('idle')
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
@@ -53,44 +54,48 @@ function LoginForm() {
 
   return (
     <ScreenLayout
-      header={<ScreenHeader eyebrow="Zugang" title="Anmelden" />}
+      header={<ScreenHeader eyebrow={copy.access} title={copy.sign_in} />}
       notices={
         <div className="max-w-xl space-y-4">
           {expiredLink() ? (
             <Alert variant="destructive">
-              <AlertTitle>{derivePublicAttention('login-expired').wording.title}</AlertTitle>
+              <AlertTitle>
+                {derivePublicAttention('login-expired', locale).wording.title}
+              </AlertTitle>
               <AlertDescription>
-                {derivePublicAttention('login-expired').wording.detail}
+                {derivePublicAttention('login-expired', locale).wording.detail}
               </AlertDescription>
             </Alert>
           ) : null}
           {status === 'sent' && magicLink ? (
             <Alert aria-live="polite" className="bg-main text-main-foreground">
-              <AlertTitle>{derivePublicAttention('login-demo').wording.title}</AlertTitle>
+              <AlertTitle>{derivePublicAttention('login-demo', locale).wording.title}</AlertTitle>
               <AlertDescription>
-                <p>{derivePublicAttention('login-demo').wording.detail}</p>
+                <p>{derivePublicAttention('login-demo', locale).wording.detail}</p>
                 <a
                   href={magicLink}
                   className="inline-flex min-h-11 items-center rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-bold text-foreground shadow-shadow"
                 >
-                  Anmelden
+                  {copy.sign_in}
                 </a>
               </AlertDescription>
             </Alert>
           ) : null}
           {status === 'sent' && !magicLink ? (
             <Alert aria-live="polite">
-              <AlertTitle>{derivePublicAttention('login-response').wording.title}</AlertTitle>
+              <AlertTitle>
+                {derivePublicAttention('login-response', locale).wording.title}
+              </AlertTitle>
               <AlertDescription>
-                <p>{derivePublicAttention('login-response').wording.detail}</p>
+                <p>{derivePublicAttention('login-response', locale).wording.detail}</p>
               </AlertDescription>
             </Alert>
           ) : null}
           {status === 'error' ? (
             <Alert variant="destructive">
-              <AlertTitle>{derivePublicAttention('login-failed').wording.title}</AlertTitle>
+              <AlertTitle>{derivePublicAttention('login-failed', locale).wording.title}</AlertTitle>
               <AlertDescription>
-                {derivePublicAttention('login-failed').wording.detail}
+                {derivePublicAttention('login-failed', locale).wording.detail}
               </AlertDescription>
             </Alert>
           ) : null}
@@ -102,7 +107,7 @@ function LoginForm() {
           {status === 'sent' && magicLink ? null : (
             <form onSubmit={submit} className="grid gap-4">
               <TextField
-                label="E-Mail-Adresse"
+                label={copy.email}
                 required
                 type="email"
                 autoComplete="email"
@@ -111,15 +116,15 @@ function LoginForm() {
               />
               <Button type="submit" disabled={status === 'sending' || cooldownRemaining > 0}>
                 {status === 'sending'
-                  ? 'Wird angefordert …'
+                  ? copy.sending
                   : cooldownRemaining > 0
-                    ? `Erneut anfordern in ${cooldownRemaining} s`
-                    : 'Magic Link anfordern'}
+                    ? copy.resend(cooldownRemaining)
+                    : copy.request_link}
               </Button>
             </form>
           )}
           <Link href="~/" className="underline">
-            Zur Startseite
+            {copy.home}
           </Link>
         </CardContent>
       </Card>
@@ -161,7 +166,7 @@ export function Login({ profile }: { profile?: ProfilePresentation }) {
       })
     return () => controller.abort()
   }, [navigate, attempt])
-  if (identity === 'anonymous') return <LoginForm />
+  if (identity === 'anonymous') return <LoginForm locale={profile?.meta.locale ?? 'de'} />
   if (identity === 'failed')
     return (
       <ScreenLayout header={<ScreenHeader title={copy.sign_in} />}>

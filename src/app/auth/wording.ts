@@ -11,6 +11,13 @@ const wording = {
     retry: 'Erneut versuchen',
     loading: 'Dein Zugang wird geladen …',
     sign_out: 'Abmelden',
+    signing_out: 'Abmeldung …',
+    access: 'Zugang',
+    email: 'E-Mail-Adresse',
+    sending: 'Wird angefordert …',
+    request_link: 'Magic Link anfordern',
+    home: 'Zur Startseite',
+    resend: (seconds: number) => `Erneut anfordern in ${seconds} s`,
   },
   en: {
     sign_in: 'Sign in',
@@ -23,6 +30,13 @@ const wording = {
     retry: 'Try again',
     loading: 'Your access is being checked …',
     sign_out: 'Sign out',
+    signing_out: 'Signing out …',
+    access: 'Access',
+    email: 'Email address',
+    sending: 'Requesting …',
+    request_link: 'Request magic link',
+    home: 'Back to home',
+    resend: (seconds: number) => `Request again in ${seconds} s`,
   },
 } as const
 export function loginCopy(locale = 'de') {

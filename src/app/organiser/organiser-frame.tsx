@@ -9,6 +9,7 @@ import { SaveStatus } from './save-status.js'
 import { HeaderMenu } from './header-menu.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
+import { loginCopy } from '../auth/wording.js'
 import { logout } from '../auth/session.js'
 import { Button } from '../components/shared/ui/button'
 import type { ProfilePresentation } from '../../config/presentation.js'
@@ -80,6 +81,7 @@ export function OrganiserFrame({
   profile?: ProfilePresentation
 }) {
   const { state } = useOrganiser()
+  const copy = loginCopy(profile?.meta.locale)
   const role = profile?.meta.locale.startsWith('en') ? 'Organising team' : 'Organisationsteam'
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState(false)
@@ -120,12 +122,16 @@ export function OrganiserFrame({
       controls={
         <>
           <div className="md:hidden">
-            <HeaderMenu on_logout={signOut} logging_out={loggingOut} />
+            <HeaderMenu
+              on_logout={signOut}
+              logging_out={loggingOut}
+              locale={profile?.meta.locale}
+            />
           </div>
           <div className="hidden items-center gap-3 md:flex">
             <SaveStatus />
             <Button type="button" variant="neutral" disabled={loggingOut} onClick={signOut}>
-              {loggingOut ? 'Abmeldung …' : 'Abmelden'}
+              {loggingOut ? copy.signing_out : copy.sign_out}
             </Button>
           </div>
         </>

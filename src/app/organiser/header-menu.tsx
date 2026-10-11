@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { Check, LoaderCircle, Pencil, SlidersHorizontal, X } from 'lucide-react'
+import { loginCopy } from '../auth/wording.js'
 import { useSaveControls } from './save-controls.js'
 import { activeProfile } from '../../config/index.js'
 import { changeCountLabel, pluralDe } from '../lib/plural-de.js'
@@ -17,10 +18,13 @@ import {
 export function HeaderMenu({
   on_logout: onLogout,
   logging_out: loggingOut = false,
+  locale,
 }: {
   on_logout: () => void | Promise<void>
   logging_out?: boolean
+  locale?: string
 }) {
+  const copy = loginCopy(locale)
   const controls = useSaveControls()
   const {
     state,
@@ -92,7 +96,7 @@ export function HeaderMenu({
             </Button>
           ) : null}
           <DialogTrigger
-            aria-label={`Menü (Speichern, Abmelden) – ${ariaStatus}`}
+            aria-label={`Menü (Speichern, ${copy.sign_out}) – ${ariaStatus}`}
             className={cn(
               'header-menu-pill inline-flex h-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-secondary-background text-sm font-bold shadow-sm',
               (kind === 'draft-empty' || kind === 'draft-pending') && 'border-dashed',
@@ -251,7 +255,7 @@ export function HeaderMenu({
           </div>
           <p className="mt-4 mb-2 text-xs font-bold text-muted uppercase">Sitzung</p>
           <Button className="w-full" variant="neutral" disabled={loggingOut} onClick={onLogout}>
-            {loggingOut ? 'Abmeldung …' : 'Abmelden'}
+            {loggingOut ? copy.signing_out : copy.sign_out}
           </Button>
         </DialogContent>
       </Dialog>

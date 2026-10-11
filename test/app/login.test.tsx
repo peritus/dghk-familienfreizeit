@@ -93,3 +93,30 @@ test('leaving login aborts its identity read', async () => {
   view.unmount()
   expect(signal.aborted).toBe(true)
 })
+
+test('English login choices use the approved role wording', async () => {
+  open(
+    vi.fn(async () => json({ principal: { roles: ['family', 'organiser'] } })),
+    'en',
+  )
+  await screen.findByRole('heading', { name: 'How would you like to sign in?' })
+  expect(screen.getByRole('navigation', { name: 'Choose how to sign in' })).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Sign in as a family' })).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Sign in as an organiser' })).toBeTruthy()
+  expect(document.body.textContent).not.toMatch(/\bapps?\b/i)
+})
+test('the English email form and demo link describe shared access', async () => {
+  open(
+    vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) =>
+      init?.method === 'POST' ? json({ magic_link: '/auth/example/' }) : json({}, 401),
+    ),
+    'en',
+  )
+  fireEvent.change(await screen.findByLabelText('Email address'), {
+    target: { value: 'a@example.test' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Request magic link' }))
+  expect(await screen.findByText('Follow the link to sign in.')).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Sign in' })).toBeTruthy()
+  expect(document.body.textContent).not.toMatch(/as an organiser|\bapps?\b/i)
+})

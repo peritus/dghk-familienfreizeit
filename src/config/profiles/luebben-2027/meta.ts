@@ -19,7 +19,7 @@ export const luebben2027Meta = {
     actions: [
       {
         id: 'organiser-login',
-        label: { de: 'Anmelden', en: 'Login' },
+        label: { de: 'Anmelden', en: 'Sign in' },
         emphasis: 'primary',
         destination: { kind: 'route', to: '/login' },
       },

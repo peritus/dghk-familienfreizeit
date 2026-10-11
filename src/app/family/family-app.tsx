@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter'
 import { FamilyDetail } from '../components/family-detail/family-detail.js'
 import { familyTopics, type FamilyTopic, type FamilyChange } from '../../family-detail/model.js'
 import { loadFamily, changeFamily, FamilyApiError, type FamilyRepresentation } from './api.js'
+import { loginCopy } from '../auth/wording.js'
 import { logout } from '../auth/session.js'
 import { ApplicationFrame } from '../components/application/application-frame.js'
 import { OccasionBrand, familyIdentityLabel } from '../components/application/occasion-brand.js'
@@ -13,6 +14,7 @@ import type { ProfilePresentation } from '../../config/presentation.js'
 
 export default function FamilyApp({ profile }: { profile?: ProfilePresentation }) {
   const [location, navigate] = useLocation()
+  const copy = loginCopy(profile?.meta.locale)
   const [representation, setRepresentation] = useState<FamilyRepresentation | null>(null),
     [error, setError] = useState<string | null>(null)
   const current = useRef<FamilyRepresentation | null>(null)
@@ -86,7 +88,7 @@ export default function FamilyApp({ profile }: { profile?: ProfilePresentation }
                 .catch(() => setError('Die Abmeldung konnte nicht abgeschlossen werden.'))
             }
           >
-            Abmelden
+            {copy.sign_out}
           </Button>
         </>
       }
