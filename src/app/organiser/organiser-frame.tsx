@@ -9,10 +9,10 @@ import { SaveStatus } from './save-status.js'
 import { HeaderMenu } from './header-menu.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/shared/ui/alert'
 import { organiserPaths, organiserRoutePaths } from '../../organiser/routes.js'
-import { useLocation } from 'wouter'
 import { logout } from '../auth/session.js'
 import { Button } from '../components/shared/ui/button'
 import type { ProfilePresentation } from '../../config/presentation.js'
+import { OccasionBrand } from '../components/application/occasion-brand.js'
 import { ProfileBrand } from '../components/application/profile-brand.js'
 import {
   profileEventTitle,
@@ -63,20 +63,7 @@ export function OrganiserMinimalFrame({
           <span>{profileOrganiserTitle(profile)}</span>
         </div>
       }
-      brand={
-        <OrganiserLink
-          href={organiserHomePath}
-          className="flex min-h-11 min-w-0 items-center gap-2 text-title md:inline-flex font-heading"
-        >
-          <span className="grid size-8 sm:size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
-            <ProfileBrand
-              branding={profile?.branding}
-              className="size-6 object-contain sm:size-7"
-            />
-          </span>
-          <span className="truncate">{profileOrganiserTitle(profile)}</span>
-        </OrganiserLink>
-      }
+      brand={<OccasionBrand profile={profile} link={<OrganiserLink href={organiserHomePath} />} />}
     >
       {children}
     </ApplicationFrame>
@@ -93,8 +80,7 @@ export function OrganiserFrame({
   profile?: ProfilePresentation
 }) {
   const { state } = useOrganiser()
-  const [, navigate] = useLocation()
-  const [switchConfirmation, setSwitchConfirmation] = useState(false)
+  const role = profile?.meta.locale.startsWith('en') ? 'Organising team' : 'Organisationsteam'
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState(false)
 
@@ -127,37 +113,12 @@ export function OrganiserFrame({
         context: 'Arbeitsansicht · Organisationsteam',
         confidentiality: 'Vertraulich: Nur für das Organisationsteam.',
       }}
-      brand={
-        <OrganiserLink
-          href={organiserHomePath}
-          className="flex min-h-11 min-w-0 items-center gap-2 text-title md:inline-flex font-heading"
-        >
-          <span className="grid size-8 sm:size-9 shrink-0 place-items-center rounded-base border-2 border-border bg-main-soft shadow-sm">
-            <ProfileBrand
-              branding={profile?.branding}
-              className="size-6 object-contain sm:size-7"
-            />
-          </span>
-          <span className="truncate">{profileOrganiserTitle(profile)}</span>
-        </OrganiserLink>
-      }
-      role="Organisationsteam"
-      brand_subtitle={[profileOrganisation(profile), 'Organisationsteam']
-        .filter(Boolean)
-        .join(' · ')}
+      brand={<OccasionBrand profile={profile} link={<OrganiserLink href={organiserHomePath} />} />}
+      role={role}
+      brand_subtitle={[profileOrganisation(profile), role].filter(Boolean).join(' · ')}
       primary_navigation={<PrimaryNavigation items={primaryNavItems} />}
       controls={
         <>
-          <Button
-            type="button"
-            variant="neutral"
-            onClick={() => {
-              if (draftCount(state) > 0) setSwitchConfirmation(true)
-              else void navigate('~/apps')
-            }}
-          >
-            Apps
-          </Button>
           <div className="md:hidden">
             <HeaderMenu on_logout={signOut} logging_out={loggingOut} />
           </div>
@@ -171,23 +132,6 @@ export function OrganiserFrame({
       }
       notices={
         <>
-          {switchConfirmation ? (
-            <div role="alert" className="grid gap-2">
-              <p>Beim Wechsel gehen die offenen Entwürfe verloren.</p>
-              <div className="flex gap-2">
-                <Button type="button" onClick={() => void navigate('~/apps')}>
-                  Trotzdem wechseln
-                </Button>
-                <Button
-                  type="button"
-                  variant="neutral"
-                  onClick={() => setSwitchConfirmation(false)}
-                >
-                  Hier bleiben
-                </Button>
-              </div>
-            </div>
-          ) : null}
           {logoutError ? (
             <p role="alert" className="text-sm text-danger-foreground">
               Die Abmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut.

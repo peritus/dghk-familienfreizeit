@@ -995,7 +995,7 @@ test('an apply response with changed feature overrides asks for a reload', async
   expect(await screen.findByText('Diese Ansicht ist veraltet. Bitte lade sie neu.')).toBeTruthy()
 })
 
-test('app switching asks before losing organiser drafts and declining preserves them', async () => {
+test('organiser drafts retain their controls without a role-switch control', async () => {
   open('/organiser/families')
   await screen.findByRole('heading', { name: /Familien/, level: 1 })
   await enableDraftMode()
@@ -1004,16 +1004,8 @@ test('app switching asks before losing organiser drafts and declining preserves 
   fireEvent.change(dialog.getByLabelText('E-Mail'), { target: { value: 'wechsel@example.test' } })
   fireEvent.click(dialog.getByRole('button', { name: 'Familie hinzufügen' }))
   await screen.findByRole('link', { name: 'Wechsel Familie' })
-  fireEvent.click(screen.getByRole('button', { name: 'Apps' }))
-  expect(screen.getByText('Beim Wechsel gehen die offenen Entwürfe verloren.')).toBeTruthy()
-  expect(window.location.pathname).toBe('/organiser/families')
-  fireEvent.click(screen.getByRole('button', { name: 'Hier bleiben' }))
-  expect(screen.queryByText('Beim Wechsel gehen die offenen Entwürfe verloren.')).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Apps' })).toBeNull()
+  expect(screen.queryByRole('link', { name: 'Apps' })).toBeNull()
   expect(saveStatusTrigger().getAttribute('aria-label')).toContain('1 Änderung')
-  fireEvent.click(screen.getByRole('button', { name: 'Apps' }))
-  fireEvent.click(screen.getByRole('button', { name: 'Trotzdem wechseln' }))
-  await screen.findByRole('heading', { name: 'Was braucht heute Aufmerksamkeit?' })
-  expect(saveStatusTrigger().getAttribute('aria-label')).toBe(
-    'Alles gespeichert. Speicheroptionen anzeigen',
-  )
+  expect(window.location.pathname).toBe('/organiser/families')
 })

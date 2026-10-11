@@ -125,6 +125,11 @@ test('family edits use REST with the displayed resource ETag and reload committe
   fireEvent.change(dialog.getByLabelText('Familienname'), { target: { value: 'Eiche' } })
   fireEvent.click(dialog.getByRole('button', { name: 'Änderungen speichern' }))
   expect(await screen.findByRole('heading', { name: 'Eiche' })).toBeTruthy()
+  expect(screen.getByText('DGHK Berlin-Brandenburg · Familie Eiche')).toBeTruthy()
+  expect(screen.queryByRole('link', { name: 'Apps' })).toBeNull()
+  expect(
+    screen.getByRole('link', { name: 'Familienfreizeit Lübben 2027' }).getAttribute('href'),
+  ).toBe('/')
   expect(fetchMock).toHaveBeenCalledWith(
     '/api/family',
     expect.objectContaining({
