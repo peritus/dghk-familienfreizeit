@@ -113,6 +113,7 @@ for (const route of organiserRouteDefinitions) {
 }
 
 test('public, login, and unknown screens print through the shared frame', async ({ page }) => {
+  await page.route('**/api/me', (route) => route.fulfill({ status: 401, json: {} }))
   for (const route of ['/', '/login', '/unknown-screen']) {
     await page.emulateMedia({ media: 'screen' })
     await page.goto(route)

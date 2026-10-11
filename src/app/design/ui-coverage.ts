@@ -26,6 +26,21 @@ export type UiCoverageEntry = {
  */
 export const uiCoverage: readonly UiCoverageEntry[] = [
   {
+    id: 'screens-public-login--role-choices',
+    area: 'screen',
+    subject: 'Shared login choices in German',
+    source: 'src/app/auth/login.tsx',
+    ready_selector: 'nav[aria-label="Anmeldung auswählen"]',
+    viewport: { width: 390, height: 900 },
+  },
+  {
+    id: 'screens-public-login--english-role-choices',
+    area: 'screen',
+    subject: 'Shared login choices in English',
+    source: 'src/app/auth/login.tsx',
+    ready_selector: 'nav[aria-label="Choose how to sign in"]',
+  },
+  {
     id: 'shared-primitives-workflowstepper--collapsed-hover',
     area: 'component',
     subject: 'Collapsed workflow whole-row hover',
@@ -482,6 +497,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     area: 'screen',
     subject: 'Login',
     source: 'src/app/auth/login.tsx',
+    ready_selector: 'input[type="email"]',
   },
   {
     id: 'screens-public-occasion-landing--default',

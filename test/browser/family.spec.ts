@@ -68,7 +68,9 @@ const initial: FamilyRepresentation = {
   },
 }
 
-test('peer app selection, REST edits, phone layout and browser print', async ({ page }) => {
+test('login role choices, REST edits, shared header, phone layout and browser print', async ({
+  page,
+}) => {
   let current = structuredClone(initial)
   const requests: { path: string; method: string; etag: string | undefined; body: unknown }[] = []
   await page.route('**/api/me', (route) =>
@@ -111,14 +113,17 @@ test('peer app selection, REST edits, phone layout and browser print', async ({ 
   page.on('request', (request) => {
     if (/\/api\/(organiser|events)/.test(request.url())) forbidden.push(request.url())
   })
-  await page.goto('/apps')
-  await expect(page.getByRole('heading', { name: 'App auswählen' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Organisationsteam' })).toHaveAttribute(
+  await page.goto('/login')
+  await expect(page.getByRole('heading', { name: 'Wie möchtest du dich anmelden?' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Als Organisator anmelden' })).toHaveAttribute(
     'href',
     '/organiser',
   )
-  await page.getByRole('link', { name: 'Familienansicht' }).click()
+  await page.getByRole('link', { name: 'Als Familie anmelden' }).click()
   await expect(page.getByRole('heading', { name: 'Linde', exact: true })).toBeVisible()
+  await page.goBack()
+  await expect(page.getByRole('heading', { name: 'Wie möchtest du dich anmelden?' })).toBeVisible()
+  await page.getByRole('link', { name: 'Als Familie anmelden' }).click()
   await page.getByRole('button', { name: 'Familie bearbeiten' }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByLabel('E-Mail', { exact: true })).toHaveCount(0)
@@ -126,6 +131,14 @@ test('peer app selection, REST edits, phone layout and browser print', async ({ 
   await dialog.getByRole('button', { name: 'Änderungen speichern' }).click()
   await expect(dialog).toBeHidden()
   await expect(page.getByRole('heading', { name: 'Eiche', exact: true })).toBeVisible()
+  await expect(page.locator('[data-slot="application-bar"]')).toContainText(
+    'DGHK Berlin-Brandenburg · Familie Eiche',
+  )
+  await expect(page.getByRole('link', { name: 'Familienfreizeit Lübben 2027' })).toHaveAttribute(
+    'href',
+    '/',
+  )
+  expect(await page.locator('body').innerText()).not.toMatch(/\bapps?\b/i)
   await page.getByRole('link', { name: 'Essen', exact: true }).click()
   await expect(page).toHaveURL(/\/family\/essen\/per_ada$/)
   await page.getByRole('radio', { name: 'Vegan', exact: true }).click()
