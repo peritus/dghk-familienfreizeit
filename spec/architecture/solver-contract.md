@@ -272,6 +272,7 @@ Every scored or pruning rule, hard or soft, in any module, implements one shape:
 ```ts
 interface Rule<Candidate = unknown, Target = unknown, Ctx = unknown> {
   id: string                    // 'hard.<name>' or 'soft.<name>', kebab-case
+  allocation_scope?: 'target-room' | 'global'
   evaluate(candidate: Candidate, target: Target, ctx: Ctx): number | Infeasible
   describe(candidate: Candidate, target: Target, ctx: Ctx): string | null
 }
@@ -289,6 +290,12 @@ parameter or on the trait it belongs to, and is fixed by the `build_revision`.
 Adding a rule is a new file with a new rule id. Never edit an existing rule to mean
 something different; add a new rule id and retire the old one. Weight changes go
 through the profile, never through code (D12).
+
+`allocation_scope: 'target-room'` is an explicit locality guarantee: after a
+placement changes occupancy, only the changed target can change feasibility for
+an unplaced candidate. Stages may use that guarantee to update candidate sets
+incrementally. Rules without the guarantee use full recomputation; a rule must
+never claim target locality if its result can depend on another target's state.
 
 ---
 
@@ -320,18 +327,38 @@ type TraceEntry = {
   subject: string               // family id, person id, workshop id, or constraint key
   text: string                  // the human-readable line
   detail?: {
-    chosen?: { target: string, score: number, terms: Array<[string, number]> }
-    runners_up?: Array<{ target: string, score: number, terms: Array<[string, number]> }>
+    allocation?: {
+      round: number
+      order: Array<{ criterion: string, value: string | number }>
+    }
+    chosen?: {
+      target: string, score: number, terms: Array<[string, number]>
+      order?: Array<{ criterion: string, value: string | number }>
+    }
+    runners_up?: Array<{
+      target: string, score: number, terms: Array<[string, number]>
+      order?: Array<{ criterion: string, value: string | number }>
+    }>
     rejected?: Array<{ target: string, rule: string }>
   }
 }
 
 ```
 
-The trace is a first-class deliverable, not a debug log: one line per decision,
-including the alternatives rejected. Every number in it traces to a named weight in a
-stored configuration, so an organiser who disagrees can point at the term rather than
-the outcome.
+The trace is a first-class deliverable, not a debug log. Whenever a stage
+recalculates which entity to place next from a changing feasible set, it declares
+its complete ordering rule in code and tests. Each automatic choice records its
+round, the exact values of every ordering factor, the chosen target, every other
+feasible target in score order, and every rejected target with the rule id that
+rejected it. Fixed decisions and unplaced entities are recorded as distinct
+outcomes. The organiser UI explains the same rule and renders this evidence; it
+must not infer or recalculate solver decisions.
+
+Every number in a score trace traces to a named weight in stored configuration,
+so an organiser who disagrees can point at the term rather than only the outcome.
+An ordering rule, its test assertions, and its organiser-facing explanation change
+together. This keeps a deterministic result reviewable and makes its fairness
+criteria explicit.
 
 Plan sections are specified by their selected modules: [room assignment](../../docs/modules/room-assignment.md),
 [workshop scheduling](../../docs/modules/workshop-scheduling.md), and

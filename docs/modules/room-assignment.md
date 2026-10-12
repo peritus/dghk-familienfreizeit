@@ -15,11 +15,23 @@ hard rules, and a requirement preflight check. No placement result is persisted.
   property; no-bed members receive the family room and a null place.
 - Required capabilities, structural sole-occupancy requirements, exclusions,
   and required keep-apart relations reject rooms.
+- Fixed room decisions are applied first. Automatic placement then runs in
+  rounds: configured opportunity priority descending, currently feasible room
+  count ascending, bed demand descending, persisted family order ascending, and
+  family ID ascending. Opportunity priority is the strongest configured weight
+  for the profile's priority trait; required needs count twice as much as
+  preferences.
+- Each family is assigned its highest-scoring feasible room; ties use persisted
+  room order and room ID. The trace records these room tie-break factors too.
+  Feasible candidates and their scores are refreshed after every placement, so
+  a room becoming occupied can change the next family in line.
 - Preferred requirements and relations, exact fit, near fit, orphan beds, and
   scarce capabilities contribute deterministic integer score terms.
-- All families are processed deterministically. Placement traces include the
-  selected score terms, rejected alternatives, and runners-up; unplaced families
-  get a blocking-rule diagnostic and closest near-miss trace.
+- Each automatic trace entry records the round and every family-order factor,
+  the chosen room and score terms, every other feasible room in score order, and
+  every rejected room with its rule ID. Fixed and unplaced outcomes have their
+  own trace entries. Organisers can inspect them at
+  `/organiser/accommodation/assignment/trace`.
 
 The solver input is sorted and frozen at the boundary. Module contributions,
 preflight checks, stage dependencies, outputs, traces, and diagnostics are
@@ -28,16 +40,17 @@ deterministic and cycles are rejected.
 
 ## Placement cost
 
-Placement is a greedy search: each family is scored against each candidate room,
-so cost tracks families times rooms and grows faster than the event log does.
-That product is the algorithm; what used to sit on top of it was rescanning.
+Placement is a deterministic greedy search. It evaluates every family/room pair
+once to establish feasible candidates, then refreshes only the room whose
+occupancy changed after each placement. Rules that do not declare target-room
+locality use full recomputation, so the optimization cannot hide an input
+dependency.
 
 The implementation groups or reuses the following work:
 
-- Each family's feasible-room count, which orders the families, is computed once
-  per family. It was previously computed twice per comparison inside the sort's
-  comparator, so ordering a hundred families meant thousands of full room
-  sweeps.
+- Candidate counts are recomputed from the current feasible-room sets every
+  round. Updating one room's occupancy refreshes that room for each remaining
+  family, rather than re-running every room check for every family.
 - A placement's trace needs both the scored candidates and the per-room
   rejections. Both come from one pass; they were two.
 - The family-dependent parts of a feasibility check — its `excludes`
@@ -45,9 +58,10 @@ The implementation groups or reuses the following work:
   decision — are resolved before the room loop rather than inside it. The
   constraint filter in particular ran over every resolved constraint in the
   occasion, per candidate pair.
-- Room occupancy and room membership come from an index derived from the
-  `placements` map at the start of each sweep. They were derived by scanning
-  every family, from the innermost rule.
+- Room occupancy and room membership come from one index derived from the
+  `placements` map after each placement and shared by all candidate checks in
+  that state. They were derived by scanning every family from the innermost
+  rule.
 - Bed demand per family and each family's `excludes` constraints are derived
   once per solve and memoised on the input's identity, rather than rebuilt per
   sweep.
@@ -58,9 +72,10 @@ drift from the placement map. `roomRemaining` and `roomFamilies` take it as an
 optional argument and fall back to scanning, so a rule defined outside this
 module keeps working.
 
-Room candidates group places and capabilities once. Forced and greedy placement
-reuse evaluated candidate/rejection sweeps; unplaced explanations build one
-placement context per family. Place assignment uses a room-keyed lookup.
+Room candidates group places and capabilities once. Placement traces retain all
+feasible alternatives and rejection reasons from the same evaluation used to
+choose the room. Unplaced explanations share a placement context. Place
+assignment uses a room-keyed lookup.
 See [scale evidence](../engineering/performance-scale.md) for the completed
 20k/50k cases and the remaining large-population search cost.
 
@@ -69,8 +84,9 @@ whole run instead of per family, and reuses one feasibility sweep per family.
 
 The placement stage remains deterministic and its output is covered directly.
 [`test/solver/placement-equivalence.test.ts`](../../test/solver/placement-equivalence.test.ts)
-pins a digest of the whole current plan and separately pins the candidate-count
-tiebreak, which the digest occasion does not exercise.
+pins a digest of the whole current plan and separately pins the dynamic
+candidate-count tiebreak and the order factors, which the digest occasion does
+not exercise.
 
 ## Closing the accommodation area
 

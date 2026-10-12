@@ -90,10 +90,10 @@ solver, so their results must not be substituted for organiser-edit computation.
 ## Regression gates and verification boundaries
 
 Deterministic tests enforce bounded uniqueness lookups, scoped place reads,
-attention array passes, solver rule evaluations and candidate sweeps. At factors
-one/two, room search uses 6,400/25,600 rule evaluations and 128/256 placement
-sweeps. The whole-plan reference digest remains
-`d95045f55764d135475904b6a3effcc08833dd3a7cfb6cf90a90e1a5a4ce05cd`.
+attention array passes, solver rule evaluations and placement contexts. At factors
+one/two, room search uses 4,440/17,808 rule evaluations and 62/122 placement
+contexts. The whole-plan reference digest is
+`2e6899914b64733247411d30968a38b88793afde15279c0534722157bf1d16d8`.
 The attention reference digest remains
 `5d4e29523bebd6bceabd3df4e71a69398196bb285457d68dbf87e92bdbab3139`.
 Adapter equivalence, event validation/index lifecycle, real Worker handlers,

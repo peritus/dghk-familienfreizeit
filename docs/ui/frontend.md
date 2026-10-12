@@ -16,6 +16,7 @@ The route table is:
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/accommodation/assignment` | Deterministic assignment review with a fixed-assignment action and browser-printable output |
+| `/organiser/accommodation/assignment/trace` | Round-by-round room allocation trace with ordering factors, chosen room, feasible alternatives, and rejection reasons |
 | `/organiser/workshops` | Shared workshop overview with Workshops, Leitungen and Externe Leitungen views |
 | `/organiser/workshops/leaders` | The same overview with the derived internal-leader collection selected |
 | `/organiser/workshops/external-leaders` | The same overview with external-leader authoring selected |
@@ -163,6 +164,12 @@ decisions. A closed area has no current step, and the mobile summary then counts
 every step.
 
 ## Frontend navigation and state invariants
+
+The accommodation **Verlauf** screen reads the current solver trace. It explains
+the fixed-first rule and the automatic ordering factors, then shows each round's
+factor values, chosen room and score, all other feasible rooms, and rejected
+rooms with their reasons. The screen presents solver evidence directly; it does
+not make a second allocation or infer the choice from the finished board.
 
 Internal route changes use wouter's client-side navigation and must not reload
 the document. The organiser state owner remains mounted while moving between
