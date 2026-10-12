@@ -21,7 +21,7 @@ const orderLabels: Readonly<Record<string, string>> = {
   'room-sort-key': 'Gespeicherte Zimmerreihenfolge',
 }
 
-const hiddenOrderCriteria = new Set(['family-id', 'room-id'])
+const hiddenOrderCriteria = new Set(['family-id', 'family-sort-key', 'room-id'])
 
 const rejectionLabels = new Map([
   ['hard.capacity', 'Nicht genug freie Schlafplätze'],
