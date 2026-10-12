@@ -247,7 +247,7 @@ function TraceDecision({
         {rejected.length ? (
           <details className="rounded-base border border-border/50 p-3">
             <summary className="cursor-pointer font-bold">
-              Abgelehnte Zimmer ({rejected.length})
+              Ungeeignete Zimmer ({rejected.length})
             </summary>
             <ul className="mt-3 space-y-2">
               {rejected.map(({ room, reasons }) => (
