@@ -150,7 +150,7 @@ function TraceDecision({
           : 'Zuordnung wird geprüft.'
 
   return (
-    <details className="rounded-base border-2 border-border bg-background p-4">
+    <details className="rounded-base border-2 border-border bg-secondary-background p-4 text-foreground">
       <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 rounded-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border">
         <span>
           <span className="block font-heading text-metric">{familyName}</span>
