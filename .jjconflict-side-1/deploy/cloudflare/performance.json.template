@@ -1,9 +1,0 @@
-{
-  "name": "__EXTERNAL_PERFORMANCE_WORKER_NAME__",
-  "account_id": "__EXTERNAL_ACCOUNT_ID__",
-  "main": "performance/index.js",
-  "compatibility_date": "2026-09-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "analytics_engine_datasets": [{ "binding": "PERFORMANCE", "dataset": "dghk_performance" }],
-  "observability": { "enabled": false }
-}

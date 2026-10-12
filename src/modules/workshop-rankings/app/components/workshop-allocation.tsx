@@ -62,7 +62,7 @@ export function WorkshopAllocationSummary({
         { value: noAnswer, label: 'Keine Antwort', tone: noAnswer ? 'attention' : undefined },
         {
           value: unassigned,
-          label: 'ohne Kurszuordnung',
+          label: 'ohne Kursplatz',
           tone: unassigned ? 'attention' : undefined,
         },
       ]}
