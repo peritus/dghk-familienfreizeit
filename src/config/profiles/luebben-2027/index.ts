@@ -345,7 +345,7 @@ export const luebben2027Profile = defineOccasionProfile({
         },
         {
           key: 'workshops',
-          title: { de: 'Workshops', en: 'Workshops' },
+          title: { de: 'Kurse', en: 'Workshops' },
           intro: null,
           traits: [],
           features: [
@@ -354,7 +354,7 @@ export const luebben2027Profile = defineOccasionProfile({
           ],
           phase: 'workshop-rankings.choice',
           late_contact: {
-            de: 'Späte Workshop-Änderungen bitte mit dem Organisationsteam abstimmen.',
+            de: 'Späte Änderungen an Kursen bitte mit dem Organisationsteam abstimmen.',
             en: 'Please coordinate late workshop changes with the organisers.',
           },
         },
@@ -363,7 +363,7 @@ export const luebben2027Profile = defineOccasionProfile({
         {
           key: 'prefers-workshop',
           section: 'workshops',
-          title: { de: 'Workshop-Wünsche', en: 'Workshop choices' },
+          title: { de: 'Kurswünsche', en: 'Workshop choices' },
           help: {
             de: `Bis zu ${workshopChoiceRounds} Wünsche, der wichtigste zuerst.`,
             en: `Up to ${workshopChoiceRounds} choices, most important first.`,
@@ -372,7 +372,7 @@ export const luebben2027Profile = defineOccasionProfile({
         {
           key: 'workshop-sign-up',
           section: 'workshops',
-          title: { de: 'Workshop-Anmeldung', en: 'Workshop sign-up' },
+          title: { de: 'Kursanmeldung', en: 'Workshop sign-up' },
           help: {
             de: 'Du meldest Dich verbindlich an.',
             en: 'This reserves your place.',

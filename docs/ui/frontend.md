@@ -10,14 +10,14 @@ The route table is:
 | `/family` and `/family/:topic/:person` | Own-family committed REST view |
 | `/organiser` | Lazy authenticated organiser dashboard |
 | `/organiser/families` | Derived family table with header-dialog invitation staging |
-| `/organiser/families/:id` | Family detail shell with the Zimmer, Personen, Essen, and Workshops views |
+| `/organiser/families/:id` | Family detail shell with the Zimmer, Personen, Essen, and Kurse views |
 | `/organiser/families/:id/:topic` | URL-backed family topic route; `zimmer` is family-scoped |
-| `/organiser/families/:id/:topic/:person_id` | URL-backed person-scoped topic route for Personen, Essen, or Workshops |
+| `/organiser/families/:id/:topic/:person_id` | URL-backed person-scoped topic route for Personen, Essen, or Kurse |
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/accommodation/assignment` | Deterministic assignment review with a fixed-assignment action and browser-printable output |
 | `/organiser/accommodation/assignment/trace` | Room allocation trace grouped into fixed decisions, automatic placements, unplaced families, and other outcomes |
-| `/organiser/workshops` | Shared workshop overview with Workshops, Leitungen and Externe Leitungen views |
+| `/organiser/workshops` | Shared workshop overview with Kurse, Leitungen and Externe Leitungen views |
 | `/organiser/workshops/leaders` | The same overview with the derived internal-leader collection selected |
 | `/organiser/workshops/external-leaders` | The same overview with external-leader authoring selected |
 | `/organiser/workshops/programme` | Whole programme: workshop placements by slot and room |
@@ -44,11 +44,11 @@ remains the only persistence boundary; there is no separate drafting API or serv
 draft state.
 
 Workshop routes use the same reducer and draft pipeline. Their section navigation
-links **Workshops**, **Teilnahme**, **Wünsche**, **Räume und Slots**, and **Listen**.
+links **Kurse**, **Teilnahme**, **Wünsche**, **Räume und Slots**, and **Listen**.
 Within Teilnahme, one shared tertiary group selects **Personen**, **Programm**,
 **Nicht eingeplant**, or **Überschneidungen**, each backed by its existing URL. The resource item stays current
 on both `/organiser/workshops/spaces` and `/organiser/workshops/slots`. The workshop
-overview has page-local tabs for **Workshops**, **Leitungen**, and **Externe Leitungen**.
+overview has page-local tabs for **Kurse**, **Leitungen**, and **Externe Leitungen**.
 Moving between workshop routes preserves staged events because navigation does not
 create another state boundary. The overview may filter by configured audience; the
 space inventory remains physical inventory with schedule-aware slot context.
