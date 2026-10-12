@@ -139,6 +139,7 @@ function TraceDecision({
   const rejected = rejectedRooms(entry)
   const chosen = entry.detail?.chosen
   const alternatives = entry.detail?.runners_up ?? []
+  const bedDemand = allocation?.order.find(({ criterion }) => criterion === 'bed-demand')?.value
   const summary =
     entry.step === 'fixed-invalid'
       ? 'Das festgelegte Zimmer ist nicht verfügbar.'
@@ -165,6 +166,18 @@ function TraceDecision({
       </summary>
 
       <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
+        {bedDemand !== undefined ? (
+          <section
+            aria-label="Benötigte Schlafplätze"
+            className="rounded-base border border-border/50 bg-background p-3"
+          >
+            <h4 className="text-sm text-muted">Benötigte Schlafplätze</h4>
+            <p className="mt-1 text-lg font-bold tabular-nums">
+              {orderedValue('bed-demand', bedDemand)}
+            </p>
+          </section>
+        ) : null}
+
         {allocation ? (
           <section aria-label="Gründe für die automatische Reihenfolge">
             <h4 className="font-bold">Warum wurde diese Familie als Nächste gewählt?</h4>
@@ -172,14 +185,16 @@ function TraceDecision({
               Die Werte zeigen, wie die Auswahlregeln bei dieser Zuordnung angewendet wurden.
             </p>
             <ol className="mt-2 grid gap-2 sm:grid-cols-2">
-              {visibleOrder(allocation.order).map(({ criterion, value }, orderIndex) => (
-                <li key={criterion} className="rounded-base border border-border/50 p-2">
-                  <span className="block text-sm text-muted">
-                    {orderIndex + 1}. {orderLabels[criterion] ?? criterion}
-                  </span>
-                  <span className="font-bold tabular-nums">{orderedValue(criterion, value)}</span>
-                </li>
-              ))}
+              {visibleOrder(allocation.order)
+                .filter(({ criterion }) => criterion !== 'bed-demand')
+                .map(({ criterion, value }, orderIndex) => (
+                  <li key={criterion} className="rounded-base border border-border/50 p-2">
+                    <span className="block text-sm text-muted">
+                      {orderIndex + 1}. {orderLabels[criterion] ?? criterion}
+                    </span>
+                    <span className="font-bold tabular-nums">{orderedValue(criterion, value)}</span>
+                  </li>
+                ))}
             </ol>
             <p className="mt-2 text-sm text-muted">
               Bei weiterem Gleichstand entscheidet die Reihenfolge, in der die Familien im System

@@ -36,6 +36,17 @@ test('organisers see compact family placements and can expand the decision evide
   fireEvent.click(familyName)
   expect(familyRow?.open).toBe(true)
   expect(screen.getByRole('heading', { name: /Warum wurde diese Familie/ })).toBeTruthy()
+  const bedDemandLabel = screen.getByText('Benötigte Schlafplätze')
+  const bedDemandValue = screen.getByText(/^\d+ Schlafplätze$/)
+  expect(bedDemandLabel.closest('section')?.textContent).toContain(bedDemandValue.textContent)
+  expect(
+    bedDemandLabel
+      .closest('section')
+      ?.compareDocumentPosition(
+        screen.getByRole('heading', { name: /Warum wurde diese Familie/ }),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
+  expect(screen.getAllByText(/^\d+ Schlafplätze$/)).toHaveLength(1)
   expect(screen.getByText(/Aktuell passende Zimmer/)).toBeTruthy()
   expect(screen.getByText('Weniger Auswahl zuerst')).toBeTruthy()
   expect(screen.queryByText(/\b\d+ Zimmer\b/)).toBeNull()
