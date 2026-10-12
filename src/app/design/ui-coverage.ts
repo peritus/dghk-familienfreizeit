@@ -877,7 +877,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
   {
     id: 'screens-organiser-workshop-allocation--answers',
     area: 'screen',
-    subject: 'Workshop allocation',
+    subject: 'Preference-list course placement',
     source: 'src/app/organiser/screens/workshop-allocation.tsx',
   },
   {
@@ -925,49 +925,49 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
   {
     id: 'modules-workshop-rankings-components-workshopallocation--answers',
     area: 'component',
-    subject: 'Workshop allocation answers',
+    subject: 'Preference-list placement answers',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--demand',
     area: 'component',
-    subject: 'Workshop allocation demand',
+    subject: 'Preference-list placement demand',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--trace',
     area: 'component',
-    subject: 'Workshop allocation trace',
+    subject: 'Preference-list placement trace',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--narrow-responsive',
     area: 'component',
-    subject: 'Workshop allocation narrow responsive',
+    subject: 'Preference-list placement narrow layout',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--empty',
     area: 'component',
-    subject: 'Workshop allocation empty state',
+    subject: 'Preference-list placement empty state',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--blocked-by-conflicts',
     area: 'component',
-    subject: 'Workshop allocation blocked by conflicts',
+    subject: 'Preference-list placement blocked by conflicts',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--loading',
     area: 'component',
-    subject: 'Workshop allocation loading state',
+    subject: 'Preference-list placement loading state',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {
     id: 'modules-workshop-rankings-components-workshopallocation--print',
     area: 'component',
-    subject: 'Workshop allocation print document',
+    subject: 'Preference-list placement print document',
     source: 'src/modules/workshop-rankings/app/components/workshop-allocation.tsx',
   },
   {

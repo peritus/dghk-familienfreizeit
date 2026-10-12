@@ -53,7 +53,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Organiser-facing workshop allocation compositions. The visible German labels follow the Wünsche views; all values are synthetic prototype fixtures.',
+          'Organiser-facing course placement based on preference lists. The visible German labels follow the Wünsche views; all values are synthetic prototype fixtures.',
       },
     },
   },

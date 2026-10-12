@@ -3,7 +3,7 @@ import { FixtureProvider, organiserWorkshopFixtureState } from '../../stories/or
 import { WorkshopAllocation } from './workshop-allocation.js'
 
 const meta = {
-  title: 'Screens/Organiser/Workshop allocation',
+  title: 'Screens/Organiser/Preference-list course placement',
   decorators: [
     (story) => {
       const Story = story
