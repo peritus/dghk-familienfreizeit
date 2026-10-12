@@ -78,6 +78,7 @@ function measureWork(factor: number): Counts {
     (rule) =>
       ({
         id: rule.id,
+        allocation_scope: rule.allocation_scope,
         evaluate: (candidate, target, context) => {
           counts.rule_evaluations += 1
           if (!contexts.has(context as object)) {
@@ -129,7 +130,7 @@ function measureWork(factor: number): Counts {
  * a budget of 11000.
  */
 const budgets: Readonly<Record<number, Counts>> = {
-  // measured: 7500 / 6260 / 64 / 180
+  // measured: 4440 / 6212 / 64 / 150 / 62
   1: {
     rule_evaluations: 7_000,
     label_reads: 8_800,
@@ -137,7 +138,7 @@ const budgets: Readonly<Record<number, Counts>> = {
     family_reads: 512,
     placement_sweeps: 150,
   },
-  // measured: 30000 / 12240 / 124 / 360
+  // measured: 17808 / 12192 / 124 / 300 / 122
   2: {
     rule_evaluations: 28_000,
     label_reads: 17_200,

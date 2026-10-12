@@ -564,6 +564,10 @@ LabelSet entity_id=fam_ensuite key=sole-occupancy value=no-other-families streng
       params,
     )
     expect(sole.section.unplaced[0]?.reason).toContain('hard.sole-occupancy')
+    expect(
+      sole.trace.find(({ step, subject }) => step === 'unplaceable' && subject === 'fam_2')?.detail
+        ?.rejected,
+    ).toContainEqual({ target: 'rm_1', rule: 'hard.sole-occupancy' })
 
     const occupancyFamily = family('fam_occupancy', 1, [
       familyRequirement('fam_occupancy', {

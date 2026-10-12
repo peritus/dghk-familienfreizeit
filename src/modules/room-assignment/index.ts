@@ -95,8 +95,16 @@ export type RoomAssignmentSection = {
 }
 
 type PlacementTrace = TraceEntry & { family_id: string }
+type AllocationTrace = NonNullable<NonNullable<TraceEntry['detail']>['allocation']>
 
 type RoomScore = { room: RoomCandidate; score: number; terms: readonly [string, number][] }
+type RoomEvaluation = ReturnType<typeof evaluateRooms>
+type RankedFamily = {
+  family: FamilyPlacementUnit
+  evaluated: RoomEvaluation
+  priority: number
+  candidate_count: number
+}
 
 type Rejection = { rule: string; text: string }
 
@@ -170,6 +178,12 @@ export const roomAssignment = defineModule<RoomAssignmentParams>({
         id: 'organiser-assignment-board',
         route: '/organiser/accommodation/assignment',
         label: 'Belegung',
+        audience: 'organiser',
+      },
+      {
+        id: 'organiser-assignment-trace',
+        route: '/organiser/accommodation/assignment/trace',
+        label: 'Verlauf',
         audience: 'organiser',
       },
     ],
@@ -305,24 +319,15 @@ export function runRoomAssignment(
   const roomsById = new Map(input.rooms.map((room) => [room.id, room]))
   const familiesById = new Map(input.families.map((family) => [family.family_id, family] as const))
   const trace: PlacementTrace[] = []
-  // `scoredRooms` against no placements is a pure function of the family, so
-  // each family's candidate count is computed once here instead of twice per
-  // comparison inside the sort: O(F) room sweeps rather than O(F log F).
-  const unplacedCandidateCounts = new Map<string, number>(
-    input.families.map((family) => [
-      family.family_id,
-      scoredRooms(family, new Map<string, string>(), input, params, rules).length,
-    ]),
-  )
-  const families = input.families
-    .slice()
-    .sort((left, right) => compareFamily(left, right, params, unplacedCandidateCounts))
+  const families = input.families.slice().sort(compareFamiliesStable)
+  const evaluations = new Map<string, RoomEvaluation>()
   const place = (
     family: FamilyPlacementUnit,
     room: RoomCandidate,
     step: string,
     score?: RoomScore,
     evaluated = evaluateRooms(family, placements, input, params, rules),
+    allocation?: AllocationTrace,
   ): void => {
     // One sweep provides both halves of the trace detail: scored candidates and
     // per-room rejections.
@@ -342,25 +347,44 @@ export function runRoomAssignment(
       family_id: family.family_id,
       text: `${family.family_id} → ${room.id}`,
       detail: {
+        ...(allocation ? { allocation } : {}),
         chosen: {
           target: room.id,
           score: selected?.score ?? 0,
           terms: selected?.terms ?? [[step, 0]],
+          ...(allocation && selected ? { order: roomOrder(selected) } : {}),
         },
         runners_up: candidates
           .filter(({ room: candidate }) => candidate.id !== room.id)
-          .slice(0, 3)
           .map(({ room: candidate, score: candidateScore, terms }) => ({
             target: candidate.id,
             score: candidateScore,
             terms,
+            ...(allocation
+              ? {
+                  order: [
+                    { criterion: 'room-score', value: candidateScore },
+                    { criterion: 'room-sort-key', value: candidate.sort_key },
+                    { criterion: 'room-id', value: candidate.id },
+                  ],
+                }
+              : {}),
           })),
         rejected,
       },
     })
   }
 
-  const fixedAssignments = input.fixed_assignments ?? []
+  const fixedAssignments = [...(input.fixed_assignments ?? [])].sort((left, right) => {
+    const leftFamily = familiesById.get(left.family_id)
+    const rightFamily = familiesById.get(right.family_id)
+    return (
+      (leftFamily?.sort_key ?? Number.MAX_SAFE_INTEGER) -
+        (rightFamily?.sort_key ?? Number.MAX_SAFE_INTEGER) ||
+      left.family_id.localeCompare(right.family_id) ||
+      left.room_id.localeCompare(right.room_id)
+    )
+  })
   const fixedFamilyIds = new Set(fixedAssignments.map(({ family_id: familyId }) => familyId))
   for (const fixed of fixedAssignments) {
     const family = familiesById.get(fixed.family_id)
@@ -385,41 +409,109 @@ export function runRoomAssignment(
     families.filter(
       ({ family_id: familyId }) => !placements.has(familyId) && !fixedFamilyIds.has(familyId),
     )
-  let changed = true
-  let iterations = 0
-  while (changed && iterations <= families.length) {
-    changed = false
-    iterations += 1
-    for (const family of unplaced()) {
-      const evaluated = evaluateRooms(family, placements, input, params, rules)
-      const candidates = evaluated.candidates
-      if (candidates.length === 1) {
-        place(family, candidates[0]!.room, 'forced', candidates[0], evaluated)
-        changed = true
+  const initiallyUnplaced = unplaced()
+  const initialContext = placementContext(placements, input)
+  for (const family of initiallyUnplaced)
+    evaluations.set(
+      family.family_id,
+      evaluateRooms(family, placements, input, params, rules, initialContext),
+    )
+  const canUpdateByTargetRoom = rules.every((rule) => rule.allocation_scope === 'target-room')
+  let round = 0
+  while (true) {
+    const ranked = unplaced()
+      .map((family) => {
+        const evaluated = evaluations.get(family.family_id)!
+        return {
+          family,
+          evaluated,
+          priority: priority(family, params),
+          candidate_count: evaluated.candidates.length,
+        }
+      })
+      .filter(({ candidate_count: candidateCount }) => candidateCount > 0)
+      .sort(compareFamily)
+    const selected = ranked[0]
+    if (!selected) break
+    const candidate = selected.evaluated.candidates.slice().sort(compareScore)[0]!
+    round += 1
+    place(
+      selected.family,
+      candidate.room,
+      selected.candidate_count === 1 ? 'forced' : 'greedy',
+      candidate,
+      selected.evaluated,
+      {
+        round,
+        order: [
+          { criterion: 'configured-opportunity-priority', value: selected.priority },
+          { criterion: 'currently-feasible-rooms', value: selected.candidate_count },
+          { criterion: 'bed-demand', value: selected.family.bed_demand },
+          { criterion: 'family-sort-key', value: selected.family.sort_key },
+          { criterion: 'family-id', value: selected.family.family_id },
+        ],
+      },
+    )
+    const remaining = unplaced()
+    const updatedContext = placementContext(placements, input)
+    if (canUpdateByTargetRoom) {
+      for (const family of remaining) {
+        const previous = evaluations.get(family.family_id)!
+        const refreshed = evaluateRoom(
+          family,
+          candidate.room,
+          placements,
+          input,
+          params,
+          rules,
+          sweepState(family, placements, input, params, updatedContext),
+        )
+        evaluations.set(family.family_id, {
+          candidates: [
+            ...previous.candidates.filter(({ room }) => room.id !== candidate.room.id),
+            ...(refreshed.candidate ? [refreshed.candidate] : []),
+          ],
+          rejections: [
+            ...previous.rejections.filter(({ target }) => target !== candidate.room.id),
+            ...refreshed.rejections,
+          ],
+        })
       }
+    } else {
+      for (const family of remaining)
+        evaluations.set(
+          family.family_id,
+          evaluateRooms(family, placements, input, params, rules, updatedContext),
+        )
     }
   }
 
-  for (const family of unplaced()) {
-    const evaluated = evaluateRooms(family, placements, input, params, rules)
-    const candidates = evaluated.candidates
-    const sorted = candidates.slice().sort(compareScore)
-    if (sorted[0]) place(family, sorted[0].room, 'greedy', sorted[0], evaluated)
-  }
-
+  const finalContext = placementContext(placements, input)
   const unplacedFamilies = unplaced().map((family) => ({
     family_id: family.family_id,
     person_ids: family.person_ids,
     reason: explainUnplaced(family, placements, input, params, rules),
   }))
-  for (const family of unplacedFamilies)
+  for (const family of unplacedFamilies) {
+    const familyInput = familiesById.get(family.family_id)!
+    const evaluated = evaluateRooms(familyInput, placements, input, params, rules, finalContext)
     trace.push({
       stage: 'room-assignment.place',
       step: 'unplaceable',
       subject: family.family_id,
       family_id: family.family_id,
       text: family.reason,
+      detail: {
+        runners_up: [],
+        rejected: evaluated.rejections
+          .slice()
+          .sort(
+            (left, right) =>
+              left.target.localeCompare(right.target) || left.rule.localeCompare(right.rule),
+          ),
+      },
     })
+  }
   const assignments = assignRoomPlaces(families, placements, input)
   const fixedViolations = fixedAssignments.flatMap((fixed) => {
     const family = familiesById.get(fixed.family_id)
@@ -506,6 +598,7 @@ export function roomAssignmentRules(): readonly Rule<
   return [
     {
       id: 'hard.capacity',
+      allocation_scope: 'target-room',
       evaluate: (family: FamilyPlacementUnit, room: RoomCandidate, context: RuleContext) =>
         // `placement_index` is optional so an externally defined rule, or a
         // caller that builds its own context, still works via the scan below.
@@ -517,6 +610,7 @@ export function roomAssignmentRules(): readonly Rule<
     },
     {
       id: 'hard.trait-requirements',
+      allocation_scope: 'target-room',
       evaluate: (family: FamilyPlacementUnit, room: RoomCandidate) =>
         // `some`, not `filter(...).length`: this runs once per candidate pair
         // and the array was only ever tested for emptiness.
@@ -660,26 +754,35 @@ function evaluateRooms(
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
   rules: readonly Rule[],
+  context: PlacementContext = placementContext(placements, input),
 ): { candidates: RoomScore[]; rejections: { target: string; rule: string }[] } {
   const candidates: RoomScore[] = []
   const rejections: { target: string; rule: string }[] = []
-  const state = sweepState(family, placements, input, params)
+  const state = sweepState(family, placements, input, params, context)
   for (const room of input.rooms) {
-    const reasons = feasible(family, room, placements, input, params, rules, state)
-    if (reasons.length === 0) candidates.push(score(family, room, placements, input, params, state))
-    else for (const { rule } of reasons) rejections.push({ target: room.id, rule })
+    const evaluated = evaluateRoom(family, room, placements, input, params, rules, state)
+    if (evaluated.candidate) candidates.push(evaluated.candidate)
+    else rejections.push(...evaluated.rejections)
   }
   return { candidates, rejections }
 }
 
-function scoredRooms(
+function evaluateRoom(
   family: FamilyPlacementUnit,
+  room: RoomCandidate,
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
   rules: readonly Rule[],
-): RoomScore[] {
-  return evaluateRooms(family, placements, input, params, rules).candidates
+  state: SweepState,
+): { candidate: RoomScore | null; rejections: { target: string; rule: string }[] } {
+  const reasons = feasible(family, room, placements, input, params, rules, state)
+  return reasons.length === 0
+    ? { candidate: score(family, room, placements, input, params, state), rejections: [] }
+    : {
+        candidate: null,
+        rejections: reasons.map(({ rule }) => ({ target: room.id, rule })),
+      }
 }
 
 /**
@@ -756,6 +859,11 @@ type RuleContext = RoomAssignmentInput & {
   placement_index?: PlacementIndex
 }
 
+type PlacementContext = {
+  index: PlacementIndex
+  rule_context: RuleContext
+}
+
 /** Everything a room sweep can resolve before it starts iterating rooms. */
 type SweepState = {
   family: FamilySweep
@@ -768,10 +876,20 @@ function sweepState(
   placements: ReadonlyMap<string, string>,
   input: RoomAssignmentInput,
   params: RoomAssignmentParams,
+  context: PlacementContext = placementContext(placements, input),
 ): SweepState {
-  const index = placementIndex(placements, input)
   return {
     family: familySweep(family, input, params),
+    ...context,
+  }
+}
+
+function placementContext(
+  placements: ReadonlyMap<string, string>,
+  input: RoomAssignmentInput,
+): PlacementContext {
+  const index = placementIndex(placements, input)
+  return {
     index,
     rule_context: { ...input, placements, placement_index: index },
   }
@@ -1017,25 +1135,29 @@ function compareEntity(
   return left.sort_key - right.sort_key || left.id.localeCompare(right.id)
 }
 
-/** Orders families by how constrained they are. `candidateCounts` holds each
- * family's feasible-room count against no placements, precomputed by the
- * caller — the comparator must stay cheap because it runs O(F log F) times. */
-function compareFamily(
-  left: FamilyPlacementUnit,
-  right: FamilyPlacementUnit,
-  params: RoomAssignmentParams,
-  candidateCounts: ReadonlyMap<string, number>,
-): number {
+/** Breaks stable ties using persisted family order and then the typed id. */
+function compareFamiliesStable(left: FamilyPlacementUnit, right: FamilyPlacementUnit): number {
+  return left.sort_key - right.sort_key || left.family_id.localeCompare(right.family_id)
+}
+
+/**
+ * For each allocation round, opportunity priority wins first; then protect
+ * families with fewer currently feasible rooms, fit the larger demand, and
+ * terminate ties with persisted family order and id.
+ */
+function compareFamily(left: RankedFamily, right: RankedFamily): number {
   return (
-    priority(right, params) - priority(left, params) ||
-    (candidateCounts.get(left.family_id) ?? 0) - (candidateCounts.get(right.family_id) ?? 0) ||
-    right.bed_demand - left.bed_demand ||
-    left.sort_key - right.sort_key ||
-    left.family_id.localeCompare(right.family_id)
+    right.priority - left.priority ||
+    left.candidate_count - right.candidate_count ||
+    right.family.bed_demand - left.family.bed_demand ||
+    left.family.sort_key - right.family.sort_key ||
+    left.family.family_id.localeCompare(right.family.family_id)
   )
 }
 
 function priority(family: FamilyPlacementUnit, params: RoomAssignmentParams): number {
+  // The strongest applicable configured weight is the opportunity priority;
+  // a required need counts twice as much as a preference.
   return Math.max(
     ...family.requirements
       .filter(
@@ -1044,6 +1166,14 @@ function priority(family: FamilyPlacementUnit, params: RoomAssignmentParams): nu
       .map(({ strength, weight }) => (strength === 'required' ? 2 : 1) * (weight ?? 0)),
     0,
   )
+}
+
+function roomOrder(candidate: RoomScore): readonly { criterion: string; value: string | number }[] {
+  return [
+    { criterion: 'room-score', value: candidate.score },
+    { criterion: 'room-sort-key', value: candidate.room.sort_key },
+    { criterion: 'room-id', value: candidate.room.id },
+  ]
 }
 
 function compareScore(left: RoomScore, right: RoomScore): number {

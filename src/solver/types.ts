@@ -53,11 +53,21 @@ export type TraceEntry = {
   subject: string
   text: string
   detail?: {
-    chosen?: { target: string; score: number; terms: readonly [string, number][] }
+    allocation?: {
+      round: number
+      order: readonly { criterion: string; value: string | number }[]
+    }
+    chosen?: {
+      target: string
+      score: number
+      terms: readonly [string, number][]
+      order?: readonly { criterion: string; value: string | number }[]
+    }
     runners_up?: readonly {
       target: string
       score: number
       terms: readonly [string, number][]
+      order?: readonly { criterion: string; value: string | number }[]
     }[]
     rejected?: readonly { target: string; rule: string }[]
   }
@@ -87,6 +97,8 @@ export type SolverStage<Output = unknown> = {
 
 export type Rule<Candidate = unknown, Target = unknown, Context = unknown> = {
   id: string
+  /** Declares whether feasibility can change only when the candidate target changes. */
+  allocation_scope?: 'target-room' | 'global'
   evaluate(candidate: Candidate, target: Target, context: Context): number | 'infeasible'
   describe(candidate: Candidate, target: Target, context: Context): string | null
 }

@@ -21,12 +21,11 @@ import { syntheticLog, syntheticScale } from '../bench/log.js'
  * assignment, score, rejection or trace entry without an explicit intent.
  */
 /**
- * This digest includes the current workshop allocation round snapshots and
- * trace contract. A change to this value means the solver now decides
- * something different or its explicit explanation contract changed — update it
- * only with that intent.
+ * This digest includes workshop allocation rounds and room placement order
+ * factors. A change means the solver now decides something different or its
+ * explicit explanation contract changed; update it only with that intent.
  */
-const baselineDigest = 'd95045f55764d135475904b6a3effcc08833dd3a7cfb6cf90a90e1a5a4ce05cd'
+const baselineDigest = '2e6899914b64733247411d30968a38b88793afde15279c0534722157bf1d16d8'
 
 const profile = luebben2027Profile
 const contributions = composeSolverContributions(profile)
@@ -57,8 +56,8 @@ test('the placement plan is unchanged for a full occasion', () => {
  * The digest above does not exercise the candidate-count tiebreak in the family
  * ordering: on that occasion every tie is already resolved by priority or bed
  * demand. This case is built so the count is what decides, and so the decision
- * changes the outcome — flattening the precomputed counts places the families
- * in different rooms rather than merely in a different order.
+ * changes the outcome — flattening the counts places the families in different
+ * rooms rather than merely in a different order.
  */
 const params = {
   weights: { exact_fit: 10, near_fit: 4, orphan_bed: -8 },
@@ -136,4 +135,85 @@ test('the candidate-count tiebreak decides which family picks first', () => {
   // pushes fam_p into rm_x.
   expect(rooms.get('fam_p')).toBe('rm_y')
   expect(rooms.get('fam_q')).toBe('rm_z')
+})
+
+test('room rounds recompute feasible counts after every placement', () => {
+  const prioritized = family('fam_priority', 3, [
+    {
+      trait_key: 'needs-accessible',
+      holder_id: 'fam_priority',
+      capability_key: 'accessible',
+      kind: 'profile-requirement',
+      structural: null,
+      value: 'accessible',
+      strength: 'required',
+      weight: 8,
+      penalty: null,
+      set_seq: 1,
+      family_id: 'fam_priority',
+    },
+  ])
+  const small = {
+    ...family('fam_small', 1, []),
+    person_ids: Object.freeze(['fam_small_a']),
+    bed_person_ids: Object.freeze(['fam_small_a']),
+    bed_demand: 1,
+  }
+  const large = family('fam_large', 2, [])
+  const input: RoomAssignmentInput = {
+    rooms: [room('rm_a', 1, 2, true), room('rm_b', 2, 2, false), room('rm_c', 3, 2, false)],
+    families: [large, small, prioritized],
+    constraints: [],
+    person_family: {
+      fam_priority_a: 'fam_priority',
+      fam_priority_b: 'fam_priority',
+      fam_small_a: 'fam_small',
+      fam_large_a: 'fam_large',
+      fam_large_b: 'fam_large',
+    },
+    room_constraints: [
+      { family_id: 'fam_small', room_ids: ['rm_b', 'rm_c'] },
+      { family_id: 'fam_large', room_ids: ['rm_a', 'rm_b', 'rm_c'] },
+    ],
+  }
+  const priorityParams = { ...params, priority_trait: 'needs-accessible' }
+
+  const result = runRoomAssignment(input, priorityParams)
+  const decisions = result.trace.filter(({ detail }) => detail?.allocation)
+
+  expect(decisions.map(({ subject }) => subject)).toEqual([
+    'fam_priority',
+    'fam_large',
+    'fam_small',
+  ])
+  expect(decisions[0]?.detail?.allocation).toEqual({
+    round: 1,
+    order: [
+      { criterion: 'configured-opportunity-priority', value: 16 },
+      { criterion: 'currently-feasible-rooms', value: 1 },
+      { criterion: 'bed-demand', value: 2 },
+      { criterion: 'family-sort-key', value: 3 },
+      { criterion: 'family-id', value: 'fam_priority' },
+    ],
+  })
+  expect(decisions[1]?.detail?.allocation?.order).toContainEqual({
+    criterion: 'currently-feasible-rooms',
+    value: 2,
+  })
+  expect(decisions[1]?.detail?.chosen?.order).toEqual([
+    { criterion: 'room-score', value: expect.any(Number) },
+    { criterion: 'room-sort-key', value: 2 },
+    { criterion: 'room-id', value: 'rm_b' },
+  ])
+  expect(decisions[1]?.detail?.runners_up).toEqual([
+    expect.objectContaining({
+      target: 'rm_c',
+      order: [
+        { criterion: 'room-score', value: expect.any(Number) },
+        { criterion: 'room-sort-key', value: 3 },
+        { criterion: 'room-id', value: 'rm_c' },
+      ],
+    }),
+  ])
+  expect(result.section.unplaced).toEqual([])
 })
