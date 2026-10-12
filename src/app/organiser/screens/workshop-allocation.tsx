@@ -131,7 +131,7 @@ function clearLabelDraft(actor: string, entityId: string, key: string, value: st
 }
 
 export function WorkshopAllocation() {
-  useDocumentTitle('Wünsche · Workshops · Familienfreizeit')
+  useDocumentTitle('Wünsche · Kurse · Familienfreizeit')
   // wouter's location is the pathname only; a traced person arrives in the query.
   const [location, navigate] = useLocation()
   const queryPersonId = new URLSearchParams(useSearch()).get('person')
@@ -228,7 +228,7 @@ export function WorkshopAllocation() {
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader
-          eyebrow="Workshops · Wünsche"
+          eyebrow="Kurse · Wünsche"
           title="Wünsche"
           description="Was gewünscht wurde und wie die automatische Zuordnung daraus entsteht."
         />
@@ -247,7 +247,7 @@ export function WorkshopAllocation() {
       workflow={
         <>
           <WorkflowStepper
-            aria_label="Ablauf der Workshopwahl"
+            aria_label="Ablauf der Kurswahl"
             storage_key="workshops.allocation.expanded"
             storage_user={state.principal_email}
             steps={workshopTrack({
@@ -300,7 +300,7 @@ export function WorkshopAllocation() {
       <section className="space-y-4" aria-label="Feste Teilnahmen">
         <SectionHeader
           title="Feste Teilnahmen"
-          description="Lege bei Bedarf eine Teilnahme fest. Sie bleibt trotz Alters-, Zielgruppen-, Kapazitäts-, Überschneidungs-, Leitungs- oder Teilnahmeartkonflikten bestehen; abgesagte und nicht terminierte Workshops werden mit einem Hinweis nicht zugeteilt."
+          description="Lege bei Bedarf eine Teilnahme fest. Sie bleibt trotz Alters-, Zielgruppen-, Kapazitäts-, Überschneidungs-, Leitungs- oder Teilnahmeartkonflikten bestehen; abgesagte und nicht terminierte Kurse werden mit einem Hinweis nicht zugeteilt."
         />
         <form
           className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
@@ -344,13 +344,13 @@ export function WorkshopAllocation() {
             ))}
           </SelectField>
           <SelectField
-            label="Workshop"
+            label="Kurs"
             value={fixedWorkshopId}
             onChange={(event) => setFixedWorkshopId(event.currentTarget.value)}
             required
           >
             <option value="" disabled>
-              Workshop auswählen
+              Kurs auswählen
             </option>
             {activeWorkshops.map((workshop) => (
               <option key={workshop.id} value={workshop.id}>
@@ -423,7 +423,7 @@ export function WorkshopAllocation() {
           <WorkshopAllocationEmptyState projection={projection} has_answers={answers.length > 0}>
             {projection.has_workshops
               ? 'Sobald Personen eine Rangfolge abgegeben haben, erscheinen Antworten und Nachfrage hier.'
-              : 'Lege zuerst Workshops an, damit Wünsche und Nachfrage berechnet werden können.'}
+              : 'Lege zuerst Kurse an, damit Wünsche und Nachfrage berechnet werden können.'}
           </WorkshopAllocationEmptyState>
           {projection.has_answers ? (
             <div id="allocation-answers-heading">
@@ -525,7 +525,7 @@ export function WorkshopAllocation() {
                     })}
                     className="underline decoration-foreground/25 decoration-[1.5px] underline-offset-[3px] hover:decoration-foreground hover:decoration-2"
                   >
-                    Workshopplan ansehen
+                    Kursplan ansehen
                   </OrganiserLink>
                 </p>
               ) : null}
