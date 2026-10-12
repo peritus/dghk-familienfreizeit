@@ -347,24 +347,6 @@ export default defineOccasionProfile({
       },
     }),
 
-    'workshop-with': relation({
-      title: { de: 'Workshop zusammen mit', en: 'Workshop together with' },
-      scopes: ['person'],
-      target: ['person'],
-      operator: 'groups-with',
-      symmetry: 'mutual-required',
-      strengths: ['required'],
-      cardinality: 'zero-or-more',
-      family_facing: {
-        control: 'person-picker',
-        title: { de: 'Workshops gemeinsam mit', en: 'Workshops together with' },
-        help: null,
-        scope: 'person',
-        strengths: ['required'],
-        invert: false,
-      },
-    }),
-
     // ── Notes ─────────────────────────────────────────────────────────────────
 
     'family-note': property({
@@ -491,7 +473,7 @@ export default defineOccasionProfile({
           key: 'workshops',
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
-          traits: ['prefers-workshop', 'workshop-with'],
+          traits: ['prefers-workshop'],
           features: [
             'workshop-rankings.family-workshop-wishes',
             'workshop-rankings.organiser-workshop-wishes',

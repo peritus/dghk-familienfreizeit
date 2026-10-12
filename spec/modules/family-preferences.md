@@ -110,7 +110,6 @@ renderer in `src/modules/<module-id>/app/controls/`.
 | `choice` | this module | one select over the trait's enum or referenced entities | `LabelSet` replacing the current value, or `LabelCleared` when optional |
 | `free-text` | this module | a text area | `LabelSet` with the text, or `LabelCleared` when emptied |
 | `family-picker` | this module | searchable family list, multi-select | one `LabelSet` per selection, value = family id |
-| `person-picker` | this module | people within the same family | one `LabelSet` per selection, value = person id |
 | `workshop-sign-up` | [`workshops`](workshops.md) | join/leave with availability | `signed-up-for` set/clear |
 | `workshop-interest` | [`workshops`](workshops.md) | non-binding interest toggle | `interested-in` set/clear |
 | `ranking` | [implemented workshop rankings](../../docs/modules/workshop-rankings.md) | ordered choices in the current workshop choice cycle | clears the cycle's labels and sets the new ones in one append |
