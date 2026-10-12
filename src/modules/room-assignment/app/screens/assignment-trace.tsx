@@ -1,5 +1,4 @@
 import { Badge } from '../../../../app/components/shared/ui/badge.js'
-import { CollectionList } from '../../../../app/components/shared/ui/collection-list.js'
 import { LoadingState } from '../../../../app/components/shared/ui/screen-state.js'
 import {
   ScreenHeader,
@@ -284,19 +283,17 @@ function TraceGroup({
   return (
     <section className="space-y-3">
       <SectionHeader title={`${title} (${entries.length})`} />
-      <CollectionList>
-        <ol className="space-y-2">
-          {entries.map((entry, index) => (
-            <li key={`${entry.step}-${entry.subject}-${index}`}>
-              <TraceDecision
-                entry={entry}
-                roomName={roomName}
-                family_name={familyLabelFor(entry.subject)}
-              />
-            </li>
-          ))}
-        </ol>
-      </CollectionList>
+      <ol className="space-y-2">
+        {entries.map((entry, index) => (
+          <li key={`${entry.step}-${entry.subject}-${index}`}>
+            <TraceDecision
+              entry={entry}
+              roomName={roomName}
+              family_name={familyLabelFor(entry.subject)}
+            />
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
