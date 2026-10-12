@@ -182,7 +182,8 @@ function TraceDecision({
               ))}
             </ol>
             <p className="mt-2 text-sm text-muted">
-              Bei exakt gleichem Ergebnis entscheidet eine stabile interne Reihenfolge.
+              Bei weiterem Gleichstand entscheidet die Reihenfolge, in der die Familien im System
+              angelegt wurden: frühere zuerst.
             </p>
           </section>
         ) : null}
@@ -351,8 +352,7 @@ export function AssignmentTraceScreen() {
             Bei weiterem Gleichstand kommt die Familie mit mehr benötigten Schlafplätzen zuerst.
           </li>
           <li>
-            Die gespeicherte Familienreihenfolge löst weitere Gleichstände auf; bei exakt gleicher
-            Reihenfolge entscheidet ein stabiler interner Tie-Breaker.
+            Bei weiterem Gleichstand kommt die Familie zuerst, die früher im System angelegt wurde.
           </li>
         </ol>
         <p className="text-sm text-muted">
