@@ -198,7 +198,7 @@ function changeFor(
       (answer.answered && !answer.values.length && control.kind !== 'tri-state')
     )
       fail(422, 'invalid_answer', 'Die Antwort ist unvollständig.')
-    if (!['person-picker', 'family-picker'].includes(control.kind) && answer.values.length > 1)
+    if (control.kind !== 'family-picker' && answer.values.length > 1)
       fail(422, 'invalid_answer', 'Bitte wähle eine Antwort.')
     if (
       new Set(answer.values.map((entry) => JSON.stringify(entry.value))).size !==

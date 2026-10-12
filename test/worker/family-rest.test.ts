@@ -287,18 +287,6 @@ test('workshop resources enforce phase, rank limits, reference scope, age and ca
   expect((await write(interest, 'DELETE', undefined, data.resource_etags[interest])).status).toBe(
     204,
   )
-  const together = '/api/family/people/per_a/preferences/workshop-with'
-  data = await current()
-  expect(
-    (
-      await write(
-        together,
-        'PUT',
-        { values: [{ value: 'per_b', strength: 'required' }], answered: true },
-        data.resource_etags[together],
-      )
-    ).status,
-  ).toBe(422)
   await seed('PersonUpdated', { ...person('per_a'), age: 4 })
   data = await current()
   expect((await write(interest, 'PUT', {}, data.resource_etags[interest])).status).toBe(422)

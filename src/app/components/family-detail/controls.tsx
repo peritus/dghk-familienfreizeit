@@ -162,7 +162,7 @@ export function PreferenceField({
       </fieldset>
     )
   }
-  if (control.kind === 'person-picker' || control.kind === 'family-picker')
+  if (control.kind === 'family-picker')
     return (
       <fieldset className="grid gap-2" disabled={disabled}>
         <legend className="font-bold">{control.title}</legend>

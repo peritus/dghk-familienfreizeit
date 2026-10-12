@@ -191,7 +191,6 @@ describe('family governed label keys', () => {
       'needs-accessible': 'family-preferences.family-room-wishes',
       'sole-occupancy': 'family-preferences.family-room-wishes',
       'family-note': 'family-preferences.family-room-wishes',
-      'workshop-with': 'workshop-rankings.family-workshop-wishes',
       'prefers-workshop': 'workshop-rankings.family-workshop-wishes',
       'signed-up-for': 'workshop-rankings.family-workshop-wishes',
       'interested-in': 'workshop-rankings.family-workshop-wishes',

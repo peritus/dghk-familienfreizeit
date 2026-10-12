@@ -68,7 +68,6 @@ export type FamilyControlKind =
   | 'choice'
   | 'free-text'
   | 'family-picker'
-  | 'person-picker'
   | 'workshop-sign-up'
   | 'workshop-interest'
   | 'ranking'

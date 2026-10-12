@@ -45,7 +45,6 @@ export type PreferenceControl = {
     | 'free-text'
     | 'choice'
     | 'family-picker'
-    | 'person-picker'
     | 'select'
     | 'ranking'
     | 'workshop-sign-up'

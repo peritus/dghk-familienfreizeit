@@ -230,22 +230,6 @@ export const luebben2027Profile = defineOccasionProfile({
       penalty: -20,
       organiser_only: true,
     }),
-    'workshop-with': relation({
-      title: { de: 'Workshop zusammen mit', en: 'Workshop together with' },
-      scopes: ['person'],
-      value: ref('person'),
-      target: ['person'],
-      operator: 'groups-with',
-      strengths: ['required'],
-      family_facing: {
-        control: 'person-picker',
-        title: { de: 'Workshops gemeinsam mit', en: 'Workshops together with' },
-        help: null,
-        scope: 'person',
-        strengths: ['required'],
-        invert: false,
-      },
-    }),
     'family-note': property({
       title: { de: 'Hinweis der Familie', en: 'Family note' },
       scopes: ['family'],
@@ -363,7 +347,7 @@ export const luebben2027Profile = defineOccasionProfile({
           key: 'workshops',
           title: { de: 'Workshops', en: 'Workshops' },
           intro: null,
-          traits: ['workshop-with'],
+          traits: [],
           features: [
             'workshop-rankings.family-workshop-wishes',
             'workshop-rankings.organiser-workshop-wishes',
