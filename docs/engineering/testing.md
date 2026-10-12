@@ -184,7 +184,7 @@ The current workshop fixtures are:
 - `workshop-assignment/slot-retirement.kdl` verifies that replaying a slot
   retirement moves a workshop placement to the next available slot.
 - `workshop-assignment/kurszuordnung-v2.kdl` holds the previous year's wishes
-  from the Kurszuordnung_V2.xlsx spreadsheet:
+  from the [Kurszuordnung_V2.xlsx analysis](../../spec/prior-art/kurszuordnung-v2.md):
   66 children, 13 courses, and 188 ordered wishes. Ages, capacities, and spaces
   are fixture assumptions stated in its header.
   [`workshop-assignment-kurszuordnung-v2.test.ts`](../../test/solver/workshop-assignment-kurszuordnung-v2.test.ts)

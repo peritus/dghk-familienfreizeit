@@ -75,3 +75,4 @@ response completeness, readiness and evidence review.
 | 29 | [Family preferences](modules/family-preferences.md) | The profile-driven preferences page and control union |
 | 30 | [Change notifications](deferred-ideas/change-notifications.md) | Accepted-but-deferred closing and change emails |
 | 31 | [Workshop companion requests](deferred-ideas/workshop-companion-requests.md) | Accepted-but-deferred requests to attend a specific workshop with named family members |
+| 32 | [Prior art](prior-art/README.md) | Analyses of earlier external solutions, starting with the previous year's course-planning spreadsheet |
