@@ -1,6 +1,6 @@
 import { activeProfile } from '../../config/index.js'
 import { buildRevision } from '../../config/build.js'
-import { computationMeasurements, performanceSampleInterval } from '../../performance/metrics.js'
+import { computationMeasurements, performanceSampleInterval } from '../../performance/recorder.js'
 import { performanceOperations } from '../../performance/operations.js'
 import type { ComputationProfiler } from '../../performance/domain.js'
 
