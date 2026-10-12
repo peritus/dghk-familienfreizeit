@@ -22,7 +22,7 @@ serializable definitions and answers. Each app supplies the same interface:
   The browser reloads committed data after success.
 
 The configured family controls include room strengths and explicit indifferent
-answers, infant bed flags, diet and food notes, and workshop companion selection.
+answers, infant bed flags, diet and food notes.
 Workshop wishes use the configured rank limit, dense unique eligible choices,
 sign-up capacity and non-binding interest. Workshop choice must be open.
 Target dates remain advisory. Closing a governed area keeps its saved answers
