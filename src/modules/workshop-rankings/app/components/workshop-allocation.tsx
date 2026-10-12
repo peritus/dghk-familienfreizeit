@@ -95,6 +95,40 @@ export function WorkshopAllocationDemand({
   return <ResponsiveCollection wide={table} narrow={cards} />
 }
 
+export function WorkshopAllocationDemandSummary({
+  demand,
+}: {
+  demand: readonly WorkshopAllocationDemand[]
+}) {
+  const firstChoices = demand.reduce((total, workshop) => total + workshop.first_choices, 0)
+  const rankedCount = demand.reduce((total, workshop) => total + workshop.ranked_count, 0)
+  const firstChoiceOverCapacity = demand.filter(
+    (workshop) =>
+      workshop.placement_label === 'platziert' && workshop.first_choices > workshop.capacity,
+  ).length
+  const wishesWithoutSlot = demand
+    .filter((workshop) => workshop.placement_label === 'ohne Termin')
+    .reduce((total, workshop) => total + workshop.ranked_count, 0)
+  return (
+    <StatsStrip
+      items={[
+        { value: firstChoices, label: 'Erstwünsche' },
+        { value: rankedCount, label: 'Kurswünsche gesamt' },
+        {
+          value: firstChoiceOverCapacity,
+          label: 'Kurse mit mehr Erstwünschen als Plätzen',
+          tone: firstChoiceOverCapacity ? 'attention' : undefined,
+        },
+        {
+          value: wishesWithoutSlot,
+          label: 'Kurswünsche ohne Termin',
+          tone: wishesWithoutSlot ? 'attention' : undefined,
+        },
+      ]}
+    />
+  )
+}
+
 export function WorkshopAllocationConflictNotice() {
   return <AttentionNotices scope="allocation" area="workshops" actionable />
 }

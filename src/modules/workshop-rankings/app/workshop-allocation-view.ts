@@ -122,6 +122,7 @@ export type WorkshopAllocationProjection = {
   answers: readonly WorkshopAllocationAnswer[]
   participation: WorkshopParticipationView
   demand: readonly WorkshopAllocationDemand[]
+  demand_by_group?: Readonly<Record<WorkshopAllocationGroup, readonly WorkshopAllocationDemand[]>>
   trace_events: readonly WorkshopAllocationTraceEvent[]
   trace_people: readonly WorkshopAllocationTracePerson[]
   person_names: readonly { id: string; name: string; family_name?: string | null }[]
@@ -801,37 +802,47 @@ export function buildWorkshopAllocationProjection(
     const ranking = rankingsByPerson.get(person.id)
     return ranking?.choices.some((choice) => choice.workshop_id !== null) ?? false
   })
-  const demand = official.workshops
-    .filter((workshop) => workshop.mode === 'assigned' && !workshop.cancelled)
-    .map((workshop) => {
-      const choices = rankedPeople.flatMap((person) =>
-        (rankingsByPerson.get(person.id)?.choices ?? []).filter(
-          (choice) => choice.workshop_id === workshop.id,
-        ),
+  const demandForPeople = (selectedPeople: readonly AllocationPerson[]) =>
+    official.workshops
+      .filter((workshop) => workshop.mode === 'assigned' && !workshop.cancelled)
+      .map((workshop) => {
+        const choices = selectedPeople.flatMap((person) =>
+          (rankingsByPerson.get(person.id)?.choices ?? []).filter(
+            (choice) => choice.workshop_id === workshop.id,
+          ),
+        )
+        return {
+          id: workshop.id,
+          title: workshop.title,
+          audience: audienceLabel(workshop.audience),
+          slot: placementLabel(workshop.id, placements, slots, unscheduled, input.time_zone),
+          capacity: workshop.capacity,
+          first_choices: choices.filter((choice) => choice.rank === 1).length,
+          ranked_count: choices.length,
+          placement_label: placements.has(workshop.id) ? 'platziert' : 'ohne Termin',
+        }
+      })
+      .sort(
+        (left, right) =>
+          right.first_choices / Math.max(right.capacity, 1) -
+            left.first_choices / Math.max(left.capacity, 1) ||
+          right.ranked_count - left.ranked_count ||
+          left.title.localeCompare(right.title, 'de'),
       )
-      return {
-        id: workshop.id,
-        title: workshop.title,
-        audience: audienceLabel(workshop.audience),
-        slot: placementLabel(workshop.id, placements, slots, unscheduled, input.time_zone),
-        capacity: workshop.capacity,
-        first_choices: choices.filter((choice) => choice.rank === 1).length,
-        ranked_count: choices.length,
-        placement_label: placements.has(workshop.id) ? 'platziert' : 'ohne Termin',
-      }
-    })
-    .sort(
-      (left, right) =>
-        right.first_choices / Math.max(right.capacity, 1) -
-          left.first_choices / Math.max(left.capacity, 1) ||
-        right.ranked_count - left.ranked_count ||
-        left.title.localeCompare(right.title, 'de'),
-    )
+  const demandByGroup: Readonly<
+    Record<WorkshopAllocationGroup, readonly WorkshopAllocationDemand[]>
+  > = {
+    all: demandForPeople(rankedPeople),
+    children: demandForPeople(rankedPeople.filter((person) => person.group === 'children')),
+    adults: demandForPeople(rankedPeople.filter((person) => person.group === 'adults')),
+  }
+  const demand = demandByGroup.all
   return {
     max_rank: input.max_rank,
     answers,
     participation,
     demand,
+    demand_by_group: demandByGroup,
     trace_events: traceEvents,
     trace_people: tracePeople,
     person_names: people.map(({ id, name, family_name: familyName }) => ({

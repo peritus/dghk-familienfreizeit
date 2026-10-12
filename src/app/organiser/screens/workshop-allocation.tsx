@@ -39,6 +39,7 @@ import {
 import {
   WorkshopAllocationAnswers,
   WorkshopAllocationDemand,
+  WorkshopAllocationDemandSummary,
   WorkshopAllocationEmptyState,
   WorkshopAllocationGroupFilter,
   WorkshopAllocationSummary,
@@ -167,6 +168,8 @@ export function WorkshopAllocation() {
   const workshopsById = new Map(allWorkshops.map((workshop) => [workshop.id, workshop]))
   const fixedKeys = new Set(fixedPairs.map((pair) => `${pair.person_id}|${pair.workshop_id}`))
   const answers = workshopAllocationPeople(projection, group)
+  const demand = projection.demand_by_group?.[group] ?? projection.demand
+  const hasGroupDemand = demand.some((workshop) => workshop.ranked_count > 0)
   const selectedPerson =
     projection.person_names.find((person) => person.id === queryPersonId) ??
     projection.person_names.find((person) => person.id === selectedPersonId)
@@ -426,15 +429,17 @@ export function WorkshopAllocation() {
         <section className="space-y-5" aria-labelledby="allocation-demand-heading">
           <SectionHeader
             title="Nachfrage"
-            description="Erstwünsche, Rangfolgen und verfügbare Plätze je Workshop."
+            description="Wünsche der gewählten Gruppe; Plätze und Termine werden je Kurs angezeigt."
           />
-          <WorkshopAllocationEmptyState
-            projection={projection}
-            has_answers={projection.demand.length > 0}
-          />
-          {projection.has_workshops && projection.has_answers ? (
+          <WorkshopAllocationDemandSummary demand={demand} />
+          <p className="text-sm text-muted">
+            Der Erstwunsch-Überhang zählt nur Kurse mit Termin. Kurswünsche ohne Termin werden
+            separat gezählt.
+          </p>
+          <WorkshopAllocationEmptyState projection={projection} has_answers={hasGroupDemand} />
+          {projection.has_workshops && hasGroupDemand ? (
             <div id="allocation-demand-heading">
-              <WorkshopAllocationDemand demand={projection.demand} />
+              <WorkshopAllocationDemand demand={demand} />
             </div>
           ) : null}
         </section>
