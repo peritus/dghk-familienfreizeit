@@ -65,6 +65,11 @@ afterEach(() => {
 
 test('one all-audience workshop remains visible in both groups and metric filters share checkbox state', () => {
   renderScreen(<Workshops />)
+  const visibleText = document.body.textContent ?? ''
+  expect(visibleText).not.toContain('wks_test')
+  expect(visibleText).not.toContain('slot_test')
+  expect(visibleText).not.toContain('wsp_test')
+
   fireEvent.click(screen.getByRole('button', { name: 'Kinder (1)' }))
   expect(screen.getByRole('heading', { name: 'Gemeinsam' })).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Erwachsene (1)' }))

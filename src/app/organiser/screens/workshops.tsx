@@ -418,7 +418,7 @@ function ExternalLeaderCollection() {
                 availability: leader.availability,
                 leads: summary.workshops
                   .filter((workshop) => workshop.leader_ids.includes(leader.id))
-                  .map((workshop) => workshopNames.get(workshop.id) ?? workshop.id),
+                  .map((workshop) => workshopNames.get(workshop.id) ?? 'Workshop ohne Titel'),
               }}
               total_slots={schedule.slots.length}
               action={
@@ -461,7 +461,7 @@ function InternalLeaderCollection() {
         .join(' ')
       const leads = summary.workshops
         .filter((workshop) => workshop.leader_ids.includes(person.id))
-        .map((workshop) => workshopById.get(workshop.id) ?? workshop.id)
+        .map((workshop) => workshopById.get(workshop.id) ?? 'Workshop ohne Titel')
       return { id: person.id, name: name || 'Name nicht verfügbar', leads }
     })
     .filter((leader) => leader.leads.length)
@@ -1026,7 +1026,7 @@ export function WorkshopProgramme() {
       ]
         .filter((value): value is string => typeof value === 'string' && value.length > 0)
         .join(' ')
-      return [person.id, name || person.id] as const
+      return [person.id, name || 'Name nicht verfügbar'] as const
     }),
   )
   const leaderNames = new Map([

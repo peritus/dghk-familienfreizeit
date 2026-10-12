@@ -90,7 +90,7 @@ test.each([
 })
 
 test.each(['per_p1', duplicatePersonId])(
-  'the person picker selects duplicate-name person %s by its stable ID',
+  'the person picker selects duplicate-name person %s without showing its ID',
   (personId) => {
     const initialPersonId = personId === 'per_p1' ? duplicatePersonId : 'per_p1'
     const location = renderLists(
@@ -106,9 +106,13 @@ test.each(['per_p1', duplicatePersonId])(
       value.startsWith('Alex Morgan · Familie Morgan'),
     )
     expect(duplicateLabels).toHaveLength(2)
-    expect(duplicateLabels.every((value) => value.includes(' · '))).toBe(true)
-    const suffix = personId.split('_').at(-1)!
-    const target = duplicateLabels.find((value) => value.endsWith(suffix))!
+    expect(new Set(duplicateLabels).size).toBe(2)
+    expect(duplicateLabels.every((value) => / · Person [12]$/.test(value))).toBe(true)
+    expect(duplicateLabels.some((value) => value.includes(personId))).toBe(false)
+    expect((document.body.textContent ?? '').includes('per_dupe')).toBe(false)
+    expect((document.body.textContent ?? '').includes('per_p1')).toBe(false)
+    const target = duplicateLabels[personId === duplicatePersonId ? 0 : 1]!
+    expect(field.value).not.toBe(target)
 
     // An incomplete name selects nothing.
     fireEvent.change(field, { target: { value: target.slice(0, 3) } })

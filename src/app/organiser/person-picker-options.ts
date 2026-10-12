@@ -13,11 +13,7 @@ function counts(values: readonly string[]): Map<string, number> {
   return result
 }
 
-function shortId(id: string): string {
-  return (id.split('_').at(-1) ?? id).slice(-4)
-}
-
-/** Keeps visible picker labels unique while preserving person identity in the option value. */
+/** Keeps human-readable picker labels unique while preserving identity in the option value. */
 export function personPickerOptions(people: readonly PersonPickerIdentity[]): PersonPickerOption[] {
   const names = people.map((person) => (person.external ? `${person.name} (extern)` : person.name))
   const duplicateNames = counts(names)
@@ -27,18 +23,13 @@ export function personPickerOptions(people: readonly PersonPickerIdentity[]): Pe
     return (duplicateNames.get(name) ?? 0) > 1 && family ? `${name} · Familie ${family}` : name
   })
   const duplicateLabels = counts(labels)
-  const withShortIds = people.map((person, index) =>
-    (duplicateLabels.get(labels[index]!) ?? 0) > 1
-      ? `${labels[index]} · ${shortId(person.id) || person.id}`
-      : labels[index]!,
-  )
-  const duplicateShortLabels = counts(withShortIds)
+  const occurrences = new Map<string, number>()
 
-  return people.map((person, index) => ({
-    id: person.id,
-    label:
-      (duplicateShortLabels.get(withShortIds[index]!) ?? 0) > 1
-        ? `${withShortIds[index]} · ${person.id}`
-        : withShortIds[index]!,
-  }))
+  return people.map((person, index) => {
+    const label = labels[index]!
+    if ((duplicateLabels.get(label) ?? 0) <= 1) return { id: person.id, label }
+    const occurrence = (occurrences.get(label) ?? 0) + 1
+    occurrences.set(label, occurrence)
+    return { id: person.id, label: `${label} · Person ${occurrence}` }
+  })
 }
