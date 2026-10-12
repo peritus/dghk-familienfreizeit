@@ -379,7 +379,7 @@ function detailHeading(outcome: WorkshopAllocationTraceOutcome, count: number): 
     case 'fixed':
       return `Fest zugeordnet · ${count} ${count === 1 ? 'Person' : 'Personen'}`
     case 'not-needed':
-      return `Ziel erreicht · ${wishes} nicht benötigt`
+      return `${wishes} übersprungen · Zuordnungsgrenze erreicht`
     case 'open':
       return `Offen · ${count} ${count === 1 ? 'Fall' : 'Fälle'}`
     default:
@@ -952,7 +952,9 @@ export function buildWorkshopAllocationTraceStages(
           : outcome === 'unscheduled'
             ? `${first.workshop_title}: ${names}`
             : outcome === 'not-needed'
-              ? `${first.workshop_title}${slot}: ${names} · Ziel bereits erreicht`
+              ? events.length === 1
+                ? `${first.workshop_title}${slot}: ${first.person_name}${first.rank === null ? '' : ` · ${first.rank}. Wunsch`} übersprungen (Zuordnungsgrenze erreicht)`
+                : `${first.workshop_title}${slot}: ${names} · Zuordnungsgrenze erreicht`
               : `${first.workshop_title}${slot}: ${names}`
       return {
         id,

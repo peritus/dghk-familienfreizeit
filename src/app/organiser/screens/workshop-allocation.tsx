@@ -74,6 +74,13 @@ function rankingLimit(): number {
   return typeof module?.parameters?.max_rank === 'number' ? module.parameters.max_rank : 3
 }
 
+function assignmentLimit(): number {
+  const module = activeProfile.modules.find((item) => item.id === 'workshop-assignment')
+  return typeof module?.parameters?.workshops_per_person === 'number'
+    ? module.parameters.workshops_per_person
+    : 2
+}
+
 function traceStages(
   projection: WorkshopAllocationProjection,
   group: WorkshopAllocationGroup,
@@ -448,8 +455,24 @@ export function WorkshopAllocation() {
         <section className="space-y-5" aria-labelledby="allocation-trace-heading">
           <SectionHeader
             title="Was ist aus jedem Wunsch geworden?"
-            description="Runde für Runde, mit den Personen, die es betrifft."
+            description="Kennzahlen für die gewählte Gruppe. Eine Personenauswahl filtert nur den Verlauf."
           />
+          <WorkshopAllocationSummary answers={answers} projection={projection} />
+          <div
+            role="note"
+            className="rounded-base border-2 border-border bg-secondary-background px-4 py-3 text-sm"
+          >
+            <p className="font-semibold">
+              Rangfolge: bis zu {rankingLimit()} Wünsche pro Person · automatische Vergabe:
+              höchstens {assignmentLimit()} Kurse pro Person
+            </p>
+            <p className="mt-1 text-muted">
+              Feste Teilnahmen zählen bei dieser Grenze mit. Sobald {assignmentLimit()} Zuordnungen
+              erreicht sind, überspringt der Solver weitere Wünsche als „Ziel bereits erreicht“.
+              Wegen Kursplätzen, Terminen, Teilnahmebedingungen und Überschneidungen kann eine
+              Person weniger Kurse erhalten.
+            </p>
+          </div>
           <TraceControls
             mode={traceMode}
             onModeChange={(mode) => {
