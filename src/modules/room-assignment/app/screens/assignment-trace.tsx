@@ -17,12 +17,12 @@ const orderLabels: Readonly<Record<string, string>> = {
   'configured-opportunity-priority': 'Konfigurierte Priorität',
   'currently-feasible-rooms': 'Aktuell passende Zimmer',
   'bed-demand': 'Benötigte Schlafplätze',
-  'family-sort-key': 'Familienreihenfolge',
-  'family-id': 'Familien-ID bei Gleichstand',
+  'family-sort-key': 'Gespeicherte Familienreihenfolge',
   'room-score': 'Zimmerwertung',
-  'room-sort-key': 'Zimmerreihenfolge',
-  'room-id': 'Zimmer-ID bei Gleichstand',
+  'room-sort-key': 'Gespeicherte Zimmerreihenfolge',
 }
+
+const hiddenOrderCriteria = new Set(['family-id', 'room-id'])
 
 const rejectionLabels = new Map([
   ['hard.capacity', 'Nicht genug freie Schlafplätze'],
@@ -44,7 +44,7 @@ function labelValue(
 
 function familyLabel(world: ReturnType<typeof useOrganiser>['world'], id: string): string {
   const displayName = labelValue(world, id, 'display-name')
-  return typeof displayName === 'string' ? displayName : id
+  return typeof displayName === 'string' && displayName.trim() ? displayName : 'Familie ohne Namen'
 }
 
 function roomLabels(world: NonNullable<ReturnType<typeof useOrganiser>['world']>) {
@@ -71,8 +71,12 @@ function placementLabel(entry: TraceEntry): string {
     case 'unplaceable':
       return 'Kein passendes Zimmer'
     default:
-      return entry.step
+      return 'Weitere Entscheidung'
   }
+}
+
+function visibleOrder(order: readonly { criterion: string; value: string | number }[] | undefined) {
+  return (order ?? []).filter(({ criterion }) => !hiddenOrderCriteria.has(criterion))
 }
 
 function orderedValue(criterion: string, value: string | number): string {
@@ -86,7 +90,7 @@ function rejectedRooms(entry: TraceEntry): readonly { room: string; reasons: rea
   const grouped = new Map<string, string[]>()
   for (const rejection of entry.detail?.rejected ?? []) {
     const reasons = grouped.get(rejection.target) ?? []
-    const label = rejectionLabels.get(rejection.rule) ?? `Weitere Regel (${rejection.rule})`
+    const label = rejectionLabels.get(rejection.rule) ?? 'Weitere Einschränkung'
     if (!reasons.includes(label)) reasons.push(label)
     grouped.set(rejection.target, reasons)
   }
@@ -113,24 +117,22 @@ function scoreTerms(terms: readonly [string, number][]): string[] {
     const label =
       labels[term] ??
       (kind === 'preferred-requirement'
-        ? `Bevorzugte Anforderung · ${traitTitle ?? key}`
+        ? `Bevorzugte Anforderung · ${traitTitle ?? 'weitere'}`
         : kind === 'preferred-relation'
-          ? `Bevorzugte Beziehung · ${traitTitle ?? key}`
+          ? `Bevorzugte Beziehung · ${traitTitle ?? 'weitere'}`
           : kind === 'scarce-capability'
-            ? `Seltenes Merkmal · ${traitTitle ?? key}`
-            : term)
+            ? `Seltene Ausstattung · ${traitTitle ?? 'weitere'}`
+            : 'Weitere Wertung')
     return `${label}: ${value > 0 ? '+' : ''}${value}`
   })
 }
 
 function TraceDecision({
   entry,
-  index,
   roomName,
   family_name: familyName,
 }: {
   entry: TraceEntry
-  index: number
   roomName: (id: string) => string
   family_name: string
 }) {
@@ -138,24 +140,22 @@ function TraceDecision({
   const rejected = rejectedRooms(entry)
   const chosen = entry.detail?.chosen
   const alternatives = entry.detail?.runners_up ?? []
-  const title = allocation
-    ? `Runde ${allocation.round}: ${familyName}`
-    : `${placementLabel(entry)}: ${familyName}`
+  const summary =
+    entry.step === 'fixed-invalid'
+      ? 'Das festgelegte Zimmer ist nicht verfügbar.'
+      : chosen
+        ? `Zugeordnet zu ${roomName(chosen.target)}`
+        : entry.step === 'unplaceable'
+          ? 'Kein passendes Zimmer gefunden.'
+          : 'Zuordnung wird geprüft.'
 
   return (
-    <article
-      className="space-y-4 rounded-base border-2 border-border bg-background p-4"
-      aria-labelledby={`room-trace-${index}`}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 id={`room-trace-${index}`} className="font-heading text-metric">
-            {title}
-          </h3>
-          <p className="mt-1 text-muted">
-            {chosen ? `Zugeordnet zu ${roomName(chosen.target)}` : entry.text}
-          </p>
-        </div>
+    <details className="rounded-base border-2 border-border bg-background p-4">
+      <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 rounded-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border">
+        <span>
+          <span className="block font-heading text-metric">{familyName}</span>
+          <span className="mt-1 block text-muted">{summary}</span>
+        </span>
         <Badge
           tone={
             entry.step === 'unplaceable' || entry.step === 'fixed-invalid' ? 'attention' : 'neutral'
@@ -163,104 +163,141 @@ function TraceDecision({
         >
           {placementLabel(entry)}
         </Badge>
-      </div>
+      </summary>
 
-      {allocation ? (
-        <section aria-label={`Reihenfolge in Runde ${allocation.round}`}>
-          <h4 className="font-bold">Warum diese Familie zuerst?</h4>
-          <p className="mt-1 text-sm text-muted">
-            Die Priorität verwendet den stärksten konfigurierten Wert; eine verpflichtende
-            Anforderung zählt doppelt so stark wie ein Wunsch.
-          </p>
-          <ol className="mt-2 grid gap-2 sm:grid-cols-2">
-            {allocation.order.map(({ criterion, value }, orderIndex) => (
-              <li key={criterion} className="rounded-base border border-border/50 p-2">
-                <span className="block text-sm text-muted">
-                  {orderIndex + 1}. {orderLabels[criterion] ?? criterion}
-                </span>
-                <span className="font-bold tabular-nums">{orderedValue(criterion, value)}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      ) : null}
-
-      {chosen ? (
-        <section>
-          <h4 className="font-bold">Zimmerwertung: {chosen.score} Punkte</h4>
-          {chosen.order ? (
-            <dl className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-              {chosen.order.map(({ criterion, value }) => (
-                <div key={criterion} className="flex gap-1">
-                  <dt className="text-muted">{orderLabels[criterion] ?? criterion}:</dt>
-                  <dd className="font-bold tabular-nums">{orderedValue(criterion, value)}</dd>
-                </div>
+      <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
+        {allocation ? (
+          <section aria-label="Gründe für die automatische Reihenfolge">
+            <h4 className="font-bold">Warum wurde diese Familie als Nächste gewählt?</h4>
+            <p className="mt-1 text-sm text-muted">
+              Die Werte zeigen, wie die Auswahlregeln bei dieser Zuordnung angewendet wurden.
+            </p>
+            <ol className="mt-2 grid gap-2 sm:grid-cols-2">
+              {visibleOrder(allocation.order).map(({ criterion, value }, orderIndex) => (
+                <li key={criterion} className="rounded-base border border-border/50 p-2">
+                  <span className="block text-sm text-muted">
+                    {orderIndex + 1}. {orderLabels[criterion] ?? criterion}
+                  </span>
+                  <span className="font-bold tabular-nums">{orderedValue(criterion, value)}</span>
+                </li>
               ))}
-            </dl>
-          ) : null}
-          {scoreTerms(chosen.terms).length ? (
-            <ul className="mt-1 list-disc pl-5 text-sm">
-              {scoreTerms(chosen.terms).map((term, termIndex) => (
-                <li key={`${term}-${termIndex}`}>{term}</li>
+            </ol>
+            <p className="mt-2 text-sm text-muted">
+              Bei exakt gleichem Ergebnis entscheidet eine stabile interne Reihenfolge.
+            </p>
+          </section>
+        ) : null}
+
+        {chosen ? (
+          <section>
+            <h4 className="font-bold">Warum dieses Zimmer? {chosen.score} Punkte</h4>
+            {visibleOrder(chosen.order).length ? (
+              <dl className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                {visibleOrder(chosen.order).map(({ criterion, value }) => (
+                  <div key={criterion} className="flex gap-1">
+                    <dt className="text-muted">{orderLabels[criterion] ?? criterion}:</dt>
+                    <dd className="font-bold tabular-nums">{orderedValue(criterion, value)}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+            {scoreTerms(chosen.terms).length ? (
+              <ul className="mt-1 list-disc pl-5 text-sm">
+                {scoreTerms(chosen.terms).map((term, termIndex) => (
+                  <li key={`${term}-${termIndex}`}>{term}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-sm text-muted">Keine zusätzlichen Wertungspunkte.</p>
+            )}
+          </section>
+        ) : null}
+
+        {alternatives.length ? (
+          <details className="rounded-base border border-border/50 p-3">
+            <summary className="cursor-pointer font-bold">
+              Andere passende Zimmer ({alternatives.length})
+            </summary>
+            <ol className="mt-3 list-decimal space-y-2 pl-5">
+              {alternatives.map((alternative) => (
+                <li key={alternative.target}>
+                  <strong>{roomName(alternative.target)}</strong> · {alternative.score} Punkte
+                  {visibleOrder(alternative.order).length ? (
+                    <ul className="mt-1 flex flex-wrap gap-x-4 text-xs text-muted">
+                      {visibleOrder(alternative.order).map(({ criterion, value }) => (
+                        <li key={criterion}>
+                          {orderLabels[criterion] ?? criterion}: {orderedValue(criterion, value)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {scoreTerms(alternative.terms).length ? (
+                    <ul className="list-disc pl-5 text-sm text-muted">
+                      {scoreTerms(alternative.terms).map((term, termIndex) => (
+                        <li key={`${term}-${termIndex}`}>{term}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          </details>
+        ) : null}
+
+        {rejected.length ? (
+          <details className="rounded-base border border-border/50 p-3">
+            <summary className="cursor-pointer font-bold">
+              Abgelehnte Zimmer ({rejected.length})
+            </summary>
+            <ul className="mt-3 space-y-2">
+              {rejected.map(({ room, reasons }) => (
+                <li key={room}>
+                  <strong>{roomName(room)}</strong>
+                  <ul className="list-disc pl-5 text-sm text-muted">
+                    {reasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                </li>
               ))}
             </ul>
-          ) : (
-            <p className="mt-1 text-sm text-muted">Keine zusätzlichen Wertungspunkte.</p>
-          )}
-        </section>
-      ) : null}
+          </details>
+        ) : null}
+      </div>
+    </details>
+  )
+}
 
-      {alternatives.length ? (
-        <details className="rounded-base border border-border/50 p-3">
-          <summary className="cursor-pointer font-bold">
-            Andere passende Zimmer ({alternatives.length})
-          </summary>
-          <ol className="mt-3 list-decimal space-y-2 pl-5">
-            {alternatives.map((alternative) => (
-              <li key={alternative.target}>
-                <strong>{roomName(alternative.target)}</strong> · {alternative.score} Punkte
-                {alternative.order ? (
-                  <ul className="mt-1 flex flex-wrap gap-x-4 text-xs text-muted">
-                    {alternative.order.map(({ criterion, value }) => (
-                      <li key={criterion}>
-                        {orderLabels[criterion] ?? criterion}: {orderedValue(criterion, value)}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                {scoreTerms(alternative.terms).length ? (
-                  <ul className="list-disc pl-5 text-sm text-muted">
-                    {scoreTerms(alternative.terms).map((term, termIndex) => (
-                      <li key={`${term}-${termIndex}`}>{term}</li>
-                    ))}
-                  </ul>
-                ) : null}
-              </li>
-            ))}
-          </ol>
-        </details>
-      ) : null}
+function TraceGroup({
+  title,
+  entries,
+  familyLabelFor,
+  roomName,
+}: {
+  title: string
+  entries: readonly TraceEntry[]
+  familyLabelFor: (id: string) => string
+  roomName: (id: string) => string
+}) {
+  if (!entries.length) return null
 
-      {rejected.length ? (
-        <details className="rounded-base border border-border/50 p-3">
-          <summary className="cursor-pointer font-bold">
-            Abgelehnte Zimmer ({rejected.length})
-          </summary>
-          <ul className="mt-3 space-y-2">
-            {rejected.map(({ room, reasons }) => (
-              <li key={room}>
-                <strong>{roomName(room)}</strong>
-                <ul className="list-disc pl-5 text-sm text-muted">
-                  {reasons.map((reason) => (
-                    <li key={reason}>{reason}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
-    </article>
+  return (
+    <section className="space-y-3">
+      <SectionHeader title={`${title} (${entries.length})`} />
+      <CollectionList>
+        <ol className="space-y-2">
+          {entries.map((entry, index) => (
+            <li key={`${entry.step}-${entry.subject}-${index}`}>
+              <TraceDecision
+                entry={entry}
+                roomName={roomName}
+                family_name={familyLabelFor(entry.subject)}
+              />
+            </li>
+          ))}
+        </ol>
+      </CollectionList>
+    </section>
   )
 }
 
@@ -279,7 +316,13 @@ export function AssignmentTraceScreen() {
 
   const entries = plan.trace.filter(({ stage }) => stage === 'room-assignment.place')
   const namesByRoom = roomLabels(world)
-  const roomName = (id: string) => namesByRoom.get(id) ?? id
+  const roomName = (id: string) => namesByRoom.get(id) ?? 'Zimmer ohne Bezeichnung'
+  const fixed = entries.filter(({ step }) => step === 'fixed' || step === 'fixed-invalid')
+  const automatic = entries.filter(({ step }) => step === 'forced' || step === 'greedy')
+  const unplaceable = entries.filter(({ step }) => step === 'unplaceable')
+  const other = entries.filter(
+    ({ step }) => !['fixed', 'fixed-invalid', 'forced', 'greedy', 'unplaceable'].includes(step),
+  )
 
   return (
     <ScreenLayout
@@ -288,53 +331,68 @@ export function AssignmentTraceScreen() {
         <ScreenHeader
           eyebrow="Unterkunft · Belegung"
           title="Verlauf der Zimmerverteilung"
-          description="Jede automatische Zuordnung folgt derselben nachvollziehbaren Reihenfolge. Hier siehst du die Faktoren, passende Alternativen und abgelehnte Zimmer."
+          description="Die Liste zeigt feste Entscheidungen zuerst und danach die automatische Auswahlreihenfolge. Öffne eine Familie, um die Bewertungsdetails zu sehen."
         />
       }
     >
       <section className="space-y-3 rounded-base border-2 border-border bg-secondary-background p-4">
-        <SectionHeader title="Die feste Reihenfolge" />
+        <SectionHeader title="So wird die nächste automatische Zuordnung entschieden" />
+        <p>
+          Die fünf Schritte bestimmen jeweils die nächste Familie. Nach jeder automatischen
+          Zuordnung werden die verfügbaren Zimmer neu geprüft und dieselben Schritte wiederholt.
+        </p>
         <ol className="list-decimal space-y-1 pl-5">
           <li>Feste Zimmerentscheidungen werden zuerst übernommen.</li>
           <li>
-            Danach kommt der stärkste konfigurierte Wert für die Priorität; verpflichtende
-            Anforderungen zählen doppelt so stark wie Wünsche.
+            Bei den übrigen Familien entscheidet zuerst der stärkste konfigurierte Prioritätswert;
+            eine verpflichtende Anforderung zählt doppelt so stark wie ein Wunsch.
           </li>
           <li>
-            Bei gleicher Priorität wird die Familie mit weniger aktuell passenden Zimmern zuerst
-            zugeordnet.
+            Bei gleicher Priorität kommt die Familie mit weniger aktuell passenden Zimmern zuerst.
           </li>
           <li>
-            Bei weiterem Gleichstand kommen Familien mit mehr benötigten Schlafplätzen zuerst.
+            Bei weiterem Gleichstand kommt die Familie mit mehr benötigten Schlafplätzen zuerst.
           </li>
           <li>
-            Die gespeicherte Familienreihenfolge und zuletzt die Familien-ID lösen jeden weiteren
-            Gleichstand auf.
+            Die gespeicherte Familienreihenfolge löst weitere Gleichstände auf; bei exakt gleicher
+            Reihenfolge entscheidet ein stabiler interner Tie-Breaker.
           </li>
         </ol>
         <p className="text-sm text-muted">
-          Nach jeder Zuordnung werden die noch passenden Zimmer neu bewertet. Das Zimmer mit der
-          höchsten Wertung gewinnt; bei Gleichstand entscheiden Zimmerreihenfolge und Zimmer-ID.
+          Für die ausgewählte Familie gewinnt das passende Zimmer mit der höchsten Wertung. Bei
+          gleicher Wertung entscheiden die gespeicherte Zimmerreihenfolge und ein stabiler interner
+          Tie-Breaker. Die Listen darunter zeigen feste Zuordnungen, automatische Zuordnungen und
+          Familien ohne passendes Zimmer.
         </p>
       </section>
 
       {entries.length ? (
-        <CollectionList>
-          <ol className="space-y-4">
-            {entries.map((entry, index) => (
-              <li
-                key={`${entry.step}-${entry.subject}-${entry.detail?.allocation?.round ?? index}`}
-              >
-                <TraceDecision
-                  entry={entry}
-                  index={index}
-                  roomName={roomName}
-                  family_name={familyLabel(world, entry.subject)}
-                />
-              </li>
-            ))}
-          </ol>
-        </CollectionList>
+        <div className="space-y-6">
+          <TraceGroup
+            title="Feste Zimmerentscheidungen"
+            entries={fixed}
+            familyLabelFor={(id) => familyLabel(world, id)}
+            roomName={roomName}
+          />
+          <TraceGroup
+            title="Automatische Zuordnungen in Auswahlreihenfolge"
+            entries={automatic}
+            familyLabelFor={(id) => familyLabel(world, id)}
+            roomName={roomName}
+          />
+          <TraceGroup
+            title="Ohne passendes Zimmer"
+            entries={unplaceable}
+            familyLabelFor={(id) => familyLabel(world, id)}
+            roomName={roomName}
+          />
+          <TraceGroup
+            title="Weitere Ergebnisse"
+            entries={other}
+            familyLabelFor={(id) => familyLabel(world, id)}
+            roomName={roomName}
+          />
+        </div>
       ) : (
         <section className="rounded-base border-2 border-border bg-secondary-background p-5">
           <SectionHeader title="Noch keine Zuordnungen" />
