@@ -838,7 +838,7 @@ function feasible(
     roomFamilies(room.id, placements, state.index).some((id) => id !== family.family_id)
   )
     rejections.push({
-      rule: 'hard.trait-requirements',
+      rule: 'hard.sole-occupancy',
       text: 'room already holds another family',
     })
   const roomConstraint = sweep.room_constraint
@@ -1081,6 +1081,20 @@ export function roomFeasibility(
       family.requirements.flatMap((requirement) =>
         requirement.capability_key
           ? [[requirement.capability_key, room.capabilities.has(requirement.capability_key)]]
+          : [],
+      ),
+    ),
+    structural_matches: Object.fromEntries(
+      family.requirements.flatMap((requirement) =>
+        requirement.structural === 'no-other-families'
+          ? [
+              [
+                requirement.structural,
+                !roomFamilies(room.id, placements, state.index).some(
+                  (id) => id !== family.family_id,
+                ),
+              ],
+            ]
           : [],
       ),
     ),

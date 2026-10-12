@@ -17,6 +17,7 @@ import {
   roomAssignment,
   roomAssignmentPreflight,
   roomAssignmentRules,
+  roomFeasibility,
   runRoomAssignment,
   type FamilyPlacementUnit,
   type FamilyRequirement,
@@ -562,7 +563,38 @@ LabelSet entity_id=fam_ensuite key=sole-occupancy value=no-other-families streng
       ),
       params,
     )
-    expect(sole.section.unplaced[0]?.reason).toContain('hard.trait-requirements')
+    expect(sole.section.unplaced[0]?.reason).toContain('hard.sole-occupancy')
+
+    const occupancyFamily = family('fam_occupancy', 1, [
+      familyRequirement('fam_occupancy', {
+        kind: 'structural',
+        structural: 'no-other-families',
+        capability_key: null,
+        strength: 'required',
+      }),
+    ])
+    const occupancyInput = assignmentInput(
+      [room('rm_1', 2)],
+      [family('fam_existing', 1), occupancyFamily],
+    )
+    const alone = roomFeasibility(occupancyInput, params, [], 'fam_occupancy')[0]
+    const occupied = roomFeasibility(
+      occupancyInput,
+      params,
+      [
+        {
+          family_id: 'fam_existing',
+          person_id: 'fam_existing-person-0',
+          room_id: 'rm_1',
+          place_id: 'rm_1-place-0',
+        },
+      ],
+      'fam_occupancy',
+    )[0]
+    expect(alone?.structural_matches['no-other-families']).toBe(true)
+    expect(alone?.capability_matches).not.toHaveProperty('no-other-families')
+    expect(occupied?.structural_matches['no-other-families']).toBe(false)
+    expect(occupied?.reasons).toContain('hard.sole-occupancy')
 
     const excluded = runRoomAssignment(
       assignmentInput(

@@ -58,9 +58,11 @@ export function FixedAssignmentDialog({
             room,
             requirements: family.requirements.map((requirement) => ({
               ...requirement,
-              met: requirement.capability_key
-                ? candidate.capability_matches[requirement.capability_key]
-                : undefined,
+              met: requirement.structural
+                ? candidate.structural_matches[requirement.structural]
+                : requirement.capability_key
+                  ? candidate.capability_matches[requirement.capability_key]
+                  : undefined,
             })),
             reasons: candidate.reasons,
             unmet_required: candidate.reasons.length,
