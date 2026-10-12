@@ -554,7 +554,7 @@ export const workshopAssignment = defineModule<WorkshopAssignmentParams>({
       {
         id: 'organiser-workshop-list-workshops',
         route: '/organiser/workshops/lists/workshops',
-        label: 'Workshoplisten',
+        label: 'Kurslisten',
         audience: 'organiser',
       },
       {

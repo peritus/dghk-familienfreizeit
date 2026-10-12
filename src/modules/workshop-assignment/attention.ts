@@ -18,7 +18,7 @@ export function workshopAssignmentAttention() {
     check(
       'workshop-assignment.no-workshops',
       'workshop-assignment',
-      ['Keine aktiven Workshops', 'No active workshops'],
+      ['Keine aktiven Kurse', 'No active workshops'],
       (c) =>
         official(c).workshops.length ? [] : [fact(c, [], [], {}, { blocks: ['close-workshops'] })],
       {

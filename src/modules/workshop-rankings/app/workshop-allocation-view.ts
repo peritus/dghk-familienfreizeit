@@ -348,9 +348,9 @@ function traceDetailText(event: WorkshopAllocationTraceEvent): string {
     case 'capacity':
       return `${event.workshop_title}${event.capacity ? ` (nur ${event.capacity} Plätze${event.slot_label ? `, ${event.slot_label}` : ''})` : ''}, daher nicht erfüllt für ${event.person_name}`
     case 'overlap':
-      return `${event.person_name}: ${event.workshop_title}${rank} nicht erfüllt, weil ${event.slot_label ?? 'der Slot'} schon ${event.competing_workshop_title ?? 'ein anderer Workshop'} belegt ist`
+      return `${event.person_name}: ${event.workshop_title}${rank} nicht erfüllt, weil ${event.slot_label ?? 'der Slot'} schon ${event.competing_workshop_title ?? 'ein anderer Kurs'} belegt ist`
     case 'leader':
-      return `${event.person_name}: ${event.workshop_title}${rank} nicht erfüllt, weil ${event.slot_label ?? 'der Slot'} selbst ${event.competing_workshop_title ?? 'ein anderer Workshop'} geleitet wird`
+      return `${event.person_name}: ${event.workshop_title}${rank} nicht erfüllt, weil ${event.slot_label ?? 'der Slot'} selbst ${event.competing_workshop_title ?? 'ein anderer Kurs'} geleitet wird`
     case 'unscheduled':
       return `${event.workshop_title}: ${event.person_name}${rank} · ohne Termin`
     case 'fulfilled':

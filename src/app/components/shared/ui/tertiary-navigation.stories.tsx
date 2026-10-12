@@ -7,10 +7,10 @@ const meta = {
   title: 'Shared/Primitives/TertiaryNavigation',
   component: TertiaryNavigation,
   args: {
-    aria_label: 'Workshopansichten',
+    aria_label: 'Kursansichten',
     value: 'workshops',
     items: [
-      { value: 'workshops', label: 'Workshops' },
+      { value: 'workshops', label: 'Kurse' },
       { value: 'leaders', label: 'Leitungen' },
       { value: 'external', label: 'Extern' },
     ],
@@ -36,11 +36,11 @@ export const WorkshopViews: Story = {
     return (
       <div className="max-w-3xl bg-background p-6">
         <TertiaryNavigation
-          aria_label="Workshopansichten"
+          aria_label="Kursansichten"
           value={view}
           onChange={setView}
           items={[
-            { value: 'workshops', label: 'Workshops' },
+            { value: 'workshops', label: 'Kurse' },
             { value: 'leaders', label: 'Leitungen' },
             { value: 'external', label: 'Extern' },
           ]}

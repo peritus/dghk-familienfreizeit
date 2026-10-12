@@ -73,7 +73,7 @@ function renderLists(path: string, listWorld = world) {
 }
 
 test.each([
-  ['/workshops/lists/workshops', 'Workshop', 'workshop'],
+  ['/workshops/lists/workshops', 'Kurs', 'workshop'],
   ['/workshops/lists/families', 'Familie', 'family'],
   ['/workshops/lists/rooms', 'Raum', 'room'],
 ])('%s keeps the document chosen in its picker', (path, label, parameter) => {
@@ -150,7 +150,7 @@ test('previous and next move through the documents and focus the new one', () =>
 test('the roster shows the confidentiality notice and keeps attendance boxes for print', () => {
   renderLists('/workshops/lists/workshops')
   expect(screen.getByRole('note').textContent).toBe(
-    'Vertraulich. Enthält Allergien und Gesundheitshinweise. Nur für die Workshopleitung.',
+    'Vertraulich. Enthält Allergien und Gesundheitshinweise. Nur für die Kursleitung.',
   )
   expect(
     screen
@@ -170,7 +170,7 @@ test('an open case shows Offen in every empty slot with the reason', () => {
   for (const row of empty)
     expect(
       within(row).getByText(
-        /Gewählte Workshops konnten nicht zugeordnet werden|Keine aktuelle Workshopwahl dokumentiert/,
+        /Gewählte Kurse konnten nicht zugeordnet werden|Keine aktuelle Kurswahl dokumentiert/,
       ),
     ).toBeTruthy()
 })

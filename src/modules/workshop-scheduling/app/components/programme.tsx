@@ -67,7 +67,7 @@ export function ProgrammeGrid({
   return (
     <TableFrame className="overflow-x-auto rounded-base border-2 border-border bg-secondary-background print:overflow-visible print:rounded-none print:border">
       <table className="w-full min-w-[48rem] text-left">
-        <caption className="sr-only">Workshops nach Raum und Slot</caption>
+        <caption className="sr-only">Kurse nach Raum und Slot</caption>
         <thead>
           <tr className="border-b-2 border-border">
             <th scope="col" className="p-3">
@@ -159,7 +159,7 @@ export function WorkshopOverlapTable({ overlaps }: { overlaps: readonly Workshop
     <DataTable
       caption="Überschneidungen"
       columns={[
-        { key: 'workshops', label: 'Workshops' },
+        { key: 'workshops', label: 'Kurse' },
         { key: 'slot', label: 'Slot' },
         { key: 'people', label: 'Personen', numeric: true },
         { key: 'names', label: 'Wer' },

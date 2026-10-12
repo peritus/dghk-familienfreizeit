@@ -11,7 +11,7 @@ export const workshopSchedulingAttention = [
   check(
     'workshop-scheduling.unscheduled',
     'workshop-scheduling',
-    ['Workshop nicht eingeplant', 'Workshop unscheduled'],
+    ['Kurs nicht eingeplant', 'Workshop unscheduled'],
     (c) => {
       const s = section(c)
       const fixed = new Set(s.fixed_violations.map((v) => v.workshop_id))

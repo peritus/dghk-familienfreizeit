@@ -42,10 +42,10 @@ export function workshopTrack(input: {
   return [
     {
       id: 'authoring',
-      label: 'Workshops anlegen',
+      label: 'Kurse anlegen',
       state: authored ? 'complete' : 'current',
       description: authored
-        ? `${input.active_workshop_count} Workshop${input.active_workshop_count === 1 ? '' : 's'} angelegt`
+        ? `${input.active_workshop_count} ${input.active_workshop_count === 1 ? 'Kurs' : 'Kurse'} angelegt`
         : 'Titel, Zielgruppe und Leitung erfassen',
     },
     {

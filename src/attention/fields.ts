@@ -20,7 +20,7 @@ const declarations = [
     'Wähle mindestens einen verfügbaren Slot.',
     'Select at least one available slot.',
   ],
-  ['workshop-title', 'Gib dem Workshop einen Titel.', 'Enter a workshop title.'],
+  ['workshop-title', 'Gib dem Kurs einen Titel.', 'Enter a workshop title.'],
   [
     'age-range',
     'Der Altersbereich muss zwischen 0 und 120 Jahren liegen und aufsteigend sein.',

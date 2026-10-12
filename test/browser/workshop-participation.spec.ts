@@ -70,7 +70,7 @@ test('participation switches between the detailed table, narrow cards, and lands
     'table-header-group',
   )
   const headerText = await page.locator('.workshop-participation__table thead').innerText()
-  expect(headerText).not.toMatch(/Rangfolge|Workshops/u)
+  expect(headerText).not.toMatch(/Rangfolge|Kurse/u)
   await expect(page.locator('.workshop-participation__legend')).toContainText('keine Zuordnung')
   await expect(page.locator('.workshop-participation__legend')).not.toContainText('Offen')
   await expect(page.locator('.workshop-participation__table')).not.toContainText('Offen')
@@ -100,7 +100,7 @@ test('participation switches between the detailed table, narrow cards, and lands
   await participationViews.getByRole('link', { name: 'Programm' }).click()
   await expect(page).toHaveURL(/\/organiser\/workshops\/programme$/u)
   await expect(
-    page.getByRole('navigation', { name: 'Workshopbereiche' }).getByRole('link', {
+    page.getByRole('navigation', { name: 'Kursbereiche' }).getByRole('link', {
       name: 'Teilnahme',
     }),
   ).toHaveAttribute('aria-current', 'page')
@@ -133,7 +133,7 @@ test('participation switches between the detailed table, narrow cards, and lands
   await expect(page.locator('.workshop-participation__narrow')).not.toContainText('Offen')
   await expect(page.locator('.workshop-participation__narrow')).not.toContainText(/Keine Antwort/u)
   await expect(page.locator('.workshop-participation__card').first()).not.toContainText(
-    /Rangfolge|\d+ Workshops/u,
+    /Rangfolge|\d+ Kurse/u,
   )
   await page.screenshot({ path: '/tmp/dghk-participation-mobile.png' })
 

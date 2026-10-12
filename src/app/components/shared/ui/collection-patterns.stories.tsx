@@ -38,18 +38,18 @@ export const WorkspaceChrome: Story = {
       <ScreenLayout
         header={
           <ScreenHeader
-            eyebrow="Workshops"
-            title="Workshopübersicht"
+            eyebrow="Kurse"
+            title="Kursübersicht"
             description="Anlegen, prüfen und den aktuellen Plan nachvollziehbar machen."
-            action={<Button>Workshop hinzufügen</Button>}
+            action={<Button>Kurs hinzufügen</Button>}
           />
         }
         workflow={
           <>
             <WorkflowStepper
-              aria_label="Ablauf der Workshopwahl"
+              aria_label="Ablauf der Kurswahl"
               steps={[
-                { id: 'create', label: 'Workshops anlegen', state: 'complete' },
+                { id: 'create', label: 'Kurse anlegen', state: 'complete' },
                 { id: 'choice', label: 'Wahl offen', state: 'current' },
                 { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
                 { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },
@@ -63,7 +63,7 @@ export const WorkspaceChrome: Story = {
         summary={
           <StatsStrip
             items={[
-              { value: 33, label: 'Workshops' },
+              { value: 33, label: 'Kurse' },
               { value: 8, label: 'Slots' },
               { value: 10, label: 'Räume' },
             ]}
@@ -71,11 +71,11 @@ export const WorkspaceChrome: Story = {
         }
         tertiary_navigation={
           <TertiaryNavigation
-            aria_label="Workshopbereiche"
+            aria_label="Kursbereiche"
             value={tab}
             onChange={setTab}
             items={[
-              { value: 'overview', label: 'Workshops' },
+              { value: 'overview', label: 'Kurse' },
               { value: 'leaders', label: 'Leitungen' },
               { value: 'external', label: 'Extern' },
             ]}
@@ -117,10 +117,10 @@ export const States: Story = {
     <div className="grid gap-4 bg-background p-6">
       <LoadingState />
       <ErrorState onRetry={() => undefined} />
-      <EmptyState title="Noch keine Workshops" action={<Button>Workshop hinzufügen</Button>}>
-        Lege den ersten Workshop an. Programm und Teilnahme werden danach berechnet.
+      <EmptyState title="Noch keine Kurse" action={<Button>Kurs hinzufügen</Button>}>
+        Lege den ersten Kurs an. Programm und Teilnahme werden danach berechnet.
       </EmptyState>
-      <EmptyState success>Alle Workshops sind eingeplant.</EmptyState>
+      <EmptyState success>Alle Kurse sind eingeplant.</EmptyState>
     </div>
   ),
 }
@@ -133,9 +133,9 @@ export const TableAndResponsiveCollection: Story = {
     ]
     const table = (
       <DataTable
-        caption="Workshops"
+        caption="Kurse"
         columns={[
-          { key: 'name', label: 'Workshop' },
+          { key: 'name', label: 'Kurs' },
           { key: 'status', label: 'Status' },
         ]}
         rows={rows}
@@ -179,7 +179,7 @@ export const PickerAndPrint: Story = {
     return (
       <div className="space-y-6 bg-background p-6">
         <EntityPicker
-          label="Workshop"
+          label="Kurs"
           value={value}
           options={[
             { value: 'keramik', label: 'Keramik' },

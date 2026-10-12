@@ -15,10 +15,10 @@ function Example({ error }: { error?: string }) {
   const [open, setOpen] = useState(true)
   return (
     <CollectionCreateAction
-      label="Workshop hinzufügen"
-      title="Workshop hinzufügen"
+      label="Kurs hinzufügen"
+      title="Kurs hinzufügen"
       description="Lege Titel, Zielgruppe und Leitung fest."
-      submit_label="Workshop anlegen"
+      submit_label="Kurs anlegen"
       open={open}
       on_open_change={setOpen}
       on_submit={(event) => event.preventDefault()}

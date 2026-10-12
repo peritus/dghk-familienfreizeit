@@ -18,7 +18,7 @@ export const officialWorkshopAttention = [
   check(
     'official-workshops.zero-capacity',
     'official-workshops',
-    ['Workshop ohne Plätze', 'Workshop without capacity'],
+    ['Kurs ohne Plätze', 'Workshop without capacity'],
     (c) =>
       summary(c)
         .workshops.filter((w) => w.capacity === 0)
@@ -68,7 +68,7 @@ export const officialWorkshopAttention = [
       kind: 'review',
       scopes: ['dashboard', 'workshop', 'closing'],
       detail: () => ({
-        de: 'Für diesen Workshop ist keine Leitung angegeben.',
+        de: 'Für diesen Kurs ist keine Leitung angegeben.',
         en: 'No leader has been specified for this workshop.',
       }),
     },

@@ -145,11 +145,11 @@ export function WorkshopAllocationEmptyState({
   const hasAnswers = hasAnswersOverride ?? projection.has_answers
   if (projection.has_workshops && hasAnswers) return null
   return (
-    <EmptyState title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Workshops'}>
+    <EmptyState title={projection.has_workshops ? 'Noch keine Wünsche' : 'Noch keine Kurse'}>
       {children ??
         (projection.has_workshops
           ? 'Sobald Personen eine Rangfolge abgegeben haben, erscheinen Antworten und Nachfrage hier.'
-          : 'Lege zuerst Workshops an, damit Wünsche und Nachfrage berechnet werden können.')}
+          : 'Lege zuerst Kurse an, damit Wünsche und Nachfrage berechnet werden können.')}
     </EmptyState>
   )
 }

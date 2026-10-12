@@ -26,7 +26,7 @@ for (const width of [390, 640, 768, 1024, 1280]) {
   test(`shared header and content sizes at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`/iframe.html?id=screens-organiser-workshops--width-${width}&viewMode=story`)
-    const h1 = page.getByRole('heading', { name: 'Workshops', level: 1, exact: true })
+    const h1 = page.getByRole('heading', { name: 'Kurse', level: 1, exact: true })
     await expect(h1).toBeVisible({ timeout: 15000 })
     expect(await h1.evaluate((e) => getComputedStyle(e).fontSize)).toBe(
       width < 640 ? '24px' : '30px',

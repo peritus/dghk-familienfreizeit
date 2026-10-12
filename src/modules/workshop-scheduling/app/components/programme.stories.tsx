@@ -52,7 +52,7 @@ export const ReviewRows: Story = {
           }}
           action={
             <Button size="sm" variant="neutral">
-              Workshop bearbeiten
+              Kurs bearbeiten
             </Button>
           }
         />

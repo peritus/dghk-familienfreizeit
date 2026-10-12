@@ -105,7 +105,7 @@ async function serve(page: Page, initial: readonly Event[]) {
 }
 
 const track = (page: Page) =>
-  page.getByRole('region', { name: 'Ablauf der Workshopwahl' }).getByRole('listitem')
+  page.getByRole('region', { name: 'Ablauf der Kurswahl' }).getByRole('listitem')
 
 test('organisers open workshop choice, close the area, and reopen it', async ({ page }) => {
   await serve(page, beforeChoice)
@@ -122,7 +122,7 @@ test('organisers open workshop choice, close the area, and reopen it', async ({ 
   await page.getByRole('button', { name: 'Hinweise zur Kenntnis genommen' }).click()
   await page.getByRole('button', { name: 'Festlegen' }).click()
   const review = page.getByRole('alertdialog')
-  await expect(review.getByRole('heading', { name: 'Workshops festlegen?' })).toBeVisible()
+  await expect(review.getByRole('heading', { name: 'Kurse festlegen?' })).toBeVisible()
   await expect(review.getByText(/Das ist die erste Festlegung/)).toBeVisible()
   await expect(review.getByText('1 Familie betroffen')).toBeVisible()
   await review.getByRole('button', { name: 'Festlegen' }).click()

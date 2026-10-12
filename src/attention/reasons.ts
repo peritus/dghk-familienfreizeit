@@ -21,9 +21,9 @@ const reasons: Readonly<Record<string, readonly [string, string]>> = {
   ['hard.capacity']: ['Teilnahmeplätze ausgeschöpft', 'Attendance capacity exhausted'],
   ['hard.overlap']: ['Gleichzeitige Teilnahme', 'Simultaneous attendance'],
   ['hard.leader-conflict']: ['Gleichzeitige Leitung', 'Simultaneous leadership'],
-  ['hard.cancellation']: ['Workshop nicht mehr verfügbar', 'Workshop unavailable'],
-  ['hard.workshop-unavailable']: ['Workshop nicht mehr verfügbar', 'Workshop unavailable'],
-  ['hard.unscheduled']: ['Workshop nicht im Programm', 'Workshop not scheduled'],
+  ['hard.cancellation']: ['Kurs nicht mehr verfügbar', 'Workshop unavailable'],
+  ['hard.workshop-unavailable']: ['Kurs nicht mehr verfügbar', 'Workshop unavailable'],
+  ['hard.unscheduled']: ['Kurs nicht im Programm', 'Workshop not scheduled'],
   ['hard.mode-not-assigned']: ['Andere Teilnahmeart', 'Different participation mode'],
   ['hard.fixed-pair-unresolved']: [
     'Feste Teilnahme nicht beidseitig bestätigt',
@@ -42,11 +42,11 @@ const reasons: Readonly<Record<string, readonly [string, string]>> = {
   ['hard.no-slot-or-space']: ['Räume oder Slots fehlen', 'Spaces or slots missing'],
   ['hard.fixed-invalid']: ['Feste Entscheidung prüfen', 'Review fixed decision'],
   ['no eligible capacity']: [
-    'Gewählte Workshops konnten nicht zugeordnet werden',
+    'Gewählte Kurse konnten nicht zugeordnet werden',
     'Chosen workshops could not be assigned',
   ],
   ['no current workshop choice']: [
-    'Keine aktuelle Workshopwahl dokumentiert',
+    'Keine aktuelle Kurswahl dokumentiert',
     'No current workshop choice recorded',
   ],
 }

@@ -31,7 +31,7 @@ export function workshopRankingAttention(maxRank: number) {
     check(
       'workshop-rankings.choice-not-opened',
       'workshop-rankings',
-      ['Workshopwahl noch nicht geöffnet', 'Workshop choice not opened'],
+      ['Kurswahl noch nicht geöffnet', 'Workshop choice not opened'],
       (c) =>
         c.world!.phase_facts.opened['workshop-rankings.choice']
           ? []
@@ -46,7 +46,7 @@ export function workshopRankingAttention(maxRank: number) {
     check(
       'workshop-rankings.invalid-response',
       'workshop-rankings',
-      ['Workshopantwort widersprüchlich', 'Inconsistent workshop response'],
+      ['Kursantwort widersprüchlich', 'Inconsistent workshop response'],
       (c) =>
         rankings(c)
           .filter((r) => {
@@ -168,7 +168,7 @@ export function workshopRankingAttention(maxRank: number) {
     check(
       'workshop-rankings.overlap',
       'workshop-rankings',
-      ['Gewählte Workshops überschneiden sich', 'Chosen workshops overlap'],
+      ['Gewählte Kurse überschneiden sich', 'Chosen workshops overlap'],
       (c) => {
         const schedule = c.plan!.sections['workshop-scheduling'] as
           | WorkshopSchedulingSection

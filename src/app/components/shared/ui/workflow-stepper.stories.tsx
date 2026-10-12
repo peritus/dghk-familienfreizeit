@@ -30,9 +30,9 @@ type Story = StoryObj<typeof meta>
 export const WorkshopChoice: Story = {
   name: 'Example: Workshops',
   args: {
-    aria_label: 'Ablauf der Workshopwahl',
+    aria_label: 'Ablauf der Kurswahl',
     steps: [
-      { id: 'create', label: 'Workshops anlegen', state: 'complete' },
+      { id: 'create', label: 'Kurse anlegen', state: 'complete' },
       { id: 'open', label: 'Wahl öffnen', state: 'current' },
       { id: 'review', label: 'Zuordnung prüfen', state: 'upcoming' },
       { id: 'fixed', label: 'Festgelegt', state: 'upcoming' },

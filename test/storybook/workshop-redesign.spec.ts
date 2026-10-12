@@ -4,9 +4,7 @@ for (const width of [390, 640, 768, 1024, 1280]) {
   test(`full workshop catalogue and expanded track fit at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`/iframe.html?id=screens-organiser-workshops--width-${width}&viewMode=story`)
-    await expect(
-      page.getByRole('heading', { name: 'Workshops', exact: true, level: 1 }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Kurse', exact: true, level: 1 })).toBeVisible()
     await expect(page.locator('[data-slot="collection-list"] > li')).toHaveCount(33)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
     await page.getByRole('button', { name: 'Alle Schritte' }).click()
@@ -24,7 +22,7 @@ test('dark appearance, reduced motion and browser print preserve semantic surfac
 }) => {
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' })
   await page.goto('/iframe.html?id=screens-organiser-workshops--width-390&viewMode=story')
-  const action = page.getByRole('button', { name: 'Workshop hinzufügen' })
+  const action = page.getByRole('button', { name: 'Kurs hinzufügen' })
   await expect(action).toBeVisible()
   await action.hover()
   expect(await action.evaluate((element) => getComputedStyle(element).translate)).toBe('none')
@@ -37,7 +35,7 @@ test('dark appearance, reduced motion and browser print preserve semantic surfac
   await expect(page.locator('.workflow-compact')).toBeHidden()
   await expect(action).toBeHidden()
   await expect(page.locator('[data-slot="stats-strip"] > *')).toHaveCount(4)
-  await expect(page.locator('[data-slot="print-context"]')).toContainText('33 von 33 Workshops')
+  await expect(page.locator('[data-slot="print-context"]')).toContainText('33 von 33 Kursen')
   await expect(page.locator('[data-slot="print-identity"] img')).toBeVisible()
   await page.pdf({
     path: test.info().outputPath('workshops-a4.pdf'),

@@ -208,9 +208,7 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
         slotId = item.evidence.slot_id as string
       return {
         id: item.id,
-        workshops: ids
-          .map((id) => workshops.get(id)?.title ?? 'Workshop nicht verfügbar')
-          .join(' + '),
+        workshops: ids.map((id) => workshops.get(id)?.title ?? 'Kurs nicht verfügbar').join(' + '),
         slot: placementLabel(slots.get(slotId), input.time_zone),
         people_count: people.length,
         people: people

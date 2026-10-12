@@ -205,9 +205,9 @@ export function WorkshopDemandTable({ workshops }: { workshops: readonly Worksho
   )
   return (
     <DataTable
-      caption="Nachfrage pro Workshop"
+      caption="Nachfrage pro Kurs"
       columns={[
-        { key: 'workshop', label: 'Workshop' },
+        { key: 'workshop', label: 'Kurs' },
         { key: 'audience', label: 'Für' },
         { key: 'slot', label: 'Slot' },
         { key: 'capacity', label: 'Plätze', numeric: true },
