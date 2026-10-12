@@ -106,3 +106,61 @@ test('labels unsuitable rooms by the reasons they cannot be assigned', () => {
   expect(screen.getByText('Ungeeignete Zimmer (1)')).toBeTruthy()
   expect(screen.queryByText(/Abgelehnte Zimmer/)).toBeNull()
 })
+
+test.each([
+  { strength: 'preferred', multiplier: 1, priority: 8 },
+  { strength: 'required', multiplier: 2, priority: 16 },
+] as const)(
+  'explains the $strength accessible-room contribution using the configured weight',
+  ({ strength, multiplier, priority }) => {
+    const initialState = stateWithDrafts([
+      {
+        at: '2027-01-01T00:30:00Z',
+        actor: 'organiser@example.test',
+        subject: null,
+        type: 'LabelSet',
+        payload: {
+          entity_id: 'rm_101',
+          key: 'is-accessible',
+          value: true,
+          strength: null,
+          note: null,
+        },
+      } satisfies EventDraft,
+      {
+        at: '2027-01-01T00:31:00Z',
+        actor: 'organiser@example.test',
+        subject: 'fam_sonnenberg',
+        type: 'LabelSet',
+        payload: {
+          entity_id: 'fam_sonnenberg',
+          key: 'needs-accessible',
+          value: 'accessible',
+          strength,
+          note: null,
+        },
+      } satisfies EventDraft,
+    ])
+    render(
+      <FixtureProvider initialState={initialState}>
+        <AssignmentTraceScreen />
+      </FixtureProvider>,
+    )
+
+    fireEvent.click(screen.getByText('Familie Sonnenberg'))
+    const prioritySection = screen.getByRole('region', { name: 'Konfigurierte Priorität' })
+    expect(prioritySection.textContent).toContain(`8 × ${multiplier} = ${priority} Punkte`)
+    expect(prioritySection.textContent).toContain(
+      `Barrierearm (${strength === 'required' ? 'erforderlich' : 'Wunsch'})`,
+    )
+    expect(screen.getByText('Familie Sonnenberg').closest('summary')?.textContent).toContain(
+      `Priorität ${priority}`,
+    )
+
+    const visibleText = document.body.textContent ?? ''
+    expect(visibleText).not.toContain('fam_sonnenberg')
+    expect(visibleText).not.toContain('rm_101')
+    expect(visibleText).not.toContain('needs-accessible')
+    expect(visibleText).not.toContain('accessible')
+  },
+)
