@@ -62,7 +62,7 @@ export function workshopTrack(input: {
     },
     {
       id: 'review',
-      label: 'Zuordnung prüfen',
+      label: 'Kursvergabe prüfen',
       state: closed ? 'complete' : choosing ? 'current' : 'upcoming',
       description: closed ? 'Geprüft' : readinessText(review),
     },

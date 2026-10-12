@@ -101,7 +101,7 @@ function allocationStatusLabel(phases: readonly PhaseView[]): string {
   const review = phases.find(({ phase }) => phase === 'workshop-assignment.review')
   if (choice?.status === 'closed') return 'Festgelegt'
   if (!choice || choice.status === 'upcoming') return 'Vorbereitung'
-  return review && !review.readiness.ready ? 'Prüfung erforderlich' : 'Zuordnung prüfen'
+  return review && !review.readiness.ready ? 'Prüfung erforderlich' : 'Kursvergabe prüfen'
 }
 
 function setLabelDraft(
@@ -230,7 +230,7 @@ export function WorkshopAllocation() {
         <ScreenHeader
           eyebrow="Kurse · Wünsche"
           title="Wünsche"
-          description="Was gewünscht wurde und wie die automatische Zuordnung daraus entsteht."
+          description="Was gewünscht wurde und wie die Kursplätze nach den abgegebenen Wunschlisten verteilt werden."
         />
       }
       notices={
@@ -240,7 +240,7 @@ export function WorkshopAllocation() {
           <FixedDecisionReview
             items={projection.fixed_reviews ?? []}
             title="Feste Teilnahmen prüfen"
-            description="Festgelegte Teilnahmen werden mit der automatischen Zuordnung ohne diese Entscheidungen verglichen."
+            description="Vergleicht feste Teilnahmen mit der Verteilung nach Wunschlisten ohne feste Vorgaben."
           />
         </>
       }
@@ -267,7 +267,7 @@ export function WorkshopAllocation() {
           <WorkshopAllocationStatus label={allocationStatusLabel(phases ?? [])}>
             {projection.has_answers
               ? 'Der Verlauf ist eine abgeleitete Vorschau. Prüfe offene Fälle und Konflikte.'
-              : 'Sobald Antworten vorliegen, zeigt der Verlauf die Zuordnung Schritt für Schritt.'}
+              : 'Sobald Antworten vorliegen, zeigt der Verlauf die Verteilung nach Wunschlisten Schritt für Schritt.'}
           </WorkshopAllocationStatus>
         </>
       }
@@ -300,7 +300,7 @@ export function WorkshopAllocation() {
       <section className="space-y-4" aria-label="Feste Teilnahmen">
         <SectionHeader
           title="Feste Teilnahmen"
-          description="Lege bei Bedarf eine Teilnahme fest. Sie bleibt trotz Alters-, Zielgruppen-, Kapazitäts-, Überschneidungs-, Leitungs- oder Teilnahmeartkonflikten bestehen; abgesagte und nicht terminierte Kurse werden mit einem Hinweis nicht zugeteilt."
+          description="Lege bei Bedarf eine Teilnahme fest. Sie bleibt trotz Alters-, Zielgruppen-, Kapazitäts-, Überschneidungs-, Leitungs- oder Teilnahmeartkonflikten bestehen; abgesagte und nicht terminierte Kurse werden mit einem Hinweis bei der Vergabe übersprungen."
         />
         <form
           className="grid gap-3 rounded-base border-2 border-border bg-secondary-background p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
@@ -366,7 +366,7 @@ export function WorkshopAllocation() {
               fixedKeys.has(`${fixedPersonId}|${fixedWorkshopId}`)
             }
           >
-            Fest zuordnen
+            Teilnahme festlegen
           </Button>
         </form>
         {fixedPairs.length ? (
@@ -417,7 +417,7 @@ export function WorkshopAllocation() {
         <section className="space-y-5" aria-labelledby="allocation-answers-heading">
           <SectionHeader
             title="Antworten"
-            description="Die abgegebenen Rangfolgen und die daraus abgeleiteten Zuordnungen."
+            description="Die abgegebenen Rangfolgen und die daraus berechnete Kursvergabe."
           />
           <WorkshopAllocationSummary answers={answers} projection={projection} />
           <WorkshopAllocationEmptyState projection={projection} has_answers={answers.length > 0}>

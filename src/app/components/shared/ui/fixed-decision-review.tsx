@@ -24,7 +24,7 @@ export function FixedDecisionReview({
   const status = {
     same: { label: 'gleich', tone: 'success' as const },
     overrides: { label: 'ersetzt automatisch', tone: 'attention' as const },
-    'no-automatic': { label: 'keine automatische Zuordnung', tone: 'neutral' as const },
+    'no-automatic': { label: 'keine automatische Kursvergabe', tone: 'neutral' as const },
     invalid: { label: 'nicht erfüllbar', tone: 'danger' as const },
   }
   return (
@@ -46,7 +46,7 @@ export function FixedDecisionReview({
                 {item.automatic_targets.length ? (
                   <strong>{item.automatic_targets.join(', ')}</strong>
                 ) : (
-                  <span className="text-muted">keine Zuordnung</span>
+                  <span className="text-muted">keine Kursvergabe</span>
                 )}
               </p>
             </CollectionRow>
