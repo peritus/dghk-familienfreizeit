@@ -1,0 +1,421 @@
+// Wish data from the previous year's Kurszuordnung_V2.xlsx spreadsheet,
+// analysed in spec/prior-art/kurszuordnung-v2.md. The spreadsheet records
+// only anonymised names ("Kind 01" to "Kind 66"), course letters A to M and up to
+// three ordered wishes per child.
+//
+// The spreadsheet has no age, audience, capacity, space or leader data, so this
+// fixture assumes: every child is 10, every course is a children's course in
+// assigned mode for ages 6 to 14 with capacity 66, five spaces hold 66 people,
+// and no course has a leader. Courses are entered in letter order, so automatic
+// first-feasible placement follows that order. Placements and capacity variants
+// are applied by workshop-assignment-kurszuordnung-v2.test.ts.
+
+WorkshopSpaceAdded workshop_space_id="wsp_raum_1" name="Raum 1" location_description="Raum 1" capacity=66 sort_key=1
+WorkshopSpaceAdded workshop_space_id="wsp_raum_2" name="Raum 2" location_description="Raum 2" capacity=66 sort_key=2
+WorkshopSpaceAdded workshop_space_id="wsp_raum_3" name="Raum 3" location_description="Raum 3" capacity=66 sort_key=3
+WorkshopSpaceAdded workshop_space_id="wsp_raum_4" name="Raum 4" location_description="Raum 4" capacity=66 sort_key=4
+WorkshopSpaceAdded workshop_space_id="wsp_raum_5" name="Raum 5" location_description="Raum 5" capacity=66 sort_key=5
+
+WorkshopSlotAdded slot_id="slot_1" starts_at="2027-05-14T09:00:00+02:00" ends_at="2027-05-14T10:30:00+02:00" sort_key=1
+WorkshopSlotAdded slot_id="slot_2" starts_at="2027-05-14T11:00:00+02:00" ends_at="2027-05-14T12:30:00+02:00" sort_key=2
+WorkshopSlotAdded slot_id="slot_3" starts_at="2027-05-14T14:00:00+02:00" ends_at="2027-05-14T15:30:00+02:00" sort_key=3
+
+WorkshopAdded workshop_id="wks_kurs_a" title="Kurs A" description="Kurs A aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=1
+WorkshopAdded workshop_id="wks_kurs_b" title="Kurs B" description="Kurs B aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=2
+WorkshopAdded workshop_id="wks_kurs_c" title="Kurs C" description="Kurs C aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=3
+WorkshopAdded workshop_id="wks_kurs_d" title="Kurs D" description="Kurs D aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=4
+WorkshopAdded workshop_id="wks_kurs_e" title="Kurs E" description="Kurs E aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=5
+WorkshopAdded workshop_id="wks_kurs_f" title="Kurs F" description="Kurs F aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=6
+WorkshopAdded workshop_id="wks_kurs_g" title="Kurs G" description="Kurs G aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=7
+WorkshopAdded workshop_id="wks_kurs_h" title="Kurs H" description="Kurs H aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=8
+WorkshopAdded workshop_id="wks_kurs_i" title="Kurs I" description="Kurs I aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=9
+WorkshopAdded workshop_id="wks_kurs_j" title="Kurs J" description="Kurs J aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=10
+WorkshopAdded workshop_id="wks_kurs_k" title="Kurs K" description="Kurs K aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=11
+WorkshopAdded workshop_id="wks_kurs_l" title="Kurs L" description="Kurs L aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=12
+WorkshopAdded workshop_id="wks_kurs_m" title="Kurs M" description="Kurs M aus der Kurszuordnung des Vorjahres." audience="children" age_min=6 age_max=14 capacity=66 participation_mode="assigned" sort_key=13
+
+FamilyInvited family_id="fam_kind_01" email="kind-01@example.test" display_name="Kind 01" locale="de"
+PersonAdded person_id="per_kind_01" family_id="fam_kind_01" given_name="Kind" family_name="01" age=10 role="child"
+LabelSet entity_id="per_kind_01" key="prefers-workshop" value="wks_kurs_e:1" strength=#null note=#null
+LabelSet entity_id="per_kind_01" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_01" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_02" email="kind-02@example.test" display_name="Kind 02" locale="de"
+PersonAdded person_id="per_kind_02" family_id="fam_kind_02" given_name="Kind" family_name="02" age=10 role="child"
+LabelSet entity_id="per_kind_02" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_02" key="prefers-workshop" value="wks_kurs_h:2" strength=#null note=#null
+LabelSet entity_id="per_kind_02" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_03" email="kind-03@example.test" display_name="Kind 03" locale="de"
+PersonAdded person_id="per_kind_03" family_id="fam_kind_03" given_name="Kind" family_name="03" age=10 role="child"
+LabelSet entity_id="per_kind_03" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_03" key="prefers-workshop" value="wks_kurs_m:2" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_04" email="kind-04@example.test" display_name="Kind 04" locale="de"
+PersonAdded person_id="per_kind_04" family_id="fam_kind_04" given_name="Kind" family_name="04" age=10 role="child"
+LabelSet entity_id="per_kind_04" key="prefers-workshop" value="wks_kurs_h:1" strength=#null note=#null
+LabelSet entity_id="per_kind_04" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_04" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_05" email="kind-05@example.test" display_name="Kind 05" locale="de"
+PersonAdded person_id="per_kind_05" family_id="fam_kind_05" given_name="Kind" family_name="05" age=10 role="child"
+LabelSet entity_id="per_kind_05" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_05" key="prefers-workshop" value="wks_kurs_h:2" strength=#null note=#null
+LabelSet entity_id="per_kind_05" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_06" email="kind-06@example.test" display_name="Kind 06" locale="de"
+PersonAdded person_id="per_kind_06" family_id="fam_kind_06" given_name="Kind" family_name="06" age=10 role="child"
+LabelSet entity_id="per_kind_06" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_06" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_06" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_07" email="kind-07@example.test" display_name="Kind 07" locale="de"
+PersonAdded person_id="per_kind_07" family_id="fam_kind_07" given_name="Kind" family_name="07" age=10 role="child"
+LabelSet entity_id="per_kind_07" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_07" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_07" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_08" email="kind-08@example.test" display_name="Kind 08" locale="de"
+PersonAdded person_id="per_kind_08" family_id="fam_kind_08" given_name="Kind" family_name="08" age=10 role="child"
+LabelSet entity_id="per_kind_08" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_08" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_08" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_09" email="kind-09@example.test" display_name="Kind 09" locale="de"
+PersonAdded person_id="per_kind_09" family_id="fam_kind_09" given_name="Kind" family_name="09" age=10 role="child"
+LabelSet entity_id="per_kind_09" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_09" key="prefers-workshop" value="wks_kurs_h:2" strength=#null note=#null
+LabelSet entity_id="per_kind_09" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_10" email="kind-10@example.test" display_name="Kind 10" locale="de"
+PersonAdded person_id="per_kind_10" family_id="fam_kind_10" given_name="Kind" family_name="10" age=10 role="child"
+LabelSet entity_id="per_kind_10" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_10" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_10" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_11" email="kind-11@example.test" display_name="Kind 11" locale="de"
+PersonAdded person_id="per_kind_11" family_id="fam_kind_11" given_name="Kind" family_name="11" age=10 role="child"
+LabelSet entity_id="per_kind_11" key="prefers-workshop" value="wks_kurs_k:1" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_12" email="kind-12@example.test" display_name="Kind 12" locale="de"
+PersonAdded person_id="per_kind_12" family_id="fam_kind_12" given_name="Kind" family_name="12" age=10 role="child"
+LabelSet entity_id="per_kind_12" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_12" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_12" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_13" email="kind-13@example.test" display_name="Kind 13" locale="de"
+PersonAdded person_id="per_kind_13" family_id="fam_kind_13" given_name="Kind" family_name="13" age=10 role="child"
+LabelSet entity_id="per_kind_13" key="prefers-workshop" value="wks_kurs_j:1" strength=#null note=#null
+LabelSet entity_id="per_kind_13" key="prefers-workshop" value="wks_kurs_m:2" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_14" email="kind-14@example.test" display_name="Kind 14" locale="de"
+PersonAdded person_id="per_kind_14" family_id="fam_kind_14" given_name="Kind" family_name="14" age=10 role="child"
+LabelSet entity_id="per_kind_14" key="prefers-workshop" value="wks_kurs_e:1" strength=#null note=#null
+LabelSet entity_id="per_kind_14" key="prefers-workshop" value="wks_kurs_i:2" strength=#null note=#null
+LabelSet entity_id="per_kind_14" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_15" email="kind-15@example.test" display_name="Kind 15" locale="de"
+PersonAdded person_id="per_kind_15" family_id="fam_kind_15" given_name="Kind" family_name="15" age=10 role="child"
+LabelSet entity_id="per_kind_15" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_15" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_15" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_16" email="kind-16@example.test" display_name="Kind 16" locale="de"
+PersonAdded person_id="per_kind_16" family_id="fam_kind_16" given_name="Kind" family_name="16" age=10 role="child"
+LabelSet entity_id="per_kind_16" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_16" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_16" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_17" email="kind-17@example.test" display_name="Kind 17" locale="de"
+PersonAdded person_id="per_kind_17" family_id="fam_kind_17" given_name="Kind" family_name="17" age=10 role="child"
+LabelSet entity_id="per_kind_17" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_17" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_17" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_18" email="kind-18@example.test" display_name="Kind 18" locale="de"
+PersonAdded person_id="per_kind_18" family_id="fam_kind_18" given_name="Kind" family_name="18" age=10 role="child"
+LabelSet entity_id="per_kind_18" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_18" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_18" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_19" email="kind-19@example.test" display_name="Kind 19" locale="de"
+PersonAdded person_id="per_kind_19" family_id="fam_kind_19" given_name="Kind" family_name="19" age=10 role="child"
+LabelSet entity_id="per_kind_19" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_19" key="prefers-workshop" value="wks_kurs_g:2" strength=#null note=#null
+LabelSet entity_id="per_kind_19" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_20" email="kind-20@example.test" display_name="Kind 20" locale="de"
+PersonAdded person_id="per_kind_20" family_id="fam_kind_20" given_name="Kind" family_name="20" age=10 role="child"
+LabelSet entity_id="per_kind_20" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_20" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_20" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_21" email="kind-21@example.test" display_name="Kind 21" locale="de"
+PersonAdded person_id="per_kind_21" family_id="fam_kind_21" given_name="Kind" family_name="21" age=10 role="child"
+LabelSet entity_id="per_kind_21" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_21" key="prefers-workshop" value="wks_kurs_c:2" strength=#null note=#null
+LabelSet entity_id="per_kind_21" key="prefers-workshop" value="wks_kurs_g:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_22" email="kind-22@example.test" display_name="Kind 22" locale="de"
+PersonAdded person_id="per_kind_22" family_id="fam_kind_22" given_name="Kind" family_name="22" age=10 role="child"
+LabelSet entity_id="per_kind_22" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_22" key="prefers-workshop" value="wks_kurs_g:2" strength=#null note=#null
+LabelSet entity_id="per_kind_22" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_23" email="kind-23@example.test" display_name="Kind 23" locale="de"
+PersonAdded person_id="per_kind_23" family_id="fam_kind_23" given_name="Kind" family_name="23" age=10 role="child"
+LabelSet entity_id="per_kind_23" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_23" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_23" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_24" email="kind-24@example.test" display_name="Kind 24" locale="de"
+PersonAdded person_id="per_kind_24" family_id="fam_kind_24" given_name="Kind" family_name="24" age=10 role="child"
+LabelSet entity_id="per_kind_24" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_24" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_25" email="kind-25@example.test" display_name="Kind 25" locale="de"
+PersonAdded person_id="per_kind_25" family_id="fam_kind_25" given_name="Kind" family_name="25" age=10 role="child"
+LabelSet entity_id="per_kind_25" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_25" key="prefers-workshop" value="wks_kurs_g:2" strength=#null note=#null
+LabelSet entity_id="per_kind_25" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_26" email="kind-26@example.test" display_name="Kind 26" locale="de"
+PersonAdded person_id="per_kind_26" family_id="fam_kind_26" given_name="Kind" family_name="26" age=10 role="child"
+LabelSet entity_id="per_kind_26" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_26" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_26" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_27" email="kind-27@example.test" display_name="Kind 27" locale="de"
+PersonAdded person_id="per_kind_27" family_id="fam_kind_27" given_name="Kind" family_name="27" age=10 role="child"
+LabelSet entity_id="per_kind_27" key="prefers-workshop" value="wks_kurs_j:1" strength=#null note=#null
+LabelSet entity_id="per_kind_27" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_28" email="kind-28@example.test" display_name="Kind 28" locale="de"
+PersonAdded person_id="per_kind_28" family_id="fam_kind_28" given_name="Kind" family_name="28" age=10 role="child"
+LabelSet entity_id="per_kind_28" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_28" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_28" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_29" email="kind-29@example.test" display_name="Kind 29" locale="de"
+PersonAdded person_id="per_kind_29" family_id="fam_kind_29" given_name="Kind" family_name="29" age=10 role="child"
+LabelSet entity_id="per_kind_29" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_29" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_29" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_30" email="kind-30@example.test" display_name="Kind 30" locale="de"
+PersonAdded person_id="per_kind_30" family_id="fam_kind_30" given_name="Kind" family_name="30" age=10 role="child"
+LabelSet entity_id="per_kind_30" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_30" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_30" key="prefers-workshop" value="wks_kurs_g:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_31" email="kind-31@example.test" display_name="Kind 31" locale="de"
+PersonAdded person_id="per_kind_31" family_id="fam_kind_31" given_name="Kind" family_name="31" age=10 role="child"
+LabelSet entity_id="per_kind_31" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_31" key="prefers-workshop" value="wks_kurs_i:2" strength=#null note=#null
+LabelSet entity_id="per_kind_31" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_32" email="kind-32@example.test" display_name="Kind 32" locale="de"
+PersonAdded person_id="per_kind_32" family_id="fam_kind_32" given_name="Kind" family_name="32" age=10 role="child"
+LabelSet entity_id="per_kind_32" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_32" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_32" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_33" email="kind-33@example.test" display_name="Kind 33" locale="de"
+PersonAdded person_id="per_kind_33" family_id="fam_kind_33" given_name="Kind" family_name="33" age=10 role="child"
+LabelSet entity_id="per_kind_33" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_33" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_33" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_34" email="kind-34@example.test" display_name="Kind 34" locale="de"
+PersonAdded person_id="per_kind_34" family_id="fam_kind_34" given_name="Kind" family_name="34" age=10 role="child"
+LabelSet entity_id="per_kind_34" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_34" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_34" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_35" email="kind-35@example.test" display_name="Kind 35" locale="de"
+PersonAdded person_id="per_kind_35" family_id="fam_kind_35" given_name="Kind" family_name="35" age=10 role="child"
+LabelSet entity_id="per_kind_35" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_35" key="prefers-workshop" value="wks_kurs_e:2" strength=#null note=#null
+LabelSet entity_id="per_kind_35" key="prefers-workshop" value="wks_kurs_g:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_36" email="kind-36@example.test" display_name="Kind 36" locale="de"
+PersonAdded person_id="per_kind_36" family_id="fam_kind_36" given_name="Kind" family_name="36" age=10 role="child"
+LabelSet entity_id="per_kind_36" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_36" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_36" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_37" email="kind-37@example.test" display_name="Kind 37" locale="de"
+PersonAdded person_id="per_kind_37" family_id="fam_kind_37" given_name="Kind" family_name="37" age=10 role="child"
+LabelSet entity_id="per_kind_37" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_37" key="prefers-workshop" value="wks_kurs_f:2" strength=#null note=#null
+LabelSet entity_id="per_kind_37" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_38" email="kind-38@example.test" display_name="Kind 38" locale="de"
+PersonAdded person_id="per_kind_38" family_id="fam_kind_38" given_name="Kind" family_name="38" age=10 role="child"
+LabelSet entity_id="per_kind_38" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_38" key="prefers-workshop" value="wks_kurs_g:2" strength=#null note=#null
+LabelSet entity_id="per_kind_38" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_39" email="kind-39@example.test" display_name="Kind 39" locale="de"
+PersonAdded person_id="per_kind_39" family_id="fam_kind_39" given_name="Kind" family_name="39" age=10 role="child"
+LabelSet entity_id="per_kind_39" key="prefers-workshop" value="wks_kurs_h:1" strength=#null note=#null
+LabelSet entity_id="per_kind_39" key="prefers-workshop" value="wks_kurs_i:2" strength=#null note=#null
+LabelSet entity_id="per_kind_39" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_40" email="kind-40@example.test" display_name="Kind 40" locale="de"
+PersonAdded person_id="per_kind_40" family_id="fam_kind_40" given_name="Kind" family_name="40" age=10 role="child"
+LabelSet entity_id="per_kind_40" key="prefers-workshop" value="wks_kurs_j:1" strength=#null note=#null
+LabelSet entity_id="per_kind_40" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_40" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_41" email="kind-41@example.test" display_name="Kind 41" locale="de"
+PersonAdded person_id="per_kind_41" family_id="fam_kind_41" given_name="Kind" family_name="41" age=10 role="child"
+LabelSet entity_id="per_kind_41" key="prefers-workshop" value="wks_kurs_k:1" strength=#null note=#null
+LabelSet entity_id="per_kind_41" key="prefers-workshop" value="wks_kurs_l:2" strength=#null note=#null
+LabelSet entity_id="per_kind_41" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_42" email="kind-42@example.test" display_name="Kind 42" locale="de"
+PersonAdded person_id="per_kind_42" family_id="fam_kind_42" given_name="Kind" family_name="42" age=10 role="child"
+LabelSet entity_id="per_kind_42" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_42" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_42" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_43" email="kind-43@example.test" display_name="Kind 43" locale="de"
+PersonAdded person_id="per_kind_43" family_id="fam_kind_43" given_name="Kind" family_name="43" age=10 role="child"
+LabelSet entity_id="per_kind_43" key="prefers-workshop" value="wks_kurs_j:1" strength=#null note=#null
+LabelSet entity_id="per_kind_43" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_43" key="prefers-workshop" value="wks_kurs_l:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_44" email="kind-44@example.test" display_name="Kind 44" locale="de"
+PersonAdded person_id="per_kind_44" family_id="fam_kind_44" given_name="Kind" family_name="44" age=10 role="child"
+LabelSet entity_id="per_kind_44" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_44" key="prefers-workshop" value="wks_kurs_h:2" strength=#null note=#null
+LabelSet entity_id="per_kind_44" key="prefers-workshop" value="wks_kurs_i:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_45" email="kind-45@example.test" display_name="Kind 45" locale="de"
+PersonAdded person_id="per_kind_45" family_id="fam_kind_45" given_name="Kind" family_name="45" age=10 role="child"
+LabelSet entity_id="per_kind_45" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_45" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_46" email="kind-46@example.test" display_name="Kind 46" locale="de"
+PersonAdded person_id="per_kind_46" family_id="fam_kind_46" given_name="Kind" family_name="46" age=10 role="child"
+LabelSet entity_id="per_kind_46" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_46" key="prefers-workshop" value="wks_kurs_l:2" strength=#null note=#null
+LabelSet entity_id="per_kind_46" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_47" email="kind-47@example.test" display_name="Kind 47" locale="de"
+PersonAdded person_id="per_kind_47" family_id="fam_kind_47" given_name="Kind" family_name="47" age=10 role="child"
+LabelSet entity_id="per_kind_47" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_47" key="prefers-workshop" value="wks_kurs_h:2" strength=#null note=#null
+LabelSet entity_id="per_kind_47" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_48" email="kind-48@example.test" display_name="Kind 48" locale="de"
+PersonAdded person_id="per_kind_48" family_id="fam_kind_48" given_name="Kind" family_name="48" age=10 role="child"
+LabelSet entity_id="per_kind_48" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_48" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+LabelSet entity_id="per_kind_48" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_49" email="kind-49@example.test" display_name="Kind 49" locale="de"
+PersonAdded person_id="per_kind_49" family_id="fam_kind_49" given_name="Kind" family_name="49" age=10 role="child"
+LabelSet entity_id="per_kind_49" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_49" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_49" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_50" email="kind-50@example.test" display_name="Kind 50" locale="de"
+PersonAdded person_id="per_kind_50" family_id="fam_kind_50" given_name="Kind" family_name="50" age=10 role="child"
+LabelSet entity_id="per_kind_50" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_50" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_50" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_51" email="kind-51@example.test" display_name="Kind 51" locale="de"
+PersonAdded person_id="per_kind_51" family_id="fam_kind_51" given_name="Kind" family_name="51" age=10 role="child"
+LabelSet entity_id="per_kind_51" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_51" key="prefers-workshop" value="wks_kurs_c:2" strength=#null note=#null
+LabelSet entity_id="per_kind_51" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_52" email="kind-52@example.test" display_name="Kind 52" locale="de"
+PersonAdded person_id="per_kind_52" family_id="fam_kind_52" given_name="Kind" family_name="52" age=10 role="child"
+LabelSet entity_id="per_kind_52" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_52" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_52" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_53" email="kind-53@example.test" display_name="Kind 53" locale="de"
+PersonAdded person_id="per_kind_53" family_id="fam_kind_53" given_name="Kind" family_name="53" age=10 role="child"
+LabelSet entity_id="per_kind_53" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_53" key="prefers-workshop" value="wks_kurs_c:2" strength=#null note=#null
+LabelSet entity_id="per_kind_53" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_54" email="kind-54@example.test" display_name="Kind 54" locale="de"
+PersonAdded person_id="per_kind_54" family_id="fam_kind_54" given_name="Kind" family_name="54" age=10 role="child"
+LabelSet entity_id="per_kind_54" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_54" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_54" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_55" email="kind-55@example.test" display_name="Kind 55" locale="de"
+PersonAdded person_id="per_kind_55" family_id="fam_kind_55" given_name="Kind" family_name="55" age=10 role="child"
+LabelSet entity_id="per_kind_55" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_55" key="prefers-workshop" value="wks_kurs_d:2" strength=#null note=#null
+LabelSet entity_id="per_kind_55" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_56" email="kind-56@example.test" display_name="Kind 56" locale="de"
+PersonAdded person_id="per_kind_56" family_id="fam_kind_56" given_name="Kind" family_name="56" age=10 role="child"
+LabelSet entity_id="per_kind_56" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_57" email="kind-57@example.test" display_name="Kind 57" locale="de"
+PersonAdded person_id="per_kind_57" family_id="fam_kind_57" given_name="Kind" family_name="57" age=10 role="child"
+LabelSet entity_id="per_kind_57" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_57" key="prefers-workshop" value="wks_kurs_i:2" strength=#null note=#null
+LabelSet entity_id="per_kind_57" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_58" email="kind-58@example.test" display_name="Kind 58" locale="de"
+PersonAdded person_id="per_kind_58" family_id="fam_kind_58" given_name="Kind" family_name="58" age=10 role="child"
+LabelSet entity_id="per_kind_58" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_58" key="prefers-workshop" value="wks_kurs_l:2" strength=#null note=#null
+LabelSet entity_id="per_kind_58" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_59" email="kind-59@example.test" display_name="Kind 59" locale="de"
+PersonAdded person_id="per_kind_59" family_id="fam_kind_59" given_name="Kind" family_name="59" age=10 role="child"
+LabelSet entity_id="per_kind_59" key="prefers-workshop" value="wks_kurs_a:1" strength=#null note=#null
+LabelSet entity_id="per_kind_59" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_59" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_60" email="kind-60@example.test" display_name="Kind 60" locale="de"
+PersonAdded person_id="per_kind_60" family_id="fam_kind_60" given_name="Kind" family_name="60" age=10 role="child"
+LabelSet entity_id="per_kind_60" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_60" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_60" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_61" email="kind-61@example.test" display_name="Kind 61" locale="de"
+PersonAdded person_id="per_kind_61" family_id="fam_kind_61" given_name="Kind" family_name="61" age=10 role="child"
+LabelSet entity_id="per_kind_61" key="prefers-workshop" value="wks_kurs_c:1" strength=#null note=#null
+LabelSet entity_id="per_kind_61" key="prefers-workshop" value="wks_kurs_k:2" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_62" email="kind-62@example.test" display_name="Kind 62" locale="de"
+PersonAdded person_id="per_kind_62" family_id="fam_kind_62" given_name="Kind" family_name="62" age=10 role="child"
+LabelSet entity_id="per_kind_62" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_62" key="prefers-workshop" value="wks_kurs_e:2" strength=#null note=#null
+LabelSet entity_id="per_kind_62" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_63" email="kind-63@example.test" display_name="Kind 63" locale="de"
+PersonAdded person_id="per_kind_63" family_id="fam_kind_63" given_name="Kind" family_name="63" age=10 role="child"
+LabelSet entity_id="per_kind_63" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_63" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_63" key="prefers-workshop" value="wks_kurs_k:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_64" email="kind-64@example.test" display_name="Kind 64" locale="de"
+PersonAdded person_id="per_kind_64" family_id="fam_kind_64" given_name="Kind" family_name="64" age=10 role="child"
+LabelSet entity_id="per_kind_64" key="prefers-workshop" value="wks_kurs_d:1" strength=#null note=#null
+LabelSet entity_id="per_kind_64" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_64" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_65" email="kind-65@example.test" display_name="Kind 65" locale="de"
+PersonAdded person_id="per_kind_65" family_id="fam_kind_65" given_name="Kind" family_name="65" age=10 role="child"
+LabelSet entity_id="per_kind_65" key="prefers-workshop" value="wks_kurs_b:1" strength=#null note=#null
+LabelSet entity_id="per_kind_65" key="prefers-workshop" value="wks_kurs_c:2" strength=#null note=#null
+LabelSet entity_id="per_kind_65" key="prefers-workshop" value="wks_kurs_j:3" strength=#null note=#null
+
+FamilyInvited family_id="fam_kind_66" email="kind-66@example.test" display_name="Kind 66" locale="de"
+PersonAdded person_id="per_kind_66" family_id="fam_kind_66" given_name="Kind" family_name="66" age=10 role="child"
+LabelSet entity_id="per_kind_66" key="prefers-workshop" value="wks_kurs_g:1" strength=#null note=#null
+LabelSet entity_id="per_kind_66" key="prefers-workshop" value="wks_kurs_j:2" strength=#null note=#null
+LabelSet entity_id="per_kind_66" key="prefers-workshop" value="wks_kurs_m:3" strength=#null note=#null

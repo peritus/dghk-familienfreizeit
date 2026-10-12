@@ -183,6 +183,16 @@ The current workshop fixtures are:
   fixed-attendance identifiers.
 - `workshop-assignment/slot-retirement.kdl` verifies that replaying a slot
   retirement moves a workshop placement to the next available slot.
+- `workshop-assignment/kurszuordnung-v2.kdl` holds the previous year's wishes
+  from the Kurszuordnung_V2.xlsx spreadsheet:
+  66 children, 13 courses, and 188 ordered wishes. Ages, capacities, and spaces
+  are fixture assumptions stated in its header.
+  [`workshop-assignment-kurszuordnung-v2.test.ts`](../../test/solver/workshop-assignment-kurszuordnung-v2.test.ts)
+  adds placements and capacities as events and checks attendance outcomes for
+  the spreadsheet's hand-made plan, the best plan found by exhaustive search, a
+  capacity of 12 per course in both person-id orders, and automatic
+  first-feasible placement with five and thirteen spaces. The automatic
+  baseline is expected to change if placement starts reading wishes.
 - `phases/workshop-lifecycle.kdl` exercises workshop choice, closing, reopening,
   and later person/workshop lifecycle events.
 
