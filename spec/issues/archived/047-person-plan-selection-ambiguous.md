@@ -36,10 +36,10 @@ and the [workshop attendance report contract](../../modules/workshop-assignment.
 ## Resolution
 
 Person plan picker options and allocation trace controls now preserve stable
-person IDs. Duplicate names include family display context; if names still
-collide, a short stable ID suffix distinguishes them, with the full ID as a
-final collision fallback. The trace uses the explicit `person` query ID before
-any local fallback.
+person IDs internally. Duplicate names include family display context; if names
+still collide, a neutral ordinal distinguishes them. Opaque IDs remain option
+values and URL parameters but are not shown in visible labels or accessible
+names. The trace uses the explicit `person` query ID before any local fallback.
 
 Regression coverage selects both people with the same name in their person
 plans and verifies that a trace URL for the second ID keeps that identity in

@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, within, act } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { DraftGroupEditor } from '../../src/app/organiser/draft-group-editor.js'
-import { AttentionNotices } from '../../src/app/organiser/attention.js'
+import { AttentionDetails, AttentionNotices } from '../../src/app/organiser/attention.js'
 import { OrganiserContext } from '../../src/app/organiser/context.js'
 import { initialOrganiserState, organiserReducer } from '../../src/app/organiser/state.js'
 import { operationFeedback } from '../../src/attention/operations.js'
@@ -98,4 +98,30 @@ test('print includes all selected attention and its evidence while screen detail
   expect(within(printed).getAllByText('Plätze')).toHaveLength(12)
   act(() => window.dispatchEvent(new Event('afterprint')))
   expect(view.container.querySelector('[data-slot="attention-print"]')).toBeNull()
+})
+
+test('attention details replace unresolved typed entity IDs with readable fallback text', () => {
+  const item: AttentionItem = {
+    ...operationFeedback('invalid-field'),
+    id: 'invalid-building-reference',
+    wording: { title: 'Verweis prüfen', detail: 'Ein Objekt fehlt.', reasons: [] },
+    evidence: { subject_id: 'bld_missing' },
+  }
+  render(
+    <OrganiserContext.Provider
+      value={{
+        state: staged,
+        world: derive([]),
+        dispatch: vi.fn(),
+        stage: vi.fn(),
+        apply: async () => {},
+        attention: { items: [item], coverage: [] },
+      }}
+    >
+      <AttentionDetails item={item} />
+    </OrganiserContext.Provider>,
+  )
+
+  expect(screen.getByText('Objekt nicht verfügbar')).toBeTruthy()
+  expect(document.body.textContent).not.toContain('bld_missing')
 })

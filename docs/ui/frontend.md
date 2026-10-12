@@ -16,7 +16,7 @@ The route table is:
 | `/organiser/accommodation` | Redirects to the accommodation inventory entry point |
 | `/organiser/accommodation/inventory` | Selected room-inventory surface for buildings, rooms, beds, capacity, traits, and costs |
 | `/organiser/accommodation/assignment` | Deterministic assignment review with a fixed-assignment action and browser-printable output |
-| `/organiser/accommodation/assignment/trace` | Round-by-round room allocation trace with ordering factors, chosen room, feasible alternatives, and rejection reasons |
+| `/organiser/accommodation/assignment/trace` | Room allocation trace grouped into fixed decisions, automatic placements, unplaced families, and other outcomes |
 | `/organiser/workshops` | Shared workshop overview with Workshops, Leitungen and Externe Leitungen views |
 | `/organiser/workshops/leaders` | The same overview with the derived internal-leader collection selected |
 | `/organiser/workshops/external-leaders` | The same overview with external-leader authoring selected |
@@ -66,9 +66,9 @@ The **Listen** navigation entry selects the workshop roster, person plan, family
 plan, or room plan route. Each view has a page-local selector for one document with
 previous and next buttons, over the same plan as every other organiser screen.
 Person selection keeps the person ID from picker option through the URL. Duplicate
-names include the family's display name, with a short stable ID suffix when that
-still leaves a collision. The allocation trace likewise resolves the `person`
-query ID before displaying the selected person's trace.
+names include the family's display name, then a neutral ordinal if that still
+leaves a collision. The allocation trace likewise resolves the `person` query ID
+before displaying the selected person's trace.
 The roster shows an explicit confidentiality notice above its picker. Rosters and
 family plans switch to labelled cards when the list area is narrower than 720px;
 family plans also use those cards when printed on A4 portrait paper. Person and
@@ -165,11 +165,26 @@ every step.
 
 ## Frontend navigation and state invariants
 
+Opaque typed entity IDs are internal identity and must not appear in visible UI
+copy or accessible names. This applies across organiser and family screens,
+including labels, summaries, notices, tooltips, titles, print text, and fallback
+labels. Use the entity's human-readable name; for duplicate names add family
+context and then a neutral ordinal, and use a generic human-readable fallback
+when a name is unavailable. IDs may remain in internal keys, form values, and
+URL segments when needed to preserve identity.
+
 The accommodation **Verlauf** screen reads the current solver trace. It explains
-the fixed-first rule and the automatic ordering factors, then shows each round's
-factor values, chosen room and score, all other feasible rooms, and rejected
-rooms with their reasons. The screen presents solver evidence directly; it does
-not make a second allocation or infer the choice from the finished board.
+the five family-selection rules: fixed decisions first; highest configured
+priority (including required preferences); fewer currently feasible rooms;
+greater bed demand; then saved family order with an internal stable tie-break.
+Those rules repeat after every placement because room availability changes. The
+selected family receives its highest-scoring feasible room, with room order as
+the tie-break. The default view groups families into fixed decisions, automatic
+placements in selection order, unplaced families, and other outcomes. Each row
+starts collapsed with the family, assigned room, and assignment kind; opening it
+shows the relevant factors, feasible alternatives, and rejection reasons. The
+screen presents solver evidence directly; it does not make a second allocation
+or infer the choice from the finished board.
 
 Internal route changes use wouter's client-side navigation and must not reload
 the document. The organiser state owner remains mounted while moving between

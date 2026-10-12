@@ -148,9 +148,7 @@ export function AttentionDetails({ item }: { item: AttentionItem }) {
               ).de ?? value)
           : (checkTitles.get(value) ??
             labels[value] ??
-            (/^(fam|per|wks|wsp|slot|rm|bed|plc|ext)_/.test(value)
-              ? 'Objekt nicht verfügbar'
-              : value))
+            (/^[a-z]{2,5}_[a-z0-9_-]+$/i.test(value) ? 'Objekt nicht verfügbar' : value))
       : typeof value === 'boolean'
         ? value
           ? 'Ja'
