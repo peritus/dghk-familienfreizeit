@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Δ1 · Nachher · 1024 px</title>
+<style>body{margin:0;background:hsl(30 6% 80%)}
+.xb-bar{position:sticky;top:0;z-index:100;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;padding:8px 16px;background:#141413;color:#fff;font:500 13px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif}
+.xb-bar a{color:#fff!important;text-underline-offset:3px}
+.xb-bar a[aria-current]{font-weight:700;text-decoration:none;background:#fff;color:#000!important;padding:0 6px;border-radius:3px}
+.xb-stage{background:hsl(30 6% 80%);min-height:100vh;padding:24px 16px 48px}
+.xb-frame{margin:0 auto;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2),0 12px 32px rgba(0,0,0,.15);overflow:hidden}
+.xb-cap{margin:0 auto 10px;font:600 12px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#333;text-align:center}
+
+.xb-frame iframe{display:block;border:0;width:100%;height:calc(100vh - 120px);min-height:640px}</style>
+</head>
+<body>
+<div class="xb-bar"><strong>Δ1</strong><span><a href="nachher-1280.html">Nachher · 1280 px</a> · <a href="nachher-1024.html" aria-current="page">Nachher · 1024 px</a> · <a href="nachher-768.html">Nachher · 768 px</a> · <a href="nachher-640.html">Nachher · 640 px</a> · <a href="nachher-390.html">Nachher · 390 px</a> · <a href="menue-sheet-390.html">Menü-Sheet offen · 390 px</a> · <a href="menue-popover-640.html">Menü-Popover offen · 640 px</a> · <a href="menue-zustaende.html">Menü-Schalter · Zustände</a></span></div>
+<div class="xb-stage"><div class="xb-cap">Nachher · 1024 px · scrollt im Rahmen</div><div class="xb-frame" style="width:1024px"><iframe title="Nachher · 1024 px" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;de&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;&lt;style&gt;
+body{margin:0;background:hsl(33 100% 92%)}
+a{color:#000}a:hover{color:#000}
+.ff *{box-sizing:border-box}
+.ff button{font:inherit;cursor:pointer}
+.ff a:focus-visible,.ff button:focus-visible,.ff input:focus-visible{outline:2px solid #000;outline-offset:2px}
+.nav1 a:not([aria-current]):hover{border-color:rgba(0,0,0,.3)!important;background:hsl(33 100% 96%)}
+.lift{transition:transform .1s,box-shadow .1s}
+.lift:not([aria-current]):hover{transform:translate(-2px,-2px);box-shadow:2px 2px 0 0 #000;border-color:#000!important;background:#fff}
+.tab3 a:hover{border-bottom-color:rgba(0,0,0,.35)!important;color:#000!important}
+.tab3 a[aria-current=&quot;page&quot;]:hover{border-bottom-color:#000!important}
+.press{box-shadow:4px 4px 0 0 #000;transition:transform .1s,box-shadow .1s}
+.press:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 0 #000}
+.press:active{transform:translate(4px,4px);box-shadow:none}
+.seg &gt; * + *{border-left:2px solid #000!important}
+.ghost:hover{background:rgba(0,0,0,.06)!important}
+.stat-btn:hover{background:hsl(33 100% 97%)!important}
+.wlist &gt; li + li{border-top:1.5px solid hsl(33 25% 78%)}
+.stp-curlab &gt; span{overflow:hidden;text-overflow:ellipsis}
+@container page (width &lt; 48rem){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@container page (width &lt; 40rem){
+  .pg-main{padding:24px 16px 40px!important;gap:24px!important}
+  .stp-crow{flex-wrap:nowrap!important;padding-left:16px!important}
+  .stp-col{flex:1 1 0!important}
+  .stp-cline{width:12px!important;margin:0 4px!important}
+  .stp-curlab{display:flex!important;flex-direction:column;line-height:1.25}
+  .stp-sep{display:none}
+  .stp-sub{font-size:12px}
+  .stp-tog-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .stp-grid{grid-template-columns:minmax(0,1fr)!important}
+  .stp-li{display:grid!important;grid-template-columns:28px minmax(0,1fr);column-gap:12px}
+  .stp-head{flex-direction:column!important}
+  .stp-hline{display:none!important}
+  .stp-vline{display:block!important}
+  .stp-text{padding:3px 0 14px!important}
+  .stp-actions{align-items:stretch!important;width:100%}
+  .stp-actions &gt; div{justify-content:flex-start!important}
+  .rv-row{flex-wrap:wrap}
+  .rv-row &gt; a{margin-left:24px}
+  .seg{display:flex!important;width:100%}
+  .seg &gt; *{flex:1 1 0;justify-content:center}
+  .card{padding:16px!important}
+}
+/* D3 – collapsed phase card is one big click target */
+.stp-crow{transition:background .1s}
+.stp-crow:hover{background:hsl(33 100% 96%)}
+.stp-crow:hover .ghost{background:rgba(0,0,0,.06)}
+/* D1 – compact account control below 48rem */
+.acct-btn{transition:transform .1s,box-shadow .1s}
+.acct-btn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 0 #000!important}
+.acct-btn:focus-visible{outline:2px solid #000;outline-offset:2px}
+.acct-opt:hover{background:hsl(33 100% 96%)}
+@container page (width &lt; 48rem){
+  .hdr-wide{display:none!important}
+  .hdr-compact{display:flex!important}
+  .hdr-row{flex-wrap:nowrap!important}
+  .hdr-title{min-width:0;flex:1 1 auto}
+  .hdr-title span span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@container page (width &gt;= 40rem){
+  .acct-sheet{left:auto!important;right:16px!important;bottom:auto!important;top:64px!important;width:340px!important;max-height:none!important;border:2px solid #000!important;border-radius:5px!important;box-shadow:4px 4px 0 0 #000;padding-top:16px!important}
+  .acct-handle{display:none!important}
+  .acct-backdrop{background:transparent!important}
+}
+/* D2 – phones: one step down the type scale, compact nav */
+@container page (width &lt; 40rem){
+  .ff [style*=&quot;font-size: 30px&quot;]{font-size:24px!important}
+  .ff [style*=&quot;font-size: 24px&quot;]{font-size:20px!important}
+  .ff [style*=&quot;font-size: 20px&quot;]{font-size:18px!important}
+  .ff [style*=&quot;font-size: 18px&quot;]{font-size:16px!important}
+  .ff [style*=&quot;font-size: 16px&quot;]{font-size:14px!important}
+  .ff .nav1{margin-left:-14px!important}
+  .ff .nav1 a{height:44px!important;padding:0 12px!important;font-size:14px!important}
+  .ff .band{gap:4px!important;padding-top:8px!important;padding-bottom:8px!important}
+  .ff .band a{font-size:12px!important;padding:0 10px!important}
+  .ff .logo-tile{width:32px!important;height:32px!important}
+  .ff .hdr-pad{padding-top:10px!important;gap:10px!important}
+  .ff .t-sub{font-size:12px!important}
+}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div id=&quot;dc-root&quot;&gt;&lt;/div&gt;&lt;template id=&quot;dc-tpl&quot;&gt;
+
+&lt;div class=&quot;ff&quot; style=&quot;container-type: inline-size; container-name: page; min-height: 100vh; background: hsl(33 100% 92%); color: #000; font-family: -apple-system, BlinkMacSystemFont, &#x27;Segoe UI&#x27;, &#x27;Helvetica Neue&#x27;, &#x27;Noto Sans&#x27;, sans-serif; font-size: 16px; line-height: 1.5; font-weight: 500&quot;&gt;
+
+&lt;!-- ===== App-Header (Ebene 1) ===== --&gt;
+&lt;header style=&quot;background: #fff; border-bottom: 2px solid #000&quot;&gt;
+  &lt;div class=&quot;hdr-pad&quot; style=&quot;max-width: 64rem; margin: 0 auto; padding: 12px 16px 0; display: flex; flex-direction: column; gap: 12px&quot;&gt;
+    &lt;div class=&quot;hdr-row&quot; style=&quot;display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px&quot;&gt;
+      &lt;a href=&quot;#&quot; class=&quot;hdr-title&quot; style=&quot;display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0&quot;&gt;
+        &lt;span aria-hidden=&quot;true&quot; class=&quot;logo-tile&quot; style=&quot;width: 36px; height: 36px; flex: none; border: 2px solid #000; border-radius: 5px; background: hsl(28 100% 80%); box-shadow: 2px 2px 0 0 #000; display: flex; align-items: center; justify-content: center&quot;&gt;
+          &lt;svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M12 3 5 13h4l-3 5h12l-3-5h4z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 18v3&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;display: flex; flex-direction: column; min-width: 0&quot;&gt;
+          &lt;span style=&quot;font-size: 18px; line-height: 1.3; font-weight: 700&quot;&gt;Familienfreizeit Lübben 2027&lt;/span&gt;
+          &lt;span class=&quot;t-sub&quot; style=&quot;font-size: 14px; line-height: 1.3; color: hsl(30 10% 32%)&quot;&gt;DGHK Berlin-Brandenburg · Organisationsteam&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/a&gt;
+      &lt;div class=&quot;hdr-wide&quot; style=&quot;display: flex; align-items: center; gap: 8px&quot;&gt;
+        &lt;button type=&quot;button&quot; class=&quot;press&quot; aria-haspopup=&quot;menu&quot; aria-expanded=&quot;false&quot; style=&quot;display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700&quot;&gt;
+          &lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M20 6 9 17l-5-5&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+          Gespeichert
+          &lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m6 9 6 6 6-6&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+        &lt;/button&gt;
+        &lt;button type=&quot;button&quot; class=&quot;press&quot; style=&quot;min-height: 40px; padding: 0 14px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700&quot;&gt;Abmelden&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;hdr-compact&quot; style=&quot;display: none; align-items: center; gap: 8px; flex: none&quot;&gt;
+        &lt;sc-if value=&quot;{{acct.showSave}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+          &lt;button type=&quot;button&quot; class=&quot;press&quot; onClick=&quot;{{saveNow}}&quot; style=&quot;min-height: 40px; padding: 0 12px; border: 2px solid #000; border-radius: 5px; background: hsl(28 100% 51%); color: #000; font-size: 14px; font-weight: 700&quot;&gt;Speichern&lt;/button&gt;
+        &lt;/sc-if&gt;
+        &lt;button type=&quot;button&quot; class=&quot;acct-btn&quot; aria-haspopup=&quot;dialog&quot; aria-expanded=&quot;{{acctOpenStr}}&quot; aria-label=&quot;{{acct.aria}}&quot; onClick=&quot;{{toggleAcct}}&quot; style=&quot;height: 40px; flex: none; padding: 0; border: 2px {{acct.pillBorder}} #000; border-radius: 999px; background: #fff; color: #000; box-shadow: 2px 2px 0 0 #000; display: flex; align-items: stretch; overflow: hidden&quot;&gt;
+          &lt;span aria-hidden=&quot;true&quot; style=&quot;min-width: 36px; padding: 0 8px; display: flex; align-items: center; justify-content: center; gap: 3px; background: {{acct.segBg}}; border-right: 2px {{acct.pillBorder}} #000; font-size: 14px; line-height: 1; font-weight: 700&quot;&gt;
+            &lt;sc-if value=&quot;{{acct.badgeCheck}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;&lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M20 6 9 17l-5-5&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/sc-if&gt;
+            &lt;sc-if value=&quot;{{acct.badgePen}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/sc-if&gt;
+            &lt;sc-if value=&quot;{{acct.badgeCount}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;{{acct.count}}&lt;/sc-if&gt;
+          &lt;/span&gt;
+          &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 36px; display: flex; align-items: center; justify-content: center&quot;&gt;&lt;svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.25&quot; stroke-linecap=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M4 7h9&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M17 7h3&quot;&gt;&lt;/path&gt;&lt;circle cx=&quot;15&quot; cy=&quot;7&quot; r=&quot;2&quot;&gt;&lt;/circle&gt;&lt;path d=&quot;M4 17h3&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M11 17h9&quot;&gt;&lt;/path&gt;&lt;circle cx=&quot;9&quot; cy=&quot;17&quot; r=&quot;2&quot;&gt;&lt;/circle&gt;&lt;/svg&gt;&lt;/span&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;nav aria-label=&quot;Hauptnavigation&quot; class=&quot;nav1&quot; style=&quot;display: flex; gap: 2px; align-items: flex-end; margin: 0 0 -2px -18px; overflow-x: auto; white-space: nowrap&quot;&gt;
+      &lt;a href=&quot;#&quot; style=&quot;display: inline-flex; align-items: center; flex: none; height: 48px; padding: 0 16px; border: 2px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; font-size: 16px; font-weight: 700; text-decoration: none&quot;&gt;Dashboard&lt;/a&gt;
+      &lt;a href=&quot;#&quot; style=&quot;display: inline-flex; align-items: center; flex: none; height: 48px; padding: 0 16px; border: 2px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; font-size: 16px; font-weight: 700; text-decoration: none&quot;&gt;Familien&lt;/a&gt;
+      &lt;a href=&quot;#&quot; style=&quot;display: inline-flex; align-items: center; flex: none; height: 48px; padding: 0 16px; border: 2px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; font-size: 16px; font-weight: 700; text-decoration: none&quot;&gt;Unterbringung&lt;/a&gt;
+      &lt;a href=&quot;#&quot; aria-current=&quot;page&quot; style=&quot;display: inline-flex; align-items: center; flex: none; height: 48px; padding: 0 16px; border: 2px solid #000; border-bottom: 0; border-radius: 6px 6px 0 0; font-size: 16px; font-weight: 700; text-decoration: none; background: hsl(28 100% 80%)&quot;&gt;Workshops&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;
+
+&lt;!-- ===== Bereichsnavigation (Ebene 2): Band unter dem aktiven Reiter ===== --&gt;
+&lt;div style=&quot;background: hsl(28 100% 80%); border-bottom: 2px solid #000&quot;&gt;
+  &lt;nav aria-label=&quot;Workshopbereiche&quot; class=&quot;band&quot; style=&quot;max-width: 64rem; margin: 0 auto; padding: 10px 16px 12px 2px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap&quot;&gt;
+    &lt;a href=&quot;#&quot; aria-current=&quot;page&quot; style=&quot;display: inline-flex; align-items: center; flex: none; min-height: 40px; padding: 0 12px; border: 2px solid #000; border-radius: 5px; font-size: 14px; text-decoration: none; background: #fff; box-shadow: 3px 3px 0 0 #000; font-weight: 700&quot;&gt;Übersicht&lt;/a&gt;
+    &lt;a href=&quot;#&quot; class=&quot;lift&quot; style=&quot;display: inline-flex; align-items: center; flex: none; min-height: 40px; padding: 0 12px; border: 2px solid transparent; border-radius: 5px; font-size: 14px; text-decoration: none&quot;&gt;Teilnahme&lt;/a&gt;
+    &lt;a href=&quot;#&quot; class=&quot;lift&quot; style=&quot;display: inline-flex; align-items: center; flex: none; min-height: 40px; padding: 0 12px; border: 2px solid transparent; border-radius: 5px; font-size: 14px; text-decoration: none&quot;&gt;Wünsche&lt;/a&gt;
+    &lt;a href=&quot;#&quot; class=&quot;lift&quot; style=&quot;display: inline-flex; align-items: center; flex: none; min-height: 40px; padding: 0 12px; border: 2px solid transparent; border-radius: 5px; font-size: 14px; text-decoration: none&quot;&gt;Räume und Slots&lt;/a&gt;
+    &lt;a href=&quot;#&quot; class=&quot;lift&quot; style=&quot;display: inline-flex; align-items: center; flex: none; min-height: 40px; padding: 0 12px; border: 2px solid transparent; border-radius: 5px; font-size: 14px; text-decoration: none&quot;&gt;Listen&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/div&gt;
+
+&lt;main class=&quot;pg-main&quot; style=&quot;max-width: 64rem; margin: 0 auto; padding: 32px 16px 48px; display: flex; flex-direction: column; gap: 32px&quot;&gt;
+
+  &lt;!-- ===== Seitentitel ===== --&gt;
+  &lt;div style=&quot;display: flex; flex-direction: column; gap: 6px&quot;&gt;
+    &lt;h1 style=&quot;margin: 0; font-size: 30px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em&quot;&gt;Workshops&lt;/h1&gt;
+    &lt;p style=&quot;margin: 0; font-size: 16px; color: hsl(30 10% 32%); font-weight: 400&quot;&gt;Workshops anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten.&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;!-- ===== Phase: Stepper + Hinweis + CTA in einer Karte ===== --&gt;
+  &lt;section aria-label=&quot;Ablauf und Kennzahlen&quot; style=&quot;display: flex; flex-direction: column; gap: 16px&quot;&gt;
+    &lt;div style=&quot;background: #fff; border: 2px solid #000; border-radius: 5px&quot;&gt;
+      &lt;sc-if value=&quot;{{ph.collapsed}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+        &lt;div class=&quot;stp-crow&quot; onClick=&quot;{{ph.toggle}}&quot; style=&quot;cursor: pointer; padding: 10px 12px 10px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px&quot;&gt;
+          &lt;ol class=&quot;stp-col&quot; aria-label=&quot;Ablauf der Workshopwahl&quot; style=&quot;flex: 999 1 420px; min-width: 0; list-style: none; margin: 0; padding: 0; display: flex; align-items: center&quot;&gt;
+            &lt;sc-for list=&quot;{{ph.steps}}&quot; as=&quot;st&quot; hint-placeholder-count=&quot;4&quot;&gt;
+              &lt;li aria-current=&quot;{{st.ariaCurrent}}&quot; style=&quot;position: relative; display: flex; align-items: center; min-width: 0; flex: {{st.cFlex}}&quot;&gt;
+                &lt;sc-if value=&quot;{{st.done}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                  &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 28px; height: 28px; flex: none; border: 2px solid #000; border-radius: 999px; background: #fff; display: flex; align-items: center; justify-content: center&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M20 6 9 17l-5-5&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{st.cur}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                  &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 28px; height: 28px; flex: none; border: 2px solid #000; border-radius: 999px; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700&quot;&gt;&lt;sc-if value=&quot;{{st.curNum}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;{{st.n}}&lt;/sc-if&gt;&lt;sc-if value=&quot;{{st.curCheck}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M20 6 9 17l-5-5&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/sc-if&gt;&lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{st.fut}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                  &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 28px; height: 28px; flex: none; border: 2px dashed hsl(30 10% 32%); border-radius: 999px; background: #fff; color: hsl(30 10% 32%); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700&quot;&gt;{{st.n}}&lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{st.cur}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                  &lt;span class=&quot;stp-curlab&quot; style=&quot;margin-left: 10px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px&quot;&gt;&lt;span style=&quot;font-weight: 700&quot;&gt;{{st.label}}&lt;/span&gt;&lt;span class=&quot;stp-sep&quot; style=&quot;font-weight: 400; color: hsl(30 10% 32%)&quot;&gt; · &lt;/span&gt;&lt;span class=&quot;stp-sub&quot; style=&quot;font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;{{st.sub}}&lt;/span&gt;&lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{st.notCur}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                  &lt;span style=&quot;position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap&quot;&gt;{{st.srText}}&lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{st.hasNext}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                  &lt;span class=&quot;stp-cline&quot; aria-hidden=&quot;true&quot; style=&quot;flex: none; width: 28px; margin: 0 8px; border-top: 2px {{st.lineStyle}} {{st.lineColor}}&quot;&gt;&lt;/span&gt;
+                &lt;/sc-if&gt;
+              &lt;/li&gt;
+            &lt;/sc-for&gt;
+          &lt;/ol&gt;
+          &lt;div style=&quot;display: flex; align-items: center; margin-left: auto&quot;&gt;
+            &lt;button type=&quot;button&quot; class=&quot;ghost&quot; aria-expanded=&quot;{{ph.expandedStr}}&quot; style=&quot;flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: #000; font-size: 14px; font-weight: 500&quot;&gt;&lt;span class=&quot;stp-tog-text&quot;&gt;{{ph.toggleText}}&lt;/span&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot; style=&quot;transform: rotate({{ph.chev}}deg)&quot;&gt;&lt;path d=&quot;m6 9 6 6 6-6&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/sc-if&gt;
+      &lt;sc-if value=&quot;{{ph.expanded}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+        &lt;div style=&quot;padding: 16px 12px 16px 20px; display: flex; align-items: flex-start; gap: 16px; border-bottom: 1.5px solid hsl(33 25% 78%)&quot;&gt;
+          &lt;ol class=&quot;stp-grid&quot; aria-label=&quot;Ablauf der Workshopwahl&quot; style=&quot;flex: 1; min-width: 0; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))&quot;&gt;
+            &lt;sc-for list=&quot;{{ph.steps}}&quot; as=&quot;st&quot; hint-placeholder-count=&quot;4&quot;&gt;
+              &lt;li class=&quot;stp-li&quot; aria-current=&quot;{{st.ariaCurrent}}&quot; style=&quot;min-width: 0&quot;&gt;
+                &lt;div class=&quot;stp-head&quot; style=&quot;display: flex; align-items: center&quot;&gt;
+                  &lt;sc-if value=&quot;{{st.done}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                    &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 28px; height: 28px; flex: none; border: 2px solid #000; border-radius: 999px; background: #fff; display: flex; align-items: center; justify-content: center&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M20 6 9 17l-5-5&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/span&gt;
+                  &lt;/sc-if&gt;
+                  &lt;sc-if value=&quot;{{st.cur}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                    &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 28px; height: 28px; flex: none; border: 2px solid #000; border-radius: 999px; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700&quot;&gt;&lt;sc-if value=&quot;{{st.curNum}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;{{st.n}}&lt;/sc-if&gt;&lt;sc-if value=&quot;{{st.curCheck}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;path d=&quot;M20 6 9 17l-5-5&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/sc-if&gt;&lt;/span&gt;
+                  &lt;/sc-if&gt;
+                  &lt;sc-if value=&quot;{{st.fut}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                    &lt;span aria-hidden=&quot;true&quot; style=&quot;width: 28px; height: 28px; flex: none; border: 2px dashed hsl(30 10% 32%); border-radius: 999px; background: #fff; color: hsl(30 10% 32%); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700&quot;&gt;{{st.n}}&lt;/span&gt;
+                  &lt;/sc-if&gt;
+                  &lt;sc-if value=&quot;{{st.hasNext}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                    &lt;span class=&quot;stp-hline&quot; aria-hidden=&quot;true&quot; style=&quot;flex: 1; margin: 0 10px; border-top: 2px {{st.lineStyle}} {{st.lineColor}}&quot;&gt;&lt;/span&gt;
+                    &lt;span class=&quot;stp-vline&quot; aria-hidden=&quot;true&quot; style=&quot;display: none; flex: 1 1 auto; width: 0; min-height: 20px; margin: 4px 0; border-left: 2px {{st.lineStyle}} {{st.lineColor}}&quot;&gt;&lt;/span&gt;
+                  &lt;/sc-if&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;stp-text&quot; style=&quot;padding: 8px 12px 0 0; display: flex; flex-direction: column&quot;&gt;
+                  &lt;span style=&quot;font-size: 14px; line-height: 1.35; font-weight: {{st.labelWeight}}; color: {{st.labelColor}}&quot;&gt;{{st.label}}&lt;span style=&quot;position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap&quot;&gt;{{st.srState}}&lt;/span&gt;&lt;/span&gt;
+                  &lt;span style=&quot;font-size: 12px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;{{st.sub}}&lt;/span&gt;
+                &lt;/div&gt;
+              &lt;/li&gt;
+            &lt;/sc-for&gt;
+          &lt;/ol&gt;
+          &lt;button type=&quot;button&quot; class=&quot;ghost&quot; aria-expanded=&quot;{{ph.expandedStr}}&quot; onClick=&quot;{{ph.toggle}}&quot; style=&quot;flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: #000; font-size: 14px; font-weight: 500&quot;&gt;&lt;span class=&quot;stp-tog-text&quot;&gt;{{ph.toggleText}}&lt;/span&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot; style=&quot;transform: rotate({{ph.chev}}deg)&quot;&gt;&lt;path d=&quot;m6 9 6 6 6-6&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div style=&quot;padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px&quot;&gt;
+          &lt;div style=&quot;flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 4px&quot;&gt;
+            &lt;h2 style=&quot;margin: 0; font-size: 18px; line-height: 1.35; font-weight: 700&quot;&gt;{{ph.heading}}&lt;/h2&gt;
+            &lt;p style=&quot;margin: 0; font-size: 14px; font-weight: 400&quot;&gt;{{ph.text}}&lt;/p&gt;
+            &lt;p style=&quot;margin: 0; font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;{{ph.note}}&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;stp-actions&quot; style=&quot;flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 8px&quot;&gt;
+            &lt;div style=&quot;display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px&quot;&gt;
+              &lt;sc-for list=&quot;{{ph.actions}}&quot; as=&quot;ac&quot; hint-placeholder-count=&quot;1&quot;&gt;
+                &lt;sc-if value=&quot;{{ac.primary}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;&lt;button type=&quot;button&quot; class=&quot;press&quot; onClick=&quot;{{ac.onClick}}&quot; style=&quot;min-height: 40px; padding: 0 16px; border: 2px solid #000; border-radius: 5px; background: hsl(28 100% 51%); color: #000; font-size: 14px; font-weight: 700&quot;&gt;{{ac.label}}&lt;/button&gt;&lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{ac.neutral}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;&lt;button type=&quot;button&quot; class=&quot;press&quot; onClick=&quot;{{ac.onClick}}&quot; style=&quot;min-height: 40px; padding: 0 16px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700&quot;&gt;{{ac.label}}&lt;/button&gt;&lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{ac.disabled}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;&lt;button type=&quot;button&quot; disabled=&quot;{{true}}&quot; style=&quot;min-height: 40px; padding: 0 16px; border: 2px dashed hsl(30 10% 32%); border-radius: 5px; background: hsl(30 8% 80%); color: hsl(30 10% 26%); font-size: 14px; font-weight: 700; cursor: not-allowed&quot;&gt;{{ac.label}}&lt;/button&gt;&lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{ac.link}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;&lt;a href=&quot;{{ac.href}}&quot; class=&quot;press&quot; style=&quot;display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700; text-decoration: none&quot;&gt;{{ac.label}}&lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M5 12h14&quot;&gt;&lt;/path&gt;&lt;path d=&quot;m13 6 6 6-6 6&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/sc-if&gt;
+              &lt;/sc-for&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;sc-if value=&quot;{{ph.reviewOpen}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+          &lt;div role=&quot;region&quot; aria-labelledby=&quot;review-h&quot; style=&quot;margin: 0 20px 20px; border: 2px dashed #000; border-radius: 5px; background: hsl(33 100% 96%)&quot;&gt;
+            &lt;div style=&quot;padding: 14px 16px 8px; display: flex; flex-direction: column; gap: 2px&quot;&gt;
+              &lt;h3 id=&quot;review-h&quot; style=&quot;margin: 0; font-size: 16px; font-weight: 700&quot;&gt;{{ph.hintCount}} offene Hinweise&lt;/h3&gt;
+              &lt;p style=&quot;margin: 0; font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;Behebe sie in der Liste oder nimm sie bewusst zur Kenntnis. Sie bleiben danach an den Workshops sichtbar.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;ul style=&quot;list-style: none; margin: 0; padding: 0 16px&quot;&gt;
+              &lt;sc-for list=&quot;{{ph.hints}}&quot; as=&quot;h&quot; hint-placeholder-count=&quot;5&quot;&gt;
+                &lt;li class=&quot;rv-row&quot; style=&quot;display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-top: 1.5px solid hsl(33 25% 78%); font-size: 14px; font-weight: 400&quot;&gt;
+                  &lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.25&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot; style=&quot;flex: none; margin-top: 2px&quot;&gt;&lt;path d=&quot;M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 9v4&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 17h.01&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+                  &lt;span style=&quot;flex: 1; min-width: 0&quot;&gt;&lt;span style=&quot;font-weight: 700&quot;&gt;{{h.ws}}&lt;/span&gt; · {{h.text}}&lt;/span&gt;
+                  &lt;a href=&quot;#&quot; style=&quot;flex: none; font-size: 14px; font-weight: 500; text-underline-offset: 3px&quot;&gt;Zum Workshop&lt;/a&gt;
+                &lt;/li&gt;
+              &lt;/sc-for&gt;
+            &lt;/ul&gt;
+            &lt;p style=&quot;margin: 0; padding: 8px 16px; border-top: 1.5px solid hsl(33 25% 78%); font-size: 14px; font-weight: 400&quot;&gt;+ {{ph.moreHints}} weitere · &lt;a href=&quot;#&quot; style=&quot;font-weight: 500; text-underline-offset: 3px&quot;&gt;Alle in der Liste zeigen&lt;/a&gt;&lt;/p&gt;
+            &lt;div style=&quot;padding: 12px 16px 16px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; border-top: 1.5px solid hsl(33 25% 78%)&quot;&gt;
+              &lt;button type=&quot;button&quot; class=&quot;press&quot; onClick=&quot;{{ph.onCancel}}&quot; style=&quot;min-height: 40px; padding: 0 16px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700&quot;&gt;Abbrechen&lt;/button&gt;
+              &lt;button type=&quot;button&quot; class=&quot;press&quot; onClick=&quot;{{ph.onConfirm}}&quot; style=&quot;min-height: 40px; padding: 0 16px; border: 2px solid #000; border-radius: 5px; background: hsl(28 100% 51%); color: #000; font-size: 14px; font-weight: 700&quot;&gt;Zur Kenntnis genommen&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/sc-if&gt;
+      &lt;/sc-if&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Kennzahlen --&gt;
+    &lt;div class=&quot;stats&quot; style=&quot;display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px&quot;&gt;
+      &lt;div style=&quot;min-width: 0; background: #fff; border: 2px solid #000; border-radius: 5px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px&quot;&gt;
+        &lt;span style=&quot;font-size: 24px; line-height: 1.25; font-weight: 700; font-variant-numeric: tabular-nums&quot;&gt;{{stats.total}}&lt;/span&gt;
+        &lt;span style=&quot;font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;aktive Workshops&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;button type=&quot;button&quot; class=&quot;stat-btn&quot; aria-pressed=&quot;{{onlyOpenStr}}&quot; onClick=&quot;{{toggleOpen}}&quot; style=&quot;min-width: 0; text-align: left; background: #fff; border: 2px dashed #000; border-radius: 5px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; color: #000&quot;&gt;
+        &lt;span style=&quot;display: flex; align-items: center; gap: 8px; font-size: 24px; line-height: 1.25; font-weight: 700; font-variant-numeric: tabular-nums&quot;&gt;
+          &lt;svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-width=&quot;2.25&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 9v4&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 17h.01&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+          {{stats.open}}
+        &lt;/span&gt;
+        &lt;span style=&quot;font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;noch nicht eingeplant · &lt;span style=&quot;text-decoration: underline; text-underline-offset: 3px; color: #000; font-weight: 500&quot;&gt;{{openLinkText}}&lt;/span&gt;&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;div style=&quot;min-width: 0; background: #fff; border: 2px solid #000; border-radius: 5px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px&quot;&gt;
+        &lt;span style=&quot;font-size: 24px; line-height: 1.25; font-weight: 700; font-variant-numeric: tabular-nums&quot;&gt;{{stats.over}}&lt;/span&gt;
+        &lt;span style=&quot;font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;mehr Wünsche als Plätze&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div style=&quot;min-width: 0; background: #fff; border: 2px solid #000; border-radius: 5px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px&quot;&gt;
+        &lt;span style=&quot;font-size: 24px; line-height: 1.25; font-weight: 700; font-variant-numeric: tabular-nums&quot;&gt;6&lt;/span&gt;
+        &lt;span style=&quot;font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;externe Leitungen&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- ===== Liste: Ansicht (Ebene 3) + Filter ===== --&gt;
+  &lt;section aria-label=&quot;Workshopliste&quot; style=&quot;display: flex; flex-direction: column; gap: 16px&quot;&gt;
+    &lt;div style=&quot;display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1.5px solid rgba(0,0,0,.2)&quot;&gt;
+      &lt;nav aria-label=&quot;Ansicht&quot; class=&quot;tab3&quot; style=&quot;display: flex; gap: 20px; overflow-x: auto; white-space: nowrap&quot;&gt;
+        &lt;a href=&quot;#&quot; aria-current=&quot;page&quot; style=&quot;display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-bottom: -1.5px; border-bottom: 2px solid #000; font-size: 14px; font-weight: 700; text-decoration: none; color: #000&quot;&gt;Workshops &lt;span style=&quot;font-weight: 500; color: hsl(30 10% 32%)&quot;&gt;33&lt;/span&gt;&lt;/a&gt;
+        &lt;a href=&quot;#&quot; style=&quot;display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-bottom: -1.5px; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; text-decoration: none; color: hsl(30 10% 32%)&quot;&gt;Leitungen&lt;/a&gt;
+        &lt;a href=&quot;#&quot; style=&quot;display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-bottom: -1.5px; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; text-decoration: none; color: hsl(30 10% 32%)&quot;&gt;Externe Leitungen &lt;span&gt;6&lt;/span&gt;&lt;/a&gt;
+      &lt;/nav&gt;
+      &lt;button type=&quot;button&quot; class=&quot;press&quot; style=&quot;margin-bottom: 10px; min-height: 44px; padding: 0 16px; border: 2px solid #000; border-radius: 5px; background: hsl(28 100% 51%); color: #000; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px&quot;&gt;
+        &lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M12 5v14&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M5 12h14&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+        Workshop hinzufügen
+      &lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div style=&quot;display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px&quot;&gt;
+      &lt;div role=&quot;group&quot; aria-label=&quot;Zielgruppe&quot; class=&quot;seg&quot; style=&quot;display: inline-flex; border: 2px solid #000; border-radius: 5px; overflow: hidden; background: #fff&quot;&gt;
+        &lt;sc-for list=&quot;{{groups}}&quot; as=&quot;g&quot; hint-placeholder-count=&quot;3&quot;&gt;
+          &lt;sc-if value=&quot;{{g.active}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+            &lt;button type=&quot;button&quot; aria-pressed=&quot;true&quot; onClick=&quot;{{g.pick}}&quot; style=&quot;min-height: 40px; padding: 0 14px; border: 0; background: #000; color: #fff; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px&quot;&gt;{{g.label}} &lt;span style=&quot;font-weight: 500; opacity: .75&quot;&gt;{{g.count}}&lt;/span&gt;&lt;/button&gt;
+          &lt;/sc-if&gt;
+          &lt;sc-if value=&quot;{{g.inactive}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+            &lt;button type=&quot;button&quot; aria-pressed=&quot;false&quot; onClick=&quot;{{g.pick}}&quot; class=&quot;ghost&quot; style=&quot;min-height: 40px; padding: 0 14px; border: 0; background: #fff; color: #000; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px&quot;&gt;{{g.label}} &lt;span style=&quot;color: hsl(30 10% 32%)&quot;&gt;{{g.count}}&lt;/span&gt;&lt;/button&gt;
+          &lt;/sc-if&gt;
+        &lt;/sc-for&gt;
+      &lt;/div&gt;
+      &lt;label style=&quot;display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; font-weight: 500; cursor: pointer&quot;&gt;
+        &lt;input type=&quot;checkbox&quot; checked=&quot;{{onlyOpen}}&quot; onChange=&quot;{{toggleOpen}}&quot; style=&quot;width: 18px; height: 18px; accent-color: #000; margin: 0&quot;&gt;
+        Nur nicht eingeplante
+      &lt;/label&gt;
+      &lt;span aria-live=&quot;polite&quot; style=&quot;margin-left: auto; font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;{{countText}}&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;ul class=&quot;wlist&quot; style=&quot;list-style: none; margin: 0; padding: 0; background: #fff; border: 2px solid #000; border-radius: 5px; overflow: hidden&quot;&gt;
+      &lt;sc-for list=&quot;{{items}}&quot; as=&quot;w&quot; hint-placeholder-count=&quot;6&quot;&gt;
+        &lt;li&gt;
+          &lt;article class=&quot;card&quot; style=&quot;padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 24px&quot;&gt;
+            &lt;div style=&quot;flex: 999 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px&quot;&gt;
+              &lt;div style=&quot;display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px&quot;&gt;
+                &lt;h3 style=&quot;margin: 0; font-size: 18px; line-height: 1.35; font-weight: 700&quot;&gt;{{w.n}}&lt;/h3&gt;
+                &lt;sc-if value=&quot;{{w.isReg}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                  &lt;span style=&quot;display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border: 1.5px solid #000; border-radius: 5px; font-size: 12px; font-weight: 700&quot;&gt;Anmeldung statt Wahl&lt;/span&gt;
+                &lt;/sc-if&gt;
+              &lt;/div&gt;
+              &lt;p style=&quot;margin: 0; font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;{{w.d}}&lt;/p&gt;
+              &lt;div style=&quot;display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 14px; font-weight: 400&quot;&gt;
+                &lt;sc-if value=&quot;{{w.hasSlot}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                  &lt;span style=&quot;display: inline-flex; align-items: center; gap: 6px; font-weight: 500&quot;&gt;
+                    &lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;&gt;&lt;/circle&gt;&lt;path d=&quot;M12 7v5l3 2&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+                    {{w.s}}
+                  &lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;sc-if value=&quot;{{w.noSlot}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                  &lt;span style=&quot;display: inline-flex; align-items: center; gap: 6px; min-height: 26px; padding: 0 8px; border: 1.5px dashed #000; border-radius: 5px; font-size: 12px; font-weight: 700&quot;&gt;
+                    &lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.25&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 9v4&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 17h.01&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+                    Noch nicht eingeplant
+                  &lt;/span&gt;
+                &lt;/sc-if&gt;
+                &lt;span style=&quot;color: hsl(30 10% 32%)&quot;&gt;{{w.meta}}&lt;/span&gt;
+              &lt;/div&gt;
+              &lt;p style=&quot;margin: 0; font-size: 14px; font-weight: 400&quot;&gt;&lt;span style=&quot;color: hsl(30 10% 32%)&quot;&gt;Leitung&lt;/span&gt; {{w.l}}&lt;/p&gt;
+              &lt;sc-for list=&quot;{{w.warn}}&quot; as=&quot;x&quot; hint-placeholder-count=&quot;0&quot;&gt;
+                &lt;p style=&quot;margin: 2px 0 0; display: flex; align-items: flex-start; gap: 6px; padding: 6px 10px; border: 1.5px dashed #000; border-radius: 5px; font-size: 14px; font-weight: 500; background: hsl(33 100% 96%)&quot;&gt;
+                  &lt;svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.25&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot; style=&quot;flex: none; margin-top: 2px&quot;&gt;&lt;path d=&quot;M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 9v4&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M12 17h.01&quot;&gt;&lt;/path&gt;&lt;/svg&gt;
+                  {{x}}
+                &lt;/p&gt;
+              &lt;/sc-for&gt;
+            &lt;/div&gt;
+            &lt;div style=&quot;flex: 1 1 190px; max-width: 260px; display: flex; flex-direction: column; gap: 6px&quot;&gt;
+              &lt;div style=&quot;display: flex; align-items: baseline; gap: 6px&quot;&gt;
+                &lt;span style=&quot;font-size: 20px; line-height: 1.2; font-weight: 700; font-variant-numeric: tabular-nums&quot;&gt;{{w.capLabel}}&lt;/span&gt;
+                &lt;span style=&quot;font-size: 12px; color: hsl(30 10% 32%)&quot;&gt;{{w.capCaption}}&lt;/span&gt;
+              &lt;/div&gt;
+              &lt;div role=&quot;img&quot; aria-label=&quot;{{w.capAria}}&quot; style=&quot;height: 8px; border: 1.5px solid #000; border-radius: 999px; background: #fff; overflow: hidden&quot;&gt;
+                &lt;div style=&quot;height: 100%; width: {{w.pct}}%; background: #000&quot;&gt;&lt;/div&gt;
+              &lt;/div&gt;
+              &lt;sc-if value=&quot;{{w.over}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+                &lt;span style=&quot;font-size: 14px; font-weight: 700&quot;&gt;{{w.wishText}}&lt;/span&gt;
+              &lt;/sc-if&gt;
+              &lt;sc-if value=&quot;{{w.notOver}}&quot; hint-placeholder-val=&quot;{{true}}&quot;&gt;
+                &lt;span style=&quot;font-size: 14px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;{{w.wishText}}&lt;/span&gt;
+              &lt;/sc-if&gt;
+            &lt;/div&gt;
+            &lt;button type=&quot;button&quot; class=&quot;press&quot; style=&quot;flex: none; margin-left: auto; min-height: 40px; padding: 0 12px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700&quot;&gt;Bearbeiten&lt;span style=&quot;position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap&quot;&gt;: {{w.n}}&lt;/span&gt;&lt;/button&gt;
+          &lt;/article&gt;
+        &lt;/li&gt;
+      &lt;/sc-for&gt;
+    &lt;/ul&gt;
+  &lt;/section&gt;
+
+  &lt;footer style=&quot;font-size: 12px; font-weight: 400; color: hsl(30 10% 32%); display: flex; flex-wrap: wrap; gap: 4px 12px&quot;&gt;
+    &lt;span&gt;Arbeitsansicht · Stand 8. Oktober 2026, 10:30 Uhr · Datenstand v1396&lt;/span&gt;
+    &lt;span&gt;Vertraulich: nur für das Organisationsteam.&lt;/span&gt;
+  &lt;/footer&gt;
+&lt;/main&gt;
+
+&lt;sc-if value=&quot;{{acctOpen}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+  &lt;div class=&quot;acct-backdrop&quot; onClick=&quot;{{closeAcct}}&quot; style=&quot;position: fixed; inset: 0; z-index: 40; background: rgba(20, 20, 19, 0.45)&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;acct-sheet&quot; role=&quot;dialog&quot; aria-modal=&quot;true&quot; aria-labelledby=&quot;acct-h&quot; style=&quot;position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 85%; overflow: auto; background: #fff; border-top: 2px solid #000; border-radius: 14px 14px 0 0; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px&quot;&gt;
+    &lt;span class=&quot;acct-handle&quot; aria-hidden=&quot;true&quot; style=&quot;align-self: center; width: 40px; height: 4px; border-radius: 2px; background: #000; opacity: 0.35&quot;&gt;&lt;/span&gt;
+    &lt;div style=&quot;display: flex; align-items: flex-start; justify-content: space-between; gap: 12px&quot;&gt;
+      &lt;div style=&quot;display: flex; flex-direction: column; min-width: 0&quot;&gt;
+        &lt;h2 id=&quot;acct-h&quot; style=&quot;margin: 0; font-size: 16px; line-height: 1.3; font-weight: 700&quot;&gt;Menü&lt;/h2&gt;
+      &lt;/div&gt;
+      &lt;button type=&quot;button&quot; aria-label=&quot;Schließen&quot; onClick=&quot;{{closeAcct}}&quot; style=&quot;width: 40px; height: 40px; flex: none; margin: -6px -8px 0 0; border: 0; border-radius: 5px; background: transparent; color: #000; display: flex; align-items: center; justify-content: center&quot;&gt;&lt;svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M6 6l12 12&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M18 6 6 18&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;span style=&quot;margin-bottom: -6px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: hsl(30 10% 32%)&quot;&gt;Speichern&lt;/span&gt;
+    &lt;section aria-labelledby=&quot;save-h&quot; style=&quot;display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 2px {{acct.boxBorder}} #000; border-radius: 5px; background: {{acct.boxBg}}&quot;&gt;
+      &lt;div style=&quot;display: flex; flex-direction: column; gap: 2px&quot;&gt;
+        &lt;span id=&quot;save-h&quot; style=&quot;font-size: 14px; font-weight: 700&quot;&gt;{{acct.statusText}}&lt;/span&gt;
+        &lt;span style=&quot;font-size: 12px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;Zuletzt gespeichert: heute, 10:30 Uhr&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div role=&quot;radiogroup&quot; aria-label=&quot;Speichermodus&quot; style=&quot;display: flex; flex-direction: column; gap: 2px; margin: 0 -8px&quot;&gt;
+        &lt;label class=&quot;acct-opt&quot; style=&quot;display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 5px; cursor: pointer&quot;&gt;
+              &lt;input type=&quot;radio&quot; name=&quot;savemode&quot; checked=&quot;{{acct.isAuto}}&quot; onChange=&quot;{{acct.set_isAuto}}&quot; style=&quot;width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: #000&quot;&gt;
+              &lt;span style=&quot;display: flex; flex-direction: column&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: 700&quot;&gt;Automatisch speichern&lt;/span&gt;&lt;span style=&quot;font-size: 12px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;Jede Änderung geht sofort an den Server.&lt;/span&gt;&lt;/span&gt;
+            &lt;/label&gt;
+        &lt;label class=&quot;acct-opt&quot; style=&quot;display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 5px; cursor: pointer&quot;&gt;
+              &lt;input type=&quot;radio&quot; name=&quot;savemode&quot; checked=&quot;{{acct.isDraft}}&quot; onChange=&quot;{{acct.set_isDraft}}&quot; style=&quot;width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: #000&quot;&gt;
+              &lt;span style=&quot;display: flex; flex-direction: column&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: 700&quot;&gt;Entwurfsmodus&lt;/span&gt;&lt;span style=&quot;font-size: 12px; font-weight: 400; color: hsl(30 10% 32%)&quot;&gt;Änderungen sammeln und erst mit „Speichern“ übertragen.&lt;/span&gt;&lt;/span&gt;
+            &lt;/label&gt;
+      &lt;/div&gt;
+      &lt;sc-if value=&quot;{{acct.showSave}}&quot; hint-placeholder-val=&quot;{{false}}&quot;&gt;
+        &lt;button type=&quot;button&quot; class=&quot;press&quot; onClick=&quot;{{saveNow}}&quot; style=&quot;min-height: 44px; border: 2px solid #000; border-radius: 5px; background: hsl(28 100% 51%); color: #000; font-size: 14px; font-weight: 700&quot;&gt;{{acct.saveLong}}&lt;/button&gt;
+      &lt;/sc-if&gt;
+    &lt;/section&gt;
+    &lt;span style=&quot;margin-bottom: -6px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: hsl(30 10% 32%)&quot;&gt;Sitzung&lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;press&quot; style=&quot;min-height: 44px; border: 2px solid #000; border-radius: 5px; background: #fff; color: #000; font-size: 14px; font-weight: 700&quot;&gt;Abmelden&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/sc-if&gt;
+&lt;/div&gt;
+&lt;/template&gt;&lt;script type=&quot;text/plain&quot; id=&quot;dc-logic&quot;&gt;
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { group: &#x27;all&#x27;, onlyOpen: false, stepsOpen: false, acctOpen: false, saveMode: &#x27;auto&#x27;, pending: 3 };
+  }
+  buildPhase(c, collapsed, toggle, opts) {
+  opts = opts || {};
+  var M = &#x27;hsl(30 10% 32%)&#x27;;
+  var hints = opts.hints == null ? 13 : opts.hints, ack = !!opts.ack;
+  var s3 = hints === 0 ? &#x27;Keine offenen Hinweise&#x27; : (ack ? hints + &#x27; Hinweise zur Kenntnis genommen&#x27; : hints + &#x27; Hinweise offen&#x27;);
+  var defs = [
+    [&#x27;Workshops anlegen&#x27;, &#x27;33 Workshops angelegt&#x27;, &#x27;33 Workshops angelegt&#x27;],
+    [&#x27;Wahl öffnen&#x27;, &#x27;Geöffnet am 15. April 2027&#x27;, &#x27;Zieltermin: 15. April 2027&#x27;],
+    [&#x27;Zuordnung prüfen&#x27;, &#x27;Alle Hinweise erledigt&#x27;, s3],
+    [&#x27;Festgelegt&#x27;, &#x27;Für Familien sichtbar&#x27;, &#x27;Ergebnis für Familien festlegen&#x27;]
+  ];
+  var steps = defs.map(function (d, i) {
+    var n = i + 1, done = n &lt; c, cur = n === c, fut = n &gt; c;
+    return {
+      n: n, label: d[0], sub: (done || (cur &amp;&amp; n === 4)) ? d[1] : d[2],
+      done: done, cur: cur, fut: fut, notCur: !cur, hasNext: n &lt; 4,
+      lineStyle: n + 1 &lt;= c ? &#x27;solid&#x27; : &#x27;dashed&#x27;, lineColor: n + 1 &lt;= c ? &#x27;#000&#x27; : M,
+      curNum: cur &amp;&amp; n &lt; 4, curCheck: cur &amp;&amp; n === 4,
+      labelWeight: cur ? 700 : 500, labelColor: fut ? M : &#x27;#000&#x27;,
+      ariaCurrent: cur ? &#x27;step&#x27; : &#x27;false&#x27;,
+      srText: &#x27;Schritt &#x27; + n + &#x27;: &#x27; + d[0] + (done ? &#x27;, erledigt&#x27; : &#x27;, offen&#x27;),
+      srState: done ? &#x27; (erledigt)&#x27; : (fut ? &#x27; (offen)&#x27; : &#x27; (aktuell)&#x27;),
+      cFlex: cur ? &#x27;0 1 auto&#x27; : &#x27;none&#x27;
+    };
+  });
+  function act(kind, label, href, onClick) { return { label: label, href: href || &#x27;#&#x27;, onClick: onClick || function () {}, primary: kind === &#x27;primary&#x27;, neutral: kind === &#x27;neutral&#x27;, disabled: kind === &#x27;disabled&#x27;, link: kind === &#x27;link&#x27; }; }
+  var review = !!opts.review, p;
+  if (c === 1) p = [&#x27;Nächster Schritt: Workshops anlegen&#x27;, &#x27;Lege alle Workshops mit Zielgruppe, Leitung und Plätzen an.&#x27;, &#x27;Familien sehen noch nichts.&#x27;, [act(&#x27;link&#x27;, &#x27;Workshops anlegen&#x27;, &#x27;#workshopliste&#x27;)]];
+  else if (c === 2) p = [&#x27;Nächster Schritt: Wahl öffnen&#x27;, &#x27;Workshopdaten sind vorhanden. Prüfe Zielgruppen und Leitungen, bevor du die Wahl öffnest.&#x27;, &#x27;Familien sehen noch keine Workshops, bis die Wahl geöffnet ist.&#x27;, [act(&#x27;primary&#x27;, &#x27;Wahl öffnen&#x27;)]];
+  else if (c === 3 &amp;&amp; hints &gt; 0 &amp;&amp; !ack) p = [&#x27;Nächster Schritt: Hinweise prüfen&#x27;, &#x27;Die Wahl ist geschlossen. &#x27; + hints + &#x27; Hinweise sind offen, z. B. überbuchte Workshops. Prüfe sie, bevor du das Ergebnis festlegst.&#x27;, &#x27;Familien sehen „Zuordnung läuft“, bis das Ergebnis festgelegt ist.&#x27;, review ? [] : [act(&#x27;primary&#x27;, hints + &#x27; Hinweise prüfen&#x27;, null, opts.onReview), act(&#x27;neutral&#x27;, &#x27;Ergebnis festlegen&#x27;, null, opts.onReview)]];
+  else if (c === 3 &amp;&amp; hints &gt; 0) p = [&#x27;Nächster Schritt: Ergebnis festlegen&#x27;, hints + &#x27; Hinweise sind zur Kenntnis genommen und bleiben an den Workshops sichtbar.&#x27;, &#x27;Mit dem Festlegen sehen Familien ihre Workshops. Danach sind Änderungen nur noch einzeln möglich.&#x27;, [act(&#x27;neutral&#x27;, hints + &#x27; Hinweise prüfen&#x27;), act(&#x27;primary&#x27;, &#x27;Ergebnis festlegen&#x27;)]];
+  else if (c === 3) p = [&#x27;Nächster Schritt: Ergebnis festlegen&#x27;, &#x27;Alle Hinweise sind erledigt.&#x27;, &#x27;Mit dem Festlegen sehen Familien ihre Workshops. Danach sind Änderungen nur noch einzeln möglich.&#x27;, [act(&#x27;primary&#x27;, &#x27;Ergebnis festlegen&#x27;)]];
+  else p = [&#x27;Festgelegt&#x27;, &#x27;Das Ergebnis ist festgelegt und für Familien sichtbar.&#x27;, &#x27;Festgelegt am 2. Mai 2027. Änderungen sind nur noch einzeln möglich.&#x27;, []];
+  var hintList = [
+    { ws: &#x27;Keramik&#x27;, text: &#x27;Zielgruppe „Erwachsene“ passt nicht zum Alter 5–14 Jahre.&#x27; },
+    { ws: &#x27;Spielewerkstatt&#x27;, text: &#x27;Eine Leitung (ID „per_p2“) ist keiner Person zugeordnet.&#x27; },
+    { ws: &#x27;Kletterwand&#x27;, text: &#x27;32 Wünsche für 12 Plätze.&#x27; },
+    { ws: &#x27;Erste Hilfe am Kind&#x27;, text: &#x27;34 Wünsche für 14 Plätze.&#x27; },
+    { ws: &#x27;Zirkus&#x27;, text: &#x27;Noch nicht eingeplant.&#x27; }
+  ];
+  return {
+    steps: steps, collapsed: collapsed, expanded: !collapsed,
+    expandedStr: collapsed ? &#x27;false&#x27; : &#x27;true&#x27;,
+    toggleText: collapsed ? &#x27;Alle Schritte&#x27; : &#x27;Weniger&#x27;,
+    chev: collapsed ? 0 : 180, toggle: toggle,
+    heading: p[0], text: p[1], note: p[2], actions: p[3],
+    reviewOpen: c === 3 &amp;&amp; hints &gt; 0 &amp;&amp; !ack &amp;&amp; review,
+    hints: hintList, hintCount: hints, moreHints: hints - hintList.length,
+    onConfirm: opts.onConfirm || function () {}, onCancel: opts.onCancel || function () {}
+  };
+}
+  renderVals() {
+    var AUD = { K: &#x27;Kinder&#x27;, E: &#x27;Erwachsene&#x27;, A: &#x27;Kinder und Erwachsene&#x27; };
+    var raw = [
+      [&#x27;Keramik&#x27;,&#x27;Schalen und Figuren aus Ton, gebrannt bis Sonntag.&#x27;,&#x27;E&#x27;,5,14,10,&#x27;Brennofen&#x27;,0,28,&#x27;Anna Albers&#x27;,&#x27;Sa. 11:30 · Atelier Zwei&#x27;,[&#x27;Zielgruppe „Erwachsene“ passt nicht zum Alter 5–14 Jahre.&#x27;]],
+      [&#x27;Waldexpedition&#x27;,&#x27;Spuren lesen, Tiere beobachten, ein Lager bauen.&#x27;,&#x27;K&#x27;,5,14,14,&#x27;draußen&#x27;,14,21,&#x27;Jens Brandt, Lotta Frank&#x27;,&#x27;Fr. 11:30 · Wiese&#x27;],
+      [&#x27;Zirkus&#x27;,&#x27;Jonglieren, Balancieren und eine kleine Vorführung.&#x27;,&#x27;K&#x27;,5,12,16,&#x27;Matten&#x27;,0,20,&#x27;Pereira (extern), Katrin Conrad&#x27;,null],
+      [&#x27;Kochwerkstatt&#x27;,&#x27;Ein Mittagessen für die eigene Gruppe kochen.&#x27;,&#x27;K&#x27;,6,14,10,&#x27;Herd&#x27;,10,20,&#x27;Stefan Dietz, Julia Ebert&#x27;,&#x27;Fr. 11:30 · Küche&#x27;],
+      [&#x27;Holzwerkstatt&#x27;,&#x27;Ein Vogelhaus sägen, bohren und zusammenbauen.&#x27;,&#x27;K&#x27;,8,15,8,&#x27;Werkbänke&#x27;,2,3,&#x27;Kaya (extern)&#x27;,&#x27;Fr. 11:30 · Werkraum&#x27;],
+      [&#x27;Kletterwand&#x27;,&#x27;Klettern mit Sicherung, erste Knoten.&#x27;,&#x27;K&#x27;,7,15,12,&#x27;Kletterwand&#x27;,12,32,&#x27;Weber (extern), Markus Frank&#x27;,&#x27;Fr. 11:30 · Außenwand&#x27;],
+      [&#x27;Papierschöpfen&#x27;,&#x27;Aus Altpapier neues Papier machen.&#x27;,&#x27;K&#x27;,5,12,10,&#x27;Werkbänke&#x27;,1,1,&#x27;Sabine Graf&#x27;,&#x27;Fr. 15:00 · Werkraum&#x27;],
+      [&#x27;Bogenschießen&#x27;,&#x27;Sicher zielen und treffen, mit Einweisung.&#x27;,&#x27;K&#x27;,10,15,8,&#x27;draußen&#x27;,8,21,&#x27;Weber (extern)&#x27;,&#x27;Fr. 15:00 · Wiese&#x27;],
+      [&#x27;Spielewerkstatt&#x27;,&#x27;Brettspiele erfinden und bauen.&#x27;,&#x27;K&#x27;,5,10,14,&#x27;Tische&#x27;,0,0,&#x27;Tobias Hess + 1 unbekannte Person&#x27;,null,[&#x27;Eine Leitung (ID „per_p2“) ist keiner Person zugeordnet.&#x27;]],
+      [&#x27;Schmuckwerkstatt&#x27;,&#x27;Ketten und Armbänder aus Perlen und Draht.&#x27;,&#x27;K&#x27;,8,15,10,&#x27;Tische&#x27;,0,2,&#x27;Nguyen (extern)&#x27;,null],
+      [&#x27;Geocaching&#x27;,&#x27;Mit GPS versteckte Schätze im Wald finden.&#x27;,&#x27;K&#x27;,7,15,14,&#x27;draußen&#x27;,4,5,&#x27;Miriam Imhof, Daniel Jäger&#x27;,&#x27;Fr. 11:30 · Wald&#x27;],
+      [&#x27;Theaterwerkstatt&#x27;,&#x27;Kurze Szenen erfinden und spielen.&#x27;,&#x27;K&#x27;,8,14,14,&#x27;Bühne&#x27;,0,5,&#x27;Pereira (extern)&#x27;,null],
+      [&#x27;Fahrradwerkstatt&#x27;,&#x27;Schlauch flicken, Bremsen einstellen.&#x27;,&#x27;K&#x27;,10,15,8,&#x27;Werkbänke&#x27;,0,1,&#x27;Kaya (extern)&#x27;,&#x27;Sa. 09:00 · Werkraum&#x27;],
+      [&#x27;Gartenwerkstatt&#x27;,&#x27;Ein Beet anlegen und Kräuter pflanzen.&#x27;,&#x27;K&#x27;,5,12,12,&#x27;draußen&#x27;,0,0,&#x27;Nadine Kraus&#x27;,&#x27;Fr. 15:00 · Wald&#x27;],
+      [&#x27;Backstube&#x27;,&#x27;Brötchen für das Abschlussfrühstück backen.&#x27;,&#x27;K&#x27;,5,12,10,&#x27;Herd&#x27;,9,9,&#x27;Christian Lorenz, Karl Jäger&#x27;,&#x27;Sa. 09:00 · Küche&#x27;],
+      [&#x27;Detektivspiel&#x27;,&#x27;Einen Fall lösen, mit Spuren und Verhören.&#x27;,&#x27;K&#x27;,7,12,16,&#x27;draußen&#x27;,3,3,&#x27;Tanja Nowak, Lotta Frank&#x27;,&#x27;Sa. 09:00 · Wiese&#x27;],
+      [&#x27;Filzen&#x27;,&#x27;Bunte Kugeln und Tiere aus Wolle.&#x27;,&#x27;K&#x27;,5,10,10,&#x27;Tische&#x27;,0,0,&#x27;Petra Dietz&#x27;,null],
+      [&#x27;Sport und Spiele&#x27;,&#x27;Staffeln, Ballspiele, Bewegungslandschaft.&#x27;,&#x27;K&#x27;,5,12,20,&#x27;Matten&#x27;,0,8,&#x27;Holger Kraus, Mats Lorenz&#x27;,null],
+      [&#x27;Lagerfeuerküche&#x27;,&#x27;Stockbrot und Suppe über dem Feuer.&#x27;,&#x27;K&#x27;,9,15,12,&#x27;draußen&#x27;,4,4,&#x27;Uwe Otto&#x27;,&#x27;Sa. 09:00 · Wald&#x27;],
+      [&#x27;Schmieden&#x27;,&#x27;Einen Haken aus Eisen schmieden.&#x27;,&#x27;K&#x27;,12,15,6,&#x27;Esse&#x27;,0,7,&#x27;Kaya (extern)&#x27;,null],
+      [&#x27;Trommeln&#x27;,&#x27;Rhythmen auf Cajón und Djembe, für Kinder und Erwachsene.&#x27;,&#x27;A&#x27;,5,99,16,&#x27;Musikanlage&#x27;,0,23,&#x27;Lindner (extern)&#x27;,null],
+      [&#x27;Tanzen&#x27;,&#x27;Eine Choreografie für den Abschlussabend.&#x27;,&#x27;A&#x27;,5,99,20,&#x27;viel Platz&#x27;,19,24,&#x27;Julia Ebert, Silke Hess&#x27;,&#x27;Fr. 15:00 · Halle&#x27;],
+      [&#x27;Yoga&#x27;,&#x27;Ruhige Bewegung und Atemübungen.&#x27;,&#x27;E&#x27;,18,99,12,&#x27;draußen&#x27;,12,22,&#x27;Anna Albers&#x27;,&#x27;Sa. 15:00 · Wiese&#x27;],
+      [&#x27;Chor&#x27;,&#x27;Mehrstimmig singen, ohne Vorkenntnisse.&#x27;,&#x27;E&#x27;,16,99,20,&#x27;Bühne&#x27;,0,16,&#x27;Lindner (extern)&#x27;,null],
+      [&#x27;Aquarell&#x27;,&#x27;Landschaften mit Wasserfarben.&#x27;,&#x27;E&#x27;,18,99,10,&#x27;Tische&#x27;,0,14,&#x27;Katrin Conrad&#x27;,null],
+      [&#x27;Wanderung&#x27;,&#x27;Zwei Stunden auf den Hausberg und zurück.&#x27;,&#x27;E&#x27;,18,99,15,&#x27;draußen&#x27;,15,27,&#x27;Jens Brandt&#x27;,&#x27;Sa. 11:30 · Wiese&#x27;],
+      [&#x27;Erste Hilfe am Kind&#x27;,&#x27;Notfälle bei Kindern erkennen und richtig handeln.&#x27;,&#x27;E&#x27;,18,99,14,&#x27;Beamer&#x27;,14,34,&#x27;Dr. Aydin (extern)&#x27;,&#x27;Fr. 11:30 · Seminarraum&#x27;],
+      [&#x27;Gesprächskreis Erziehung&#x27;,&#x27;Austausch über den Alltag mit Kindern.&#x27;,&#x27;E&#x27;,18,99,12,&#x27;ruhig&#x27;,0,0,&#x27;Markus Frank&#x27;,&#x27;Fr. 15:00 · Kaminzimmer&#x27;],
+      [&#x27;Improtheater&#x27;,&#x27;Spontan spielen, viel lachen.&#x27;,&#x27;E&#x27;,18,99,12,&#x27;viel Platz&#x27;,4,5,&#x27;Tobias Hess&#x27;,&#x27;Fr. 11:30 · Halle&#x27;],
+      [&#x27;Handyfotografie&#x27;,&#x27;Bessere Fotos mit dem Telefon.&#x27;,&#x27;E&#x27;,18,99,8,&#x27;Tische&#x27;,0,1,&#x27;Nguyen (extern)&#x27;,null],
+      [&#x27;Sauerteigbrot&#x27;,&#x27;Ein Brot ansetzen, backen und mitnehmen.&#x27;,&#x27;E&#x27;,18,99,8,&#x27;Herd&#x27;,8,11,&#x27;Stefan Dietz&#x27;,&#x27;Sa. 11:30 · Küche&#x27;],
+      [&#x27;Achtsamkeit&#x27;,&#x27;Stille Übungen für zwischendurch.&#x27;,&#x27;E&#x27;,18,99,12,&#x27;ruhig&#x27;,3,4,&#x27;Sabine Graf&#x27;,&#x27;Fr. 11:30 · Kaminzimmer&#x27;],
+      [&#x27;Bandprobe&#x27;,&#x27;Die Jugendgruppe probt offen. Wer mitspielen will, meldet sich an.&#x27;,&#x27;A&#x27;,12,99,8,&#x27;Bühne&#x27;,1,null,&#x27;Mats Lorenz&#x27;,null,[],&#x27;reg&#x27;]
+    ];
+    function plural(n, one, many) { return n + &#x27; &#x27; + (n === 1 ? one : many); }
+    var all = raw.map(function (r) {
+      var reg = r[12] === &#x27;reg&#x27;;
+      var places = r[5], z = r[7], wishes = r[8];
+      var age = r[4] &gt;= 99 ? &#x27;ab &#x27; + r[3] + &#x27; J.&#x27; : r[3] + &#x27;–&#x27; + r[4] + &#x27; J.&#x27;;
+      var over = !reg &amp;&amp; wishes &gt; places;
+      var wishText = reg ? plural(z, &#x27;Anmeldung&#x27;, &#x27;Anmeldungen&#x27;) + &#x27; bisher&#x27; :(wishes === 0 ? &#x27;Noch keine Wünsche&#x27; : (over ? plural(wishes, &#x27;Wunsch&#x27;, &#x27;Wünsche&#x27;) + &#x27; für &#x27; + places + &#x27; Plätze&#x27; : plural(wishes, &#x27;Wunsch&#x27;, &#x27;Wünsche&#x27;)));
+      return {
+        n: r[0], d: r[1], a: r[2], s: r[10],
+        hasSlot: !!r[10], noSlot: !r[10],
+        meta: AUD[r[2]] + &#x27; · &#x27; + age + &#x27; · braucht &#x27; + r[6],
+        l: r[9], warn: r[11] || [], isReg: reg,
+        capLabel: z + &#x27;/&#x27; + places,
+        capCaption: reg ? &#x27;angemeldet&#x27; : &#x27;zugeordnet&#x27;,
+        capAria: z + &#x27; von &#x27; + places + &#x27; Plätzen &#x27; + (reg ? &#x27;belegt&#x27; : &#x27;zugeordnet&#x27;),
+        pct: Math.round(Math.min(1, z / places) * 100),
+        over: over, notOver: !over, wishText: wishText
+      };
+    });
+    var s = this.state;
+    var self = this;
+    var inGroup = function (w, g) { return g === &#x27;all&#x27; || w.a === g || w.a === &#x27;A&#x27;; };
+    var items = all.filter(function (w) { return inGroup(w, s.group) &amp;&amp; (!s.onlyOpen || w.noSlot); });
+    var groups = [[&#x27;all&#x27;, &#x27;Alle&#x27;], [&#x27;K&#x27;, &#x27;Kinder&#x27;], [&#x27;E&#x27;, &#x27;Erwachsene&#x27;]].map(function (g) {
+      return {
+        label: g[1],
+        count: all.filter(function (w) { return inGroup(w, g[0]); }).length,
+        active: s.group === g[0], inactive: s.group !== g[0],
+        pick: function () { self.setState({ group: g[0] }); }
+      };
+    });
+    return {
+      items: items,
+      groups: groups,
+      onlyOpen: s.onlyOpen,
+      onlyOpenStr: s.onlyOpen ? &#x27;true&#x27; : &#x27;false&#x27;,
+      openLinkText: s.onlyOpen ? &#x27;alle zeigen&#x27; : &#x27;anzeigen&#x27;,
+      toggleOpen: function () { self.setState({ onlyOpen: !self.state.onlyOpen }); },
+      acctOpen: s.acctOpen, acctOpenStr: s.acctOpen ? &#x27;true&#x27; : &#x27;false&#x27;,
+      toggleAcct: function () { self.setState({ acctOpen: !self.state.acctOpen }); },
+      closeAcct: function () { self.setState({ acctOpen: false }); },
+      saveNow: function () { self.setState({ pending: 0 }); },
+      acct: (function () {
+        var draft = s.saveMode === &#x27;draft&#x27;, n = draft ? s.pending : 0;
+        return {
+          isAuto: !draft, isDraft: draft,
+          set_isAuto: function () { self.setState({ saveMode: &#x27;auto&#x27;, pending: 0 }); },
+          set_isDraft: function () { self.setState({ saveMode: &#x27;draft&#x27;, pending: 3 }); },
+          showSave: draft &amp;&amp; n &gt; 0, count: n,
+          badgeCheck: !draft, badgeCount: draft &amp;&amp; n &gt; 0, badgePen: draft,
+          segBg: draft ? &#x27;hsl(28 100% 80%)&#x27; : &#x27;#fff&#x27;, pillBorder: draft ? &#x27;dashed&#x27; : &#x27;solid&#x27;,
+          boxBorder: draft ? &#x27;dashed&#x27; : &#x27;solid&#x27;, boxBg: draft ? &#x27;hsl(33 100% 96%)&#x27; : &#x27;#fff&#x27;,
+          statusText: draft ? (n ? &#x27;Entwurf · &#x27; + n + &#x27; ungespeicherte Änderungen&#x27; : &#x27;Entwurfsmodus · nichts offen&#x27;) : &#x27;Alles gespeichert&#x27;,
+          saveLong: n + &#x27; Änderungen speichern&#x27;,
+          aria: &#x27;Menü (Speichern, Abmelden) – &#x27; + (draft ? (n ? n + &#x27; ungespeicherte Änderungen&#x27; : &#x27;Entwurfsmodus&#x27;) : &#x27;alles gespeichert&#x27;)
+        };
+      })(),
+      ph: this.buildPhase(2, !s.stepsOpen, function () { self.setState({ stepsOpen: !self.state.stepsOpen }); }),
+      countText: plural(items.length, &#x27;Workshop&#x27;, &#x27;Workshops&#x27;) + (items.length === all.length ? &#x27;&#x27; : &#x27; von &#x27; + all.length),
+      stats: {
+        total: all.length,
+        open: all.filter(function (w) { return w.noSlot; }).length,
+        over: all.filter(function (w) { return w.over; }).length
+      }
+    };
+  }
+}
+&lt;/script&gt;&lt;script&gt;/* dc-lite: minimal standalone renderer for the .dc.html mockups ({{holes}}, sc-for, sc-if, events, setState). */
+(function () {
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; render(); });
+  }
+  class DCLogic {
+    constructor(props) { this.props = props || {}; this.state = {}; }
+    setState(u) {
+      var n = typeof u === &#x27;function&#x27; ? u(this.state, this.props) : u;
+      Object.assign(this.state, n);
+      schedule();
+    }
+    forceUpdate() { schedule(); }
+  }
+  var queued = false;
+  var code = document.getElementById(&#x27;dc-logic&#x27;).textContent;
+  var Component = new Function(&#x27;DCLogic&#x27;, code + &#x27;\n;return Component;&#x27;)(DCLogic);
+  var comp = new Component({});
+  if (!comp.state) comp.state = {};
+  var tpl = document.getElementById(&#x27;dc-tpl&#x27;).content;
+  var root = document.getElementById(&#x27;dc-root&#x27;);
+  var HOLE = /\{\{\s*([^}]+?)\s*\}\}/g, WHOLE = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/;
+
+  function look(path, scope) {
+    path = path.trim();
+    if (path === &#x27;true&#x27;) return true;
+    if (path === &#x27;false&#x27;) return false;
+    if (path === &#x27;null&#x27;) return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    if (/^([&#x27;&quot;]).*\1$/.test(path)) return path.slice(1, -1);
+    var parts = path.split(&#x27;.&#x27;), v = scope;
+    for (var i = 0; i &lt; parts.length; i++) { if (v == null) return undefined; v = v[parts[i]]; }
+    return v;
+  }
+  function interp(str, scope) {
+    return str.replace(HOLE, function (_, p) { var v = look(p, scope); return v == null ? &#x27;&#x27; : String(v); });
+  }
+  function kids(node, scope, parent) {
+    node.childNodes.forEach(function (c) { build(c, scope, parent); });
+  }
+  function build(node, scope, parent) {
+    if (node.nodeType === 3) { parent.appendChild(document.createTextNode(interp(node.nodeValue, scope))); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.localName;
+    if (tag === &#x27;helmet&#x27;) return;
+    if (tag === &#x27;sc-for&#x27;) {
+      var m = WHOLE.exec(node.getAttribute(&#x27;list&#x27;) || &#x27;&#x27;);
+      var list = m ? look(m[1], scope) : [];
+      var as = node.getAttribute(&#x27;as&#x27;) || &#x27;item&#x27;;
+      (list || []).forEach(function (item, i) {
+        var s = Object.create(scope); s[as] = item; s.$index = i; kids(node, s, parent);
+      });
+      return;
+    }
+    if (tag === &#x27;sc-if&#x27;) {
+      var m2 = WHOLE.exec(node.getAttribute(&#x27;value&#x27;) || &#x27;&#x27;);
+      if (m2 &amp;&amp; look(m2[1], scope)) kids(node, scope, parent);
+      return;
+    }
+    var el = document.createElementNS(node.namespaceURI, tag);
+    Array.prototype.forEach.call(node.attributes, function (a) {
+      var name = a.name, val = a.value;
+      if (name.indexOf(&#x27;hint-&#x27;) === 0) return;
+      var w = WHOLE.exec(val);
+      if (name.length &gt; 2 &amp;&amp; name.slice(0, 2) === &#x27;on&#x27;) {
+        if (w) { var fn = look(w[1], scope); if (typeof fn === &#x27;function&#x27;) el.addEventListener(name.slice(2), fn); }
+        return;
+      }
+      if (w) {
+        var v = look(w[1], scope);
+        if (name === &#x27;checked&#x27;) { el.checked = !!v; if (v) el.setAttribute(&#x27;checked&#x27;, &#x27;&#x27;); return; }
+        if (name === &#x27;disabled&#x27; || name === &#x27;readonly&#x27; || name === &#x27;hidden&#x27;) { if (v) el.setAttribute(name, &#x27;&#x27;); return; }
+        if (v == null || (v === false &amp;&amp; name.indexOf(&#x27;aria-&#x27;) !== 0)) return;
+        el.setAttribute(name, String(v));
+        return;
+      }
+      el.setAttribute(name, val.indexOf(&#x27;{{&#x27;) &gt;= 0 ? interp(val, scope) : val);
+    });
+    kids(node, scope, el);
+    parent.appendChild(el);
+  }
+  function render() {
+    var vals = comp.renderVals();
+    var frag = document.createDocumentFragment();
+    kids(tpl, vals, frag);
+    root.replaceChildren(frag);
+    // Narrow screens: keep the active tab/chip of horizontally scrolling navs in view (guide §4.1).
+    root.querySelectorAll(&#x27;nav&#x27;).forEach(function (nav) {
+      var a = nav.querySelector(&#x27;[aria-current=&quot;page&quot;]&#x27;);
+      if (!a || nav.scrollWidth &lt;= nav.clientWidth) return;
+      var nr = nav.getBoundingClientRect(), ar = a.getBoundingClientRect();
+      nav.scrollLeft += (ar.left - nr.left) - (nav.clientWidth - ar.width) / 2;
+    });
+  }
+  render();
+  if (typeof comp.componentDidMount === &#x27;function&#x27;) comp.componentDidMount();
+})();
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe></div></div>
+</body>
+</html>

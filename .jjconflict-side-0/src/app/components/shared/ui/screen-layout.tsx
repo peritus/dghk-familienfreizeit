@@ -1,0 +1,206 @@
+import { useContext, useId, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { FrameNavigationTarget } from '../../application/application-frame.js'
+import { cn } from '../../../lib/utils.js'
+
+export type ScreenHeaderProps = {
+  title: ReactNode
+  eyebrow?: ReactNode
+  description?: ReactNode
+  action?: ReactNode
+  className?: string
+}
+
+export function ScreenHeader({ title, description, action, className }: ScreenHeaderProps) {
+  return (
+    <header
+      data-slot="screen-header"
+      className={cn('flex flex-wrap items-end justify-between gap-4 ', className)}
+    >
+      <div className="min-w-0">
+        <h1 className="text-h1 leading-tight font-heading tracking-[-0.01em]">{title}</h1>
+        {description ? (
+          <div className="mt-2 max-w-3xl font-normal text-muted">{description}</div>
+        ) : null}
+      </div>
+      {action ? (
+        <div data-slot="screen-actions" className="ml-auto flex flex-wrap gap-2 print:hidden">
+          {action}
+        </div>
+      ) : null}
+    </header>
+  )
+}
+
+/** Screen-wide context stays mounted above local views; collection content follows them. */
+export function ScreenLayout({
+  header,
+  print_context: printContext,
+  print_running_title: printRunningTitle,
+  print_orientation: printOrientation = 'portrait',
+  secondary_navigation: secondaryNavigation,
+  notices,
+  workflow,
+  summary,
+  tertiary_navigation: tertiaryNavigation,
+  footer,
+  children,
+  className,
+}: {
+  header: ReactNode
+  print_running_title?: string
+  print_context?: ReactNode
+  print_orientation?: 'portrait' | 'landscape'
+  secondary_navigation?: ReactNode
+  notices?: ReactNode
+  workflow?: ReactNode
+  summary?: ReactNode
+  tertiary_navigation?: ReactNode
+  footer?: ReactNode
+  children?: ReactNode
+  className?: string
+}) {
+  const navigationTarget = useContext(FrameNavigationTarget)
+  return (
+    <div
+      data-slot="screen-layout"
+      data-print-orientation={printOrientation}
+      className={cn('w-full min-w-0 space-y-6 sm:space-y-8', className)}
+    >
+      {printRunningTitle ? (
+        <style>{`@media print { @page { @top-left { content: ${JSON.stringify(printRunningTitle + ' · Fortsetzung')}; font: 9pt sans-serif; } } @page:first { @top-left { content: none; } } }`}</style>
+      ) : null}
+      {secondaryNavigation ? (
+        navigationTarget ? (
+          createPortal(secondaryNavigation, navigationTarget)
+        ) : (
+          <div
+            data-slot="screen-secondary-navigation"
+            className="border-b-2 border-border bg-main-soft print:hidden"
+          >
+            {secondaryNavigation}
+          </div>
+        )
+      ) : null}
+      {header}
+      {printContext ? (
+        <div data-slot="print-context" className="hidden print:block">
+          {printContext}
+        </div>
+      ) : null}
+      {notices ? (
+        <div data-slot="screen-notices" className="empty:hidden">
+          {notices}
+        </div>
+      ) : null}
+      {workflow || summary ? (
+        <div data-slot="screen-status" className="space-y-4">
+          {workflow ? (
+            <div data-slot="screen-workflow" className="space-y-4 empty:hidden">
+              {workflow}
+            </div>
+          ) : null}
+          {summary ? (
+            <div data-slot="screen-summary" className="empty:hidden">
+              {summary}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {tertiaryNavigation ? (
+        <div data-slot="screen-tertiary-navigation" className="print:hidden">
+          {tertiaryNavigation}
+        </div>
+      ) : null}
+      {children ? (
+        <div data-slot="screen-content" className="min-w-0 space-y-6">
+          {children}
+        </div>
+      ) : null}
+      {footer ? <div data-slot="screen-footer">{footer}</div> : null}
+    </div>
+  )
+}
+
+export type SectionHeaderProps = {
+  title: ReactNode
+  description?: ReactNode
+  action?: ReactNode
+  heading_level?: 2 | 3 | 4
+  id?: string
+  className?: string
+}
+
+export function SectionHeader({
+  title,
+  description,
+  action,
+  heading_level: headingLevel = 2,
+  id,
+  className,
+}: SectionHeaderProps) {
+  const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4'
+  return (
+    <div
+      data-slot="section-header"
+      className={cn('flex flex-wrap items-end justify-between gap-3', className)}
+    >
+      <div className="min-w-0">
+        <Heading
+          id={id}
+          className={cn('font-heading', headingLevel === 2 ? 'text-figure' : 'text-metric')}
+        >
+          {title}
+        </Heading>
+        {description ? <div className="mt-1 text-sm text-muted">{description}</div> : null}
+      </div>
+      {action ? (
+        <div data-slot="collection-actions" className="ml-auto flex flex-wrap gap-2 print:hidden">
+          {action}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export function CollectionSection({
+  title,
+  description,
+  action,
+  heading_level: headingLevel,
+  controls,
+  label,
+  children,
+  className,
+  id,
+}: SectionHeaderProps & { label?: string; controls?: ReactNode; children: ReactNode }) {
+  const generatedId = useId()
+  const headingId = id ?? `collection-${generatedId}`
+  return (
+    <section
+      data-slot="collection-section"
+      aria-labelledby={title ? headingId : undefined}
+      aria-label={!title ? label : undefined}
+      className={cn('min-w-0 space-y-4', className)}
+    >
+      {title ? (
+        <SectionHeader
+          id={headingId}
+          title={title}
+          description={description}
+          action={action}
+          heading_level={headingLevel}
+        />
+      ) : action ? (
+        <div data-slot="collection-actions">{action}</div>
+      ) : null}
+      {controls ? (
+        <div data-slot="collection-controls" className="print:hidden">
+          {controls}
+        </div>
+      ) : null}
+      {children}
+    </section>
+  )
+}

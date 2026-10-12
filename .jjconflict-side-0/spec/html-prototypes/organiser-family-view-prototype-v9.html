@@ -1,0 +1,1643 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff0d6">
+<title>Familien – Familienfreizeit</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:hsl(33 100% 92%);--surface:#fff;--paper:#fffaf0;--ink:#000;--muted:hsl(30 10% 32%);--rule:hsl(33 25% 82%);--off:hsl(30 12% 88%);
+  --main:hsl(28 100% 51%);--danger:hsl(2 90% 66%);--line:var(--ink);--shadow:3px 3px 0 0 var(--line);--r:6px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Arial,sans-serif;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:hsl(30 14% 9%);--surface:hsl(30 12% 14%);--paper:hsl(30 12% 18%);--ink:hsl(36 60% 93%);--muted:hsl(33 18% 72%);--rule:hsl(30 10% 32%);--off:hsl(30 8% 26%);
+    --main:hsl(28 100% 56%);--danger:hsl(2 85% 66%);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:hsl(30 14% 9%);--surface:hsl(30 12% 14%);--paper:hsl(30 12% 18%);--ink:hsl(36 60% 93%);--muted:hsl(33 18% 72%);--rule:hsl(30 10% 32%);--off:hsl(30 8% 26%);
+  --main:hsl(28 100% 56%);--danger:hsl(2 85% 66%);color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;overflow-x:hidden}
+[hidden]{display:none!important}
+h1,h2,h3,h4,h5,p,ul,ol,fieldset,legend{margin:0;padding:0}
+h1,h2,h3,h4,h5{font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+ul,ol{list-style:none}
+fieldset{border:0;min-width:0}
+a{color:inherit;text-underline-offset:4px}
+button,input,select,textarea{font:inherit;color:inherit}
+:where(a,button,input,summary,select,textarea):focus-visible{outline:3px solid var(--line);outline-offset:3px}
+[tabindex="-1"]:focus{outline:none}
+[tabindex="-1"]:focus-visible{outline:3px solid var(--line);outline-offset:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.muted{color:var(--muted)}
+.hint{font-size:14px;color:var(--muted);max-width:64ch}
+.opt{font-weight:500;color:var(--muted)}
+.icon{width:16px;height:16px;flex-shrink:0}
+
+.skip{position:absolute;left:12px;top:-80px;z-index:50;background:var(--ink);color:var(--surface);padding:12px 16px;border-radius:var(--r);font-weight:700}
+.skip:focus{top:calc(env(safe-area-inset-top,0px) + 12px)}
+
+/* Prototype-only controls */
+.proto-wrap{max-width:72rem;margin:0 auto;padding:12px 16px 0}
+@media (min-width:600px){.proto-wrap{padding:12px 32px 0}}
+details.proto{border:2px dashed var(--muted);border-radius:var(--r);font-size:14px}
+details.proto summary{min-height:44px;display:flex;align-items:center;padding:0 12px;font-weight:700;cursor:pointer}
+.proto-body{display:flex;flex-wrap:wrap;align-items:center;gap:4px 24px;padding:0 12px 10px}
+.proto label{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer}
+.proto input[type=checkbox]{width:20px;height:20px;accent-color:var(--ink)}
+.proto button{min-height:44px;border:1.5px dashed var(--muted);border-radius:3px;background:transparent;padding:4px 10px;cursor:pointer}
+
+/* Top bar */
+.topbar{background:var(--surface);border-bottom:2px solid var(--line);margin-top:12px}
+.topbar-in{max-width:72rem;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
+@media (min-width:600px){.topbar-in{padding:12px 32px}}
+.brand a{font-size:20px;font-weight:700;text-decoration:none;display:inline-flex;min-height:44px;align-items:center}
+.brand p{font-size:14px;color:var(--muted);margin-top:-8px}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:2px solid transparent;border-radius:var(--r);font-weight:700;text-decoration:none}
+.nav a:hover{border-color:var(--line)}
+.nav a[aria-current="page"]{background:var(--ink);color:var(--surface);border-color:var(--line)}
+
+/* Page */
+.wrap{max-width:72rem;margin:0 auto;padding:24px 16px 72px}
+@media (min-width:600px){.wrap{padding:32px 32px 96px}}
+main:focus{outline:none}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:2px solid var(--line);margin-bottom:16px}
+h1{font-size:clamp(28px,8vw,36px)}
+h2{font-size:22px}
+.crumbs a{display:inline-flex;align-items:center;gap:4px;min-height:44px;font-weight:700}
+.meta a{display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.stack{display:grid;gap:28px}
+.stack-sm{display:grid;gap:16px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 16px;max-width:100%;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font-size:15px;font-weight:700;line-height:1.25;text-align:center;cursor:pointer;box-shadow:var(--shadow);transition:translate 120ms,box-shadow 120ms;text-decoration:none}
+.btn:hover,.btn:active{translate:3px 3px;box-shadow:none}
+.btn.main{background:var(--main);color:#000}
+.btn.danger{background:var(--danger);color:#000}
+.btn.plain{box-shadow:none}
+.btn.plain:hover{translate:none;background:var(--paper)}
+.btn.icon-only{width:44px;padding:0}
+.btn[aria-disabled="true"]{background:var(--off);border-color:var(--muted);color:var(--muted);box-shadow:none;translate:none;cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+/* Chips and badges */
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:2px 8px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);font-size:14px;font-weight:700;line-height:1.25;max-width:100%}
+.chip.attn{background:var(--main);color:#000;border-color:#000}
+.chip.bad{background:var(--danger);color:#000;border-color:#000}
+.chip.off{background:var(--off);border-color:var(--muted)}
+.chip.free{border-style:dashed}
+.chip.dark{background:var(--ink);color:var(--surface)}
+.chip.plan{background:var(--paper);border-style:dotted}
+.chip.maybe{border-style:dashed;background:var(--surface);color:var(--ink);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:0 8px;border:1.5px solid var(--muted);border-radius:var(--r);background:var(--surface);font-size:14px}
+.spinner{display:inline-block;width:16px;height:16px;flex:none;border:3px solid var(--rule);border-top-color:var(--ink);border-radius:50%;animation:spin 900ms linear infinite}
+@keyframes spin{to{rotate:360deg}}
+
+/* Save bar + alerts */
+.savebar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin:0 -16px 16px;padding:8px 16px;background:var(--bg);border-bottom:2px solid var(--line)}
+@media (min-width:600px){.savebar{margin:0 -32px 16px;padding:8px 32px}}
+.save{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:2px 12px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);font-weight:700;font-size:15px}
+.save .sico{display:inline-grid;place-items:center;width:20px;height:20px;flex:none}
+.save.idle{border-style:dashed;font-weight:500;border-color:var(--muted)}
+.save.saving{background:var(--paper)}
+.save.failed{background:var(--danger);color:#000;border-color:#000}
+.alert{border:2px solid var(--line);border-left-width:10px;border-radius:var(--r);background:var(--surface);padding:12px 14px;display:grid;gap:4px}
+.alert.attn{border-left-color:var(--main)}
+.alert.bad{border-left-color:var(--danger)}
+.alert-h{font-weight:700;font-size:17px}
+.alert .actions{margin-top:8px}
+.tried-text{display:block;margin-top:4px;padding:6px 10px;white-space:pre-wrap;overflow-wrap:anywhere;border:1.5px dashed var(--muted);border-radius:3px;background:var(--paper)}
+.open-list{display:grid;gap:10px;margin-top:8px}
+.open-list li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding-top:10px;border-top:1px solid var(--rule)}
+.open-list li:first-child{border-top:0;padding-top:0}
+.done-line{display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);font-weight:700}
+
+/* Cards */
+.card{border:2px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);padding:16px;display:grid;gap:14px;min-width:0}
+.card-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 12px}
+.card h4{font-size:19px}
+.card h5{font-size:16px}
+.field{display:grid;gap:6px;min-width:0}
+.field>label,.field>legend{font-weight:700;font-size:16px;line-height:1.3}
+.field>legend{margin-bottom:6px}
+.fhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:28px}
+.fhead:empty{display:none}
+
+/* Option buttons (radios styled like the workshop prototype's filter buttons) */
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts label{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);font-weight:700;font-size:15px;line-height:1.25;cursor:pointer}
+.opts input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.opts label:hover{background:var(--paper)}
+.opts label:has(input:checked){background:var(--ink);color:var(--surface)}
+.opts label:has(input:checked)::before{content:"✓";font-weight:700}
+.opts label:has(input:focus-visible){outline:3px solid var(--line);outline-offset:3px}
+
+input[type=text],input[type=email],input[type=search],input[type=date],select,textarea{width:100%;margin:0;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font-size:16px;line-height:1.4}
+input[type=text],input[type=email],input[type=search],input[type=date],select{min-height:48px;padding:0 12px}
+textarea{display:block;min-height:110px;padding:10px 12px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere}
+[aria-invalid="true"]{border-color:var(--danger)!important;box-shadow:0 0 0 2px var(--danger)}
+.error{font-size:14px;font-weight:700}
+.error:empty{display:none}
+.st-quiet{font-size:15px;color:var(--muted)}
+
+.toggle,.check{display:inline-flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-weight:700}
+.toggle input{appearance:none;-webkit-appearance:none;margin:0;width:52px;height:30px;border:2px solid var(--line);border-radius:999px;background:var(--paper);position:relative;cursor:pointer;flex-shrink:0;transition:background-color 120ms}
+.toggle input::before{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:999px;background:var(--surface);border:2px solid var(--line);transition:translate 120ms}
+.toggle input:checked{background:var(--main)}
+.toggle input:checked::before{translate:22px 0}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--ink);flex-shrink:0}
+
+/* People: person list + person view */
+.ppl-sec{container-type:inline-size;container-name:ppl}
+.sec-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:12px}
+.ppl{display:grid;gap:24px;align-items:start}
+.ptabs{display:grid;gap:10px}
+.ptab{display:grid;gap:2px;width:100%;min-height:64px;padding:12px 14px;text-align:left;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);cursor:pointer}
+.ptab:hover{background:var(--paper)}
+.ptab[aria-selected="true"]{background:var(--ink);color:var(--surface);box-shadow:var(--shadow)}
+.ptab[aria-selected="true"] .badge{border-color:var(--surface);color:var(--ink)}
+.ptab[aria-selected="true"] .ptab-age{color:var(--surface)}
+.ptab-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 10px}
+.ptab-name{font-weight:700;font-size:17px;overflow-wrap:anywhere}
+.ptab-age{font-size:14px;color:var(--muted)}
+.ptab .chips{margin-top:6px}
+.add-person{margin-top:14px}
+.empty-inline{padding:16px;border:2px dashed var(--muted);border-radius:var(--r)}
+@container ppl (min-width:760px){.ppl{grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:28px}}
+
+.pview{container-type:inline-size;container-name:pview;min-width:0;scroll-margin-top:16px}
+.av{display:grid;place-items:center;width:56px;height:56px;flex:none;border:2px solid #000;border-radius:50%;background:var(--main);color:#000;font-weight:700;font-size:24px}
+.phead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:10px}
+.phead h3{font-size:26px}
+.phead-actions{margin-left:auto}
+.subtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 20px;padding-bottom:16px;border-bottom:2px solid var(--line)}
+.subtab{min-height:56px;padding:6px 12px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;line-height:1.25}
+.subtab .t{display:block;font-weight:700;font-size:16px}
+.subtab .s{display:block;font-size:13px}
+.subtab[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.subtab:not([aria-selected="true"]):hover{background:var(--paper)}
+.nextp{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;padding-top:16px;border-top:2px solid var(--line)}
+
+/* Ranking (from the workshop prototype) */
+.rklist{display:grid;gap:10px}
+.rk{display:grid;grid-template-columns:36px 1fr;align-items:center;gap:8px 12px;padding:12px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.rk.empty{border-style:dashed;border-color:var(--muted);background:transparent;color:var(--muted);align-items:center}
+.rk-slot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;min-width:0}
+.rk.empty .rk-slot>span{color:var(--muted)}
+.rk-n{display:grid;place-items:center;width:36px;height:36px;border:2px solid #000;border-radius:50%;background:var(--main);color:#000;font-weight:700}
+.rk.empty .rk-n{background:var(--surface);border-style:dashed;border-color:var(--muted);color:var(--muted)}
+.rk-body{min-width:0;display:grid;gap:4px}
+.rk-body>.chip{justify-self:start}
+.rk-body strong{font-size:17px;overflow-wrap:anywhere}
+.rk-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-left:auto}
+.numctl{display:flex;align-items:center;gap:6px}
+.numctl .lbl{font-size:14px;font-weight:700;margin-right:2px}
+.num{width:44px;height:44px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);font-weight:700;font-size:16px;cursor:pointer}
+.num[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.plist{display:grid;gap:8px;margin-top:8px}
+.plist li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:8px 8px 8px 12px;border:2px solid var(--line);border-radius:var(--r)}
+
+/* Workshop catalogue */
+.filters{display:grid;gap:14px;margin-bottom:14px}
+.filters label.fl,.filters legend{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg .btn{box-shadow:none}
+.seg .btn:hover{translate:none;background:var(--paper)}
+.seg .btn[aria-pressed="true"]:hover{background:var(--ink)}
+.count{font-size:15px;margin-bottom:12px;font-weight:700}
+.wlist{display:grid;gap:16px}
+.wcard{border:2px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);padding:16px;display:grid;gap:10px;align-content:start;min-width:0}
+.wcard.inelig{border-style:dashed;border-color:var(--muted);box-shadow:none;background:var(--paper)}
+.wcard h4{font-size:19px}
+.w-top{display:grid;gap:8px}
+.modeinfo{font-size:14px;color:var(--muted)}
+.inel{border-left:4px solid var(--muted);padding-left:10px;font-size:15px}
+.places{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-variant-numeric:tabular-nums}
+.seats{display:flex;flex-wrap:wrap;gap:3px}
+.seat{width:12px;height:12px;border:2px solid var(--line);border-radius:2px;background:var(--surface)}
+.seat.taken{background:var(--ink)}
+.wact{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.empty-state{border:2px dashed var(--muted);border-radius:var(--r);padding:20px;display:grid;gap:10px;justify-items:start}
+
+@container pview (min-width:560px){.subtabs{display:flex}.subtab{min-width:200px}}
+@container pview (min-width:640px){
+  .filters{grid-template-columns:minmax(0,1fr) auto}
+  .filters{grid-template-columns:1fr 1fr}
+  .filters .full{grid-column:1/-1}
+  .wlist{grid-template-columns:1fr 1fr;align-items:start}
+}
+
+/* List */
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:10px}
+.search{position:relative;flex:1 1 16rem;max-width:26rem}
+.search .icon{position:absolute;left:13px;top:50%;translate:0 -50%;pointer-events:none}
+.search input{padding-left:38px}
+.result-count{margin-bottom:12px;font-size:14px;color:var(--muted)}
+.lcard{background:var(--surface);border:2px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.table-scroll{overflow-x:auto}
+.ftable{width:100%;border-collapse:collapse;text-align:left}
+.ftable thead th{padding:12px 16px;border-bottom:2px solid var(--line);font-size:14px;white-space:nowrap}
+.ftable td,.ftable tbody th{padding:14px 16px;vertical-align:top;font-weight:400}
+.ftable tbody tr{border-top:1px solid var(--line)}
+.ftable tbody tr:first-child{border-top:0}
+.ftable tbody tr:hover{background:var(--paper)}
+.cell{display:grid;gap:6px;justify-items:start}
+.sub{display:block;font-size:14px;color:var(--muted)}
+.rowlink{font-weight:700;font-size:17px}
+.ftable tbody tr.rowclick{cursor:pointer}
+.ftable tbody tr.rowclick:has(.rowlink:focus-visible){outline:3px solid var(--line);outline-offset:-3px}
+.rowlink:focus-visible{outline:none;text-decoration-thickness:3px}
+.empty{padding:32px 24px;display:grid;gap:12px;justify-items:start}
+@media (max-width:47.99rem){
+  .ftable thead{display:none}
+  .ftable,.ftable tbody,.ftable tr{display:block}
+  .ftable tbody tr{padding:12px 16px}
+  .ftable td{display:flex;justify-content:space-between;gap:16px;padding:6px 0}
+  .ftable tbody th{display:block;padding:0 0 8px}
+  .ftable td::before{content:attr(data-label);font-weight:700;font-size:14px;flex:none}
+  .ftable td .cell{justify-items:end;text-align:right}
+}
+
+
+/* Topic tabs (underline style, from the Räume/Slots heading) */
+.ttabs-bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:0 24px;border-bottom:2px solid color-mix(in srgb,var(--line) 30%,transparent)}
+@media (max-width:39.99rem){.ttabs-bar{flex-direction:column;align-items:stretch}}
+.ttabs{display:flex;flex-wrap:wrap;gap:4px 20px}
+.ttab{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 2px 4px;border:0;border-bottom:4px solid transparent;background:none;color:var(--muted);font-weight:700;font-size:18px;text-align:left;cursor:pointer}
+.ttab[aria-selected="true"]{border-bottom-color:var(--line);color:var(--ink)}
+.ttab:focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--line)}
+.ttab .chip{min-height:22px;padding:0 6px;font-size:13px}
+.scope{font-size:14px;color:var(--muted);padding:6px 0}
+.tpanel{padding-top:20px}
+
+/* Roster */
+.roster-card{container-type:inline-size;container-name:roster}
+.roster li{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--rule)}
+.roster li:first-child{border-top:0;padding-top:0}
+.roster li:last-child{padding-bottom:0}
+.r-name{display:grid;gap:2px;justify-items:start;min-width:0}
+.r-name strong{font-size:17px;overflow-wrap:anywhere}
+.r-ctl{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.r-ctl .actions{gap:6px}
+@container roster (min-width:560px){.roster li{grid-template-columns:minmax(0,1fr) auto}.r-ctl{grid-column:auto;justify-content:flex-end}}
+.roster li.away .r-name strong{color:var(--muted)}
+.av.sm{width:40px;height:40px;font-size:17px}
+.who{display:flex;align-items:center;gap:12px;min-width:0}
+.who h3{font-size:20px}
+
+/* Text save controls */
+.tctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.btn:disabled{background:var(--off);border-color:var(--muted);color:var(--muted);box-shadow:none;translate:none;cursor:not-allowed}
+.beds{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.beds strong{font-size:30px;line-height:1}
+input[type=number]{min-height:48px;padding:0 12px;width:8rem;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font-size:16px}
+
+
+/* Person sidebar shared by Personen, Essen and Workshops */
+.pl{container-type:inline-size;container-name:pl}
+.pl-grid{display:grid;gap:20px;align-items:start}
+.pside{display:grid;gap:12px;align-content:start;min-width:0}
+.pside>.btn{justify-self:start}
+.plist{display:grid;gap:8px}
+.pbtn{display:grid;justify-items:start;gap:2px;width:100%;min-height:52px;padding:10px 12px;text-align:left;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);cursor:pointer;min-width:0}
+.pbtn:hover{background:var(--paper)}
+.pbtn[aria-selected="true"]{background:var(--ink);color:var(--surface);box-shadow:var(--shadow)}
+.pbtn.new{border-style:dashed}
+.pbtn .chip{margin-top:6px;background:var(--surface);color:var(--ink)}
+.pb-name{font-weight:700;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.pb-sub{font-size:13px;color:var(--muted);line-height:1.3}
+.pbtn[aria-selected="true"] .pb-sub{color:var(--surface)}
+.pside>.btn{justify-self:stretch}
+@container pl (min-width:720px){
+  .pl-grid{grid-template-columns:minmax(190px,23%) minmax(0,1fr);gap:28px}
+  .pside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+  .pside>.btn{justify-self:start}
+}
+.lbl-h{font-size:19px!important;font-weight:700}
+.findhead{margin:-6px 0 8px}
+.wl-items{display:grid;gap:8px;margin-top:8px}
+.wl-items li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:8px 8px 8px 12px;border:2px solid var(--line);border-radius:var(--r)}
+.two{display:grid;gap:14px}
+@container pview (min-width:520px){.two{grid-template-columns:1fr 1fr}}
+input.age{width:8rem}
+.danger-zone h4{font-size:16px}
+.pst{display:inline-grid;place-items:center;width:22px;height:22px;flex:none;border:2px solid #000;border-radius:50%;font-size:12px;font-weight:800;line-height:1}
+.pst.warn{background:var(--main);color:#000}
+.pst.ok{background:#fff;color:#000}
+.pst.off{background:var(--off);color:var(--ink);border-color:var(--muted)}
+.pst.bad{background:var(--danger);color:#000}
+.pst.plan{background:var(--paper);color:var(--ink);border-style:dotted}
+button.chipbtn{min-height:36px;cursor:pointer;font:inherit;font-size:14px;font-weight:700}
+button.chipbtn:hover{text-decoration:underline;text-underline-offset:3px}
+
+.dlg-danger{display:grid;gap:6px;margin-top:8px;padding-top:16px;border-top:2px dashed var(--muted)}
+.dlg-danger h3{font-size:16px}
+.dlg-danger .btn{margin-top:4px}
+
+/* Log + danger */
+.log{display:grid;gap:16px}
+.log>li{padding-left:14px;border-left:4px solid var(--line)}
+.log-title{font-weight:700;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.log-lines{margin:4px 0;display:grid;gap:2px;font-size:15px}
+.danger-zone{padding:20px;border:2px dashed var(--muted);border-radius:var(--r);display:grid;gap:8px;justify-items:start}
+.danger-zone h2{font-size:17px}
+
+/* Dialog + toast */
+dialog{border:2px solid var(--line);border-radius:var(--r);box-shadow:6px 6px 0 0 var(--line);background:var(--surface);color:var(--ink);padding:0;width:min(30rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem)}
+dialog::backdrop{background:rgb(0 0 0 / .45)}
+.dlg-head{padding:12px 12px 12px 20px;border-bottom:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px}
+.dlg-head h2{font-size:20px}
+.dlg-body{padding:20px;display:grid;gap:16px}
+.dlg-foot{padding:14px 20px;border-top:2px solid var(--line);display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;background:var(--paper)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:var(--surface);padding:12px 16px;border-radius:var(--r);font-weight:700;max-width:calc(100vw - 2rem);z-index:60;box-shadow:3px 3px 0 0 var(--main)}
+
+@media (prefers-reduced-motion:reduce){
+  .ttab{transition:none}
+  .btn{transition:none}
+  .btn:hover,.btn:active{translate:none;box-shadow:var(--shadow)}
+  .btn.plain:hover{box-shadow:none}
+  .spinner{animation-duration:2.4s}
+  .toggle input,.toggle input::before{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Zum Inhalt springen</a>
+<div class="proto-wrap">
+  <details class="proto" id="proto">
+    <summary>Nur Prototyp: Zustände umschalten</summary>
+    <div class="proto-body">
+      <label><input type="checkbox" id="p-savefail"> Speichern schlägt fehl</label>
+      <label><input type="checkbox" id="p-slow"> Speichern dauert lange</label>
+      <button type="button" id="btn-reset" data-act="reset-demo">Beispieldaten zurücksetzen</button>
+      <span class="muted">Feste Beispieldaten, kein Server. Änderungen bleiben nur in diesem Browser.</span>
+    </div>
+  </details>
+</div>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><a href="#/">Familienfreizeit</a><p>Organisationsteam</p></div>
+    <nav class="nav" aria-label="Hauptnavigation">
+      <a href="#/" data-act="na">Dashboard</a>
+      <a href="#/" aria-current="page">Familien</a>
+      <a href="#/" data-act="na">Unterbringung</a>
+      <a href="#/" data-act="na">Workshops</a>
+    </nav>
+  </div>
+</header>
+<main id="content" class="wrap" tabindex="-1"></main>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+<p id="live" class="sr-only" aria-live="polite"></p>
+<p id="alertLive" class="sr-only" role="alert"></p>
+<div id="toast" class="toast" hidden></div>
+<noscript>Bitte aktiviere JavaScript, um diese Seite zu öffnen.</noscript>
+<script>
+(() => {
+'use strict';
+
+/* ---------- constants ---------- */
+const STORE = 'ff-familien-prototyp-v11';
+const SAVE_MS = 750, SLOW_MS = 5000;
+const ME = { kind: 'organiser', email: 'organiser@example.test' };
+const ROLES = { adult: 'Erwachsene(r)', child: 'Kind', infant: 'Baby' };
+// '' = nothing chosen yet. Shown as the first, preselected option, like "Keine Angabe" for rooms.
+const DIETS = [['', 'Keine Angabe'], ['vegetarian', 'Vegetarisch'], ['vegan', 'Vegan'], ['meat', 'Mit Fleisch'], ['other', 'Anderes']];
+const dietLabel = v => (DIETS.find(d => d[0] === (v || '')) || [])[1];
+const SCALE = [['egal', 'Egal'], ['gerne', 'Gerne'], ['unbedingt', 'Unbedingt']];
+const SCALE_LABEL = Object.fromEntries(SCALE);
+const ROOM_FIELDS = [
+  { key: 'privateBath', label: 'Eigenes Bad' },
+  { key: 'accessible', label: 'Barrierearmes Zimmer' },
+  { key: 'ownRoom', label: 'Zimmer für die Familie allein', hint: 'Bei „Egal“ teilt die Familie ein Zimmer auch mit anderen.' }
+];
+const LABEL = { attending: 'Kommt mit', bed: 'Schläft im Bett der Eltern', diet: 'Essen', allergy: 'Hinweise zum Essen', notes: 'Sonstiges zum Zimmer' };
+ROOM_FIELDS.forEach(r => { LABEL[r.key] = r.label; });
+const FIELD_CAT = { attending: 'person', bed: 'room', diet: 'food', allergy: 'food' };
+const TEXT_FIELDS = ['allergy', 'notes'];
+const CAT = { family: 'Familie', person: 'Personen', food: 'Essen', workshop: 'Workshops', room: 'Zimmerwünsche' };
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* Workshop catalogue, taken from the workshop prototype. "seats" = places for signup workshops. */
+const WORKSHOPS = [
+  { id: 'zirkus', title: 'Zirkus-Werkstatt', mode: 'assigned', published: true, ageMin: 6, ageMax: 14, groups: ['kind', 'jugend'], audience: 'Kinder und Jugendliche', desc: 'Jonglieren, Diabolo und kleine Balance-Kunststücke. Am Ende gibt es ein kurzes Programm.' },
+  { id: 'wald', title: 'Waldforscher:innen', mode: 'assigned', published: true, ageMin: 5, ageMax: 10, groups: ['kleinkind', 'kind'], audience: 'Kinder', desc: 'Spuren suchen, ein Insektenhotel bauen und Blätter für ein Waldbuch sammeln.' },
+  { id: 'video', title: 'Kurzfilm mit dem Handy', mode: 'assigned', published: true, ageMin: 11, ageMax: 17, groups: ['kind', 'jugend'], audience: 'Jugendliche', desc: 'Idee, Drehbuch, Dreh und Schnitt: In kleinen Teams entsteht ein Kurzfilm von etwa drei Minuten.' },
+  { id: 'holz', title: 'Holzwerkstatt', mode: 'assigned', published: true, ageMin: 12, ageMax: null, groups: ['kind', 'jugend', 'erw'], audience: 'Jugendliche und Erwachsene', desc: 'Sägen, Schleifen, Verbinden: ein kleines Möbelstück oder ein Vogelhaus zum Mitnehmen.' },
+  { id: 'toepfern', title: 'Töpfern für Anfänger:innen', mode: 'assigned', published: true, ageMin: 14, ageMax: null, groups: ['jugend', 'erw'], audience: 'Jugendliche und Erwachsene', desc: 'Von der Kugel zur Schale: formen, verzieren und glasieren. Das Brennen übernimmt das Team.' },
+  { id: 'kraeuter', title: 'Kräuterküche', mode: 'assigned', published: true, ageMin: 18, ageMax: null, groups: ['erw'], audience: 'Erwachsene', desc: 'Wildkräuter erkennen, sammeln und zu Pesto, Tee und Salz verarbeiten.' },
+  { id: 'slam', title: 'Poetry-Slam-Werkstatt', mode: 'assigned', published: true, ageMin: 13, ageMax: 17, groups: ['jugend'], audience: 'Jugendliche', desc: 'Eigene Texte schreiben, üben und vortragen. Zum Schluss gibt es eine kleine Bühne.' },
+  { id: 'chor', title: 'Offenes Singen', mode: 'signup', published: true, ageMin: 0, ageMax: null, groups: ['kleinkind', 'kind', 'jugend', 'erw'], audience: 'alle', seats: 12, desc: 'Bekannte und neue Lieder, ohne Vorkenntnisse. Alle Altersgruppen singen gemeinsam.' },
+  { id: 'yoga', title: 'Morgen-Yoga', mode: 'signup', published: true, ageMin: 18, ageMax: null, groups: ['erw'], audience: 'Erwachsene', seats: 4, desc: 'Sanfter Start in den Tag mit einfachen Übungen. Bitte eine eigene Matte mitbringen.' },
+  { id: 'backen', title: 'Brot backen mit Kindern', mode: 'signup', published: true, ageMin: 6, ageMax: 12, groups: ['kind'], audience: 'Kinder', seats: 0, desc: 'Teig kneten, formen und backen. Am Ende gibt es warmes Brot für alle.' },
+  { id: 'klang', title: 'Klangwelt für Kleine', mode: 'signup', published: true, ageMin: 0, ageMax: 4, groups: ['kleinkind'], audience: 'Kleinkinder mit Begleitperson', seats: 8, desc: 'Rasseln, Trommeln und Fingerspiele zum Mitmachen und Zuhören.' },
+  { id: 'sterne', title: 'Sternenabend mit Fernrohr', mode: 'interest', published: true, ageMin: 8, ageMax: null, groups: ['kind', 'jugend', 'erw'], audience: 'alle ab 8 Jahren', desc: 'Bei klarem Himmel schauen wir Mond und Planeten an. Ob der Abend stattfindet, hängt vom Wetter ab.' },
+  { id: 'lesen', title: 'Vorlesecafé', mode: 'interest', published: true, ageMin: 4, ageMax: 9, groups: ['kleinkind', 'kind'], audience: 'Kinder', desc: 'Gemütliche Vorlesestunde mit Kissen, Kakao und Geschichten zum Mitraten.' },
+  { id: 'tanz', title: 'Tanzen wie früher', mode: 'interest', published: true, ageMin: 18, ageMax: null, groups: ['erw'], audience: 'Erwachsene', desc: 'Einfache Volks- und Gesellschaftstänze, auch ohne Partner:in.' },
+  { id: 'entwurf', title: 'Nachtwanderung (Entwurf)', mode: 'interest', published: false, ageMin: 10, ageMax: null, groups: ['kind', 'jugend', 'erw'], audience: 'alle', desc: 'Noch nicht veröffentlicht.' }
+];
+const MODES = {
+  assigned: { chip: 'Workshop-Wunschliste', icon: '★', cls: '', info: 'Bis zu 3 Wünsche pro Person. Das Team teilt zu.' },
+  signup: { chip: 'Feste Anmeldung', icon: '✎', cls: 'dark', info: 'Mit der Anmeldung ist der Platz sofort reserviert.' },
+  interest: { chip: 'Interesse', icon: '♡', cls: 'free', info: 'Unverbindlich, ohne Platzreservierung.' }
+};
+const W = id => WORKSHOPS.find(w => w.id === id);
+const published = () => WORKSHOPS.filter(w => w.published);
+
+const LUCIDE = {
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  pencil: '<path d="M21.17 6.81a1 1 0 0 0-3.98-3.98L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  left: '<path d="m15 18-6-6 6-6"/>'
+};
+const icon = n => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${LUCIDE[n]}</svg>`;
+const chipHTML = (cls, glyph, text) => `<span class="chip ${cls}"><span aria-hidden="true">${glyph}</span>${esc(text)}</span>`;
+const maybe = text => chipHTML('maybe', '+', text);
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const localIso = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const D = s => new Date(s.length === 10 ? s + 'T00:00:00' : s);
+const fmtDate = s => D(s).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function fmtWhen(s) {
+  const d = D(s), now = new Date();
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+  const diff = Math.round((day(now) - day(d)) / 864e5);
+  const time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  if (diff === 0) return `heute, ${time}`;
+  if (diff === 1) return `gestern, ${time}`;
+  return `${fmtDate(s)}, ${time}`;
+}
+const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, '0')).join('');
+const fullName = p => `${p.given} ${p.family}`.trim();
+const joinDe = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1];
+const persons = n => `${n} ${n === 1 ? 'Person' : 'Personen'}`;
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function ageYears(p) {
+  if (p.role === 'infant') return 0;
+  if (p.role === 'child') return Number.isInteger(p.age) ? p.age : null;
+  return null;
+}
+const ageLine = p => p.role === 'adult' ? 'Erwachsene(r)' : p.role === 'infant' ? 'Baby' : (Number.isInteger(p.age) ? `Kind, ${p.age} ${p.age === 1 ? 'Jahr' : 'Jahre'}` : 'Kind');
+
+/* ---------- workshop logic (from the workshop prototype) ---------- */
+function groupFor(p) {
+  if (p.role === 'adult') return 'erw';
+  const a = ageYears(p);
+  if (a == null) return 'kind';
+  return a < 6 ? 'kleinkind' : a < 13 ? 'kind' : 'jugend';
+}
+function eligibility(p, w) {
+  const a = ageYears(p);
+  if (a != null) {
+    if (a < w.ageMin) return { ok: false, reason: `Ab ${w.ageMin} Jahren. ${p.given} ist ${a}.` };
+    if (w.ageMax != null && a > w.ageMax) return { ok: false, reason: `Bis ${w.ageMax} Jahre. ${p.given} ist ${a}.` };
+  }
+  if (!w.groups.includes(groupFor(p))) return { ok: false, reason: `Nur für ${w.audience}.` };
+  return { ok: true };
+}
+const ageUnsure = p => p.role === 'child' && !Number.isInteger(p.age);
+function ageLabel(w) {
+  if (w.ageMin === 0 && w.ageMax == null) return 'Alle Altersgruppen';
+  if (w.ageMax == null) return `Alter ab ${w.ageMin} Jahren`;
+  if (w.ageMin === 0) return `Alter bis ${w.ageMax} Jahre`;
+  return `Alter ${w.ageMin} bis ${w.ageMax} Jahre`;
+}
+const audienceLabel = w => w.audience === 'alle' ? 'Für alle' : `Für ${w.audience}`;
+const target = p => Math.min(3, published().filter(w => w.mode === 'assigned' && eligibility(p, w).ok).length);
+function remaining(wid) {
+  const w = W(wid);
+  let n = 0;
+  db.families.forEach(f => Object.values(f.ws).forEach(d => { if (d.join.includes(wid)) n++; }));
+  return Math.max(0, w.seats - n);
+}
+function pstatus(p, d) {
+  const t = target(p), n = d.rank.length, free = t - n;
+  if (t === 0 && n === 0) return { k: 'none', cls: 'off', icon: '–', text: 'Keine Wunschliste' };
+  if (n >= t) return { k: 'complete', cls: '', icon: '✓', text: `${n} von ${Math.max(t, n)} Wünschen` };
+  return { k: n ? 'partial' : 'empty', cls: 'maybe', icon: '+', text: `${free} ${free === 1 ? 'Wunsch' : 'Wünsche'} frei` };
+}
+
+/* ---------- seed ---------- */
+function P(id, given, family, role, age, attending, diet, allergy, bed) {
+  return { id, given, family, role, age, attending, diet, allergy: allergy || '', bed: !!bed };
+}
+const WS = (rank = [], join = [], interest = []) => ({ rank, join, interest });
+function seed() {
+  return { families: [
+    {
+      id: 'f_schmitz', name: 'Schmitz', email: 'schmitz@example.org',
+      people: [
+        P('p_kathrin', 'Kathrin', 'Schmitz', 'adult', null, true, 'vegetarian', 'Haselnüsse'),
+        P('p_joerg', 'Jörg', 'Schmitz', 'adult', null, true, 'meat'),
+        P('p_leni', 'Leni', 'Schmitz', 'child', 8, true, 'vegetarian', 'Erdnüsse – auch Spuren!\nNotfall-Pen ist im Rucksack, vorderes Fach.'),
+        P('p_mats', 'Mats', 'Schmitz', 'infant', null, true, 'other', 'Brei bringen wir selbst mit.', true)
+      ],
+      room: { privateBath: 'gerne', accessible: 'egal', ownRoom: 'unbedingt', notes: 'Gerne im Erdgeschoss, wir haben einen Kinderwagen dabei.' },
+      ws: {
+        p_kathrin: WS(['toepfern', 'kraeuter', 'holz'], [], ['tanz']),
+        p_joerg: WS(['holz', 'kraeuter', 'toepfern'], ['yoga']),
+        p_leni: WS(['zirkus', 'wald'], [], ['sterne']),
+        p_mats: WS([], ['klang'])
+      },
+      log: []
+    },
+    {
+      id: 'f_becker', name: 'Becker', email: 'becker@example.org',
+      people: [
+        P('p_sabine', 'Sabine', 'Becker', 'adult', null, true, null, 'laktose nur in kleinen mengen  (butter geht)'),
+        P('p_thomas', 'Thomas', 'Becker', 'adult', null, true, 'meat'),
+        P('p_finn', 'Finn', 'Becker', 'child', 14, true, null)
+      ],
+      room: { privateBath: 'egal', accessible: 'egal', ownRoom: 'egal', notes: '' },
+      ws: { p_sabine: WS([], [], ['tanz']), p_thomas: WS(['holz'], ['yoga']), p_finn: WS(['video', 'slam', 'holz']) },
+      log: []
+    },
+    {
+      id: 'f_hoffmann', name: 'Hoffmann', email: 'hoffmann@example.org',
+      people: [
+        P('p_jana', 'Jana', 'Hoffmann', 'adult', null, true, 'vegetarian'),
+        P('p_paul', 'Paul', 'Hoffmann', 'child', 11, true, 'vegetarian')
+      ],
+      room: { privateBath: 'egal', accessible: 'gerne', ownRoom: 'egal', notes: '' },
+      ws: { p_jana: WS(['kraeuter', 'toepfern', 'holz'], ['chor']), p_paul: WS(['video', 'zirkus'], ['chor']) },
+      log: []
+    },
+    {
+      id: 'f_kowalczyk', name: 'Kowalczyk', email: 'kowalczyk@example.org',
+      people: [],
+      room: { privateBath: null, accessible: null, ownRoom: null, notes: '' },
+      ws: {},
+      log: []
+    },
+    {
+      id: 'f_yildiz', name: 'Yıldız', email: 'yildiz@example.org',
+      people: [
+        P('p_elif', 'Elif', 'Yıldız', 'adult', null, true, 'vegan'),
+        P('p_murat', 'Murat', 'Yıldız', 'adult', null, true, null),
+        P('p_defne', 'Defne', 'Yıldız', 'child', null, true, null)
+      ],
+      room: { privateBath: null, accessible: null, ownRoom: null, notes: '' },
+      ws: { p_elif: WS(['kraeuter']), p_murat: WS(), p_defne: WS() },
+      log: []
+    }
+  ] };
+}
+
+/* ---------- state ---------- */
+let db = null;
+try { db = JSON.parse(localStorage.getItem(STORE)); } catch (e) { db = null; }
+if (!db || !Array.isArray(db.families)) db = seed();
+function persist() { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) { /* storage unavailable */ } }
+
+const TOPICS = [['zimmer', 'Zimmer'], ['personen', 'Personen'], ['essen', 'Essen'], ['workshops', 'Workshops']];
+const PER_PERSON = ['personen', 'essen', 'workshops'];
+const NEW = '__new';
+const ui = { q: '', filter: 'all', showAllLog: false, topic: 'zimmer', sel: {}, confirmRemove: null, sub: 'sel', find: { q: '', all: false }, saveFail: false, slow: false };
+const DRAFT = {};   // unsaved text while typing, by field key
+const PFORM = {};   // unsaved person details (name, role, age), by family|person
+const ITEMS = {};   // per-item save chips: 'saving' | 'saved' | 'failed'
+let queue = [], running = false, gen = 0, pendingFocus = null;
+let saveState = { state: 'idle' }, failState = null;
+const main = $('#content'), dlg = $('#dlg'), toastEl = $('#toast');
+let lastReturn = null;
+
+function route() {
+  const parts = location.hash.replace(/^#\/?/, '').split('/');
+  if (parts[0] === 'familie' && parts[1]) return { view: 'detail', id: parts[1], topic: TOPICS.some(t => t[0] === parts[2]) ? parts[2] : null, pid: parts[3] || null };
+  return { view: 'list' };
+}
+const currentFamily = () => { const r = route(); return r.view === 'detail' ? db.families.find(f => f.id === r.id) : null; };
+const person = (f, id) => f.people.find(p => p.id === id);
+const wsOf = (f, pid) => f.ws[pid] || (f.ws[pid] = WS());
+const fkey = (f, scope, name) => `${f.id}|${scope}.${name}`;
+const ikey = (f, pid, wid) => `${f.id}|${pid}:${wid}`;
+
+/* ---------- stats ---------- */
+function personMissing(f, p) {
+  const m = [];
+  if (!p.diet) m.push('Essen');
+  if (wsOf(f, p.id).rank.length < target(p)) m.push('Workshop-Wünsche');
+  if (ageUnsure(p)) m.push('Alter');
+  return m;
+}
+function stats(f) {
+  const att = f.people;
+  const noDiet = att.filter(p => !p.diet);
+  const wsOpen = att.filter(p => wsOf(f, p.id).rank.length < target(p));
+  const noAge = att.filter(ageUnsure);
+  const roomOpen = ROOM_FIELDS.filter(r => !f.room[r.key]).length;
+  const open = noDiet.length + wsOpen.length + noAge.length + (roomOpen ? 1 : 0) + (f.people.length ? 0 : 1);
+  const last = f.log.length ? [...f.log].sort((a, b) => b.at.localeCompare(a.at))[0] : null;
+  return { att, noDiet, wsOpen, noAge, roomOpen, complete: open === 0, last };
+}
+
+/* ---------- feedback ---------- */
+let liveT;
+function announce(msg) { const el = $('#live'); el.textContent = ''; clearTimeout(liveT); liveT = setTimeout(() => { el.textContent = msg; }, 60); }
+function shout(msg) { const el = $('#alertLive'); el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 60); }
+let toastT;
+function toast(msg) {
+  toastEl.textContent = msg; toastEl.hidden = false; announce(msg);
+  clearTimeout(toastT); toastT = setTimeout(() => { toastEl.hidden = true; }, 3500);
+}
+function log(f, cat, text, actor = ME) { f.log.push({ at: localIso(), actor, cat, text }); }
+
+/* ---------- saving: optimistic, one request at a time, rollback on failure ---------- */
+function setItem(key, val) {
+  if (!key) return;
+  if (val == null) delete ITEMS[key]; else ITEMS[key] = val;
+  if (val === 'saved') {
+    const g = gen;
+    setTimeout(() => { if (g === gen && ITEMS[key] === 'saved') { delete ITEMS[key]; renderAll(); } }, 2600);
+  }
+}
+function commit(op) {
+  if (failState && failState.key === op.key) failState = null;
+  op.apply();
+  queue.push(op);
+  setItem(op.chip, 'saving');
+  saveState = { state: 'saving' };
+  pendingFocus = op.focus || null;
+  announce(op.who + ' wird gespeichert …');
+  renderAll();
+  pump();
+}
+function pump() {
+  if (running || !queue.length) return;
+  running = true;
+  const g = gen, op = queue[0];
+  setTimeout(() => {
+    if (g !== gen) return;
+    queue.shift(); running = false;
+    if (ui.saveFail) {
+      op.revert();
+      for (let i = queue.length - 1; i >= 0; i--) if (queue[i].key === op.key) { setItem(queue[i].chip, null); queue.splice(i, 1); }
+      setItem(op.chip, 'failed');
+      if (op.tried != null) DRAFT[op.key] = op.tried;
+      if (op.onFail) op.onFail();
+      failState = { fid: op.f.id, key: op.key, chip: op.chip, msg: op.fail, tried: op.tried, retry: op.retry };
+      saveState = { state: 'failed' };
+      shout(op.fail);
+    } else {
+      setItem(op.chip, 'saved');
+      if (op.log && db.families.includes(op.f)) log(op.f, op.log[0], op.log[1]);
+      persist();
+      saveState = queue.length ? { state: 'saving' } : { state: 'saved' };
+      announce(op.done);
+    }
+    renderAll(); pump();
+  }, ui.slow ? SLOW_MS : SAVE_MS);
+}
+function fmtVal(name, v) {
+  if (name === 'attending' || name === 'bed') return v ? 'Ja' : 'Nein';
+  if (name === 'diet') return dietLabel(v);
+  return v ? SCALE_LABEL[v] : 'Keine Angabe';
+}
+function opField(f, scope, name, value, focus) {
+  const isRoom = scope === 'room', p = isRoom ? null : person(f, scope), obj = isRoom ? f.room : p;
+  const prev = obj[name];
+  if (prev === value) return;
+  const isText = TEXT_FIELDS.includes(name), label = LABEL[name];
+  const who = isRoom ? label : `${fullName(p)}: ${label}`;
+  const logWho = isRoom ? label : `${fullName(p)}, ${label}`;
+  commit({
+    f, key: fkey(f, scope, name), chip: fkey(f, scope, name), focus, who,
+    apply() { obj[name] = value; }, revert() { obj[name] = prev; },
+    log: [isRoom ? 'room' : FIELD_CAT[name], isText ? `${logWho} geändert` : `${logWho}: ${fmtVal(name, prev)} → ${fmtVal(name, value)}`],
+    done: `${who} gespeichert.`,
+    fail: isText ? `${who} konnte nicht gespeichert werden. Der Text steht noch im Feld.` : `${who} konnte nicht gespeichert werden. Im Feld steht wieder die vorherige Angabe: ${fmtVal(name, prev)}.`,
+    tried: isText ? value : null,
+    retry() { opField(f, scope, name, value, focus); }
+  });
+}
+function rankAdd(f, p, wid, focus) {
+  const d = wsOf(f, p.id), w = W(wid), prev = d.rank.slice();
+  if (!w || w.mode !== 'assigned' || !eligibility(p, w).ok || prev.includes(wid) || prev.length >= 3) return;
+  commit({
+    f, key: `${f.id}|rank:${p.id}`, chip: ikey(f, p.id, wid), focus, who: `${fullName(p)}: Wunschliste`,
+    apply() { d.rank = prev.concat([wid]); }, revert() { d.rank = prev; },
+    log: ['workshop', `${fullName(p)}: ${w.title} auf Wunsch-Platz ${prev.length + 1}`],
+    done: `${fullName(p)}: ${w.title} steht auf Platz ${prev.length + 1}.`,
+    fail: `${fullName(p)}: ${w.title} konnte nicht auf die Wunschliste gesetzt werden. Der vorherige Stand ist wiederhergestellt.`,
+    retry() { rankAdd(f, p, wid, focus); }
+  });
+}
+function rankRemove(f, p, wid, focus) {
+  const d = wsOf(f, p.id), w = W(wid), prev = d.rank.slice();
+  if (!prev.includes(wid)) return;
+  commit({
+    f, key: `${f.id}|rank:${p.id}`, chip: ikey(f, p.id, wid), focus, who: `${fullName(p)}: Wunschliste`,
+    apply() { d.rank = prev.filter(x => x !== wid); }, revert() { d.rank = prev; },
+    log: ['workshop', `${fullName(p)}: ${w.title} von der Wunschliste entfernt`],
+    done: `${fullName(p)}: ${w.title} ist nicht mehr auf der Wunschliste.`,
+    fail: `${fullName(p)}: ${w.title} konnte nicht entfernt werden. Der vorherige Stand ist wiederhergestellt.`,
+    retry() { rankRemove(f, p, wid, focus); }
+  });
+}
+function rankMove(f, p, from, to, focus) {
+  const d = wsOf(f, p.id), prev = d.rank.slice();
+  if (from === to || to < 0 || to >= prev.length || from < 0 || from >= prev.length) return;
+  const wid = prev[from], w = W(wid), next = prev.slice();
+  next.splice(to, 0, next.splice(from, 1)[0]);
+  commit({
+    f, key: `${f.id}|rank:${p.id}`, chip: ikey(f, p.id, wid), focus, who: `${fullName(p)}: Reihenfolge`,
+    apply() { d.rank = next; }, revert() { d.rank = prev; },
+    log: ['workshop', `${fullName(p)}: ${w.title} auf Wunsch-Platz ${to + 1} verschoben`],
+    done: `${fullName(p)}: ${w.title} steht jetzt auf Platz ${to + 1}.`,
+    fail: `${fullName(p)}: Die neue Reihenfolge konnte nicht gespeichert werden. Die vorherige Reihenfolge ist wiederhergestellt.`,
+    retry() { rankMove(f, p, from, to, focus); }
+  });
+}
+function joinSet(f, p, wid, want, focus) {
+  const d = wsOf(f, p.id), w = W(wid), had = d.join.includes(wid);
+  if (!w || w.mode !== 'signup' || had === want || !eligibility(p, w).ok) return;
+  if (want && remaining(wid) <= 0) return;
+  const set = v => { d.join = d.join.filter(x => x !== wid); if (v) d.join.push(wid); };
+  commit({
+    f, key: `${f.id}|join:${p.id}:${wid}`, chip: ikey(f, p.id, wid), focus, who: `${fullName(p)}: ${w.title}`,
+    apply() { set(want); }, revert() { set(had); },
+    log: ['workshop', `${fullName(p)}: für ${w.title} ${want ? 'angemeldet' : 'abgemeldet'}`],
+    done: `${fullName(p)} ist für ${w.title} ${want ? 'angemeldet' : 'abgemeldet'}.`,
+    fail: `${fullName(p)} konnte nicht ${want ? 'für' : 'von'} ${w.title} ${want ? 'angemeldet' : 'abgemeldet'} werden. Der vorherige Stand ist wiederhergestellt.`,
+    retry() { joinSet(f, p, wid, want, focus); }
+  });
+}
+function interestSet(f, p, wid, want, focus) {
+  const d = wsOf(f, p.id), w = W(wid), had = d.interest.includes(wid);
+  if (!w || w.mode !== 'interest' || had === want || !eligibility(p, w).ok) return;
+  const set = v => { d.interest = d.interest.filter(x => x !== wid); if (v) d.interest.push(wid); };
+  commit({
+    f, key: `${f.id}|interest:${p.id}:${wid}`, chip: ikey(f, p.id, wid), focus, who: `${fullName(p)}: Interesse an ${w.title}`,
+    apply() { set(want); }, revert() { set(had); },
+    log: ['workshop', `${fullName(p)}: Interesse an ${w.title} ${want ? 'markiert' : 'zurückgenommen'}`],
+    done: `${fullName(p)}: Interesse an ${w.title} ${want ? 'markiert' : 'zurückgenommen'}.`,
+    fail: `${fullName(p)}: Die Angabe zu ${w.title} konnte nicht gespeichert werden. Der vorherige Stand ist wiederhergestellt.`,
+    retry() { interestSet(f, p, wid, want, focus); }
+  });
+}
+
+function itemChip(key) {
+  const s = ITEMS[key];
+  if (s === 'saving') return '<span class="chip plan"><span class="spinner" aria-hidden="true"></span>Wird gespeichert …</span>';
+  if (s === 'failed') return chipHTML('bad', '!', 'Nicht gespeichert');
+  return '';
+}
+const storedText = (f, scope, name) => scope === 'room' ? f.room[name] : person(f, scope)[name];
+const isDirty = (f, scope, name) => { const k = fkey(f, scope, name); return k in DRAFT && DRAFT[k] !== storedText(f, scope, name); };
+function textControls(f, scope, name) {
+  const dirty = isDirty(f, scope, name), saving = ITEMS[fkey(f, scope, name)] === 'saving';
+  return `<button type="button" class="btn main" id="ts-${scope}-${name}" data-act="text-save" data-pid="${scope}" data-field="${name}"${dirty && !saving ? '' : ' disabled'}>Speichern</button>
+    <button type="button" class="btn plain" id="td-${scope}-${name}" data-act="text-discard" data-pid="${scope}" data-field="${name}"${dirty && !saving ? '' : ' disabled'}>Verwerfen</button>
+    ${itemChip(fkey(f, scope, name))}`;
+}
+function patchText(f, scope, name) { const el = document.getElementById(`tc-${scope}-${name}`); if (el) el.innerHTML = textControls(f, scope, name); }
+function textField(f, scope, name, label, hint, rows) {
+  return `<div class="field">
+      <label class="lbl-h" for="c-${scope}-${name}">${label} <span class="opt">(optional)</span></label>
+      ${hint ? `<p class="hint" id="h-${scope}-${name}">${hint}</p>` : ''}
+      <textarea id="c-${scope}-${name}" rows="${rows}" autocorrect="off" data-pid="${scope}" data-field="${name}"${hint ? ` aria-describedby="h-${scope}-${name}"` : ''}></textarea>
+      <div class="tctl" id="tc-${scope}-${name}">${textControls(f, scope, name)}</div>
+    </div>`;
+}
+const dirtyIn = (f, topic, pid) => Object.keys(DRAFT).filter(k => k.startsWith(f.id + '|')).some(k => {
+  const [scope, name] = k.slice(f.id.length + 1).split('.');
+  if (scope === 'room' ? topic !== 'zimmer' : topic !== 'essen') return false;
+  if (scope !== 'room' && (!person(f, scope) || (pid && scope !== pid))) return false;
+  return DRAFT[k] !== storedText(f, scope, name);
+});
+
+/* ---------- list view ---------- */
+function openChips(f, s) {
+  if (!f.people.length) return maybe('Personen eintragen');
+  const out = [];
+  if (s.noAge.length) out.push(maybe(`Alter offen: ${persons(s.noAge.length)}`));
+  if (s.noDiet.length) out.push(maybe(`Essen offen: ${persons(s.noDiet.length)}`));
+  if (s.wsOpen.length) out.push(maybe(`Workshop-Wünsche offen: ${persons(s.wsOpen.length)}`));
+  if (s.roomOpen) out.push(maybe(`Zimmer: ${s.roomOpen} ${s.roomOpen === 1 ? 'Frage' : 'Fragen'} offen`));
+  return out.length ? out.join('') : `<span class="badge"><span aria-hidden="true">✓</span>Alles angegeben</span>`;
+}
+function listRow({ f, s }) {
+  const dash = '<span aria-hidden="true">—</span><span class="sr-only">keine Angabe</span>';
+  const last = s.last;
+  return `<tr class="rowclick" data-href="#/familie/${f.id}">
+    <th scope="row" data-label="Familie"><a class="rowlink" href="#/familie/${f.id}">${esc(f.name)}</a><span class="sub">${esc(f.email)}</span></th>
+    <td data-label="Personen"><div class="cell">${f.people.length ? `<span>${f.people.length}</span>` : dash}</div></td>
+    <td data-label="Angaben"><div class="cell">${openChips(f, s)}</div></td>
+  </tr>`;
+}
+function viewList() {
+  const all = db.families.map(f => ({ f, s: stats(f) })).sort((a, b) => a.f.name.localeCompare(b.f.name, 'de'));
+  const counts = { all: all.length, open: all.filter(x => !x.s.complete).length, done: all.filter(x => x.s.complete).length };
+  const FILTERS = [['all', 'Alle'], ['open', 'Angaben offen'], ['done', 'Vollständig']];
+  const q = ui.q.trim().toLowerCase();
+  let shown = all.filter(x => ui.filter === 'all' || (ui.filter === 'open' ? !x.s.complete : x.s.complete));
+  if (q) shown = shown.filter(({ f }) => [f.name, f.email, ...f.people.map(fullName)].some(t => t.toLowerCase().includes(q)));
+  const table = shown.length
+    ? `<div class="table-scroll"><table class="ftable"><caption class="sr-only">Familien</caption><thead><tr><th scope="col">Familie</th><th scope="col">Personen</th><th scope="col">Angaben</th></tr></thead><tbody>${shown.map(listRow).join('')}</tbody></table></div>`
+    : `<div class="empty"><p><strong>Keine Familie gefunden.</strong></p><p class="hint">Keine Familie passt zu Suche und Filter.</p><button type="button" class="btn" id="btn-filter-reset" data-act="filter-reset">Suche und Filter zurücksetzen</button></div>`;
+  return `
+  <div class="page-head">
+    <h1 id="page-title" tabindex="-1">Familien</h1>
+    <button type="button" class="btn main" id="btn-family-add" data-act="family-add">${icon('plus')}Familie hinzufügen</button>
+  </div>
+  <div class="toolbar">
+    <div class="search"><label for="q" class="sr-only">Familien durchsuchen</label>${icon('search')}<input id="q" type="search" value="${esc(ui.q)}" placeholder="Familie, E-Mail oder Person" autocomplete="off"></div>
+    <div class="seg" role="group" aria-label="Familien filtern">${FILTERS.map(([k, l]) => `<button type="button" class="btn" id="filter-${k}" data-act="filter" data-v="${k}" aria-pressed="${ui.filter === k}">${l} <span style="font-weight:500">${counts[k]}</span></button>`).join('')}</div>
+  </div>
+  <p class="result-count" id="result-count">${shown.length} von ${all.length} Familien</p>
+  <div class="lcard">${table}</div>`;
+}
+
+/* ---------- detail view ---------- */
+function savebarHTML() {
+  const s = saveState.state;
+  const ic = s === 'saving' ? '<span class="spinner" aria-hidden="true"></span>' : `<span class="sico" aria-hidden="true">${s === 'saved' ? '✓' : s === 'failed' ? '!' : 'i'}</span>`;
+  if (s === 'idle') return '';
+  const tx = s === 'saving' ? 'Wird gespeichert …' : s === 'saved' ? 'Gespeichert' : 'Nicht gespeichert';
+  return `<span class="save ${s}">${ic}<span>${tx}</span></span>`;
+}
+function failHTML(f) {
+  if (!failState || failState.fid !== f.id) return '';
+  return `<div class="alert bad" style="margin-bottom:16px"><p class="alert-h"><span aria-hidden="true">!</span> Änderung nicht gespeichert</p><p>${esc(failState.msg)}</p>
+    <div class="actions"><button type="button" class="btn" id="fail-retry" data-act="retry">Erneut versuchen</button><button type="button" class="btn plain" id="fail-dismiss" data-act="dismiss-fail">Schließen</button></div></div>`;
+}
+
+/* Topic: Personen (whole family): who is in the family, who comes, what is still open per person */
+function personOpenChips(f, p) {
+  const out = [];
+  if (ageUnsure(p)) out.push(`<button type="button" class="chip attn chipbtn" id="oc-age-${p.id}" data-act="goto-topic" data-topic="personen" data-pid="${p.id}" data-focus="pf-age"><span aria-hidden="true">!</span>Alter fehlt<span class="sr-only">: Alter von ${esc(p.given)} eintragen</span></button>`);
+  if (!p.diet) out.push(`<button type="button" class="chip attn chipbtn" id="oc-essen-${p.id}" data-act="goto-topic" data-topic="essen" data-pid="${p.id}"><span aria-hidden="true">!</span>Ernährung fehlt<span class="sr-only">: zu Essen für ${esc(p.given)}</span></button>`);
+  const t = target(p), n = wsOf(f, p.id).rank.length;
+  if (n < t) out.push(`<button type="button" class="chip attn chipbtn" id="oc-ws-${p.id}" data-act="goto-topic" data-topic="workshops" data-pid="${p.id}"><span aria-hidden="true">!</span>Wunschliste ${n} von ${t}<span class="sr-only">: zu Workshops für ${esc(p.given)}</span></button>`);
+  return out.length ? out.join('') : chipHTML('', '✓', 'Alles eingetragen');
+}
+/* Topic: Zimmer (whole family) */
+function topicZimmer(f, s) {
+  const status = s.roomOpen ? maybe(`${s.roomOpen} ${s.roomOpen === 1 ? 'Frage' : 'Fragen'} offen`) : chipHTML('', '✓', 'Alles angegeben');
+  const fields = ROOM_FIELDS.map(rf => {
+    const cur = f.room[rf.key];
+    return `<fieldset class="field"${rf.hint ? ` aria-describedby="hint-${rf.key}"` : ''}>
+      <legend>${rf.label}</legend>
+      ${rf.hint ? `<p class="hint" id="hint-${rf.key}" style="margin-bottom:4px">${rf.hint}</p>` : ''}
+      <div class="opts">${[['', 'Keine Angabe'], ...SCALE].map(([v, l]) => `<label><input type="radio" name="room-${rf.key}" id="c-room-${rf.key}-${v || 'none'}" value="${v}" data-pid="room" data-field="${rf.key}"${(cur || '') === v ? ' checked' : ''}>${l}</label>`).join('')}</div>
+      <div class="fhead">${itemChip(fkey(f, 'room', rf.key))}</div>
+    </fieldset>`;
+  }).join('');
+  const babies = s.att.filter(p => p.role === 'infant');
+  const beds = s.att.length - babies.filter(p => p.bed).length;
+  return `<div class="stack-sm">
+    <section class="card" aria-labelledby="h-zw">
+      <div class="card-head"><h3 id="h-zw" tabindex="-1">Zimmerwünsche</h3>${status}</div>
+      ${fields}
+    </section>
+    <section class="card" aria-labelledby="h-sleep">
+      <h3 id="h-sleep">Schlafen</h3>
+      <p class="beds"><strong>${beds}</strong><span>${beds === 1 ? 'Schlafplatz' : 'Schlafplätze'} nötig</span></p>
+      ${babies.length
+        ? babies.map(p => `<div class="fhead"><label class="check"><input type="checkbox" id="c-${p.id}-bed" data-pid="${p.id}" data-field="bed"${p.bed ? ' checked' : ''}><span>${esc(fullName(p))} schläft im Bett der Eltern</span></label>${itemChip(fkey(f, p.id, 'bed'))}</div>`).join('') + '<p class="hint">Babys im Bett der Eltern brauchen keinen eigenen Schlafplatz.</p>'
+        : '<p class="hint">Jede Person braucht einen eigenen Schlafplatz.</p>'}
+    </section>
+    <section class="card">
+      ${textField(f, 'room', 'notes', 'Sonstiges zum Zimmer', 'Alles, was oben nicht vorkommt.', 3)}
+    </section>
+  </div>`;
+}
+
+/* Person sidebar: the one way to pick a person, shared by Personen, Essen and Workshops */
+const pkey = (f, pid) => `${f.id}|${pid}`;
+const ageStr = p => Number.isInteger(p.age) ? String(p.age) : '';
+function pformOf(f, pid) {
+  const d = PFORM[pkey(f, pid)];
+  if (d) return d;
+  const p = person(f, pid);
+  return { given: p.given, family: p.family, role: p.role, age: ageStr(p) };
+}
+function pformDirty(f, pid) {
+  const d = PFORM[pkey(f, pid)];
+  if (!d) return false;
+  if (pid === NEW) return true;
+  const p = person(f, pid);
+  if (!p) return false;
+  return d.given !== p.given || d.family !== p.family || d.role !== p.role || (d.role === 'child' && d.age !== ageStr(p));
+}
+const anyPformDirty = f => f.people.some(p => pformDirty(f, p.id)) || !!PFORM[pkey(f, NEW)];
+function personOpportunity(f, p, topic) {
+  if (topic === 'personen') return ageUnsure(p) ? 'Alter angeben' : '';
+  if (topic === 'essen') return p.diet ? '' : 'Essen angeben';
+  const st = pstatus(p, wsOf(f, p.id));
+  return st.cls === 'maybe' ? st.text : '';
+}
+function personItems(f, list, sel, topic, hasNew) {
+  const items = list.map(p => {
+    const on = p.id === sel, opp = personOpportunity(f, p, topic);
+    const full = topic === 'workshops' && pstatus(p, wsOf(f, p.id)).k === 'complete' ? chipHTML('', '✓', pstatus(p, wsOf(f, p.id)).text) : '';
+    return `<button type="button" class="pbtn" role="tab" id="pp-${p.id}" data-pid="${p.id}" aria-selected="${on}" aria-controls="pp-panel" tabindex="${on ? 0 : -1}">
+      <span class="pb-name">${esc(fullName(p))}</span><span class="pb-sub">${ageLine(p)}</span>
+      ${opp ? maybe(opp) : full}
+    </button>`;
+  }).join('');
+  const nw = hasNew ? `<button type="button" class="pbtn new" role="tab" id="pp-${NEW}" data-pid="${NEW}" aria-selected="${sel === NEW}" aria-controls="pp-panel" tabindex="${sel === NEW ? 0 : -1}">
+      <span class="pb-name">${esc((PFORM[pkey(f, NEW)].given || '').trim() || 'Neue Person')}</span><span class="pb-sub">Neu</span>
+    </button>` : '';
+  return items + nw;
+}
+function personSide(f, list, sel, topic, hasNew) {
+  const items = personItems(f, list, sel, topic, hasNew);
+  return `<div class="pside">
+    ${items ? `<div class="plist" role="tablist" aria-label="Person auswählen" aria-orientation="vertical">${items}</div>` : '<p class="hint">Noch niemand eingetragen.</p>'}
+    <button type="button" class="btn" id="btn-person-add" data-act="person-add">${icon('plus')}Person hinzufügen</button>
+  </div>`;
+}
+function patchSideAndTabs(f) {
+  const s = stats(f), pl = $('.plist');
+  if (pl) pl.innerHTML = personItems(f, s.att, ui.sel[f.id], ui.topic, ui.topic === 'personen' && !!PFORM[pkey(f, NEW)]);
+}
+
+/* Topic: Personen (one person at a time): details edited in place */
+function pformControls(f, pid) {
+  if (pid === NEW) return `<button type="button" class="btn main" id="pf-save" data-act="pform-save">${icon('plus')}Hinzufügen</button><button type="button" class="btn plain" id="pf-discard" data-act="pform-discard">Abbrechen</button>`;
+  const dirty = pformDirty(f, pid), key = `${f.id}|${pid}.identity`, saving = ITEMS[key] === 'saving';
+  return `<button type="button" class="btn main" id="pf-save" data-act="pform-save"${dirty && !saving ? '' : ' disabled'}>Speichern</button>
+    <button type="button" class="btn plain" id="pf-discard" data-act="pform-discard"${dirty && !saving ? '' : ' disabled'}>Verwerfen</button>
+    ${itemChip(key)}`;
+}
+const panelTitle = text => `<h3 class="sr-only" id="h-person" tabindex="-1">${esc(text)}</h3>`;
+function personenView(f, pid, list) {
+  const isNew = pid === NEW, p = isNew ? null : person(f, pid), d = pformOf(f, pid);
+  const nm = isNew ? 'Neue Person' : esc(fullName(p));
+  const groupOpts = Object.entries(ROLES).map(([k, l]) => `<label><input type="radio" name="pf-role" id="pf-role-${k}" value="${k}" data-pform="role"${d.role === k ? ' checked' : ''}>${l}</label>`).join('');
+  const removal = isNew ? '' : `<section class="danger-zone" aria-labelledby="h-rm">
+      <h4 id="h-rm">Person entfernen</h4>
+      ${ui.confirmRemove === pid
+        ? `<p><strong>${nm} wirklich entfernen?</strong> Alle Angaben zu Essen und Workshops gehen verloren. Das lässt sich nicht rückgängig machen.</p>
+           <div class="actions"><button type="button" class="btn" id="prc-cancel" data-act="person-remove-cancel">Abbrechen</button><button type="button" class="btn danger" id="prc-confirm" data-act="person-remove-confirm">${icon('trash')}${nm} entfernen</button></div>`
+        : `<p class="hint">Entfernt ${nm} mit allen Angaben zu Essen und Workshops.</p><div><button type="button" class="btn" id="pd-remove" data-act="person-remove-ask">${icon('trash')}Person entfernen</button></div>`}
+    </section>`;
+  return `${panelTitle(isNew ? 'Neue Person' : fullName(p))}
+    <div class="stack-sm">
+      <section class="card" aria-labelledby="h-pdata">
+        <h4 id="h-pdata">Person</h4>
+        <fieldset class="field"><legend>Altersgruppe</legend><div class="opts">${groupOpts}</div></fieldset>
+        ${d.role === 'child' ? field('pf-age', 'Alter', { type: 'number', value: d.age, attrs: 'data-pform="age" inputmode="numeric" min="1" max="17" step="1" class="age"' }) : ''}
+        <div class="two">
+          ${field('pf-given', 'Vorname', { value: d.given, attrs: 'data-pform="given"' })}
+          ${field('pf-family', 'Nachname', { value: d.family, attrs: 'data-pform="family"' })}
+        </div>
+        <div class="tctl" id="tc-pform">${pformControls(f, pid)}</div>
+      </section>
+      ${removal}
+    </div>
+    ${isNew ? '' : nextButton(f, list, p)}`;
+}
+
+function personHead(p) {
+  return `<div class="phead"><div><h3 id="h-person" tabindex="-1">${esc(fullName(p))}</h3><p class="muted">${ageLine(p)}</p></div></div>`;
+}
+function nextButton() { return ''; }
+
+/* Topic: Essen (one person at a time) */
+function essenView(f, p, list) {
+  const v = p.diet;
+  return `${panelTitle(fullName(p))}
+    <div class="stack-sm">
+      <section class="card">
+        <fieldset class="field"${v === 'other' ? ` aria-describedby="h-${p.id}-diet"` : ''}>
+          <legend class="lbl-h">Was isst ${esc(p.given)}?</legend>
+          <div class="opts">${DIETS.map(([k, l]) => `<label><input type="radio" name="diet-${p.id}" id="c-${p.id}-diet-${k || 'none'}" value="${k}" data-pid="${p.id}" data-field="diet"${(v || '') === k ? ' checked' : ''}>${l}</label>`).join('')}</div>
+          ${v === 'other' ? `<p class="hint" id="h-${p.id}-diet">Was genau, gerne unten bei den Hinweisen.</p>` : ''}
+          <div class="fhead">${itemChip(fkey(f, p.id, 'diet'))}</div>
+        </fieldset>
+      </section>
+      <section class="card">
+        ${textField(f, p.id, 'allergy', 'Hinweise zum Essen', 'Zum Beispiel Allergien, Unverträglichkeiten, halal oder was im Notfall zu tun ist.', 4)}
+      </section>
+    </div>
+    ${nextButton(f, list, p)}`;
+}
+
+/* Topic: Workshops (one person at a time) */
+function renderRank(f, p) {
+  const d = wsOf(f, p.id), t = target(p), n = d.rank.length;
+  let h = '';
+  for (let i = 0; i < Math.max(t, n); i++) {
+    const wid = d.rank[i];
+    if (wid) {
+      const w = W(wid);
+      let nums = '';
+      for (let k = 1; k <= n; k++) nums += `<button type="button" class="num" id="num-${wid}-${k}" data-wact="rank-set" data-w="${wid}" data-to="${k}" aria-pressed="${k === i + 1}" aria-label="${esc(w.title)} auf Platz ${k} setzen">${k}</button>`;
+      h += `<li class="rk">
+        <span class="rk-n" aria-hidden="true">${i + 1}</span>
+        <div class="rk-slot">
+          <div class="rk-body"><strong><span class="sr-only">Platz ${i + 1}: </span>${esc(w.title)}</strong><span class="hint">${esc(ageLabel(w))}</span>${itemChip(ikey(f, p.id, wid))}</div>
+          <div class="rk-ctl">${n > 1 ? `<div class="numctl" role="group" aria-label="Platz für ${esc(w.title)}"><span class="lbl" aria-hidden="true">Platz</span>${nums}</div>` : ''}<button type="button" class="btn plain" id="rm-${wid}" data-wact="rank-remove" data-w="${wid}" aria-label="${esc(w.title)} von der Wunschliste entfernen">Entfernen</button></div>
+        </div>
+      </li>`;
+    } else {
+      h += i === n
+        ? `<li class="rk empty"><span class="rk-n" aria-hidden="true">${i + 1}</span><span class="rk-slot"><span>Platz ${i + 1} ist frei.</span><button type="button" class="btn main" id="goto-find-assigned" data-act="goto-find" data-mode="assigned">Workshop finden<span class="sr-only"> für Platz ${i + 1}</span></button></span></li>`
+        : `<li class="rk empty"><span class="rk-n" aria-hidden="true">${i + 1}</span><span>Platz ${i + 1} ist frei.</span></li>`;
+    }
+  }
+  return h;
+}
+function cardWishes(f, p) {
+  const d = wsOf(f, p.id), t = target(p), n = d.rank.length, st = pstatus(p, d);
+  let body;
+  if (t === 0 && n === 0) body = `<p>Für ${esc(p.given)} gibt es keinen Workshop mit Wunschliste. Anmeldungen und Interesse sind trotzdem möglich.</p>`;
+  else {
+    body = `<ol class="rklist" aria-label="Wunschliste von ${esc(fullName(p))}">${renderRank(f, p)}</ol>`;
+  }
+  return `<section class="card" aria-labelledby="h-wl-${p.id}">
+    <div class="card-head"><div><h4 id="h-wl-${p.id}" tabindex="-1">Wunschliste</h4><p class="hint">Bis zu 3 Workshops, geordnet nach Wunsch.</p></div></div>
+    ${body}
+    
+  </section>`;
+}
+function cardList(f, p, mode) {
+  const d = wsOf(f, p.id), ids = mode === 'signup' ? d.join : d.interest, nm = esc(fullName(p));
+  const cfg = mode === 'signup'
+    ? { h: 'Feste Anmeldungen', hint: 'Mit der Anmeldung ist der Platz sofort reserviert.', empty: 'Keine.', act: 'leave', btn: 'Abmelden', aria: w => `${nm} von ${esc(w.title)} abmelden`, sr: ' zum Anmelden' }
+    : { h: 'Interesse', hint: 'Unverbindlich, ohne Platzreservierung.', empty: 'Keins.', act: 'interest-off', btn: 'Zurücknehmen', aria: w => `Interesse von ${nm} an ${esc(w.title)} zurücknehmen`, sr: ' für Interesse' };
+  const items = ids.map(wid => {
+    const w = W(wid);
+    return `<li><span class="chips" style="align-items:center"><strong>${esc(w.title)}</strong>${itemChip(ikey(f, p.id, wid))}</span><button type="button" class="btn plain" id="x-${wid}" data-wact="${cfg.act}" data-w="${wid}" aria-label="${cfg.aria(w)}">${cfg.btn}</button></li>`;
+  }).join('');
+  return `<section class="card" aria-labelledby="h-${mode}-${p.id}">
+    <div><h4 id="h-${mode}-${p.id}" tabindex="-1">${cfg.h}</h4><p class="hint">${cfg.hint}</p></div>
+    ${items ? `<ul class="wl-items">${items}</ul>` : `<p class="hint">${cfg.empty}</p>`}
+    <div class="actions"><button type="button" class="btn" id="goto-find-${mode}" data-act="goto-find" data-mode="${mode}">Workshops finden<span class="sr-only">${cfg.sr}</span></button></div>
+  </section>`;
+}
+
+const findMode = () => ui.sub.startsWith('find-') ? ui.sub.slice(5) : null;
+function filteredList(p, mode) {
+  const q = ui.find.q.trim().toLowerCase();
+  return published().filter(w => w.mode === mode)
+    .filter(w => ui.find.all || eligibility(p, w).ok)
+    .filter(w => !q || (w.title + ' ' + w.desc).toLowerCase().includes(q))
+    .map((w, i) => ({ w, i, ok: eligibility(p, w).ok }))
+    .sort((a, b) => (b.ok - a.ok) || (a.i - b.i)).map(x => x.w);
+}
+function workshopCard(f, p, w) {
+  const d = wsOf(f, p.id), el = eligibility(p, w), m = MODES[w.mode], nm = esc(fullName(p));
+  let h = `<li class="wcard${el.ok ? '' : ' inelig'}">
+    <div class="w-top"><h4>${esc(w.title)}</h4>${el.ok ? '' : `<div class="chips">${chipHTML('off', '✕', `Passt nicht zu ${p.given}`)}</div>`}</div>
+    <div class="chips"><span class="badge">${esc(ageLabel(w))}</span><span class="badge">${esc(audienceLabel(w))}</span></div>
+    <p>${esc(w.desc)}</p>`;
+  if (!el.ok) {
+    h += `<p class="inel"><strong>Warum nicht?</strong> ${esc(el.reason)}</p>`;
+  } else if (w.mode === 'assigned') {
+    const idx = d.rank.indexOf(w.id);
+    h += '<div class="wact">';
+    if (idx >= 0) h += `${chipHTML('', '★', `Wunsch Platz ${idx + 1}`)}<button type="button" class="btn plain" id="act-${w.id}" data-wact="rank-remove" data-w="${w.id}" aria-label="${esc(w.title)} von der Wunschliste entfernen">Entfernen</button>`;
+    else if (d.rank.length >= 3) h += `<button type="button" class="btn" id="act-${w.id}" aria-disabled="true" aria-describedby="full-${w.id}">Auf Wunschliste setzen</button><p class="hint" id="full-${w.id}">Die Wunschliste ist voll. Zuerst einen Wunsch entfernen.</p>`;
+    else h += `<button type="button" class="btn main" id="act-${w.id}" data-wact="rank-add" data-w="${w.id}" aria-label="${esc(w.title)} auf die Wunschliste von ${nm} setzen">Auf Wunschliste setzen</button>`;
+    h += itemChip(ikey(f, p.id, w.id)) + '</div>';
+  } else if (w.mode === 'signup') {
+    const rem = remaining(w.id), joined = d.join.includes(w.id), total = w.seats, taken = total - rem;
+    let seats = '';
+    if (total <= 12) for (let s = 0; s < total; s++) seats += `<span class="seat${s < taken ? ' taken' : ''}"></span>`;
+    h += `<div class="places"><strong>${rem === 0 ? 'Keine Plätze frei' : `Noch ${rem} ${rem === 1 ? 'Platz' : 'Plätze'} frei`}</strong>${seats ? `<span class="seats" aria-hidden="true">${seats}</span>` : ''}</div><div class="wact">`;
+    if (joined) h += `<button type="button" class="btn plain" id="act-${w.id}" data-wact="leave" data-w="${w.id}" aria-label="${nm} von ${esc(w.title)} abmelden">Abmelden</button>`;
+    else if (rem <= 0) h += `${chipHTML('bad', '✕', 'Ausgebucht')}<button type="button" class="btn" id="act-${w.id}" aria-disabled="true" aria-describedby="full-${w.id}">Anmelden</button><p class="hint" id="full-${w.id}">Alle Plätze sind vergeben.</p>`;
+    else h += `<button type="button" class="btn main" id="act-${w.id}" data-wact="join" data-w="${w.id}" aria-label="${nm} für ${esc(w.title)} anmelden">Anmelden</button>`;
+    h += itemChip(ikey(f, p.id, w.id)) + '</div>';
+  } else {
+    const on = d.interest.includes(w.id);
+    h += `<div class="wact"><button type="button" class="btn${on ? '' : ' main'}" id="act-${w.id}" data-wact="${on ? 'interest-off' : 'interest-on'}" data-w="${w.id}" aria-pressed="${on}" aria-label="Interesse von ${nm} an ${esc(w.title)}">${on ? '✓ Interesse markiert' : 'Interesse markieren'}</button>${itemChip(ikey(f, p.id, w.id))}</div>`;
+  }
+  return h + '</li>';
+}
+function findPanel(f, p, mode) {
+  const list = filteredList(p, mode);
+  const titles = { assigned: 'Workshops, die über die Wunschliste vergeben werden', interest: 'Workshops nach Interesse', signup: 'Workshops mit fester Anmeldung' };
+  const hidden = published().filter(w => w.mode === mode && !eligibility(p, w).ok).length;
+  return `<div class="findhead"><button type="button" class="btn plain" id="find-back" data-act="find-back">${icon('left')}Zurück</button></div>
+    <h4 id="h-find" tabindex="-1" style="margin-bottom:12px">${titles[mode]}</h4>
+    <div class="filters">
+      <div><label class="fl" for="wq">Suchen</label><input id="wq" type="search" value="${esc(ui.find.q)}" placeholder="Titel oder Stichwort" autocomplete="off"></div>
+      ${hidden ? `<div style="align-self:end"><label class="toggle"><input type="checkbox" role="switch" id="find-all" data-act="find-all"${ui.find.all ? ' checked' : ''}><span>Auch zeigen, was nicht zu ${esc(p.given)} passt</span></label></div>` : ''}
+    </div>
+    <p class="count" id="wcount">${list.length} ${list.length === 1 ? 'Workshop' : 'Workshops'}</p>
+    ${list.length
+      ? `<ul class="wlist" aria-label="Workshops">${list.map(w => workshopCard(f, p, w)).join('')}</ul>`
+      : `<div class="empty-state"><p>${ui.find.q ? 'Zur Suche passt kein Workshop.' : `Für ${esc(p.given)} passt hier gerade kein Workshop.`}</p>${ui.find.q ? '<button type="button" class="btn" id="find-reset" data-act="find-reset">Suche leeren</button>' : ''}</div>`}`;
+}
+
+function workshopsView(f, p, list) {
+  const mode = findMode();
+  if (mode) return `${panelTitle(fullName(p))}${findPanel(f, p, mode)}`;
+  return `${panelTitle(fullName(p))}
+    <div class="stack-sm">${cardWishes(f, p)}${cardList(f, p, 'interest')}${cardList(f, p, 'signup')}</div>`;
+}
+
+function perPersonTopic(f, s, topic) {
+  const list = s.att, hasNew = topic === 'personen' && !!PFORM[pkey(f, NEW)];
+  let sel = ui.sel[f.id];
+  if (!(list.some(p => p.id === sel) || (hasNew && sel === NEW))) sel = ui.sel[f.id] = list.length ? list[0].id : (hasNew ? NEW : null);
+  let panel;
+  if (!sel) panel = topic === 'personen'
+    ? '<p class="empty-inline">Noch niemand eingetragen. Mit „Person hinzufügen“ geht es los.</p>'
+    : '<p class="empty-inline">Noch niemand eingetragen. Personen kommen unter „Personen“ dazu.</p>';
+  else if (topic === 'personen') panel = personenView(f, sel, list);
+  else panel = topic === 'essen' ? essenView(f, person(f, sel), list) : workshopsView(f, person(f, sel), list);
+  return `<div class="pl"><div class="pl-grid">
+    ${personSide(f, list, sel, topic, hasNew)}
+    <div class="pview"${sel ? ` role="tabpanel" id="pp-panel" aria-labelledby="pp-${sel}"` : ''}>${panel}</div>
+  </div></div>`;
+}
+
+const topicCounts = (f, s) => ({ personen: s.noAge.length + (f.people.length ? 0 : 1), zimmer: s.roomOpen, essen: s.noDiet.length, workshops: s.wsOpen.length });
+function ttabInner(f, counts, k) {
+  const l = TOPICS.find(t => t[0] === k)[1];
+  return l;
+}
+function topicsHTML(f, s) {
+  const counts = topicCounts(f, s), cur = TOPICS.find(t => t[0] === ui.topic);
+  const tabs = TOPICS.map(([k]) => {
+    const on = k === ui.topic;
+    return `<button type="button" role="tab" class="ttab" id="tt-${k}" data-topic="${k}" aria-selected="${on}" aria-controls="tp" tabindex="${on ? 0 : -1}">${ttabInner(f, counts, k)}</button>`;
+  }).join('');
+  const body = ui.topic === 'zimmer' ? topicZimmer(f, s) : perPersonTopic(f, s, ui.topic);
+  const allDone = Object.values(counts).every(n => !n);
+  return `<section aria-label="Angaben der Familie">
+    <div class="ttabs-bar"><div role="tablist" aria-label="Bereiche" class="ttabs">${tabs}</div></div>
+    <div role="tabpanel" id="tp" class="tpanel" aria-labelledby="tt-${ui.topic}">
+      ${allDone ? '<p class="done-line" style="margin-bottom:16px"><span aria-hidden="true">✓</span>Alles angegeben.</p>' : ''}
+      ${body}
+    </div>
+  </section>`;
+}
+
+function viewDetail(r) {
+  const f = db.families.find(x => x.id === r.id);
+  if (!f) return `<nav class="crumbs" aria-label="Pfad"><a href="#/">${icon('left')}Familien</a></nav>
+    <div class="page-head"><h1 id="page-title" tabindex="-1">Familie nicht gefunden</h1></div>
+    <p>Diese Familie gibt es nicht mehr, oder der Link ist falsch.</p>`;
+  const s = stats(f);
+  return `
+  <nav class="crumbs" aria-label="Pfad"><a href="#/">${icon('left')}Familien</a></nav>
+  <div class="page-head">
+    <div>
+      <h1 id="page-title" tabindex="-1">Familie ${esc(f.name)}</h1>
+    </div>
+    <div class="actions" style="align-items:center">${savebarHTML()}<button type="button" class="btn" id="btn-family-edit" data-act="family-edit">${icon('pencil')}Familie bearbeiten</button></div>
+  </div>
+  ${failHTML(f)}
+  <div class="stack">
+    ${topicsHTML(f, s)}
+  </div>`;
+}
+
+/* ---------- render ---------- */
+function render() {
+  const ae = document.activeElement;
+  const id = ae && ae !== document.body && main.contains(ae) ? ae.id : null;
+  let selRange = null;
+  if (id && (ae.tagName === 'TEXTAREA' || ae.type === 'search')) { try { selRange = [ae.selectionStart, ae.selectionEnd]; } catch (e) { selRange = null; } }
+  const r = route();
+  main.innerHTML = r.view === 'detail' ? viewDetail(r) : viewList();
+  const f = currentFamily();
+  // Text values are set as properties so they stay byte-for-byte as stored (incl. leading line breaks).
+  if (f) main.querySelectorAll('textarea[data-field]').forEach(t => {
+    const sc = t.dataset.pid, nm = t.dataset.field, key = fkey(f, sc, nm);
+    t.value = key in DRAFT ? DRAFT[key] : (sc === 'room' ? f.room[nm] : person(f, sc)[nm]);
+  });
+  document.title = r.view === 'detail' ? `${f ? 'Familie ' + f.name : 'Familie'} – Familienfreizeit` : 'Familien – Familienfreizeit';
+  if (id) {
+    const el = document.getElementById(id);
+    if (el && !el.disabled) {
+      el.focus({ preventScroll: true });
+      if (selRange) { try { el.setSelectionRange(selRange[0], selRange[1]); } catch (e) { /* ignore */ } }
+    }
+  }
+}
+function renderAll() {
+  render();
+  if (pendingFocus) {
+    const ids = pendingFocus; pendingFocus = null;
+    for (const id of ids) { const el = document.getElementById(id); if (el && !el.disabled) { el.focus({ preventScroll: true }); break; } }
+  }
+}
+const focusId = id => { const el = document.getElementById(id); if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'nearest' }); } };
+
+function onRoute() {
+  db.families.forEach(dropDrafts);
+  ui.showAllLog = false; ui.sub = 'sel'; ui.confirmRemove = null;
+  const r = route();
+  if (r.view === 'detail') { ui.topic = r.topic || 'zimmer'; if (r.pid) ui.sel[r.id] = r.pid; }
+  render();
+  window.scrollTo(0, 0);
+  const t = $('#page-title'); if (t) t.focus({ preventScroll: true });
+}
+window.addEventListener('hashchange', () => {
+  if (ownHash && location.hash === ownHash) { ownHash = null; return; }
+  onRoute();
+});
+
+function dropDrafts(f) {
+  if (!f) return;
+  Object.keys(PFORM).filter(k => k.startsWith(f.id + '|')).forEach(k => delete PFORM[k]);
+  Object.keys(DRAFT).filter(k => k.startsWith(f.id + '|')).forEach(k => delete DRAFT[k]);
+}
+function selectPerson(f, pid) {
+  if (ui.sel[f.id] !== pid) { ui.sub = 'sel'; ui.confirmRemove = null; dropDrafts(f); }
+  ui.sel[f.id] = pid;
+  render();
+  syncHash(f);
+}
+// Keeps the address in sync with tab and person. Inside sandboxed or srcdoc frames
+// replaceState can be refused; then the hash is set directly and the resulting
+// hashchange is ignored, so the view does not reset.
+let ownHash = null;
+function syncHash(f) {
+  const pid = PER_PERSON.includes(ui.topic) && ui.sel[f.id] && ui.sel[f.id] !== NEW ? '/' + ui.sel[f.id] : '';
+  const hash = `#/familie/${f.id}/${ui.topic}${pid}`;
+  if (location.hash === hash) return;
+  try { history.replaceState(null, '', location.href.split('#')[0] + hash); }
+  catch (e) {
+    try { ownHash = hash; location.hash = hash; } catch (e2) { ownHash = null; }
+  }
+}
+function setTopic(f, k) {
+  if (ui.topic !== k) { dropDrafts(f); ui.sub = 'sel'; ui.confirmRemove = null; }
+  ui.topic = k;
+  render();
+  syncHash(f);
+}
+function scrollToView() {
+  const pv = $('#pview');
+  if (pv) pv.scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' });
+}
+
+/* ---------- dialogs ---------- */
+function dlgShell(title, body, foot, formId, hidden = '') {
+  return `<form id="${formId}" data-form="${formId}" novalidate>${hidden}
+    <div class="dlg-head"><h2 id="dlg-title">${title}</h2><button type="button" class="btn plain icon-only" data-act="dlg-close" aria-label="Schließen">${icon('x')}</button></div>
+    <div class="dlg-body">${body}</div>
+    <div class="dlg-foot">${foot}</div>
+  </form>`;
+}
+function openDialog(html, returnId, focusSel) {
+  lastReturn = returnId;
+  dlg.innerHTML = html;
+  if (!dlg.open) dlg.showModal();
+  const first = (focusSel && dlg.querySelector(focusSel)) || dlg.querySelector('.dlg-body input, .dlg-body select') || dlg.querySelector('.dlg-foot .btn');
+  first.focus();
+}
+function closeDialog(returnId) { lastReturn = returnId; dlg.close(); }
+dlg.addEventListener('close', () => {
+  const el = lastReturn && document.getElementById(lastReturn);
+  if (el) el.focus();
+  dlg.innerHTML = '';
+});
+const CANCEL = '<button type="button" class="btn" data-act="dlg-close">Abbrechen</button>';
+function field(id, label, o = {}) {
+  const { type = 'text', value = '', hint = '', attrs = '' } = o;
+  return `<div class="field"><label for="${id}">${label}</label>${hint ? `<p class="hint" id="${id}-hint">${hint}</p>` : ''}<input id="${id}" type="${type}" value="${esc(value)}" autocomplete="off" aria-describedby="${hint ? id + '-hint ' : ''}${id}-err" ${attrs}><p class="error" id="${id}-err"></p></div>`;
+}
+function validate(rules) {
+  const bad = new Set(), seen = new Set();
+  let first = null;
+  for (const [id, check, msg] of rules) {
+    const el = document.getElementById(id), err = document.getElementById(id + '-err');
+    if (!seen.has(id)) { seen.add(id); el.removeAttribute('aria-invalid'); err.textContent = ''; }
+    if (bad.has(id)) continue;
+    if (!check(el.value.trim())) { bad.add(id); el.setAttribute('aria-invalid', 'true'); err.textContent = msg; first = first || el; }
+  }
+  if (first) { first.focus(); return false; }
+  return true;
+}
+function surnameGuess(f) {
+  const c = {};
+  f.people.forEach(p => { c[p.family] = (c[p.family] || 0) + 1; });
+  const best = Object.entries(c).sort((a, b) => b[1] - a[1])[0];
+  return best ? best[0] : f.name;
+}
+const SUBMIT = {
+  'f-family-add'() {
+    if (!validate([
+      ['fa-name', v => v, 'Bitte einen Familiennamen eingeben.'],
+      ['fa-email', v => EMAIL.test(v), 'Bitte eine gültige E-Mail-Adresse eingeben.'],
+      ['fa-email', v => !db.families.some(x => x.email.toLowerCase() === v.toLowerCase()), 'Diese E-Mail ist schon bei einer anderen Familie eingetragen.']
+    ])) return;
+    const name = $('#fa-name').value.trim(), email = $('#fa-email').value.trim();
+    const f = { id: rid(), name, email, people: [], room: { privateBath: null, accessible: null, ownRoom: null, notes: '' }, ws: {}, log: [] };
+    log(f, 'family', `Familie ${name} hinzugefügt`);
+    db.families.push(f);
+    persist(); closeDialog(null);
+    location.hash = '#/familie/' + f.id;
+    toast(`Familie ${name} hinzugefügt.`);
+  },
+  'f-family'() {
+    const f = currentFamily();
+    if (!validate([
+      ['fe-name', v => v, 'Bitte einen Familiennamen eingeben.'],
+      ['fe-email', v => EMAIL.test(v), 'Bitte eine gültige E-Mail-Adresse eingeben.'],
+      ['fe-email', v => !db.families.some(x => x !== f && x.email.toLowerCase() === v.toLowerCase()), 'Diese E-Mail ist schon bei einer anderen Familie eingetragen.']
+    ])) return;
+    const name = $('#fe-name').value.trim(), email = $('#fe-email').value.trim();
+    if (name !== f.name) log(f, 'family', `Familienname: ${f.name} → ${name}`);
+    if (email !== f.email) log(f, 'family', `E-Mail: ${f.email} → ${email}`);
+    f.name = name; f.email = email;
+    persist(); closeDialog('btn-family-edit'); render();
+  },
+  'f-family-remove'() {
+    const f = currentFamily();
+    db.families = db.families.filter(x => x !== f);
+    persist(); closeDialog(null);
+    location.hash = '#/';
+    toast(`Familie ${f.name} entfernt.`);
+  }
+};
+document.addEventListener('submit', e => {
+  const form = e.target.closest('form[data-form]');
+  if (!form) return;
+  e.preventDefault();
+  const h = SUBMIT[form.dataset.form];
+  if (h) h(form);
+});
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  // In-page links ("#/…") are handled here: inside srcdoc/sandboxed frames the browser
+  // would otherwise resolve them against the frame's base URL and leave the page.
+  const a = e.target.closest('a[href^="#"]');
+  if (a && !a.dataset.act && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button)) {
+    e.preventDefault();
+    const href = a.getAttribute('href');
+    if (href === '#content') { main.focus(); main.scrollIntoView({ block: 'start' }); return; }
+    if (location.hash === href || (href === '#/' && !location.hash)) { onRoute(); return; }
+    location.hash = href;
+    return;
+  }
+  // Whole list row opens the family; the name link stays the keyboard and screen-reader target.
+  const row = e.target.closest('tr.rowclick');
+  if (row && !e.target.closest('a, button')) {
+    if (window.getSelection && String(window.getSelection()).length) return; // allow selecting text
+    location.hash = row.dataset.href;
+    return;
+  }
+  const f = currentFamily();
+  const tab = e.target.closest('[role="tab"]');
+  if (tab && f) {
+    if (tab.classList.contains('ttab')) { setTopic(f, tab.dataset.topic); focusId('tt-' + tab.dataset.topic); }
+    else if (tab.classList.contains('pbtn')) { selectPerson(f, tab.dataset.pid); focusId('pp-' + tab.dataset.pid); } else { if (tab.dataset.sub === 'find' && ui.sub !== 'find') ui.find.elig = 'yes'; ui.sub = tab.dataset.sub; render(); focusId('sub-' + ui.sub); }
+    return;
+  }
+  const wb = e.target.closest('[data-wact]');
+  if (wb && f) {
+    const p = person(f, ui.sel[f.id]), wid = wb.dataset.w, d = wsOf(f, p.id), inFind = !!findMode();
+    switch (wb.dataset.wact) {
+      case 'rank-add': rankAdd(f, p, wid, ['act-' + wid]); break;
+      case 'rank-remove': rankRemove(f, p, wid, inFind ? ['act-' + wid] : ['h-wl-' + p.id]); break;
+      case 'rank-set': rankMove(f, p, d.rank.indexOf(wid), +wb.dataset.to - 1, [`num-${wid}-${wb.dataset.to}`]); break;
+      case 'join': joinSet(f, p, wid, true, ['act-' + wid]); break;
+      case 'leave': joinSet(f, p, wid, false, inFind ? ['act-' + wid] : ['h-signup-' + p.id]); break;
+      case 'interest-on': interestSet(f, p, wid, true, ['act-' + wid]); break;
+      case 'interest-off': interestSet(f, p, wid, false, inFind ? ['act-' + wid] : ['h-interest-' + p.id]); break;
+    }
+    return;
+  }
+  const t = e.target.closest('[data-act]');
+  if (!t) return;
+  switch (t.dataset.act) {
+    case 'na': e.preventDefault(); toast('Dieser Bereich ist im Prototyp nicht enthalten.'); break;
+    case 'filter': ui.filter = t.dataset.v; render(); break;
+    case 'filter-reset': ui.filter = 'all'; ui.q = ''; render(); focusId('q'); break;
+    case 'family-add':
+      openDialog(dlgShell('Familie hinzufügen',
+        `${field('fa-name', 'Familienname', { hint: 'So erscheint die Familie in Listen und Zimmerplänen.' })}${field('fa-email', 'E-Mail', { type: 'email' })}`,
+        `${CANCEL}<button type="submit" class="btn main">${icon('plus')}Hinzufügen</button>`, 'f-family-add'), 'btn-family-add');
+      break;
+    case 'family-edit':
+      openDialog(dlgShell('Familie bearbeiten',
+        `${field('fe-name', 'Familienname', { value: f.name, hint: 'So erscheint die Familie in Listen und Zimmerplänen. Die Nachnamen der Personen bleiben, wie sie sind.' })}${field('fe-email', 'E-Mail', { type: 'email', value: f.email })}
+        <div class="dlg-danger"><h3>Familie entfernen</h3><p class="hint">Löscht die Familie mit allen Personen und Angaben.</p><div><button type="button" class="btn" id="fd-remove" data-act="family-remove">${icon('trash')}Familie entfernen</button></div></div>`,
+        `${CANCEL}<button type="submit" class="btn main">Speichern</button>`, 'f-family'), 'btn-family-edit');
+      break;
+    case 'person-add': {
+      const k = pkey(f, NEW);
+      if (ui.sel[f.id] !== NEW || ui.topic !== 'personen') dropDrafts(f);
+      if (!PFORM[k]) PFORM[k] = { given: '', family: surnameGuess(f), role: 'adult', age: '' };
+      ui.sub = 'sel';
+      ui.sel[f.id] = NEW; ui.confirmRemove = null; ui.topic = 'personen';
+      render(); syncHash(f); focusId('pf-given');
+      break;
+    }
+    case 'pform-save': {
+      const pid = ui.sel[f.id], k = pkey(f, pid), d = { ...pformOf(f, pid) };
+      const rules = [['pf-given', v => v, 'Bitte einen Vornamen eingeben.'], ['pf-family', v => v, 'Bitte einen Nachnamen eingeben.']];
+      if (d.role === 'child') rules.push(['pf-age', v => /^\d+$/.test(v) && +v >= 1 && +v <= 17, 'Bitte das Alter in ganzen Jahren eingeben, zwischen 1 und 17.']);
+      if (!validate(rules)) break;
+      const vals = { given: d.given.trim(), family: d.family.trim(), role: d.role, age: d.role === 'child' ? parseInt(d.age, 10) : null };
+      const newName = `${vals.given} ${vals.family}`;
+      if (pid === NEW) {
+        const p = { id: 'p_' + rid(), ...vals, attending: true, diet: null, allergy: '', bed: false };
+        f.people.push(p); f.ws[p.id] = WS();
+        delete PFORM[k]; ui.sel[f.id] = p.id;
+        log(f, 'person', `${newName} hinzugefügt`); persist();
+        render(); syncHash(f); focusId('pp-' + p.id);
+        toast(`${newName} hinzugefügt.`);
+        break;
+      }
+      const p = person(f, pid), prev = { given: p.given, family: p.family, role: p.role, age: p.age, bed: p.bed };
+      const changes = [];
+      if (fullName(p) !== newName) changes.push(`Name: ${fullName(p)} → ${newName}`);
+      if (p.role !== vals.role) changes.push(`Altersgruppe: ${ROLES[p.role]} → ${ROLES[vals.role]}`);
+      if (vals.role === 'child' && p.age !== vals.age) changes.push(`Alter: ${Number.isInteger(p.age) ? p.age : 'leer'} → ${vals.age}`);
+      delete PFORM[k];
+      if (!changes.length) { render(); break; }
+      commit({
+        f, key: `${f.id}|${pid}.identity`, chip: `${f.id}|${pid}.identity`, focus: ['pf-given'], who: `${newName}: Angaben`,
+        apply() { Object.assign(p, vals); if (p.role !== 'infant') p.bed = false; },
+        revert() { Object.assign(p, prev); },
+        onFail() { PFORM[k] = d; },
+        log: ['person', `${newName}, ${changes.join(', ')}`],
+        done: `${newName}: Angaben gespeichert.`,
+        fail: `${newName}: Die Angaben konnten nicht gespeichert werden. Die Eingaben stehen noch im Formular.`,
+        retry() { PFORM[k] = d; document.getElementById('pf-save') && document.getElementById('pf-save').click(); }
+      });
+      break;
+    }
+    case 'pform-discard': {
+      const pid = ui.sel[f.id];
+      delete PFORM[pkey(f, pid)];
+      if (pid === NEW) { ui.sel[f.id] = f.people.length ? f.people[0].id : null; render(); syncHash(f); focusId(f.people.length ? 'pp-' + f.people[0].id : 'btn-person-add'); }
+      else { render(); focusId('pf-given'); announce('Änderungen verworfen.'); }
+      break;
+    }
+    case 'person-remove-ask': ui.confirmRemove = ui.sel[f.id]; render(); focusId('prc-cancel'); break;
+    case 'person-remove-cancel': ui.confirmRemove = null; render(); focusId('pd-remove'); break;
+    case 'person-remove-confirm': {
+      const pid = ui.confirmRemove, p = person(f, pid);
+      if (!p) break;
+      const nm = fullName(p);
+      f.people = f.people.filter(x => x.id !== pid);
+      delete f.ws[pid]; delete PFORM[pkey(f, pid)];
+      ui.confirmRemove = null; ui.sel[f.id] = f.people.length ? f.people[0].id : null;
+      log(f, 'person', `${nm} entfernt`); persist();
+      render(); syncHash(f); focusId(f.people.length ? 'pp-' + f.people[0].id : 'btn-person-add');
+      toast(`${nm} entfernt.`);
+      break;
+    }
+    case 'family-remove':
+      openDialog(dlgShell(`Familie ${esc(f.name)} entfernen?`,
+        `<p>Die Familie wird mit ${persons(f.people.length)} und allen Angaben gelöscht. Das lässt sich nicht rückgängig machen.</p>`,
+        `<button type="button" class="btn" data-act="family-edit">Abbrechen</button><button type="submit" class="btn danger">${icon('trash')}Familie entfernen</button>`, 'f-family-remove'), 'btn-family-edit', '.dlg-foot .btn');
+      break;
+    case 'goto-topic': {
+      const k = t.dataset.topic, pid = t.dataset.pid;
+      if (pid) { ui.sel[f.id] = pid; ui.sub = 'sel'; }
+      setTopic(f, k);
+      const target = k === 'zimmer' ? 'h-zw' : k === 'personen' ? (t.dataset.focus || 'pf-given') : k === 'essen' ? `c-${pid}-diet-none` : `h-wl-${pid}`;
+      const el = document.getElementById(target);
+      if (el) { (el.closest('.card') || el).scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' }); el.focus({ preventScroll: true }); }
+      break;
+    }
+    case 'text-save': {
+      const sc = t.dataset.pid, nm = t.dataset.field, key = fkey(f, sc, nm);
+      if (!(key in DRAFT)) break;
+      const v = DRAFT[key]; delete DRAFT[key];
+      if (v === storedText(f, sc, nm)) { render(); break; }
+      opField(f, sc, nm, v, [`c-${sc}-${nm}`]);
+      break;
+    }
+    case 'text-discard': {
+      const sc = t.dataset.pid, nm = t.dataset.field;
+      delete DRAFT[fkey(f, sc, nm)];
+      if (failState && failState.key === fkey(f, sc, nm)) { setItem(failState.chip, null); failState = null; if (saveState.state === 'failed') saveState = { state: 'idle' }; }
+      render(); focusId(`c-${sc}-${nm}`); announce('Änderung verworfen.');
+      break;
+    }
+    case 'goto-next': selectPerson(f, t.dataset.pid); { const tp = $('#tp'); if (tp) tp.scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' }); } focusId('pp-' + t.dataset.pid); break;
+    case 'goto-find': { ui.sub = 'find-' + t.dataset.mode; ui.find = { q: '', all: false }; render(); focusId('h-find'); const pv = $('#pp-panel'); if (pv) pv.scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' }); break; }
+    case 'find-back': { const m = findMode(); ui.sub = 'sel'; render(); focusId(m === 'assigned' ? 'h-wl-' + ui.sel[f.id] : `h-${m}-${ui.sel[f.id]}`); break; }
+    case 'find-reset': ui.find.q = ''; render(); focusId('wq'); break;
+    case 'retry': if (failState) { const r = failState.retry; failState = null; r(); } break;
+    case 'dismiss-fail':
+      if (failState) { setItem(failState.chip, null); failState = null; if (saveState.state === 'failed') saveState = { state: 'idle' }; render(); focusId('page-title'); }
+      break;
+    case 'dlg-close': dlg.close(); break;
+    case 'reset-demo':
+      gen++; queue = []; running = false; failState = null; saveState = { state: 'idle' };
+      Object.keys(ITEMS).forEach(k => delete ITEMS[k]);
+      Object.keys(DRAFT).forEach(k => delete DRAFT[k]);
+      db = seed(); persist();
+      Object.keys(PFORM).forEach(k => delete PFORM[k]);
+      ui.q = ''; ui.filter = 'all'; ui.sel = {}; ui.sub = 'sel'; ui.confirmRemove = null; ui.topic = 'zimmer'; ui.find = { q: '', all: false };
+      render(); toast('Beispieldaten zurückgesetzt.');
+      break;
+  }
+});
+
+document.addEventListener('keydown', e => {
+  const tab = e.target.closest && e.target.closest('[role="tab"]');
+  if (!tab) return;
+  const f = currentFamily(); if (!f) return;
+  if (tab.classList.contains('ttab')) {
+    const ks = TOPICS.map(t => t[0]), i = ks.indexOf(tab.dataset.topic), n = ks.length;
+    const j = { ArrowRight: (i + 1) % n, ArrowLeft: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
+    if (j === undefined) return;
+    e.preventDefault(); setTopic(f, ks[j]); focusId('tt-' + ks[j]);
+    return;
+  }
+  if (tab.classList.contains('pbtn')) {
+    const ids = [...document.querySelectorAll('.pbtn')].map(b => b.dataset.pid), i = ids.indexOf(tab.dataset.pid), n = ids.length;
+    const j = { ArrowDown: (i + 1) % n, ArrowRight: (i + 1) % n, ArrowUp: (i - 1 + n) % n, ArrowLeft: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
+    if (j === undefined) return;
+    e.preventDefault(); selectPerson(f, ids[j]); focusId('pp-' + ids[j]);
+  } else {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const nextSub = e.key === 'Home' ? 'sel' : e.key === 'End' ? 'find' : (tab.dataset.sub === 'sel' ? 'find' : 'sel');
+    if (nextSub === 'find' && ui.sub !== 'find') ui.find.elig = 'yes';
+    ui.sub = nextSub;
+    render(); focusId('sub-' + ui.sub);
+  }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'p-savefail') { ui.saveFail = t.checked; return; }
+  if (t.id === 'p-slow') { ui.slow = t.checked; return; }
+  if (t.id === 'find-all') { ui.find.all = t.checked; render(); focusId('find-all'); return; }
+  if (t.dataset && t.dataset.pform === 'role') {
+    const f = currentFamily(), pid = f && ui.sel[f.id];
+    if (!pid) return;
+    PFORM[pkey(f, pid)] = { ...pformOf(f, pid), role: t.value };
+    render(); focusId(t.id);
+    return;
+  }
+  const scope = t.dataset && t.dataset.pid, name = t.dataset && t.dataset.field;
+  if (!scope || !name) return;
+  const f = currentFamily(); if (!f) return;
+  let v;
+  if (name === 'attending' || name === 'bed') v = t.checked;
+  else if (TEXT_FIELDS.includes(name)) return; // saved with the "Speichern" button
+  else v = t.value || null; // "Keine Angabe" is stored as no value
+  opField(f, scope, name, v, [t.id]);
+});
+
+let searchT;
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'q') {
+    ui.q = t.value; render();
+    clearTimeout(searchT);
+    searchT = setTimeout(() => { const c = $('#result-count'); if (c) announce(c.textContent); }, 500);
+    return;
+  }
+  if (t.id === 'wq') {
+    ui.find.q = t.value; render();
+    clearTimeout(searchT);
+    searchT = setTimeout(() => { const c = $('#wcount'); if (c) announce(c.textContent); }, 500);
+    return;
+  }
+  if (t.tagName === 'TEXTAREA' && t.dataset.field) {
+    const f = currentFamily(); if (!f) return;
+    const key = fkey(f, t.dataset.pid, t.dataset.field);
+    if (t.value === storedText(f, t.dataset.pid, t.dataset.field)) delete DRAFT[key]; else DRAFT[key] = t.value; // exactly as typed
+    patchText(f, t.dataset.pid, t.dataset.field);
+    const tz = document.getElementById('tt-zimmer'); if (tz) tz.innerHTML = ttabInner(f, null, 'zimmer');
+    patchSideAndTabs(f);
+    return;
+  }
+  if (t.dataset && t.dataset.pform && t.dataset.pform !== 'role') {
+    const f = currentFamily(), pid = f && ui.sel[f.id];
+    if (!pid) return;
+    const k = pkey(f, pid), d = { ...pformOf(f, pid), [t.dataset.pform]: t.value };
+    PFORM[k] = d;
+    if (pid !== NEW && !pformDirty(f, pid)) delete PFORM[k];
+    const tc = document.getElementById('tc-pform'); if (tc) tc.innerHTML = pformControls(f, pid);
+    patchSideAndTabs(f);
+  }
+});
+
+window.addEventListener('beforeunload', e => {
+  const dirty = db.families.some(f => Object.keys(DRAFT).some(k => k.startsWith(f.id + '|')) || anyPformDirty(f));
+  if (dirty) { e.preventDefault(); e.returnValue = ''; }
+});
+{ const r0 = route(); if (r0.view === 'detail') { if (r0.topic) ui.topic = r0.topic; if (r0.pid) ui.sel[r0.id] = r0.pid; } }
+render();
+})();
+</script>
+</body>
+</html>

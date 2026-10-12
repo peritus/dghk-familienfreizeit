@@ -537,7 +537,7 @@ export function buildWorkshopAllocationProjection(
           outcome === 'fulfilled'
             ? `${decision.rank}. Wunsch erfüllt.`
             : outcome === 'fixed'
-              ? 'Feste Zuordnung.'
+              ? 'Feste Teilnahme.'
               : outcome === 'not-needed'
                 ? 'Ziel bereits erreicht.'
                 : reasonText(outcome),
@@ -563,7 +563,7 @@ export function buildWorkshopAllocationProjection(
       rank: null,
       phase: tracePhase(item.reason),
       outcome: assignmentOutcome(item.reason),
-      detail: item.reason === 'fixed' ? 'Feste Zuordnung.' : 'Automatisch zugeordnet.',
+      detail: item.reason === 'fixed' ? 'Feste Teilnahme.' : 'Nach Wunschliste vergeben.',
       slot_label: slotLabel(item.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
@@ -606,7 +606,7 @@ export function buildWorkshopAllocationProjection(
       rank: null,
       phase: 'fixed',
       outcome: reasonOutcome(violation.reasons[0]),
-      detail: `Feste Zuordnung bleibt bestehen. Konflikte: ${violation.reasons.map((reason) => attentionReason(reason)).join(', ')}.`,
+      detail: `Festgelegte Teilnahme bleibt bestehen. Konflikte: ${violation.reasons.map((reason) => attentionReason(reason)).join(', ')}.`,
       slot_label: slotLabel(violation.workshop_id, placements, slots, input.time_zone),
       capacity: workshop?.capacity ?? null,
       competing_workshop_title: null,
@@ -622,11 +622,11 @@ export function buildWorkshopAllocationProjection(
       workshop_id: item.workshop_id ?? '',
       workshop_title: item.workshop_id
         ? (workshops.get(item.workshop_id)?.title ?? item.workshop_id)
-        : 'Keine Zuordnung',
+        : 'Kein Kursplatz',
       rank: null,
       phase: 'result',
       outcome: 'open',
-      detail: `Keine Zuordnung: ${item.reason}.`,
+      detail: `Kein Kursplatz: ${item.reason}.`,
       slot_label: null,
       capacity: null,
       competing_workshop_title: null,
@@ -1027,7 +1027,7 @@ export function buildWorkshopAllocationTraceStages(
     stages.push({
       id: 'result',
       label: 'Ergebnis',
-      description: 'Feste Zuordnungen und offene Fälle',
+      description: 'Feste Teilnahmen und offene Fälle',
       phase: 'result',
       rank: null,
       ...resultCounts,
