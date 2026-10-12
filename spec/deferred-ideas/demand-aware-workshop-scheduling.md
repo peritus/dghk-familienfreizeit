@@ -87,7 +87,76 @@ reconciled with the active [D4 allocation priority](../../decisions.md#d4--stabl
 The active [D31 choice boundary](../../decisions.md#d31--automatic-workshop-attendance-is-limited-to-chosen-workshops)
 continues to prohibit automatic assignments to unchosen workshops.
 
-## 5. Preserved acceptance checks
+## 5. Evidence from the previous year's spreadsheet
+
+The previous year's course plan was built by hand in a spreadsheet, analysed in
+[Kurszuordnung_V2.xlsx](../prior-art/kurszuordnung-v2.md). Its wish data is the
+[`kurszuordnung-v2.kdl` fixture](../../test/fixtures/workshop-assignment/kurszuordnung-v2.kdl):
+66 children, 13 courses, three slots, and up to three ordered wishes each.
+[`workshop-assignment-kurszuordnung-v2.test.ts`](../../test/solver/workshop-assignment-kurszuordnung-v2.test.ts)
+runs it through the current stages without capacity limits and with two
+courses per person:
+
+| Placement | Children with two courses | Of those, first and second wish |
+|---|---|---|
+| First-feasible, thirteen spaces | 0 | 0 |
+| First-feasible, five spaces | 59 | 39 |
+| Hand-made spreadsheet plan, as fixed placements | 61 | 48 |
+| Best plan from exhaustive search, as fixed placements | 64 | 55 |
+
+Sixty-four is the ceiling: the other two children named a single course. The
+same wishes therefore produce between 59 and 64 children with two courses
+depending only on placement, and the attendance rounds cannot recover a
+placement loss.
+
+The evidence also bounds the objective. The spreadsheet scored plans by how many
+of each child's three wishes fall in distinct slots. The plan that maximises that
+score gives only 60 children two courses, because it optimises third courses
+the two-course target never assigns. A placement objective must be derived from
+the configured `workshops_per_person` and the attendance rules, not from wish
+coverage alone.
+
+Thirteen courses in three slots allow an exhaustive search of 531,441 plans. The
+33-workshop prototype dataset does not, so a promoted search needs a bounded
+heuristic. The spreadsheet's manual method suggests its seed: separate the most
+frequently co-selected pairs and spread first-choice demand across slots, then
+improve by evaluating the attendance outcome.
+
+## 6. Single placement path
+
+Demand-aware placement, if promoted, belongs in the existing
+`workshop-scheduling.placement` stage. A separate suggestion path, such as a
+button that computes an alternative plan outside the solver, is rejected: two
+ways to arrive at a plan would give organisers and families two answers to why a
+workshop runs in a slot. The derived plan is computed by the same stage in the
+browser's prospective world and in the Worker when the area is closed, so a
+single path also keeps those results identical.
+
+Fixed placements remain the only organiser override of the stage's choice.
+
+## 7. Plan score in the placement review
+
+The spreadsheet's most effective feature was one score that changed as soon as
+the plan changed. A promoted placement review should show, for the current
+derived plan:
+
+- the number of people who reach the configured `workshops_per_person` target;
+- of those, the number assigned their highest-ranked choices;
+- the number of co-selected pairs that share a slot, and the people affected;
+- workshops whose demand is very low compared with the other workshops.
+
+Co-selected pairs should be visible before placement as well, ordered by the
+number of people who chose both, not only after they collide in a slot.
+
+## 8. Work budget
+
+Because the stage also runs in the Worker, a placement search needs a fixed,
+deterministic work budget that does not depend on wall-clock time. The budget
+should be enforced by the same kind of counted gate as the existing
+[solver cost gates](../../docs/engineering/testing.md#solver-cost-gates), and the
+search must return the same plan for the same input regardless of where it runs.
+
+## 9. Preserved acceptance checks
 
 If promoted, fixtures and review should demonstrate that:
 
@@ -106,15 +175,30 @@ If promoted, fixtures and review should demonstrate that:
   recalculation and review boundary;
 - organisers can understand the demand/co-selection trade-offs and why a
   requested move was rejected.
+- the [previous-year fixture](../../test/solver/workshop-assignment-kurszuordnung-v2.test.ts)
+  reaches 64 people with two courses under automatic placement, at least the
+  61 of the hand-made plan, with its first-feasible baseline updated in the
+  same change;
+- the placement search stays within its counted work budget for the
+  33-workshop prototype dataset.
 
-## 6. Open questions
+## 10. Open questions
 
 1. Should the search optimize workshop placement only, or evaluate placement
    together with likely attendance outcomes?
+   Evidence: on the previous-year data, the best placement-only score gives 60
+   people two courses, against 64 when plans are compared by attendance outcome
+   ([section 5](#5-evidence-from-the-previous-years-spreadsheet)).
 2. Should demand include all configured ranks or only ranks that can contribute
    before a person's configured target is reached?
+   Evidence: counting every rank toward distinct slots optimised third courses
+   that a two-course target never assigns.
 3. Are pairwise co-selection counts enough, or should larger frequently chosen
    groups be included?
+   Evidence: pairwise counts were enough to reach the top five percent of plans
+   by hand. The three children the hand-made plan missed chose three courses
+   that share one slot, which an attendance-based evaluation detects without
+   group counts.
 4. How should workshop capacity affect placement priority when demand exceeds
    available seats?
 5. What movement budget is permitted, and how does it fit the deterministic
