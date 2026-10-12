@@ -46,7 +46,7 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
     return (
       <span className="workshop-participation__quiet">
         <span aria-hidden="true">-</span>
-        <span className="sr-only">keine Zuordnung</span>
+        <span className="sr-only">kein Kursplatz</span>
       </span>
     )
   return (
@@ -68,7 +68,7 @@ function CellContent({ cell }: { cell: WorkshopParticipationCell }) {
                   : entry.reason === 'interest'
                     ? 'Interesse'
                     : entry.reason === 'fixed'
-                      ? 'fest zugeordnet'
+                      ? 'festgelegt'
                       : entry.rank
                         ? `${entry.rank}. Wahl`
                         : 'nicht gewählt'}
@@ -105,7 +105,7 @@ function Legend({ max_rank: maxRank }: { max_rank: number }) {
       ))}
       <span>
         <i aria-hidden="true" className="workshop-participation__swatch" />
-        keine Zuordnung
+        kein Kursplatz
       </span>
       <span>
         <i
@@ -192,7 +192,7 @@ function PersonCards({ participation }: { participation: WorkshopParticipationVi
                 · {participationAgeLabel(person)}
               </span>
             </h3>
-            <h4>Zuordnung</h4>
+            <h4>Kursplätze</h4>
             <ul className="workshop-participation__card-slots">
               {participation.slots.map((slot, index) => (
                 <li key={slot.id}>

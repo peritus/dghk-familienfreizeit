@@ -71,7 +71,7 @@ test('participation switches between the detailed table, narrow cards, and lands
   )
   const headerText = await page.locator('.workshop-participation__table thead').innerText()
   expect(headerText).not.toMatch(/Rangfolge|Kurse/u)
-  await expect(page.locator('.workshop-participation__legend')).toContainText('keine Zuordnung')
+  await expect(page.locator('.workshop-participation__legend')).toContainText('kein Kursplatz')
   await expect(page.locator('.workshop-participation__legend')).not.toContainText('Offen')
   await expect(page.locator('.workshop-participation__table')).not.toContainText('Offen')
   await expect(page.locator('.workshop-participation__table')).not.toContainText(/Keine Antwort/u)
