@@ -206,8 +206,7 @@ function audienceLabel(audience: string): string {
 
 function participationLabel(mode: string): string {
   return (
-    { assigned: 'Automatische Zuordnung', 'sign-up': 'Anmeldung', interest: 'Interesse' }[mode] ??
-    mode
+    { assigned: 'Nach Wunschliste', 'sign-up': 'Anmeldung', interest: 'Interesse' }[mode] ?? mode
   )
 }
 

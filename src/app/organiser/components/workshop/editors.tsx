@@ -200,7 +200,7 @@ export function WorkshopEditorFields({
         name="participation_mode"
         defaultValue={defaultValues.participation_mode ?? 'assigned'}
       >
-        <option value="assigned">Zuordnung</option>
+        <option value="assigned">Nach Wunschliste</option>
         <option value="sign-up">Anmeldung</option>
         <option value="interest">Interesse</option>
       </SelectField>
