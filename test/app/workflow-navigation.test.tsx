@@ -38,14 +38,14 @@ test('tertiary navigation selects and focuses the next view with arrow keys', ()
       value="workshops"
       onChange={onChange}
       items={[
-        { value: 'workshops', label: 'Workshops' },
+        { value: 'workshops', label: 'Kurse' },
         { value: 'leaders', label: 'Leitungen' },
         { value: 'external', label: 'Extern' },
       ]}
     />,
   )
 
-  const current = screen.getByRole('tab', { name: 'Workshops' })
+  const current = screen.getByRole('tab', { name: 'Kurse' })
   fireEvent.keyDown(current, { key: 'ArrowRight' })
   expect(onChange).toHaveBeenCalledWith('leaders')
   expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Leitungen' }))
@@ -55,12 +55,12 @@ test('secondary navigation selects an item for any of its typed active routes', 
   window.history.replaceState({}, '', '/workshops/slots')
   render(
     <SecondaryNavigation
-      aria_label="Workshopbereiche"
+      aria_label="Kursbereiche"
       items={[
         {
           href: organiserPaths.workshops(),
           active_paths: [organiserPaths.workshops()],
-          label: 'Workshops',
+          label: 'Kurse',
         },
         {
           href: organiserPaths.workshop_spaces(),
@@ -71,7 +71,7 @@ test('secondary navigation selects an item for any of its typed active routes', 
     />,
   )
 
-  expect(screen.getByRole('link', { name: 'Workshops' }).getAttribute('aria-current')).toBeNull()
+  expect(screen.getByRole('link', { name: 'Kurse' }).getAttribute('aria-current')).toBeNull()
   expect(screen.getByRole('link', { name: 'Räume und Slots' }).getAttribute('aria-current')).toBe(
     'page',
   )
@@ -81,12 +81,12 @@ test('workshop allocation keeps the workshop area active across all three views'
   window.history.replaceState({}, '', '/workshops/allocation/trace')
   render(
     <SecondaryNavigation
-      aria_label="Workshopbereiche"
+      aria_label="Kursbereiche"
       items={[
         {
           href: organiserPaths.workshops(),
           active_paths: [organiserPaths.workshops()],
-          label: 'Workshops',
+          label: 'Kurse',
         },
         {
           href: organiserPaths.workshop_allocation(),

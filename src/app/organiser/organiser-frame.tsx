@@ -43,7 +43,7 @@ const primaryNavItems = [
   {
     href: organiserPaths.workshops(),
     match: organiserRoutePaths.workshops,
-    label: 'Workshops',
+    label: 'Kurse',
     include_descendants: true,
   },
 ] as const

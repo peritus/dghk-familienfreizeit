@@ -94,8 +94,8 @@ const labels: Readonly<Record<string, string>> = {
   slot_id: 'Slot',
   space_id: 'Raum',
   room_id: 'Zimmer',
-  workshop_id: 'Workshop',
-  workshop_ids: 'Workshops',
+  workshop_id: 'Kurs',
+  workshop_ids: 'Kurse',
   person_ids: 'Personen',
   unplaced_person_ids: 'Ohne Schlafplatz',
   family_ids: 'Betroffene Familien',
@@ -105,7 +105,7 @@ const labels: Readonly<Record<string, string>> = {
   age_min: 'Mindestalter',
   age_max: 'Höchstalter',
   audience: 'Zielgruppe',
-  asked: 'Gewählte Workshops',
+  asked: 'Gewählte Kurse',
   fulfilled: 'Erfüllte Wünsche',
   max_rank: 'Anzahl Wahlrunden',
   attendance_changed: 'Teilnahme würde sich ändern',
@@ -253,7 +253,7 @@ export function AttentionDetails({ item }: { item: AttentionItem }) {
                 ({
                   append: 'Speichern',
                   'close-accommodation': 'Unterkunft festlegen',
-                  'close-workshops': 'Workshops festlegen',
+                  'close-workshops': 'Kurse festlegen',
                   'capacity-reduction': 'Platzanzahl verringern',
                 })[operation],
             )

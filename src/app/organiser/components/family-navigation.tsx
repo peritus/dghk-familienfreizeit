@@ -7,7 +7,7 @@ const topicLabels: Record<FamilyTopic, string> = {
   zimmer: 'Zimmer',
   personen: 'Personen',
   essen: 'Essen',
-  workshops: 'Workshops',
+  workshops: 'Kurse',
 }
 
 export function FamilyTopicNavigation({
