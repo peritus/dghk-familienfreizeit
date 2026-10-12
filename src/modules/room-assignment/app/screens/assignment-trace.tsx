@@ -79,7 +79,7 @@ function visibleOrder(order: readonly { criterion: string; value: string | numbe
 }
 
 function orderedValue(criterion: string, value: string | number): string {
-  if (criterion === 'currently-feasible-rooms') return `${value} Zimmer`
+  if (criterion === 'currently-feasible-rooms') return 'Weniger Auswahl zuerst'
   if (criterion === 'bed-demand') return `${value} Schlafplätze`
   if (criterion === 'room-score') return `${value} Punkte`
   return String(value)

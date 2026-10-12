@@ -36,6 +36,8 @@ test('organisers see compact family placements and can expand the decision evide
   expect(familyRow?.open).toBe(true)
   expect(screen.getByRole('heading', { name: /Warum wurde diese Familie/ })).toBeTruthy()
   expect(screen.getByText(/Aktuell passende Zimmer/)).toBeTruthy()
+  expect(screen.getByText('Weniger Auswahl zuerst')).toBeTruthy()
+  expect(screen.queryByText(/\b\d+ Zimmer\b/)).toBeNull()
   expect(document.body.textContent).not.toContain('Gespeicherte Familienreihenfolge')
   expect(document.body.textContent).toContain('früher im System angelegt')
   expect(document.body.textContent).not.toContain('Zeitpunkt der Anmeldung')
