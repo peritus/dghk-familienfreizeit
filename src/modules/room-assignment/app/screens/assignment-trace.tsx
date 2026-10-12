@@ -9,12 +9,17 @@ import { useOrganiser } from '../../../../app/organiser/context.js'
 import { AccommodationNavigation } from '../../../../app/organiser/components/accommodation-navigation.js'
 import { useDocumentTitle } from '../../../../app/lib/use-document-title.js'
 import { inventoryWorld } from '../../../room-inventory/index.js'
+import { RequirementChip } from '../components/assignment-board/chips.js'
+import type { RequirementView } from './assignment-board/types.js'
+import type { RoomAssignmentParams } from '../../index.js'
 import type { TraceEntry } from '../../../../solver/types.js'
 import { activeProfile } from '../../../../config/index.js'
 
+type TraceWorld = NonNullable<ReturnType<typeof useOrganiser>['world']>
+
 const orderLabels: Readonly<Record<string, string>> = {
   'configured-opportunity-priority': 'Konfigurierte Priorität',
-  'currently-feasible-rooms': 'Aktuell passende Zimmer',
+  'currently-feasible-rooms': 'Wie viele Zimmer noch passen',
   'bed-demand': 'Benötigte Schlafplätze',
   'family-sort-key': 'Gespeicherte Familienreihenfolge',
   'room-score': 'Zimmerwertung',
@@ -79,7 +84,8 @@ function visibleOrder(order: readonly { criterion: string; value: string | numbe
 }
 
 function orderedValue(criterion: string, value: string | number): string {
-  if (criterion === 'currently-feasible-rooms') return 'Weniger Auswahl zuerst'
+  if (criterion === 'currently-feasible-rooms')
+    return 'Familien mit weniger passenden Zimmern kommen früher dran'
   if (criterion === 'bed-demand') return `${value} Schlafplätze`
   if (criterion === 'room-score') return `${value} Punkte`
   return String(value)
@@ -102,6 +108,166 @@ function localizedTraitTitle(key: string): string | null {
   if (title && typeof title === 'object')
     return title[activeProfile.meta.locale] ?? title[activeProfile.meta.fallback_locale] ?? null
   return null
+}
+
+type FamilyRoomPreference = {
+  trait_key: string
+  weight: number
+  view: RequirementView
+}
+
+function familyRoomPreferences(world: TraceWorld, familyId: string): FamilyRoomPreference[] {
+  const personIds = new Set(
+    world.persons
+      .filter((person) => labelValue(world, person.id, 'member-of') === familyId)
+      .map(({ id }) => id),
+  )
+  const seen = new Set<string>()
+
+  return world.requirements.flatMap((requirement) => {
+    if (
+      (requirement.holder_id !== familyId && !personIds.has(requirement.holder_id)) ||
+      (requirement.consumer && requirement.consumer !== 'room-assignment') ||
+      requirement.value === `${familyId}_room` ||
+      (requirement.strength !== 'required' && requirement.strength !== 'preferred')
+    )
+      return []
+
+    const identity = [
+      requirement.trait_key,
+      requirement.capability_key ?? requirement.structural ?? '',
+      requirement.value ?? '',
+      requirement.strength,
+    ].join(':')
+    if (seen.has(identity)) return []
+    seen.add(identity)
+
+    const valueTrait = requirement.capability_key
+      ? activeProfile.traits[requirement.capability_key as keyof typeof activeProfile.traits]
+      : undefined
+    const label =
+      (valueTrait ? localizedTraitTitle(requirement.capability_key!) : null) ||
+      localizedTraitTitle(requirement.trait_key) ||
+      (requirement.structural === 'no-other-families' ? 'Zimmer nicht teilen' : 'Zimmerwunsch')
+
+    return [
+      {
+        trait_key: requirement.trait_key,
+        weight: requirement.weight ?? 0,
+        view: {
+          key: identity,
+          label,
+          strength: requirement.strength,
+          capability_key: requirement.capability_key,
+          value: requirement.value,
+          kind: requirement.kind,
+          structural: requirement.structural,
+        },
+      },
+    ]
+  })
+}
+
+function priorityConfiguration() {
+  const parameters = activeProfile.modules.find(({ id }) => id === 'room-assignment')
+    ?.parameters as RoomAssignmentParams | undefined
+  const traitKey = parameters?.priority_trait ?? null
+  const trait = traitKey
+    ? activeProfile.traits[traitKey as keyof typeof activeProfile.traits]
+    : undefined
+  const weight =
+    trait && 'weight' in trait && typeof trait.weight === 'number' ? trait.weight : null
+
+  return {
+    trait_key: traitKey,
+    label: traitKey ? localizedTraitTitle(traitKey) || 'Zimmerwunsch' : null,
+    weight,
+  }
+}
+
+function PriorityEvidence({
+  world,
+  family_id: familyId,
+  value,
+}: {
+  world: TraceWorld
+  family_id: string
+  value: string | number
+}) {
+  const preferences = familyRoomPreferences(world, familyId)
+  const configuration = priorityConfiguration()
+  const relevant = preferences.filter(
+    ({ trait_key: traitKey }) => !configuration.trait_key || traitKey === configuration.trait_key,
+  )
+
+  return (
+    <section
+      aria-label="Konfigurierte Priorität"
+      className="rounded-base border border-border/50 bg-background p-3"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 className="font-bold">1. Konfigurierte Priorität</h4>
+          <p className="mt-1 text-sm text-muted">
+            {configuration.label
+              ? `Für die Reihenfolge zählt ${configuration.label}${configuration.weight === null ? '' : ` mit Gewicht ${configuration.weight}`}.`
+              : 'Für die Reihenfolge zählen die konfigurierten Zimmerwünsche.'}{' '}
+            Ein Wunsch zählt einfach, eine erforderliche Anforderung doppelt.
+          </p>
+          {configuration.label && configuration.weight !== null ? (
+            <p className="mt-1 text-sm text-muted">
+              Das ergibt: Wunsch {configuration.weight} × 1 = {configuration.weight}; erforderlich{' '}
+              {configuration.weight} × 2 = {configuration.weight * 2}.
+            </p>
+          ) : null}
+        </div>
+        <p className="font-heading text-metric font-bold tabular-nums">{value}</p>
+      </div>
+
+      <div className="mt-3">
+        <h5 className="text-sm font-bold">Zimmerwünsche und Anforderungen dieser Familie</h5>
+        {preferences.length ? (
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {preferences.map(({ view }) => (
+              <li key={view.key}>
+                <RequirementChip requirement={view} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-sm text-muted">
+            Keine Zimmerwünsche oder Anforderungen eingetragen.
+          </p>
+        )}
+      </div>
+
+      {relevant.length ? (
+        <>
+          <ul className="mt-3 space-y-1 text-sm">
+            {relevant.map(({ weight, view }) => {
+              const multiplier = view.strength === 'required' ? 2 : 1
+              const strength = view.strength === 'required' ? 'erforderlich' : 'Wunsch'
+              return (
+                <li key={view.key}>
+                  {view.label} ({strength}): {weight} × {multiplier} = {weight * multiplier} Punkte
+                </li>
+              )
+            })}
+          </ul>
+          <p className="mt-2 text-sm text-muted">
+            Bei mehreren passenden Einträgen zählt der höchste Wert; die Werte werden nicht addiert.
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 text-sm text-muted">
+          {configuration.label
+            ? `Für diese Familie ist ${configuration.label} nicht eingetragen.`
+            : 'Für diese Familie gibt es keinen passenden Eintrag.'}{' '}
+          Deshalb beträgt die konfigurierte Priorität 0.
+        </p>
+      )}
+    </section>
+  )
 }
 
 function scoreTerms(terms: readonly [string, number][]): string[] {
@@ -129,10 +295,14 @@ function scoreTerms(terms: readonly [string, number][]): string[] {
 function TraceDecision({
   entry,
   roomName,
+  world,
+  family_id: familyId,
   family_name: familyName,
 }: {
   entry: TraceEntry
   roomName: (id: string) => string
+  world: TraceWorld
+  family_id: string
   family_name: string
 }) {
   const allocation = entry.detail?.allocation
@@ -182,39 +352,33 @@ function TraceDecision({
       </summary>
 
       <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
-        {bedDemand !== undefined ? (
-          <section
-            aria-label="Benötigte Schlafplätze"
-            className="rounded-base border border-border/50 bg-background p-3"
-          >
-            <h4 className="text-sm text-muted">Benötigte Schlafplätze</h4>
-            <p className="mt-1 text-lg font-bold tabular-nums">
-              {orderedValue('bed-demand', bedDemand)}
-            </p>
-          </section>
-        ) : null}
-
         {allocation ? (
-          <section aria-label="Gründe für die automatische Reihenfolge">
+          <section className="space-y-4" aria-label="Gründe für die automatische Reihenfolge">
             <h4 className="font-bold">Warum wurde diese Familie als Nächste gewählt?</h4>
-            <p className="mt-1 text-sm text-muted">
-              Die Werte zeigen, wie die Auswahlregeln bei dieser Zuordnung angewendet wurden.
-            </p>
-            <ol className="mt-2 grid gap-2 sm:grid-cols-2">
-              {visibleOrder(allocation.order)
-                .filter(({ criterion }) => criterion !== 'bed-demand')
-                .map(({ criterion, value }, orderIndex) => (
-                  <li key={criterion} className="rounded-base border border-border/50 p-2">
-                    <span className="block text-sm text-muted">
-                      {orderIndex + 1}. {orderLabels[criterion] ?? criterion}
-                    </span>
-                    <span className="font-bold tabular-nums">{orderedValue(criterion, value)}</span>
-                  </li>
-                ))}
-            </ol>
+            {priority !== undefined ? (
+              <PriorityEvidence world={world} family_id={familyId} value={priority} />
+            ) : null}
+            <section aria-label="Auswahl an passenden Zimmern">
+              <h5 className="font-bold">2. Wie viele Zimmer noch passen</h5>
+              <p className="mt-1 text-sm text-muted">
+                Familien mit weniger passenden Zimmern werden früher zugeordnet. Die Zimmer, die für
+                diese Familie noch passen, stehen weiter unten.
+              </p>
+            </section>
+            {bedDemand !== undefined ? (
+              <section
+                aria-label="Benötigte Schlafplätze"
+                className="rounded-base border border-border/50 bg-background p-3"
+              >
+                <h5 className="font-bold">3. Benötigte Schlafplätze</h5>
+                <p className="mt-1 text-lg font-bold tabular-nums">
+                  {orderedValue('bed-demand', bedDemand)}
+                </p>
+              </section>
+            ) : null}
             <p className="mt-2 text-sm text-muted">
-              Bei weiterem Gleichstand entscheidet die Reihenfolge, in der die Familien im System
-              angelegt wurden: frühere zuerst.
+              Bei exakt gleicher Reihenfolge entscheidet der Zeitpunkt der Anmeldung: früher
+              angemeldete Familien zuerst.
             </p>
           </section>
         ) : null}
@@ -304,11 +468,13 @@ function TraceGroup({
   entries,
   familyLabelFor,
   roomName,
+  world,
 }: {
   title: string
   entries: readonly TraceEntry[]
   familyLabelFor: (id: string) => string
   roomName: (id: string) => string
+  world: TraceWorld
 }) {
   if (!entries.length) return null
 
@@ -321,6 +487,8 @@ function TraceGroup({
             <TraceDecision
               entry={entry}
               roomName={roomName}
+              world={world}
+              family_id={entry.subject}
               family_name={familyLabelFor(entry.subject)}
             />
           </li>
@@ -401,24 +569,28 @@ export function AssignmentTraceScreen() {
             entries={fixed}
             familyLabelFor={(id) => familyLabel(world, id)}
             roomName={roomName}
+            world={world}
           />
           <TraceGroup
             title="Automatische Zuordnungen in Auswahlreihenfolge"
             entries={automatic}
             familyLabelFor={(id) => familyLabel(world, id)}
             roomName={roomName}
+            world={world}
           />
           <TraceGroup
             title="Ohne passendes Zimmer"
             entries={unplaceable}
             familyLabelFor={(id) => familyLabel(world, id)}
             roomName={roomName}
+            world={world}
           />
           <TraceGroup
             title="Weitere Ergebnisse"
             entries={other}
             familyLabelFor={(id) => familyLabel(world, id)}
             roomName={roomName}
+            world={world}
           />
         </div>
       ) : (

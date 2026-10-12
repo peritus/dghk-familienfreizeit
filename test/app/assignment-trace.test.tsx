@@ -7,8 +7,23 @@ import type { EventDraft } from '../../src/events/types.js'
 afterEach(() => cleanup())
 
 test('organisers see compact family placements and can expand the decision evidence', () => {
+  const initialState = stateWithDrafts([
+    {
+      at: '2027-01-01T00:24:00Z',
+      actor: 'organiser@example.test',
+      subject: 'fam_sonnenberg',
+      type: 'LabelSet',
+      payload: {
+        entity_id: 'fam_sonnenberg',
+        key: 'needs-private-sanitary',
+        value: 'private-sanitary',
+        strength: 'preferred',
+        note: null,
+      },
+    } satisfies EventDraft,
+  ])
   render(
-    <FixtureProvider>
+    <FixtureProvider initialState={initialState}>
       <AssignmentTraceScreen />
     </FixtureProvider>,
   )
@@ -39,23 +54,29 @@ test('organisers see compact family placements and can expand the decision evide
   fireEvent.click(familyName)
   expect(familyRow?.open).toBe(true)
   expect(screen.getByRole('heading', { name: /Warum wurde diese Familie/ })).toBeTruthy()
-  const bedDemandLabel = screen.getByText('Benötigte Schlafplätze')
+  const prioritySection = screen.getByRole('region', { name: 'Konfigurierte Priorität' })
+  expect(prioritySection.textContent).toContain('1. Konfigurierte Priorität')
+  expect(prioritySection.textContent).toContain('Eigenes Bad (Wunsch)')
+  expect(prioritySection.textContent).toContain('Barrierearmes Zimmer')
+  expect(prioritySection.textContent).toContain('Wunsch 8 × 1 = 8')
+  expect(prioritySection.textContent).toContain('erforderlich 8 × 2 = 16')
+  expect(prioritySection.textContent).toContain('0')
+  expect(prioritySection.textContent).toContain('nicht eingetragen')
+  const bedDemandSection = screen.getByRole('region', { name: 'Benötigte Schlafplätze' })
   const bedDemandValue = screen.getByText(/^\d+ Schlafplätze$/)
-  expect(bedDemandLabel.closest('section')?.textContent).toContain(bedDemandValue.textContent)
+  expect(bedDemandSection.textContent).toContain(bedDemandValue.textContent)
   expect(
-    bedDemandLabel
-      .closest('section')
-      ?.compareDocumentPosition(
-        screen.getByRole('heading', { name: /Warum wurde diese Familie/ }),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    prioritySection.compareDocumentPosition(bedDemandSection) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy()
   expect(screen.getAllByText(/^\d+ Schlafplätze$/)).toHaveLength(1)
-  expect(screen.getByText(/Aktuell passende Zimmer/)).toBeTruthy()
-  expect(screen.getByText('Weniger Auswahl zuerst')).toBeTruthy()
+  expect(screen.getByText('2. Wie viele Zimmer noch passen')).toBeTruthy()
+  expect(
+    screen.getByText(/Familien mit weniger passenden Zimmern werden früher zugeordnet/),
+  ).toBeTruthy()
+  expect(screen.queryByText('Weniger Auswahl zuerst')).toBeNull()
   expect(screen.queryByText(/\b\d+ Zimmer\b/)).toBeNull()
   expect(document.body.textContent).not.toContain('Gespeicherte Familienreihenfolge')
-  expect(document.body.textContent).toContain('früher im System angelegt')
-  expect(document.body.textContent).not.toContain('Zeitpunkt der Anmeldung')
+  expect(document.body.textContent).toContain('Zeitpunkt der Anmeldung')
 })
 
 test('labels unsuitable rooms by the reasons they cannot be assigned', () => {
