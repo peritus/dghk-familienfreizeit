@@ -75,6 +75,29 @@ const profile = defineOccasionProfile({
       value: enumOf(['yes']),
       derive: (room) => room.label('is-accessible') === true,
     }),
+    'private-sanitary': capability({
+      title: 'Private sanitary facilities',
+      scopes: ['room'],
+      value: enumOf(['private-sanitary']),
+      derive: (room) => room.label('sanitary') === 'private',
+    }),
+    'needs-private-sanitary': requirement({
+      title: 'Private sanitary facilities',
+      scopes: ['family'],
+      value: enumOf(['private-sanitary']),
+      satisfied_by: 'private-sanitary',
+      strengths: ['required', 'preferred'],
+      weight: 6,
+      penalty: -2,
+    }),
+    'sole-occupancy': requirement({
+      title: 'Sole occupancy',
+      scopes: ['family'],
+      value: enumOf(['no-other-families']),
+      structural: 'no-other-families',
+      strengths: ['required', 'preferred'],
+      penalty: -12,
+    }),
     'needs-accessible': requirement({
       title: 'Needs accessible',
       scopes: ['family'],
@@ -348,6 +371,42 @@ describe('room assignment business logic', () => {
         }),
       }),
     )
+  })
+
+  test('keeps sole occupancy structural while matching an ensuite capability', () => {
+    const events = loadKdl(
+      `BuildingAdded building_id=bld_ensuite name="Ensuite House" sort_key=1
+RoomAdded room_id=rm_ensuite building_id=bld_ensuite number="1" floor=ground room_type=standard sort_key=1
+LabelSet entity_id=rm_ensuite key=sanitary value=private strength=#null note=#null
+LabelSet entity_id=rm_ensuite key=price-per-bed-eur value=100 strength=#null note=#null
+BedAdded bed_id=bed_ensuite room_id=rm_ensuite label="A" bed_type=single sleeps=1 sort_key=1
+FamilyInvited family_id=fam_ensuite email="ensuite@example.test" display_name="Ensuite" locale=de
+PersonAdded person_id=per_ensuite family_id=fam_ensuite given_name="Eli" family_name="Ensuite" age=#null role=adult
+LabelSet entity_id=fam_ensuite key=needs-private-sanitary value=private-sanitary strength=required note=#null
+LabelSet entity_id=fam_ensuite key=sole-occupancy value=no-other-families strength=required note=#null`,
+      profile.validation_view,
+    )
+    const world = derive(events, profile.validation_view)
+    expect(world.requirements).toContainEqual(
+      expect.objectContaining({
+        holder_id: 'fam_ensuite',
+        trait_key: 'sole-occupancy',
+        capability_key: null,
+        kind: 'structural',
+        structural: 'no-other-families',
+      }),
+    )
+
+    const solved = solve(buildSolverInput(world, contributions), contributions, config)
+    const section = solved.sections['room-assignment'] as {
+      assignments: readonly { family_id: string; room_id: string }[]
+      unplaced: readonly unknown[]
+    }
+    expect(section.assignments).toContainEqual(
+      expect.objectContaining({ family_id: 'fam_ensuite', room_id: 'rm_ensuite' }),
+    )
+    expect(section.unplaced).toEqual([])
+    expect(solved.preflight).toEqual([])
   })
 
   test('keeps fixed assignments ahead of automatic placement and reports violations', () => {
