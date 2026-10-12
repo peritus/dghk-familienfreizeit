@@ -84,10 +84,7 @@ do — the scope grew during execution to also rename "tag" itself, per D23.
    the `traits: {...}` object and `type Trait = keyof typeof traits` in
    `profiles/contract.md`/`profiles/familienfreizeit-2027.example.ts`; the
    `_trait` parameter-naming convention and every parameter using it
-   (`co_room_trait`, `no_bed_trait`, `priority_trait`, `keep_apart_trait`,
-   `ranking_trait`, `audience_trait`, `leader_trait`, `needs_group_trait`,
-   `provides_group_trait`, `diet_trait`, `allergies_trait`,
-   `co_assignment_trait`) across every `spec/modules/*.md` and
+across every `spec/modules/*.md` and
    `spec/deferred-ideas/*.md` file that has one; `tag_roles`/`TagRole` →
    `trait_roles`/`TraitRole` in `modules/contract.md`;
    `kernel.unknown-tag` → `kernel.unknown-trait` and

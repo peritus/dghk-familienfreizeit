@@ -14,7 +14,7 @@ opened: 2026-09-19
 ## Problem
 
 [`profiles/familienfreizeit-2027.example.ts:443-444`](../../profiles/familienfreizeit-2027.example.ts) calls `workshopAssignment({…})` with
-`co_assignment_trait: 'workshop-with'` and `cancel_under_subscribed: true`.
+`cancel_under_subscribed: true`.
 [`modules/workshop-assignment.md:25-30`](../../modules/workshop-assignment.md) declares `WorkshopAssignmentParams` as
 the documented workshop-assignment parameters; the
 validation table lists the same fields. [`modules/contract.md:147`](../../modules/contract.md)
@@ -29,31 +29,29 @@ module contracts.
 passages forbid: [`modules/workshops.md:95-96`](../../modules/workshops.md) — "Cancellation is an explicit
 domain decision; the solver never derives cancellation from attendance or
 capacity" — reinforced at [`modules/workshop-assignment.md:51-52`](../../modules/workshop-assignment.md) and by [`architecture/events.md:164`](../../architecture/events.md), which
-places `WorkshopCancelled` ownership in the workshops module. `workshop-with`
-also appears in family-facing controls with no corresponding module trait.
+places `WorkshopCancelled` ownership in the workshops module.
 
 ## Recommendation
 
-Before M2: either drop `co_assignment_trait` and `cancel_under_subscribed` from
-the active profile, or define their module semantics, diagnostics and tests
-in [`workshop-assignment.md`](../../modules/workshop-assignment.md)/[`workshops.md`](../../modules/workshops.md). Do not reintroduce automatic cancellation or co-assignment
-implicitly — if that capability is wanted, it needs to go through decision
-review since it contradicts the existing "cancellation is an explicit domain
-decision" language. Profile composition must reject unknown parameters, and
-the real profile must typecheck once its builders exist.
+Before M2: either drop `cancel_under_subscribed` from the active profile, or
+define its module semantics, diagnostics and tests in
+[`workshop-assignment.md`](../../modules/workshop-assignment.md)/[`workshops.md`](../../modules/workshops.md).
+Do not reintroduce automatic cancellation implicitly — it needs to go through
+decision review since it contradicts the existing "cancellation is an explicit
+domain decision" language. Profile composition must reject unknown parameters,
+and the real profile must typecheck once its builders exist.
 
 ## Open questions
 
-None. The unsupported parameters are removed from the illustrative active
-profile. Co-assignment and automatic cancellation remain out of scope; any
-future reintroduction requires a separate decision review.
+None. The unsupported parameter is removed from the illustrative active
+profile. Automatic cancellation remains out of scope; any future
+reintroduction requires a separate decision review.
 
 ## Resolution
 
-Removed `co_assignment_trait` and `cancel_under_subscribed` from
-`workshopAssignment(...)`. The profile now matches the four parameters defined
-by the workshop-assignment contract and does not imply solver-derived
-cancellation.
+Removed `cancel_under_subscribed` from `workshopAssignment(...)`. The profile
+now matches the four parameters defined by the workshop-assignment contract and
+does not imply solver-derived cancellation.
 
 ## Related files
 
