@@ -23,10 +23,13 @@ test('organisers see compact family placements and can expand the decision evide
   expect(screen.getByText(/Nach jeder automatischen Zuordnung/)).toBeTruthy()
   expect(screen.getByText(/Automatische Zuordnungen in Auswahlreihenfolge \(1\)/)).toBeTruthy()
 
-  const familyName = screen.getByText('Sonnenberg')
-  const familyRow = familyName.closest('details')
+  const familyName = screen.getByText('Familie Sonnenberg')
+  const familySummary = familyName.closest('summary')
+  const familyRow = familySummary?.closest('details')
   expect(familyRow?.open).toBe(false)
-  expect(screen.getByText(/Zugeordnet zu Zimmer 101/)).toBeTruthy()
+  expect(familySummary?.textContent).toContain('1.')
+  expect(familySummary?.textContent).toContain('Zimmer 101')
+  expect(familySummary?.textContent).toContain('Priorität 0')
 
   const visibleText = document.body.textContent ?? ''
   expect(visibleText).not.toContain('fam_sonnenberg')
@@ -78,7 +81,7 @@ test('labels unsuitable rooms by the reasons they cannot be assigned', () => {
     </FixtureProvider>,
   )
 
-  fireEvent.click(screen.getByText('Sonnenberg'))
+  fireEvent.click(screen.getByText('Familie Sonnenberg'))
   expect(screen.getByText('Ungeeignete Zimmer (1)')).toBeTruthy()
   expect(screen.queryByText(/Abgelehnte Zimmer/)).toBeNull()
 })

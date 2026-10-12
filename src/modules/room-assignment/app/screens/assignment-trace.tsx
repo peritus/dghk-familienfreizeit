@@ -140,6 +140,9 @@ function TraceDecision({
   const chosen = entry.detail?.chosen
   const alternatives = entry.detail?.runners_up ?? []
   const bedDemand = allocation?.order.find(({ criterion }) => criterion === 'bed-demand')?.value
+  const priority = allocation?.order.find(
+    ({ criterion }) => criterion === 'configured-opportunity-priority',
+  )?.value
   const summary =
     entry.step === 'fixed-invalid'
       ? 'Das festgelegte Zimmer ist nicht verfügbar.'
@@ -152,17 +155,30 @@ function TraceDecision({
   return (
     <details className="rounded-base border-2 border-border bg-secondary-background p-4 text-foreground">
       <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 rounded-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border">
-        <span>
-          <span className="block font-heading text-metric">{familyName}</span>
-          <span className="mt-1 block text-muted">{summary}</span>
+        <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-1">
+          {allocation?.round !== undefined ? (
+            <span className="font-bold tabular-nums">{allocation.round}.</span>
+          ) : null}
+          {chosen ? <span className="font-bold">{roomName(chosen.target)}</span> : null}
+          <span className="font-heading text-metric">
+            {allocation ? `Familie ${familyName}` : familyName}
+          </span>
+          {!chosen || entry.step === 'fixed-invalid' ? (
+            <span className="text-muted">{summary}</span>
+          ) : null}
         </span>
-        <Badge
-          tone={
-            entry.step === 'unplaceable' || entry.step === 'fixed-invalid' ? 'attention' : 'neutral'
-          }
-        >
-          {placementLabel(entry)}
-        </Badge>
+        <span className="flex flex-wrap items-center gap-2">
+          {priority !== undefined ? <Badge>Priorität {priority}</Badge> : null}
+          <Badge
+            tone={
+              entry.step === 'unplaceable' || entry.step === 'fixed-invalid'
+                ? 'attention'
+                : 'neutral'
+            }
+          >
+            {placementLabel(entry)}
+          </Badge>
+        </span>
       </summary>
 
       <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
