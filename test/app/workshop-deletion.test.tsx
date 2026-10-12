@@ -42,7 +42,7 @@ test('deleting a workshop requires confirmation and removes it only from the pro
       <DraftState />
     </FixtureProvider>,
   )
-  const remove = screen.getAllByRole('button', { name: /^Workshop löschen:/ })[0]!
+  const remove = screen.getAllByRole('button', { name: /^Kurs löschen:/ })[0]!
   const row = remove.closest('article')!
   const title = within(row).getByRole('heading').textContent!
   const workshopId = row.id.slice('workshop-'.length)

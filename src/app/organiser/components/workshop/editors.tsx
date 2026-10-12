@@ -228,7 +228,7 @@ export function WorkshopEditorFields({
 export function WorkshopEditorForm({
   default_values: defaultValues = {},
   on_submit: onSubmit,
-  submit_label: submitLabel = 'Workshop speichern',
+  submit_label: submitLabel = 'Kurs speichern',
   children,
 }: {
   default_values?: WorkshopEditorValues
@@ -239,7 +239,7 @@ export function WorkshopEditorForm({
   return (
     <Card className="bg-secondary-background">
       <CardHeader>
-        <CardTitle>Workshopdaten</CardTitle>
+        <CardTitle>Kursdaten</CardTitle>
       </CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
@@ -270,13 +270,11 @@ export function WorkshopEditorDialog({
   error?: ReactNode
   children?: ReactNode
 }) {
-  const title = defaultValues.title
-    ? `Workshop bearbeiten: ${defaultValues.title}`
-    : 'Workshop hinzufügen'
+  const title = defaultValues.title ? `Kurs bearbeiten: ${defaultValues.title}` : 'Kurs hinzufügen'
   return (
     <EntityEditorDialog
       title={title}
-      description="Beschreibung, Zielgruppe und Rahmen für diesen Workshop festlegen."
+      description="Beschreibung, Zielgruppe und Rahmen für diesen Kurs festlegen."
       open={open}
       on_open_change={onOpenChange}
       on_submit={onSubmit}
@@ -331,7 +329,7 @@ export function ExternalLeaderEditorFields({
           </div>
         ) : (
           <p className="rounded-base border-2 border-border bg-warning-bg text-foreground p-3 text-sm">
-            Lege zuerst einen Workshop-Slot an.
+            Lege zuerst ein Zeitfenster für einen Kurs an.
           </p>
         )}
       </fieldset>

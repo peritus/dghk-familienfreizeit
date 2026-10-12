@@ -71,7 +71,7 @@ function personen(count: number): string {
 }
 
 function workshops(count: number): string {
-  return `${count} ${count === 1 ? 'Workshop' : 'Workshops'}`
+  return `${count} ${count === 1 ? 'Kurs' : 'Kurse'}`
 }
 
 function capitalized(text: string): string {
@@ -201,7 +201,7 @@ function personMetadata(person: WorkshopReportPerson): ReactNode[] {
 }
 
 export function WorkshopLists() {
-  useDocumentTitle('Listen · Workshops · Familienfreizeit')
+  useDocumentTitle('Listen · Kurse · Familienfreizeit')
   // wouter's location is the pathname only; the selected documents live in the query.
   const [location, navigate] = useLocation()
   const search = useSearch()
@@ -289,7 +289,7 @@ export function WorkshopLists() {
         secondary_navigation={<WorkshopNavigation />}
         header={<ScreenHeader title="Listen" />}
       >
-        <LoadingState message="Workshoplisten werden berechnet …" />
+        <LoadingState message="Kurslisten werden berechnet …" />
       </ScreenLayout>
     )
 
@@ -307,14 +307,14 @@ export function WorkshopLists() {
     kind === 'workshop' ? (
       selectedWorkshop ? (
         <WorkshopListPickerWithDocument
-          label="Workshop"
+          label="Kurs"
           value={selectedWorkshop.id}
           options={workshopOptions(projection.workshops)}
           onChange={select}
           onStep={step}
           notice={
             <ConfidentialityNotice>
-              Enthält Allergien und Gesundheitshinweise. Nur für die Workshopleitung.
+              Enthält Allergien und Gesundheitshinweise. Nur für die Kursleitung.
             </ConfidentialityNotice>
           }
         >
@@ -326,7 +326,7 @@ export function WorkshopLists() {
           />
         </WorkshopListPickerWithDocument>
       ) : (
-        <p className="text-muted">Sobald ein Workshop eingeplant ist, steht hier seine Liste.</p>
+        <p className="text-muted">Sobald ein Kurs eingeplant ist, steht hier seine Liste.</p>
       )
     ) : kind === 'person' && selectedPerson ? (
       <WorkshopListPickerWithDocument
@@ -384,7 +384,7 @@ export function WorkshopLists() {
     <ScreenLayout
       className="workshop-lists"
       secondary_navigation={<WorkshopNavigation />}
-      header={<ScreenHeader eyebrow="Workshops" title="Listen" className="workshop-screen-only" />}
+      header={<ScreenHeader eyebrow="Kurse" title="Listen" className="workshop-screen-only" />}
       tertiary_navigation={
         <WorkshopListKinds
           route_links
@@ -400,7 +400,7 @@ export function WorkshopLists() {
           time_zone={activeProfile.meta.timezone}
           confidentiality={
             kind === 'workshop'
-              ? 'Vertraulich: Nur für Workshop-Leitungen bestimmt.'
+              ? 'Vertraulich: Nur für Kursleitungen bestimmt.'
               : 'Vertraulich: Nur für das Organisationsteam.'
           }
           revision={state.head_seq}

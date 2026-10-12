@@ -17,7 +17,7 @@ function rankingLimit(): number {
 }
 
 export function WorkshopParticipationScreen() {
-  useDocumentTitle('Teilnahme · Workshops · Familienfreizeit')
+  useDocumentTitle('Teilnahme · Kurse · Familienfreizeit')
   const { state, world, current_plan: currentPlan } = useOrganiser()
   const projection = useMemo(
     () =>
@@ -49,7 +49,7 @@ export function WorkshopParticipationScreen() {
       className="workshop-participation-page"
       print_orientation="landscape"
       secondary_navigation={<WorkshopNavigation />}
-      header={<ScreenHeader eyebrow="Workshops" title="Teilnahme" />}
+      header={<ScreenHeader eyebrow="Kurse" title="Teilnahme" />}
       tertiary_navigation={<WorkshopParticipationNavigation />}
       footer={
         <PrintFooter

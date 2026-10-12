@@ -75,13 +75,13 @@ function HeaderFixture({ kind, interactive = false }: { kind: Kind; interactive?
         profile={{ meta: activeProfile.meta, branding: luebben2027Branding }}
         print_generated_at={new Date('2027-01-15T12:00:00Z')}
       >
-        <h1 className="text-h1">Workshops</h1>
+        <h1 className="text-h1">Kurse</h1>
         {interactive ? (
           <Button onClick={() => dispatch({ type: 'stage', events: [organiserPendingDraft] })}>
             Beispieländerung
           </Button>
         ) : (
-          <p className="mt-2 text-body text-muted">Workshops anlegen und bearbeiten.</p>
+          <p className="mt-2 text-body text-muted">Kurse anlegen und bearbeiten.</p>
         )}
       </OrganiserFrame>
     </OrganiserContext.Provider>

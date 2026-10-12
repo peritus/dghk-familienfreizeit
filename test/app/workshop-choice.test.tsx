@@ -47,7 +47,7 @@ test('organisers open workshop choice through a confirmed decision', () => {
 
 test('the overview, programme and allocation screens render the same workshop track', () => {
   const stepsOf = () =>
-    within(screen.getByRole('region', { name: 'Ablauf der Workshopwahl' }))
+    within(screen.getByRole('region', { name: 'Ablauf der Kurswahl' }))
       .getAllByRole('listitem')
       .map((item) => `${item.textContent}|${item.getAttribute('aria-current') ?? ''}`)
   const tracks = [Workshops, WorkshopProgramme, WorkshopAllocation].map((Screen) => {

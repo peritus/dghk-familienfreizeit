@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.worker.json",
+  "compilerOptions": {
+    "types": ["node", "@cloudflare/vitest-plugin/types"]
+  },
+  "include": [
+    "src/attention/**/*.ts",
+    "src/worker/**/*.ts",
+    "src/events/**/*.ts",
+    "src/auth/**/*.ts",
+    "src/config/**/*.ts",
+    "src/derive/**/*.ts",
+    "src/modules/**/*.ts",
+    "src/solver/**/*.ts",
+    "src/organiser/**/*.ts",
+    "worker-configuration.d.ts",
+    "test/worker/**/*.ts",
+    "src/performance/**/*.ts",
+    "test/bench/**/*.ts",
+    "scripts/performance-history.ts",
+    "src/family-detail/**/*.ts"
+  ]
+}

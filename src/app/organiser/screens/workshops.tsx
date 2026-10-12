@@ -267,7 +267,7 @@ export function WorkshopNavigation() {
   ] as const
   return (
     <SecondaryNavigation
-      aria_label="Workshopbereiche"
+      aria_label="Kursbereiche"
       items={[
         {
           href: organiserPaths.workshops(),
@@ -379,7 +379,7 @@ function ExternalLeaderCollection() {
           title={
             editingLeader ? `Externe Leitung: ${editingLeader.name}` : 'Externe Leitung hinzufügen'
           }
-          description="Externe Leitungen leiten Workshops, nehmen aber nicht an der Freizeit teil."
+          description="Externe Leitungen leiten Kurse, nehmen aber nicht an der Freizeit teil."
           open={editor !== null}
           on_open_change={(open) => {
             setEditor(open ? (editor ?? 'new') : null)
@@ -439,7 +439,7 @@ function ExternalLeaderCollection() {
         </CollectionList>
       ) : (
         <EmptyState title="Noch keine externen Leitungen">
-          Lege eine externe Leitung an, bevor du sie einem Workshop zuweist.
+          Lege eine externe Leitung an, bevor du sie einem Kurs zuweist.
         </EmptyState>
       )}
     </CollectionSection>
@@ -469,7 +469,7 @@ function InternalLeaderCollection() {
   return (
     <CollectionSection
       title="Leitungen"
-      description={`${leaders.length} Personen aus der Veranstaltung leiten mindestens einen Workshop.`}
+      description={`${leaders.length} Personen aus der Veranstaltung leiten mindestens einen Kurs.`}
     >
       {leaders.length ? (
         <CollectionList>
@@ -482,7 +482,7 @@ function InternalLeaderCollection() {
         </CollectionList>
       ) : (
         <EmptyState title="Noch keine internen Leitungen">
-          Weise eine Person aus der Veranstaltung einem Workshop zu.
+          Weise eine Person aus der Veranstaltung einem Kurs zu.
         </EmptyState>
       )}
     </CollectionSection>
@@ -519,7 +519,7 @@ export function Workshops({
   initial_view: initialView = 'workshops',
 }: { initial_view?: 'workshops' | 'leaders' | 'external' } = {}) {
   const [pathname, navigate] = useLocation()
-  useDocumentTitle('Workshops · Familienfreizeit')
+  useDocumentTitle('Kurse · Familienfreizeit')
   const { world, state, stage, phases, current_plan: currentPlan } = useOrganiser()
   const summary = officialWorkshopsWorld(world!)
   const choice = phases?.find(({ phase }) => phase === 'workshop-rankings.choice')
@@ -670,32 +670,28 @@ export function Workshops({
   }
   return (
     <ScreenLayout
-      print_running_title="Workshops"
+      print_running_title="Kurse"
       print_context={
         <p>
           Ansicht:{' '}
+          {view === 'workshops' ? 'Kurse' : view === 'leaders' ? 'Leitungen' : 'Externe Leitungen'}
           {view === 'workshops'
-            ? 'Workshops'
-            : view === 'leaders'
-              ? 'Leitungen'
-              : 'Externe Leitungen'}
-          {view === 'workshops'
-            ? ` · Zielgruppe: ${audienceFilter === 'all' ? 'Alle' : audienceLabel(audienceFilter)}${onlyUnplaced ? ' · Nur nicht eingeplante' : ''}${onlyNotes ? ' · Nur mit Hinweisen' : ''} · ${activeWorkshops.length} von ${summary.workshops.length} Workshops`
+            ? ` · Zielgruppe: ${audienceFilter === 'all' ? 'Alle' : audienceLabel(audienceFilter)}${onlyUnplaced ? ' · Nur nicht eingeplante' : ''}${onlyNotes ? ' · Nur mit Hinweisen' : ''} · ${activeWorkshops.length} von ${summary.workshops.length} Kursen`
             : ''}
         </p>
       }
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader
-          eyebrow="Workshops"
-          title="Workshops"
-          description="Workshops anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten."
+          eyebrow="Kurse"
+          title="Kurse"
+          description="Kurse anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten."
         />
       }
       workflow={
         <>
           <WorkflowStepper
-            aria_label="Ablauf der Workshopwahl"
+            aria_label="Ablauf der Kurswahl"
             storage_key="workshops.phase.expanded"
             storage_user={state.principal_email}
             panel={{
@@ -706,7 +702,7 @@ export function Workshops({
                     ? 'Familien können ihre Wünsche, Anmeldungen und ihr Interesse bis zum Festlegen weiter ändern. Prüfe das Ergebnis in den Ansichten dieser Seite.'
                     : summary.workshops.length
                       ? 'Prüfe Zielgruppen und Leitungen. Öffne danach die Wahl für Familien.'
-                      : 'Lege den ersten Workshop an.',
+                      : 'Lege den ersten Kurs an.',
             }}
             steps={workshopTrack({
               phases: phases ?? [],
@@ -719,15 +715,15 @@ export function Workshops({
               ) : summary.workshops.length > 0 && state.principal_email ? (
                 <PhaseDecisionAction
                   label="Wahl öffnen"
-                  title="Workshopwahl öffnen?"
-                  description="Familien sehen danach den Workshopkatalog und können Wünsche, Anmeldungen und Interesse angeben. Das Öffnen wird nicht zurückgenommen; danach steuert das Festlegen die Eingaben."
+                  title="Kurswahl öffnen?"
+                  description="Familien sehen danach den Kurskatalog und können Wünsche, Anmeldungen und Interesse angeben. Das Öffnen wird nicht zurückgenommen; danach steuert das Festlegen die Eingaben."
                   confirm_label="Wahl öffnen"
                   on_confirm={() =>
                     stage([draft(state.principal_email!, 'WorkshopChoiceOpened', {})])
                   }
                 />
               ) : !summary.workshops.length ? (
-                <Button onClick={() => setEditor('new')}>Workshops anlegen</Button>
+                <Button onClick={() => setEditor('new')}>Kurse anlegen</Button>
               ) : null
             }
           />
@@ -739,7 +735,7 @@ export function Workshops({
           items={[
             {
               value: summary.workshops.length,
-              label: pluralDe(summary.workshops.length, 'aktiver Workshop', 'aktive Workshops'),
+              label: pluralDe(summary.workshops.length, 'aktiver Kurs', 'aktive Kurse'),
             },
             {
               value: summary.workshops.filter((workshop) => !placedWorkshopIds.has(workshop.id))
@@ -770,7 +766,7 @@ export function Workshops({
       }
       tertiary_navigation={
         <TertiaryNavigation
-          aria_label="Workshopansichten"
+          aria_label="Kursansichten"
           value={view}
           onChange={(next) => {
             const value = next as 'workshops' | 'leaders' | 'external'
@@ -785,13 +781,11 @@ export function Workshops({
           controls={
             view === 'workshops' ? (
               <CollectionCreateAction
-                label="Workshop hinzufügen"
+                label="Kurs hinzufügen"
                 title={
-                  editingWorkshop
-                    ? `Workshop bearbeiten: ${editingWorkshop.title}`
-                    : 'Workshop hinzufügen'
+                  editingWorkshop ? `Kurs bearbeiten: ${editingWorkshop.title}` : 'Kurs hinzufügen'
                 }
-                description="Beschreibung, Zielgruppe und Rahmen für diesen Workshop festlegen."
+                description="Beschreibung, Zielgruppe und Rahmen für diesen Kurs festlegen."
                 open={editor !== null}
                 on_open_change={(open) => {
                   setEditor(open ? (editor ?? 'new') : null)
@@ -838,7 +832,7 @@ export function Workshops({
           items={[
             {
               value: 'workshops',
-              label: 'Workshops',
+              label: 'Kurse',
               count: summary.workshops.length,
               link: <OrganiserLink href={organiserPaths.workshops()} />,
             },
@@ -863,7 +857,7 @@ export function Workshops({
       {view === 'workshops' ? (
         <CollectionSection
           title={null}
-          label="Aktive Workshops"
+          label="Aktive Kurse"
 
           controls={
             <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -901,7 +895,7 @@ export function Workshops({
                 }}
               />
               <p role="status" aria-live="polite" className="text-sm text-muted">
-                {activeWorkshops.length} von {summary.workshops.length} Workshops
+                {activeWorkshops.length} von {summary.workshops.length} Kursen
               </p>
             </div>
           }
@@ -967,9 +961,9 @@ export function Workshops({
                       </Button>
                       <WorkshopRetireAction
                         label="Löschen"
-                        aria_label={`Workshop löschen: ${workshop.title}`}
-                        title={`Workshop löschen: ${workshop.title}?`}
-                        description="Der Workshop wird aus dem aktuellen Programm entfernt. Bereits erfasste Wünsche und Entscheidungen bleiben erhalten. Prüfe anschließend die offenen Fälle unter Wünsche · Verlauf."
+                        aria_label={`Kurs löschen: ${workshop.title}`}
+                        title={`Kurs löschen: ${workshop.title}?`}
+                        description="Der Kurs wird aus dem aktuellen Programm entfernt. Bereits erfasste Wünsche und Entscheidungen bleiben erhalten. Prüfe anschließend die offenen Fälle unter Wünsche · Verlauf."
                         confirm_label="Ja, löschen"
                         onConfirm={() =>
                           stage([
@@ -988,14 +982,12 @@ export function Workshops({
           ) : (
             <EmptyState
               title={
-                summary.workshops.length
-                  ? 'Keine Workshops für diese Filter'
-                  : 'Keine aktiven Workshops'
+                summary.workshops.length ? 'Keine Kurse für diese Filter' : 'Keine aktiven Kurse'
               }
             >
               {summary.workshops.length
-                ? 'Ändere die Filter, um weitere Workshops zu sehen.'
-                : 'Noch keine Workshops. Lege den ersten Entwurf an.'}
+                ? 'Ändere die Filter, um weitere Kurse zu sehen.'
+                : 'Noch keine Kurse. Lege den ersten Entwurf an.'}
             </EmptyState>
           )}
         </CollectionSection>
@@ -1008,7 +1000,7 @@ export function Workshops({
 
 /** The workshop review phase's readiness, with its first findings (phases.md §3, §8). */
 export function WorkshopProgramme() {
-  useDocumentTitle('Programm · Workshops · Familienfreizeit')
+  useDocumentTitle('Programm · Kurse · Familienfreizeit')
   const { world, phases, state, current_plan: currentPlan } = useOrganiser()
   const [location, navigate] = useLocation()
   const schedule = workshopSchedulingWorld(world!)
@@ -1070,7 +1062,7 @@ export function WorkshopProgramme() {
         <ScreenHeader
           eyebrow="Programm"
           title="Programm"
-          description="Welcher Workshop wann in welchem Raum stattfindet."
+          description="Welcher Kurs wann in welchem Raum stattfindet."
         />
       }
       notices={
@@ -1085,7 +1077,7 @@ export function WorkshopProgramme() {
       }
       workflow={
         <WorkflowStepper
-          aria_label="Ablauf der Workshopwahl"
+          aria_label="Ablauf der Kurswahl"
           storage_key="workshops.programme.expanded"
           storage_user={state.principal_email}
           steps={workshopTrack({
@@ -1133,7 +1125,7 @@ export function WorkshopProgramme() {
             ))}
           </ul>
         ) : (
-          <EmptyState success>Alle Workshops sind eingeplant.</EmptyState>
+          <EmptyState success>Alle Kurse sind eingeplant.</EmptyState>
         )
       ) : null}
       {view === 'overlaps' ? (
@@ -1143,7 +1135,7 @@ export function WorkshopProgramme() {
               Überschneidungen
             </h2>
             <p className="mt-1 max-w-3xl text-muted">
-              Zwei Workshops aus derselben Top 3 im selben Slot: Die Person kann nur einen davon
+              Zwei Kurse aus derselben Top 3 im selben Slot: Die Person kann nur einen davon
               bekommen.
             </p>
           </div>
@@ -1159,7 +1151,7 @@ export function WorkshopProgramme() {
 }
 
 export function WorkshopSlots() {
-  useDocumentTitle('Slots · Workshops · Familienfreizeit')
+  useDocumentTitle('Slots · Kurse · Familienfreizeit')
   const { world, state, stage, current_plan: currentPlan } = useOrganiser()
   const summary = workshopSchedulingWorld(world!)
   const plan = solveWorkshopPlan(world!, currentPlan)
@@ -1250,9 +1242,9 @@ export function WorkshopSlots() {
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader
-          eyebrow="Workshops"
+          eyebrow="Kurse"
           title="Räume und Slots"
-          description="Workshopräume, Kapazitäten und Zeitfenster verwalten."
+          description="Kursräume, Kapazitäten und Zeitfenster verwalten."
         />
       }
       tertiary_navigation={<WorkshopResourceNavigation value="slots" />}
@@ -1263,7 +1255,7 @@ export function WorkshopSlots() {
           <CollectionCreateAction
             label="Slot hinzufügen"
             title={editingSlot ? 'Slot bearbeiten' : 'Slot hinzufügen'}
-            description="Lege Beginn und Dauer für ein Zeitfenster des Workshopprogramms an."
+            description="Lege Beginn und Dauer für ein Zeitfenster des Kursprogramms an."
             open={addingSlot || editingSlot !== null}
             on_open_change={(open) => {
               setAddingSlot(open)
@@ -1293,7 +1285,7 @@ export function WorkshopSlots() {
       >
         {!summary.slots.length ? (
           <EmptyState title="Noch keine Slots">
-            Lege das erste Zeitfenster für das Workshopprogramm an.
+            Lege das erste Zeitfenster für das Kursprogramm an.
           </EmptyState>
         ) : null}
         <div className="grid gap-6">
@@ -1316,7 +1308,7 @@ export function WorkshopSlots() {
                   <WorkshopRetireAction
                     label="Entfernen"
                     title="Slot entfernen?"
-                    description={`${slot.day_label}, ${slot.time_label} wird aus dem Workshopprogramm entfernt.`}
+                    description={`${slot.day_label}, ${slot.time_label} wird aus dem Kursprogramm entfernt.`}
                     onConfirm={() =>
                       stage([
                         draft(state.principal_email ?? '', 'WorkshopSlotRetired', {
@@ -1337,7 +1329,7 @@ export function WorkshopSlots() {
 }
 
 export function WorkshopSpaces() {
-  useDocumentTitle('Räume und Slots · Workshops · Familienfreizeit')
+  useDocumentTitle('Räume und Slots · Kurse · Familienfreizeit')
   const { world, state, stage } = useOrganiser()
   const summary = workshopSpaceWorld(world!)
   const schedule = workshopSchedulingWorld(world!)
@@ -1390,9 +1382,9 @@ export function WorkshopSpaces() {
       secondary_navigation={<WorkshopNavigation />}
       header={
         <ScreenHeader
-          eyebrow="Workshops"
+          eyebrow="Kurse"
           title="Räume und Slots"
-          description="Workshopräume, Kapazitäten und ihre Verfügbarkeit pro Slot verwalten."
+          description="Kursräume, Kapazitäten und ihre Verfügbarkeit pro Slot verwalten."
         />
       }
       tertiary_navigation={<WorkshopResourceNavigation value="spaces" />}
@@ -1402,8 +1394,8 @@ export function WorkshopSpaces() {
         action={
           <CollectionCreateAction
             label="Raum hinzufügen"
-            title={editingSpace ? 'Workshopraum bearbeiten' : 'Workshopraum hinzufügen'}
-            description="Lege Ort und Kapazität des Workshopraums fest. Die Verfügbarkeit markierst du pro Slot."
+            title={editingSpace ? 'Kursraum bearbeiten' : 'Kursraum hinzufügen'}
+            description="Lege Ort und Kapazität des Kursraums fest. Die Verfügbarkeit markierst du pro Slot."
             open={addingSpace || editingSpace !== null}
             on_open_change={(open) => {
               setAddingSpace(open)
@@ -1428,7 +1420,7 @@ export function WorkshopSpaces() {
         }
       >
         {!spaceViews.length ? (
-          <EmptyState title="Noch keine Räume">Lege den ersten Workshopraum an.</EmptyState>
+          <EmptyState title="Noch keine Räume">Lege den ersten Kursraum an.</EmptyState>
         ) : null}
         <div className="grid gap-3">
           {spaceViews.map((space) => (
@@ -1491,7 +1483,7 @@ export function WorkshopSpaces() {
                   <WorkshopRetireAction
                     label="Entfernen"
                     title="Raum entfernen?"
-                    description={`${space.name} wird aus dem Workshopplan entfernt.`}
+                    description={`${space.name} wird aus dem Kursplan entfernt.`}
                     onConfirm={() =>
                       stage([
                         draft(state.principal_email ?? '', 'WorkshopSpaceRetired', {

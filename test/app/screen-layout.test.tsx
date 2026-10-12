@@ -21,7 +21,7 @@ test('screen-wide findings remain mounted above tabs while collection actions ch
     const [view, setView] = useState('workshops')
     return (
       <ScreenLayout
-        header={<ScreenHeader title="Workshopübersicht" />}
+        header={<ScreenHeader title="Kursübersicht" />}
         notices={
           <ActionableNotices>
             <ActionableNotice title="Leitung fehlt" action={<button>Prüfen</button>} />
@@ -29,19 +29,19 @@ test('screen-wide findings remain mounted above tabs while collection actions ch
         }
         tertiary_navigation={
           <TertiaryNavigation
-            aria_label="Workshopansichten"
+            aria_label="Kursansichten"
             value={view}
             onChange={setView}
             items={[
-              { value: 'workshops', label: 'Workshops' },
+              { value: 'workshops', label: 'Kurse' },
               { value: 'leaders', label: 'Leitungen' },
             ]}
           />
         }
       >
         <CollectionSection
-          title={view === 'workshops' ? 'Aktive Workshops' : 'Interne Leitungen'}
-          action={view === 'workshops' ? <button>Workshop hinzufügen</button> : undefined}
+          title={view === 'workshops' ? 'Aktive Kurse' : 'Interne Leitungen'}
+          action={view === 'workshops' ? <button>Kurs hinzufügen</button> : undefined}
         >
           <p>Inhalt</p>
         </CollectionSection>
@@ -54,13 +54,13 @@ test('screen-wide findings remain mounted above tabs while collection actions ch
     notice.compareDocumentPosition(screen.getByRole('tablist')) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy()
   expect(
-    within(screen.getByRole('region', { name: 'Aktive Workshops' })).getByRole('button', {
-      name: 'Workshop hinzufügen',
+    within(screen.getByRole('region', { name: 'Aktive Kurse' })).getByRole('button', {
+      name: 'Kurs hinzufügen',
     }),
   ).toBeTruthy()
   fireEvent.click(screen.getByRole('tab', { name: 'Leitungen' }))
   expect(screen.getByRole('note')).toBe(notice)
-  expect(screen.queryByRole('button', { name: 'Workshop hinzufügen' })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Kurs hinzufügen' })).toBeNull()
   expect(screen.getByRole('region', { name: 'Interne Leitungen' })).toBeTruthy()
 })
 
@@ -158,14 +158,14 @@ test('section navigation belongs to the frame band and disappears with its scree
   const { rerender } = render(
     <ApplicationFrame brand="Veranstaltung">
       <ScreenLayout
-        header={<ScreenHeader title="Workshops" />}
-        secondary_navigation={<nav aria-label="Workshopbereiche">Übersicht</nav>}
+        header={<ScreenHeader title="Kurse" />}
+        secondary_navigation={<nav aria-label="Kursbereiche">Übersicht</nav>}
       >
-        <p>Workshopliste</p>
+        <p>Kursliste</p>
       </ScreenLayout>
     </ApplicationFrame>,
   )
-  const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
+  const navigation = screen.getByRole('navigation', { name: 'Kursbereiche' })
   expect(navigation.closest('[data-slot="application-section-band"]')).toBeTruthy()
   expect(screen.getByRole('main').contains(navigation)).toBe(false)
   rerender(
@@ -173,5 +173,5 @@ test('section navigation belongs to the frame band and disappears with its scree
       <ScreenLayout header={<ScreenHeader title="Familien" />} />
     </ApplicationFrame>,
   )
-  expect(screen.queryByRole('navigation', { name: 'Workshopbereiche' })).toBeNull()
+  expect(screen.queryByRole('navigation', { name: 'Kursbereiche' })).toBeNull()
 })

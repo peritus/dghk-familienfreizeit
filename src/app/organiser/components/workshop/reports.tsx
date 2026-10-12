@@ -249,7 +249,7 @@ export function PersonPlanTable({
       head={
         <>
           <th scope="col">Slot</th>
-          <th scope="col">Workshop</th>
+          <th scope="col">Kurs</th>
           <th scope="col">Raum</th>
           <th scope="col">Rolle</th>
         </>
@@ -391,7 +391,7 @@ export function RoomPlanTable({
       head={
         <>
           <th scope="col">Zeit</th>
-          <th scope="col">Workshop</th>
+          <th scope="col">Kurs</th>
           <th scope="col">Für</th>
           <th scope="col">Leitung</th>
         </>
@@ -426,7 +426,7 @@ export function WorkshopListKinds({
       items={[
         {
           value: 'workshop',
-          label: 'Workshop',
+          label: 'Kurs',
           link: routeLinks ? (
             <OrganiserLink href={organiserPaths.workshop_workshop_list()} />
           ) : undefined,
@@ -474,7 +474,7 @@ export function WorkshopRosterDocument({
       title={title}
       metadata={metadata}
       heading_ref={headingRef}
-      print_note="Vertraulich: enthält Gesundheitsangaben. Nur für die Workshopleitung. Nach der Veranstaltung vernichten."
+      print_note="Vertraulich: enthält Gesundheitsangaben. Nur für die Kursleitung. Nach der Veranstaltung vernichten."
     >
       {entries.length ? (
         <ListResponsive

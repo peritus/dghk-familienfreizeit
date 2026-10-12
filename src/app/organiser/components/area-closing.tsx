@@ -14,7 +14,7 @@ import { PhaseDecisionAction } from './phase-decision.js'
 
 const areaLabels: Record<AreaId, { name: string; result: string }> = {
   accommodation: { name: 'Unterkunft', result: 'die Zimmerzuordnung' },
-  workshops: { name: 'Workshops', result: 'Programm und Teilnahme' },
+  workshops: { name: 'Kurse', result: 'Programm und Teilnahme' },
 }
 
 const changeLabels = { added: 'neu', removed: 'entfällt', moved: 'geändert' } as const

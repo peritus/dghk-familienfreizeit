@@ -109,7 +109,7 @@ export function SlotRow({ slot, action }: { slot: WorkshopSlotView; action?: Rea
             <SlotIdentity day_label={slot.day_label} time_label={slot.time_label} />
             <SlotConflictBadge conflict={slot.conflict} />
           </p>
-          <p className="text-sm text-muted">{slot.workshop_count} Workshops im aktuellen Stand</p>
+          <p className="text-sm text-muted">{slot.workshop_count} Kurse im aktuellen Stand</p>
         </div>
         {action ? <RowActions>{action}</RowActions> : null}
       </CardContent>

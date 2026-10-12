@@ -393,7 +393,7 @@ test('workshop navigation exposes the intended areas and switches resource views
   open('/organiser/workshops/slots')
   expect(await screen.findByRole('heading', { name: 'Slots' })).toBeTruthy()
 
-  const navigation = screen.getByRole('navigation', { name: 'Workshopbereiche' })
+  const navigation = screen.getByRole('navigation', { name: 'Kursbereiche' })
   expect(
     within(navigation)
       .getAllByRole('link')
@@ -434,7 +434,7 @@ test('workshop participation shows the responsive person overview and links to w
       (table?.querySelectorAll('tbody tr:first-child .workshop-participation__slot-cell').length ??
         0),
   )
-  expect(table?.querySelector('thead')?.textContent).not.toMatch(/Rangfolge|Workshops/u)
+  expect(table?.querySelector('thead')?.textContent).not.toMatch(/Rangfolge|Kurse/u)
   expect(table?.querySelector('caption')?.textContent).toMatch(
     /Teilnahme · \d+ Person(?:en)? · \d+ Slots?/u,
   )
@@ -445,9 +445,8 @@ test('workshop participation shows the responsive person overview and links to w
   )
   expect(screen.getAllByRole('link', { name: /Wünsche verfolgen/u }).length).toBeGreaterThan(0)
   expect(
-    screen
-      .getByRole('navigation', { name: 'Workshopbereiche' })
-      .querySelector('[aria-current="page"]')?.textContent,
+    screen.getByRole('navigation', { name: 'Kursbereiche' }).querySelector('[aria-current="page"]')
+      ?.textContent,
   ).toBe('Teilnahme')
 })
 
@@ -511,14 +510,14 @@ test('workshop allocation exposes three URL-backed Wunsch views', async () => {
 
 test('the workshop overview uses the prototype view labels', async () => {
   open('/organiser/workshops', workshopFixtureEvents())
-  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Kurse', level: 1 })).toBeTruthy()
 
-  const views = screen.getByRole('navigation', { name: 'Workshopansichten' })
+  const views = screen.getByRole('navigation', { name: 'Kursansichten' })
   expect(
     within(views)
       .getAllByRole('link')
       .map((tab) => tab.textContent?.replace(/\d+/g, '').trim()),
-  ).toEqual(['Workshops', 'Leitungen', 'Externe Leitungen'])
+  ).toEqual(['Kurse', 'Leitungen', 'Externe Leitungen'])
 })
 
 test('the external leaders view follows the prototype list and stages a complete update', async () => {
@@ -554,7 +553,7 @@ test('the external leaders view follows the prototype list and stages a complete
 test('the workshop overview presents resolved labels and derived placement data', async () => {
   open('/organiser/workshops', workshopFixtureEvents())
 
-  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Kurse', level: 1 })).toBeTruthy()
   expect(screen.getAllByText('Kinder').length).toBeGreaterThan(0)
   expect(screen.queryByText('Automatische Zuordnung')).toBeNull()
   expect(screen.getByText(/Mira Stein/)).toBeTruthy()
@@ -565,11 +564,11 @@ test('workshop authoring uses the focused editor dialog to create a workshop', a
   const { fetchMock } = open('/organiser/workshops', workshopFixtureEvents())
   if (!fetchMock) throw new Error('organiser fetch mock not installed')
 
-  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
-  fireEvent.click(screen.getByRole('button', { name: 'Workshop hinzufügen' }))
+  expect(await screen.findByRole('heading', { name: 'Kurse', level: 1 })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Kurs hinzufügen' }))
 
   expect(screen.getByRole('dialog')).toBeTruthy()
-  expect(screen.getByRole('heading', { name: 'Workshop hinzufügen' })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Kurs hinzufügen' })).toBeTruthy()
   fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Fotowerkstatt' } })
   fireEvent.change(screen.getByLabelText('Beschreibung für Familien'), {
     target: { value: 'Bilder machen und entwickeln.' },
@@ -596,10 +595,10 @@ test('workshop authoring opens existing values and stages a complete update', as
   const { fetchMock } = open('/organiser/workshops', workshopFixtureEvents())
   if (!fetchMock) throw new Error('organiser fetch mock not installed')
 
-  expect(await screen.findByRole('heading', { name: 'Workshops', level: 1 })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'Kurse', level: 1 })).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Keramik' }))
 
-  expect(screen.getByRole('heading', { name: 'Workshop bearbeiten: Keramik' })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Kurs bearbeiten: Keramik' })).toBeTruthy()
   expect((screen.getByLabelText('Titel') as HTMLInputElement).value).toBe('Keramik')
   expect((screen.getByRole('checkbox', { name: 'Mira Stein' }) as HTMLInputElement).checked).toBe(
     true,

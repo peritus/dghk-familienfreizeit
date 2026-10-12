@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workshops · Pfingsten 2027 — Prototyp v16</title>
+<style>
+  :root {
+    color-scheme: light;
+    --background: hsl(33 100% 92%);
+    --paper: #fffaf0;
+    --main: hsl(28 100% 51%);
+    --danger: hsl(2 90% 66%);
+    --muted: hsl(30 10% 32%);
+    --rule: hsl(33 25% 82%);
+    --off: hsl(30 12% 88%);
+    --r1: hsl(33 100% 76%);
+    --r2: hsl(33 100% 83%);
+    --r3: hsl(33 100% 88%);
+    --r4: hsl(33 70% 94%);
+    --shadow: 4px 4px 0 0 #000;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 24px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--background); color: #000; line-height: 1.625;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  }
+  button, select { font: inherit; color: inherit; }
+  a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #000; outline-offset: 4px; }
+  [tabindex="-1"]:focus { outline: 3px solid #000; outline-offset: 4px; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 32px 24px 96px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 14px; }
+  h1, h2, h3, h4 { font-weight: 700; margin: 0; line-height: 1.2; overflow-wrap: anywhere; }
+  p { margin: 0; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .edit-link { color: inherit; text-decoration: underline; text-decoration-color: rgb(0 0 0 / 0.25); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  .edit-link:hover { text-decoration-color: #000; text-decoration-thickness: 2px; }
+
+  .btn {
+    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px; padding: 8px 16px; white-space: nowrap;
+    border: 2px solid #000; border-radius: 5px; background: #fff; color: #000;
+    font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer;
+    box-shadow: var(--shadow); transition: translate 120ms, box-shadow 120ms;
+  }
+  .btn:hover, .btn:active { translate: 4px 4px; box-shadow: none; }
+  .btn.sm { min-height: 36px; padding: 4px 12px; }
+  .btn.main { background: var(--main); }
+  .btn[aria-disabled="true"] { background: var(--off); border-color: var(--muted); color: var(--muted); box-shadow: none; translate: none; cursor: not-allowed; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 8px;
+    border: 2px solid #000; border-radius: 5px; background: #fff;
+    font-size: 14px; font-weight: 700; white-space: nowrap;
+  }
+  .chip.free { border-style: dashed; }
+  .chip.attn { background: var(--main); }
+  .chip.bad { background: var(--danger); }
+  .chip.off { background: var(--off); border-color: var(--muted); }
+  .chip.plan { background: var(--paper); border-style: dotted; }
+  .chip.dark { background: #000; color: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .badge { display: inline-flex; align-items: center; min-height: 26px; padding: 0 8px; border: 1.5px solid var(--muted); border-radius: 5px; background: #fff; font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .badge.dashed { border-style: dashed; }
+
+  /* Prototype-only chrome */
+  .proto { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; border: 2px dashed var(--muted); border-radius: 5px; padding: 8px 12px; margin-bottom: 12px; font-size: 14px; }
+  .proto label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .proto select { font-size: 14px; border: 1.5px dashed var(--muted); border-radius: 3px; background: transparent; padding: 2px 4px; max-width: 100%; }
+  .proto input { width: 18px; height: 18px; accent-color: #000; }
+  .state-label { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .state-label strong { color: #000; }
+  .frame { container-type: inline-size; container-name: app; }
+  .frame.narrow { max-width: 390px; margin: 0 auto; outline: 2px dashed var(--muted); outline-offset: 12px; }
+  .shell { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 6px 12px; margin-bottom: 24px; border: 1.5px dashed var(--muted); border-radius: 5px; font-size: 13px; color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 2px dashed var(--muted); font-size: 13px; }
+
+  /* Tabs and segmented buttons */
+  .app-name { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tabs.outer { padding-bottom: 20px; border-bottom: 2px solid #000; margin-bottom: 28px; }
+  .tabs.inner { margin: 8px 0 28px; }
+  .seg {
+    min-height: 44px; padding: 6px 16px; border: 2px solid #000; border-radius: 5px; background: #fff;
+    font-size: 15px; font-weight: 700; cursor: pointer; text-align: left;
+  }
+  .seg[aria-selected="true"], .seg[aria-pressed="true"] { background: #000; color: #fff; }
+  .seg:not([aria-selected="true"]):not([aria-pressed="true"]):hover { background: var(--paper); }
+  .seg .sub { display: block; font-size: 12px; font-weight: 500; }
+
+  .page-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+  h1 { font-size: clamp(30px, 4vw, 36px); }
+  .ctxline { margin-top: 8px; }
+  .head-side { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+  /* Phase bar: a real sequence, so numbered */
+  .phase { border: 2px solid #000; border-radius: 5px; background: #fff; margin-bottom: 28px; }
+  .phase ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .phase li { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-right: 2px solid #000; font-weight: 700; font-size: 15px; line-height: 1.3; }
+  .phase li:last-child { border-right: 0; }
+  .phase .n { display: inline-grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border: 2px solid #000; border-radius: 50%; font-size: 14px; }
+  .phase li.done { color: var(--muted); }
+  .phase li.done .n { border-color: var(--muted); }
+  .phase li[aria-current="step"] { background: #000; color: #fff; }
+  .phase li[aria-current="step"] .n { border-color: #fff; }
+  .phase-act { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding: 12px 16px; border-top: 2px solid #000; background: var(--paper); }
+  .phase-act .actions { margin-top: 0; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(var(--n), 1fr); border: 2px solid #000; border-radius: 5px; background: #fff; margin-bottom: 24px; overflow: hidden; }
+  .stat { padding: 16px; text-align: center; border-right: 2px solid #000; }
+  .stat:last-child { border-right: 0; }
+  .stat.attn { background: var(--main); }
+  .stat.bad { background: var(--danger); }
+  .stat .num { font-size: 36px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .num small { font-size: 18px; }
+  .stat .lbl { font-weight: 700; margin-top: 4px; }
+
+  /* Alerts */
+  .alert { border: 2px solid #000; border-left-width: 10px; border-radius: 5px; background: #fff; padding: 14px 16px; margin-bottom: 24px; }
+  .alert.attn { border-left-color: var(--main); }
+  .alert.bad { border-left-color: var(--danger); }
+  .alert.plan { border-left-color: var(--muted); background: var(--paper); }
+  .alert.info { border-left-color: #000; }
+  .alert h2 { font-size: 20px; margin-bottom: 4px; }
+  .alert ul { margin: 6px 0 0; padding-left: 20px; }
+  .success { display: inline-flex; }
+  .empty-state { border: 2px dashed var(--muted); border-radius: 5px; padding: 24px; max-width: 660px; }
+  .empty-state h2 { font-size: 22px; margin-bottom: 6px; }
+  .loading { display: flex; align-items: center; gap: 12px; border: 2px dashed var(--muted); border-radius: 5px; padding: 24px; }
+  .spinner { width: 18px; height: 18px; border: 3px solid var(--rule); border-top-color: #000; border-radius: 50%; animation: spin 900ms linear infinite; }
+  @keyframes spin { to { rotate: 360deg; } }
+
+  section + section { margin-top: 44px; }
+  .section-head { margin-bottom: 12px; }
+  h2 { font-size: 24px; }
+  .section-head p { margin-top: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 20px; align-items: start; }
+  .list { border: 2px solid #000; border-radius: 5px; background: #fff; }
+  .list > * + * { border-top: 2px solid #000; }
+
+  /* Event overview grid */
+  .days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+  .days > section.day { margin-top: 0; }
+  .day h3 { font-size: 18px; padding-bottom: 8px; border-bottom: 2px solid #000; margin-bottom: 10px; }
+  .slotcells { display: grid; gap: 10px; }
+  .slotcell {
+    display: grid; gap: 6px; width: 100%; padding: 12px 14px; text-align: left; cursor: pointer;
+    border: 2px solid #000; border-radius: 5px; background: #fff; box-shadow: var(--shadow); transition: translate 120ms, box-shadow 120ms;
+  }
+  .slotcell:hover { translate: 4px 4px; box-shadow: none; }
+  .slotcell .t { font-weight: 700; font-size: 17px; }
+  .slotcell .d { font-size: 14px; color: var(--muted); }
+  .slotcell.attn { border-left: 10px solid var(--main); }
+  .slotcell.bad { border-left: 10px solid var(--danger); }
+
+  /* Slot picker */
+  .picker { display: grid; gap: 10px; margin-bottom: 24px; }
+  .picker .lbl { font-weight: 700; font-size: 14px; }
+
+  /* Offering card */
+  .offer { border: 2px solid #000; border-radius: 5px; background: #fff; overflow: hidden; }
+  .offer-top { padding: 16px; }
+  .offer-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .offer-title h3 { font-size: 20px; line-height: 1.3; }
+  .offer-title .chips { justify-content: flex-end; }
+  .meta { margin-top: 6px; font-size: 14px; }
+  .cap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+  .cap strong { font-size: 18px; }
+  .seats { display: flex; flex-wrap: wrap; gap: 3px; }
+  .seat { width: 12px; height: 12px; border: 2px solid #000; border-radius: 2px; background: #000; }
+  .seat.free { background: #fff; }
+  .seat.over { background: var(--danger); }
+  .evidence { margin-top: 4px; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .warn { margin-top: 12px; padding-left: 10px; border-left: 4px solid var(--main); font-size: 14px; }
+  .warn.bad { border-left-color: var(--danger); }
+  .warn.plan { border-left-color: var(--muted); }
+  .people { padding: 12px 16px 14px; border-top: 2px solid #000; font-size: 15px; }
+  .people .lbl { font-weight: 700; font-size: 14px; }
+  .people .names { color: var(--muted); }
+  .offer.unplanned { border-style: dashed; background: transparent; }
+
+  /* Open cases */
+  .case { padding: 14px 16px; }
+  .case .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+  .case .reason { margin-top: 6px; }
+  .case .links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; font-size: 14px; }
+
+  /* Person x slot table */
+  .intro { max-width: 72ch; margin-bottom: 16px; }
+  .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-bottom: 12px; font-size: 13px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 18px; height: 14px; border: 1.5px solid #000; border-radius: 2px; }
+  .table-wrap { border: 2px solid #000; border-radius: 5px; background: #fff; overflow-x: auto; }
+  table.pt { border-collapse: separate; border-spacing: 0; font-size: 13px; min-width: 100%; }
+  .pt caption { text-align: left; padding: 12px 16px; font-weight: 700; font-size: 15px; border-bottom: 2px solid #000; }
+  .pt caption span { font-weight: 400; color: var(--muted); }
+  .pt th, .pt td { padding: 8px 10px; text-align: left; vertical-align: top; border-top: 1.5px solid var(--rule); border-left: 1.5px solid var(--rule); }
+  .pt thead th { border-top: 0; border-bottom: 2px solid #000; white-space: nowrap; font-size: 13px; line-height: 1.3; }
+  .pt thead th .d { display: block; font-weight: 500; color: var(--muted); }
+  .pt tbody tr:first-child > * { border-top: 0; }
+  .pt th[scope="row"] { position: sticky; left: 0; z-index: 1; background: #fff; min-width: 12em; font-size: 14px; border-left: 0; border-right: 2px solid #000; }
+  .pt thead th:first-child { position: sticky; left: 0; z-index: 2; background: #fff; border-left: 0; border-right: 2px solid #000; }
+  .pt tr.is-open > th[scope="row"] { box-shadow: inset 6px 0 0 var(--main); }
+  .pt td.h { min-width: 8.5em; }
+  .pt td.h .w { display: block; font-weight: 700; }
+  .pt td.h .rk { display: block; color: var(--muted); }
+  .pt td.r1 { background: var(--r1); } .pt td.r2 { background: var(--r2); } .pt td.r3 { background: var(--r3); } .pt td.r4 { background: var(--r4); }
+  .pt td.r1 .rk, .pt td.r2 .rk, .pt td.r3 .rk { color: #000; }
+  .pt td.rep { box-shadow: inset 0 0 0 2px #000; background: repeating-linear-gradient(45deg, #fff 0 4px, var(--paper) 4px 8px); }
+  .pt td.su { background: repeating-linear-gradient(135deg, #fff 0 6px, var(--paper) 6px 12px); }
+  .pt td.rank { min-width: 13em; font-size: 13px; }
+  .rk5 { list-style: none; margin: 0; padding: 0; }
+  .rk5 li.got { font-weight: 700; }
+  .rk5 li.miss { color: var(--muted); }
+  details.why { margin-top: 4px; font-size: 13px; }
+  details.why summary { cursor: pointer; text-decoration: underline; text-decoration-color: rgb(0 0 0 / 0.35); text-underline-offset: 3px; width: fit-content; }
+  details.why p { margin-top: 4px; }
+
+  .pcards { display: grid; gap: 12px; }
+  .pcard { border: 2px solid #000; border-radius: 5px; background: #fff; padding: 14px 16px; }
+  .pcard.is-open { border-left: 10px solid var(--main); }
+  .pcard h3 { font-size: 18px; }
+  .pcard h4 { font-size: 14px; margin-top: 12px; }
+  .pcard ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+  .pcard ul li { display: grid; grid-template-columns: 4.5em 1fr; gap: 8px; }
+  .pcard ul li .s { color: var(--muted); }
+  .pcard .rk5 { margin-top: 4px; font-size: 14px; }
+  .narrow-only { display: none; }
+
+  /* Candidate / planning rows */
+  .srow { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 16px; padding: 14px 16px; }
+  .srow h3 { font-size: 18px; }
+  .srow .main { min-width: 0; flex: 1 1 360px; }
+  .srow .side { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+  .srow p + p { margin-top: 2px; }
+  table.sched { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+  .sched th, .sched td { padding: 8px 10px; text-align: left; vertical-align: top; border: 1.5px solid var(--rule); }
+  .sched thead th { border-bottom: 2px solid #000; white-space: nowrap; }
+  .sched tbody th { white-space: nowrap; }
+  .sched tr.dayrow th { background: var(--paper); border-top: 2px solid #000; font-size: 15px; }
+  .sched td.c { min-width: 9.5em; }
+  .sched td.c strong { display: block; }
+  .sched td.c.bad { box-shadow: inset 0 0 0 3px var(--danger); }
+  .sched td.empty { color: var(--muted); }
+
+  /* Leader lists */
+  .sheet { background: #fff; border: 2px solid #000; border-radius: 5px; padding: 28px 32px; max-width: 900px; }
+  .sheet-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 24px; padding-bottom: 12px; border-bottom: 3px solid #000; }
+  .sheet-head h2 { font-size: 28px; }
+  .sheet .stamp { font-size: 14px; text-align: right; }
+  .sheet .proposal-mark { margin-top: 12px; padding: 8px 12px; border: 2px dashed #000; font-weight: 700; text-align: center; }
+  .sheet .conf { margin-top: 12px; font-size: 13px; }
+  .sheet-slot { margin-top: 24px; }
+  .sheet-slot h3 { font-size: 18px; }
+  .sheet-slot .sub { font-size: 14px; margin-top: 2px; }
+  .sheet table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+  .sheet th, .sheet td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid #999; }
+  .sheet thead th { border-bottom: 2px solid #000; font-size: 13px; }
+  .sheet td.health strong { display: inline-block; }
+  .sheet td.chk { width: 5.5em; }
+  .sheet td.chk span { display: inline-block; width: 16px; height: 16px; border: 1.5px solid #000; vertical-align: middle; }
+  .sheet .overlap { margin-top: 6px; font-weight: 700; }
+  .sheet-foot { margin-top: 20px; padding-top: 8px; border-top: 1px solid #999; font-size: 12px; color: #333; }
+  .leaders .srow { align-items: center; }
+  #printArea { display: none; }
+
+  dialog { border: 2px solid #000; border-radius: 5px; padding: 0; background: #fff; color: #000; width: min(36rem, calc(100vw - 2rem)); box-shadow: 6px 6px 0 0 #000; }
+  dialog::backdrop { background: rgb(0 0 0 / 0.4); }
+  .dlg-head { padding: 20px 20px 12px; border-bottom: 2px solid #000; }
+  .dlg-head h2 { font-size: 22px; }
+  .dlg-body { padding: 16px 20px; background: var(--paper); display: grid; gap: 8px; }
+  .dlg-body ul { margin: 0; padding-left: 20px; }
+  .dlg-foot { padding: 14px 20px; border-top: 2px solid #000; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+  .sheet-demo h1 { margin-bottom: 8px; }
+  .sheet-demo > section { margin-top: 40px; }
+  .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; align-items: start; }
+  .cap-lbl { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+
+  @container app (max-width: 820px) {
+    .days { grid-template-columns: 1fr; }
+    .phase ol { grid-template-columns: 1fr; }
+    .phase li { border-right: 0; border-bottom: 2px solid #000; padding: 8px 14px; }
+    .phase li:last-child { border-bottom: 0; }
+  }
+  @container app (max-width: 720px) {
+    .stats { grid-template-columns: 1fr; }
+    .stat { display: flex; align-items: baseline; gap: 10px; text-align: left; padding: 10px 14px; border-right: 0; border-bottom: 2px solid #000; }
+    .stat:last-child { border-bottom: 0; }
+    .stat .num { font-size: 26px; }
+    .stat .lbl { margin-top: 0; }
+    .wide-only { display: none; }
+    .narrow-only { display: block; }
+    .tabs.outer { gap: 6px; }
+    .seg { padding: 6px 12px; }
+    .offer-title { flex-direction: column; gap: 6px; }
+    .offer-title .chips { justify-content: flex-start; }
+    .page-head { flex-direction: column; }
+    .sheet { padding: 18px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .slotcell { transition: none; }
+    .btn:hover, .btn:active, .slotcell:hover { translate: none; box-shadow: var(--shadow); }
+    .spinner { animation: none; border-top-color: var(--muted); }
+  }
+
+  /* ===== Print (Ctrl+P). The same rules drive the on-screen "Druckansicht" toggle via html.printmode ===== */
+  @page { size: A4; margin: 12mm; }
+  @page wide { size: A4 landscape; margin: 10mm; }
+  .print-head { display: none; }
+  @media print { .proto, .state-label, footer, dialog { display: none !important; } }
+  html.printmode { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html.printmode body { background: #fff; font-size: 10pt; line-height: 1.45; }
+  html.printmode .wrap { padding: 0; max-width: none; }
+  html.printmode .frame, html.printmode .frame.narrow { outline: 0; max-width: none; }
+  html.printmode :is(.shell, .timeline, .views, .subviews, header.top, .btn, .row-actions, .picker, .alert .actions, .case .links, .legend, details > summary, .skip-print) { display: none !important; }
+  html.printmode .print-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 14px; font-size: 9pt; }
+  html.printmode * { box-shadow: none !important; }
+  html.printmode a { color: #000; text-decoration: none; }
+  html.printmode h2 { font-size: 15pt; break-after: avoid; }
+  html.printmode h3 { font-size: 11.5pt; break-after: avoid; }
+  html.printmode section + section { margin-top: 16px; }
+  html.printmode .view-head { margin-bottom: 8px; }
+  html.printmode .intro { max-width: none; margin-bottom: 8px; }
+  html.printmode :is(.list, .offer, .stats, .table-wrap, .stand, .filters, .example, .slotcell) { border-width: 1.5px; }
+  html.printmode .alert { border-width: 1.5px; border-left-width: 6px; padding: 8px 10px; margin-bottom: 12px; }
+  html.printmode .stand { padding: 8px 10px; margin-bottom: 12px; }
+  html.printmode :is(.srow, .offer, .case, .pcard, .slotcell, .fstage, .filters > li, .dist li, tr, .overlaps li, .sheet-slot table tr) { break-inside: avoid; }
+  html.printmode .stats { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); margin-bottom: 12px; }
+  html.printmode .stat { display: block; text-align: center; padding: 6px 4px; border-right: 1.5px solid #000; border-bottom: 0; }
+  html.printmode .stat:last-child { border-right: 0; }
+  html.printmode .stat .num { font-size: 17pt; }
+  html.printmode .stat .lbl { font-size: 8.5pt; margin-top: 2px; }
+  html.printmode .wide-only { display: block !important; }
+  html.printmode .narrow-only { display: none !important; }
+  html.printmode .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  html.printmode .print-wide .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  html.printmode .days { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  html.printmode .slotcell { padding: 6px 8px; gap: 2px; }
+  html.printmode .offer-title { flex-direction: row; }
+  html.printmode .offer-top { padding: 10px; }
+  html.printmode .people { padding: 8px 10px; font-size: 9pt; }
+  html.printmode .srow { padding: 8px 10px; }
+  html.printmode .table-wrap { overflow: visible; }
+  html.printmode thead { display: table-header-group; }
+  html.printmode .pt { font-size: 7.5pt; width: 100%; }
+  html.printmode .pt th, html.printmode .pt td { padding: 3px 4px; }
+  html.printmode .pt :is(th[scope="row"], thead th:first-child) { position: static; min-width: 0; font-size: 8pt; }
+  html.printmode .pt td.h, html.printmode .pt td.rank { min-width: 0; }
+  html.printmode .pt caption { padding: 6px 8px; font-size: 9pt; }
+  html.printmode .pt :is(th, td, td *, th *) { font-size: 7.5pt !important; line-height: 1.3; }
+  html.printmode .pt td.rank { width: 20em; }
+  html.printmode .chip { min-height: 0; padding: 0 5px; font-size: 8pt; border-width: 1.5px; }
+  html.printmode .rk5 li { display: inline; }
+  html.printmode .rk5 li + li::before { content: ' · '; font-weight: 400; color: #000; }
+  html.printmode .pt details.why { margin-top: 2px; }
+  html.printmode .pt details.why p { display: inline; margin: 0; font-size: 7pt; color: var(--muted); }
+  html.printmode .pt details.why p + p::before { content: ' · '; }
+  html.printmode .pt th[scope="row"] .badge { min-height: 0; font-size: 7pt; padding: 0 4px; }
+  html.printmode .sched tr.dayrow { break-after: avoid; }
+  html.printmode .sched { font-size: 8pt; }
+  html.printmode .sched th, html.printmode .sched td { padding: 4px 5px; }
+  html.printmode .sched td.c { min-width: 0; }
+  html.printmode .fstage { grid-template-columns: 30px 190px minmax(0, 1fr); gap: 6px 14px; padding: 8px 0; }
+  html.printmode .fviz, html.printmode .ftext { grid-column: auto; grid-row: auto; }
+  html.printmode .fnum { width: 26px; height: 26px; }
+  html.printmode .fbar, html.printmode .fstack { min-height: 26px; font-size: 8.5pt; }
+  html.printmode .filters > li { grid-template-columns: 9em 1fr; padding: 4px 8px; font-size: 9pt; }
+  html.printmode .filters details { grid-column: 2; }
+  html.printmode details.why p { font-size: 8.5pt; }
+  html.printmode.landscape #app { page: wide; }
+  /* Leitungslisten: only the selected workshop list, black and white */
+  .print-only { display: none; }
+  html.printmode .print-only { display: revert; }
+  html.printmode .lead-panel > :not(#list-panel), html.printmode #list-panel > :not(.roster-doc) { display: none !important; }
+  html.printmode.leadprint .print-head { display: none; }
+  html.printmode .roster-doc { color: #000; }
+  html.printmode .roster-doc .doc-top { display: flex; justify-content: space-between; font-size: 9pt; }
+  html.printmode .roster-doc h3 { font-size: 20pt; margin-top: 2px; padding-bottom: 4px; }
+  html.printmode .roster-doc .roster-meta { font-size: 10.5pt; }
+  html.printmode .roster-doc .roster-meta:last-of-type { padding-bottom: 8px; border-bottom: 3px solid #000; }
+  html.printmode .roster-doc .doc-mark { margin-top: 10px; padding: 6px 10px; border: 2px dashed #000; font-weight: 700; text-align: center; font-size: 9.5pt; }
+  html.printmode .roster-doc .doc-conf { margin-top: 8px; font-size: 8.5pt; }
+  html.printmode .roster-doc .table-wrap { border: 0; border-radius: 0; margin-top: 10px; }
+  html.printmode .roster { font-size: 10pt; }
+  html.printmode .roster th, html.printmode .roster td { padding: 7px 6px; border-bottom: 1px solid #777; background: none !important; }
+  html.printmode .roster thead th { border-bottom: 2px solid #000; font-size: 9pt; }
+  html.printmode .roster td.chk { width: 5.5em; }
+  html.printmode .roster td.chk span { display: inline-block; width: 16px; height: 16px; border: 1.5px solid #000; }
+  html.printmode .roster-doc .doc-foot { margin-top: 16px; padding-top: 6px; border-top: 1px solid #777; font-size: 8pt; }
+  html.printmode .roster-doc .muted { color: #333; }
+  /* On-screen simulation of the printed page */
+  @media screen {
+    html.printmode body { background: #8a8680; }
+    html.printmode .wrap { padding: 24px; }
+    html.printmode .state-label { color: #fff; }
+    html.printmode .state-label strong { color: #fff; }
+    html.printmode .proto { background: var(--background); }
+    html.printmode .frame { width: 186mm; margin: 0 auto; background: #fff; padding: 12mm; box-sizing: content-box; box-shadow: 0 2px 14px rgb(0 0 0 / 0.45) !important; }
+    html.printmode.landscape .frame { width: 277mm; padding: 10mm; }
+    }
+  .list-pick { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 20px; }
+  .list-pick .field { flex: 1 1 320px; }
+  .field { display: grid; gap: 4px; max-width: 520px; }
+  .field label { font-weight: 700; font-size: 14px; }
+  .field select { min-height: 44px; padding: 6px 10px; border: 2px solid #000; border-radius: 5px; background: #fff; font-size: 16px; width: 100%; }
+  .roster-doc h3 { font-size: 24px; }
+  .roster-meta { margin-top: 4px; }
+  .roster-doc .table-wrap, .rcards { margin-top: 12px; }
+  table.roster { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .roster th, .roster td { text-align: left; vertical-align: top; padding: 10px 14px; border-top: 1.5px solid var(--rule); }
+  .roster thead th { border-top: 0; border-bottom: 2px solid #000; font-size: 14px; }
+  .roster tbody tr:first-child > * { border-top: 0; }
+  .roster td.health strong { font-weight: 700; }
+  .rcards { list-style: none; padding: 0; display: grid; gap: 10px; }
+  .rcard { border: 2px solid #000; border-radius: 5px; background: #fff; padding: 12px 14px; display: grid; gap: 4px; }
+  .rcard a { color: inherit; }
+
+  /* v3 additions */
+  .badge svg { width: 14px; height: 14px; margin-right: 4px; flex-shrink: 0; }
+  .desc { margin-top: 6px; font-size: 15px; max-width: 70ch; }
+  .pt td.free { color: var(--muted); }
+  .pt td.cnt { text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .dist { display: grid; gap: 6px; max-width: 560px; }
+  .dist li { display: grid; grid-template-columns: 8.5em 1fr 6.5em; align-items: center; gap: 10px; font-size: 14px; }
+  .dist .bar { height: 14px; border: 1.5px solid #000; border-radius: 2px; background: #fff; overflow: hidden; }
+  .dist .bar span { display: block; height: 100%; background: #000; }
+  .dist ul { list-style: none; margin: 0; padding: 0; }
+  .slotcell .ws { font-size: 14px; }
+  .frame-note { margin-bottom: 20px; }
+  .sched td.frame { color: var(--muted); }
+  .overlaps li { padding: 10px 16px; }
+  .overlaps ul { list-style: none; margin: 0; padding: 0; }
+  .overlaps li + li { border-top: 2px solid #000; }
+
+  /* v5: step timeline (progress, not navigation) */
+  .timeline { margin: 4px 0 32px; }
+  .timeline ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .timeline li { position: relative; padding-right: 16px; }
+  .timeline li::before { content: ''; position: absolute; top: 15px; left: 34px; right: 4px; border-top: 2px dashed var(--muted); }
+  .timeline li.done::before { border-top: 3px solid #000; top: 14px; }
+  .timeline li:last-child::before { display: none; }
+  .timeline .dot { position: relative; z-index: 1; display: inline-grid; place-items: center; width: 32px; height: 32px; border: 2px solid #000; border-radius: 50%; background: var(--background); font-weight: 700; font-size: 15px; }
+  .timeline li.done .dot { background: #fff; }
+  .timeline li[aria-current="step"] .dot { background: #000; color: #fff; width: 36px; height: 36px; margin-top: -2px; }
+  .timeline .t { display: block; margin-top: 6px; font-weight: 700; font-size: 16px; line-height: 1.3; }
+  .timeline li:not(.done):not([aria-current]) .t { color: var(--muted); }
+  .timeline .d { display: block; font-size: 13px; color: var(--muted); }
+  .timeline li[aria-current="step"] .d { color: #000; }
+  .tl-toggle { display: none; }
+  .timeline .next { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 16px; padding-top: 12px; border-top: 1.5px solid var(--rule); }
+  .timeline .next p { flex: 1 1 320px; font-size: 14px; }
+  @container app (max-width: 720px) {
+    .tl-toggle { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; width: 100%; padding: 10px 12px; border: 2px solid #000; border-radius: 5px; background: #fff; text-align: left; cursor: pointer; }
+    .timeline .tl-toggle .dot { position: static; background: #000; color: #fff; flex-shrink: 0; }
+    .tl-toggle .t { margin: 0; flex: 1 1 auto; }
+    .tl-toggle .more { font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+    .timeline ol.collapsed > li:not([aria-current]) { display: none; }
+    .tl-more { display: inline-flex; }
+    .timeline ol { grid-template-columns: 1fr; gap: 12px; margin-top: 14px; }
+    .timeline li { padding: 0 0 0 48px; min-height: 36px; }
+    .timeline .dot { position: absolute; left: 0; top: 0; }
+    .timeline li::before { top: 34px; bottom: -14px; left: 15px; right: auto; border-top: 0; border-left: 2px dashed var(--muted); }
+    .timeline li.done::before { border-top: 0; border-left: 3px solid #000; top: 32px; }
+    .timeline .t { margin-top: 4px; }
+  }
+  /* v6: allocation funnel */
+  .funnel { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .fstage { display: grid; grid-template-columns: 44px minmax(200px, 320px) minmax(0, 1fr); gap: 8px 24px; align-items: start; padding: 18px 0; border-top: 1.5px solid var(--rule); }
+  .fstage:first-child { border-top: 0; }
+  .fnum { display: inline-grid; place-items: center; width: 36px; height: 36px; border: 2px solid #000; border-radius: 50%; background: #fff; font-weight: 700; }
+  .fviz { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 2px; }
+  .fbar { min-height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid #000; border-radius: 3px; background: #000; color: #fff; font-weight: 700; font-size: 14px; text-align: center; padding: 2px 6px; box-sizing: border-box; }
+  .fbar.light { background: #fff; color: #000; }
+  .fbar.hatch { background: repeating-linear-gradient(135deg, #fff 0 5px, var(--rule) 5px 10px); color: #000; border-style: dashed; }
+  .fbar.hatch span { background: #fff; padding: 0 6px; }
+  .rounds li { grid-template-columns: 9em 1fr; }
+  .fbar.none { background: transparent; color: var(--muted); border-style: dashed; border-color: var(--muted); font-weight: 500; }
+  .fstack { display: flex; min-height: 40px; border: 2px solid #000; border-radius: 3px; overflow: hidden; }
+  .fstack span { display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border-right: 1.5px solid #000; min-width: 22px; }
+  .fstack span:last-child { border-right: 0; }
+  .fviz .cap { font-size: 12px; color: var(--muted); margin: 0; text-align: center; }
+  .ftext h3 { font-size: 18px; margin-bottom: 4px; }
+  .ftext > p + p { margin-top: 4px; }
+  .ftext .rule { font-size: 14px; color: var(--muted); }
+  .filters { list-style: none; margin: 8px 0 0; padding: 0; border: 2px solid #000; border-radius: 5px; background: #fff; }
+  .filters > li { display: grid; grid-template-columns: 11em 1fr; gap: 4px 12px; padding: 8px 12px; font-size: 15px; }
+  .filters > li + li { border-top: 1.5px solid var(--rule); }
+  .filters .n { font-variant-numeric: tabular-nums; }
+  .filters details { grid-column: 2; }
+  .example { display: inline-block; margin-top: 8px; padding: 8px 12px; border: 2px solid #000; border-radius: 5px; background: #fff; font-size: 15px; }
+  .example ol { margin: 4px 0 0; padding-left: 22px; }
+  .rounds { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 15px; }
+  .rounds li { display: grid; grid-template-columns: 7em 1fr; gap: 12px; }
+  @container app (max-width: 720px) {
+    .fstage { grid-template-columns: 44px minmax(0, 1fr); }
+    .fviz { grid-column: 2; grid-row: 2; align-items: stretch; }
+    .ftext { grid-column: 2; grid-row: 1; }
+    .filters > li { grid-template-columns: 1fr; }
+    .filters details { grid-column: 1; }
+  }
+  /* v7: data trace */
+  .pname { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: rgb(0 0 0 / 0.35); text-underline-offset: 3px; }
+  .pname:hover { text-decoration-color: #000; }
+  .who { margin-top: 8px; padding: 8px 12px; border-left: 4px solid #000; background: #fff; font-size: 14px; }
+  .who p + p { margin-top: 4px; }
+  .who-h { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .round { margin-top: 10px; }
+  .round .fstack { margin-bottom: 4px; }
+  .round p { font-size: 15px; }
+  .trace { border: 2px solid #000; border-radius: 5px; background: #fff; padding: 14px 16px; }
+  .trace-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .trace .steps { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; font-size: 15px; }
+  .trace .steps li, .trace .slots li { display: grid; grid-template-columns: 7em 1fr; gap: 10px; }
+  .trace .k { color: var(--muted); font-size: 13px; padding-top: 2px; }
+  .trace h3 { font-size: 16px; margin-top: 14px; }
+  .trace .slots { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; font-size: 15px; }
+  .trace .slots .s { color: var(--muted); }
+  html.printmode .who { padding: 4px 8px; font-size: 8.5pt; border-left-width: 3px; }
+  html.printmode .pname { text-decoration: none; }
+  html.printmode #trace .field { display: none; }
+  html.printmode .trace { border-width: 1.5px; padding: 8px 10px; break-inside: avoid; }
+  /* v8: wish funnel with person tracing */
+  .ctx-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15px; }
+  .tracebar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 20px; margin: 16px 0 8px; padding: 12px 0; background: var(--background); border-bottom: 2px solid #000; }
+  .tracebar .field { flex: 0 1 340px; }
+  .modes { border: 0; margin: 0; padding: 0; display: flex; gap: 0; }
+  .modes label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px; border: 2px solid #000; background: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
+  .modes label:first-of-type { border-radius: 5px 0 0 5px; }
+  .modes label:last-of-type { border-radius: 0 5px 5px 0; border-left: 0; }
+  .modes label:has(input:checked) { background: #000; color: #fff; }
+  .modes input { accent-color: #000; width: 16px; height: 16px; }
+  .modes:disabled label, .modes:disabled label:has(input:checked) { border-color: var(--muted); color: var(--muted); background: var(--off); cursor: not-allowed; }
+  .modes label:has(input:focus-visible) { outline: 2px solid #000; outline-offset: 3px; }
+  .wfunnel { list-style: none; margin: 0; padding: 0; }
+  .frow { display: grid; grid-template-columns: minmax(160px, 260px) minmax(0, 1fr); gap: 6px 24px; padding: 16px 0; border-top: 1.5px solid var(--rule); }
+  .frow:first-child { border-top: 0; }
+  .fcol { display: flex; justify-content: center; padding-top: 2px; }
+  .fcol .fbar { height: 28px; min-height: 0; padding: 0; border: 0; border-radius: 2px; background: #000; }
+  .fsplit { display: flex; width: 100%; height: 28px; border: 2px solid #000; border-radius: 2px; overflow: hidden; }
+  .fsplit span { background: var(--r1); }
+  .fsplit span.lost { background: repeating-linear-gradient(135deg, #fff 0 5px, var(--rule) 5px 10px); border-left: 2px solid #000; }
+  .frow h3 { font-size: 18px; }
+  .stats-line { margin-top: 2px; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .frow.quiet { padding: 6px 0; }
+  .frow.quiet h3 { font-size: 15px; font-weight: 500; color: var(--muted); }
+  .frow.quiet .ftext { display: flex; gap: 10px; align-items: baseline; }
+  .pline { margin-top: 8px; padding: 6px 10px; border: 2px solid #000; border-radius: 5px; background: #fff; font-size: 15px; }
+  .plabel { display: inline-block; padding: 0 6px; margin-right: 4px; background: #000; color: #fff; font-weight: 700; border-radius: 3px; font-size: 14px; }
+  .pname.sel { background: #000; color: #fff; padding: 0 4px; border-radius: 3px; text-decoration: none; }
+  details.who > summary { cursor: pointer; list-style: revert; }
+  .after { margin-top: 28px; padding-top: 16px; border-top: 2px solid #000; }
+  .after h3 { font-size: 18px; }
+  .plan { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; font-size: 15px; }
+  .plan li { display: grid; grid-template-columns: 8.5em 1fr; gap: 10px; }
+  .plan .s { color: var(--muted); }
+  .pline-block { margin-top: 10px; padding: 8px 12px; border: 2px solid #000; border-radius: 5px; background: #fff; }
+  .way { font-size: 12px; font-weight: 500; display: block; margin-top: 4px; }
+  @container app (max-width: 720px) {
+    .frow { grid-template-columns: 1fr; }
+    .fcol { justify-content: flex-start; }
+    .fcol .fbar, .fsplit { max-width: 100%; }
+    .tracebar { flex-direction: column; align-items: stretch; }
+    .modes { flex-direction: column; }
+    .modes label, .modes label:not(:first-of-type):not(:last-of-type), .modes label:last-of-type { flex: 1; justify-content: flex-start; border-left: 2px solid #000; border-radius: 0; }
+    .modes label:first-of-type { border-radius: 5px 5px 0 0; }
+    .modes label:last-of-type { border-radius: 0 0 5px 5px; }
+    .modes label + label { border-top: 0; }
+    .tracebar .field { flex: none; max-width: none; }
+  }
+  html.printmode .tracebar { position: static; border: 0; padding: 0; margin: 6px 0; }
+  html.printmode .tracebar .field, html.printmode .tracebar .modes { display: none; }
+  html.printmode .frow { grid-template-columns: 170px minmax(0, 1fr); padding: 8px 0; break-inside: avoid; }
+  html.printmode .frow h3 { font-size: 11pt; }
+  html.printmode .stats-line, html.printmode .pline { font-size: 9pt; }
+  html.printmode .pline { padding: 3px 6px; border-width: 1.5px; }
+  html.printmode .way { display: none; }
+  /* v9: tabular funnel */
+  :root { --r5: hsl(33 60% 96%); }
+  .flegend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; margin: 16px 0 10px; }
+  .flegend span { display: inline-flex; align-items: center; gap: 6px; }
+  .flegend i.bs { display: inline-block; width: 20px; height: 14px; border: 1.5px solid #000; border-radius: 2px; }
+  .track { display: flex; width: 100%; height: 30px; border: 2px solid #000; border-radius: 3px; overflow: hidden; background: #fff; }
+  .track.slim { height: 18px; }
+  .track.empty { align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+  .bs { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #000; border-right: 1.5px solid #000; white-space: nowrap; overflow: hidden; }
+  .bs:last-child { border-right: 0; }
+  .bs.r1 { background: var(--r1); } .bs.r2 { background: var(--r2); } .bs.r3 { background: var(--r3); } .bs.r4 { background: var(--r4); } .bs.r5 { background: var(--r5); }
+  .bs.full { background: repeating-linear-gradient(135deg, #fff 0 4px, #b9b3ab 4px 6px); }
+  .bs.overlap { background: hsl(30 10% 74%); }
+  .bs.unsched { background: radial-gradient(#6b645c 1px, transparent 1.4px) 0 0 / 5px 5px, #fff; }
+  .bs.open { background: #fff; color: var(--muted); font-weight: 500; }
+  table.ftable { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .ftable th, .ftable td { padding: 10px 12px; text-align: left; vertical-align: middle; border-top: 1.5px solid var(--rule); }
+  .ftable thead th { border-top: 0; border-bottom: 2px solid #000; font-size: 13px; vertical-align: bottom; line-height: 1.25; }
+  .ftable tbody th[scope="row"], .ftable tfoot th[scope="row"] { white-space: nowrap; }
+  .ftable .sub { display: block; font-weight: 500; font-size: 13px; color: var(--muted); }
+  .ftable .barcell, .ftable .barh { width: 36%; min-width: 220px; }
+  .ftable .num { text-align: right; font-variant-numeric: tabular-nums; width: 5.5em; }
+  .ftable td.zero { color: var(--muted); }
+  .ftable td.strong { font-weight: 700; }
+  .ftable tr.quiet th, .ftable tr.quiet td { color: var(--muted); }
+  .ftable tr.who-row td { border-top: 0; padding-top: 0; padding-bottom: 14px; font-size: 14px; }
+  .ftable tfoot th, .ftable tfoot td { border-top: 2px solid #000; font-weight: 700; }
+  .ftable .pcol, .ftable .pcell { width: 15em; background: var(--paper); vertical-align: top; }
+  .ftable .pcell { font-size: 14px; }
+  .ftable .pcell p + p { margin-top: 6px; }
+  .ftable.only .pcell { background: #fff; }
+  .wg + .wg { margin-top: 8px; }
+  .wg-h { font-weight: 700; font-size: 13px; }
+  details.wg > summary { cursor: pointer; }
+  .wg ul { list-style: none; margin: 2px 0 0; padding: 0; }
+  .wg li + li { margin-top: 2px; }
+  table.kv { border-collapse: collapse; margin: 0 0 8px; font-size: 15px; }
+  .kv th { text-align: left; padding: 6px 20px 6px 0; vertical-align: top; white-space: nowrap; }
+  .kv td { padding: 6px 0; }
+  .kv tr + tr > * { border-top: 1.5px solid var(--rule); }
+  table.plain { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .plain th, .plain td { padding: 8px 12px; text-align: left; vertical-align: top; border-top: 1.5px solid var(--rule); }
+  .plain thead th { border-top: 0; border-bottom: 2px solid #000; font-size: 13px; }
+  .plain tbody tr:first-child > * { border-top: 0; }
+  .plain .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .plain .barcell { width: 50%; vertical-align: middle; }
+  .after-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 28px; align-items: start; }
+  .after-grid h3 { font-size: 18px; margin-bottom: 8px; }
+  @container app (max-width: 820px) {
+    .after-grid { grid-template-columns: 1fr; }
+    table.ftable, .ftable tbody, .ftable tfoot, .ftable tr, .ftable th, .ftable td { display: block; }
+    .ftable thead { display: none; }
+    .ftable tr.main, .ftable tr.total { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px 8px; padding: 12px; }
+    .ftable tr.main + tr.main, .ftable tr.who-row + tr.main { border-top: 2px solid #000; }
+    .ftable tr.main > th, .ftable tr.total > th, .ftable .barcell, .ftable .pcell { grid-column: 1 / -1; }
+    .ftable th, .ftable td { border: 0 !important; padding: 0; width: auto !important; min-width: 0 !important; }
+    .ftable td.num { text-align: left; }
+    .ftable td.num::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
+    .ftable .pcell { padding: 8px 10px; margin-top: 4px; border: 1.5px solid #000 !important; border-radius: 5px; }
+    .ftable .pcell::before { content: attr(data-label); display: block; font-weight: 700; font-size: 12px; margin-bottom: 2px; }
+    .ftable tr.who-row { padding: 0 12px 12px; }
+    .ftable tr.who-row td.spacer { display: none; }
+  }
+  html.printmode .ftable, html.printmode .plain, html.printmode .kv { font-size: 8.5pt; }
+  html.printmode .ftable th, html.printmode .ftable td { padding: 5px 6px; }
+  html.printmode .track { height: 20px; border-width: 1.5px; }
+  html.printmode .bs { font-size: 7.5pt; }
+  html.printmode .ftable .barcell { min-width: 0; }
+  html.printmode .after-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+  html.printmode .ftable tr.who-row td { font-size: 8pt; padding-bottom: 6px; }
+  html.printmode .flegend { font-size: 8pt; margin: 6px 0; }
+  .after-grid > section { margin-top: 0; }
+  .bs.past { opacity: 0.5; font-weight: 500; }
+  .bs.cur { font-weight: 800; font-size: 13px; }
+  .wg { margin-top: 14px; }
+  .wg:first-child { margin-top: 2px; }
+  .wg-h { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .ftable td.pcell.pad { background: var(--paper); }
+  .modes label:not(:first-of-type):not(:last-of-type) { border-left: 0; border-radius: 0; }
+  .bs.full, .bs.unsched { text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 4px #fff; }
+  /* v4 additions */
+  .top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px 32px; margin-bottom: 24px; }
+  .status { flex: 0 1 460px; border: 2px solid #000; border-radius: 5px; background: var(--paper); padding: 14px 16px; }
+  .status .step { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .status h2 { font-size: 20px; margin: 2px 0 4px; }
+  .status .actions { margin-top: 10px; }
+  .status details { margin-top: 10px; font-size: 14px; }
+  .status summary { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; width: fit-content; }
+  .status ol { margin: 6px 0 0; padding-left: 20px; }
+  .status li.cur { font-weight: 700; }
+  .views { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 20px; border-bottom: 2px solid #000; margin-bottom: 28px; }
+  .subviews { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 4px 0 24px; border-bottom: 2px solid var(--rule); }
+  .subviews [role="tab"] { border: 0; background: none; padding: 8px 2px; font-size: 15px; font-weight: 700; cursor: pointer; border-bottom: 4px solid transparent; margin-bottom: -2px; color: var(--muted); }
+  .subviews [role="tab"][aria-selected="true"] { color: #000; border-bottom-color: #000; }
+  .stand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; border: 2px dashed #000; border-radius: 5px; background: var(--paper); padding: 12px 16px; margin-bottom: 24px; }
+  .stand p { flex: 1 1 360px; }
+  .stand ul { margin: 4px 0 0; padding-left: 20px; flex-basis: 100%; font-size: 14px; }
+  .view-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px 20px; margin-bottom: 16px; }
+  .view-head p { margin-top: 2px; }
+  .row-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+  .form { display: grid; gap: 14px; }
+  .form .f { display: grid; gap: 4px; }
+  .form label, .form legend { font-weight: 700; font-size: 14px; }
+  .form input[type=text], .form input[type=number], .form input[type=time], .form textarea, .form select {
+    min-height: 44px; padding: 6px 10px; border: 2px solid #000; border-radius: 5px; background: #fff; font: inherit; font-size: 16px; width: 100%;
+  }
+  .form textarea { min-height: 80px; }
+  .form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .form .checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .form .checks label { font-weight: 500; display: inline-flex; gap: 6px; align-items: center; }
+  .form .checks input { width: 18px; height: 18px; accent-color: #000; }
+  .form .hint { font-size: 13px; color: var(--muted); }
+  .form .err { font-size: 14px; font-weight: 700; padding-left: 8px; border-left: 4px solid var(--danger); }
+  .dlg-foot .btn.danger { background: var(--danger); margin-right: auto; }
+  .dlg-body { max-height: 70vh; overflow: auto; }
+  .check-strip { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 20px; font-size: 15px; }
+  .daylist + .daylist { margin-top: 16px; }
+  .table-wrap + section, .grid + section { margin-top: 44px; }
+  .daylist h3 { font-size: 17px; margin-bottom: 8px; }
+
+  /* v11 */
+  .tl-more { display: none; margin-top: 8px; border: 0; background: none; padding: 4px 0; font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  @container app (max-width: 720px) { .timeline .tl-more { display: inline-flex; } .timeline ol.collapsed li::before { display: none; } }
+  .table-wrap { position: relative; }
+  .plink { font-weight: 700; }
+  .dembar { position: relative; height: 18px; min-width: 120px; }
+  .dembar .dcap { position: absolute; left: 0; top: 0; height: 18px; border: 2px solid #000; border-radius: 2px; background: #fff; }
+  .dembar .dfirst { position: absolute; left: 0; top: 4px; height: 10px; background: var(--r1); border: 1.5px solid #000; border-radius: 2px; }
+  .demand-table tr.over .dembar .dfirst { background: var(--main); }
+  .demand-table td:nth-child(3) { white-space: nowrap; }
+  .demand { font-weight: 700; padding-left: 6px; border-left: 3px solid var(--main); margin-top: 2px; }
+  .org-note { margin: 0 0 12px; padding: 6px 10px; border-left: 4px solid #000; background: #fff; }
+  html.printmode .screen-only { display: none !important; }
+  .badge.ext { border-style: dashed; font-size: 11px; min-height: 18px; padding: 0 5px; vertical-align: middle; }
+  .pt td.lead { background: #fff; box-shadow: inset 0 0 0 2px #000; }
+  .pt td.lead .rk { color: #000; font-weight: 700; }
+  .sw.lead-sw { background: #fff; box-shadow: inset 0 0 0 2px #000; }
+  .bs.lead { background: repeating-linear-gradient(90deg, #fff 0 4px, #8a847c 4px 6px); text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 4px #fff; }
+  .filter-row { margin: 0 0 16px; }
+  .group-switch label { min-height: 38px; padding: 4px 12px; font-size: 14px; }
+  .group-table { margin-bottom: 20px; }
+  .cell-link { display: block; border: 0; background: none; padding: 0; font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: rgb(0 0 0 / 0.3); text-underline-offset: 3px; }
+  .sched.prog td.c > span, .sched.prog td.c .org-only > span { display: block; }
+  .sched.prog td.c { min-width: 11em; }
+  .sched.prog td.dim { background: var(--paper); }
+  .sched.prog .chip { min-height: 20px; font-size: 12px; padding: 0 5px; }
+  .roster.fam td { min-width: 8em; }
+  s { text-decoration-thickness: 1.5px; }
+  html.progprint .org-only { display: none !important; }
+  html.progprint .sched.prog td.dim span { color: #000; }
+  html.printmode .roster.room { font-size: 13pt; }
+  html.printmode .roster.room th, html.printmode .roster.room td { padding: 12px 8px; }
+  html.printmode .roster.fam { font-size: 9pt; }
+  html.printmode .group-switch, html.printmode .filter-row { display: none; }
+  html.printmode .badge.ext { font-size: 7pt; min-height: 0; }
+
+  /* v14: footer stamp, section heads */
+  .app-foot { margin-top: 40px; padding-top: 8px; border-top: 1.5px solid var(--rule); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  html.printmode .app-foot { display: block !important; margin-top: 18px; font-size: 8pt; color: #333; }
+  .sec-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 14px; }
+  .subviews { margin-top: 0; }
+
+  /* v14: form controls, one style everywhere in the product (not the prototype bar) */
+  #app :is(input:not([type=checkbox]):not([type=radio]), select, textarea),
+  #dlg :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    box-sizing: border-box; width: 100%; height: 44px; margin: 0; padding: 0 12px;
+    border: 2px solid #000; border-radius: 5px; background-color: #fff; color: #000;
+    font: inherit; font-size: 16px; line-height: 1.3; box-shadow: none; appearance: none;
+  }
+  #app select:not([multiple]):not([size='9']), #dlg select:not([multiple]):not([size='9']) {
+    padding-right: 38px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;
+  }
+  #app textarea:not([rows='99']):not([cols='99']), #dlg textarea:not([rows='99']):not([cols='99']) { height: auto; min-height: 96px; padding: 10px 12px; resize: vertical; }
+  #app input[type=search]::-webkit-search-cancel-button { cursor: pointer; }
+  #app :is(input, select, textarea):focus-visible, #dlg :is(input, select, textarea):focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+  #app :is(input, select, textarea):disabled, #dlg :is(input, select, textarea):disabled { background-color: var(--off); border-color: var(--muted); color: var(--muted); cursor: not-allowed; }
+  #app [aria-invalid="true"], #dlg [aria-invalid="true"] { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+  #app :is(input[type=checkbox], input[type=radio]), #dlg :is(input[type=checkbox], input[type=radio]) { width: 20px; height: 20px; margin: 0; accent-color: #000; flex-shrink: 0; }
+  .field, .form .f { display: grid; gap: 6px; align-content: start; }
+  .field label, .form .f > label, .form legend { font-weight: 700; font-size: 14px; line-height: 1.3; }
+  .field { max-width: 480px; width: 100%; }
+  .form .hint { font-size: 13px; color: var(--muted); }
+  .form .checks label { min-height: 32px; }
+  .modes label, .group-switch label { min-height: 44px; padding: 0 14px; font-size: 15px; }
+  .tracebar .field, .list-pick .field { flex: 1 1 320px; }
+
+  /* v15: one row for tabs and the group control */
+  .secbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 24px; margin: 4px 0 24px; border-bottom: 2px solid var(--rule); }
+  .secbar .subviews { margin: 0; border-bottom: 0; }
+  .secbar-ctl { padding-bottom: 8px; }
+  .secbar-ctl .group-select { grid-template-columns: auto 180px; align-items: center; gap: 10px; }
+  .secbar-ctl .group-select label { font-size: 14px; }
+  @container app (max-width: 720px) {
+    .secbar { flex-direction: column; align-items: stretch; gap: 0; }
+    .secbar-ctl { padding: 10px 0; }
+    .secbar-ctl .group-switch { width: 100%; flex-direction: row; }
+    .secbar-ctl .group-switch label, .secbar-ctl .group-switch label:last-of-type, .secbar-ctl .group-switch label:not(:first-of-type):not(:last-of-type) { flex: 1; justify-content: center; border-radius: 0; border-left: 0; border-top: 2px solid #000; }
+    .secbar-ctl .group-switch label:first-of-type { border-left: 2px solid #000; border-radius: 5px 0 0 5px; }
+    .secbar-ctl .group-switch label:last-of-type { border-radius: 0 5px 5px 0; }
+    .secbar-ctl .group-select { grid-template-columns: auto 1fr; }
+  }
+  html.printmode .secbar-ctl { display: none; }
+
+  /* v16 */
+  .dist-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: -8px 0 20px; font-size: 15px; }
+  .dist-item { font-variant-numeric: tabular-nums; }
+  .note-line { margin: -8px 0 20px; font-size: 15px; }
+  .person-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 16px; padding: 10px 14px; border: 2px solid #000; border-radius: 5px; background: #fff; }
+  .answers td, .answers th { white-space: nowrap; }
+  .answers tr.noans th, .answers tr.noans td { background: var(--paper); }
+  .rcard .rk5 { margin: 4px 0 0; padding-left: 22px; list-style: decimal; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="proto" role="group" aria-label="Prototyp-Steuerung, nicht Teil des Produkts">
+    <strong>Prototyp</strong>
+    <label>Beispieldaten <select id="protoData"><option value="start">Anfang: 1 Workshop</option><option value="full">Volles Programm</option></select></label>
+    <label>Schritt <select id="protoPhase"></select></label>
+    <label>Sonderzustand <select id="protoMode"><option value="normal">keiner</option><option value="loading">Wird geladen</option><option value="error">Laden fehlgeschlagen</option></select></label>
+    <label>Gruppenwahl <select id="protoGroupUi"><option value="toggle">Umschalter</option><option value="select">Auswahlliste</option></select></label>
+    <label><input type="checkbox" id="protoNarrow"> Schmale Breite (390 px)</label>
+    <label><input type="checkbox" id="protoPrint"> Druckansicht (wie Strg+P)</label>
+    <button type="button" id="protoSave" style="font:inherit;font-size:13px;border:1.5px dashed var(--muted);background:transparent;border-radius:3px;padding:2px 8px;cursor:pointer">Global speichern (neue Version)</button>
+  </div>
+  <p class="state-label" id="stateLabel" aria-live="polite"></p>
+  <div class="frame" id="frame"><div id="app"></div></div>
+  <footer class="muted">Statischer Prototyp v16. 80 Kinder, 60 Erwachsene, Leitungen aus der Veranstaltung und externe Leitungen. Alles wird im Browser aus den aktuellen Eingaben berechnet; die Berechnung ist ein einfacher Platzhalter. Die Regel „Kinder mit weniger als 3 Workshops werden markiert“ ist nur ein Beispiel. Die Revisionsnummer kommt in der Anwendung vom Server. Alle Namen, Alter, Telefonnummern und Gesundheitsangaben sind erfunden.</footer>
+</div>
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+<p id="live" class="sr" aria-live="polite"></p>
+<script>
+/* =========================================================
+   Fixed event facts (from the application)
+   ========================================================= */
+const EVENT = { name: 'Pfingsten 2027', deadline: '28. März 2027', fixedOn: '12. April 2027' };
+const DAYS = { fr: { name: 'Freitag', date: '14. Mai', short: 'Fr' }, sa: { name: 'Samstag', date: '15. Mai', short: 'Sa' }, so: { name: 'Sonntag', date: '16. Mai', short: 'So' } };
+const DAY_ORDER = ['fr', 'sa', 'so'];
+const MIN_KIDS = 3;           // example rule: children with fewer workshops are flagged
+const TOPN = 5;
+const GROUP = { kids: 'Kinder', adults: 'Erwachsene', all: 'Alle' };
+
+/* =========================================================
+   Editable inputs (live)
+   ========================================================= */
+let WS = {}, ROOMS = [], SLOTS = [], EXT = {};
+let seq = 1;
+const uid = p => p + (seq++);
+const DEFAULT_SLOTS = [['fr', '09:00', '11:00'], ['fr', '11:30', '13:30'], ['fr', '15:00', '17:00'], ['sa', '09:00', '11:00'], ['sa', '11:30', '13:30'], ['sa', '15:00', '17:00'], ['sa', '17:30', '19:30'], ['so', '09:30', '11:30']];
+const DEFAULT_ROOMS = [['Atelier', ['Tische', 'Brennofen']], ['Werkraum', ['Werkbänke']], ['Küche', ['Herd']], ['Halle', ['Matten', 'Musikanlage', 'viel Platz']], ['Saal', ['Bühne', 'Tische', 'viel Platz']], ['Seminarraum', ['Tische', 'Beamer']], ['Kaminzimmer', ['ruhig']], ['Wiese', ['draußen']], ['Wald', ['draußen']], ['Außenwand', ['Kletterwand']]];
+// External leaders: available slots given as indexes into the default slots
+const DEFAULT_EXT = [['Pereira', '0151 555 0901', [0, 1, 2, 3, 4, 5]], ['Kaya', '0151 555 0902', [0, 1, 2, 3, 4, 5, 6]], ['Weber', '0151 555 0903', [2, 3, 4, 5, 6]], ['Nguyen', '0151 555 0904', [3, 4, 5, 6]], ['Lindner', '0151 555 0905', [0, 1, 2, 3, 4, 5, 6]], ['Dr. Aydin', '0151 555 0906', [3, 4]]];
+// id, title, target, age, cap, leaders (P: registered person, X: external, T: teen by index), need, weight, description
+const FULL_WS = [
+  ['keramik', 'Keramik', 'kids', [5, 14], 10, ['P:Sam Morgan', 'P:Anna Albers'], 'Brennofen', 5, 'Schalen und Figuren aus Ton, gebrannt bis Sonntag.'],
+  ['wald', 'Waldexpedition', 'kids', [5, 14], 14, ['P:Jens Brandt', 'T:0'], 'draußen', 4, 'Spuren lesen, Tiere beobachten, ein Lager bauen.'],
+  ['zirkus', 'Zirkus', 'kids', [5, 12], 16, ['X:Pereira', 'P:Katrin Conrad'], 'Matten', 4, 'Jonglieren, Balancieren und eine kleine Vorführung.'],
+  ['koch', 'Kochwerkstatt', 'kids', [6, 14], 10, ['P:Stefan Dietz', 'P:Julia Ebert'], 'Herd', 4, 'Ein Mittagessen für die eigene Gruppe kochen.'],
+  ['holz', 'Holzwerkstatt', 'kids', [8, 15], 8, ['X:Kaya'], 'Werkbänke', 3, 'Ein Vogelhaus sägen, bohren und zusammenbauen.'],
+  ['kletter', 'Kletterwand', 'kids', [7, 15], 12, ['X:Weber', 'P:Markus Frank'], 'Kletterwand', 6, 'Klettern mit Sicherung, erste Knoten.'],
+  ['papier', 'Papierschöpfen', 'kids', [5, 12], 10, ['P:Sabine Graf'], 'Werkbänke', 2, 'Aus Altpapier neues Papier machen.'],
+  ['bogen', 'Bogenschießen', 'kids', [10, 15], 8, ['X:Weber'], 'draußen', 6, 'Sicher zielen und treffen, mit Einweisung.'],
+  ['spiele', 'Spielewerkstatt', 'kids', [5, 10], 14, ['P:Tobias Hess', 'P:Jamie Morgan'], 'Tische', 2, 'Brettspiele erfinden und bauen.'],
+  ['schmuck', 'Schmuckwerkstatt', 'kids', [8, 15], 10, ['X:Nguyen'], 'Tische', 3, 'Ketten und Armbänder aus Perlen und Draht.'],
+  ['geo', 'Geocaching', 'kids', [7, 15], 14, ['P:Miriam Imhof', 'P:Daniel Jäger'], 'draußen', 3, 'Mit GPS versteckte Schätze im Wald finden.'],
+  ['theater', 'Theaterwerkstatt', 'kids', [8, 14], 14, ['X:Pereira'], 'Bühne', 3, 'Kurze Szenen erfinden und spielen.'],
+  ['fahrrad', 'Fahrradwerkstatt', 'kids', [10, 15], 8, ['X:Kaya'], 'Werkbänke', 2, 'Schlauch flicken, Bremsen einstellen.'],
+  ['garten', 'Gartenwerkstatt', 'kids', [5, 12], 12, ['P:Nadine Kraus'], 'draußen', 2, 'Ein Beet anlegen und Kräuter pflanzen.'],
+  ['back', 'Backstube', 'kids', [5, 12], 10, ['P:Christian Lorenz', 'T:1'], 'Herd', 3, 'Brötchen für das Abschlussfrühstück backen.'],
+  ['detektiv', 'Detektivspiel', 'kids', [7, 12], 16, ['P:Tanja Nowak', 'P:Lotta Frank'], 'draußen', 3, 'Einen Fall lösen, mit Spuren und Verhören.'],
+  ['filzen', 'Filzen', 'kids', [5, 10], 10, ['P:Petra Dietz'], 'Tische', 2, 'Bunte Kugeln und Tiere aus Wolle.'],
+  ['sport', 'Sport und Spiele', 'kids', [5, 12], 20, ['P:Holger Kraus', 'P:Mats Lorenz'], 'Matten', 3, 'Staffeln, Ballspiele, Bewegungslandschaft.'],
+  ['feuer', 'Lagerfeuerküche', 'kids', [9, 15], 12, ['P:Uwe Otto'], 'draußen', 3, 'Stockbrot und Suppe über dem Feuer.'],
+  ['schmieden', 'Schmieden', 'kids', [12, 15], 6, ['X:Kaya'], 'Esse', 5, 'Einen Haken aus Eisen schmieden.'],
+  ['musik', 'Trommeln', 'all', [5, 99], 16, ['X:Lindner'], 'Musikanlage', 3, 'Rhythmen auf Cajón und Djembe, für Kinder und Erwachsene.'],
+  ['tanz', 'Tanzen', 'all', [5, 99], 20, ['P:Julia Ebert', 'P:Silke Hess'], 'viel Platz', 3, 'Eine Choreografie für den Abschlussabend.'],
+  ['yoga', 'Yoga', 'adults', [18, 99], 12, ['P:Anna Albers'], 'draußen', 4, 'Ruhige Bewegung und Atemübungen.'],
+  ['chor', 'Chor', 'adults', [16, 99], 20, ['X:Lindner'], 'Bühne', 3, 'Mehrstimmig singen, ohne Vorkenntnisse.'],
+  ['aquarell', 'Aquarell', 'adults', [18, 99], 10, ['P:Katrin Conrad'], 'Tische', 3, 'Landschaften mit Wasserfarben.'],
+  ['wandern', 'Wanderung', 'adults', [18, 99], 15, ['P:Jens Brandt'], 'draußen', 4, 'Zwei Stunden auf den Hausberg und zurück.'],
+  ['erstehilfe', 'Erste Hilfe am Kind', 'adults', [18, 99], 14, ['X:Dr. Aydin'], 'Beamer', 5, 'Notfälle bei Kindern erkennen und richtig handeln.'],
+  ['gespraech', 'Gesprächskreis Erziehung', 'adults', [18, 99], 12, ['P:Markus Frank'], 'ruhig', 2, 'Austausch über den Alltag mit Kindern.'],
+  ['impro', 'Improtheater', 'adults', [18, 99], 12, ['P:Tobias Hess'], 'viel Platz', 2, 'Spontan spielen, viel lachen.'],
+  ['handyfoto', 'Handyfotografie', 'adults', [18, 99], 8, ['X:Nguyen'], 'Tische', 2, 'Bessere Fotos mit dem Telefon.'],
+  ['brot', 'Sauerteigbrot', 'adults', [18, 99], 8, ['P:Stefan Dietz'], 'Herd', 3, 'Ein Brot ansetzen, backen und mitnehmen.'],
+  ['still', 'Achtsamkeit', 'adults', [18, 99], 12, ['P:Sabine Graf'], 'ruhig', 2, 'Stille Übungen für zwischendurch.'],
+];
+
+/* =========================================================
+   People and families (registered elsewhere in the app)
+   ========================================================= */
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(7);
+const KID_F = ['Emma','Sofia','Hannah','Marlene','Lina','Ella','Clara','Maja','Marie','Nele','Frieda','Greta','Luise','Mathilda','Rosa','Ida','Mia','Lotta','Paula','Jule'];
+const KID_M = ['Paul','Ben','Finn','Luis','Elias','Tom','Felix','Henri','Jakob','Theo','Leon','Anton','Karl','Oskar','Jonte','Emil','Moritz','Linus','Ole','Mats'];
+const AD_F = ['Anna','Katrin','Julia','Sabine','Miriam','Nadine','Ute','Eva','Petra','Silke','Tanja','Birgit','Claudia','Kerstin','Heike'];
+const AD_M = ['Jens','Stefan','Markus','Tobias','Daniel','Christian','Rolf','Tim','Frank','Uwe','Sven','Jörg','Thomas','Michael','Holger'];
+const SURN = ['Albers','Brandt','Conrad','Dietz','Ebert','Frank','Graf','Hess','Imhof','Jäger','Kraus','Lorenz','Mayer','Nowak','Otto','Pohl','Quast','Reuter','Sauer','Thiel','Ulrich','Vogt','Winter','Yildiz','Zeller','Arnold','Busch','Dahl','Engel','Fuchs','Haas','Kühn','Lang','Möller','Roth','Seidel','Wolf','Ziegler','Bock','Horn'];
+const HEALTH = ['Nussallergie (schwer). Notfallset im Rucksack.', 'Bienenstichallergie. Notfallset bei der Betreuung.', 'Asthma. Spray immer dabei.', 'Laktoseintoleranz.', 'Zöliakie, kein Gluten.', 'Epilepsie, medikamentös eingestellt. Bei Anfall Notfallkontakt anrufen.', 'Diabetes Typ 1. Messgerät im Rucksack.'];
+const PEOPLE = [], FAMILIES = [];
+function addPerson(fam, first, age, female, extra = {}) {
+  const p = { id: 'p' + PEOPLE.length, name: `${first} ${fam.name}`, first, age, kid: age < 18, female, fam: fam.id, ...extra };
+  p.phone = `0151 555 ${String(1000 + PEOPLE.length).slice(-4)}`;
+  PEOPLE.push(p); fam.members.push(p.id); return p;
+}
+function addFamily(name) { const f = { id: 'f' + FAMILIES.length, name, members: [] }; FAMILIES.push(f); return f; }
+// Named families first (leaders and examples)
+const NAMED = [
+  ['Morgan', [['Sam', 41, true]], [['Alex', 9, false], ['Jamie', 12, false]]],
+  ['Bauer', [['Ute', 36, true]], [['Lena', 4, true]]],
+  ['Keller', [['Rolf', 44, false]], [['Jonas', 7, false]]],
+  ['Stein', [['Eva', 39, true]], [['Mira', 11, true]]],
+  ['Fischer', [['Tim', 42, false]], [['Noah', 10, false]]],
+  ['Albers', [['Anna', 38, true], ['Frank', 40, false]], [['Paul', 8, false], ['Ida', 5, true]]],
+  ['Brandt', [['Jens', 45, false]], [['Emma', 13, true]]],
+  ['Conrad', [['Katrin', 37, true], ['Sven', 39, false]], [['Ben', 7, false]]],
+  ['Dietz', [['Stefan', 44, false], ['Petra', 42, true]], [['Sofia', 11, true], ['Linus', 6, false]]],
+  ['Ebert', [['Julia', 35, true]], [['Finn', 5, false], ['Ella', 9, true]]],
+  ['Frank', [['Markus', 48, false], ['Heike', 46, true]], [['Lotta', 14, true]]],
+  ['Graf', [['Sabine', 41, true]], [['Oskar', 10, false]]],
+  ['Hess', [['Tobias', 36, false], ['Silke', 35, true]], [['Mia', 6, true], ['Emil', 8, false]]],
+  ['Imhof', [['Miriam', 43, true]], [['Jakob', 12, false], ['Rosa', 9, true]]],
+  ['Jäger', [['Daniel', 47, false]], [['Karl', 15, false]]],
+  ['Kraus', [['Nadine', 34, true], ['Holger', 37, false]], [['Paula', 7, true]]],
+  ['Lorenz', [['Christian', 50, false], ['Birgit', 49, true]], [['Mats', 15, false], ['Jule', 12, true]]],
+  ['Nowak', [['Tanja', 39, true]], [['Theo', 8, false]]],
+  ['Otto', [['Uwe', 52, false], ['Claudia', 51, true]], []],
+];
+const NAMED_SURN = NAMED.map(n => n[0]);
+NAMED.forEach(([n, ads, kids]) => { const f = addFamily(n); ads.forEach(([fn, a, fe]) => addPerson(f, fn, a, fe)); kids.forEach(([fn, a, fe]) => addPerson(f, fn, a, fe)); });
+let si = 0, kf = 0, km = 0, af = 0, am = 0;
+while (PEOPLE.filter(p => p.kid).length < 80 || PEOPLE.filter(p => !p.kid).length < 60) {
+  const pool = SURN.filter(n => !NAMED_SURN.includes(n));
+  const f = addFamily(pool[si % pool.length] + (si >= pool.length ? '-' + pool[(si * 7) % pool.length] : '')); si++;
+  const adultsLeft = 60 - PEOPLE.filter(p => !p.kid).length, kidsLeft = 80 - PEOPLE.filter(p => p.kid).length;
+  const nA = Math.min(adultsLeft, si % 3 === 0 ? 1 : 2), nK = Math.min(kidsLeft, [2, 1, 3, 2, 1, 2, 2][si % 7]);
+  for (let i = 0; i < nA; i++) { const fe = i === 0 ? si % 2 === 0 : !(si % 2 === 0); addPerson(f, fe ? AD_F[af++ % AD_F.length] : AD_M[am++ % AD_M.length], 30 + Math.floor(R() * 25), fe); }
+  for (let i = 0; i < nK; i++) { const fe = R() < 0.5; addPerson(f, fe ? KID_F[kf++ % KID_F.length] : KID_M[km++ % KID_M.length], 4 + Math.floor(R() * 12), fe); }
+  if (!f.members.length) FAMILIES.pop();
+}
+const PERSON = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+const FAMILY = Object.fromEntries(FAMILIES.map(f => [f.id, f]));
+const byName = n => PEOPLE.find(p => p.name === n);
+// Contacts and health
+PEOPLE.forEach((p, i) => {
+  const fam = FAMILY[p.fam], adults = fam.members.map(id => PERSON[id]).filter(x => !x.kid);
+  const c = p.kid ? adults[0] : adults.find(x => x.id !== p.id);
+  p.contact = c ? [c.name, p.kid ? (c.female ? 'Mutter' : 'Vater') : 'Partner'] : [p.name, 'selbst'];
+  p.cphone = c ? c.phone : p.phone;
+  if (i % 11 === 4 || p.name === 'Alex Morgan' || p.name === 'Mira Stein') p.health = HEALTH[i % HEALTH.length];
+});
+byName('Alex Morgan').health = HEALTH[0]; byName('Mira Stein').health = HEALTH[2];
+const TEENS = PEOPLE.filter(p => p.kid && p.age >= 14);
+
+/* ---------- Load workshops, rooms, slots ---------- */
+function resolveLeader(key) {
+  const [k, v] = key.split(':');
+  if (k === 'P') { const p = byName(v); return p ? { p: p.id } : null; }
+  if (k === 'T') { const p = TEENS[+v]; return p ? { p: p.id } : null; }
+  const x = Object.values(EXT).find(e => e.name === v); return x ? { x: x.id } : null;
+}
+function loadData(kind) {
+  seq = 1;
+  SLOTS = DEFAULT_SLOTS.map(([day, start, end]) => ({ id: uid('s'), day, start, end }));
+  ROOMS = DEFAULT_ROOMS.map(([name, features]) => ({ id: uid('r'), name, features: [...features], blocked: [] }));
+  ROOMS.find(r => r.name === 'Saal').blocked = [SLOTS[4].id];
+  EXT = {};
+  DEFAULT_EXT.forEach(([name, phone, idx]) => { const id = uid('x'); EXT[id] = { id, name, phone, avail: idx.map(i => SLOTS[i].id) }; });
+  WS = {};
+  const list = kind === 'start' ? FULL_WS.slice(0, 1) : FULL_WS;
+  list.forEach(([id, title, target, age, cap, leaders, need, w, desc]) => WS[id] = { id, title, target, age: [...age], cap, leaders: leaders.map(k => resolveLeader(k) || (console.warn('Leitung fehlt:', k), null)).filter(Boolean), need, w, desc, source: 'off', mode: 'assign' });
+  if (kind === 'full') WS.band = { id: 'band', title: 'Bandprobe', target: 'all', age: [12, 99], cap: 8, leaders: [{ p: TEENS[2].id }], need: 'Bühne', desc: 'Die Jugendgruppe probt offen. Wer mitspielen will, meldet sich an.', source: 'self', mode: 'signup', example: true, fixedSlot: SLOTS[6].id };
+}
+loadData('full');
+// Rankings (answers). Nobody ranks a workshop they lead.
+const FULL_RANKABLE = FULL_WS.map(x => x[0]);
+const TGT = Object.fromEntries(FULL_WS.map(x => [x[0], x[2]])), AGE = Object.fromEntries(FULL_WS.map(x => [x[0], x[3]])), WGT = Object.fromEntries(FULL_WS.map(x => [x[0], x[7]]));
+const LEADS0 = Object.fromEntries(FULL_WS.map(x => [x[0], x[5].map(resolveLeader).filter(l => l && l.p).map(l => l.p)]));
+const fitsGroup = (p, target) => target === 'all' || (target === 'kids') === p.kid;
+PEOPLE.forEach((p, i) => {
+  p.resp = p.name === 'Lena Bauer' || i % 29 === 13 ? 'none' : p.name === 'Noah Fischer' || i % 37 === 20 ? 'nopref' : 'ranked';
+  if (p.resp !== 'ranked') { p.ranks = []; return; }
+  const pool = FULL_RANKABLE.filter(k => fitsGroup(p, TGT[k]) && p.age >= AGE[k][0] && p.age <= AGE[k][1] && !LEADS0[k].includes(p.id));
+  const fixed = { 'Alex Morgan': ['keramik', 'zirkus', 'kletter', 'wald', 'musik'], 'Mira Stein': ['bogen', 'kletter', 'keramik', 'koch', 'geo'], 'Jonas Keller': ['keramik', 'zirkus', 'wald', 'spiele', 'back'] }[p.name];
+  p.ranks = fixed || pool.map(k => ({ k, v: R() * WGT[k] })).sort((a, b) => b.v - a.v).slice(0, p.kid ? 5 : 4).map(x => x.k);
+});
+const ANSWER_ORDER = PEOPLE.map(p => p.id).sort((a, b) => ((+a.slice(1) * 17) % 140) - ((+b.slice(1) * 17) % 140));
+const ANSWERED_IN_2 = new Set(ANSWER_ORDER.slice(0, 92));
+
+/* =========================================================
+   State
+   ========================================================= */
+const STEPS = ['Workshops anlegen', 'Wahl offen', 'Zuordnung prüfen', 'Festgelegt'];
+const STAND = { 1: 'Probelauf', 2: 'Vorläufig', 3: 'Vorschlag', 4: 'Festgelegt' };
+const S = { data: 'full', phase: 3, view: 'teil', sub: 'rank', group: 'all', tlOpen: false, print: false, trace: null, tmode: 'all', list: 'ws', sec: { ws: 'list', rs: 'rooms', prog: 'grid', wish: 'ans', teil: 'people' }, groupUi: 'toggle', listWs: null, listP: null, listF: null, listR: null, mode: 'normal', narrow: false, drafts: 0, rev: 345 };
+const VIEWS = [['ws', 'Workshops'], ['rs', 'Räume und Slots'], ['prog', 'Programm'], ['wish', 'Wünsche'], ['teil', 'Teilnahme'], ['lists', 'Listen']];
+let SNAP = null, POSTFIX = [], MD = null, LASTR = null, PREV = null;
+
+/* =========================================================
+   Stand-in calculation: schedule + attendance
+   ========================================================= */
+const eligible = (p, w) => fitsGroup(p, w.target) && p.age >= w.age[0] && p.age <= w.age[1];
+const leaderPeople = w => w.leaders.filter(l => l.p).map(l => l.p);
+const leaderAvail = (l, sid) => l.p ? true : (EXT[l.x] ? EXT[l.x].avail.includes(sid) : false);
+const lkey = l => l.p || l.x;
+const slotIdx = id => SLOTS.findIndex(s => s.id === id);
+function sortSlots() { SLOTS.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) || a.start.localeCompare(b.start)); }
+function responseOf(p, phase) {
+  if (phase === 1 || (phase === 2 && !ANSWERED_IN_2.has(p.id))) return { resp: 'pending', ranks: [] };
+  return { resp: p.resp, ranks: p.ranks.filter(k => WS[k] && WS[k].source === 'off' && WS[k].mode === 'assign') };
+}
+function compute() {
+  const resp = {}; PEOPLE.forEach(p => resp[p.id] = responseOf(p, S.phase));
+  const ws = Object.values(WS);
+  const demand = id => PEOPLE.filter(p => resp[p.id].ranks.includes(id)).length;
+  const place = {}, used = {}, busy = {}, perSlot = {};
+  const overlapScore = (w, sid) => PEOPLE.filter(p => { const top = resp[p.id].ranks.slice(0, 3); return top.includes(w.id) && top.some(k => k !== w.id && place[k] && place[k].slot === sid); }).length;
+  const leaderCost = (w, sid) => leaderPeople(w).reduce((a, pid) => a + resp[pid].ranks.slice(0, 3).filter(k => place[k] && place[k].slot === sid).length, 0);
+  ws.slice().sort((a, b) => (b.fixedSlot ? 1 : 0) - (a.fixedSlot ? 1 : 0) || demand(b.id) - demand(a.id) || b.cap - a.cap || a.title.localeCompare(b.title, 'de')).forEach(w => {
+    const rooms = ROOMS.filter(r => !w.need || r.features.includes(w.need));
+    if (!rooms.length) { place[w.id] = { reason: `Kein Raum hat „${w.need}“.` }; return; }
+    if (!SLOTS.length) { place[w.id] = { reason: 'Es gibt noch keine Slots.' }; return; }
+    let best = null, reason = null;
+    (w.fixedSlot ? SLOTS.filter(s => s.id === w.fixedSlot) : SLOTS).forEach((s, i) => {
+      if (!w.leaders.every(l => leaderAvail(l, s.id))) { reason = reason || 'Die Leitung ist in keinem passenden Slot verfügbar.'; return; }
+      if (w.leaders.some(l => busy[s.id + '|' + lkey(l)])) { reason = reason || 'Die Leitung leitet in allen passenden Slots schon etwas.'; return; }
+      rooms.forEach(r => {
+        if (used[s.id + '|' + r.id] || r.blocked.includes(s.id)) { reason = reason || `Alle Räume mit „${w.need}“ sind belegt.`; return; }
+        const score = overlapScore(w, s.id) * 10 + leaderCost(w, s.id) * 10 + (perSlot[s.id] || 0) * 3 + i * 0.01;
+        if (!best || score < best.score) best = { slot: s.id, room: r.id, score };
+      });
+    });
+    if (!best) { place[w.id] = { reason: reason || 'Kein passender Slot.' }; return; }
+    place[w.id] = { slot: best.slot, room: best.room };
+    used[best.slot + '|' + best.room] = w.id; w.leaders.forEach(l => busy[best.slot + '|' + lkey(l)] = w.id); perSlot[best.slot] = (perSlot[best.slot] || 0) + 1;
+  });
+
+  const asg = {}, ppl = {}, skip = {}, trace = {};
+  PEOPLE.forEach(p => { asg[p.id] = {}; skip[p.id] = {}; trace[p.id] = []; });
+  ws.forEach(w => ppl[w.id] = []);
+  const T = (p, e) => trace[p.id].push(e);
+  // Leading blocks the slot for registered leaders
+  ws.forEach(w => { const sid = place[w.id].slot; if (sid) leaderPeople(w).forEach(pid => { if (!asg[pid][sid]) asg[pid][sid] = { lead: w.id }; }); });
+  const cnt = p => Object.values(asg[p.id]).filter(a => a.w).length;
+  const seatFree = w => ppl[w.id].length < w.cap;
+  ws.filter(w => w.mode === 'signup' && place[w.id].slot).forEach(w => PEOPLE.filter(p => p.kid && p.age >= 12 && !asg[p.id][place[w.id].slot]).slice(0, 4).forEach(p => { asg[p.id][place[w.id].slot] = { signup: w.id }; ppl[w.id].push(p.id); }));
+  let dropped = 0;
+  if (PREV) PEOPLE.forEach(p => Object.entries(PREV.asg[p.id] || {}).forEach(([sid, a]) => {
+    if (!a.w || !a.got) return;
+    const w = WS[a.w], r = resp[p.id].ranks.indexOf(a.w);
+    const why = !w ? 'gone' : !place[a.w] || place[a.w].slot !== sid ? 'moved' : asg[p.id][sid] ? 'taken' : r < 0 ? 'unranked' : !eligible(p, w) ? 'elig' : !seatFree(w) ? 'cap' : null;
+    if (why) { dropped++; T(p, { t: 'drop', w: a.w, sid, why, title: w ? w.title : '' }); return; }
+    ppl[a.w].push(p.id); asg[p.id][sid] = { w: a.w, got: r + 1, kept: true }; T(p, { t: 'keep', w: a.w, sid, n: r + 1 });
+  }));
+  for (let r = 0; r < TOPN; r++) {
+    const queue = PEOPLE.filter(p => resp[p.id].ranks[r]).map((p, i) => ({ p, v: cnt(p) * 1000 + ((i * 11 + r * 7) % 140) })).sort((a, b) => a.v - b.v);
+    queue.forEach(({ p }, pos) => {
+      const k = resp[p.id].ranks[r], w = WS[k], pl = place[k];
+      const e = { t: 'wish', n: r + 1, w: k, pos: pos + 1, of: queue.length, had: cnt(p) };
+      if (!pl.slot) { skip[p.id][k] = 'unsched'; T(p, { ...e, res: 'unsched' }); return; }
+      e.sid = pl.slot;
+      const here = asg[p.id][pl.slot];
+      if (here && here.w === k) { T(p, { ...e, res: 'kept' }); return; }
+      if (here && here.lead) { skip[p.id][k] = 'lead'; T(p, { ...e, res: 'lead', other: here.lead }); return; }
+      if (here) { skip[p.id][k] = 'overlap'; T(p, { ...e, res: 'overlap', other: here.w || here.signup, otherGot: here.got }); return; }
+      if (!seatFree(w)) { skip[p.id][k] = 'cap'; T(p, { ...e, res: 'cap', cap: w.cap }); return; }
+      ppl[k].push(p.id); asg[p.id][pl.slot] = { w: k, got: r + 1 }; T(p, { ...e, res: 'ok' });
+    });
+  }
+  const assignWs = ws.filter(w => w.source === 'off' && w.mode === 'assign' && place[w.id].slot);
+  const order = { ranked: 0, nopref: 1, pending: 2, none: 2 };
+  PEOPLE.filter(p => p.kid).sort((a, b) => order[resp[a.id].resp] - order[resp[b.id].resp] || cnt(a) - cnt(b)).forEach(p => {
+    while (cnt(p) < MIN_KIDS) {
+      const opts = assignWs.filter(w => !asg[p.id][place[w.id].slot] && eligible(p, w) && seatFree(w) && !resp[p.id].ranks.includes(w.id))
+        .sort((a, b) => (b.cap - ppl[b.id].length) - (a.cap - ppl[a.id].length) || slotIdx(place[a.id].slot) - slotIdx(place[b.id].slot));
+      if (!opts.length) break;
+      const w = opts[0]; ppl[w.id].push(p.id); asg[p.id][place[w.id].slot] = { w: w.id, got: null }; T(p, { t: 'fill', w: w.id, sid: place[w.id].slot });
+    }
+  });
+  const kids = PEOPLE.filter(p => p.kid);
+  const seats = assignWs.filter(w => w.target !== 'adults').reduce((a, w) => a + w.cap, 0), needed = kids.length * MIN_KIDS;
+  const gap = seats < needed ? { seats, needed } : null;
+  if (!gap) kids.forEach(p => {
+    let need = MIN_KIDS - cnt(p);
+    for (const s of SLOTS) {
+      if (need <= 0) break;
+      if (asg[p.id][s.id]) continue;
+      const here = assignWs.filter(w => place[w.id].slot === s.id && w.target !== 'adults');
+      if (!here.length) continue;
+      asg[p.id][s.id] = { open: here.some(w => eligible(p, w)) ? 'full' : 'age' }; T(p, { t: 'open', sid: s.id, why: asg[p.id][s.id].open }); need--;
+    }
+  });
+  return { resp, place, asg, ppl, skip, gap, seats, needed, dropped, hadPrev: !!PREV, trace };
+}
+const clone = o => JSON.parse(JSON.stringify(o));
+function liveModel() { return { WS, ROOMS, SLOTS, EXT, R: compute() }; }
+function fixNow() { SNAP = clone({ WS, ROOMS, SLOTS, EXT }); const ph = S.phase; S.phase = 4; SNAP.R = compute(); S.phase = ph; POSTFIX = []; }
+function noteChange(text) { S.drafts++; if (S.phase === 4) POSTFIX.push(text); else if (LASTR) PREV = { asg: clone(LASTR.asg) }; }
+
+/* =========================================================
+   Wording and helpers
+   ========================================================= */
+const ICON = {
+  off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M11.051 7.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.867l-1.156-1.152a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/></svg>',
+  self: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>',
+};
+const SRC = { off: 'Offiziell', self: 'Selbstorganisiert' };
+const MODE = { assign: 'Zugewiesen', signup: 'Anmeldung' };
+const WHY = { cap: 'Kapazität des Angebots war erreicht.', overlap: 'Das Angebot überschneidet sich mit einer bereits zugeordneten Teilnahme.', unsched: 'Das Angebot ist noch nicht geplant.', lead: 'Die Person leitet zu dieser Zeit selbst einen Workshop.' };
+const OPEN = { full: ['Alle geeigneten Angebote sind belegt.', () => 'Die passenden Workshops sind voll.'], age: ['Keine passende Teilnahme im gewählten Slot.', p => `Kein Workshop ist für ${p.age}-Jährige geöffnet.`] };
+const ROUND = ['Erstwünsche', 'Zweitwünsche', 'Drittwünsche', 'Viertwünsche', 'Fünftwünsche'];
+const DROP = { gone: 'Workshop gelöscht', moved: 'liegt jetzt in einem anderen Slot', taken: 'Slot schon belegt', unranked: 'nicht mehr gewählt', elig: 'passt nicht mehr zum Alter', cap: 'weniger Plätze als vorher' };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const plaetze = n => n === 1 ? '1 Platz' : n + ' Plätze';
+const personen = n => n === 1 ? '1 Person' : n + ' Personen';
+const workshops = n => n === 1 ? '1 Workshop' : n + ' Workshops';
+const wuensche = n => n === 1 ? '1 Wunsch' : n + ' Wünsche';
+const slotsTxt = n => n === 1 ? '1 Slot' : n + ' Slots';
+const chip = (t, c = '') => `<span class="chip${c ? ' ' + c : ''}">${t}</span>`;
+const success = t => `<p class="success">${chip('✓ ' + t)}</p>`;
+const ph = (href, text) => `<a class="edit-link ph" href="${href}">${text}</a>`;
+const statsStrip = items => `<div class="stats" style="--n:${items.length}">${items.map(([n, l, c]) => `<div class="stat${c ? ' ' + c : ''}"><p class="num">${n}</p><p class="lbl">${l}</p></div>`).join('')}</div>`;
+const ageText = w => w.age[1] >= 99 ? `ab ${w.age[0]} Jahren` : `${w.age[0]}–${w.age[1]} Jahre`;
+const time = s => `${s.start}–${s.end}`;
+const sShort = s => s ? `${DAYS[s.day].short} ${time(s)}` : '';
+const sLong = s => `${DAYS[s.day].name}, ${DAYS[s.day].date} 2027, ${time(s)} Uhr`;
+const now = () => { const d = new Date(); return `${d.toLocaleDateString('de-DE')}, ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`; };
+const revText = () => `v${S.rev}${S.drafts ? ' · mit ungespeicherten Änderungen' : ''}`;
+const printStamp = () => `${now()} · ${revText()}`;
+function badges(w) { return `<div class="badges"><span class="badge">${ICON[w.source]}${SRC[w.source]}</span><span class="badge">${GROUP[w.target]}</span><span class="badge">${MODE[w.mode]}</span>${w.example ? '<span class="badge dashed">Beispiel, im Profil nicht ausgewählt</span>' : ''}</div>`; }
+function respBadge(r) { return r.resp === 'none' ? '<span class="badge dashed">Keine Antwort</span>' : r.resp === 'pending' ? `<span class="badge dashed">${S.phase === 1 ? 'Wahl noch nicht geöffnet' : 'Noch keine Antwort'}</span>` : r.resp === 'nopref' ? '<span class="badge">Keine Präferenz</span>' : ''; }
+const inGroup = p => S.group === 'all' || (S.group === 'kids') === p.kid;
+const wsInGroup = w => S.group === 'all' || w.target === 'all' || w.target === S.group;
+
+/* Model accessors (MD: live or frozen) */
+const mSlot = id => MD.SLOTS.find(s => s.id === id);
+const mRoom = id => MD.ROOMS.find(r => r.id === id);
+const mPlace = id => MD.R.place[id] || {};
+const mInSlot = sid => Object.values(MD.WS).filter(w => mPlace(w.id).slot === sid);
+const mAssignWs = () => Object.values(MD.WS).filter(w => w.source === 'off' && w.mode === 'assign');
+const nWs = p => Object.values(MD.R.asg[p.id]).filter(a => a.w).length;
+const lname = l => l.p ? (PERSON[l.p] ? PERSON[l.p].name : '?') : (MD.EXT[l.x] || EXT[l.x] || { name: '?' }).name;
+const lhtml = l => `${esc(lname(l))}${l.x ? ' <span class="badge ext">extern</span>' : ''}`;
+const leadersHtml = w => w.leaders.length ? w.leaders.map(lhtml).join(', ') : '—';
+function openEntries() { const out = []; PEOPLE.forEach(p => MD.SLOTS.forEach(s => { const a = MD.R.asg[p.id][s.id]; if (a && a.open) out.push({ p, sid: s.id, a }); })); return out; }
+function groupByPerson(es) { const g = {}; es.forEach(e => (g[e.p.id] = g[e.p.id] || { p: e.p, list: [] }).list.push(e)); return Object.values(g); }
+const hasAnswers = () => PEOPLE.some(p => MD.R.resp[p.id].ranks.length);
+const groupSwitch = () => S.groupUi === 'select'
+  ? `<div class="field group-select"><label for="group-select">Gruppe</label><select id="group-select">${[['all', 'Alle'], ['kids', 'Kinder'], ['adults', 'Erwachsene']].map(([k, l]) => `<option value="${k}"${S.group === k ? ' selected' : ''}>${l}</option>`).join('')}</select></div>`
+  : `<fieldset class="modes group-switch"><legend class="sr">Gruppe</legend>${[['all', 'Alle'], ['kids', 'Kinder'], ['adults', 'Erwachsene']].map(([k, l]) => `<label><input type="radio" name="group" value="${k}"${S.group === k ? ' checked' : ''}> ${l}</label>`).join('')}</fieldset>`;
+
+/* =========================================================
+   Header
+   ========================================================= */
+function timeline() {
+  const next = {
+    1: ['Programm, Teilnahme und Listen sind schon als Probelauf berechnet.', `<button type="button" class="btn sm main" data-act="open">Workshopwahl öffnen</button>`],
+    2: ['Familien sehen die Workshopbeschreibungen, keine Zeiten.', `<button type="button" class="btn sm main" data-act="close">Wahl schließen</button>`],
+    3: ['Alle Antworten sind da. Prüfen, dann festlegen.', `<button type="button" class="btn sm main" data-act="fix">Zuordnung festlegen</button>`],
+    4: ['Slots, Räume und Teilnahme ändern sich nicht mehr.', `<a class="btn sm ph" href="/organiser/mitteilungen?bereich=teilnahme">An Familien kommunizieren</a>`],
+  }[S.phase];
+  return `<section class="timeline" aria-labelledby="tl-h"><h2 id="tl-h" class="sr">Ablauf der Workshopwahl</h2>
+    <ol id="tl-list" class="${S.tlOpen ? 'open' : 'collapsed'}">${STEPS.map((t, i) => { const k = i + 1, done = k < S.phase, cur = k === S.phase;
+      return `<li class="${done ? 'done' : ''}"${cur ? ' aria-current="step"' : ''}><span class="dot" aria-hidden="true">${done ? '✓' : k}</span><span class="t">${t}</span><span class="d">optional secondary text</span></li>`; }).join('')}</ol>
+    <button type="button" class="tl-more" aria-expanded="${S.tlOpen}" aria-controls="tl-list" data-tl-toggle>${S.tlOpen ? 'Weniger' : `Alle Schritte (${S.phase} von 4)`}</button>
+    <div class="next"><p>${next[0]}</p>${next[1]}</div></section>`;
+}
+function standNotice() {
+  const answered = PEOPLE.filter(p => MD.R.resp[p.id].resp !== 'pending').length;
+  const t = {
+    1: 'Noch nicht für Familien sichtbar. Berechnet aus den aktuellen Workshops, Räumen und Slots, noch ohne Antworten.',
+    2: `Berechnet mit ${answered} von ${PEOPLE.length} Antworten. Ändert sich mit jeder Antwort und jeder Änderung.`,
+    3: 'Alle Antworten sind da. Wird bei jeder Änderung neu berechnet, bis die Zuordnung festgelegt ist.',
+    4: `Festgelegt am ${EVENT.fixedOn}. Ändert sich nicht mehr.`,
+  }[S.phase];
+  const post = S.phase === 4 && POSTFIX.length ? `<ul>${POSTFIX.map(c => `<li>Seit dem Festlegen geändert: ${esc(c)}. Die festgelegte Zuordnung ändert sich dadurch nicht.</li>`).join('')}</ul>` : '';
+  return `<div class="stand" role="note">${chip(STAND[S.phase], S.phase === 4 ? '' : 'free')}<p>${t}</p>${post}</div>`;
+}
+const viewHead = (h, sub, action = '') => `<div class="view-head"><div><h2 id="vh" tabindex="-1">${h}</h2>${sub ? `<p class="muted">${sub}</p>` : ''}</div>${action}</div>`;
+const SEC = {
+  ws: [['list', 'Workshops'], ['lead', 'Leitungen'], ['ext', 'Extern']],
+  rs: [['rooms', 'Räume'], ['slots', 'Slots']],
+  prog: [['grid', 'Ganzes Programm'], ['unplaced', 'Nicht eingeplant'], ['overlap', 'Überschneidungen']],
+  wish: [['ans', 'Antworten'], ['dem', 'Nachfrage'], ['flow', 'Verlauf']],
+  teil: [['people', 'Personen'], ['fill', 'Ohne Wunsch'], ['open', 'Offene Fälle']],
+  lists: [['ws', 'Workshop'], ['p', 'Person'], ['f', 'Familie'], ['r', 'Raum']],
+};
+// Where the group control applies
+const GROUPED = { ws: ['list', 'lead'], prog: ['grid', 'unplaced', 'overlap'], wish: ['ans', 'dem', 'flow'], teil: ['people', 'fill'] };
+const secOf = v => v === 'lists' ? S.list : S.sec[v];
+const secLabel = v => (SEC[v].find(([k]) => k === secOf(v)) || [, ''])[1];
+function secNav(v) {
+  const cur = secOf(v);
+  const tabs = `<div class="subviews" role="tablist" aria-label="Bereich ${esc(Object.fromEntries(VIEWS)[v])}">${SEC[v].map(([k, l]) => `<button type="button" role="tab" id="tab-sec-${k}" data-sec="${k}" aria-selected="${cur === k}" aria-controls="sec-panel" tabindex="${cur === k ? 0 : -1}">${l}</button>`).join('')}</div>`;
+  const grouped = (GROUPED[v] || []).includes(cur);
+  return `<div class="secbar">${tabs}${grouped ? `<div class="secbar-ctl">${groupSwitch()}</div>` : ''}</div>`;
+}
+const secPanel = (v, html) => `<div role="tabpanel" id="sec-panel" aria-labelledby="tab-sec-${secOf(v)}">${html}</div>`;
+function product() {
+  const special = S.mode === 'loading' || S.mode === 'error';
+  let body;
+  if (S.mode === 'loading') body = `<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><p>Workshops werden geladen …</p></div>`;
+  else if (S.mode === 'error') body = `<div class="alert bad" role="alert"><p><strong>Workshops konnten nicht geladen werden.</strong> Bitte erneut versuchen.</p><div class="actions"><button type="button" class="btn sm" data-retry>Erneut laden</button></div></div>`;
+  else body = `<nav class="views" aria-label="Bereiche" role="tablist">${VIEWS.map(([k, l]) => `<button type="button" class="seg" role="tab" id="tab-view-${k}" data-view="${k}" aria-selected="${S.view === k}" aria-controls="view-panel" tabindex="${S.view === k ? 0 : -1}">${l}</button>`).join('')}</nav>
+    <div role="tabpanel" id="view-panel" aria-labelledby="tab-view-${S.view}" class="${landscape() ? 'print-wide' : ''}${S.view === 'lists' ? ' lead-panel' : ''}">${({ ws: vWorkshops, rs: vRoomsSlots, prog: vProgramm, wish: vWishes, teil: vTeilnahme, lists: vLists }[S.view])()}</div>`;
+  const person = S.view === 'wish' && S.sec.wish === 'flow' && S.tmode !== 'all' && S.trace ? ' · ' + esc(PERSON[S.trace].name) : '';
+  return `<div class="shell" aria-hidden="true"><span>Anwendungsrahmen (von der App geliefert)</span><span>Speicherstatus: ${S.drafts ? `${S.drafts} ${S.drafts === 1 ? 'Änderung' : 'Änderungen'} im Entwurf (global speichern)` : 'alles gespeichert'}</span></div>
+    <div class="print-head"><span><strong>Workshops · ${Object.fromEntries(VIEWS)[S.view]} · ${secLabel(S.view)}${(GROUPED[S.view] || []).includes(secOf(S.view)) && S.group !== 'all' ? ' · ' + GROUP[S.group] : ''}</strong>${person}</span><span>${STAND[S.phase]}</span></div>
+    <header class="top"><div><h1 id="h1">Workshops</h1><p class="ctxline">${personen(PEOPLE.length)} · ${slotsTxt(SLOTS.length)} · ${workshops(Object.keys(WS).length)} · ${Object.keys(EXT).length} externe Leitungen</p></div></header>
+    ${special ? '' : timeline()}${body}
+    <p class="app-foot">${printStamp()}</p>`;
+}
+/* =========================================================
+   Workshops (edit)
+   ========================================================= */
+function vWorkshops() {
+  const sec = secOf('ws');
+  let inner = '';
+  const leads = key => Object.values(WS).filter(w => w.leaders.some(l => lkey(l) === key));
+  if (sec === 'list') {
+    const list = Object.values(WS).filter(wsInGroup);
+    const rows = list.map(w => {
+      const pl = MD.R.place[w.id] || {}, s = pl.slot && mSlot(pl.slot), r = pl.room && mRoom(pl.room);
+      const placed = S.phase === 4 && !MD.WS[w.id] ? '<strong>Nach dem Festlegen hinzugefügt.</strong>' : s ? `${STAND[S.phase]}: ${esc(sShort(s))} · ${esc(r ? r.name : '')}` : `<strong>Nicht eingeplant:</strong> ${esc(pl.reason || '')}`;
+      return `<div class="srow"><div class="main"><h3>${esc(w.title)}</h3>${badges(w)}
+        ${w.desc ? `<p class="desc">${esc(w.desc)}</p>` : ''}
+        <p class="small muted" style="margin-top:4px">${ageText(w)} · ${plaetze(w.cap)} · braucht: ${esc(w.need || 'nichts Besonderes')}</p>
+        <p class="small">Leitung: ${leadersHtml(w)}</p><p class="small">${placed}</p></div>
+        <div class="row-actions">${s ? '' : chip('Nicht eingeplant', 'plan')}<button type="button" class="btn sm" data-edit-ws="${w.id}">Bearbeiten<span class="sr">: ${esc(w.title)}</span></button></div></div>`;
+    }).join('');
+    inner = `<div class="sec-head"><p class="muted">${workshops(list.length)} · ${S.phase === 1 ? 'nur für die Orga sichtbar' : 'Familien sehen Beschreibung, Alter und Leitung, keine Zeiten'}</p><button type="button" class="btn sm main" data-new-ws id="btn-new-ws">Workshop hinzufügen</button></div>`
+      + (list.length ? `<div class="list">${rows}</div>` : `<div class="empty-state"><h3>Noch keine Workshops</h3><p>Lege den ersten Workshop an. Programm und Teilnahme werden sofort als Probelauf berechnet.</p></div>`);
+  } else if (sec === 'lead') {
+    const leaders = [...new Set(Object.values(WS).flatMap(w => w.leaders.filter(l => l.p).map(l => l.p)))].map(id => PERSON[id]).filter(inGroup).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    inner = `<div class="sec-head"><p class="muted">${personen(leaders.length)} aus der Veranstaltung leiten Workshops. Sie zählen nicht als Teilnehmende und können sonst selbst teilnehmen.</p></div>
+      <div class="table-wrap"><table class="plain"><caption class="sr">Leitungen aus der Veranstaltung</caption><thead><tr><th scope="col">Person</th><th scope="col">Alter</th><th scope="col">Leitet</th><th scope="col" class="num">Nimmt teil an</th></tr></thead><tbody>
+      ${leaders.map(p => `<tr><th scope="row">${esc(p.name)}</th><td>${p.kid ? p.age + ' Jahre' : 'erwachsen'}</td><td>${leads(p.id).map(w => { const s = (MD.R.place[w.id] || {}).slot; return `${esc(w.title)}${s && mSlot(s) ? ` <span class="muted">(${esc(sShort(mSlot(s)))})</span>` : ''}`; }).join(', ')}</td><td class="num">${MD.R.asg[p.id] ? workshops(nWs(p)) : '—'}</td></tr>`).join('')}</tbody></table></div>`;
+  } else {
+    inner = `<div class="sec-head"><p class="muted">${Object.keys(EXT).length} externe Leitungen. Sie leiten nur und nehmen sonst nicht teil.</p><button type="button" class="btn sm main" data-new-ext id="btn-new-ext">Externe Leitung hinzufügen</button></div>
+      <div class="list">${Object.values(EXT).map(x => `<div class="srow"><div class="main"><p><strong>${esc(x.name)}</strong> <span class="badge ext">extern</span>${x.phone ? ` <span class="muted small">· ${esc(x.phone)}</span>` : ''}</p><p class="small">Leitet: ${leads(x.id).map(w => esc(w.title)).join(', ') || '—'}</p><p class="small muted">Verfügbar: ${x.avail.length === SLOTS.length ? 'alle Slots' : x.avail.map(id => SLOTS.find(s => s.id === id)).filter(Boolean).map(sShort).join(', ') || 'kein Slot'}</p></div>
+        <div class="row-actions"><button type="button" class="btn sm" data-edit-ext="${x.id}">Bearbeiten<span class="sr">: ${esc(x.name)}</span></button></div></div>`).join('')}</div>`;
+  }
+  return viewHead('Workshops', '') + secNav('ws') + secPanel('ws', inner);
+}
+/* =========================================================
+   Räume und Slots (edit)
+   ========================================================= */
+function vRoomsSlots() {
+  const roomSlots = SLOTS.length * ROOMS.length - ROOMS.reduce((a, r) => a + r.blocked.filter(b => SLOTS.some(s => s.id === b)).length, 0);
+  const needs = [...new Set(Object.values(WS).map(w => w.need).filter(Boolean))];
+  const missing = needs.filter(n => !ROOMS.some(r => r.features.includes(n)));
+  const checks = `<div class="check-strip"><span><strong>${roomSlots}</strong> freie Raum-Slots für <strong>${workshops(Object.keys(WS).length)}</strong></span>
+    ${missing.length ? missing.map(n => `<span>${chip('Fehlt', 'attn')} Kein Raum hat „${esc(n)}“ (${Object.values(WS).filter(w => w.need === n).map(w => esc(w.title)).join(', ')})</span>`).join('') : `<span>${chip('✓ Alle Anforderungen haben einen Raum')}</span>`}</div>`;
+  let inner;
+  if (secOf('rs') === 'slots') {
+    inner = `<div class="sec-head"><p class="muted">${slotsTxt(SLOTS.length)}</p><button type="button" class="btn sm main" data-new-slot id="btn-new-slot">Slot hinzufügen</button></div>` + DAY_ORDER.map(d => { const ss = SLOTS.filter(s => s.day === d);
+      return `<div class="daylist"><h3>${DAYS[d].name}, ${DAYS[d].date}</h3>${ss.length ? `<div class="list">${ss.map(s => { const clash = ss.find(o => o !== s && o.start < s.end && s.start < o.end);
+        return `<div class="srow"><div class="main"><p><strong>${time(s)} Uhr</strong>${clash ? ` ${chip('Überschneidet sich', 'attn')}` : ''}</p><p class="small muted">${workshops(Object.values(WS).filter(w => (MD.R.place[w.id] || {}).slot === s.id).length)} im ${STAND[S.phase]}</p></div>
+          <div class="row-actions"><button type="button" class="btn sm" data-edit-slot="${s.id}">Bearbeiten<span class="sr">: Slot ${esc(sShort(s))}</span></button></div></div>`; }).join('')}</div>` : '<p class="muted">Kein Slot an diesem Tag.</p>'}</div>`; }).join('');
+  } else {
+    inner = `<div class="sec-head"><p class="muted">Workshops sagen, was sie brauchen; Räume sagen, was sie haben.</p><button type="button" class="btn sm main" data-new-room id="btn-new-room">Raum hinzufügen</button></div>
+      ${ROOMS.length ? `<div class="list">${ROOMS.map(r => `<div class="srow"><div class="main"><p><strong>${esc(r.name)}</strong></p><p class="small">Ausstattung: ${r.features.length ? r.features.map(esc).join(', ') : 'keine Angabe'}</p>
+        ${r.blocked.length ? `<p class="small muted">Nicht verfügbar: ${r.blocked.map(id => SLOTS.find(s => s.id === id)).filter(Boolean).map(sShort).join(', ')}</p>` : ''}</div>
+        <div class="row-actions"><button type="button" class="btn sm" data-edit-room="${r.id}">Bearbeiten<span class="sr">: Raum ${esc(r.name)}</span></button></div></div>`).join('')}</div>` : '<p class="muted">Noch keine Räume.</p>'}`;
+  }
+  return viewHead('Räume und Slots', 'Der Rahmen, in den die Planung die Workshops setzt.') + checks + secNav('rs') + secPanel('rs', inner);
+}
+/* =========================================================
+   Programm: rooms x slots, with fill and demand per workshop
+   ========================================================= */
+function overlapPairs() {
+  const pairs = {};
+  PEOPLE.filter(inGroup).forEach(p => { const top = MD.R.resp[p.id].ranks.slice(0, 3).filter(k => mPlace(k).slot);
+    for (let i = 0; i < top.length; i++) for (let j = i + 1; j < top.length; j++) if (mPlace(top[i]).slot === mPlace(top[j]).slot) { const key = [top[i], top[j]].sort().join('+'); (pairs[key] = pairs[key] || { a: top[i], b: top[j], ppl: [] }).ppl.push(p.id); } });
+  return Object.values(pairs).sort((a, b) => b.ppl.length - a.ppl.length);
+}
+function vProgramm() {
+  const sec = secOf('prog'), wsAll = Object.values(MD.WS);
+  let inner;
+  if (sec === 'grid') {
+    inner = `<div class="org-only">${standNotice()}</div>` + (MD.SLOTS.length && MD.ROOMS.length ? `<div class="table-wrap"><table class="sched prog"><caption class="sr">Workshops nach Raum und Slot</caption>
+    <thead><tr><th scope="col">Slot</th>${MD.ROOMS.map(r => `<th scope="col">${esc(r.name)}</th>`).join('')}</tr></thead><tbody>
+    ${DAY_ORDER.filter(d => MD.SLOTS.some(s => s.day === d)).map(d => `<tr class="dayrow"><th scope="colgroup" colspan="${MD.ROOMS.length + 1}">${DAYS[d].name}, ${DAYS[d].date}</th></tr>` +
+      MD.SLOTS.filter(s => s.day === d).map(s => `<tr><th scope="row">${time(s)}</th>${MD.ROOMS.map(r => {
+        if (r.blocked.includes(s.id)) return '<td class="empty"><span class="org-only">gesperrt</span></td>';
+        const w = wsAll.find(x => mPlace(x.id).slot === s.id && mPlace(x.id).room === r.id);
+        if (!w) return '<td class="empty">—<span class="sr">frei</span></td>';
+        if (!wsInGroup(w)) return `<td class="c dim"><span class="muted small">${esc(w.title)}</span></td>`;
+        const n = MD.R.ppl[w.id].length, firsts = PEOPLE.filter(p => MD.R.resp[p.id].ranks[0] === w.id).length;
+        const st = w.mode === 'assign' ? (n > w.cap ? chip('Über Kapazität', 'attn') : n === w.cap ? chip('Voll') : chip(`${plaetze(w.cap - n)} frei`, 'free')) : chip('Anmeldung', 'free');
+        return `<td class="c"><button type="button" class="cell-link" data-open-list="${w.id}"><strong>${esc(w.title)}</strong><span class="sr">: Teilnahmeliste öffnen</span></button>
+          <span class="small">${GROUP[w.target]} · ${ageText(w)}</span><span class="small">${leadersHtml(w)}</span>
+          <span class="org-only"><span class="small"><strong>${n} / ${w.cap}</strong> ${st}</span>${w.mode === 'assign' && firsts > w.cap ? `<span class="small demand">${firsts}× als 1. Wahl, nur ${plaetze(w.cap)}</span>` : ''}</span></td>`;
+      }).join('')}</tr>`).join('')).join('')}</tbody></table></div>` : '<p class="muted">Ohne Slots und Räume kann nichts eingeplant werden.</p>');
+  } else if (sec === 'unplaced') {
+    const un = wsAll.filter(w => !mPlace(w.id).slot && wsInGroup(w));
+    inner = un.length ? `<div class="list">${un.map(w => `<div class="srow"><div class="main"><h3>${esc(w.title)}</h3>${badges(w)}<p class="warn plan">${esc(mPlace(w.id).reason || '')}</p><p class="small muted">${PEOPLE.filter(p => MD.R.resp[p.id].ranks.includes(w.id)).length}× in einer Rangfolge</p></div><div class="row-actions"><button type="button" class="btn sm" data-go-edit-ws="${w.id}">Workshop bearbeiten<span class="sr">: ${esc(w.title)}</span></button></div></div>`).join('')}</div>` : success('Alle Workshops sind eingeplant.');
+  } else {
+    const ov = overlapPairs();
+    inner = `<p class="intro">Zwei Workshops aus derselben Top 3 im selben Slot: Die Person kann nur einen davon bekommen.</p>` + (!hasAnswers() ? '<p class="muted">Ohne Antworten gibt es noch keine Überschneidungen.</p>' : ov.length ? `<div class="table-wrap"><table class="plain"><caption class="sr">Überschneidungen</caption><thead><tr><th scope="col">Workshops</th><th scope="col">Slot</th><th scope="col" class="num">Personen</th><th scope="col">Wer</th></tr></thead><tbody>
+      ${ov.map(o => `<tr><th scope="row">${esc(MD.WS[o.a].title)} + ${esc(MD.WS[o.b].title)}</th><td>${esc(sShort(mSlot(mPlace(o.a).slot)))}</td><td class="num">${o.ppl.length}</td><td>${o.ppl.map(id => `<button type="button" class="pname" data-way="${id}">${esc(PERSON[id].name)}</button>`).join(', ')}</td></tr>`).join('')}</tbody></table></div>` : success('Keine Überschneidungen.'));
+  }
+  return viewHead('Programm', 'Welcher Workshop wann in welchem Raum stattfindet. Ein Workshop öffnet seine Teilnahmeliste.') + secNav('prog') + secPanel('prog', inner);
+}
+/* =========================================================
+   Teilnahme
+   ========================================================= */
+function groupRow(label, ps) {
+  const ranked = ps.filter(p => MD.R.resp[p.id].ranks.length);
+  const first = ranked.filter(p => Object.values(MD.R.asg[p.id]).some(a => a.got === 1)).length;
+  const two = ranked.filter(p => MD.R.resp[p.id].ranks.filter(k => Object.values(MD.R.asg[p.id]).some(a => a.w === k)).length >= 2).length;
+  const leads = ps.filter(p => Object.values(MD.R.asg[p.id]).some(a => a.lead)).length;
+  return `<tr><th scope="row">${label}</th><td class="num">${ps.length}</td><td class="num">${ranked.length}</td><td class="num">${first} / ${ranked.length}</td><td class="num">${two} / ${ranked.length}</td><td class="num">${leads}</td></tr>`;
+}
+function vTeilnahme() {
+  const sec = secOf('teil');
+  let inner = '';
+  if (sec === 'fill') {
+    const rows = [];
+    PEOPLE.filter(inGroup).forEach(p => MD.SLOTS.forEach(s => { const a = MD.R.asg[p.id][s.id]; if (a && a.w && !a.got) rows.push({ p, s, w: MD.WS[a.w], r: MD.R.resp[p.id] }); }));
+    rows.sort((a, b) => a.p.name.localeCompare(b.p.name, 'de') || MD.SLOTS.indexOf(a.s) - MD.SLOTS.indexOf(b.s));
+    const why = r => r.resp === 'none' ? 'Keine Antwort' : r.resp === 'pending' ? 'Noch keine Antwort' : r.resp === 'nopref' ? 'Keine Präferenz' : `Aufgefüllt auf ${MIN_KIDS} Workshops`;
+    inner = rows.length ? `<p class="intro">${personen(new Set(rows.map(x => x.p.id)).size)} haben ${rows.length === 1 ? 'einen Platz' : rows.length + ' Plätze'} bekommen, die sie nicht gewählt haben.</p>
+      <div class="table-wrap"><table class="plain"><caption class="sr">Ohne Wunsch zugeordnet</caption><thead><tr><th scope="col">Person</th><th scope="col">Alter</th><th scope="col">Workshop</th><th scope="col">Slot</th><th scope="col">Warum ohne Wunsch</th></tr></thead><tbody>
+      ${rows.map(x => `<tr><th scope="row"><button type="button" class="pname plink" data-way="${x.p.id}">${esc(x.p.name)}<span class="sr">: Wünsche verfolgen</span></button></th><td>${x.p.kid ? x.p.age : 'erw.'}</td><td>${esc(x.w.title)}</td><td>${esc(sShort(x.s))}</td><td>${why(x.r)}</td></tr>`).join('')}</tbody></table></div>`
+      : success('Niemand hat einen Platz ohne Wunsch bekommen.');
+    return viewHead('Teilnahme', 'Wer nimmt woran teil, und wer leitet?') + standNotice() + secNav('teil') + secPanel('teil', inner);
+  }
+  if (sec === 'open') {
+    const openG = groupByPerson(openEntries());
+    inner = openG.length ? `<p class="intro">Die Berechnung markiert freie Slots, wenn ein Kind weniger als ${MIN_KIDS} Workshops bekommt.</p><div class="table-wrap"><table class="plain"><caption class="sr">Offene Fälle</caption><thead><tr><th scope="col">Person</th><th scope="col">Workshops</th><th scope="col">Markierte Slots</th><th scope="col">Grund</th></tr></thead><tbody>
+      ${openG.map(g => `<tr><th scope="row"><button type="button" class="pname plink" data-way="${g.p.id}">${esc(g.p.name)}<span class="sr">: Wünsche verfolgen</span></button><span class="small muted" style="display:block;font-weight:500">${g.p.age} Jahre</span></th><td>${nWs(g.p)}</td><td>${g.list.map(e => esc(sShort(mSlot(e.sid)))).join(', ')}</td><td>${esc(OPEN[g.list[0].a.open][1](g.p))}${g.list[0].a.open === 'age' ? ' ' + ph('/organiser/teilnahmebedingungen', 'Teilnahmebedingungen prüfen') : ''}</td></tr>`).join('')}</tbody></table></div>`
+      : MD.R.gap ? '<p class="muted">Solange insgesamt Kinderplätze fehlen, werden keine einzelnen Kinder markiert.</p>' : success('Keine offenen Fälle.');
+    return viewHead('Teilnahme', 'Wer nimmt woran teil, und wer leitet?') + standNotice() + secNav('teil') + secPanel('teil', inner);
+  }
+  const people = PEOPLE.filter(inGroup);
+  const assignWs = mAssignWs(), placed = assignWs.filter(w => mPlace(w.id).slot);
+  const open = openEntries().filter(e => inGroup(e.p)), openPeople = new Set(open.map(e => e.p.id)).size;
+  const ranked = people.filter(p => MD.R.resp[p.id].ranks.length);
+  const first = ranked.filter(p => Object.values(MD.R.asg[p.id]).some(a => a.got === 1)).length;
+  const two = ranked.filter(p => MD.R.resp[p.id].ranks.filter(k => Object.values(MD.R.asg[p.id]).some(a => a.w === k)).length >= 2).length;
+  const g = MD.R.gap, kidsShown = S.group !== 'adults';
+  const cells = [[people.length, S.group === 'all' ? 'Personen' : GROUP[S.group]], [`${placed.length}<small> / ${assignWs.length}</small>`, 'Workshops eingeplant', placed.length < assignWs.length ? 'attn' : '']];
+  if (kidsShown) cells.push([`${MD.R.seats}<small> / ${MD.R.needed}</small>`, `Kinderplätze für ${MIN_KIDS} pro Kind`, g ? 'attn' : '']);
+  if (ranked.length) cells.push([`${first}<small> / ${ranked.length}</small>`, '1. Wahl erhalten'], [`${two}<small> / ${ranked.length}</small>`, `Mind. 2 aus Top ${TOPN}`]);
+  if (kidsShown && !g) cells.push([openPeople, openPeople === 1 ? 'Kind mit offenen Fällen' : 'Kinder mit offenen Fällen', openPeople ? 'attn' : '']);
+  inner += statsStrip(cells);
+  const dist = people.reduce((d, p) => (d[nWs(p)] = (d[nWs(p)] || 0) + 1, d), {});
+  inner += `<p class="dist-line"><strong>Workshops pro Person:</strong> ${Object.keys(dist).map(Number).sort((a, b) => b - a).map(n => `<span class="dist-item"><strong>${n}</strong> ${n === 1 ? 'Workshop' : 'Workshops'}: ${personen(dist[n])}</span>`).join('')}</p>`;
+  if (S.group === 'all' && hasAnswers()) inner += `<div class="table-wrap group-table"><table class="plain"><caption class="sr">Nach Gruppe</caption><thead><tr><th scope="col">Gruppe</th><th scope="col" class="num">Personen</th><th scope="col" class="num">mit Rangfolge</th><th scope="col" class="num">1. Wahl erhalten</th><th scope="col" class="num">Mind. 2 aus Top ${TOPN}</th><th scope="col" class="num">leiten selbst</th></tr></thead><tbody>${groupRow('Kinder', PEOPLE.filter(p => p.kid))}${groupRow('Erwachsene', PEOPLE.filter(p => !p.kid))}</tbody></table></div>`;
+  const items = [], links = [];
+  if (g && kidsShown) items.push(`Zu wenige Kinderplätze: ${MD.R.seats} für ${PEOPLE.filter(p => p.kid).length} Kinder.`), links.push(`<a class="btn sm" href="#workshops" data-view="ws">Workshops hinzufügen</a>`);
+  if (openPeople) items.push(`${openPeople === 1 ? '1 Kind' : openPeople + ' Kinder'} mit offenen Fällen`), links.push(`<a class="btn sm" href="#offene-faelle" data-go-cases>Offene Fälle anzeigen</a>`);
+  if (placed.length < assignWs.length) items.push(`${assignWs.length - placed.length} Workshop nicht eingeplant`), links.push(`<a class="btn sm" href="#programm" data-go-unplaced>Nicht eingeplante anzeigen</a>`);
+  if (items.length) inner += `<div class="alert attn" role="region" aria-label="Probleme"><p><strong>⚠ ${items.join(' · ')}</strong></p><div class="actions">${links.join('')}</div></div>`;
+  inner += MD.SLOTS.length && Object.keys(MD.WS).length ? tRanking() : '<p class="muted">Sobald es Workshops und Slots gibt, steht hier die Teilnahme.</p>';
+  return viewHead('Teilnahme', 'Wer nimmt woran teil, und wer leitet?') + standNotice() + secNav('teil') + secPanel('teil', inner);
+}
+function cellFor(p, s) {
+  const a = MD.R.asg[p.id][s.id], r = MD.R.resp[p.id];
+  if (!a) return '<td class="h free">frei</td>';
+  if (a.lead) return `<td class="h lead"><span class="w">${esc(MD.WS[a.lead].title)}</span><span class="rk">leitet</span></td>`;
+  if (a.signup) return `<td class="h su"><span class="w">${esc(MD.WS[a.signup].title)}</span><span class="rk">Anmeldung</span></td>`;
+  if (a.open) return `<td class="h">${chip('Offen', 'attn')}<span class="rk" style="display:block;margin-top:2px">${esc(OPEN[a.open][0])}</span></td>`;
+  const rk = a.got ? `${a.got}. Wahl` : r.resp === 'ranked' ? 'nicht gewählt' : 'freier Platz';
+  return `<td class="h ${a.got ? 'r' + Math.min(a.got, 4) : ''}"><span class="w">${esc(MD.WS[a.w].title)}</span><span class="rk">${rk}</span></td>`;
+}
+function rankList(p) {
+  const r = MD.R.resp[p.id];
+  if (!r.ranks.length) return `<span class="muted">${{ pending: S.phase === 1 ? 'Wahl noch nicht geöffnet' : 'Noch keine Antwort', none: 'Keine Rangfolge abgegeben', nopref: 'Bewusst keine Präferenz', ranked: '—' }[r.resp]}</span>`;
+  return `<ol class="rk5">${r.ranks.map((k, i) => { const got = Object.values(MD.R.asg[p.id]).some(a => a.w === k); return `<li class="${got ? 'got' : 'miss'}">${i + 1}. ${esc(MD.WS[k].title)}${got ? ' ✓<span class="sr"> erhalten</span>' : ' –<span class="sr"> nicht erhalten</span>'}</li>`; }).join('')}</ol>`;
+}
+function tRanking() {
+  const people = PEOPLE.filter(inGroup).sort((a, b) => { const oa = Object.values(MD.R.asg[a.id]).some(x => x.open), ob = Object.values(MD.R.asg[b.id]).some(x => x.open); return oa !== ob ? (oa ? -1 : 1) : a.name.localeCompare(b.name, 'de'); });
+  const head = MD.SLOTS.map(s => `<th scope="col">${DAYS[s.day].short} ${s.start}<span class="d">bis ${s.end}</span></th>`).join('');
+  const nameLink = p => `<button type="button" class="pname plink" data-way="${p.id}">${esc(p.name)}<span class="sr">: Wünsche verfolgen</span></button>`;
+  const rows = people.map(p => { const open = Object.values(MD.R.asg[p.id]).some(a => a.open); return `<tr${open ? ' class="is-open"' : ''} id="prow-${p.id}" tabindex="-1">
+    <th scope="row">${nameLink(p)}<span class="small muted" style="display:block;font-weight:500">${p.kid ? p.age + ' Jahre' : 'erwachsen'}</span>${respBadge(MD.R.resp[p.id])}</th>
+    <td class="rank">${rankList(p)}</td><td class="cnt">${nWs(p)}</td>${MD.SLOTS.map(s => cellFor(p, s)).join('')}</tr>`; }).join('');
+  const cards = people.map(p => { const open = Object.values(MD.R.asg[p.id]).some(a => a.open);
+    const items = MD.SLOTS.map(s => { const a = MD.R.asg[p.id][s.id]; const v = !a ? '<span class="muted">frei</span>' : a.lead ? `<strong>${esc(MD.WS[a.lead].title)}</strong> <span class="badge">leitet</span>` : a.signup ? `${esc(MD.WS[a.signup].title)} <span class="muted">(Anmeldung)</span>` : a.open ? `${chip('Offen', 'attn')}` : `<strong>${esc(MD.WS[a.w].title)}</strong> <span class="muted">${a.got ? a.got + '. Wahl' : ''}</span>`;
+      return `<li><span class="s">${DAYS[s.day].short} ${s.start}<span class="sr"> bis ${s.end}</span></span><span>${v}</span></li>`; }).join('');
+    return `<article class="pcard${open ? ' is-open' : ''}" id="pcard-${p.id}" tabindex="-1" aria-labelledby="pc-${p.id}"><h3 id="pc-${p.id}">${nameLink(p)} <span class="muted small" style="font-weight:500">· ${p.kid ? p.age + ' Jahre' : 'erwachsen'} · ${workshops(nWs(p))}</span></h3>
+      ${respBadge(MD.R.resp[p.id]) ? `<div class="badges">${respBadge(MD.R.resp[p.id])}</div>` : ''}<h4>Zuordnung</h4><ul>${items}</ul><h4>Rangfolge</h4>${rankList(p)}</article>`; }).join('');
+  return `<section aria-labelledby="h-rank"><div class="section-head"><h2 id="h-rank" class="sr">Personen</h2><p class="muted">Ein Name zeigt, was aus den Wünschen der Person geworden ist.</p></div>
+    <div class="legend" aria-hidden="true"><span><i class="sw" style="background:var(--r1)"></i>1. Wahl</span><span><i class="sw" style="background:var(--r2)"></i>2. Wahl</span><span><i class="sw" style="background:var(--r3)"></i>3. Wahl</span><span><i class="sw" style="background:var(--r4)"></i>4.–5. Wahl</span><span><i class="sw" style="background:#fff"></i>nicht gewählt oder freier Platz</span><span><i class="sw lead-sw"></i>leitet</span><span>${chip('Offen', 'attn')} markierter Fall</span></div>
+    <div class="wide-only"><div class="table-wrap"><table class="pt"><caption>Teilnahme <span>· ${personen(people.length)} · ${slotsTxt(MD.SLOTS.length)}</span></caption>
+      <thead><tr><th scope="col">Person</th><th scope="col">Rangfolge</th><th scope="col">Work&shy;shops</th>${head}</tr></thead><tbody>${rows}</tbody></table></div></div>
+    <div class="narrow-only"><div class="pcards">${cards}</div></div></section>`;
+}
+
+/* ---------- So entsteht die Zuordnung ---------- */
+function vWishes() {
+  const people = PEOPLE.filter(inGroup), R = MD.R, sec = secOf('wish');
+  const ranked = people.filter(p => R.resp[p.id].ranks.length);
+  const nopref = people.filter(p => R.resp[p.id].resp === 'nopref'), noans = people.filter(p => ['none', 'pending'].includes(R.resp[p.id].resp));
+  const nb = p => `<button type="button" class="pname" data-way="${p.id}">${esc(p.name)}</button>`;
+  const placed = mAssignWs().filter(w => mPlace(w.id).slot), fit = p => placed.filter(w => eligible(p, w)).length;
+  let inner = '';
+  if (sec === 'ans') {
+    const order = { pending: 0, none: 0, nopref: 1, ranked: 2 };
+    const rows = [...people].sort((a, b) => order[R.resp[a.id].resp] - order[R.resp[b.id].resp] || a.name.localeCompare(b.name, 'de'));
+    const status = r => r.resp === 'ranked' ? 'Rangfolge' : r.resp === 'nopref' ? 'Keine Präferenz' : r.resp === 'pending' ? (S.phase === 1 ? 'Wahl noch nicht geöffnet' : 'Noch keine Antwort') : 'Keine Antwort';
+    const wcell = k => { if (!k) return '<span class="muted">—</span>'; const w = MD.WS[k]; return `${esc(w.title)}${mPlace(k).slot ? '' : ` ${chip('ohne Termin', 'plan')}`}`; };
+    const ranksOf = p => p.ranks.filter(k => MD.WS[k]);
+    inner += statsStrip([[people.length, S.group === 'all' ? 'Personen' : GROUP[S.group]], [ranked.length, 'mit Rangfolge'], [nopref.length, 'Keine Präferenz'], [noans.length, S.phase <= 2 ? 'noch keine Antwort' : 'Keine Antwort', noans.length && S.phase === 2 ? 'attn' : '']])
+      + (people.some(p => p.kid && fit(p) < MIN_KIDS) ? `<p class="note-line"><strong>Weniger als ${MIN_KIDS} passende Workshops:</strong> ${people.filter(p => p.kid && fit(p) < MIN_KIDS).map(p => `${nb(p)} <span class="muted">(${p.age} Jahre, ${fit(p)} passend)</span>`).join(', ')}</p>` : '')
+      + `<div class="wide-only"><div class="table-wrap"><table class="plain answers"><caption class="sr">Antworten</caption><thead><tr><th scope="col">Person</th><th scope="col">Alter</th><th scope="col">Antwort</th>${[1, 2, 3, 4, 5].map(n => `<th scope="col">${n}. Wahl</th>`).join('')}</tr></thead><tbody>
+        ${rows.map(p => { const r = R.resp[p.id], ks = r.resp === 'ranked' ? ranksOf(p) : [];
+          return `<tr${r.resp === 'ranked' ? '' : ' class="noans"'}><th scope="row">${nb(p)}</th><td>${p.kid ? p.age : 'erw.'}</td><td>${r.resp === 'ranked' ? 'Rangfolge' : `<span class="badge${r.resp === 'nopref' ? '' : ' dashed'}">${status(r)}</span>`}</td>${[0, 1, 2, 3, 4].map(i => `<td>${wcell(ks[i])}</td>`).join('')}</tr>`; }).join('')}</tbody></table></div></div>
+      <div class="narrow-only"><ul class="rcards">${rows.map(p => { const r = R.resp[p.id], ks = r.resp === 'ranked' ? ranksOf(p) : [];
+          return `<li class="rcard"><p>${nb(p)} <span class="muted">· ${p.kid ? p.age + ' Jahre' : 'erwachsen'}</span></p>${ks.length ? `<ol class="rk5">${ks.map(k => `<li>${wcell(k)}</li>`).join('')}</ol>` : `<p><span class="badge${r.resp === 'nopref' ? '' : ' dashed'}">${status(r)}</span></p>`}</li>`; }).join('')}</ul></div>`;
+  } else if (sec === 'dem') {
+    const ws = mAssignWs().filter(wsInGroup).map(w => ({ w, first: PEOPLE.filter(p => R.resp[p.id].ranks[0] === w.id).length, any: PEOPLE.filter(p => R.resp[p.id].ranks.includes(w.id)).length })).sort((a, b) => b.first / b.w.cap - a.first / a.w.cap || b.any - a.any);
+    const maxR = Math.max(1, ...ws.map(x => Math.max(x.first, x.w.cap)));
+    inner += hasAnswers() ? `<p class="intro">Sortiert nach 1. Wahlen im Verhältnis zu den Plätzen. Balken: 1. Wahlen (gefüllt) gegen Plätze (Rahmen).</p><div class="table-wrap"><table class="plain demand-table"><caption class="sr">Nachfrage pro Workshop</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Für</th><th scope="col">Slot</th><th scope="col" class="num">Plätze</th><th scope="col" class="num">als 1. Wahl</th><th scope="col" class="num">in einer Rangfolge</th><th scope="col"><span class="sr">1. Wahlen und Plätze</span></th></tr></thead><tbody>
+      ${ws.map(({ w, first, any }) => { const s = mPlace(w.id).slot; return `<tr${first > w.cap ? ' class="over"' : ''}><th scope="row">${esc(w.title)}${first > w.cap ? '<span class="small muted" style="display:block;font-weight:500">mehr 1. Wahlen als Plätze</span>' : ''}</th><td>${GROUP[w.target]}</td><td>${s ? esc(sShort(mSlot(s))) : chip('ohne Termin', 'plan')}</td><td class="num">${w.cap}</td><td class="num">${first}</td><td class="num">${any}</td>
+        <td class="barcell"><div class="dembar" aria-hidden="true"><span class="dcap" style="width:${w.cap / maxR * 100}%"></span><span class="dfirst" style="width:${first / maxR * 100}%"></span></div></td></tr>`; }).join('')}</tbody></table></div>` : '<p class="muted">Noch keine Rangfolgen.</p>';
+  } else inner += tHow();
+  return viewHead('Wünsche', 'Was gewünscht wurde und was daraus geworden ist.') + standNotice() + secNav('wish') + secPanel('wish', inner);
+}
+function tHow() {
+  const R = MD.R, wsAll = Object.values(MD.WS);
+  if (S.tmode !== 'all' && !(S.trace && PERSON[S.trace] && inGroup(PERSON[S.trace]))) S.trace = PEOPLE.filter(inGroup).sort((a, b) => a.name.localeCompare(b.name, 'de'))[0].id;
+  const sel = S.tmode !== 'all' ? PERSON[S.trace] : null;
+  const only = !!sel && S.tmode === 'only';
+  const people = PEOPLE.filter(inGroup);
+  const assign = wsAll.filter(w => w.source === 'off' && w.mode === 'assign'), placed = assign.filter(w => mPlace(w.id).slot);
+  const ranked = people.filter(p => R.resp[p.id].ranks.length);
+  const nopref = people.filter(p => R.resp[p.id].resp === 'nopref'), noans = people.filter(p => ['none', 'pending'].includes(R.resp[p.id].resp));
+  const T = k => esc(MD.WS[k] ? MD.WS[k].title : k);
+  const at = sid => { const s = mSlot(sid); return s ? esc(sShort(s)) : ''; };
+  const isSel = p => sel && p.id === sel.id;
+  const nb = (p, strike = false) => { const n = esc(p.name); return `<button type="button" class="pname${isSel(p) ? ' sel' : ''}" data-trace="${p.id}"${isSel(p) ? ' aria-current="true"' : ''}>${strike ? `<s>${n}</s>` : n}${isSel(p) ? '<span class="sr"> (ausgewählt)</span>' : ''}</button>`; };
+  const names = (es, strike, rank = true) => es.map(e => nb(e.p, strike) + (rank && e.n ? `<span class="muted"> (${e.n}. Wahl)</span>` : '')).join(', ');
+  const byWs = (list, fmt) => { const g = {}; list.forEach(e => (g[e.w] = g[e.w] || []).push(e)); return Object.entries(g).sort((a, b) => b[1].length - a[1].length).map(([k, es]) => `<li>${fmt(k, es)}</li>`).join(''); };
+  const group = (label, items) => items ? `<div class="wg"><h4 class="wg-h">${label}</h4><ul>${items}</ul></div>` : '';
+  const gotTxt = n => n ? ` (${n}. Wahl)` : '';
+  const pcell = es => es.map(e => {
+    if (e.t === 'keep') return `<p><strong>${T(e.w)}</strong> ✓ <span class="muted">${at(e.sid)} · übernommen</span></p>`;
+    if (e.t === 'drop') return `<p>${esc(e.title)} <span class="muted">· ${DROP[e.why]}</span></p>`;
+    if (e.res === 'unsched') return `<p><s>${T(e.w)}</s> <span class="muted">· ohne Termin</span></p>`;
+    if (e.res === 'kept') return `<p>${T(e.w)} <span class="muted">· schon übernommen</span></p>`;
+    const res = { ok: `<strong>${T(e.w)}</strong> ✓ <span class="muted">${at(e.sid)}</span>`, cap: `<s>${T(e.w)}</s> <span class="muted">· voll</span>`, overlap: `<s>${T(e.w)}</s> <span class="muted">· ${at(e.sid)} schon ${T(e.other)}</span>`, lead: `<s>${T(e.w)}</s> <span class="muted">· leitet ${at(e.sid)} ${T(e.other)}</span>` }[e.res];
+    return `<p>${res}<br><span class="muted small">als ${e.pos}. von ${e.of} an der Reihe · hatte bisher ${e.had}</span></p>`;
+  }).join('') || '<span class="muted">—</span>';
+  const all = PEOPLE.filter(inGroup).flatMap(p => R.trace[p.id].map(e => ({ ...e, p })));
+  const src = only ? all.filter(e => e.p.id === sel.id) : all;
+  const mine = sel ? R.trace[sel.id] : [];
+  const W = only ? R.resp[sel.id].ranks.length : ranked.reduce((a, p) => a + R.resp[p.id].ranks.length, 0);
+  const rows = [];
+  rows.push({ key: 'unsched', title: 'Ohne Termin', sub: 'Workshop nicht eingeplant', match: e => e.t === 'wish' && e.res === 'unsched', add: es => ({ unsched: es.length }),
+    who: es => group(`Ohne Termin · ${wuensche(es.length)} nicht erfüllt`, byWs(es, (k, xs) => `<strong>${T(k)}</strong> <span class="muted">(${esc(mPlace(k).reason || 'nicht eingeplant')})</span>, daher nicht erfüllt für ${names(xs, true)}`)) });
+  if (R.hadPrev) rows.push({ key: 'keep', title: 'Übernommen', sub: 'aus der vorherigen Berechnung', match: e => e.t === 'keep' || e.t === 'drop',
+    add: es => { const o = {}; es.filter(e => e.t === 'keep').forEach(e => o['r' + Math.min(e.n, 5)] = (o['r' + Math.min(e.n, 5)] || 0) + 1); return o; },
+    who: es => group('Nicht mehr passend', es.filter(e => e.t === 'drop').map(e => `<li>${nb(e.p)}: ${esc(e.title)}, ${DROP[e.why]}</li>`).join('')) + group(`Übernommen · ${wuensche(es.filter(e => e.t === 'keep').length)}`, byWs(es.filter(e => e.t === 'keep'), (k, xs) => `<strong>${T(k)}</strong> <span class="muted">(${at(mPlace(k).slot)})</span>: ${names(xs, false)}`)) });
+  for (let r = 1; r <= TOPN; r++) {
+    if (!all.some(e => e.t === 'wish' && e.n === r)) continue;
+    rows.push({ key: 'r' + r, title: `Runde ${r}`, sub: ROUND[r - 1], match: e => e.t === 'wish' && e.n === r && e.res !== 'unsched',
+      add: es => ({ ['r' + r]: es.filter(e => e.res === 'ok').length, cap: es.filter(e => e.res === 'cap').length, overlap: es.filter(e => e.res === 'overlap').length, lead: es.filter(e => e.res === 'lead').length }),
+      who: es => { const cap = es.filter(e => e.res === 'cap'), ov = es.filter(e => e.res === 'overlap'), ld = es.filter(e => e.res === 'lead'), ok = es.filter(e => e.res === 'ok');
+        return group(`Voll · ${wuensche(cap.length)} nicht erfüllt`, byWs(cap, (k, xs) => `<strong>${T(k)}</strong> <span class="muted">(nur ${plaetze(MD.WS[k].cap)}, ${at(mPlace(k).slot)})</span>, daher nicht erfüllt für ${names(xs, true, false)}`))
+          + group(`Überschneidung · ${wuensche(ov.length)} nicht erfüllt`, ov.map(e => `<li>${nb(e.p, true)}: ${T(e.w)} (${e.n}. Wahl) nicht erfüllt, weil ${at(e.sid)} schon ${T(e.other)}${gotTxt(e.otherGot)} belegt ist</li>`).join(''))
+          + group(`Leitet selbst · ${wuensche(ld.length)} nicht erfüllt`, ld.map(e => `<li>${nb(e.p, true)}: ${T(e.w)} (${e.n}. Wahl) nicht erfüllt, weil ${at(e.sid)} selbst ${T(e.other)} geleitet wird</li>`).join(''))
+          + group(`Erfüllt · ${wuensche(ok.length)}`, byWs(ok, (k, xs) => `<strong>${T(k)}</strong> <span class="muted">(${at(mPlace(k).slot)})</span>: ${names(xs, false, false)}`)); } });
+  }
+  const ORDER = ['r1', 'r2', 'r3', 'r4', 'r5', 'cap', 'overlap', 'lead', 'unsched'];
+  const CLS = { cap: 'full' };
+  const groups = [];
+  const bar = (upto, cur) => {
+    if (!W) return '<div class="track empty"><span class="lbl">keine Wünsche</span></div>';
+    const segs = groups.slice(0, upto).map((g, gi) => ORDER.filter(k => g[k]).map(k => { const v = g[k], st = cur === null ? '' : gi === cur ? ' cur' : ' past';
+      return `<span class="bs ${CLS[k] || k}${st}" style="width:${v / W * 100}%">${v / W >= (only ? 0.1 : 0.035) ? v : ''}</span>`; }).join('')).join('');
+    const o = W - groups.slice(0, upto).reduce((a, g) => a + ORDER.reduce((x, k) => x + (g[k] || 0), 0), 0);
+    return `<div class="track">${segs}${o ? `<span class="bs open" style="width:${o / W * 100}%">${o / W >= 0.08 ? o + ' offen' : ''}</span>` : ''}</div>`;
+  };
+  const cum = { ok: 0, cap: 0, overlap: 0, lead: 0, unsched: 0 };
+  const openNow = () => W - cum.ok - cum.cap - cum.overlap - cum.lead - cum.unsched;
+  const numCells = (a, open) => ['ok', 'cap', 'overlap', 'lead', 'unsched'].map((k, i) => { const v = a ? a[k] || 0 : null; return `<td class="num${v ? '' : ' zero'}" data-label="${['erfüllt', 'voll', 'Überschn.', 'leitet selbst', 'o. Termin'][i]}">${v === null ? '–' : v}</td>`; }).join('') + `<td class="num strong" data-label="offen">${open}</td>`;
+  const head = `<tr><th scope="col">Schritt</th><th scope="col" class="barh">Verlauf aller Wünsche</th><th scope="col" class="num">erfüllt</th><th scope="col" class="num">voll</th><th scope="col" class="num">Über&shy;schnei&shy;dung</th><th scope="col" class="num">leitet selbst</th><th scope="col" class="num">ohne Termin</th><th scope="col" class="num">noch offen</th>${sel ? `<th scope="col" class="pcol"><span class="plabel">${esc(sel.name)}</span></th>` : ''}</tr>`;
+  let body = `<tr class="main"><th scope="row">Wünsche abgegeben<span class="sub">${only ? esc(sel.name) : `von ${personen(ranked.length)}`}</span></th><td class="barcell">${bar(0, null)}</td>${numCells(null, W)}
+    ${sel ? `<td class="pcell" data-label="${esc(sel.name)}">${R.resp[sel.id].ranks.length ? 'Rangfolge:<br>' + R.resp[sel.id].ranks.map((k, i) => `${i + 1}. ${T(k)}`).join('<br>') : (respBadge(R.resp[sel.id]) || '—')}</td>` : ''}</tr>`;
+  rows.forEach(row => {
+    const es = src.filter(row.match), a = row.add(es);
+    const ok = ['r1', 'r2', 'r3', 'r4', 'r5'].reduce((x, k) => x + (a[k] || 0), 0);
+    cum.ok += ok; ['cap', 'overlap', 'lead', 'unsched'].forEach(k => cum[k] += a[k] || 0);
+    groups.push(a); const gi = groups.length - 1;
+    body += `<tr class="main${only && !es.length ? ' quiet' : ''}"><th scope="row">${row.title}<span class="sub">${row.sub}${row.key.startsWith('r') ? ` · ${wuensche(es.filter(e => e.res !== 'kept').length)}` : ''}</span></th><td class="barcell">${bar(gi + 1, gi)}</td>${numCells({ ok, cap: a.cap, overlap: a.overlap, lead: a.lead, unsched: a.unsched }, openNow())}
+      ${sel ? `<td class="pcell" data-label="${esc(sel.name)}">${pcell(mine.filter(row.match))}</td>` : ''}</tr>`;
+    if (!only) { const w = row.who(es); if (w) body += `<tr class="who-row"><td class="spacer"></td><td colspan="7">${w}</td>${sel ? '<td class="pcell pad"></td>' : ''}</tr>`; }
+  });
+  const foot = `<tr class="total"><th scope="row">Ergebnis</th><td class="barcell">${bar(groups.length, null)}</td>${numCells(cum, openNow())}
+    ${sel ? `<td class="pcell" data-label="${esc(sel.name)}">${mine.filter(e => (e.t === 'wish' && e.res === 'ok') || e.t === 'keep').length} von ${R.resp[sel.id].ranks.length} Wünschen erfüllt</td>` : ''}</tr>`;
+  const legend = `<div class="flegend" aria-hidden="true">${[1, 2, 3, 4, 5].map(n => `<span><i class="bs r${n}"></i>${n}. Wahl erfüllt</span>`).join('')}<span><i class="bs full"></i>voll</span><span><i class="bs overlap"></i>Überschneidung</span><span><i class="bs lead"></i>leitet selbst</span><span><i class="bs unsched"></i>ohne Termin</span><span><i class="bs open"></i>noch offen</span></div>`;
+  const fit = p => placed.filter(w => eligible(p, w)).length;
+  const context = !only ? '' : true
+    ? `<table class="kv"><tbody><tr><th scope="row">Person</th><td><strong>${esc(sel.name)}</strong>, ${sel.kid ? sel.age + ' Jahre' : 'erwachsen'} ${respBadge(R.resp[sel.id])}</td></tr><tr><th scope="row">Passende Workshops</th><td>${fit(sel)} von ${placed.length}</td></tr><tr><th scope="row">Leitet</th><td>${Object.values(R.asg[sel.id]).filter(a => a.lead).map(a => T(a.lead)).join(', ') || '—'}</td></tr></tbody></table>`
+    : statsStrip([[people.length, 'Personen'], [ranked.length, 'mit Rangfolge'], [nopref.length, 'Keine Präferenz'], [noans.length, S.phase <= 2 ? 'noch keine Antwort' : 'Keine Antwort'], [people.filter(p => Object.values(R.asg[p.id]).some(a => a.lead)).length, 'leiten selbst']])
+      + `<table class="kv"><tbody>
+        ${nopref.length ? `<tr><th scope="row">Keine Präferenz</th><td>${nopref.map(p => nb(p)).join(', ')}</td></tr>` : ''}
+        ${noans.length ? `<tr><th scope="row">${S.phase <= 2 ? 'Noch keine Antwort' : 'Keine Antwort'}</th><td>${noans.length > 15 ? personen(noans.length) : noans.map(p => nb(p)).join(', ')}</td></tr>` : ''}
+        ${people.some(p => p.kid && fit(p) < MIN_KIDS) ? `<tr><th scope="row">Weniger als ${MIN_KIDS} passende Workshops</th><td>${people.filter(p => p.kid && fit(p) < MIN_KIDS).map(p => `${nb(p)} <span class="muted">(${p.age} Jahre, ${fit(p)} passend)</span>`).join(', ')}</td></tr>` : ''}
+      </tbody></table>`;
+  const tracebar = `<div class="tracebar" role="group" aria-label="Personen im Trichter">
+      <fieldset class="modes"><legend class="sr">Darstellung</legend>
+        <label><input type="radio" name="tmode" value="all"${S.tmode === 'all' ? ' checked' : ''}> Alle Personen</label>
+        <label><input type="radio" name="tmode" value="hl"${S.tmode === 'hl' ? ' checked' : ''}> Person hervorheben</label>
+        <label><input type="radio" name="tmode" value="only"${S.tmode === 'only' ? ' checked' : ''}> Nur diese Person</label></fieldset>
+      ${sel ? `<div class="field"><label for="trace-person">Person suchen</label><input type="search" id="trace-person" list="people-list" value="${esc(sel.name)}" autocomplete="off"><datalist id="people-list">${people.map(p => `<option value="${esc(p.name)}">`).join('')}</datalist></div>
+      <p class="print-only">Person: ${esc(sel.name)} (${only ? 'nur diese Person' : 'hervorgehoben'})</p>` : ''}</div>`;
+  const fills = src.filter(e => e.t === 'fill'); const fg = {}; fills.forEach(e => (fg[e.w] = fg[e.w] || []).push(e));
+  const freeTable = fills.length ? `<div class="table-wrap"><table class="plain"><caption class="sr">Freie Plätze ohne Wunsch</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Slot</th><th scope="col" class="num">Plätze</th><th scope="col">Personen</th></tr></thead><tbody>
+    ${Object.entries(fg).sort((a, b) => b[1].length - a[1].length).map(([k, es]) => `<tr><th scope="row">${T(k)}</th><td>${at(mPlace(k).slot)}</td><td class="num">${es.length}</td><td>${names(es, false, false)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Keine.</p>';
+  const dist = people.reduce((d, p) => (d[nWs(p)] = (d[nWs(p)] || 0) + 1, d), {}), maxD = Math.max(1, ...Object.values(dist));
+  const distTable = `<div class="table-wrap"><table class="plain"><caption class="sr">Workshops pro Person</caption><thead><tr><th scope="col">Workshops</th><th scope="col" class="num">Personen</th><th scope="col"><span class="sr">Anteil</span></th></tr></thead><tbody>
+    ${Object.keys(dist).map(Number).sort((a, b) => b - a).map(n => `<tr><th scope="row">${n}</th><td class="num">${dist[n]}</td><td class="barcell"><div class="track slim"><span class="bs r1" style="width:${dist[n] / maxD * 100}%"></span></div></td></tr>`).join('')}</tbody></table></div>`;
+  const openG = groupByPerson(openEntries().filter(e => inGroup(e.p)));
+  const openTable = openG.length ? `<div class="table-wrap"><table class="plain"><caption class="sr">Offene Fälle</caption><thead><tr><th scope="col">Person</th><th scope="col">Slots</th><th scope="col">Grund</th></tr></thead><tbody>
+    ${openG.map(g => `<tr><th scope="row">${nb(g.p)}</th><td>${g.list.map(e => at(e.sid)).join(', ')}</td><td>${esc(OPEN[g.list[0].a.open][1](g.p))}</td></tr>`).join('')}</tbody></table></div>` : success('Keine offenen Fälle.');
+  const plan = sel ? personPlanTable(sel, true) : '';
+  return `<section aria-labelledby="h-how"><div class="section-head"><h2 id="h-how">Was ist aus jedem Wunsch geworden?</h2><p class="muted">Runde für Runde, mit den Personen, die es betrifft.</p></div>
+    ${context}${tracebar}${only && !W ? '' : legend}
+    ${only && !W ? `<div class="alert plan"><p><strong>${esc(sel.name)} hat keine Wünsche.</strong> ${{ none: 'Keine Rangfolge abgegeben.', nopref: 'Bewusst keine Präferenz.', pending: 'Noch keine Antwort.' }[R.resp[sel.id].resp] || ''} ${sel.kid ? 'Plätze kommen nur aus den freien Plätzen.' : 'Erwachsene ohne Wünsche bekommen keine Plätze zugeteilt.'}</p></div>`
+      : `<div class="table-wrap"><table class="ftable${only ? ' only' : ''}"><caption class="sr">Verlauf der Wünsche Schritt für Schritt</caption><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`}
+    ${sel ? `<p class="person-sum"><span class="plabel">${esc(sel.name)}</span> ${mine.filter(e => (e.t === 'wish' && e.res === 'ok') || e.t === 'keep').length} von ${R.resp[sel.id].ranks.length} ${R.resp[sel.id].ranks.length === 1 ? 'Wunsch' : 'Wünschen'} erfüllt · ${workshops(nWs(sel))} · <a class="edit-link" href="#listen" data-open-person="${sel.id}">Workshopplan ansehen</a></p>` : ''}
+    </section>`;
+}
+
+/* =========================================================
+   Listen: Workshop · Person · Familie · Raum
+   ========================================================= */
+function personPlanTable(p, compact = false) {
+  const rows = MD.SLOTS.map(s => { const a = MD.R.asg[p.id][s.id]; const wid = a && (a.lead || a.w || a.signup); const w = wid && MD.WS[wid];
+    const room = w ? esc(mRoom(mPlace(w.id).room).name) : '';
+    const role = !a ? '' : a.lead ? '<strong>leitet</strong>' : a.signup ? 'Anmeldung' : a.open ? esc(OPEN[a.open][1](p)) : a.got ? `nimmt teil (${a.got}. Wahl)` : 'nimmt teil';
+    return `<tr><th scope="row">${esc(sShort(s))}</th><td>${w ? `<strong>${esc(w.title)}</strong>` : a && a.open ? chip('Offen', 'attn') : '<span class="muted">frei</span>'}</td><td>${room}</td><td>${role}</td></tr>`; }).join('');
+  return `<div class="table-wrap"><table class="plain roster"><caption class="sr">Plan von ${esc(p.name)}</caption><thead><tr><th scope="col">Slot</th><th scope="col">Workshop</th><th scope="col">Raum</th><th scope="col">Rolle</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function extPlanTable(x) {
+  const rows = MD.SLOTS.map(s => { const w = Object.values(MD.WS).find(v => mPlace(v.id).slot === s.id && v.leaders.some(l => l.x === x.id));
+    return `<tr><th scope="row">${esc(sShort(s))}</th><td>${w ? `<strong>${esc(w.title)}</strong>` : '<span class="muted">—</span>'}</td><td>${w ? esc(mRoom(mPlace(w.id).room).name) : ''}</td><td>${w ? `<strong>leitet</strong> · ${personen(MD.R.ppl[w.id].length)}` : x.avail.includes(s.id) ? '<span class="muted">verfügbar</span>' : ''}</td></tr>`; }).join('');
+  return `<div class="table-wrap"><table class="plain roster"><caption class="sr">Plan von ${esc(x.name)}</caption><thead><tr><th scope="col">Slot</th><th scope="col">Workshop</th><th scope="col">Raum</th><th scope="col">Rolle</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function docShell(kindLabel, title, meta, body, extra = '') {
+  const stamp = S.phase === 4 ? `festgelegt am ${EVENT.fixedOn}` : `${STAND[S.phase]}, nicht endgültig`;
+  return `<article class="roster-doc" aria-labelledby="roster-h">
+    <p class="print-only doc-top"><span>${kindLabel}</span><strong>${stamp}</strong></p>
+    <h3 id="roster-h" tabindex="-1">${title}</h3>${meta.map(m => `<p class="roster-meta">${m}</p>`).join('')}
+    ${S.phase === 4 ? '' : `<p class="print-only doc-mark">${STAND[S.phase].toUpperCase()}: kann sich bis zum Festlegen noch ändern.</p>`}
+    ${extra}${body}</article>`;
+}
+function pickRow(select, prev, next, attr) {
+  return `<div class="list-pick">${select}<div class="actions" style="margin-top:0">${prev ? `<button type="button" class="btn sm" data-${attr}="${prev[0]}">‹ Vorherige<span class="sr">: ${esc(prev[1])}</span></button>` : ''}${next ? `<button type="button" class="btn sm" data-${attr}="${next[0]}">Nächste ›<span class="sr">: ${esc(next[1])}</span></button>` : ''}</div></div>`;
+}
+function vLists() {
+  const kinds = [['ws', 'Workshop'], ['p', 'Person'], ['f', 'Familie'], ['r', 'Raum']];
+  let h = viewHead('Listen', 'Zum Ansehen und Drucken (Strg+P). Gedruckt wird die gerade gewählte Liste.') + standNotice();
+  h += `<div class="subviews" role="tablist" aria-label="Art der Liste">${kinds.map(([k, l]) => `<button type="button" role="tab" id="tab-list-${k}" data-listkind="${k}" aria-selected="${S.list === k}" aria-controls="list-panel" tabindex="${S.list === k ? 0 : -1}">${l}</button>`).join('')}</div>`;
+  let panel = '';
+  if (S.list === 'ws') {
+    const ws = Object.values(MD.WS).filter(w => mPlace(w.id).slot).sort((a, b) => MD.SLOTS.findIndex(x => x.id === mPlace(a.id).slot) - MD.SLOTS.findIndex(x => x.id === mPlace(b.id).slot) || a.title.localeCompare(b.title, 'de'));
+    if (!ws.length) panel = '<p class="muted">Sobald ein Workshop eingeplant ist, steht hier seine Liste.</p>';
+    else {
+      if (!ws.find(w => w.id === S.listWs)) S.listWs = ws[0].id;
+      const i = ws.findIndex(w => w.id === S.listWs), w = ws[i], sl = mSlot(mPlace(w.id).slot), room = mRoom(mPlace(w.id).room);
+      const ppl = MD.R.ppl[w.id].map(id => PERSON[id]).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+      const groups = MD.SLOTS.filter(x => ws.some(v => mPlace(v.id).slot === x.id)).map(x => `<optgroup label="${esc(sShort(x))}">${ws.filter(v => mPlace(v.id).slot === x.id).map(v => `<option value="${v.id}"${v.id === w.id ? ' selected' : ''}>${esc(v.title)} · ${personen(MD.R.ppl[v.id].length)}</option>`).join('')}</optgroup>`).join('');
+      const rows = ppl.map(p => `<tr><th scope="row">${esc(p.name)}</th><td>${p.kid ? p.age : 'erw.'}</td><td class="health">${p.health ? `<strong>${esc(p.health)}</strong>` : '<span class="muted">keine Angabe</span>'}</td><td>${esc(p.contact[0])} (${esc(p.contact[1])})<br>${esc(p.cphone)}</td><td class="print-only chk"><span aria-hidden="true"></span></td></tr>`).join('');
+      const cards = ppl.map(p => `<li class="rcard"><p><strong>${esc(p.name)}</strong> <span class="muted">· ${p.kid ? p.age + ' Jahre' : 'erwachsen'}</span></p>${p.health ? `<p class="health"><strong>${esc(p.health)}</strong></p>` : ''}<p class="small">Notfall: ${esc(p.contact[0])} (${esc(p.contact[1])}), <a href="tel:${p.cphone.replace(/\s/g, '')}">${esc(p.cphone)}</a></p></li>`).join('');
+      panel = `<div class="alert info"><p><strong>Vertraulich.</strong> Enthält Allergien, Gesundheitshinweise und Notfallkontakte. Nur für die Workshopleitung.</p></div>` +
+        pickRow(`<div class="field"><label for="list-ws">Workshop</label><select id="list-ws">${groups}</select></div>`, ws[i - 1] && [ws[i - 1].id, ws[i - 1].title], ws[i + 1] && [ws[i + 1].id, ws[i + 1].title], 'lws') +
+        (w.mode === 'assign' && hasAnswers() ? (() => { const mine = MD.R.ppl[w.id].map(id => MD.R.asg[id][sl.id]); const firsts = PEOPLE.filter(p => MD.R.resp[p.id].ranks[0] === w.id).length;
+          return `<p class="screen-only org-note small"><strong>Nur für die Orga:</strong> ${mine.filter(a => a && a.got === 1).length} Teilnehmende mit 1. Wahl · ${mine.filter(a => a && a.got).length} mit einer Wahl aus ihrer Top ${TOPN} · ${firsts}× als 1. Wahl gewünscht</p>`; })() : '') +
+        docShell('Teilnahmeliste', esc(w.title), [`${esc(sLong(sl))} · ${esc(room.name)}`, `Leitung: ${leadersHtml(w)}`, `<strong>${personen(ppl.length)}</strong> von ${w.cap} ${w.cap === 1 ? 'Platz' : 'Plätzen'} · ${GROUP[w.target]}, ${ageText(w)}${ppl.filter(p => p.health).length ? ` · ${personen(ppl.filter(p => p.health).length)} mit Gesundheitshinweis` : ''}`],
+          ppl.length ? `<div class="wide-only"><div class="table-wrap"><table class="roster"><caption class="sr">Teilnehmende ${esc(w.title)}</caption><thead><tr><th scope="col">Name</th><th scope="col">Alter</th><th scope="col">Allergien und Gesundheit</th><th scope="col">Notfallkontakt</th><th scope="col" class="print-only">Anwesend</th></tr></thead><tbody>${rows}</tbody></table></div></div><div class="narrow-only"><ul class="rcards">${cards}</ul></div>` : '<p class="muted">Noch niemand zugeordnet.</p>',
+          `<p class="print-only doc-conf">Vertraulich: enthält Gesundheitsangaben und Telefonnummern. Nur für die Workshopleitung. Nach der Veranstaltung vernichten.</p>`);
+    }
+  } else if (S.list === 'p') {
+    const all = [...PEOPLE.map(p => [p.id, p.name]), ...Object.values(MD.EXT).map(x => [x.id, x.name + ' (extern)'])].sort((a, b) => a[1].localeCompare(b[1], 'de'));
+    if (!all.find(x => x[0] === S.listP)) S.listP = all[0][0];
+    const i = all.findIndex(x => x[0] === S.listP), cur = all[i];
+    const pick = `<div class="field"><label for="list-person">Person suchen</label><input type="search" id="list-person" list="list-people" value="${esc(cur[1])}" autocomplete="off"><datalist id="list-people">${all.map(x => `<option value="${esc(x[1])}">`).join('')}</datalist></div>`;
+    let doc;
+    if (PERSON[S.listP]) { const p = PERSON[S.listP]; doc = docShell('Workshopplan', esc(p.name), [`${p.kid ? p.age + ' Jahre' : 'Erwachsen'} · Familie ${esc(FAMILY[p.fam].name)}`, `${workshops(nWs(p))}${Object.values(MD.R.asg[p.id]).some(a => a.lead) ? ` · leitet ${Object.values(MD.R.asg[p.id]).filter(a => a.lead).map(a => esc(MD.WS[a.lead].title)).join(', ')}` : ''}`], personPlanTable(p)); }
+    else { const x = MD.EXT[S.listP]; doc = docShell('Workshopplan', esc(x.name), ['Externe Leitung'], extPlanTable(x)); }
+    panel = pickRow(pick, all[i - 1], all[i + 1], 'lp') + doc;
+  } else if (S.list === 'f') {
+    const fams = [...FAMILIES].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    if (!FAMILY[S.listF]) S.listF = fams[0].id;
+    const i = fams.findIndex(f => f.id === S.listF), f = fams[i], mem = f.members.map(id => PERSON[id]).sort((a, b) => a.kid - b.kid || b.age - a.age);
+    const cell = (p, s) => { const a = MD.R.asg[p.id][s.id]; const wid = a && (a.lead || a.w || a.signup); if (!wid) return a && a.open ? chip('Offen', 'attn') : '<span class="muted">—</span>'; const w = MD.WS[wid]; return `<strong>${esc(w.title)}</strong>${a.lead ? ' <span class="badge">leitet</span>' : ''}<br><span class="small muted">${esc(mRoom(mPlace(w.id).room).name)}</span>`; };
+    const table = `<div class="wide-only"><div class="table-wrap"><table class="plain roster fam"><caption class="sr">Familie ${esc(f.name)}</caption><thead><tr><th scope="col">Slot</th>${mem.map(p => `<th scope="col">${esc(p.first)}<span class="small muted" style="display:block;font-weight:500">${p.kid ? p.age + ' Jahre' : 'erwachsen'}</span></th>`).join('')}</tr></thead>
+      <tbody>${MD.SLOTS.map(s => `<tr><th scope="row">${esc(sShort(s))}</th>${mem.map(p => `<td>${cell(p, s)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+    const cards = `<div class="narrow-only"><ul class="rcards">${MD.SLOTS.map(s => `<li class="rcard"><p><strong>${esc(sShort(s))}</strong></p>${mem.map(p => `<p class="small">${esc(p.first)}: ${cell(p, s)}</p>`).join('')}</li>`).join('')}</ul></div>`;
+    panel = pickRow(`<div class="field"><label for="list-fam">Familie</label><select id="list-fam">${fams.map(x => `<option value="${x.id}"${x.id === f.id ? ' selected' : ''}>${esc(x.name)} · ${personen(x.members.length)}</option>`).join('')}</select></div>`, fams[i - 1] && [fams[i - 1].id, fams[i - 1].name], fams[i + 1] && [fams[i + 1].id, fams[i + 1].name], 'lf')
+      + docShell('Workshopplan', `Familie ${esc(f.name)}`, [mem.map(p => esc(p.first)).join(', ')], table + cards);
+  } else {
+    const rooms = MD.ROOMS;
+    if (!rooms.find(r => r.id === S.listR)) S.listR = rooms[0].id;
+    const i = rooms.findIndex(r => r.id === S.listR), r = rooms[i];
+    const rows = MD.SLOTS.map(s => { const w = Object.values(MD.WS).find(v => mPlace(v.id).slot === s.id && mPlace(v.id).room === r.id);
+      return `<tr><th scope="row">${DAYS[s.day].short} ${time(s)}</th><td>${w ? `<strong>${esc(w.title)}</strong>` : '<span class="muted">—</span>'}</td><td>${w ? `${GROUP[w.target]}, ${ageText(w)}` : ''}</td><td>${w ? leadersHtml(w) : ''}</td></tr>`; }).join('');
+    panel = pickRow(`<div class="field"><label for="list-room">Raum</label><select id="list-room">${rooms.map(x => `<option value="${x.id}"${x.id === r.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>`, rooms[i - 1] && [rooms[i - 1].id, rooms[i - 1].name], rooms[i + 1] && [rooms[i + 1].id, rooms[i + 1].name], 'lr')
+      + docShell('Raumplan', esc(r.name), [`${workshops(Object.values(MD.WS).filter(v => mPlace(v.id).room === r.id).length)} in diesem Raum`], `<div class="table-wrap"><table class="plain roster room"><caption class="sr">Raumplan ${esc(r.name)}</caption><thead><tr><th scope="col">Zeit</th><th scope="col">Workshop</th><th scope="col">Für</th><th scope="col">Leitung</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  }
+  return h + `<div role="tabpanel" id="list-panel" aria-labelledby="tab-list-${S.list}">${panel}</div>`;
+}
+
+/* =========================================================
+   Edit dialogs
+   ========================================================= */
+const dlg = document.getElementById('dlg');
+let returnFocus = null, DLG = null;
+function openDlg(title, body, foot) { dlg.innerHTML = `<div class="dlg-head"><h2 id="dlgTitle">${title}</h2></div><div class="dlg-body">${body}</div><div class="dlg-foot">${foot}</div>`; dlg.showModal(); const f = dlg.querySelector('input, textarea, select'); if (f) f.focus(); }
+function closeDlg(focusSel) { dlg.close(); render(focusSel || returnFocus); }
+const dlgErr = t => { const e = dlg.querySelector('#f-err'); e.textContent = t; e.hidden = false; };
+const knownFeatures = () => [...new Set([...ROOMS.flatMap(r => r.features), ...Object.values(WS).map(w => w.need).filter(Boolean)])].sort((a, b) => a.localeCompare(b, 'de'));
+const footEdit = (canDelete, delLabel) => `${canDelete ? `<button type="button" class="btn sm danger" data-dlg="delete">${delLabel}</button>` : ''}<button type="button" class="btn sm" data-dlg="cancel">Abbrechen</button><button type="button" class="btn sm main" data-dlg="save">Übernehmen</button>`;
+function editWs(id) {
+  const w = id ? WS[id] : { title: '', desc: '', target: 'kids', age: [5, 14], cap: 8, leaders: [], need: '', mode: 'assign', source: 'off' };
+  DLG = { kind: 'ws', id };
+  const names = [...PEOPLE.map(p => p.name), ...Object.values(EXT).map(x => x.name)];
+  openDlg(id ? `Workshop bearbeiten: ${esc(w.title)}` : 'Workshop hinzufügen', `<div class="form">
+    <div class="f"><label for="f-title">Titel</label><input type="text" id="f-title" value="${esc(w.title)}"></div>
+    <div class="f"><label for="f-desc">Beschreibung für Familien</label><textarea id="f-desc">${esc(w.desc || '')}</textarea></div>
+    <div class="f"><label for="f-target">Für</label><select id="f-target">${Object.entries(GROUP).map(([k, l]) => `<option value="${k}"${w.target === k ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+    <div class="two"><div class="f"><label for="f-a0">Alter ab</label><input type="number" id="f-a0" min="0" max="99" value="${w.age[0]}"></div><div class="f"><label for="f-a1">Alter bis</label><input type="number" id="f-a1" min="0" max="99" value="${w.age[1]}"></div></div>
+    <div class="two"><div class="f"><label for="f-cap">Plätze</label><input type="number" id="f-cap" min="1" max="200" value="${w.cap}"><span class="hint">Leitungen zählen nicht mit.</span></div>
+      <div class="f"><label for="f-mode">Teilnahme</label><select id="f-mode"><option value="assign"${w.mode === 'assign' ? ' selected' : ''}>Zugewiesen</option><option value="signup"${w.mode === 'signup' ? ' selected' : ''}>Anmeldung</option></select></div></div>
+    <div class="f"><label for="f-lead">Leitung</label><input type="text" id="f-lead" list="lead-names" value="${esc(w.leaders.map(lname).join(', '))}"><datalist id="lead-names">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+      <span class="hint">Mehrere Namen mit Komma trennen. Angemeldete Personen werden erkannt, andere Namen als externe Leitung angelegt.</span></div>
+    <div class="f"><label for="f-need">Braucht</label><input type="text" id="f-need" list="feat" value="${esc(w.need || '')}"><datalist id="feat">${knownFeatures().map(f => `<option value="${esc(f)}">`).join('')}</datalist><span class="hint">Eine Ausstattung, die ein Raum haben muss.</span></div>
+    <p class="err" id="f-err" hidden></p></div>`, footEdit(!!id, 'Workshop löschen'));
+}
+function saveWs() {
+  const v = id => dlg.querySelector('#' + id).value.trim();
+  const title = v('f-title'), a0 = +v('f-a0'), a1 = +v('f-a1'), cap = +v('f-cap');
+  const err = !title ? 'Bitte einen Titel angeben.' : a1 < a0 ? '„Alter bis“ muss mindestens „Alter ab“ sein.' : cap < 1 ? 'Mindestens 1 Platz.' : '';
+  if (err) return dlgErr(err);
+  const leaders = v('f-lead').split(',').map(x => x.trim()).filter(Boolean).map(n => {
+    const p = PEOPLE.find(x => x.name === n); if (p) return { p: p.id };
+    let x = Object.values(EXT).find(e => e.name === n); if (!x) { const id = uid('x'); x = EXT[id] = { id, name: n, phone: '', avail: SLOTS.map(s => s.id) }; }
+    return { x: x.id };
+  });
+  const data = { title, desc: v('f-desc'), target: v('f-target'), age: [a0, a1], cap, mode: v('f-mode'), leaders, need: v('f-need') };
+  const id = DLG.id || uid('w');
+  if (!DLG.id) WS[id] = { id, source: 'off', ...data }; else Object.assign(WS[id], data);
+  noteChange(DLG.id ? `Workshop „${title}“ bearbeitet` : `Workshop „${title}“ hinzugefügt`);
+  closeDlg(`[data-edit-ws="${id}"]`);
+}
+function editExt(id) {
+  const x = id ? EXT[id] : { name: '', phone: '', avail: SLOTS.map(s => s.id) }; DLG = { kind: 'ext', id };
+  openDlg(id ? `Externe Leitung: ${esc(x.name)}` : 'Externe Leitung hinzufügen', `<div class="form">
+    <div class="f"><label for="f-name">Name</label><input type="text" id="f-name" value="${esc(x.name)}"></div>
+    <div class="f"><label for="f-phone">Telefon</label><input type="text" id="f-phone" inputmode="tel" value="${esc(x.phone)}"><span class="hint">Nur für die Orga sichtbar.</span></div>
+    <fieldset><legend>Verfügbar</legend><div class="checks">${SLOTS.map(s => `<label><input type="checkbox" value="${s.id}"${x.avail.includes(s.id) ? ' checked' : ''}> ${esc(sShort(s))}</label>`).join('')}</div></fieldset>
+    <p class="err" id="f-err" hidden></p></div>`, footEdit(false));
+}
+function saveExt() {
+  const name = dlg.querySelector('#f-name').value.trim(); if (!name) return dlgErr('Bitte einen Namen angeben.');
+  const avail = [...dlg.querySelectorAll('.checks input:checked')].map(i => i.value); if (!avail.length) return dlgErr('Mindestens einen Slot wählen.');
+  const id = DLG.id || uid('x');
+  EXT[id] = { ...(EXT[id] || { id }), id, name, phone: dlg.querySelector('#f-phone').value.trim(), avail };
+  noteChange(`Externe Leitung ${name} ${DLG.id ? 'geändert' : 'hinzugefügt'}`); closeDlg(`[data-edit-ext="${id}"]`);
+}
+function editSlot(id) {
+  const s = id ? SLOTS.find(x => x.id === id) : { day: 'sa', start: '09:00', end: '11:00' };
+  DLG = { kind: 'slot', id };
+  openDlg(id ? `Slot bearbeiten: ${esc(sShort(s))}` : 'Slot hinzufügen', `<div class="form">
+    <div class="f"><label for="f-day">Tag</label><select id="f-day">${DAY_ORDER.map(d => `<option value="${d}"${d === s.day ? ' selected' : ''}>${DAYS[d].name}, ${DAYS[d].date}</option>`).join('')}</select></div>
+    <div class="two"><div class="f"><label for="f-start">Beginn</label><input type="time" id="f-start" value="${s.start}"></div><div class="f"><label for="f-end">Ende</label><input type="time" id="f-end" value="${s.end}"></div></div>
+    <p class="err" id="f-err" hidden></p></div>`, footEdit(!!id, 'Slot löschen'));
+}
+function saveSlot() {
+  const v = id => dlg.querySelector('#' + id).value;
+  const day = v('f-day'), start = v('f-start'), end = v('f-end');
+  if (!start || !end || end <= start) return dlgErr('Das Ende muss nach dem Beginn liegen.');
+  const id = DLG.id || uid('s');
+  if (!DLG.id) { SLOTS.push({ id, day, start, end }); Object.values(EXT).forEach(x => x.avail.push(id)); } else Object.assign(SLOTS.find(x => x.id === id), { day, start, end });
+  sortSlots(); noteChange(`Slot ${DAYS[day].short} ${start}–${end} ${DLG.id ? 'geändert' : 'hinzugefügt'}`); closeDlg(`[data-edit-slot="${id}"]`);
+}
+function editRoom(id) {
+  const r = id ? ROOMS.find(x => x.id === id) : { name: '', features: [], blocked: [] };
+  DLG = { kind: 'room', id };
+  openDlg(id ? `Raum bearbeiten: ${esc(r.name)}` : 'Raum hinzufügen', `<div class="form">
+    <div class="f"><label for="f-name">Name</label><input type="text" id="f-name" value="${esc(r.name)}"></div>
+    <div class="f"><label for="f-feat">Ausstattung</label><input type="text" id="f-feat" value="${esc(r.features.join(', '))}" list="feat"><datalist id="feat">${knownFeatures().map(f => `<option value="${esc(f)}">`).join('')}</datalist><span class="hint">Mit Komma trennen.</span></div>
+    <fieldset><legend>Nicht verfügbar</legend><div class="checks">${SLOTS.map(s => `<label><input type="checkbox" value="${s.id}"${r.blocked.includes(s.id) ? ' checked' : ''}> ${esc(sShort(s))}</label>`).join('')}</div></fieldset>
+    <p class="err" id="f-err" hidden></p></div>`, footEdit(!!id, 'Raum löschen'));
+}
+function saveRoom() {
+  const name = dlg.querySelector('#f-name').value.trim(); if (!name) return dlgErr('Bitte einen Namen angeben.');
+  const features = dlg.querySelector('#f-feat').value.split(',').map(x => x.trim()).filter(Boolean), blocked = [...dlg.querySelectorAll('.checks input:checked')].map(i => i.value);
+  const id = DLG.id || uid('r');
+  if (!DLG.id) ROOMS.push({ id, name, features, blocked }); else Object.assign(ROOMS.find(x => x.id === id), { name, features, blocked });
+  noteChange(`Raum „${name}“ ${DLG.id ? 'geändert' : 'hinzugefügt'}`); closeDlg(`[data-edit-room="${id}"]`);
+}
+function deleteCurrent() {
+  const { kind, id } = DLG;
+  if (kind === 'ws') { const t = WS[id].title; delete WS[id]; noteChange(`Workshop „${t}“ gelöscht`); closeDlg('#btn-new-ws'); }
+  if (kind === 'slot') { const s = SLOTS.find(x => x.id === id); SLOTS = SLOTS.filter(x => x.id !== id); ROOMS.forEach(r => r.blocked = r.blocked.filter(b => b !== id)); noteChange(`Slot ${sShort(s)} gelöscht`); closeDlg('#btn-new-slot'); }
+  if (kind === 'room') { const r = ROOMS.find(x => x.id === id); ROOMS = ROOMS.filter(x => x.id !== id); noteChange(`Raum „${r.name}“ gelöscht`); closeDlg('#btn-new-room'); }
+}
+function confirmStep(title, body, ok, fn) { DLG = { kind: 'confirm', fn }; openDlg(title, body, `<button type="button" class="btn sm" data-dlg="cancel">Abbrechen</button><button type="button" class="btn sm main" data-dlg="save">${ok}</button>`); }
+const ACTS = {
+  open: () => confirmStep('Workshopwahl öffnen?', `<p>Familien sehen danach die Workshopbeschreibungen, ohne Zeiten, und können bis ${EVENT.deadline} für jede Person eine Rangfolge abgeben.</p>`, 'Workshopwahl öffnen', () => { S.phase = 2; }),
+  close: () => confirmStep('Wahl schließen?', `<p>Danach können Familien keine Rangfolge mehr abgeben oder ändern.</p>`, 'Wahl schließen', () => { S.phase = 3; }),
+  fix: () => { MD = liveModel(); const open = new Set(openEntries().map(e => e.p.id)).size, un = mAssignWs().filter(w => !mPlace(w.id).slot).length;
+    const warn = [MD.R.gap ? `Es fehlen ${MD.R.needed - MD.R.seats} Kinderplätze.` : '', open ? `${open} Kinder mit offenen Fällen.` : '', un ? `${workshops(un)} nicht eingeplant.` : '', S.drafts ? 'Es gibt ungespeicherte Änderungen. Festgelegt wird der gespeicherte Stand.' : ''].filter(Boolean);
+    confirmStep('Zuordnung festlegen?', `<p><strong>Slots, Räume und Teilnahme werden festgelegt.</strong> Danach wird nichts mehr neu berechnet.</p>${warn.length ? `<p><strong>Noch offen:</strong></p><ul>${warn.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}`, 'Festlegen', () => { fixNow(); S.phase = 4; }); },
+};
+
+/* =========================================================
+   Render and events
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const landscape = () => (S.view === 'prog' && S.sec.prog === 'grid') || (S.view === 'teil' && S.sec.teil === 'people');
+function render(focus) {
+  MD = S.phase === 4 && SNAP ? SNAP : liveModel();
+  if (!(S.phase === 4 && SNAP)) LASTR = MD.R;
+  $('#protoPhase').innerHTML = STEPS.map((t, i) => `<option value="${i + 1}"${S.phase === i + 1 ? ' selected' : ''}>${i + 1}. ${t}</option>`).join('');
+  $('#protoData').value = S.data; $('#protoMode').value = S.mode; $('#protoNarrow').checked = S.narrow; $('#protoGroupUi').value = S.groupUi; $('#protoPrint').checked = S.print;
+  $('#frame').classList.toggle('narrow', S.narrow);
+  const v = Object.fromEntries(VIEWS)[S.view];
+  $('#stateLabel').innerHTML = `Zustand: <strong>Schritt ${S.phase} (${STAND[S.phase]}) · ${v} · ${secLabel(S.view)} · Gruppe: ${GROUP[S.group]}</strong>${S.narrow ? ' · schmale Breite' : ''}${S.print ? ' · Druckansicht' : ''}`;
+  $('#app').innerHTML = product();
+  applyPrint(S.print);
+  if (focus) { const el = typeof focus === 'string' ? $(focus) : focus; if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } }
+}
+function announce() { const p = S.trace && PERSON[S.trace]; $('#live').textContent = !p || S.tmode === 'all' ? 'Alle Personen' : S.tmode === 'only' ? `Nur ${p.name}: ${MD.R.trace[p.id].length} Schritte` : `${p.name} hervorgehoben`; }
+function applyPrint(on) {
+  const h = document.documentElement;
+  h.classList.toggle('printmode', on); h.classList.toggle('landscape', on && landscape()); h.classList.toggle('leadprint', on && S.view === 'lists'); h.classList.toggle('progprint', on && S.view === 'prog');
+  if (on) document.querySelectorAll('#app details').forEach(d => d.open = true);
+}
+window.addEventListener('beforeprint', () => { const f = document.querySelector('.app-foot'); if (f) f.textContent = printStamp(); applyPrint(true); });
+window.addEventListener('afterprint', () => { if (!S.print) render(); });
+
+document.addEventListener('click', e => {
+  const t = e.target;
+  const dd = t.closest('[data-dlg]');
+  if (dd) { const a = dd.dataset.dlg;
+    if (a === 'cancel') { dlg.close(); if (returnFocus) returnFocus.focus(); return; }
+    if (a === 'delete') { if (!dd.dataset.armed) { dd.dataset.armed = '1'; dd.textContent = 'Wirklich löschen?'; return; } deleteCurrent(); return; }
+    if (DLG.kind === 'confirm') { dlg.close(); DLG.fn(); render('#h1'); return; }
+    ({ ws: saveWs, slot: saveSlot, room: saveRoom, ext: saveExt })[DLG.kind](); return; }
+  if (t.closest('.ph')) { e.preventDefault(); return; }
+  if (t.closest('#protoSave')) { if (S.drafts) { S.rev++; S.drafts = 0; } render(); return; }
+  const btn = t.closest('button, a'); if (btn) returnFocus = btn;
+  const act = t.closest('[data-act]'); if (act) { ACTS[act.dataset.act](); return; }
+  const v = t.closest('[data-view]'); if (v) { e.preventDefault(); S.view = v.dataset.view; render(`#tab-view-${S.view}`); return; }
+  const sc = t.closest('[data-sec]'); if (sc) { S.sec[S.view] = sc.dataset.sec; render(`#tab-sec-${sc.dataset.sec}`); return; }
+  if (t.closest('[data-new-ext]')) return editExt(null);
+  if (t.closest('[data-go-unplaced]')) { e.preventDefault(); S.view = 'prog'; S.sec.prog = 'unplaced'; render('#tab-sec-unplaced'); return; }
+  const lk = t.closest('[data-listkind]'); if (lk) { S.list = lk.dataset.listkind; render(`#tab-list-${S.list}`); return; }
+  const ol = t.closest('[data-open-list]'); if (ol) { S.view = 'lists'; S.list = 'ws'; S.listWs = ol.dataset.openList; render('#roster-h'); return; }
+  for (const [attr, key] of [['lws', 'listWs'], ['lp', 'listP'], ['lf', 'listF'], ['lr', 'listR']]) { const b = t.closest(`[data-${attr}]`); if (b) { S[key] = b.dataset[attr]; render('#roster-h'); return; } }
+  const tp = t.closest('[data-trace]'); if (tp) { S.trace = tp.dataset.trace; if (S.tmode === 'all') S.tmode = 'hl'; render('#trace-person'); announce(); return; }
+  const op = t.closest('[data-open-person]'); if (op) { e.preventDefault(); S.view = 'lists'; S.list = 'p'; S.listP = op.dataset.openPerson; render('#roster-h'); return; }
+  const wy = t.closest('[data-way]'); if (wy) { S.trace = wy.dataset.way; S.tmode = 'only'; S.view = 'wish'; S.sec.wish = 'flow'; render('#trace-person'); announce(); return; }
+  if (t.closest('[data-tl-toggle]')) { S.tlOpen = !S.tlOpen; render('[data-tl-toggle]'); return; }
+  if (t.closest('[data-go-cases]')) { e.preventDefault(); S.view = 'teil'; S.sec.teil = 'open'; render('#tab-sec-open'); return; }
+  const ge = t.closest('[data-go-edit-ws]'); if (ge) { S.view = 'ws'; render(`[data-edit-ws="${ge.dataset.goEditWs}"]`); return; }
+  if (t.closest('[data-new-ws]')) return editWs(null);
+  if (t.closest('[data-new-slot]')) return editSlot(null);
+  if (t.closest('[data-new-room]')) return editRoom(null);
+  const ew = t.closest('[data-edit-ws]'); if (ew) return editWs(ew.dataset.editWs);
+  const ex = t.closest('[data-edit-ext]'); if (ex) return editExt(ex.dataset.editExt);
+  const es = t.closest('[data-edit-slot]'); if (es) return editSlot(es.dataset.editSlot);
+  const er = t.closest('[data-edit-room]'); if (er) return editRoom(er.dataset.editRoom);
+  if (t.closest('[data-retry]')) { S.mode = 'loading'; render('#h1'); setTimeout(() => { if (S.mode === 'loading') { S.mode = 'normal'; render(); } }, 1400); }
+});
+document.addEventListener('change', e => {
+  const id = e.target.id, t = e.target;
+  if (id === 'protoData') { S.data = t.value; PREV = null; LASTR = null; SNAP = null; POSTFIX = []; loadData(S.data); S.drafts = 0; if (S.phase === 4) fixNow(); render(); }
+  else if (id === 'protoPhase') { S.phase = +t.value; if (S.phase === 4 && !SNAP) fixNow(); if (S.phase < 4) SNAP = null; render(); }
+  else if (id === 'protoMode') { S.mode = t.value; render(); }
+  else if (id === 'protoNarrow') { S.narrow = t.checked; render(); }
+  else if (id === 'protoPrint') { S.print = t.checked; render(); }
+  else if (id === 'group-select') { S.group = t.value; render('#group-select'); }
+  else if (id === 'protoGroupUi') { S.groupUi = t.value; render(); }
+  else if (t.name === 'group') { S.group = t.value; render(`input[name="group"][value="${S.group}"]`); }
+  else if (t.name === 'tmode') { S.tmode = t.value; render(`input[name="tmode"][value="${S.tmode}"]`); announce(); }
+  else if (id === 'trace-person') { const p = PEOPLE.find(x => x.name === t.value.trim()); if (p) { S.trace = p.id; render('#trace-person'); announce(); } }
+  else if (id === 'list-ws') { S.listWs = t.value; render('#list-ws'); }
+  else if (id === 'list-fam') { S.listF = t.value; render('#list-fam'); }
+  else if (id === 'list-room') { S.listR = t.value; render('#list-room'); }
+  else if (id === 'list-person') { const v = t.value.trim(); const p = PEOPLE.find(x => x.name === v); const x = Object.values(MD.EXT).find(q => q.name + ' (extern)' === v || q.name === v); if (p || x) { S.listP = (p || x).id; render('#list-person'); } }
+});
+document.addEventListener('keydown', e => {
+  const tab = e.target.closest && e.target.closest('[role="tab"]');
+  if (!tab) return;
+  const list = [...tab.parentElement.querySelectorAll('[role="tab"]')];
+  let i = list.indexOf(tab);
+  if (e.key === 'ArrowRight') i = (i + 1) % list.length; else if (e.key === 'ArrowLeft') i = (i - 1 + list.length) % list.length;
+  else if (e.key === 'Home') i = 0; else if (e.key === 'End') i = list.length - 1; else return;
+  e.preventDefault(); list[i].click();
+});
+dlg.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); dlg.querySelector('[data-dlg="save"]').click(); } });
+render();
+
+</script>
+</body>
+</html>

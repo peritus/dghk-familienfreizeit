@@ -16,7 +16,7 @@ test('organisers can add and clear a fixed attendance despite an eligibility con
   )
 
   fireEvent.change(screen.getByLabelText('Person'), { target: { value: 'per_martin' } })
-  fireEvent.change(screen.getByLabelText('Workshop'), { target: { value: 'wks_schmieden' } })
+  fireEvent.change(screen.getByLabelText('Kurs'), { target: { value: 'wks_schmieden' } })
   fireEvent.click(screen.getByRole('button', { name: 'Fest zuordnen' }))
 
   const fixedAttendance = screen.getByRole('region', { name: 'Feste Teilnahmen' })

@@ -64,7 +64,7 @@ export const Plans: Story = {
     <div className="grid gap-8 bg-background p-6">
       <WorkshopPersonPlanDocument
         title="Mara Schmidt"
-        metadata={['9 Jahre · Familie Schmidt', '2 Workshops']}
+        metadata={['9 Jahre · Familie Schmidt', '2 Kurse']}
         entries={[
           {
             id: 'one',
@@ -87,7 +87,7 @@ export const Plans: Story = {
             id: 'four',
             slot: 'Sa 11:30–13:30',
             status: 'open',
-            role: 'Alle passenden Workshops sind voll.',
+            role: 'Alle passenden Kurse sind voll.',
           },
         ]}
       />
@@ -156,7 +156,7 @@ export const Plans: Story = {
       />
       <WorkshopRoomPlanDocument
         title="Atelier"
-        metadata={['2 Workshops in diesem Raum']}
+        metadata={['2 Kurse in diesem Raum']}
         entries={[
           {
             id: 'one',

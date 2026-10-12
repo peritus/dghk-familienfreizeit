@@ -79,7 +79,7 @@ test('one all-audience workshop remains visible in both groups and metric filter
   expect(
     (screen.getByRole('checkbox', { name: 'Nur nicht eingeplante' }) as HTMLInputElement).checked,
   ).toBe(true)
-  expect(screen.getByText('Keine Workshops für diese Filter')).toBeTruthy()
+  expect(screen.getByText('Keine Kurse für diese Filter')).toBeTruthy()
   fireEvent.click(screen.getByRole('checkbox', { name: 'Nur nicht eingeplante' }))
   expect(tile.getAttribute('aria-pressed')).toBe('false')
 })

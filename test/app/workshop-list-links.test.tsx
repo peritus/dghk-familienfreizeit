@@ -62,7 +62,7 @@ test('a placed workshop in the programme opens its roster', () => {
 test('the traced person links to their workshop plan', () => {
   renderAt('/workshops/allocation/trace?person=per_p1', <WorkshopAllocation />)
 
-  expect(screen.getByRole('link', { name: 'Workshopplan ansehen' }).getAttribute('href')).toBe(
+  expect(screen.getByRole('link', { name: 'Kursplan ansehen' }).getAttribute('href')).toBe(
     '/workshops/lists/persons?person=per_p1',
   )
 })

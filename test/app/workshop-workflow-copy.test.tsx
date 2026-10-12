@@ -38,7 +38,7 @@ const unsupportedPromises = [
   'den aktuellen Plan festlegen',
   'manuelle Freigabe',
   'Historie',
-  'bei der Workshopplanung ergänzt',
+  'bei der Kursplanung ergänzt',
   'vor dem Festlegen',
   'bevor der Plan festgelegt wird',
 ]
@@ -82,9 +82,7 @@ test('the workshop overview describes only what the screen can do', () => {
   renderAt('/workshops', <Workshops />)
 
   expect(
-    screen.getByText(
-      'Workshops anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten.',
-    ),
+    screen.getByText('Kurse anlegen und bearbeiten, Leitungen und Zielgruppen im Blick behalten.'),
   ).toBeTruthy()
   expectNoUnsupportedPromise()
 
