@@ -48,7 +48,7 @@ The three names describe scope, independently of button emphasis:
 
 | Component | Scope | Current examples |
 |---|---|---|
-| `PrimaryNavigation` | Application areas | Dashboard, Familien, Unterbringung, Workshops |
+| `PrimaryNavigation` | Application areas | Dashboard, Familien, Unterbringung, Kurse |
 | `SecondaryNavigation` | Routes within an area | Inventar / Belegung; workshop areas |
 | `TertiaryNavigation` | Sibling views within the active context | Workshop collections; participation views; family topics |
 

@@ -18,7 +18,7 @@ literal when a more natural German phrase is clearer.
 - Use inclusive language naturally. Use **Familie** for the authenticated family
   account, **Person** for an individual human, and **Familienmitglied** when the
   family relationship matters. Use **Teilnehmende** only for people taking part
-  in a workshop or other activity.
+  in a course or other activity.
 
 ## 2. Canonical domain terms
 
@@ -37,8 +37,8 @@ emails, notifications, and help text.
 | room | **Zimmer** | |
 | bed | **Bett** | |
 | place | **Schlafplatz** | A generated place in a bed or room |
-| workshop | **Workshop** | Familiar and preferred over *Arbeitsgruppe* |
-| workshop participant | **teilnehmende Person** | Use **Teilnehmende** for a group taking part in a workshop |
+| workshop | **Kurs** | Use **Kurse** in the plural |
+| workshop participant | **teilnehmende Person** | Use **Teilnehmende** for a group taking part in a course |
 | slot | **Zeitslot** | Use **Zeitfenster** in prose when *Zeitslot* feels too technical |
 | preference | **Wunsch** | Use **Angabe** when it is not a preference or choice |
 | constraint | **Vorgabe** | The calculated effect of a fixed resolver mechanism and the relevant Angaben; use **Regel** only when explaining behaviour informally |
@@ -52,7 +52,7 @@ emails, notifications, and help text.
 | closed | **Festgelegt** | The area's inputs are closed and families see its result |
 | reopen an area | **Wieder öffnen** | Families can change their inputs again; they keep seeing the last result |
 | target date | **Zieltermin** | Advisory; never **Frist**, which implies a cut-off |
-| open workshop choice | **Wahl öffnen** | Families can see the workshops and rank them |
+| open workshop choice | **Wahl öffnen** | Families can see the courses and rank them |
 | draft changes | **Änderungsentwürfe** | Browser-local changes awaiting application; other organisers cannot yet see them |
 | start drafting mode | **Entwurfsmodus starten** | The organiser control for deferring the ordinary Apply command |
 | drafting mode active | **Entwurfsmodus aktiv** | State text for the enabled local commit-timing policy |

@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ci",
+      "type": "process",
+      "command": "nix",
+      "args": [
+        "develop",
+        "--command",
+        "sh",
+        "-c",
+        "pnpm install --frozen-lockfile && exec pnpm run ci"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "dev-preview",
+      "type": "process",
+      "command": "nix",
+      "args": [
+        "develop",
+        "--command",
+        "sh",
+        "-c",
+        "export DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=true DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=true DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN=true DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS=\"${DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS:-demo-organiser@example.invalid}\"; _created_dev_vars=false; if [ ! -e .dev.vars ]; then printf 'DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE=%s\\nDGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES=%s\\nDGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN=%s\\nDGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS=%s\\nDGHK_DEBUG_ONLY_LOCAL_PREVIEW_HOST=%s\\n' \"$DGHK_DEBUG_ONLY_DANGEROUS_SHOW_MAGIC_LINKS_ON_CONSOLE\" \"$DGHK_DEBUG_ONLY_DANGEROUS_ALLOW_INSECURE_SESSION_COOKIES\" \"$DGHK_DEBUG_ONLY_DANGEROUS_DEMO_LOGIN\" \"$DGHK_DEBUG_ONLY_DANGEROUS_DEMO_ORGANISER_EMAILS\" \"${DGHK_PREVIEW_HOST:-}\" > .dev.vars; for _feature_binding in DGHK_FEATURE_FAMILY_PREFERENCES_FAMILY_ROOM_WISHES DGHK_FEATURE_FAMILY_PREFERENCES_ORGANISER_ROOM_WISHES DGHK_FEATURE_WORKSHOP_RANKINGS_FAMILY_WORKSHOP_WISHES DGHK_FEATURE_WORKSHOP_RANKINGS_ORGANISER_WORKSHOP_WISHES; do eval \"_feature_value=\\${$_feature_binding:-}\"; if [ -n \"$_feature_value\" ]; then printf '%s=%s\\n' \"$_feature_binding\" \"$_feature_value\" >> .dev.vars; fi; done; _created_dev_vars=true; fi; trap '[ \"$_created_dev_vars\" = true ] && rm -f .dev.vars' EXIT; pnpm install --frozen-lockfile && env CI=1 pnpm run dev"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "storybook",
+      "type": "process",
+      "command": "nix",
+      "args": [
+        "develop",
+        "--command",
+        "sh",
+        "-c",
+        "pnpm install --frozen-lockfile && exec pnpm run storybook --host \"${DGHK_STORYBOOK_BIND:-127.0.0.1}\" --port \"${DGHK_STORYBOOK_PORT:-6006}\""
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}
