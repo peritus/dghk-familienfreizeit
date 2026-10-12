@@ -179,7 +179,7 @@ function personName(world: World, personId: string): string {
   return (
     [stringLabel(labels, 'given-name'), stringLabel(labels, 'family-name')]
       .filter((value): value is string => Boolean(value))
-      .join(' ') || personId
+      .join(' ') || 'Name nicht verfügbar'
   )
 }
 
@@ -255,7 +255,10 @@ function leader(
 ): WorkshopReportLeader {
   if (world.entity_kind_by_id[id] === 'person')
     return { name: personName(world, id), external: false }
-  return { name: externalLeaders.find((item) => item.id === id)?.name ?? id, external: true }
+  return {
+    name: externalLeaders.find((item) => item.id === id)?.name ?? 'Externe Leitung ohne Namen',
+    external: true,
+  }
 }
 
 function byName<T extends { id: string; name: string }>(left: T, right: T): number {
@@ -541,7 +544,8 @@ export function buildWorkshopReportsProjection(
       return {
         id: family.id,
         name:
-          stringLabel(input.world.labels_by_entity[family.id] ?? [], 'display-name') ?? family.id,
+          stringLabel(input.world.labels_by_entity[family.id] ?? [], 'display-name') ??
+          'Familie ohne Namen',
         members: memberIds.map((id) => ({
           id,
           name: personName(input.world, id),

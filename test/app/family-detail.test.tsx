@@ -1,5 +1,8 @@
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import { afterEach, expect, test } from 'vitest'
+import { activeProfile } from '../../src/config/index.js'
+import { deriveWorld } from '../../src/app/organiser/state.js'
+import { familyRows } from '../../src/app/organiser/family-data.js'
 import { FamilyDetail } from '../../src/app/organiser/screens/family-detail.js'
 import {
   FixtureProvider,
@@ -7,6 +10,23 @@ import {
 } from '../../src/app/stories/organiser-fixtures.js'
 
 afterEach(() => cleanup())
+
+test('family rows use a human fallback when a family display name is missing', () => {
+  const world = deriveWorld(organiserFamilyDetailFixtureState, activeProfile.validation_view)
+  const labelsByEntity = {
+    ...world.labels_by_entity,
+    fam_sonnenberg: (world.labels_by_entity.fam_sonnenberg ?? []).filter(
+      (label) => label.key !== 'display-name',
+    ),
+  }
+
+  const family = familyRows({ ...world, labels_by_entity: labelsByEntity }).find(
+    ({ family }) => family.id === 'fam_sonnenberg',
+  )
+
+  expect(family?.display_name).toBe('Familie ohne Namen')
+  expect(family?.display_name).not.toContain('fam_sonnenberg')
+})
 
 test('organiser can rename a family and edit profile-driven controls', async () => {
   render(

@@ -112,6 +112,15 @@ describe('buildProgrammeView', () => {
     ])
   })
 
+  test('uses a readable fallback when a leader display name is unavailable', () => {
+    const view = buildProgrammeView({ ...baseInput, leader_names: new Map() })
+
+    expect(view.rows[0]?.cells[0]).toEqual(
+      expect.objectContaining({ leaders: 'Name nicht verfügbar' }),
+    )
+    expect(JSON.stringify(view)).not.toContain('per_lead')
+  })
+
   test('counts fixed attendance once beside sign-ups and shows it for interest workshops', () => {
     const view = buildProgrammeView({
       ...baseInput,

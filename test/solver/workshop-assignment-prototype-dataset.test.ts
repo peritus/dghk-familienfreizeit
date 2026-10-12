@@ -327,6 +327,40 @@ test('projects the complete workshop list set from the organiser plan', () => {
   )
 })
 
+test('organiser report projections use readable fallbacks when entity names are missing', () => {
+  const { plan, world } = solveFixture()
+  const family = world.families[0]!
+  const person = world.persons[0]!
+  const labelsByEntity = {
+    ...world.labels_by_entity,
+    [family.id]: (world.labels_by_entity[family.id] ?? []).filter(
+      (label) => label.key !== 'display-name',
+    ),
+    [person.id]: (world.labels_by_entity[person.id] ?? []).filter(
+      (label) => !['given-name', 'family-name'].includes(label.key),
+    ),
+  }
+  const namelessWorld = { ...world, labels_by_entity: labelsByEntity }
+  const reports = buildWorkshopReportsProjection({
+    world: namelessWorld,
+    plan,
+    time_zone: 'Europe/Berlin',
+  })
+  const allocation = buildWorkshopAllocationProjection({
+    world: namelessWorld,
+    plan,
+    event_date: '2027-05-14',
+    time_zone: 'Europe/Berlin',
+    max_rank: 3,
+  })
+
+  expect(reports.families.find((item) => item.id === family.id)?.name).toBe('Familie ohne Namen')
+  expect(reports.persons.find((item) => item.id === person.id)?.name).toBe('Name nicht verfügbar')
+  expect(allocation.person_names.find((item) => item.id === person.id)?.name).toBe(
+    'Name nicht verfügbar',
+  )
+})
+
 test('workshop rosters read health notes from the profile food note', () => {
   const { plan, world } = solveFixture()
   const attendee = (plan.sections['workshop-assignment'] as WorkshopAssignmentSection)

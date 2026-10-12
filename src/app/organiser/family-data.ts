@@ -117,7 +117,7 @@ export function familyRows(world: World): FamilyRow[] {
     )
     return {
       family,
-      display_name: labelValue(labels, 'display-name') ?? family.id,
+      display_name: labelValue(labels, 'display-name') ?? 'Familie ohne Namen',
       email: labelValue(labels, 'email') ?? '—',
       persons,
     }

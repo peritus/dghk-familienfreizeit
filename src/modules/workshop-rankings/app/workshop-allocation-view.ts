@@ -207,7 +207,7 @@ function personName(world: World, personId: string): string {
   return (
     [labelValue(labels, 'given-name'), labelValue(labels, 'family-name')]
       .filter((value): value is string => Boolean(value))
-      .join(' ') || personId
+      .join(' ') || 'Name nicht verfügbar'
   )
 }
 
@@ -497,7 +497,7 @@ export function buildWorkshopAllocationProjection(
     subject: personName(input.world, review.subject_id),
     fixed_target: workshops.get(review.fixed_target_id)?.title ?? review.fixed_target_id,
     automatic_targets: review.automatic_target_ids.map(
-      (workshopId) => workshops.get(workshopId)?.title ?? workshopId,
+      (workshopId) => workshops.get(workshopId)?.title ?? 'Workshop ohne Titel',
     ),
     status: review.status,
   }))

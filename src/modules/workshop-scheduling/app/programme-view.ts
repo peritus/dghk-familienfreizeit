@@ -156,7 +156,7 @@ export function buildProgrammeView(input: ProgrammeProjectionInput): ProgrammeVi
       const workshop = placement ? workshops.get(placement.workshop_id) : undefined
       if (!workshop) return { id: `${slot.id}-${room.id}`, state: 'empty' as const }
       const leaderNames = workshop.leader_ids
-        .map((leaderId) => input.leader_names.get(leaderId) ?? leaderId)
+        .map((leaderId) => input.leader_names.get(leaderId) ?? 'Name nicht verfügbar')
         .join(', ')
       const count = attendance.get(workshop.id)?.size ?? 0
       const remaining = workshop.capacity - count
