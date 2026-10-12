@@ -51,6 +51,11 @@ const AssignmentBoardScreen = lazy(() =>
     default: module.AssignmentBoardScreen,
   })),
 )
+const AssignmentTraceScreen = lazy(() =>
+  import('../../modules/room-assignment/app/screens/assignment-trace.js').then((module) => ({
+    default: module.AssignmentTraceScreen,
+  })),
+)
 import {
   familyIdFromRouteSegment,
   isFamilyTopic,
@@ -623,6 +628,11 @@ export default function OrganiserApp({ profile }: { profile?: ProfilePresentatio
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-board') ? (
               <Route path={organiserRoutePaths.assignment_board}>
                 <AssignmentBoardScreen />
+              </Route>
+            ) : null}
+            {organiserScreenRegistry.some(({ id }) => id === 'organiser-assignment-trace') ? (
+              <Route path={organiserRoutePaths.assignment_trace}>
+                <AssignmentTraceScreen />
               </Route>
             ) : null}
             {organiserScreenRegistry.some(({ id }) => id === 'organiser-workshops') ? (

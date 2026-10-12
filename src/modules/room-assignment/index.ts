@@ -95,10 +95,13 @@ export type RoomAssignmentSection = {
 }
 
 type PlacementTrace = TraceEntry & { family_id: string }
+
 type AllocationTrace = NonNullable<NonNullable<TraceEntry['detail']>['allocation']>
 
 type RoomScore = { room: RoomCandidate; score: number; terms: readonly [string, number][] }
+
 type RoomEvaluation = ReturnType<typeof evaluateRooms>
+
 type RankedFamily = {
   family: FamilyPlacementUnit
   evaluated: RoomEvaluation

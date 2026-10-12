@@ -31,6 +31,7 @@ test('organiser route definitions have unique relative and absolute paths', () =
     '/organiser/families/:id/:topic/:person_id',
     '/organiser/accommodation/inventory',
     '/organiser/accommodation/assignment',
+    '/organiser/accommodation/assignment/trace',
     '/organiser/workshops/spaces',
     '/organiser/workshops',
     '/organiser/workshops/leitungen',
@@ -69,6 +70,10 @@ test('module screens are composed only when their module is selected', () => {
         id: 'organiser-assignment-board',
         route: '/organiser/accommodation/assignment',
       }),
+      expect.objectContaining({
+        id: 'organiser-assignment-trace',
+        route: '/organiser/accommodation/assignment/trace',
+      }),
     ]),
   )
   expect(new Set(organiserScreenRegistry.map(({ id }) => id)).size).toBe(
@@ -90,6 +95,8 @@ test('nested organiser paths and public URLs are kept distinct', () => {
   expect(organiserUrls.inventory()).toBe('/organiser/accommodation/inventory')
   expect(organiserPaths.assignment_board()).toBe('/accommodation/assignment')
   expect(organiserUrls.assignment_board()).toBe('/organiser/accommodation/assignment')
+  expect(organiserPaths.assignment_trace()).toBe('/accommodation/assignment/trace')
+  expect(organiserUrls.assignment_trace()).toBe('/organiser/accommodation/assignment/trace')
   expect(organiserPaths.workshop_allocation()).toBe('/workshops/allocation')
   expect(organiserPaths.workshop_allocation_demand()).toBe('/workshops/allocation/demand')
   expect(organiserPaths.workshop_allocation_trace()).toBe('/workshops/allocation/trace')
@@ -155,6 +162,7 @@ test('known organiser path matching is driven by the route catalog', () => {
   )
   expect(isKnownOrganiserPath('/organiser/accommodation')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/accommodation/inventory')).toBe(true)
+  expect(isKnownOrganiserPath('/organiser/accommodation/assignment/trace')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/spaces')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/slots')).toBe(true)
   expect(isKnownOrganiserPath('/organiser/workshops/programme/unplaced')).toBe(true)

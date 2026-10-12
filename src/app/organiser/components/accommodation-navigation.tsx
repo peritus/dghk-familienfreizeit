@@ -16,6 +16,11 @@ export function AccommodationNavigation() {
           active_paths: [organiserPaths.assignment_board()],
           label: 'Belegung',
         },
+        {
+          href: organiserPaths.assignment_trace(),
+          active_paths: [organiserPaths.assignment_trace()],
+          label: 'Verlauf',
+        },
       ]}
     />
   )
