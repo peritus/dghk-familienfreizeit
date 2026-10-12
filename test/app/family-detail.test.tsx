@@ -71,6 +71,22 @@ test('family detail renders the people view with its person selector and editor'
   expect(screen.getByRole('heading', { name: 'Person' })).toBeTruthy()
   expect(screen.getByLabelText('Vorname')).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Person entfernen' })).toBeTruthy()
+  const accessibleNames = [...document.body.querySelectorAll('[aria-label], [title]')]
+    .map((element) => element.getAttribute('aria-label') ?? element.getAttribute('title') ?? '')
+    .join('\n')
+  const controlValues = [
+    ...[...document.body.querySelectorAll('input:not([type="hidden"]), textarea')].map(
+      (element) => (element as HTMLInputElement | HTMLTextAreaElement).value,
+    ),
+    ...[...document.body.querySelectorAll('select')].map((element) =>
+      [...(element as HTMLSelectElement).selectedOptions]
+        .map((option) => option.textContent)
+        .join(' '),
+    ),
+  ].join('\n')
+  expect(`${document.body.textContent}\n${accessibleNames}\n${controlValues}`).not.toMatch(
+    /\b[a-z]{2,5}_[a-z0-9]+\b/,
+  )
 })
 
 test('family detail renders person food preferences through generic controls', () => {

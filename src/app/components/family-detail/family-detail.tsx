@@ -925,7 +925,7 @@ function FamilyWorkshopView({
                       key={id}
                       className="flex flex-wrap items-center justify-between gap-2 rounded-base border-2 border-border p-2"
                     >
-                      <strong>{displayWorkshop(id)?.title ?? id}</strong>
+                      <strong>{displayWorkshop(id)?.title ?? 'Workshop ohne Titel'}</strong>
                       <Button
                         type="button"
                         variant="neutral"

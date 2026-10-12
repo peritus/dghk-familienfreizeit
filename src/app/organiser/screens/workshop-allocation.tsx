@@ -364,6 +364,8 @@ export function WorkshopAllocation() {
             {fixedPairs.map(({ person_id: personId, workshop_id: workshopId }) => {
               const token = fixedWorkshopAttendanceToken(personId, workshopId)
               const actor = state.principal_email ?? 'organiser@example.test'
+              const personName = personNamesById.get(personId) ?? 'Name nicht verfügbar'
+              const workshopTitle = workshopsById.get(workshopId)?.title ?? 'Workshop ohne Titel'
               const workshopExists = world.entities_by_kind.workshop?.some(
                 (workshop) => workshop.id === workshopId,
               )
@@ -375,7 +377,7 @@ export function WorkshopAllocation() {
                       type="button"
                       variant="neutral"
                       size="sm"
-                      aria-label={`Feste Teilnahme von ${personNamesById.get(personId) ?? personId} an ${workshopsById.get(workshopId)?.title ?? workshopId} entfernen`}
+                      aria-label={`Feste Teilnahme von ${personName} an ${workshopTitle} entfernen`}
                       onClick={() =>
                         stage([
                           clearLabelDraft(actor, personId, 'needs', token),
@@ -389,9 +391,9 @@ export function WorkshopAllocation() {
                     </Button>
                   }
                 >
-                  <strong>{personNamesById.get(personId) ?? personId}</strong>
+                  <strong>{personName}</strong>
                   <p className="mt-1 text-sm">
-                    Fest: <strong>{workshopsById.get(workshopId)?.title ?? workshopId}</strong>
+                    Fest: <strong>{workshopTitle}</strong>
                   </p>
                 </CollectionRow>
               )
