@@ -8,13 +8,7 @@ export {
   performanceSampleRate,
 } from './recorder.js'
 
-export type {
-  Metric,
-  MetricBatch,
-  MetricKind,
-  MetricWriter,
-  SpanRunner,
-} from './recorder.js'
+export type { Metric, MetricBatch, MetricKind, MetricWriter, SpanRunner } from './recorder.js'
 
 export const performanceLogMarker = 'dghk.performance.v1'
 
