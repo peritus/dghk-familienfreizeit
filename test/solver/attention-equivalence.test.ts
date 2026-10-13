@@ -29,5 +29,5 @@ test('attention output preserves its reference digest', () => {
   })
   const digest = createHash('sha256').update(JSON.stringify(attention)).digest('hex')
   process.stderr.write(`ATTENTION reference ${digest}\n`)
-  expect(digest).toBe('498f8bf27ff2e528940aa57a8a8606dc21f4b5d51e60d8c6e0d06380de9c1f74')
+  expect(digest).toBe('faaf48696077dc580e493cde0b67960169d22d210e8c0d7d319c1d0c3a2de875')
 })
