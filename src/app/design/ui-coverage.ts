@@ -875,7 +875,7 @@ export const uiCoverage: readonly UiCoverageEntry[] = [
     source: 'src/app/organiser/screens/workshops.tsx',
   },
   {
-    id: 'screens-organiser-workshop-allocation--answers',
+    id: 'screens-organiser-preference-list-course-placement--answers',
     area: 'screen',
     subject: 'Preference-list course placement',
     source: 'src/app/organiser/screens/workshop-allocation.tsx',
