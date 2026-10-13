@@ -196,7 +196,9 @@ export function resolve(
             requirements.push({
               trait_key: label.key,
               holder_id: label.entity_id,
-              capability_key: descriptor.structural ? null : descriptor.satisfied_by ?? label.value,
+              capability_key: descriptor.structural
+                ? null
+                : (descriptor.satisfied_by ?? label.value),
               kind: descriptor.structural ? 'structural' : 'profile-requirement',
               structural: descriptor.structural ?? null,
               value: label.value,
